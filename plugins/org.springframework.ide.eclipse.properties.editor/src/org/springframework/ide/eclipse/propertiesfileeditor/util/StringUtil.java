@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
+
 public class StringUtil {
 
 	public static int commonPrefixLength(String s, String t) {
@@ -39,5 +44,18 @@ public class StringUtil {
 		}
 		return "";
 	}
+
+	public static String camelCaseToHyphens(String value) {
+		Matcher matcher = CAMEL_CASE_PATTERN.matcher(value);
+		StringBuffer result = new StringBuffer();
+		while (matcher.find()) {
+			matcher.appendReplacement(result, matcher.group(1) + '-'
+					+ matcher.group(2).toLowerCase());
+		}
+		matcher.appendTail(result);
+		return result.toString();
+	}
+	
+	private static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("([^A-Z-])([A-Z])");
 
 }

@@ -748,24 +748,22 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	 */
 	public void assertProblems(MockEditor editor, String... expectedProblems)
 			throws BadLocationException {
-				defaultTestData();
-				List<SpringPropertyProblem> actualProblems = reconcile(editor);
-				String bad = null;
-				if (actualProblems.size()!=expectedProblems.length) {
-					bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
-				} else {
-					for (int i = 0; i < expectedProblems.length; i++) {
-						if (!matchProblem(editor, actualProblems.get(i), expectedProblems[i])) {
-							bad = "First mismatch at index "+i+": "+expectedProblems[i]+"\n";
-							break;
-						}
-					}
-				}
-				if (bad!=null) {
-					fail(bad+problemSumary(editor, actualProblems));
+		List<SpringPropertyProblem> actualProblems = reconcile(editor);
+		String bad = null;
+		if (actualProblems.size()!=expectedProblems.length) {
+			bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
+		} else {
+			for (int i = 0; i < expectedProblems.length; i++) {
+				if (!matchProblem(editor, actualProblems.get(i), expectedProblems[i])) {
+					bad = "First mismatch at index "+i+": "+expectedProblems[i]+"\n";
+					break;
 				}
 			}
-
+		}
+		if (bad!=null) {
+			fail(bad+problemSumary(editor, actualProblems));
+		}
+	}
 	private String problemSumary(MockEditor editor, List<SpringPropertyProblem> actualProblems)
 			throws BadLocationException {
 				StringBuilder buf = new StringBuilder();

@@ -11,10 +11,12 @@
 package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.isAssign;
-import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.*;
+import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.ERROR_TYPE;
+import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.WARNING_TYPE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -363,14 +365,21 @@ public class SpringPropertiesReconcileEngine {
 		int bracketPos = name.lastIndexOf('[');
 		int endPos = bracketPos>=0?bracketPos:name.length();
 		PropertyInfo prop = null;
+		String prefix = null;
 		while (endPos>0 && prop==null) {
-			prop = index.get(name.substring(0, endPos));
+			prefix = name.substring(0, endPos);
+			String canonicalPrefix = StringUtil.camelCaseToHyphens(prefix);
+			prop = index.get(canonicalPrefix);
 			if (prop==null) {
 				endPos = name.lastIndexOf('.', endPos-1);
 			}
 		}
-		return prop;
+		if (prop!=null) {
+			//We should meet caller's expectation that matched properties returned by this method
+			// match the names exactly even if we found them using relaxed name matching.
+			return prop.withId(prefix);
+		}
+		return null;
 	}
-
 
 }

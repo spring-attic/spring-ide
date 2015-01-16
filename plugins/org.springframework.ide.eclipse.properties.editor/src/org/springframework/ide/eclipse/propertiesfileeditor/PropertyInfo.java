@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataSource;
+import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 
 /**
  * Information about a spring property, basically, this is the same as
@@ -52,26 +53,48 @@ public class PropertyInfo {
 		}
 	}
 	
-	private ConfigurationMetadataProperty property; //TODO: unpack and keep interesting data only and throw away the rest?
+	final private String id;
+	final private String type;
+	final private String name;
+	final private Object defaultValue;
+	final private String description;
 	private List<PropertySource> sources;
-	
+
+	private PropertyInfo(String id, String type, String name,
+			Object defaultValue, String description,
+			List<PropertySource> sources) {
+		super();
+		this.id = id;
+		this.type = type;
+		this.name = name;
+		this.defaultValue = defaultValue;
+		this.description = description;
+		this.sources = sources;
+	}
 	public PropertyInfo(ConfigurationMetadataProperty prop) {
-		this.property = prop;
+		this(
+			prop.getId(),
+			prop.getType(),
+			prop.getName(),
+			prop.getDefaultValue(),
+			prop.getDescription(),
+			null
+		);
 	}
 	public String getId() {
-		return property.getId();
+		return id;
 	}
 	public String getType() {
-		return property.getType();
+		return type;
 	}
 	public String getName() {
-		return property.getName();
+		return name;
 	}
 	public Object getDefaultValue() {
-		return property.getDefaultValue();
+		return defaultValue;
 	}
 	public String getDescription() {
-		return property.getDescription();
+		return description;
 	}
 	
 	public List<PropertySource> getSources() {
@@ -83,12 +106,19 @@ public class PropertyInfo {
 	
 	@Override
 	public String toString() {
-		return "PropertyInfo("+property.getId()+")";
+		return "PropertyInfo("+getId()+")";
 	}
 	public void addSource(ConfigurationMetadataSource source) {
 		if (sources==null) {
 			sources = new ArrayList<PropertySource>();
 		}
 		sources.add(new PropertySource(source));
+	}
+	
+	public PropertyInfo withId(String alias) {
+		if (alias.equals(id)) {
+			return this;
+		}
+		return new PropertyInfo(alias, type, name, defaultValue, description, sources);
 	}
 }

@@ -240,8 +240,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		System.out.println("<<< testHyperlinkTargetsLoggingLevel");
 	}
 	
-
 	public void testReconcile() throws Exception {
+		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"server.port=8080\n" + 
 				"server.port.extracrap=8080\n" + 
@@ -258,6 +258,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testReconcileArrayNotation() throws Exception {
+		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"borked=bad+\n" + //token problem, to make sure reconciler is working
 				"server.ssl.ciphers[0]=foo\n" +
@@ -270,6 +271,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testReconcileArrayNotationError() throws Exception {
+		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"server.ssl.ciphers[bork]=foo\n" +
 				"server.ssl.ciphers[1=foo\n" +
@@ -285,8 +287,44 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 	
+	public void testRelaxedNameReconciling() throws Exception {
+		data("connection.remote-host", "java.lang.String", "service.net", null);
+		data("foo-bar.name", "java.lang.String", null, null);
+		MockEditor editor = new MockEditor(
+				"bork=foo\n" +
+				"connection.remote-host=alternate.net\n" +
+				"connection.remoteHost=alternate.net\n" +
+				"foo-bar.name=Charlie\n" +
+				"fooBar.name=Charlie\n"
+		);
+		assertProblems(editor,
+				"bork|unknown property"
+				//no other problems
+		);
+	}
+	
+	public void testRelaxedNameReconcilingErrors() throws Exception {
+		//Tricky with relaxec names: the error positions have to be moved
+		// around because the relaxed names aren't same length as the 
+		// canonical ids.
+		data("foo-bar-zor.enabled", "java.lang.Boolean", null, null);
+		MockEditor editor = new MockEditor(
+				"fooBarZor.enabled=notBoolean\n" +
+				"fooBarZor.enabled.subprop=true\n"
+		);
+		assertProblems(editor,
+				"notBoolean|Boolean",
+				".subprop|Supbproperties are invalid"
+		);
+	}
+	
+	public void testRelaxedNameContentAssist() throws Exception {
+		data("foo-bar-zor.enabled", "java.lang.Boolean", null, null);
+		assertCompletion("fooBar<*>", "foo-bar-zor.enabled=<*>");
+	}
 	
 	public void testReconcileValues() throws Exception {
+		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"server.port=badPort\n" + 
 				"liquibase.enabled=nuggels"
@@ -298,6 +336,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testNoReconcileInterpolatedValues() throws Exception {
+		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"server.port=${port}\n" + 
 				"liquibase.enabled=nuggels"
@@ -309,6 +348,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 	
 	public void testReconcileValuesWithSpaces() throws Exception {
+		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"server.port  =   badPort\n" + 
 				"liquibase.enabled   nuggels  \n" +
@@ -323,6 +363,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	
 	
 	public void testReconcileWithExtraSpaces() throws Exception {
+		defaultTestData();
 		//Same test as previous but with extra spaces to make things more confusing
 		MockEditor editor = new MockEditor(
 				"   server.port   =  8080  \n" + 

@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -52,6 +51,8 @@ import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.Propert
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
+
+import static org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil.*;
 
 /**
  * @author Kris De Volder
@@ -252,7 +253,7 @@ public class SpringPropertiesCompletionEngine {
 	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
 		String prefix= getPrefix(doc, offset);
 		if (prefix != null) {
-			Collection<Match<PropertyInfo>> matches = getIndex().find(prefix);
+			Collection<Match<PropertyInfo>> matches = getIndex().find(camelCaseToHyphens(prefix));
 			if (matches!=null && !matches.isEmpty()) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
 				for (Match<PropertyInfo> match : matches) {
