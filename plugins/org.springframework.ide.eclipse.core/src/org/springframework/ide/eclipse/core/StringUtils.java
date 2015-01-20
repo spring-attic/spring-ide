@@ -219,4 +219,8 @@ public final class StringUtils {
 			b.append(INDENT);
 		}
 	}
+
+	public static boolean hasText(String name) {
+		return name!=null && !"".equals(name.trim());
+	}
 }

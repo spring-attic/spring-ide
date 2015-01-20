@@ -8,7 +8,7 @@
  * Contributors:
  *    GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.ui;
+package org.springframework.ide.eclipse.boot.launch;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -43,8 +43,7 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 	/**
 	 * Launch configuration id of the configs created by this shortcut.
 	 */
-	public static final String LAUNCH_CONFIG_TYPE_ID = 
-			IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
+	public static final String LAUNCH_CONFIG_TYPE_ID = BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID;
 
 	public static final String JMX_PORT_PROP = "com.sun.management.jmxremote.port";
 	
@@ -119,8 +118,8 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 			int jmxPort = (int) (5000 + Math.random()*60000); //TODO: better way to pick this port?
 			ILaunchConfigurationType configType = getConfigurationType();
 			String projectName = type.getJavaProject().getElementName();
-			wc = configType.newInstance(null, projectName+" - "+getLaunchManager().generateLaunchConfigurationName(
-					type.getTypeQualifiedName('.')));
+			wc = configType.newInstance(null, getLaunchManager().generateLaunchConfigurationName(
+					projectName+" - "+type.getTypeQualifiedName('.')));
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, liveBeanVmArgs(jmxPort));

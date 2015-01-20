@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGe
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;

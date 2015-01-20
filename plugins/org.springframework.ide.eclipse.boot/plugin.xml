@@ -61,7 +61,7 @@
  <extension
        point="org.eclipse.debug.ui.launchShortcuts">
     <shortcut
-          class="org.springframework.ide.eclipse.boot.ui.BootLaunchShortcut"
+          class="org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut"
           description="Run or Debug as a Standalone Spring Boot Application"
           id="org.springsource.ide.eclipse.boot.BootLaunchShortcut"
           icon="resources/icons/spring.png"
@@ -81,7 +81,7 @@
            </enablement>
         </contextualLaunch>
         <configurationType
-               id="org.eclipse.jdt.launching.localJavaApplication">
+               id="org.springframework.ide.eclipse.boot.launch">
          </configurationType>
         <description
                description="Run as Spring Boot App"
@@ -101,6 +101,14 @@
         category="org.eclipse.ui.externaltools"
         modes="run"
         id="org.springsource.ide.eclipse.boot.groovy.script.launch">
+    </launchConfigurationType>
+    <launchConfigurationType
+          id="org.springframework.ide.eclipse.boot.launch"
+          name="Spring Boot App"
+          delegate="org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate"
+          modes="run,debug"
+          sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+          sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
     </launchConfigurationType>
   </extension>
  
@@ -140,6 +148,22 @@
          </description> -->
     </shortcut>
  </extension>
+ 
+ <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+    <launchConfigurationTypeImage
+        icon="resources/icons/boot-icon.png"
+        configTypeID="org.springframework.ide.eclipse.boot.launch"
+        id="org.springframework.ide.eclipse.boot.launch.image">
+    </launchConfigurationTypeImage>
+</extension>
+ 
+<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    <launchConfigurationTabGroup
+        type="org.springframework.ide.eclipse.boot.launch"
+        class="org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationTabGroup"
+        id="org.springframework.ide.eclipse.boot.launch.LaunchConfigurationTabGroup">
+    </launchConfigurationTabGroup>
+</extension>
  
 <!-- TODO: ui for editing Spring Groovy CLI launch configs
  <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">

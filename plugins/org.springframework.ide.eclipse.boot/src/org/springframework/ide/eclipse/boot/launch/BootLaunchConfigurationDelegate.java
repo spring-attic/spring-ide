@@ -1,0 +1,128 @@
+/*******************************************************************************
+ * Copyright (c) 2015 GoPivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.launch;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+
+/**
+ * @author Kris De Volder
+ */
+public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
+
+	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
+	
+	public static class PropVal {
+		public String name;
+		public String value;
+		boolean isChecked;
+
+		public PropVal(String name, String value, boolean isChecked) {
+			//Don't use null, use empty Strings
+			Assert.isNotNull(name);
+			Assert.isNotNull(value);
+			this.name = name;
+			this.value = value;
+			this.isChecked = isChecked;
+		}
+
+		@Override
+		public String toString() {
+			return name + "="+ value;
+		}
+	}
+	
+	/**
+	 * Spring boot properties are stored as launch confiuration properties with
+	 * an extra prefix added to property name to avoid name clashes with 
+	 * other launch config properties.
+	 */
+	private static final String PROPS_PREFIX = "spring.boot.prop.";
+
+	/**
+	 * To be able to store multiple assignment to the same spring boot 
+	 * property name we add a 'oid' at the end of each stored
+	 * property name. OID_SEPERATOR is used to separate the 'real'
+	 * property name from the 'oid' string.
+	 */
+	private static final char OID_SEPERATOR = ':';
+
+	public static List<PropVal> getProperties(ILaunchConfiguration conf) {
+		ArrayList<PropVal> props = new ArrayList<PropVal>();
+		try {
+			for (Entry<String, Object> e : conf.getAttributes().entrySet()) {
+				try {
+					String prefixed = e.getKey();
+					if (prefixed.startsWith(PROPS_PREFIX)) {
+						String name = prefixed.substring(PROPS_PREFIX.length());
+						int dotPos = name.lastIndexOf(OID_SEPERATOR);
+						if (dotPos>=0) {
+							name = name.substring(0, dotPos);
+						}
+						String valueEnablement = (String)e.getValue();
+						String value = valueEnablement.substring(1);
+						boolean enabled = valueEnablement.charAt(0)=='1'; 
+						props.add(new PropVal(name, value, enabled));
+					}
+				} catch (Exception ignore) {
+					//silently ignore invalid property data.
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return props;
+	}
+	
+	public static void setProperties(ILaunchConfigurationWorkingCopy conf, List<PropVal> props) {
+		if (props==null) {
+			props = Collections.emptyList();
+		}
+		clearProperties(conf);
+		int oid = 0; //unique id appended to each stored key, otherwise we loose
+					 //entries with identical keys.
+		for (PropVal p : props) {
+			//Don't store stuff with 'empty keys'. These are likely just
+			// 'emtpy' entries user added but never filled in.
+			if (hasText(p.name)) {
+				String prefixed = PROPS_PREFIX+p.name+OID_SEPERATOR+(oid++);
+				String valueEnabled = (p.isChecked?'1':'0')+p.value;
+				conf.setAttribute(prefixed, valueEnabled);
+			}
+		}
+	}
+	
+	public static void clearProperties(ILaunchConfigurationWorkingCopy conf) {
+		try {
+			for (String prefixedProp : conf.getAttributes().keySet()) {
+				if (prefixedProp.startsWith(PROPS_PREFIX)) {
+					conf.removeAttribute(prefixedProp);
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+	}
+
+	private static boolean hasText(String name) {
+		return name!=null && !name.trim().equals("");
+	}
+
+
+}
