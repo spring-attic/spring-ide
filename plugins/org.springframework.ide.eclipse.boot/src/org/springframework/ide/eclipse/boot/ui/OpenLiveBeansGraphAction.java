@@ -31,13 +31,13 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGe
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
+import org.springframework.ide.eclipse.boot.core.LiveBeanSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
-	
+
 	private static final String HOST = "127.0.0.1";
 
 	@Override
@@ -79,7 +79,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			if (serviceUrl==null) {
 				throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '"+project.getName()+"'\n"+
 						"To open the livebeans graph a process must be run with the following or similar VM arguments:\n\n"
-						+ BootLaunchShortcut.liveBeanVmArgs("${jmxPort}")
+						+ LiveBeanSupport.liveBeanVmArgs("${jmxPort}")
 				);
 			}
 
@@ -96,31 +96,31 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 					+ "Check the error log for more details");
 		}
 	}
-	
+
 	/**
 	 * Determine JMX service url to be used to connect live bean graph on a running JMX-enabled process
 	 * associated with given project.
-	 * 
+	 *
 	 * @return url never null
 	 * @throws CoreException with an explanation error message if url can not be determined.
 	 */
 	private String getServiceUrl(IProject project) throws CoreException {
-		//The service url is derived from the jmxport property of an active launch associated 
-		// with the property. Therefore, we look for a launch that is associated with project 
+		//The service url is derived from the jmxport property of an active launch associated
+		// with the property. Therefore, we look for a launch that is associated with project
 		// and sets the corresponding system property as one of its VMArguments.
 
 		boolean hasActiveProcess = false; //set to true if at least one active process is found
 										// used to create a better error message on failure.
-		
+
 		for (ILaunchConfiguration c : getLaunchConfigs(project)) {
-			String jmxPortProp = getVMSystemProp(c, BootLaunchShortcut.JMX_PORT_PROP); 
+			String jmxPortProp = getVMSystemProp(c, LiveBeanSupport.JMX_PORT_PROP);
 			for (ILaunch l : LaunchUtils.getLaunches(c)) {
 				if (!l.isTerminated()) {
 					hasActiveProcess = true;
-					
+
 					if (jmxPortProp!=null) {
 						//Looks like JMX is enabled via VM args.
-						
+
 						return "service:jmx:rmi:///jndi/rmi://" + HOST + ":" + jmxPortProp + "/jmxrmi";
 					}
 				}
@@ -130,7 +130,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			//There's a active process but looks like JMX arguments are missing
 			throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '"+project.getName()+"'\n"+
 					"To open the livebeans graph a process must be run with the following VM arguments:\n\n"
-					+ BootLaunchShortcut.liveBeanVmArgs("${jmxPort}")
+					+ LiveBeanSupport.liveBeanVmArgs("${jmxPort}")
 			);
 		} else {
 			throw ExceptionUtil.coreException("No active process found for project '"+project.getName()+"'\n"+
@@ -166,7 +166,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 	 * Collect the listing of {@link ILaunchConfiguration}s that apply to a given project.
 	 */
 	private static List<ILaunchConfiguration> getLaunchConfigs(IProject project) {
-		String ctypeId = BootLaunchShortcut.LAUNCH_CONFIG_TYPE_ID;
+		String ctypeId = LiveBeanSupport.LAUNCH_CONFIG_TYPE_ID;
 		ILaunchConfigurationType ctype = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(ctypeId);
 		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList();
 		try {
@@ -183,6 +183,6 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 		}
 		return candidateConfigs;
 	}
-	
+
 
 }

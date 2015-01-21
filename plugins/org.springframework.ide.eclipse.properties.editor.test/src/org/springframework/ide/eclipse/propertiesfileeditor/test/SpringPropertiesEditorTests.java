@@ -21,39 +21,39 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
-	
-	//TODO: List type is assignable (but paramteric),
+
+	//TODO: List type is assignable (but parametric),
 	//  - handle this in reconciling?
-	
+
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		assertCompletion("ser<*>", "server.port=8080<*>");
 		assertCompletionDisplayString("ser<*>", "server.port=8080 : int Port where server listens for http.");
 	}
-	
+
 	public void testLoggingLevelCompletion() throws Exception {
 		data("logging.level", "java.util.Map<java.lang.String,java.lang.Object>", null, "Logging level per package.");
 		assertCompletion("lolev<*>","logging.level.<*>");
 	}
-	
+
 	public void testListCompletion() throws Exception {
 		data("foo.bars", "java.util.List<java.lang.String>", null, "List of bars in foo.");
 		assertCompletion("foba<*>","foo.bars=<*>");
 	}
-	
+
 	public void testInetAddresCompletion() throws Exception {
 		defaultTestData();
 		assertCompletion("server.add<*>", "server.address=<*>");
 	}
-	
+
 	public void testStringArrayCompletion() throws Exception {
 		data("spring.freemarker.view-names", "java.lang.String[]", null, "White list of view names that can be resolved.");
 		data("some.defaulted.array", "java.lang.String[]", new String[] {"a", "b", "c"} , "Stuff.");
-		
+
 		assertCompletion("spring.freemarker.vn<*>", "spring.freemarker.view-names=<*>");
 		assertCompletion("some.d.a<*>", "some.defaulted.array=a,b,c<*>");
 	}
-	
+
 	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor("");
@@ -68,41 +68,41 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 			previous = current;
 		}
 	}
-	
+
 	public void testValueCompletion() throws Exception {
 		defaultTestData();
 		assertCompletions("liquibase.enabled=<*>",
 				"liquibase.enabled=true<*>",
 				"liquibase.enabled=false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled:<*>",
 				"liquibase.enabled:true<*>",
 				"liquibase.enabled:false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled = <*>",
 				"liquibase.enabled = true<*>",
 				"liquibase.enabled = false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled   <*>",
 				"liquibase.enabled   true<*>",
 				"liquibase.enabled   false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled=f<*>",
 				"liquibase.enabled=false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled=t<*>",
 				"liquibase.enabled=true<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled:f<*>",
 				"liquibase.enabled:false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled:t<*>",
 				"liquibase.enabled:true<*>"
 		);
@@ -110,29 +110,29 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletions("liquibase.enabled = f<*>",
 				"liquibase.enabled = false<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled = t<*>",
 				"liquibase.enabled = true<*>"
 		);
-		
+
 		assertCompletions("liquibase.enabled   t<*>",
 				"liquibase.enabled   true<*>"
 		);
-		
+
 		//one more... for special char like '-' in the name
 
 		assertCompletions("liquibase.check-change-log-location=t<*>",
 				"liquibase.check-change-log-location=true<*>"
 		);
 	}
-	
-	
+
+
 	public void testHoverInfos() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"#foo\n" + 
-				"# bar\n" + 
-				"server.port=8080\n" + 
+				"#foo\n" +
+				"# bar\n" +
+				"server.port=8080\n" +
 				"logging.level.com.acme=INFO\n"
 		);
 		//Case 1: an 'exact' match of the property is in the hover region
@@ -144,14 +144,14 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Case 2: an object/map property has extra text after the property name
 		assertHoverText(editor, "logging.", "<b>logging.level</b>");
 	}
-	
+
 	public void testHoverInfosWithSpaces() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"#foo\n" + 
-				"# bar\n"+ 
-				"\n" + 
-				"  server.port = 8080\n" + 
+				"#foo\n" +
+				"# bar\n"+
+				"\n" +
+				"  server.port = 8080\n" +
 				"  logging.level.com.acme = INFO\n"
 		);
 		//Case 1: an 'exact' match of the property is in the hover region
@@ -168,24 +168,24 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		data("server.port.fancy", BOOLEAN, 8080, "Whether the port is fancy.");
 		MockEditor editor = new MockEditor(
-				"server.port=8080\n" + 
+				"server.port=8080\n" +
 				"server.port.fancy=true\n"
 		);
 		assertHoverText(editor, "server.", "<b>server.port</b>");
 		assertHoverText(editor, "port.fa", "<b>server.port.fancy</b>");
 	}
-	
-	
+
+
 	public void testPredefinedProject() throws Exception {
 		IProject p = createPredefinedProject("demo");
 		IType type = JavaCore.create(p).findType("demo.DemoApplication");
 		assertNotNull(type);
 	}
-	
+
 	public void testEnableApt() throws Throwable {
 		IProject p = createPredefinedProject("demo-live-metadata");
 		IJavaProject jp = JavaCore.create(p);
-		
+
 		//Check some assumptions about the initial state of the test project (if these checks fail then
 		// the test may be 'vacuous' since the things we are testing for already exist beforehand.
 		assertFalse(AptUtils.isAptEnabled(jp));
@@ -194,28 +194,28 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		AptUtils.enableApt(jp);
 		buildProject(jp);
-		
+
 		assertTrue(AptUtils.isAptEnabled(jp));
 		assertTrue(metadataFile.exists()); //apt should create the json metadata file during project build.
 		assertContains("\"name\": \"foo.counter\"", getContents(metadataFile));
 	}
-	
+
 	public void testHyperlinkTargets() throws Exception {
 		System.out.println(">>> testHyperlinkTargets");
 		IProject p = createPredefinedProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
-		
+
 		MockEditor editor = new MockEditor(
-				"server.port=888\n" + 
+				"server.port=888\n" +
 				"spring.datasource.login-timeout=1000\n" +
 				"flyway.init-sqls=a,b,c\n"
 		);
-		
-		assertLinkTargets(editor, "server", 
+
+		assertLinkTargets(editor, "server",
 				"org.springframework.boot.autoconfigure.web.ServerProperties.setPort(Integer)"
 		);
-		assertLinkTargets(editor, "data", 
+		assertLinkTargets(editor, "data",
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.hikariDataSource()",
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.tomcatDataSource()",
 				"org.springframework.boot.autoconfigure.jdbc.DataSourceConfigMetadata.dbcpDataSource()"
@@ -224,29 +224,29 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"org.springframework.boot.autoconfigure.flyway.FlywayProperties.setInitSqls(List<String>)");
 		System.out.println("<<< testHyperlinkTargets");
 	}
-	
+
 	public void testHyperlinkTargetsLoggingLevel() throws Exception {
 		System.out.println(">>> testHyperlinkTargetsLoggingLevel");
 		IProject p = createPredefinedProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
-		
+
 		MockEditor editor = new MockEditor(
 				"logging.level.com.acme=INFO\n"
 		);
-		assertLinkTargets(editor, "level", 
+		assertLinkTargets(editor, "level",
 				"org.springframework.boot.logging.LoggingApplicationListener"
 		);
 		System.out.println("<<< testHyperlinkTargetsLoggingLevel");
 	}
-	
+
 	public void testReconcile() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"server.port=8080\n" + 
-				"server.port.extracrap=8080\n" + 
-				"logging.level.com.acme=INFO\n" + 
-				"logging.snuggem=what?\n" + 
+				"server.port=8080\n" +
+				"server.port.extracrap=8080\n" +
+				"logging.level.com.acme=INFO\n" +
+				"logging.snuggem=what?\n" +
 				"bogus.no.good=true\n"
 		);
 		assertProblems(editor,
@@ -254,9 +254,9 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"snuggem|unknown property",
 				"ogus.no.good|unknown property"
 		);
-				
+
 	}
-	
+
 	public void testReconcileArrayNotation() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
@@ -269,7 +269,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				//no other problems
 		);
 	}
-	
+
 	public void testReconcileArrayNotationError() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
@@ -286,7 +286,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				//no other problems
 		);
 	}
-	
+
 	public void testRelaxedNameReconciling() throws Exception {
 		data("connection.remote-host", "java.lang.String", "service.net", null);
 		data("foo-bar.name", "java.lang.String", null, null);
@@ -302,10 +302,10 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				//no other problems
 		);
 	}
-	
+
 	public void testRelaxedNameReconcilingErrors() throws Exception {
 		//Tricky with relaxec names: the error positions have to be moved
-		// around because the relaxed names aren't same length as the 
+		// around because the relaxed names aren't same length as the
 		// canonical ids.
 		data("foo-bar-zor.enabled", "java.lang.Boolean", null, null);
 		MockEditor editor = new MockEditor(
@@ -317,16 +317,16 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				".subprop|Supbproperties are invalid"
 		);
 	}
-	
+
 	public void testRelaxedNameContentAssist() throws Exception {
 		data("foo-bar-zor.enabled", "java.lang.Boolean", null, null);
 		assertCompletion("fooBar<*>", "foo-bar-zor.enabled=<*>");
 	}
-	
+
 	public void testReconcileValues() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"server.port=badPort\n" + 
+				"server.port=badPort\n" +
 				"liquibase.enabled=nuggels"
 		);
 		assertProblems(editor,
@@ -334,11 +334,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"nuggels|Boolean"
 		);
 	}
-	
+
 	public void testNoReconcileInterpolatedValues() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"server.port=${port}\n" + 
+				"server.port=${port}\n" +
 				"liquibase.enabled=nuggels"
 		);
 		assertProblems(editor,
@@ -346,11 +346,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"nuggels|Boolean"
 		);
 	}
-	
+
 	public void testReconcileValuesWithSpaces() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"server.port  =   badPort\n" + 
+				"server.port  =   badPort\n" +
 				"liquibase.enabled   nuggels  \n" +
 				"liquibase.enabled   : snikkers"
 		);
@@ -360,17 +360,17 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"snikkers|Boolean"
 		);
 	}
-	
-	
+
+
 	public void testReconcileWithExtraSpaces() throws Exception {
 		defaultTestData();
 		//Same test as previous but with extra spaces to make things more confusing
 		MockEditor editor = new MockEditor(
-				"   server.port   =  8080  \n" + 
-				"\n" + 
-				"  server.port.extracrap = 8080\n" + 
-				" logging.level.com.acme  : INFO\n" + 
-				"logging.snuggem = what?\n" + 
+				"   server.port   =  8080  \n" +
+				"\n" +
+				"  server.port.extracrap = 8080\n" +
+				" logging.level.com.acme  : INFO\n" +
+				"logging.snuggem = what?\n" +
 				"bogus.no.good=  true\n"
 		);
 		assertProblems(editor,

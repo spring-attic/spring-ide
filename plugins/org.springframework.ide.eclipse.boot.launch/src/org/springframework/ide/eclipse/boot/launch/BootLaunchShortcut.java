@@ -36,35 +36,19 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
+import static org.springframework.ide.eclipse.boot.core.LiveBeanSupport.*;
+
 
 @SuppressWarnings("restriction")
 public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
-	
+
 	/**
 	 * Launch configuration id of the configs created by this shortcut.
 	 */
 	public static final String LAUNCH_CONFIG_TYPE_ID = BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID;
 
-	public static final String JMX_PORT_PROP = "com.sun.management.jmxremote.port";
-	
-	/**
-	 * VM args that enable 'live bean graph' and jmx.
-	 */
-	public static String liveBeanVmArgs(int jmxPort) {
-		return liveBeanVmArgs(""+jmxPort);
-	}
-	
-	public static String liveBeanVmArgs(String jmxPort) {
-		return
-				"-Dspring.liveBeansView.mbeanDomain\n" + //enable live beans construction
-				"-Dcom.sun.management.jmxremote\n" + //enable jmx to access the beans
-				"-D"+ JMX_PORT_PROP +"="+jmxPort + "\n" +
-				"-Dcom.sun.management.jmxremote.authenticate=false\n" +
-				"-Dcom.sun.management.jmxremote.ssl=false\n";
-	}
 
-	
-			
+
 	@Override
 	protected IType[] findTypes(Object[] elements, IRunnableContext context)
 			throws InterruptedException, CoreException {
@@ -101,10 +85,10 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 		// only a fallback option if the above code failed. (Or should we rather signal an error instead?)
 		return super.findTypes(elements, context);
 	}
-	
+
 	@Override
 	protected ILaunchConfigurationType getConfigurationType() {
-		return getLaunchManager().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE_ID);		
+		return getLaunchManager().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE_ID);
 	}
 
 	/**

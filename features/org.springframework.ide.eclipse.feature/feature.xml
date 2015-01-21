@@ -141,13 +141,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.boot"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.springframework.ide.eclipse.config.core"
          download-size="0"
          install-size="0"
@@ -244,9 +237,25 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+         
    <plugin
          id="org.springframework.transaction"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <!-- spring boot -->
+   
+   <plugin
+         id="org.springframework.ide.eclipse.boot"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.boot.launch"
          download-size="0"
          install-size="0"
          version="0.0.0"
