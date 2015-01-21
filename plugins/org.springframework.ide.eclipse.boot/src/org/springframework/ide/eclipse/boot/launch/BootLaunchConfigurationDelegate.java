@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
+import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,11 +65,15 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	@Override
 	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
 		List<PropVal> props = getProperties(conf);
-		if (props==null || props.isEmpty()) {
+		boolean debugOutput = getEnableDebugOutput(conf);
+		if ((props==null || props.isEmpty()) && !debugOutput) {
 			//shortcut for case where no boot-specific customizations are specified.
 			return super.getProgramArguments(conf);
 		}
 		ArrayList<String> args = new ArrayList<String>();
+		if (debugOutput) {
+			args.add("--debug");
+		}
 		addPropertiesArguments(args, props);
 		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
 		return DebugPlugin.renderArguments(args.toArray(new String[args.size()]), null);
@@ -75,7 +81,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	private void addPropertiesArguments(ArrayList<String> args, List<PropVal> props) {
 		for (PropVal p : props) {
-			//spring boot doesn't like empty option keys so skip those.
+			//spring boot doesn't like empty option keys/values so skip those.
 			if (p.isChecked && !p.name.isEmpty() && !p.value.isEmpty()) {
 				//spring boot has no handling of escape sequences like '\=' to
 				//so we cannot represent keys containing '='.
@@ -97,11 +103,15 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	/**
 	 * To be able to store multiple assignment to the same spring boot
 	 * property name we add a 'oid' at the end of each stored
-	 * property name. OID_SEPERATOR is used to separate the 'real'
+	 * property name. ?_SEPERATOR is used to separate the 'real'
 	 * property name from the 'oid' string.
 	 */
 	private static final char OID_SEPERATOR = ':';
 
+	private static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
+	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
+
+	@SuppressWarnings("unchecked")
 	public static List<PropVal> getProperties(ILaunchConfiguration conf) {
 		ArrayList<PropVal> props = new ArrayList<PropVal>();
 		try {
@@ -141,7 +151,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 					 //entries with identical keys.
 		for (PropVal p : props) {
 			//Don't store stuff with 'empty keys'. These are likely just
-			// 'emtpy' entries user added but never filled in.
+			// 'empty' entries user added but never filled in.
 			if (hasText(p.name)) {
 				String prefixed = PROPS_PREFIX+p.name+OID_SEPERATOR+(oid++);
 				String valueEnabled = (p.isChecked?'1':'0')+p.value;
@@ -165,9 +175,17 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		}
 	}
 
-	private static boolean hasText(String name) {
-		return name!=null && !name.trim().equals("");
+	public static boolean getEnableDebugOutput(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(ENABLE_DEBUG_OUTPUT, DEFAULT_ENABLE_DEBUG_OUTPUT);
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return DEFAULT_ENABLE_DEBUG_OUTPUT;
+		}
 	}
 
+	public static void setEnableDebugOutput(ILaunchConfigurationWorkingCopy conf, boolean enable) {
+		conf.setAttribute(ENABLE_DEBUG_OUTPUT, enable);
+	}
 
 }

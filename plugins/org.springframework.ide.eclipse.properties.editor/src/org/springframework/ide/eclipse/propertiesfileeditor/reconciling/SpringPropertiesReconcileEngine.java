@@ -32,8 +32,9 @@ import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
+
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
@@ -41,7 +42,7 @@ import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
  * The code in here could have been also part of the {@link SpringPropertiesReconcileStrategy}
  * itself, however isolating it here allows it to me more easily unit tested (no dependencies
  * on ISourceViewer which is difficult to 'mock' in testing harness.
- * 
+ *
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
@@ -103,7 +104,7 @@ public class SpringPropertiesReconcileEngine {
 
 	}
 
-	
+
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider) {
 		fIndexProvider = provider;
 	}
@@ -111,7 +112,7 @@ public class SpringPropertiesReconcileEngine {
 	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon) {
 		FuzzyMap<PropertyInfo> index = getIndex();
 		if (index==null || index.isEmpty()) {
-			//don't report errors when index is empty, simply don't check (otherwise we will just reprot 
+			//don't report errors when index is empty, simply don't check (otherwise we will just reprot
 			// all properties as errors, but this not really useful information since the cause is
 			// some problem putting information about properties into the index.
 			return;
@@ -131,7 +132,7 @@ public class SpringPropertiesReconcileEngine {
 							if (fullName.length()<r.getLength()) {
 								String paddedName = doc.get(r.getOffset(), r.getLength());
 								int start = paddedName.indexOf(fullName);
-								trimmedRegion = new Region(r.getOffset()+start, fullName.length()); 
+								trimmedRegion = new Region(r.getOffset()+start, fullName.length());
 							}
 							if (fullName.isEmpty()) {
 								if (!isAssigned(doc, r)) {
@@ -159,7 +160,7 @@ public class SpringPropertiesReconcileEngine {
 										} else {
 											int rbrack = fullName.lastIndexOf(']');
 											if (rbrack<0) {
-												problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE, 
+												problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 														"No matching ']'",
 														trimmedRegion.getOffset()+lbrack, 1));
 											} else {
@@ -168,7 +169,7 @@ public class SpringPropertiesReconcileEngine {
 													try {
 														Integer.parseInt(indexStr);
 													} catch (Exception e) {
-														problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE, 
+														problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 															"Expecting 'Integer' for '[...]' notation '"+validProperty.getId()+"'",
 															trimmedRegion.getOffset()+lbrack+1, rbrack-lbrack-1
 														));
@@ -187,7 +188,7 @@ public class SpringPropertiesReconcileEngine {
 										if ('['==fullName.charAt(validProperty.getId().length())) {
 											problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 													"[...] notation is invalid for property "+
-															"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 
+															"'"+validPrefix+"' with type '"+validProperty.getType()+"'",
 															trimmedRegion.getOffset()+validPrefix.length(),
 															trimmedRegion.getLength()-validPrefix.length()
 													));
@@ -198,16 +199,16 @@ public class SpringPropertiesReconcileEngine {
 													validPrefix);
 										}
 									} else { //type is not a known directly assignable type
-										//accessing sub-properties may be ok in this case. 
+										//accessing sub-properties may be ok in this case.
 										// So do not complain
 									}
 								}
 							} else { //validProperty==null
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
 								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
-								String validPrefix = StringUtil.commonPrefix(similarEntry.getId(), fullName);
+								String validPrefix = commonPrefix(similarEntry.getId(), fullName);
 								problemCollector.accept(new SpringPropertyProblem(WARNING_TYPE,
-										"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName), 
+										"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
 										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
 							} //end: validProperty==null
 						}
@@ -228,7 +229,7 @@ public class SpringPropertiesReconcileEngine {
 			String validPrefix) {
 		problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 				"Supbproperties are invalid for property "+
-						"'"+validPrefix+"' with type '"+validProperty.getType()+"'", 
+						"'"+validPrefix+"' with type '"+validProperty.getType()+"'",
 						trimmedRegion.getOffset()+validPrefix.length(),
 						trimmedRegion.getLength()-validPrefix.length()
 				));
@@ -280,7 +281,7 @@ public class SpringPropertiesReconcileEngine {
 			}
 			if (errorRegion!=null) {
 				problems.accept(new SpringPropertyProblem(ERROR_TYPE,
-						"Expecting '"+shortTypeName(expectType)+"' for property '"+validProperty.getId()+"'", 
+						"Expecting '"+shortTypeName(expectType)+"' for property '"+validProperty.getId()+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}
 		}
@@ -298,8 +299,8 @@ public class SpringPropertiesReconcileEngine {
 	}
 
 	/**
-	 * Extract the 'assigned' value represented as String from document. 
-	 * 
+	 * Extract the 'assigned' value represented as String from document.
+	 *
 	 * @param doc The document
 	 * @param regions Regions in the document
 	 * @param i Target region (i.e. points at the 'key' region for which we want to find assigned value
@@ -311,14 +312,14 @@ public class SpringPropertiesReconcileEngine {
 				ITypedRegion valueRegion = regions[valueRegionIndex];
 				if (valueRegion.getType()==IPropertiesFilePartitions.PROPERTY_VALUE) {
 					String regionText = doc.get(valueRegion.getOffset(), valueRegion.getLength());
-					//region text includes 
-					//  potential padding with whitespace. 
+					//region text includes
+					//  potential padding with whitespace.
 					//  the ':' or '=' (if its there).
 					regionText = regionText.trim();
 					if (!regionText.isEmpty()) {
 						char assignment = regionText.charAt(0);
 						if (isAssign(assignment)) {
-							//strip of 'assignment' and also more whitepace which might occur 
+							//strip of 'assignment' and also more whitepace which might occur
 							//after it.
 							regionText = regionText.substring(1).trim(); //
 						}
@@ -358,7 +359,7 @@ public class SpringPropertiesReconcileEngine {
 
 	/**
 	 * Find the longest known property that is a prefix of the given name. Here prefix does not mean
-	 * 'string prefix' but a prefix in the sense of treating '.' as a kind of separators. So 
+	 * 'string prefix' but a prefix in the sense of treating '.' as a kind of separators. So
 	 * 'prefix' is not allowed to end in the middle of a 'segment'.
 	 */
 	private PropertyInfo findLongestValidProperty(FuzzyMap<PropertyInfo> index, String name) {
@@ -368,7 +369,7 @@ public class SpringPropertiesReconcileEngine {
 		String prefix = null;
 		while (endPos>0 && prop==null) {
 			prefix = name.substring(0, endPos);
-			String canonicalPrefix = StringUtil.camelCaseToHyphens(prefix);
+			String canonicalPrefix = camelCaseToHyphens(prefix);
 			prop = index.get(canonicalPrefix);
 			if (prop==null) {
 				endPos = name.lastIndexOf('.', endPos-1);

@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.launch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -36,30 +35,28 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
-import org.springframework.ide.eclipse.core.StringUtils;
-
 /**
  * An IPageSection that contains a table-based properties editor.
- * 
+ *
  * @author Kris De Volder
  */
 public class PropertiesTableSection extends WizardPageSection implements ILaunchConfigurationTabSection {
 
-	private static final char OID_SEPERATOR = ':';
-
 	public class CellEditorSupport extends EditingSupport {
 
 		//TODO: add content assist support to the text cell editor
-		//See here for sample code http://javafind.appspot.com/model?id=318036 
+		//See here for sample code http://javafind.appspot.com/model?id=318036
 
 		private CellEditor editor;
 		private int col;
@@ -122,7 +119,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 	public LiveVariable<Boolean> getDirtyState() {
 		return dirtyState;
 	}
-	
+
 	public PropertiesTableSection(IPageWithSections owner) {
 		super(owner);
 	}
@@ -133,7 +130,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 	private List<PropVal> props = new ArrayList<PropVal>();
 
 	private CheckStateSynchronizer checkStateProvider = new CheckStateSynchronizer();
-	
+
 	/**
 	 * Remembers element that was last clicked by mouse, so that we
 	 * can use it in executing context menu actions on it.
@@ -152,10 +149,10 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 //				System.out.println("y = "+e.y);
 				//Tricky: just asking for the 'cell' at event position returns null
 				// when click is received on a checkbox in the CheckBoxTableViewer.
-				//Since we really only want to know if we are clicking in some 
-				//existing row we can just 'ignore' event.x position and set 
+				//Since we really only want to know if we are clicking in some
+				//existing row we can just 'ignore' event.x position and set
 				//it to the middle of the viewer.
-				
+
 				if (clickedElement==null) {
 					lastMouseDownTarget = null;
 //					System.out.println("NO cell");
@@ -178,6 +175,8 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 
 	@Override
 	public void createContents(Composite parent) {
+		Label label = new Label(parent, SWT.NONE);
+		label.setText("Override properties:");
 		tableViewer = CheckboxTableViewer.newCheckList(parent, SWT.NONE);
 		tableViewer.setColumnProperties(COLUMN_NAMES);
 		tableViewer.getTable().setHeaderVisible(true);
@@ -214,7 +213,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 				addNewRow(false);
 			}
 		});
-		table.setMenu(contextMenu);  
+		table.setMenu(contextMenu);
 	}
 
 	/**
@@ -238,7 +237,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 	private PropVal findEmptyProp() {
 		if (!props.isEmpty()) {
 			PropVal last = props.get(props.size()-1);
-			if (!StringUtils.hasText(last.name)) {
+			if (!StringUtil.hasText(last.name)) {
 				return last;
 			}
 		}

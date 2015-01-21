@@ -24,30 +24,31 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
-import org.springframework.util.StringUtils;
+
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information
  * control.
  * <p>
  * Essentially this is a wrapper around {@link ConfigurationMetadataProperty}
- * 
+ *
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
 public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 
 	private static final String[] NO_ARGS = new String[0];
-	
+
 	/**
 	 * Java project which is used to find declaration for 'navigate to declaration' action
 	 */
 	private IJavaProject javaProject;
-	
+
 	/**
 	 * Data object to display in 'hover text'
 	 */
-	private PropertyInfo data; 
+	private PropertyInfo data;
 
 	public SpringPropertyHoverInfo(IJavaProject project, PropertyInfo data) {
 		super(null);
@@ -62,12 +63,12 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 
 	public static String getHtmlHoverText(PropertyInfo data) {
 		HtmlBuffer html = new HtmlBuffer();
-		
+
 		html.raw("<b>");
 			html.text(data.getId());
 		html.raw("</b>");
 		html.raw("<br>");
-		
+
 		String type = data.getType();
 		if (type==null) {
 			type = Object.class.getName();
@@ -77,8 +78,8 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 		html.raw("\">");
 		html.text(type);
 		html.raw("</a>");
-		
-		
+
+
 		String deflt = formatDefaultValue(data.getDefaultValue());
 		if (deflt!=null) {
 			html.raw("<br><br>");
@@ -87,16 +88,16 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			html.text(deflt);
 			html.raw("</i>");
 		}
-		
+
 		String description = data.getDescription();
 		if (description!=null) {
 			html.raw("<br><br>");
 			html.text(description);
 		}
-		
+
 		return html.toString();
 	}
-	
+
 	public static String formatDefaultValue(Object defaultValue) {
 		if (defaultValue!=null) {
 			if (defaultValue instanceof String) {
@@ -106,9 +107,9 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			} else if (defaultValue instanceof Boolean) {
 				return Boolean.toString((Boolean) defaultValue);
 			} else if (defaultValue instanceof Object[]) {
-				return StringUtils.arrayToCommaDelimitedString((Object[]) defaultValue);
+				return arrayToCommaDelimitedString((Object[]) defaultValue);
 			} else if (defaultValue instanceof Collection<?>) {
-				return StringUtils.collectionToCommaDelimitedString((Collection<?>) defaultValue);
+				return collectionToCommaDelimitedString((Collection<?>) defaultValue);
 			} else {
 				//no idea what it is but try 'toString' and hope for the best
 				return defaultValue.toString();
@@ -134,7 +135,7 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 	public boolean canOpenDeclaration() {
 		return getJavaElements()!=null;
 	}
-	
+
 	/**
 	 * Like 'getSources' but converts raw info into IJavaElements. Raw data which fails to be converted
 	 * is silenetly ignored.
@@ -189,7 +190,7 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 				+Character.toUpperCase(propName.charAt(0))
 				+toCamelCase(propName.substring(1));
 			String sloppySetterName = setterName.toLowerCase();
-	
+
 			IMethod sloppyMatch = null;
 			for (IMethod m : type.getMethods()) {
 				String mname = m.getElementName();
@@ -208,7 +209,7 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 	}
 
 	/**
-	 * Convert hyphened name to camel case name. It is 
+	 * Convert hyphened name to camel case name. It is
 	 * safe to call this on an already camel-cased name.
 	 */
 	private String toCamelCase(String name) {
@@ -247,7 +248,7 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 		} else {
 			name = methodSig;
 		}
-		//TODO: This code assumes 0 arguments, which is the case currently for all 
+		//TODO: This code assumes 0 arguments, which is the case currently for all
 		//  'real' data in spring jars.
 		IMethod m = type.getMethod(name, NO_ARGS);
 		if (m!=null) {

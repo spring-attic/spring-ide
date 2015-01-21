@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.formatJavaType;
 import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.getValues;
 
@@ -46,31 +47,29 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
-
-import static org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil.*;
 
 /**
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
 public class SpringPropertiesCompletionEngine {
-	
+
 	private static final boolean DEBUG = false;
-//	private static final boolean DEBUG = 
+//	private static final boolean DEBUG =
 //			(""+Platform.getLocation()).contains("kdvolder") ||
 //			(""+Platform.getLocation()).contains("bamboo");
-	
+
 	public static void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("SpringPropertiesCompletionEngine: "+msg);
 		}
 	}
-	
+
 	public Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
@@ -89,9 +88,9 @@ public class SpringPropertiesCompletionEngine {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_OPERATOR);
 		}
 	};
-	
-	
-	
+
+
+
 	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			if (p1 instanceof PropertyProposal && p2 instanceof PropertyProposal) {
@@ -112,23 +111,23 @@ public class SpringPropertiesCompletionEngine {
 			return 0;
 		}
 	};
-	
+
 	private DocumentContextFinder documentContextFinder = null;
 	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
-	
-	/** 
+
+	/**
 	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
-	 * constructor that accepts an {@link IJavaProject}. 
+	 * constructor that accepts an {@link IJavaProject}.
 	 * <p>
 	 * In a test context the test harness is responsible for injecting proper documentContextFinder
 	 * and indexProvider.
 	 */
 	public SpringPropertiesCompletionEngine() {
 	}
-	
-	/** 
-	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal 
-	 * Eclipse runtime. 
+
+	/**
+	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal
+	 * Eclipse runtime.
 	 */
 	public SpringPropertiesCompletionEngine(final IJavaProject jp) throws Exception {
 		this.indexProvider = new Provider<FuzzyMap<PropertyInfo>>() {
@@ -141,7 +140,7 @@ public class SpringPropertiesCompletionEngine {
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
 //		dumpAsTestData();
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
-		
+
 	}
 
 	private String getPrefix(IDocument doc, int offset) throws BadLocationException {
@@ -154,23 +153,23 @@ public class SpringPropertiesCompletionEngine {
 
 		return doc.get(prefixStart, offset-prefixStart);
 	}
-	
+
 	private boolean isPrefixChar(char c) {
 		return !Character.isWhitespace(c);
 	}
-	
+
 	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
 		ITypedRegion partition = getPartition(doc, offset);
 		String type = partition.getType();
 		if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-			//inside a property 'key' 
+			//inside a property 'key'
 			return getPropertyCompletions(doc, offset);
 		} else if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
 			return getValueCompletions(doc, offset, partition);
 		}
 		return Collections.emptyList();
 	}
-	
+
 	public static boolean isAssign(char assign) {
 		return assign==':'||assign=='=';
 	}
@@ -207,7 +206,7 @@ public class SpringPropertiesCompletionEngine {
 				startOfValue = offset;
 				valuePrefix = "";
 			}
-			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards. 
+			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 					//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
 				PropertyInfo prop = getIndex().get(propertyName);
@@ -218,7 +217,7 @@ public class SpringPropertiesCompletionEngine {
 						for (int i = 0; i < valueCompletions.length; i++) {
 							String valueCandidate = valueCompletions[i];
 							if (valueCandidate.startsWith(valuePrefix)) {
-								proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)); 
+								proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i));
 							}
 						}
 						return proposals;
@@ -237,7 +236,7 @@ public class SpringPropertiesCompletionEngine {
 			if (pos>=0) {
 				char assign = doc.getChar(pos);
 				if (!isAssign(assign)) {
-					return pos; //For the case where key and value are separated by whitespace instead of assignment 
+					return pos; //For the case where key and value are separated by whitespace instead of assignment
 				}
 				pos = skipWhiteSpace(doc, pos+1);
 				if (pos>=0) {
@@ -264,14 +263,14 @@ public class SpringPropertiesCompletionEngine {
 		}
 		return Collections.emptyList();
 	}
-	
+
 	private final class ValueProposal implements ICompletionProposal {
-		
+
 		private int valueStart;
 		private String valuePrefix;
 		private String value;
 		private int sortingOrder;
-		
+
 		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
 			this.valueStart = valueStart;
 			this.valuePrefix = valuePrefix;
@@ -313,7 +312,7 @@ public class SpringPropertiesCompletionEngine {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "<"+valuePrefix+">"+value;
@@ -322,8 +321,8 @@ public class SpringPropertiesCompletionEngine {
 	}
 
 
-	
-	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, 
+
+	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
 	{
 
@@ -347,7 +346,7 @@ public class SpringPropertiesCompletionEngine {
 			PropertyInfo data = match.data;
 			return SpringPropertyHoverInfo.getHtmlHoverText(data);
 		}
-		
+
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
@@ -451,7 +450,7 @@ public class SpringPropertiesCompletionEngine {
 			}
 			return completion.toString();
 		}
-		
+
 		@Override
 		public StyledString getStyledDisplayString() {
 			StyledString result = new StyledString();
@@ -473,7 +472,7 @@ public class SpringPropertiesCompletionEngine {
 			}
 			return result;
 		}
-		
+
 		private String getShortDescription() {
 			String description = match.data.getDescription();
 			if (description!=null) {
@@ -511,7 +510,7 @@ public class SpringPropertiesCompletionEngine {
 		}
 		return null;
 	}
-	
+
 	public List<IJavaElement> getSourceElements(IDocument doc, int offset) {
 		debug("getSourceElements");
 		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, offset, IDocument.DEFAULT_CONTENT_TYPE);
@@ -522,7 +521,7 @@ public class SpringPropertiesCompletionEngine {
 		}
 		return Collections.emptyList();
 	}
-	
+
 	public ITypedRegion getHoverRegion(IDocument document, int offset) {
     	try {
     		return getPartition(document, offset);
@@ -565,8 +564,8 @@ public class SpringPropertiesCompletionEngine {
 	/**
 	 * Dumps out 'test data' based on the current contents of the index. This is not meant to be
 	 * used in 'production' code. The idea is to call this method during development to dump a
-	 * 'snapshot' of the index onto System.out. The data is printed in a forma so that it can be easily 
-	 * pasted/used into JUNit testing code. 
+	 * 'snapshot' of the index onto System.out. The data is printed in a forma so that it can be easily
+	 * pasted/used into JUNit testing code.
 	 */
 	public void dumpAsTestData() {
 		List<Match<PropertyInfo>> allData = getIndex().find("");
@@ -603,13 +602,13 @@ public class SpringPropertiesCompletionEngine {
 			for (char c : s.toCharArray()) {
 				switch (c) {
 				case '\r':
-					buf.append("\\r"); 
+					buf.append("\\r");
 					break;
 				case '\n':
-					buf.append("\\n"); 
+					buf.append("\\n");
 					break;
 				case '\\':
-					buf.append("\\\\"); 
+					buf.append("\\\\");
 					break;
 				case '\"':
 					buf.append("\\\"");
@@ -627,7 +626,7 @@ public class SpringPropertiesCompletionEngine {
 	public FuzzyMap<PropertyInfo> getIndex() {
 		return indexProvider.get();
 	}
-	
+
 	public Provider<FuzzyMap<PropertyInfo>> getIndexProvider() {
 		return indexProvider;
 	}
@@ -655,5 +654,5 @@ public class SpringPropertiesCompletionEngine {
 		this.indexProvider = it;
 	}
 
-	
+
 }

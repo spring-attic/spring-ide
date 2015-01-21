@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,14 +8,18 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.propertiesfileeditor.util;
+package org.springframework.ide.eclipse.boot.util;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
-
 public class StringUtil {
+
+	public static boolean hasText(String name) {
+		return name!=null && !name.trim().equals("");
+	}
 
 	public static int commonPrefixLength(String s, String t) {
 		int shortestStringLen = Math.min(s.length(), t.length());
@@ -55,7 +59,24 @@ public class StringUtil {
 		matcher.appendTail(result);
 		return result.toString();
 	}
-	
+
 	private static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("([^A-Z-])([A-Z])");
+
+	public static String arrayToCommaDelimitedString(Object[] array) {
+		return collectionToCommaDelimitedString(Arrays.asList(array));
+	}
+
+	public static String collectionToCommaDelimitedString(Collection<?> items) {
+		StringBuilder buf = new StringBuilder();
+		boolean first = true;
+		for (Object item : items) {
+			buf.append(item);
+			if (!first) {
+				buf.append(",");
+			}
+			first = false;
+		}
+		return buf.toString();
+	}
 
 }

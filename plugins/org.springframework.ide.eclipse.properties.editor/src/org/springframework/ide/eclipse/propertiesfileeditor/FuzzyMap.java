@@ -17,18 +17,18 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.springframework.ide.eclipse.propertiesfileeditor.util.StringUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string
  * matching algorithm. Clients must override 'getKey' method to define how
- * a search 'key' is associated with each data item. 
+ * a search 'key' is associated with each data item.
  * <p>
- * The collection can then be searched for items who's key matches 
+ * The collection can then be searched for items who's key matches
  * simple 'fuzzy' patterns.
  */
 public abstract class FuzzyMap<E> implements Iterable<E> {
-	
+
 	@Override
 	public Iterator<E> iterator() {
 		return entries.values().iterator();
@@ -52,7 +52,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			}
 			return best;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Match(score="+score+", data="+data+")";
@@ -60,9 +60,9 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	}
 
 	private TreeMap<String,E> entries = new TreeMap<String, E>();
-	
+
 	protected abstract String getKey(E entry);
-	
+
 	public void add(E value) {
 		//This assumes no two entries have the same id.
 		String key = getKey(value);
@@ -73,10 +73,10 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			SpringPropertiesEditorPlugin.warning(FuzzyMap.class.getName()+": Multiple entries for key "+key+" some entries discarded");
 		}
 	}
-	
+
 	/**
-	 * Search for pattern. A pattern is just a sequence of characters which have to found in 
-	 * an entrie's key in the same order as they are in the pattern. 
+	 * Search for pattern. A pattern is just a sequence of characters which have to found in
+	 * an entrie's key in the same order as they are in the pattern.
 	 */
 	public List<Match<E>> find(String pattern) {
 		if ("".equals(pattern)) {
@@ -114,7 +114,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		E best = findLongestCommonPrefixEntry(propertyName);
 		return best==null?null:StringUtil.commonPrefix(propertyName, getKey(best));
 	}
-	
+
 	/**
 	 * Find property with longest common prefix for given key.
 	 */
@@ -123,7 +123,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		//This means that entries with common prefix will occur 'next to eachother'
 		//The 'best' entry must therefore be either the entry just before or just after
 		//the property we are searching for.
-		
+
 		Entry<String, E> ceiln = entries.ceilingEntry(propertyName);
 		Entry<String, E> floor = entries.floorEntry(propertyName);
 		Entry<String, E> best;
@@ -145,11 +145,11 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	public E get(String id) {
 		return entries.get(id);
 	}
-	
+
 	/**
 	 * Match given pattern with a given data. The data is considered a 'match' for the
 	 * pattern if all characters in the pattern can be found in the data, in the
-	 * same order but with possible 'gaps' in between. 
+	 * same order but with possible 'gaps' in between.
 	 * <p>
 	 * The function returns 0. when the pattern doesn't match the data and a non-zero
 	 * 'score' when it does. The higher the score, the better the match is considered to
@@ -185,7 +185,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		//end of pattern reached. All matched.
 		if (dpos<dlen) {
 			//data left over
-			//gaps++; don't count end skipped chars as a real 'gap'. Otherwise we 
+			//gaps++; don't count end skipped chars as a real 'gap'. Otherwise we
 			//tend to favor matches at the end of the string over matches in the middle.
 			skips+=dlen-dpos; //but do count the extra chars at end => more extra = worse score
 		}

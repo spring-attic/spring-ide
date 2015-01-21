@@ -34,13 +34,14 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 	public Image getImage() {
 		return BootUIImages.getImage(BOOT_ICON);
 	}
-	
+
 	@Override
 	protected List<IPageSection> createSections() {
 		return Arrays.asList(new IPageSection[] {
 				//new JavaMainSection(this),
+				new EnableDebugSection(this),
 				new PropertiesTableSection(this)
 		});
 	}
-	
+
 }

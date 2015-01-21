@@ -26,12 +26,12 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.apache.commons.io,
  org.eclipse.jdt.ui,
- org.springsource.ide.eclipse.commons.ui,
  org.springframework.ide.eclipse.beans.ui.livegraph,
- org.springframework.ide.eclipse.core
+ org.springsource.ide.eclipse.commons.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.boot.core
+Export-Package: org.springframework.ide.eclipse.boot.core,
+ org.springframework.ide.eclipse.boot.util
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,

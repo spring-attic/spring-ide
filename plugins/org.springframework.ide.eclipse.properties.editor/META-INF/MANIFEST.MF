@@ -22,9 +22,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.jdt;resolution:=optional,
  org.springsource.ide.eclipse.commons.frameworks.ui,
  org.eclipse.ui.ide,
- org.springframework.core,
  org.springsource.ide.eclipse.gradle.core;resolution:=optional,
- org.springsource.ide.eclipse.gradle.toolingapi;resolution:=optional
+ org.springsource.ide.eclipse.gradle.toolingapi;resolution:=optional,
+ org.springframework.ide.eclipse.boot
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

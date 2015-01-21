@@ -18,15 +18,15 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 /**
  * Additional API that a IPageSection may wish to implement when it
  * is placed inside a {@link LaunchConfigurationTabWithSections}.
- * 
+ *
  * @author Kris De Volder
  */
 public interface ILaunchConfigurationTabSection extends IPageSection {
 
-	void initializeFrom(ILaunchConfiguration configuration);
-	void performApply(ILaunchConfigurationWorkingCopy configuration);
-	void setDefaults(ILaunchConfigurationWorkingCopy configuration);
-	
+	void initializeFrom(ILaunchConfiguration conf);
+	void performApply(ILaunchConfigurationWorkingCopy conf);
+	void setDefaults(ILaunchConfigurationWorkingCopy conf);
+
 	/**
 	 * Launch config tabs must track their 'dirty state'. This state reflects
 	 * whether any of the UI elements contain 'unsaved edits' since the last time
