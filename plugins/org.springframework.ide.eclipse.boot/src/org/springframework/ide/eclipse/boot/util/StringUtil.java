@@ -70,10 +70,10 @@ public class StringUtil {
 		StringBuilder buf = new StringBuilder();
 		boolean first = true;
 		for (Object item : items) {
-			buf.append(item);
 			if (!first) {
 				buf.append(",");
 			}
+			buf.append(item);
 			first = false;
 		}
 		return buf.toString();
