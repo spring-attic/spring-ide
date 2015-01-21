@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactoringChangeUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
@@ -52,10 +55,22 @@ public class BeansTypeRenameRefactoringParticipant extends AbstractRenameRefacto
 	protected void addChange(CompositeChange result, IResource resource, IProgressMonitor pm) throws CoreException {
 
 		if (resource.exists()) {
-			Change change = BeansRefactoringChangeUtils.createRenameChange((IFile) resource, getAffectedElements(),
-					getNewNames(), pm);
-			if (change != null) {
-				result.add(change);
+			TextChange textChange = getTextChange(resource);
+			
+			if (textChange == null) {
+				textChange = new TextFileChange("", (IFile)resource);
+			}
+			
+			TextEdit textEdit = textChange.getEdit();
+			if (textEdit == null) {
+				textEdit = new MultiTextEdit();
+				textChange.setEdit(textEdit);
+			}
+			
+			BeansRefactoringChangeUtils.createRenameChange(textChange, textEdit, (IFile) resource, getAffectedElements(), getNewNames(), pm);
+
+			if (textEdit.hasChildren() && textChange.getParent() == null) {
+				result.add(textChange);
 			}
 		}
 	}

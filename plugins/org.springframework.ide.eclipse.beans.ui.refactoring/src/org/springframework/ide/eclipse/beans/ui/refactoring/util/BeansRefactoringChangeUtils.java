@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -454,7 +455,7 @@ public class BeansRefactoringChangeUtils {
 		}
 	}
 
-	public static Change createRenameChange(IFile file, IJavaElement[] affectedElements, String[] newNames,
+	public static void createRenameChange(TextChange textChange, TextEdit textEdit, IFile file, IJavaElement[] affectedElements, String[] newNames,
 			IProgressMonitor monitor) throws CoreException {
 		IJavaProject jp = JdtUtils.getJavaProject(file.getProject());
 		IStructuredModel model = null;
@@ -462,10 +463,10 @@ public class BeansRefactoringChangeUtils {
 			model = StructuredModelManager.getModelManager().getModelForRead(file);
 
 			if (model == null) {
-				return null;
+				return;
 			}
+
 			IDOMDocument document = ((DOMModelImpl) model).getDocument();
-			MultiTextEdit multiEdit = new MultiTextEdit();
 			NodeList nodes = document.getChildNodes();
 			for (int j = 0; j < affectedElements.length; j++) {
 
@@ -475,17 +476,9 @@ public class BeansRefactoringChangeUtils {
 				if (jp == null || (jp != null && jp.isOnClasspath(je))) {
 					for (int i = 0; i < nodes.getLength(); i++) {
 						Node n = nodes.item(i);
-						recursiveCreateTextEdit(newNames[j], multiEdit, je, n);
+						recursiveCreateTextEdit(newNames[j], textChange, textEdit, je, n);
 					}
 				}
-			}
-			if (multiEdit.hasChildren()) {
-				TextFileChange change = new TextFileChange("", file);
-				change.setEdit(multiEdit);
-				for (TextEdit e : multiEdit.getChildren()) {
-					change.addTextEditGroup(new TextEditGroup("Rename class name", e));
-				}
-				return change;
 			}
 		}
 		catch (IOException e) {
@@ -495,18 +488,17 @@ public class BeansRefactoringChangeUtils {
 				model.releaseFromRead();
 			}
 		}
-		return null;
 	}
 
-	private static void recursiveCreateTextEdit(String newName, MultiTextEdit multiEdit, IJavaElement je, Node n) {
-		createTextEdit(n, je, newName, multiEdit);
+	private static void recursiveCreateTextEdit(String newName, TextChange textChange, TextEdit textEdit, IJavaElement je, Node n) {
+		createTextEdit(n, je, newName, textChange, textEdit);
 		NodeList children = n.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
-			recursiveCreateTextEdit(newName, multiEdit, je, children.item(i));
+			recursiveCreateTextEdit(newName, textChange, textEdit, je, children.item(i));
 		}
 	}
 
-	private static void createTextEdit(Node node, IJavaElement element, String newName, MultiTextEdit multiEdit) {
+	private static void createTextEdit(Node node, IJavaElement element, String newName, TextChange textChange, TextEdit textEdit) {
 		if (node == null) {
 			return;
 		}
@@ -523,7 +515,10 @@ public class BeansRefactoringChangeUtils {
 					AttrImpl attr = (AttrImpl) attributes.getNamedItem(attributes.item(i).getNodeName());
 					int offset = attr.getValueRegionStartOffset() + 1;
 					if (offset >= 0) {
-						multiEdit.addChild(new ReplaceEdit(offset, oldName.length(), newName));
+						ReplaceEdit edit = new ReplaceEdit(offset, oldName.length(), newName);
+
+						textEdit.addChild(edit);
+						textChange.addTextEditGroup(new TextEditGroup("Update class reference", edit));
 					}
 				}
 			}
@@ -536,7 +531,10 @@ public class BeansRefactoringChangeUtils {
 				if (oldName.equals(value) || isGoodMatch(value, oldName, element instanceof IPackageFragment)) {
 					int offset = ((TextImpl)node).getStartOffset();
 					if (offset >= 0) {
-						multiEdit.addChild(new ReplaceEdit(offset, oldName.length(), newName));
+						ReplaceEdit edit = new ReplaceEdit(offset, oldName.length(), newName);
+
+						textEdit.addChild(edit);
+						textChange.addTextEditGroup(new TextEditGroup("Update class reference", edit));
 					}
 				}
 			}
