@@ -25,13 +25,6 @@
 		<category name="Core / Spring IDE" />
 	</feature>
 	
-	<!-- UAA -->
-	<feature
-		url="features/org.springframework.ide.eclipse.uaa.feature_3.6.4.qualifier.jar"
-		id="org.springframework.ide.eclipse.uaa.feature" version="3.6.4.qualifier">
-        <category name="Core / Spring IDE"/>
-    </feature>
-	
 	<!-- Dashboard removed, not eclipse version independent anymore. Keeping it on this site causes
 	     trouble in product builds consuming this site 
 	<feature 

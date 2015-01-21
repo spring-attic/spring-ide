@@ -8,13 +8,6 @@
 			<category name="Core / Spring IDE" />
 		</feature>
 
-		<!-- UAA -->
-		<feature
-			url="features/org.springframework.ide.eclipse.uaa.feature_0.0.0.jar"
-			id="org.springframework.ide.eclipse.uaa.feature" version="0.0.0">
-			<category name="Core / Spring IDE"/>
-	    </feature>
-
 		<feature 
 			url="features/org.springsource.ide.eclipse.commons_3.6.4.qualifier.jar" 
 			id="org.springsource.ide.eclipse.commons" version="3.6.4.qualifier">
@@ -100,12 +93,6 @@
 			id="org.springframework.ide.eclipse.feature.source" version="3.6.4.qualifier">
 			<category name="Resources / Spring IDE" />
 		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.uaa.feature.source_0.0.0.jar"
-			id="org.springframework.ide.eclipse.uaa.feature.source" version="0.0.0">
-			<category name="Core / Spring IDE"/>
-	    </feature>
 
 		<feature
 			url="features/org.springframework.ide.eclipse.aop.feature.source_3.6.4.qualifier.jar"
