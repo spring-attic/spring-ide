@@ -48,7 +48,7 @@ implements IPageWithSections, Disposable {
 	@Override
 	public final void createControl(Composite parent) {
 		Composite page = SWTFactory.createComposite(parent, parent.getFont(), 1, 1, GridData.FILL_BOTH);
-		((GridLayout)page.getLayout()).verticalSpacing = 0;
+		//((GridLayout)page.getLayout()).verticalSpacing = 0;
 
 		CompositeValidator validator = new CompositeValidator();
 		OrExpression dirtyState = new OrExpression();
