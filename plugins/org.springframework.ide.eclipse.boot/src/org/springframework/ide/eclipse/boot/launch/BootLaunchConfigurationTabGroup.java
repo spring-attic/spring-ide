@@ -21,6 +21,7 @@ import org.eclipse.debug.ui.sourcelookup.SourceLookupTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaMainTab;
 
 public class BootLaunchConfigurationTabGroup extends AbstractLaunchConfigurationTabGroup {
 
@@ -30,6 +31,7 @@ public class BootLaunchConfigurationTabGroup extends AbstractLaunchConfiguration
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
 			new BootMainTab(),
+			new JavaMainTab(),
 			new JavaArgumentsTab(),
 			new JavaJRETab(),
 			new JavaClasspathTab(),

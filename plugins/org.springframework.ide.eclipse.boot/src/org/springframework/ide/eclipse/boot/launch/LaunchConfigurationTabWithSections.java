@@ -33,17 +33,16 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
 @SuppressWarnings("restriction")
-public abstract class LaunchConfigurationTabWithSections extends AbstractLaunchConfigurationTab 
+public abstract class LaunchConfigurationTabWithSections extends AbstractLaunchConfigurationTab
 implements IPageWithSections, Disposable {
-	
+
 	private List<IPageSection> sections = null;
 	private boolean disposed = false;
-	
+
 	protected abstract List<IPageSection> createSections();
-	
 
 	/**
-	 * This method is final. To add content to a {@link LaunchConfigurationTabWithSections} 
+	 * This method is final. To add content to a {@link LaunchConfigurationTabWithSections}
 	 * override 'createSections' instead.
 	 */
 	@Override
@@ -61,7 +60,7 @@ implements IPageWithSections, Disposable {
 			}
 		}
 		setControl(page);
-		
+
 		validator.addListener(new ValueListener<ValidationResult>() {
 			public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
 				if (value.isOk()) {
@@ -90,7 +89,7 @@ implements IPageWithSections, Disposable {
 				}
 			}
 		});
-		
+
 	}
 
 	@Override
@@ -101,7 +100,7 @@ implements IPageWithSections, Disposable {
 			super.scheduleUpdateJob();
 		}
 	}
-	
+
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		for (IPageSection s : getSections()) {
@@ -160,5 +159,5 @@ implements IPageWithSections, Disposable {
 		}
 		super.dispose();
 	}
-		
+
 }

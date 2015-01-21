@@ -11,11 +11,16 @@
 package org.springframework.ide.eclipse.boot.launch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
@@ -48,6 +53,39 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		}
 	}
 	
+	@Override
+	public void launch(ILaunchConfiguration configuration, String mode,
+			ILaunch launch, IProgressMonitor monitor) throws CoreException {
+		super.launch(configuration, mode, launch, monitor);
+	}
+	
+	@Override
+	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
+		List<PropVal> props = getProperties(conf);
+		if (props==null || props.isEmpty()) {
+			//shortcut for case where no boot-specific customizations are specified.
+			return super.getProgramArguments(conf);
+		}
+		ArrayList<String> args = new ArrayList<String>();
+		addPropertiesArguments(args, props);
+		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
+		return DebugPlugin.renderArguments(args.toArray(new String[args.size()]), null);
+	}
+	
+	private void addPropertiesArguments(ArrayList<String> args, List<PropVal> props) {
+		for (PropVal p : props) {
+			//spring boot doesn't like empty option keys so skip those.
+			if (p.isChecked && !p.name.isEmpty() && !p.value.isEmpty()) { 
+				//spring boot has no handling of escape sequences like '\=' to
+				//so we cannot represent keys containing '='.
+				if (p.name.contains("=")) {
+					throw new IllegalArgumentException("property name's shouldn't contain '=':"+p);
+				}
+				args.add("--"+p.name + "=" +p.value);
+			}
+		}
+	}
+
 	/**
 	 * Spring boot properties are stored as launch confiuration properties with
 	 * an extra prefix added to property name to avoid name clashes with 

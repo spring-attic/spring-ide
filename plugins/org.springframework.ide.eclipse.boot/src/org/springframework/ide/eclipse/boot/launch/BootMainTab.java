@@ -1,31 +1,27 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012,2015 IBM Corporation and others.
+ * Copyright (c) 2015 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Kris De Volder - Copied and repurposed for Spring Boot
+ * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
+
+import static org.springframework.ide.eclipse.boot.ui.BootUIImages.BOOT_ICON;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.ui.BootUIImages;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
 /**
- * A launch configuration tab that displays and edits project and
- * main type name launch configuration attributes.
- * <p>
- * This class may be instantiated.
- * </p>
- * @since 3.2
- * @noextend This class is not intended to be subclassed by clients.
+ * @author Kris De Volder
  */
 public class BootMainTab extends LaunchConfigurationTabWithSections implements IPageWithSections {
 
@@ -36,13 +32,13 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 
 	@Override
 	public Image getImage() {
-		return super.getImage();
+		return BootUIImages.getImage(BOOT_ICON);
 	}
 	
 	@Override
 	protected List<IPageSection> createSections() {
 		return Arrays.asList(new IPageSection[] {
-//				new ExistingTabAsSection(new JavaMainTab()),
+				//new JavaMainSection(this),
 				new PropertiesTableSection(this)
 		});
 	}
