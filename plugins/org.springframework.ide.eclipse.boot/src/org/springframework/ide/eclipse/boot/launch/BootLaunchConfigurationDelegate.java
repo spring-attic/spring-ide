@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
@@ -32,7 +33,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
-	
+
 	public static class PropVal {
 		public String name;
 		public String value;
@@ -52,13 +53,13 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			return name + "="+ value;
 		}
 	}
-	
+
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		super.launch(configuration, mode, launch, monitor);
 	}
-	
+
 	@Override
 	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
 		List<PropVal> props = getProperties(conf);
@@ -71,11 +72,11 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
 		return DebugPlugin.renderArguments(args.toArray(new String[args.size()]), null);
 	}
-	
+
 	private void addPropertiesArguments(ArrayList<String> args, List<PropVal> props) {
 		for (PropVal p : props) {
 			//spring boot doesn't like empty option keys so skip those.
-			if (p.isChecked && !p.name.isEmpty() && !p.value.isEmpty()) { 
+			if (p.isChecked && !p.name.isEmpty() && !p.value.isEmpty()) {
 				//spring boot has no handling of escape sequences like '\=' to
 				//so we cannot represent keys containing '='.
 				if (p.name.contains("=")) {
@@ -88,13 +89,13 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	/**
 	 * Spring boot properties are stored as launch confiuration properties with
-	 * an extra prefix added to property name to avoid name clashes with 
+	 * an extra prefix added to property name to avoid name clashes with
 	 * other launch config properties.
 	 */
 	private static final String PROPS_PREFIX = "spring.boot.prop.";
 
 	/**
-	 * To be able to store multiple assignment to the same spring boot 
+	 * To be able to store multiple assignment to the same spring boot
 	 * property name we add a 'oid' at the end of each stored
 	 * property name. OID_SEPERATOR is used to separate the 'real'
 	 * property name from the 'oid' string.
@@ -104,8 +105,11 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public static List<PropVal> getProperties(ILaunchConfiguration conf) {
 		ArrayList<PropVal> props = new ArrayList<PropVal>();
 		try {
-			for (Entry<String, Object> e : conf.getAttributes().entrySet()) {
+			//Note: in e43 conf.getAttributes doesn't use generics yet. So to
+			//build with 4.3 we need to to some funky casting below.
+			for (Object _e : conf.getAttributes().entrySet()) {
 				try {
+					Map.Entry<String, Object> e = (Entry<String, Object>) _e;
 					String prefixed = e.getKey();
 					if (prefixed.startsWith(PROPS_PREFIX)) {
 						String name = prefixed.substring(PROPS_PREFIX.length());
@@ -115,7 +119,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 						}
 						String valueEnablement = (String)e.getValue();
 						String value = valueEnablement.substring(1);
-						boolean enabled = valueEnablement.charAt(0)=='1'; 
+						boolean enabled = valueEnablement.charAt(0)=='1';
 						props.add(new PropVal(name, value, enabled));
 					}
 				} catch (Exception ignore) {
@@ -127,7 +131,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		}
 		return props;
 	}
-	
+
 	public static void setProperties(ILaunchConfigurationWorkingCopy conf, List<PropVal> props) {
 		if (props==null) {
 			props = Collections.emptyList();
@@ -145,10 +149,13 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			}
 		}
 	}
-	
+
 	public static void clearProperties(ILaunchConfigurationWorkingCopy conf) {
 		try {
-			for (String prefixedProp : conf.getAttributes().keySet()) {
+			//note: e43 doesn't use generics for conf.getAttributes, hence the
+			// funky casting below.
+			for (Object _prefixedProp : conf.getAttributes().keySet()) {
+				String prefixedProp = (String) _prefixedProp;
 				if (prefixedProp.startsWith(PROPS_PREFIX)) {
 					conf.removeAttribute(prefixedProp);
 				}
