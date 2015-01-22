@@ -38,6 +38,7 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 	@Override
 	protected List<IPageSection> createSections() {
 		return Arrays.asList(new IPageSection[] {
+				new SelectProjectLaunchTabSection(this),
 				//new JavaMainSection(this),
 				new EnableDebugSection(this),
 				new PropertiesTableSection(this)

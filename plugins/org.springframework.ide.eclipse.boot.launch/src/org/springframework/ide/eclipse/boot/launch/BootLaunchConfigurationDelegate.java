@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
+import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
 import java.util.ArrayList;
@@ -19,9 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -34,7 +38,15 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
  */
 public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
 	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
+
+	static void debug(ILaunchConfiguration c, String msg) {
+		if (DEBUG) {
+			System.out.println(c+"#"+ c.hashCode()+ ": "+msg);
+		}
+	}
 
 	public static class PropVal {
 		public String name;
@@ -160,6 +172,26 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		}
 	}
 
+	/**
+	 * Get the project associated with this a luanch config. Note that this
+	 * method returns an IProject reference regardless of whether or not the
+	 * project exists.
+	 */
+	public static IProject getProject(ILaunchConfiguration conf) {
+		try {
+			String pname = conf.getAttribute(ATTR_PROJECT_NAME, "");
+			if (hasText(pname)) {
+				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
+				debug(conf, "getProject => "+p);
+				return p;
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		debug(conf, "getProject => NULL");
+		return null;
+	}
+
 	public static void clearProperties(ILaunchConfigurationWorkingCopy conf) {
 		try {
 			//note: e43 doesn't use generics for conf.getAttributes, hence the
@@ -186,6 +218,15 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	public static void setEnableDebugOutput(ILaunchConfigurationWorkingCopy conf, boolean enable) {
 		conf.setAttribute(ENABLE_DEBUG_OUTPUT, enable);
+	}
+
+	public static void setProject(ILaunchConfigurationWorkingCopy conf, IProject p) {
+		debug(conf, "setProject <= "+p);
+		if (p==null) {
+			conf.removeAttribute(ATTR_PROJECT_NAME);
+		} else {
+			conf.setAttribute(ATTR_PROJECT_NAME, p.getName());
+		}
 	}
 
 }
