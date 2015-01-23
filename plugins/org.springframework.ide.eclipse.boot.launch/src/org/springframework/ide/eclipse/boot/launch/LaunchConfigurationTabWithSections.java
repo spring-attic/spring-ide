@@ -18,8 +18,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -159,5 +159,9 @@ implements IPageWithSections, Disposable {
 		}
 		super.dispose();
 	}
+
+	public IRunnableContext getRunnableContext() {
+		return super.getLaunchConfigurationDialog();
+	};
 
 }

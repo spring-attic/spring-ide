@@ -15,8 +15,11 @@ import static org.springframework.ide.eclipse.boot.ui.BootUIImages.BOOT_ICON;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
@@ -35,10 +38,18 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 		return BootUIImages.getImage(BOOT_ICON);
 	}
 
+	private static SelectionModel<IProject> createProjectSelectionModel() {
+		LiveVariable<IProject> s = new LiveVariable<IProject>();
+		ExistingBootProjectSelectionValidator v = new ExistingBootProjectSelectionValidator(s);
+		return new SelectionModel<IProject>(s,v);
+	}
+
 	@Override
 	protected List<IPageSection> createSections() {
+		MainTypeSelectionModel model = new MainTypeSelectionModel();
 		return Arrays.asList(new IPageSection[] {
-				new SelectProjectLaunchTabSection(this),
+				new SelectProjectLaunchTabSection(this, model.project),
+				new MainTypeLaunchTabSection(this, model),
 				//new JavaMainSection(this),
 				new EnableDebugSection(this),
 				new PropertiesTableSection(this)

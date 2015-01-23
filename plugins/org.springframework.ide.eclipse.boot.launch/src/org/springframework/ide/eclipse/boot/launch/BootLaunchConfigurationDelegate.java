@@ -30,6 +30,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 
@@ -103,6 +104,10 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 				args.add("--"+p.name + "=" +p.value);
 			}
 		}
+	}
+
+	public static void setMainType(ILaunchConfigurationWorkingCopy config, String typeName) {
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, typeName);
 	}
 
 	/**

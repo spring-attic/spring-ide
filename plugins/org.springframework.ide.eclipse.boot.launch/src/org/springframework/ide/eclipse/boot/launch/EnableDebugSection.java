@@ -21,17 +21,14 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
-import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
 /**
  * @author Kris De Volder
  */
-public class EnableDebugSection extends WizardPageSection implements ILaunchConfigurationTabSection {
+public class EnableDebugSection extends LaunchConfigurationTabSection {
 
 	private Button enableDebug;
-	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(true);
 
 	public EnableDebugSection(IPageWithSections owner) {
 		super(owner);
@@ -43,7 +40,7 @@ public class EnableDebugSection extends WizardPageSection implements ILaunchConf
 		enableDebug.setText("Enable debug output");
 		enableDebug.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				dirtyState.setValue(true);
+				getDirtyState().setValue(true);
 			}
 		});
 	}
@@ -51,23 +48,18 @@ public class EnableDebugSection extends WizardPageSection implements ILaunchConf
 	@Override
 	public void initializeFrom(ILaunchConfiguration conf) {
 		enableDebug.setSelection(getEnableDebugOutput(conf));
-		dirtyState.setValue(false);
+		getDirtyState().setValue(false);
 	}
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy conf) {
 		setEnableDebugOutput(conf, enableDebug.getSelection());
-		dirtyState.setValue(false);
+		getDirtyState().setValue(false);
 	}
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy conf) {
 		setEnableDebugOutput(conf, DEFAULT_ENABLE_DEBUG_OUTPUT);
-	}
-
-	@Override
-	public LiveVariable<Boolean> getDirtyState() {
-		return dirtyState;
 	}
 
 }

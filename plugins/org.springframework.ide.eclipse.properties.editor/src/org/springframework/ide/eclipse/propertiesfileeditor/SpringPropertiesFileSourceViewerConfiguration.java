@@ -43,21 +43,21 @@ import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPr
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 
 @SuppressWarnings("restriction")
-public class SpringPropertiesFileSourceViewerConfiguration 
+public class SpringPropertiesFileSourceViewerConfiguration
 extends PropertiesFileSourceViewerConfiguration {
 
 	/**
-	 * WE unforytunately must subclass this just to make it possible to call non 
+	 * WE unforytunately must subclass this just to make it possible to call non
 	 * public method 'forceReconcile'.
-	 * 
+	 *
 	 * We need this to trigger a reconcile when live metadata has changed.
 	 */
 	public class SpringPropertiesReconciler extends MonoReconciler {
-		
+
 		public SpringPropertiesReconciler(IReconcilingStrategy strategy) {
 			super(strategy, false);
 		}
-		
+
 		public void forceReconcile() {
 			super.forceReconciling();
 		}
@@ -73,7 +73,7 @@ extends PropertiesFileSourceViewerConfiguration {
 			ITextEditor editor, String partitioning) {
 		super(colorManager, preferenceStore, editor, partitioning);
 	}
-	
+
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		try {
@@ -108,12 +108,12 @@ extends PropertiesFileSourceViewerConfiguration {
 		}
 		return engine;
 	}
-	
+
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
 		return getTextHover(sourceViewer, contentType, 0);
 	}
-	
+
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		ITextHover delegate = super.getTextHover(sourceViewer, contentType, stateMask);
@@ -129,7 +129,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		}
 		return delegate;
 	}
-	
+
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
 		IDialogSettings existing = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (existing!=null) {
@@ -138,7 +138,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		IDialogSettings created = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
 		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
 		int suggestW = (int)(windowBounds.width*0.35);
-		int suggestH = (int)(suggestW*0.6); 
+		int suggestH = (int)(suggestW*0.6);
 		if (suggestW>300) {
 			created.put(ContentAssistant.STORE_SIZE_X, suggestW);
 			created.put(ContentAssistant.STORE_SIZE_Y, suggestH);
@@ -155,7 +155,7 @@ extends PropertiesFileSourceViewerConfiguration {
 			//ignore, sorter not supported with Eclipse 3.7 API
 		}
 	}
-	
+
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		IReconcilingStrategy strategy = null;
@@ -183,7 +183,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		SpringPropertiesHyperlinkDetector myDetector = null;
@@ -197,12 +197,12 @@ extends PropertiesFileSourceViewerConfiguration {
 				myDetector
 		);
 	}
-	
+
 //	@Override
 //	public IHyperlinkPresenter getHyperlinkPresenter(ISourceViewer sourceViewer) {
 //		return super.getHyperlinkPresenter(sourceViewer);
 //	}
-	
+
 	protected java.util.Map<String,org.eclipse.core.runtime.IAdaptable> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
 		Map<String, IAdaptable> superTargets = super.getHyperlinkDetectorTargets(sourceViewer);
 		superTargets.remove("org.eclipse.jdt.ui.PropertiesFileEditor"); //This just adds a 'search for' link which never seems to return anything useful
@@ -212,7 +212,7 @@ extends PropertiesFileSourceViewerConfiguration {
 	private IHyperlinkDetector[] merge(IHyperlinkDetector[] a, SpringPropertiesHyperlinkDetector b) {
 		if (a==null || a.length==0) {
 			return new IHyperlinkDetector[] {b};
-		} 
+		}
 		if (b==null) {
 			return a;
 		}
@@ -239,5 +239,5 @@ extends PropertiesFileSourceViewerConfiguration {
 			fReconciler.forceReconcile();
 		}
 	}
-	
+
 }

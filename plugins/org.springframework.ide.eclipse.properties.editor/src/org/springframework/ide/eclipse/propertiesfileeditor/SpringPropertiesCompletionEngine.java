@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
+import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.formatJavaType;
 import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil.getValues;
 

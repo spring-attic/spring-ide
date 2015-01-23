@@ -36,18 +36,17 @@ import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.propertiesfileeditor.DocumentContextFinder;
 import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
 import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo;
+import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.propertiesfileeditor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
-import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 
@@ -57,7 +56,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	}
 
 	public class MockProblemCollector implements IProblemCollector {
-		
+
 		private List<SpringPropertyProblem> problems = null;
 
 		public List<SpringPropertyProblem> getAllProblems() {
@@ -92,7 +91,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	private SpringPropertyIndex index = new SpringPropertyIndex();
 	private IJavaProject javaProject = null;
 
-	
+
 	public void data(String id, String type, Object deflt, String description, String... source) {
 		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
 		item.setId(id);
@@ -101,7 +100,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		item.setDefaultValue(deflt);
 		index.add(new PropertyInfo(item));
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -117,20 +116,20 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 			}
 		});
 	}
-	
+
 	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
 		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndexProvider());
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
 		return problems.getAllProblems();
 	}
-	
+
 
 	/**
 	 * Basic 'simulated' editor. Contains text and a cursor position / selection.
 	 */
 	public class MockEditor {
-		
+
 		private int selectionStart;
 		private int selectionEnd;
 		private Document document;
@@ -143,12 +142,12 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		 * Create mock editor. Selection position is initialized by looking for the CURSOR string.
 		 * <p>
 		 * THe cursor string is not actually considered part of the text, but only a marker for
-		 * the cursor position. 
+		 * the cursor position.
 		 * <p>
-		 * If one 'cursor' marker is present in the text the selection 
+		 * If one 'cursor' marker is present in the text the selection
 		 * is length 0 and starts at the marker.
 		 * <p>
-		 * If two markers are present the selection is between the two 
+		 * If two markers are present the selection is between the two
 		 * markers.
 		 * <p>
 		 * If no markers are present the cursor is placed at the very end of the document.
@@ -201,9 +200,9 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		public String getText(int offset, int length) throws BadLocationException {
 			return document.get(offset, length);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Compute hover text when mouse hovers at the end of the first occurence of
 	 * a given String in the editor contents.
@@ -213,7 +212,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		if (pos>=0) {
 			pos += atString.length();
 		}
-		ITypedRegion region = (ITypedRegion)engine.getHoverRegion(editor.document, pos);
+		ITypedRegion region = engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
 			return engine.getHoverInfo(editor.document, pos, region.getType()).getHtml();
 		}
@@ -232,7 +231,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		Arrays.sort(completions, COMPARATOR);
 		return completions;
 	}
-	
+
 	/**
 	 * Verifies an expected textSnippet is contained in the hovertext that is
 	 * computed when hovering mouse at position at the end of first occurence of
@@ -265,9 +264,9 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		assertEquals(expectTextAfter, editor.getText());
 	}
 
-	
+
 	/**
-	 * Like 'assertCompletionsBasic' but places the 'textBefore' in a context 
+	 * Like 'assertCompletionsBasic' but places the 'textBefore' in a context
 	 * with other text around it... trying several different variations of
 	 * text before and after the 'interesting' line.
 	 */
@@ -319,7 +318,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	}
 
 
-	
+
 	/**
 	 * Call this method to add some default test data to the Completion engine's index.
 	 * Note that this data is not added automatically, some test may want to use smaller
@@ -736,12 +735,12 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	/**
 	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are
 	 * specified by string of the form "${badSnippet}|${messageSnippet}". The badSnippet
-	 * is the text expected to be covered by the marker's region and the message snippet must 
+	 * is the text expected to be covered by the marker's region and the message snippet must
 	 * be found in the error marker's message.
 	 * <p>
-	 * The expected problems are matched one-to-one in the order given (so markers in the 
-	 * editor must appear in the expected order for the assert to pass). 
-	 * 
+	 * The expected problems are matched one-to-one in the order given (so markers in the
+	 * editor must appear in the expected order for the assert to pass).
+	 *
 	 * @param editor
 	 * @param expectedProblems
 	 * @throws BadLocationException
@@ -794,15 +793,15 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		int pos = editor.getText().indexOf(hoverAtEndOf);
 		assertTrue("Not found in editor: '"+hoverAtEndOf+"'", pos>=0);
 		pos += hoverAtEndOf.length();
-		
+
 		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
 		assertEquals(expecteds.length, rawTargets.size());
-// below code doesn't work anymore becuase the 'raw' targets aren't as precise as th IJavaElements 
+// below code doesn't work anymore becuase the 'raw' targets aren't as precise as th IJavaElements
 // IJavaElement will point to specific setter if possible, but property source only points to source type.
 //		for (int i = 0; i < expecteds.length; i++) {
 //			assertEquals(expecteds[i], label(rawTargets.get(i)));
 //		}
-		
+
 		List<IJavaElement> targets = getLinkTargets(editor, pos);
 		assertEquals(expecteds.length, targets.size());
 		for (int i = 0; i < expecteds.length; i++) {
@@ -823,7 +822,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		if (hover!=null) {
 			return hover.getSources();
 		}
-		
+
 		return Collections.emptyList();
 	}
 

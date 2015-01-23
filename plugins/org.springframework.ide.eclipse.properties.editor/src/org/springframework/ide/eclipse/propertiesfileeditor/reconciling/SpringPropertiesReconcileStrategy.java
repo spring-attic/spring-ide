@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Kris De Volder - copied from org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy and modified 
+ *     Kris De Volder - copied from org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy and modified
  *                      from for spring properties reconciling
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
@@ -126,7 +126,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	/** Text content type */
 	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType(IContentTypeManager.CT_TEXT);
-	
+
 	/** The text editor to operate on. */
 	private ISourceViewer fViewer;
 
@@ -189,8 +189,8 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 		fEngine.reconcile(fDocument, fProblemCollector, fProgressMonitor);
 	}
 
-	
-	
+
+
 	/**
 	 * Returns the content type of the underlying editor input.
 	 *

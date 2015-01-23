@@ -32,8 +32,8 @@ public class SelectProjectLaunchTabSection extends ChooseOneSectionCombo<IProjec
 
 	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
 
-	public SelectProjectLaunchTabSection(IPageWithSections owner) {
-		super(owner, "Project", createModel());
+	public SelectProjectLaunchTabSection(IPageWithSections owner, SelectionModel<IProject> model) {
+		super(owner, "Project", model);
 		allowTextEdits(ProjectNameParser.INSTANCE);
 		setLabelProvider(new SimpleLabelProvider() {
 			public String getText(Object element) {
@@ -49,12 +49,6 @@ public class SelectProjectLaunchTabSection extends ChooseOneSectionCombo<IProjec
 				dirtyState.setValue(true);
 			}
 		});
-	}
-
-	private static SelectionModel<IProject> createModel() {
-		LiveVariable<IProject> s = new LiveVariable<IProject>();
-		ExistingBootProjectSelectionValidator v = new ExistingBootProjectSelectionValidator(s);
-		return new SelectionModel<IProject>(s,v);
 	}
 
 	protected IProject[] computeOptions() {

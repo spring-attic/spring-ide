@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.propertiesfileeditor.reconciling;
 
+import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
+import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.isAssign;
 import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.ERROR_TYPE;
 import static org.springframework.ide.eclipse.propertiesfileeditor.reconciling.SpringPropertyAnnotation.WARNING_TYPE;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -33,8 +34,6 @@ import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEdit
 import org.springframework.ide.eclipse.propertiesfileeditor.util.DocumentUtil;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.Provider;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil;
-
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
