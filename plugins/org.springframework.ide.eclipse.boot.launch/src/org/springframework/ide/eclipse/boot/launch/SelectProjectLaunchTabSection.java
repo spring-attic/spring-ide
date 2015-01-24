@@ -63,8 +63,8 @@ public class SelectProjectLaunchTabSection extends ChooseOneSectionCombo<IProjec
 	}
 
 	/**
-	 * Decides whether given IProject drom the workspace is of interest.
-	 * Only projects 'of interest' will be selectable from the project
+	 * Decides whether given IProject from the workspace is of interest.
+	 * Only projects 'of interest' will be available from the project
 	 * selector's pull-down menu.
 	 */
 	protected boolean isInteresting(IProject project) {

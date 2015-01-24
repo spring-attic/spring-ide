@@ -38,12 +38,6 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 		return BootUIImages.getImage(BOOT_ICON);
 	}
 
-	private static SelectionModel<IProject> createProjectSelectionModel() {
-		LiveVariable<IProject> s = new LiveVariable<IProject>();
-		ExistingBootProjectSelectionValidator v = new ExistingBootProjectSelectionValidator(s);
-		return new SelectionModel<IProject>(s,v);
-	}
-
 	@Override
 	protected List<IPageSection> createSections() {
 		MainTypeSelectionModel model = new MainTypeSelectionModel();
@@ -52,6 +46,7 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 				new MainTypeLaunchTabSection(this, model),
 				//new JavaMainSection(this),
 				new EnableDebugSection(this),
+				new EnableLiveBeanSupportSection(this),
 				new PropertiesTableSection(this)
 		});
 	}

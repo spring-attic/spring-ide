@@ -8,7 +8,7 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.ui;
+package org.springframework.ide.eclipse.boot.launch;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGe
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.core.LiveBeanSupport;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
@@ -113,14 +113,13 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 										// used to create a better error message on failure.
 
 		for (ILaunchConfiguration c : getLaunchConfigs(project)) {
-			String jmxPortProp = getVMSystemProp(c, LiveBeanSupport.JMX_PORT_PROP);
+			String jmxPortProp = getActiveJMXPort(c);
 			for (ILaunch l : LaunchUtils.getLaunches(c)) {
 				if (!l.isTerminated()) {
 					hasActiveProcess = true;
 
 					if (jmxPortProp!=null) {
-						//Looks like JMX is enabled via VM args.
-
+						//Looks like JMX is enabled.
 						return "service:jmx:rmi:///jndi/rmi://" + HOST + ":" + jmxPortProp + "/jmxrmi";
 					}
 				}
@@ -140,6 +139,17 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 		}
 	}
 
+	private String getActiveJMXPort(ILaunchConfiguration c) {
+		if (BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(c)) {
+			String port = BootLaunchConfigurationDelegate.getJMXPort(c);
+			if (StringUtil.hasText(port)) {
+				return port;
+			}
+		}
+		//Maybe user configured it manually himself in VM args:
+		return getVMSystemProp(c, LiveBeanSupport.JMX_PORT_PROP);
+	}
+
 	/**
 	 * Extract VM argument list from launch config and look for -D<prop>=<value> arguments.
 	 * @return the value corresponding to given system prop or null if this value is not found.
@@ -148,7 +158,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 		try {
 			String vmArgs = c.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, (String)null);
 			if (vmArgs!=null) {
-				String[] pieces = vmArgs.split("\\s+");
+				String[] pieces = DebugPlugin.parseArguments(vmArgs);
 				String lookFor = "-D"+propName+"=";
 				for (String piece : pieces) {
 					if (piece.startsWith(lookFor)) {

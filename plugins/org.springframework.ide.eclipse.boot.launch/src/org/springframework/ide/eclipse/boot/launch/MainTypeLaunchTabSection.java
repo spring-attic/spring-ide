@@ -209,6 +209,7 @@ public class MainTypeLaunchTabSection extends LaunchConfigurationTabSection {
 	public void initializeFrom(ILaunchConfiguration config) {
 		try {
 			mainTypeName().setValue(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""));
+			getDirtyState().setValue(false);
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}

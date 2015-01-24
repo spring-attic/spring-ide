@@ -15,6 +15,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.springsource.ide.eclipse.commons.livexp;bundle-version="3.6.4",
  org.springframework.ide.eclipse.boot,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.springframework.ide.eclipse.beans.ui.livegraph,
+ org.springsource.ide.eclipse.commons.frameworks.ui,
+ org.springsource.ide.eclipse.commons.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

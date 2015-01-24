@@ -79,28 +79,4 @@
    		</page>
    	</extension>
    	
-   <extension
-         point="org.eclipse.ui.popupMenus">
-   	      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="com.springsource.sts.roo.ui.actions.rooProject">
-         <visibility>
-         	<!-- TODO: only allow this for spring boot projects? -->
-	        <objectState
-	              name="nature"
-	              value="org.springframework.ide.eclipse.core.springnature">
-	        </objectState>
-         </visibility>
-         <action
-                   class="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
-                   enablesFor="+"
-                   icon="resources/icons/live-beans-graph.png"
-                   id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
-                   label="Open Live Beans Graph"
-                   menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
-         </action>
-      </objectContribution>
-   	</extension>
-
 </plugin>

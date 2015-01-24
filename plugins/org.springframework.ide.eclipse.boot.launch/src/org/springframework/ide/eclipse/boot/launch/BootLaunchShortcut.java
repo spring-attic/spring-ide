@@ -36,9 +36,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
-import static org.springframework.ide.eclipse.boot.core.LiveBeanSupport.*;
-
-
 @SuppressWarnings("restriction")
 public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 
@@ -99,14 +96,14 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 		ILaunchConfiguration config = null;
 		ILaunchConfigurationWorkingCopy wc = null;
 		try {
-			int jmxPort = (int) (5000 + Math.random()*60000); //TODO: better way to pick this port?
 			ILaunchConfigurationType configType = getConfigurationType();
 			String projectName = type.getJavaProject().getElementName();
 			wc = configType.newInstance(null, getLaunchManager().generateLaunchConfigurationName(
 					projectName+" - "+type.getTypeQualifiedName('.')));
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
-			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, liveBeanVmArgs(jmxPort));
+			BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
+			BootLaunchConfigurationDelegate.setJMXPort(wc, ""+LiveBeanSupport.randomPort());
 			wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
 			config = wc.doSave();
 		} catch (CoreException exception) {

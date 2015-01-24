@@ -39,15 +39,15 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
  */
 public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	//private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
 
-	static void debug(ILaunchConfiguration c, String msg) {
-		if (DEBUG) {
-			System.out.println(c+"#"+ c.hashCode()+ ": "+msg);
-		}
-	}
+//	static void debug(ILaunchConfiguration c, String msg) {
+//		if (DEBUG) {
+//			System.out.println(c+"#"+ c.hashCode()+ ": "+msg);
+//		}
+//	}
 
 	public static class PropVal {
 		public String name;
@@ -92,6 +92,29 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		return DebugPlugin.renderArguments(args.toArray(new String[args.size()]), null);
 	}
 
+	@Override
+	public String getVMArguments(ILaunchConfiguration conf)
+			throws CoreException {
+		try {
+			if (getEnableLiveBeanSupport(conf)) {
+				int port = 0;
+				try {
+					port = Integer.parseInt(getJMXPort(conf));
+				} catch (Exception e) {
+					//ignore: bad data in launch config.
+				}
+				if (port==0) {
+					port = LiveBeanSupport.randomPort();
+				}
+				String enableLiveBeanArgs = LiveBeanSupport.liveBeanVmArgs(getJMXPort(conf));
+				return enableLiveBeanArgs + super.getVMArguments(conf);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return super.getVMArguments(conf);
+	}
+
 	private void addPropertiesArguments(ArrayList<String> args, List<PropVal> props) {
 		for (PropVal p : props) {
 			//spring boot doesn't like empty option keys/values so skip those.
@@ -127,6 +150,11 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	private static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
 	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
+
+	private static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
+	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
+
+	private static final String JMX_PORT = "spring.boot.livebean.port";
 
 	@SuppressWarnings("unchecked")
 	public static List<PropVal> getProperties(ILaunchConfiguration conf) {
@@ -187,13 +215,13 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			String pname = conf.getAttribute(ATTR_PROJECT_NAME, "");
 			if (hasText(pname)) {
 				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
-				debug(conf, "getProject => "+p);
+				//debug(conf, "getProject => "+p);
 				return p;
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
-		debug(conf, "getProject => NULL");
+		//debug(conf, "getProject => NULL");
 		return null;
 	}
 
@@ -226,12 +254,38 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	}
 
 	public static void setProject(ILaunchConfigurationWorkingCopy conf, IProject p) {
-		debug(conf, "setProject <= "+p);
+		//debug(conf, "setProject <= "+p);
 		if (p==null) {
 			conf.removeAttribute(ATTR_PROJECT_NAME);
 		} else {
 			conf.setAttribute(ATTR_PROJECT_NAME, p.getName());
 		}
+	}
+
+	public static boolean getEnableLiveBeanSupport(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(ENABLE_LIVE_BEAN_SUPPORT, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
+	}
+
+	public static String getJMXPort(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(JMX_PORT, (String)null);
+		} catch (CoreException e) {
+			BootActivator.log(e);
+		}
+		return null;
+	}
+
+	public static void setEnableLiveBeanSupport(ILaunchConfigurationWorkingCopy conf, boolean value) {
+		conf.setAttribute(ENABLE_LIVE_BEAN_SUPPORT, value);
+	}
+
+	public static void setJMXPort(ILaunchConfigurationWorkingCopy conf, String portAsStr) {
+		conf.setAttribute(JMX_PORT, portAsStr);
 	}
 
 }
