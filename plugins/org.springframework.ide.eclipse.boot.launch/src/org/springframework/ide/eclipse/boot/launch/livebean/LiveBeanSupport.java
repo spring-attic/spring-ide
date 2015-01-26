@@ -8,7 +8,9 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch;
+package org.springframework.ide.eclipse.boot.launch.livebean;
+
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 /**
  * Helper methods to generate vm args for launch config with LiveBean support enabled.

@@ -8,7 +8,7 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch;
+package org.springframework.ide.eclipse.boot.launch.livebean;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGe
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;

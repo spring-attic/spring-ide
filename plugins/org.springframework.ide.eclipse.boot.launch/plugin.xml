@@ -237,7 +237,7 @@
 	        </objectState>
          </visibility>
          <action
-                   class="org.springframework.ide.eclipse.boot.launch.OpenLiveBeansGraphAction"
+                   class="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeansGraphAction"
                    enablesFor="+"
                    icon="resources/icons/live-beans-graph.png"
                    id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"

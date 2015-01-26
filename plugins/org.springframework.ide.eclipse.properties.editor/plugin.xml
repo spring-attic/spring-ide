@@ -85,7 +85,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.springframework.ide.eclipse.properties.file.editor.ui.ContentTypeEnablerDisabler:enable"
+            class="org.springframework.ide.eclipse.propertiesfileeditor.ui.ContentTypeEnablerDisabler:enable"
             commandId="org.springframework.ide.eclipse.properties.file.editor.enable">
             <enabledWhen>
               <and>
@@ -100,7 +100,7 @@
             </enabledWhen>
       </handler>
       <handler
-            class="org.springframework.ide.eclipse.properties.file.editor.ui.ContentTypeEnablerDisabler:disable"
+            class="org.springframework.ide.eclipse.propertiesfileeditor.ui.ContentTypeEnablerDisabler:disable"
             commandId="org.springframework.ide.eclipse.properties.file.editor.disable">
             <enabledWhen>
               <and>

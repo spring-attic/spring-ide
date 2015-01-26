@@ -8,13 +8,16 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch;
+package org.springframework.ide.eclipse.boot.launch.properties;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -40,7 +43,10 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
+import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -53,6 +59,13 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
  */
 public class PropertiesTableSection extends WizardPageSection implements ILaunchConfigurationTabSection {
 
+	private static final String[] COLUMN_NAMES = {"property", "value"};
+	private static final int PROPERTY_NAME_COLUMN = 0;
+
+	private static final KeyStroke CTRL_SPACE = KeyStroke.getInstance(SWT.CTRL, SWT.SPACE);
+
+	//private static final int PROPERTY_VALUE_COLUMN = 1;
+
 	public class CellEditorSupport extends EditingSupport {
 
 		//TODO: add content assist support to the text cell editor
@@ -64,7 +77,13 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 		public CellEditorSupport(int col) {
 			super(tableViewer);
 			this.col = col;
-			this.editor = new TextCellEditor(tableViewer.getTable());
+			if (col==PROPERTY_NAME_COLUMN) {
+				IContentProposalProvider proposalProvider = //TODO: provide 'real' content assist
+						new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
+				this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(), proposalProvider, CTRL_SPACE, null);
+			} else {
+				this.editor = new TextCellEditor(tableViewer.getTable());
+			}
 		}
 
 		@Override
@@ -124,7 +143,6 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 		super(owner);
 	}
 
-	private static final String[] COLUMN_NAMES = {"property", "value"};
 	private CheckboxTableViewer tableViewer;
 
 	private List<PropVal> props = new ArrayList<PropVal>();
@@ -143,16 +161,6 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 			PropVal clickedElement = getElementUnder(e);
 			lastMouseDownTarget = clickedElement;
 			if (e.button==1) {
-//				System.out.println("---- mouse down -----");
-//				System.out.println("Button = "+e.button);
-//				System.out.println("x = "+e.x);
-//				System.out.println("y = "+e.y);
-				//Tricky: just asking for the 'cell' at event position returns null
-				// when click is received on a checkbox in the CheckBoxTableViewer.
-				//Since we really only want to know if we are clicking in some
-				//existing row we can just 'ignore' event.x position and set
-				//it to the middle of the viewer.
-
 				if (clickedElement==null) {
 					lastMouseDownTarget = null;
 //					System.out.println("NO cell");
@@ -162,6 +170,11 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 		}
 
 		private PropVal getElementUnder(MouseEvent e) {
+			//Tricky: just asking for the 'cell' at event position returns null
+			// when click is received on a checkbox in the CheckBoxTableViewer.
+			//Since we really only want to know if we are clicking in some
+			//existing row we can just 'ignore' event.x position and set
+			//it to the middle of the viewer.
 			ViewerCell cell = tableViewer.getCell(new Point(
 					tableViewer.getTable().getBounds().width/2,
 					e.y
@@ -191,8 +204,8 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 
 		createContextMenu();
 
-		TableResizeHelper resizeHelper = new TableResizeHelper(tableViewer);
-		resizeHelper.enableResizing();
+		//TODO: Add TableResizeHelper?? But it doesn't play nice on GTK and doesn't like
+		//   Checkbox tables.
 
 		tableViewer.setInput(props);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tableViewer.getTable());
@@ -255,7 +268,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 
 	private String getColumnValue(Object element, final int col) {
 		if (element instanceof PropVal) {
-			if (col==0) {
+			if (col==PROPERTY_NAME_COLUMN) {
 				return ((PropVal) element).name;
 			}
 			return ((PropVal) element).value;
@@ -265,7 +278,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 
 	private void setColumnValue(Object element, int col, Object value) {
 		if (element instanceof PropVal) {
-			if (col==0) {
+			if (col==PROPERTY_NAME_COLUMN) {
 				((PropVal) element).name = (String)value;
 			} else {
 				((PropVal) element).value = (String)value;

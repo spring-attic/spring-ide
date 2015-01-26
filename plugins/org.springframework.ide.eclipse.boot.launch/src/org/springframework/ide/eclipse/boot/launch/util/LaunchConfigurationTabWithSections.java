@@ -8,7 +8,7 @@
  * Contributors:
  *    Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch;
+package org.springframework.ide.eclipse.boot.launch.util;
 
 import java.util.Collections;
 import java.util.List;

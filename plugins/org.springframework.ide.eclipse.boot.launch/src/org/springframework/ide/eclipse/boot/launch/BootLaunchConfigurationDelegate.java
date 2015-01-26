@@ -25,7 +25,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -33,6 +32,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
 
 /**
  * @author Kris De Volder
@@ -52,7 +52,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public static class PropVal {
 		public String name;
 		public String value;
-		boolean isChecked;
+		public boolean isChecked;
 
 		public PropVal(String name, String value, boolean isChecked) {
 			//Don't use null, use empty Strings

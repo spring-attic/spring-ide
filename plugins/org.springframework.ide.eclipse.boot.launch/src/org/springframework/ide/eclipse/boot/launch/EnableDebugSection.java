@@ -21,6 +21,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
 /**

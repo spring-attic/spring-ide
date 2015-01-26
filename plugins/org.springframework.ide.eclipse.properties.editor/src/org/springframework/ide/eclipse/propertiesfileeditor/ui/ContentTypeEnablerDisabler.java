@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.properties.file.editor.ui;
+package org.springframework.ide.eclipse.propertiesfileeditor.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
