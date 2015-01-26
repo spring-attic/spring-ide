@@ -16,20 +16,19 @@ import java.util.List;
 
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataSource;
-import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap.Match;
 
 /**
  * Information about a spring property, basically, this is the same as
- * 
+ *
  * {@link ConfigurationMetadataProperty} but augmented with information
  * about {@link ConfigurationMetadataSource}s that declare the property.
- * 
+ *
  * @author Kris De Volder
  */
 public class PropertyInfo {
 
 	/**
-	 * Identifies a 'Source'. This is essentially the sames as {@link ConfigurationMetadataSource}. 
+	 * Identifies a 'Source'. This is essentially the sames as {@link ConfigurationMetadataSource}.
 	 * We could use {@link ConfigurationMetadataSource} directly, but this only contains
 	 * the info that we actually use so takes less memory.
 	 */
@@ -52,7 +51,7 @@ public class PropertyInfo {
 			return sourceMethod;
 		}
 	}
-	
+
 	final private String id;
 	final private String type;
 	final private String name;
@@ -96,14 +95,14 @@ public class PropertyInfo {
 	public String getDescription() {
 		return description;
 	}
-	
+
 	public List<PropertySource> getSources() {
 		if (sources!=null) {
 			return sources;
 		}
 		return Collections.emptyList();
 	}
-	
+
 	@Override
 	public String toString() {
 		return "PropertyInfo("+getId()+")";
@@ -114,7 +113,7 @@ public class PropertyInfo {
 		}
 		sources.add(new PropertySource(source));
 	}
-	
+
 	public PropertyInfo withId(String alias) {
 		if (alias.equals(id)) {
 			return this;
