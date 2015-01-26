@@ -191,6 +191,9 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 
 		createContextMenu();
 
+		TableResizeHelper resizeHelper = new TableResizeHelper(tableViewer);
+		resizeHelper.enableResizing();
+
 		tableViewer.setInput(props);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tableViewer.getTable());
 	}
