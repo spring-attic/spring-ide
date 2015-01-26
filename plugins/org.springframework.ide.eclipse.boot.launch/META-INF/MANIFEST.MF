@@ -18,6 +18,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.expressions,
  org.springframework.ide.eclipse.beans.ui.livegraph,
  org.springsource.ide.eclipse.commons.frameworks.ui,
- org.springsource.ide.eclipse.commons.ui
+ org.springsource.ide.eclipse.commons.ui,
+ org.springframework.ide.eclipse.properties.editor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

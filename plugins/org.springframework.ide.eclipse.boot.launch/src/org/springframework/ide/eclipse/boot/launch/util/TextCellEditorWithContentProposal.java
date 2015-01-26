@@ -28,6 +28,11 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 		enableContentProposal(contentProposalProvider, keyStroke, autoActivationCharacters);
 	}
 
+	public TextCellEditorWithContentProposal setProposalAcceptanceStyle(int acceptance) {
+		contentProposalAdapter.setProposalAcceptanceStyle(acceptance);
+		return this;
+	}
+
 	private void enableContentProposal(IContentProposalProvider contentProposalProvider, KeyStroke keyStroke,
 			char[] autoActivationCharacters) {
 		contentProposalAdapter = new ContentProposalAdapter(text, new TextContentAdapter(),

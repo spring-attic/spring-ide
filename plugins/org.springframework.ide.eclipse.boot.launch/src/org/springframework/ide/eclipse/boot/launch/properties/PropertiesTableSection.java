@@ -13,11 +13,12 @@ package org.springframework.ide.eclipse.boot.launch.properties;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
-import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -48,6 +49,8 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesProposalProcessor;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
@@ -68,9 +71,6 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 
 	public class CellEditorSupport extends EditingSupport {
 
-		//TODO: add content assist support to the text cell editor
-		//See here for sample code http://javafind.appspot.com/model?id=318036
-
 		private CellEditor editor;
 		private int col;
 
@@ -78,9 +78,13 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 			super(tableViewer);
 			this.col = col;
 			if (col==PROPERTY_NAME_COLUMN) {
-				IContentProposalProvider proposalProvider = //TODO: provide 'real' content assist
-						new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
-				this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(), proposalProvider, CTRL_SPACE, null);
+				IContentProposalProvider proposalProvider =
+					//	new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
+					 new PropertyNameContentProposalProvider(project);
+				this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(),
+						proposalProvider, CTRL_SPACE,
+						SpringPropertiesProposalProcessor.AUTO_ACTIVATION_CHARS
+				).setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 			} else {
 				this.editor = new TextCellEditor(tableViewer.getTable());
 			}
@@ -132,21 +136,20 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 		}
 	}
 
-	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
-
 	@Override
 	public LiveVariable<Boolean> getDirtyState() {
 		return dirtyState;
 	}
 
-	public PropertiesTableSection(IPageWithSections owner) {
+	public PropertiesTableSection(IPageWithSections owner, LiveExpression<IProject> project) {
 		super(owner);
+		this.project = project;
 	}
 
+	private final LiveExpression<IProject> project;
+	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
 	private CheckboxTableViewer tableViewer;
-
 	private List<PropVal> props = new ArrayList<PropVal>();
-
 	private CheckStateSynchronizer checkStateProvider = new CheckStateSynchronizer();
 
 	/**

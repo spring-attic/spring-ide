@@ -17,6 +17,7 @@ import static org.springframework.ide.eclipse.propertiesfileeditor.util.TypeUtil
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +26,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jface.fieldassist.ContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -111,6 +114,7 @@ public class SpringPropertiesCompletionEngine {
 			return 0;
 		}
 	};
+	private static final IContentProposal[] NO_CONTENT_PROPOSALS = new IContentProposal[0];
 
 	private DocumentContextFinder documentContextFinder = null;
 	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
@@ -158,6 +162,9 @@ public class SpringPropertiesCompletionEngine {
 		return !Character.isWhitespace(c);
 	}
 
+	/**
+	 * Create completions proposals in the context of a properties text editor.
+	 */
 	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
 		ITypedRegion partition = getPartition(doc, offset);
 		String type = partition.getType();
@@ -249,10 +256,15 @@ public class SpringPropertiesCompletionEngine {
 		return -1;
 	}
 
+	private List<Match<PropertyInfo>> findMatches(String prefix) {
+		List<Match<PropertyInfo>> matches = getIndex().find(camelCaseToHyphens(prefix));
+		return matches;
+	}
+
 	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
-		String prefix= getPrefix(doc, offset);
+		String prefix = getPrefix(doc, offset);
 		if (prefix != null) {
-			Collection<Match<PropertyInfo>> matches = getIndex().find(camelCaseToHyphens(prefix));
+			Collection<Match<PropertyInfo>> matches = findMatches(prefix);
 			if (matches!=null && !matches.isEmpty()) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
 				for (Match<PropertyInfo> match : matches) {
@@ -263,6 +275,37 @@ public class SpringPropertiesCompletionEngine {
 		}
 		return Collections.emptyList();
 	}
+
+	/**
+	 * Create completions proposals for a field editor where property names can be entered.
+	 */
+	public IContentProposal[] getPropertyFieldProposals(String contents, int position) {
+		String prefix = contents.substring(0,position);
+		if (StringUtil.hasText(prefix)) {
+			List<Match<PropertyInfo>> matches = findMatches(prefix);
+			if (matches!=null && !matches.isEmpty()) {
+				IContentProposal[] proposals = new IContentProposal[matches.size()];
+				Collections.sort(matches, new Comparator<Match<PropertyInfo>>() {
+					@Override
+					public int compare(Match<PropertyInfo> o1, Match<PropertyInfo> o2) {
+						int scoreCompare = Double.compare(o2.score, o1.score);
+						if (scoreCompare!=0) {
+							return scoreCompare;
+						} else {
+							return o1.data.getId().compareTo(o2.data.getId());
+						}
+					}
+				});
+				int i = 0;
+				for (Match<PropertyInfo> m : matches) {
+					proposals[i++] = new ContentProposal(m.data.getId(), m.data.getDescription());
+				}
+				return proposals;
+			}
+		}
+		return NO_CONTENT_PROPOSALS;
+	}
+
 
 	private final class ValueProposal implements ICompletionProposal {
 
