@@ -34,23 +34,23 @@ import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 
 /**
- * An instance of this test verifies that a codesets for a given 
+ * An instance of this test verifies that a codesets for a given
  * guide imports and builds cleanly with with a given build
- * tool. 
+ * tool.
  * <p>
  * A static suite method is provided to create a suite that has
- * a test instance for each valid guide, codeset and buildtool 
+ * a test instance for each valid guide, codeset and buildtool
  * combination.
- * 
+ *
  * @author Kris De Volder
  */
 public class ZBuildGuidesTest extends GuidesTestCase {
-	
+
 	//Note the funny name of this class is an attempt to
 	// show test results at the bottom on bamboo builds.
 	// It looks like the tests reports are getting sorted
 	// alphabetically.
-	
+
 	private CodeSet codeset;
 	private BuildType buildType;
 
@@ -80,18 +80,18 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 		});
 		//System.out.println("<<< Setting up "+getName());
 	}
-	
+
 	@Override
 	protected void runTest() throws Throwable {
 		//System.out.println(">>> Running "+getName());
-		
+
 		try {
 			System.out.println("=== codeset build test ===");
 			System.out.println("guide   : "+guide.getName());
 			System.out.println("codeset : "+codeset.getName());
 			System.out.println("type    : "+buildType);
 			System.out.println();
-			
+
 			ImportConfiguration importConf = ImportUtils.importConfig(guide, codeset);
 			String projectName = importConf.getProjectName();
 			final IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConf);
@@ -101,7 +101,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 					importOp.run(new NullProgressMonitor());
 //				}
 //			});
-	
+
 			//TODO: we are not checking if there are extra projects beyond the expected one.
 			IProject project = getProject(projectName);
 			assertNoErrors(project);
@@ -112,7 +112,7 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			//System.out.println("<<< Running "+getName());
 		}
 	}
-	
+
 	static boolean zipLooksOk(GithubRepoContent g) {
 		try {
 			GuidesStructureTest.validateZipStructure(g);
@@ -122,13 +122,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 		}
 		return false;
 	}
-	
+
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(ZBuildGuidesTest.class.getName());
 		for (GithubRepoContent g : GuidesTests.getGuides()) {
 //			if (g.getName().contains("securing-web")) {
 //			if (g.getName().contains("accessing-facebook")) {
-				if (!g.getName().contains("android")) {
+				if (!g.getName().contains("android") && !g.getName().contains("data-gorm")) {
 					//Skipping android tests for now... lots of problems there.
 					if (zipLooksOk(g)) {
 						//Avoid running build tests for zips that look like they have 'missing parts'
