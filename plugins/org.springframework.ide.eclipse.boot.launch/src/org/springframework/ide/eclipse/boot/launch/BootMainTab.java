@@ -15,14 +15,12 @@ import static org.springframework.ide.eclipse.boot.ui.BootUIImages.BOOT_ICON;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableLiveBeanSupportSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
@@ -47,9 +45,11 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 		return Arrays.asList(new IPageSection[] {
 				new SelectProjectLaunchTabSection(this, model.project),
 				new MainTypeLaunchTabSection(this, model),
-				//new JavaMainSection(this),
+				new ProfileLaunchTabSection(this, model.project.selection),
+				new HLineSection(this),
 				new EnableDebugSection(this),
 				new EnableLiveBeanSupportSection(this),
+				new HLineSection(this),
 				new PropertiesTableSection(this, model.project.selection)
 		});
 	}

@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.configurationmetadata.ConfigurationMetadataRepositoryJsonLoader;
 import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.FileUtil;
+import org.springframework.ide.eclipse.boot.util.FileUtil;
 
 import static org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesCompletionEngine.debug;
 

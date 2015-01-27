@@ -8,11 +8,11 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.propertiesfileeditor.util;
+package org.springframework.ide.eclipse.boot.util;
 
 import java.io.File;
 
-import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 
 public class FileUtil {
 
@@ -20,9 +20,9 @@ public class FileUtil {
 		try {
 			return jarFile!=null && jarFile.isFile() && jarFile.toString().toLowerCase().endsWith(".jar");
 		} catch (Throwable e) {
-			SpringPropertiesEditorPlugin.log(e);
+			BootActivator.log(e);
 			return false;
 		}
 	}
-	
+
 }

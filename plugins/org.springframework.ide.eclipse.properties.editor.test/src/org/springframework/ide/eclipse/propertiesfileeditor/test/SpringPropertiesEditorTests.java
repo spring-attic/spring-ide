@@ -18,7 +18,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.JavaProjectUtil;
+
+import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 

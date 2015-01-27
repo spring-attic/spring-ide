@@ -18,7 +18,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
-import org.springframework.ide.eclipse.boot.launch.util.ProjectNameParser;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -35,8 +34,8 @@ public class SelectProjectLaunchTabSection extends ChooseOneSectionCombo<IProjec
 	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
 
 	public SelectProjectLaunchTabSection(IPageWithSections owner, SelectionModel<IProject> model) {
-		super(owner, "Project", model);
-		allowTextEdits(ProjectNameParser.INSTANCE);
+		super(owner, "Project", model, new LiveVariable<IProject[]>());
+		//allowTextEdits(ProjectNameParser.INSTANCE);
 		setLabelProvider(new SimpleLabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof IProject) {
@@ -51,9 +50,10 @@ public class SelectProjectLaunchTabSection extends ChooseOneSectionCombo<IProjec
 				dirtyState.setValue(true);
 			}
 		});
+		getOptionsVar().setValue(interestingProjects());
 	}
 
-	protected IProject[] computeOptions() {
+	protected IProject[] interestingProjects() {
 		IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		ArrayList<IProject> interesting = new ArrayList<IProject>(allProjects.length);
 		for (IProject p : allProjects) {

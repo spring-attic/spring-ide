@@ -43,6 +43,33 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
 
+	/**
+	 * Spring boot properties are stored as launch confiuration properties with
+	 * an extra prefix added to property name to avoid name clashes with
+	 * other launch config properties.
+	 */
+	private static final String PROPS_PREFIX = "spring.boot.prop.";
+
+	/**
+	 * To be able to store multiple assignment to the same spring boot
+	 * property name we add a 'oid' at the end of each stored
+	 * property name. ?_SEPERATOR is used to separate the 'real'
+	 * property name from the 'oid' string.
+	 */
+	private static final char OID_SEPERATOR = ':';
+
+	private static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
+	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
+
+	private static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
+	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
+
+	private static final String JMX_PORT = "spring.boot.livebean.port";
+
+	private static final String PROFILE = "spring.boot.profile";
+	public static final String DEFAULT_PROFILE = "";
+
+
 //	static void debug(ILaunchConfiguration c, String msg) {
 //		if (DEBUG) {
 //			System.out.println(c+"#"+ c.hashCode()+ ": "+msg);
@@ -78,14 +105,18 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	@Override
 	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
 		List<PropVal> props = getProperties(conf);
+		String profile = getProfile(conf);
 		boolean debugOutput = getEnableDebugOutput(conf);
-		if ((props==null || props.isEmpty()) && !debugOutput) {
+		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile)) {
 			//shortcut for case where no boot-specific customizations are specified.
 			return super.getProgramArguments(conf);
 		}
 		ArrayList<String> args = new ArrayList<String>();
 		if (debugOutput) {
 			args.add("--debug");
+		}
+		if (hasText(profile)) {
+			args.add(propertyAssignmentArgument("spring.profiles.active", profile));
 		}
 		addPropertiesArguments(args, props);
 		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
@@ -119,42 +150,23 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		for (PropVal p : props) {
 			//spring boot doesn't like empty option keys/values so skip those.
 			if (p.isChecked && !p.name.isEmpty() && !p.value.isEmpty()) {
-				//spring boot has no handling of escape sequences like '\=' to
-				//so we cannot represent keys containing '='.
-				if (p.name.contains("=")) {
-					throw new IllegalArgumentException("property name's shouldn't contain '=':"+p);
-				}
-				args.add("--"+p.name + "=" +p.value);
+				args.add(propertyAssignmentArgument(p.name, p.value));
 			}
 		}
+	}
+
+	private String propertyAssignmentArgument(String name, String value) {
+		if (name.contains("=")) {
+			//spring boot has no handling of escape sequences like '\='
+			//so we cannot represent keys containing '='.
+			throw new IllegalArgumentException("property name shouldn't contain '=':"+name);
+		}
+		return "--"+name + "=" +value;
 	}
 
 	public static void setMainType(ILaunchConfigurationWorkingCopy config, String typeName) {
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, typeName);
 	}
-
-	/**
-	 * Spring boot properties are stored as launch confiuration properties with
-	 * an extra prefix added to property name to avoid name clashes with
-	 * other launch config properties.
-	 */
-	private static final String PROPS_PREFIX = "spring.boot.prop.";
-
-	/**
-	 * To be able to store multiple assignment to the same spring boot
-	 * property name we add a 'oid' at the end of each stored
-	 * property name. ?_SEPERATOR is used to separate the 'real'
-	 * property name from the 'oid' string.
-	 */
-	private static final char OID_SEPERATOR = ':';
-
-	private static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
-	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
-
-	private static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
-	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
-
-	private static final String JMX_PORT = "spring.boot.livebean.port";
 
 	@SuppressWarnings("unchecked")
 	public static List<PropVal> getProperties(ILaunchConfiguration conf) {
@@ -286,6 +298,19 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	public static void setJMXPort(ILaunchConfigurationWorkingCopy conf, String portAsStr) {
 		conf.setAttribute(JMX_PORT, portAsStr);
+	}
+
+	public static String getProfile(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(PROFILE, DEFAULT_PROFILE);
+		} catch (CoreException e) {
+			BootActivator.log(e);
+			return DEFAULT_PROFILE;
+		}
+	}
+
+	public static void setProfile(ILaunchConfigurationWorkingCopy conf, String profile) {
+		conf.setAttribute(PROFILE, profile);
 	}
 
 }

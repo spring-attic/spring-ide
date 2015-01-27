@@ -1,50 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-<!--
-  this extension point is deprecated but since the hosting menu still uses it we
-  have no choice (unless we convert to hosting menu and all contributions to the new
-  mechanism  -->
- <!--disabled. Instead offer something simpler that only applies to a project's
-     pom file and allows use to add a 'starter' from a list.
-     -->
-  <!--
+  
    <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
-         <visibility>
-            <and>
-		        <objectState
-		              name="nature"
-		              value="org.springframework.ide.eclipse.core.springnature">
-		        </objectState>
-		        <objectState
-		              name="nature"
-		              value="org.eclipse.m2e.core.maven2Nature">
-		        </objectState>
-            </and>
-         </visibility>
-         <action
-               label="Edit Boot Starters"
-               class="org.springframework.ide.eclipse.boot.ui.EditStartersAction"
-               enablesFor="1"
-               menubarPath="org.springframework.ide.eclipse.ui.tools/group0"
-               id="org.springframework.ide.eclipse.boot.ui.EditStartersAction">
-         </action>
-      </objectContribution>
-  </extension>
- -->
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.springframework.ide.eclipse.boot.handlers.EditBootStartersHandler"
+            commandId="org.springframework.ide.eclipse.boot.commands.editStartersCommand">
+            <enabledWhen>
+              <and>
+	             <count value="1"/>
+	             <iterate>
+	           	   <adapt type="org.eclipse.core.resources.IResource">
+	           	      <test property="org.eclipse.core.resources.name"
+	           	            value="pom.xml"/>
+		       	      <test
+		                    forcePluginActivation="true"
+		                    property="org.springsource.ide.eclipse.boot.isBootResource"
+		                    value="true"/>
+	           	   </adapt>
+	             </iterate>
+              </and>
+            </enabledWhen>
+      </handler>
+   </extension>
+   
+   
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+            <menu
+                  id="org.springsource.ide.eclipse.boot.pomMenu"
+                  label="Spring">
+                <visibleWhen
+                    checkEnabled="false">
+	              <and>
+		             <count value="1"/>
+		             <iterate>
+		           	   <adapt type="org.eclipse.core.resources.IResource">
+		           	      <test property="org.eclipse.core.resources.name"
+		           	            value="pom.xml"/>
+			       	      <test
+			                    forcePluginActivation="true"
+			                    property="org.springsource.ide.eclipse.boot.isBootResource"
+			                    value="true"/>
+		           	   </adapt>
+		             </iterate>
+	              </and>
+                </visibleWhen>
+	            <command
+	                  commandId="org.springframework.ide.eclipse.boot.commands.editStartersCommand"
+	                  id="org.springframework.ide.eclipse.boot.menus.editStarters"
+	                  label="Edit Starters"
+	                  mnemonic="S">
+	                  <visibleWhen
+	                        checkEnabled="true">
+	                  </visibleWhen>
+	            </command>
+            </menu>
+      </menuContribution>
+   </extension>
  
-<!-- Create an 'Add Spring Starter' menu that applies to pom.xml file inside a
-  spring boot project -->
-  
-  
- 
-  <!-- run as boot support -->
   
 <extension
        point="org.eclipse.core.expressions.propertyTesters">
