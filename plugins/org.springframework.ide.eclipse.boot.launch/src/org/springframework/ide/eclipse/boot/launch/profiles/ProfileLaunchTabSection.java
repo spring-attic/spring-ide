@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch;
+package org.springframework.ide.eclipse.boot.launch.profiles;
 
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_PROFILE;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getProfile;
@@ -41,8 +41,15 @@ import org.springsource.ide.eclipse.commons.livexp.util.Parser;
  */
 public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 
+	private static final String[] NO_PROFILES =  new String[0];
+
+	private static final Pattern FILE_NAME_PAT = Pattern.compile("^application-(.*)\\.properties$");
+	private static final int FILE_NAME_PAT_GROUP = 1;
+
 	private final LiveVariable<String> profileSelection = new LiveVariable<String>(DEFAULT_PROFILE);
 	private final ChooseOneSectionCombo<String> profileChooser;
+
+	private final ProfileHistory profileHistory = new ProfileHistory();
 
 	/**
 	 * LiveExpression that computes list of suggested profiles for the selected
@@ -50,12 +57,8 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 	 *
 	 * @author Kris De Volder
 	 */
-	public static class ProfileOptions extends LiveExpression<String[]> {
+	private class ProfileOptions extends LiveExpression<String[]> {
 
-		private static final Pattern pat = Pattern.compile("^application-(.*)\\.properties$");
-		private static final int pat_group = 1;
-
-		private static final String[] NO_PROFILES = new String[0];
 		private final LiveExpression<IProject> project;
 
 		public ProfileOptions(LiveExpression<IProject> project) {
@@ -67,14 +70,34 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 		@Override
 		protected String[] compute() {
 			ArrayList<String> profiles = new ArrayList<String>();
+			discoverValidProfiles(profiles);
+			addHistoricProfiles(profiles);
+			return profiles.toArray(new String[profiles.size()]);
+		}
+
+		/**
+		 * Retrieve a stored list of profiles that have been used in the
+		 * past with the selected project. Add these profiles to
+		 * the provided List.
+		 */
+		private void addHistoricProfiles(ArrayList<String> profiles) {
+			for (String p : profileHistory.getHistory(project.getValue())) {
+				profiles.add(p);
+			}
+		}
+
+		/**
+		 * @param profiles discovered profiles are added to this array.
+		 */
+		private void discoverValidProfiles(ArrayList<String> profiles) {
 			try {
 				for (IContainer srcFolder : JavaProjectUtil.getSourceFolders(project.getValue())) {
 					for (IResource rsrc : srcFolder.members()) {
 						if (rsrc.getType()==IResource.FILE) {
 							String name = rsrc.getName();
-							Matcher matcher = pat.matcher(name);
+							Matcher matcher = FILE_NAME_PAT.matcher(name);
 							if (matcher.matches()) {
-								profiles.add(matcher.group(pat_group));
+								profiles.add(matcher.group(FILE_NAME_PAT_GROUP));
 							}
 						}
 					}
@@ -82,7 +105,6 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}
-			return profiles.toArray(new String[profiles.size()]);
 		}
 
 	}
@@ -118,7 +140,14 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy conf) {
-		setProfile(conf, profileSelection.getValue());
+		String profile = profileSelection.getValue();
+		setProfile(conf, profile);
+		//Note: it seems logical to update profile history here, but it gets called
+		// too often. I.e. not just when the user presses apply button, but really
+		// any time a change happens in the launch tab, the LaunchConfig editor copies
+		// all the data from the ui to a workingcopy by calling performApply.
+		//Therefore, history is instead updated when a launch config is actually
+		//launched.
 		getDirtyState().setValue(false);
 	}
 

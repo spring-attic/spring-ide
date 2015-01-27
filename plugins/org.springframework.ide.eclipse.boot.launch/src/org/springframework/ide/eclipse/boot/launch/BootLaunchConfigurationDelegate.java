@@ -33,6 +33,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
+import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 
 /**
  * @author Kris De Volder
@@ -69,6 +70,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
 
+	private ProfileHistory profileHistory = new ProfileHistory();
 
 //	static void debug(ILaunchConfiguration c, String msg) {
 //		if (DEBUG) {
@@ -97,9 +99,10 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	}
 
 	@Override
-	public void launch(ILaunchConfiguration configuration, String mode,
+	public void launch(ILaunchConfiguration conf, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		super.launch(configuration, mode, launch, monitor);
+		profileHistory.updateHistory(getProject(conf), getProfile(conf));
+		super.launch(conf, mode, launch, monitor);
 	}
 
 	@Override

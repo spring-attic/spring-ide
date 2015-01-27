@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableLiveBeanSupportSection;
+import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
