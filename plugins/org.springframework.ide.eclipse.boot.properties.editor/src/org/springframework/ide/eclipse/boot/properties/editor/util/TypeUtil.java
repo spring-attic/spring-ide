@@ -54,11 +54,11 @@ public class TypeUtil {
 
 
 	/**
-	 * Check is a type is 'array like' meaning it is valid to
+	 * Check if it is valid to
 	 * use the notation <name>[<index>]=<value> in property file
 	 * for properties of this type.
 	 */
-	public static boolean isArrayLikeType(String type) {
+	public static boolean isBracketable(String type) {
 		if (type.endsWith("[]")) {
 			return true;
 		} else {
@@ -78,7 +78,7 @@ public class TypeUtil {
 	}
 
 	public static boolean isAssignableType(String type) {
-		return ASSIGNABLE_TYPES.contains(TypeUtil.typeErasure(type)) || isArrayLikeType(type);
+		return ASSIGNABLE_TYPES.contains(TypeUtil.typeErasure(type)) || isBracketable(type);
 	}
 
 	public static String typeErasure(String type) {

@@ -148,7 +148,7 @@ public class SpringPropertiesReconcileEngine {
 								} else { //found a 'validPrefix' which is shorter than the fullName.
 									//check if it looks okay to continue with sub-properties based on property type
 									String validPrefix = validProperty.getId();
-									if (TypeUtil.isArrayLikeType(validProperty.getType())) {
+									if (TypeUtil.isBracketable(validProperty.getType())) {
 										//can go 'deeper' in collection type using array notation: foo.bar[123]=...
 										int lbrack = validPrefix.length();
 										if (fullName.charAt(lbrack)!='[') {
