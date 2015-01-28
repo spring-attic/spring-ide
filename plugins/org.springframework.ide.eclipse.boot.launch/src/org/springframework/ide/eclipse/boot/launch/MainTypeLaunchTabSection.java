@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
-import org.eclipse.jdt.internal.debug.ui.actions.ControlAccessibleListener;
 import org.eclipse.jdt.internal.debug.ui.launcher.DebugTypeSelectionDialog;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.internal.debug.ui.launcher.MainMethodSearchEngine;
@@ -41,11 +40,9 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -56,7 +53,6 @@ import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabSe
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.UIConstants;
@@ -102,13 +98,14 @@ public class MainTypeLaunchTabSection extends LaunchConfigurationTabSection {
 		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false);
 
 		Composite field = new Composite(parent, SWT.NONE);
-        GridLayout layout = new GridLayout();
-        layout.numColumns = 3;
+		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(3).create();
+//        GridLayout layout = new GridLayout();
+ //       layout.numColumns = 3;
 //        layout.marginBottom = 0;
 //        layout.marginTop = 0;
 //        layout.marginLeft = 0;
 //        layout.marginRight = 0;
-        layout.marginWidth = 0;
+//        layout.marginWidth = 0;
 		field.setLayout(layout);
 		grabHor.applyTo(field);
 
