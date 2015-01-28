@@ -25,6 +25,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  */
 public class PropertyNameContentProposalProvider implements IContentProposalProvider {
 
+	private static final IContentProposal[] NO_PROPOSALS = new IContentProposal[0];
+
 	private SpringPropertiesCompletionEngine _engine;
 	final private LiveExpression<IProject> project;
 
@@ -40,7 +42,10 @@ public class PropertyNameContentProposalProvider implements IContentProposalProv
 	@Override
 	public IContentProposal[] getProposals(String contents, int position) {
 		SpringPropertiesCompletionEngine engine = getEngine();
-		return engine.getPropertyFieldProposals(contents, position);
+		if (engine!=null) {
+			return engine.getPropertyFieldProposals(contents, position);
+		}
+		return NO_PROPOSALS;
 	}
 
 	private SpringPropertiesCompletionEngine getEngine() {
