@@ -48,8 +48,8 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springframework.ide.eclipse.propertiesfileeditor.SpringPropertiesProposalProcessor;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;

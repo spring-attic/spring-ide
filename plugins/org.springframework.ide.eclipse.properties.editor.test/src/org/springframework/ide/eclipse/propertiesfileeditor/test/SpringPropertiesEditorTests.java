@@ -16,9 +16,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.ide.eclipse.propertiesfileeditor.StsConfigMetadataRepositoryJsonLoader;
-import org.springframework.ide.eclipse.propertiesfileeditor.util.AptUtils;
-
+import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
+import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
@@ -262,8 +261,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		defaultTestData();
 		MockEditor editor = new MockEditor(
 				"borked=bad+\n" + //token problem, to make sure reconciler is working
-				"server.ssl.ciphers[0]=foo\n" +
-				"server.ssl.ciphers[${one}]=foo"
+				"security.user.role[0]=foo\n" +
+				"security.user.role[${one}]=foo"
 		);
 		assertProblems(editor,
 				"orked|unknown property"

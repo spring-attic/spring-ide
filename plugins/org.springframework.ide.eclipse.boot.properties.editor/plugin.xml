@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.eclipse.jdt.core.javaProperties"
+            default-charset="ISO-8859-1"
+            id="org.springframework.ide.eclipse.applicationProperties"
+            name="Spring Properties File"
+            priority="high">
+      </content-type>
+      <file-association
+            content-type="org.springframework.ide.eclipse.applicationProperties"
+            file-names="application.properties">
+      </file-association>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Spring Properties Editor"
+            icon="icons/spring_obj.gif"
+            class="org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesFileEditor"
+            symbolicFontName="org.eclipse.jdt.ui.PropertiesFileEditor.textfont"
+            id="org.springframework.ide.eclipse.PropertiesFileEditor">
+            <contentTypeBinding
+               contentTypeId="org.springframework.ide.eclipse.applicationProperties"
+            /> 
+      </editor>
+   </extension>
+   
+     <extension point="org.eclipse.m2e.core.lifecycleMappingMetadataSource" />
+     <extension
+           point="org.eclipse.m2e.core.projectConfigurators">
+        <configurator
+              class="org.springframework.ide.eclipse.boot.properties.editor.maven.EnableJdtAptM2EProjectConfigurator"
+              id="org.springframework.ide.eclipse.propertiesfileeditor.maven.EnableJdtAptM2EProjectConfigurator"
+              name="Configure JDT Apt for spring-boot-configuration-processor"
+              secondaryTo="org.eclipse.m2e.jdt.javaConfigurator">
+        </configurator>
+     </extension>
+     
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+            <menu
+                  id="org.springframework.ide.eclipse.properties.file.menu"
+                  label="Spring Properties">
+  <!--              <visibleWhen
+                    checkEnabled="false">
+	              <and>
+		             <count value="1"/>
+		             <iterate>
+		           	   <adapt type="org.eclipse.core.resources.IResource">
+		           	      <test property="org.eclipse.core.resources.contentTypeId" 
+       	        			value="org.eclipse.jdt.core.javaProperties"/>"
+		           	   </adapt>
+		             </iterate>
+	              </and>
+                </visibleWhen> -->
+	            <command
+	                  commandId="org.springframework.ide.eclipse.properties.file.editor.enable"
+	                  id="org.springframework.ide.eclipse.properties.file.editor.enable"
+	                  label="Enable Spring Properties Editor"
+	                  mnemonic="E">
+	                  <visibleWhen
+	                        checkEnabled="true">
+	                  </visibleWhen>
+	            </command>
+	            <command
+	                  commandId="org.springframework.ide.eclipse.properties.file.editor.disable"
+	                  id="org.springframework.ide.eclipse.properties.file.editor.disable"
+	                  label="Disable Spring Properties Editor"
+	                  mnemonic="D">
+	                  <visibleWhen
+	                        checkEnabled="true">
+	                  </visibleWhen>
+	            </command>
+            </menu>
+      </menuContribution>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:enable"
+            commandId="org.springframework.ide.eclipse.properties.file.editor.enable">
+            <enabledWhen>
+              <and>
+	             <count value="1"/>
+	             <iterate>
+	           	   <adapt type="org.eclipse.core.resources.IResource">
+	           	      <test property="org.eclipse.core.resources.contentTypeId" 
+   	        			value="org.eclipse.jdt.core.javaProperties"/>"
+	           	   </adapt>
+	             </iterate>
+              </and>
+            </enabledWhen>
+      </handler>
+      <handler
+            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:disable"
+            commandId="org.springframework.ide.eclipse.properties.file.editor.disable">
+            <enabledWhen>
+              <and>
+	             <count value="1"/>
+	             <iterate>
+	           	   <adapt type="org.eclipse.core.resources.IResource">
+	           	      <test property="org.eclipse.core.resources.contentTypeId" 
+   	        			value="org.springframework.ide.eclipse.applicationProperties"/>"
+	           	   </adapt>
+	             </iterate>
+              </and>
+            </enabledWhen>
+      </handler>
+   </extension>
+     
+  <extension
+        point="org.eclipse.ui.commands">
+        <category
+              id="org.springframework.ide.eclipse.properties.file.editor.category"
+              name="Spring Properties Editor">
+        </category>
+     <command
+           id="org.springframework.ide.eclipse.properties.file.editor.enable"
+           categoryId="org.springframework.ide.eclipse.properties.file.editor.category"
+           name="Enable/Disable Spring Properties Editor"/>
+     <command
+           id="org.springframework.ide.eclipse.properties.file.editor.disable"
+           categoryId="org.springframework.ide.eclipse.properties.file.editor.category"
+           name="Enable/Disable Spring Properties Editor"/>
+  </extension>
+  
+  <extension
+	      point="org.eclipse.ui.preferencePages">
+	   <page
+	         name="Annotation Processing"
+	         category="org.springsource.ide.eclipse.commons.preferencePage"
+	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage"
+	         id="org.springframework.ide.eclipse.propertiesfileeditor.preferences.AnotationProcessingPreferencesPage">
+	   </page>
+   </extension>  
+   
+<extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceInitializer">
+      </initializer>
+  </extension>
+<extension
+      point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
+       <configurator
+             after="org.springframework.ide.eclipse.springproject"
+             class="org.springframework.ide.eclipse.propertiesfileeditor.gradle.EnableJdtAptGradleProjectConfigurator"
+             id="org.springframework.ide.eclipse.propertiesfileeditor.gradle.EnableJdtAptGradleProjectConfigurator"
+             name="Spring">
+       </configurator>
+</extension>     
+</plugin>

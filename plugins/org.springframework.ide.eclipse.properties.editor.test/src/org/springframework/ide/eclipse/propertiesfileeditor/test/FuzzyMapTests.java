@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.propertiesfileeditor.test;
 
 import junit.framework.TestCase;
 
-import org.springframework.ide.eclipse.propertiesfileeditor.FuzzyMap;
+import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 
 public class FuzzyMapTests extends TestCase {
 	
