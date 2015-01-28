@@ -273,16 +273,18 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testReconcileArrayNotationError() throws Exception {
 		defaultTestData();
 		MockEditor editor = new MockEditor(
-				"server.ssl.ciphers[bork]=foo\n" +
-				"server.ssl.ciphers[1=foo\n" +
-				"server.ssl.ciphers[1]crap=foo\n" +
-				"server.port[0]=8888"
+				"security.user.role[bork]=foo\n" +
+				"security.user.role[1=foo\n" +
+				"security.user.role[1]crap=foo\n" +
+				"server.port[0]=8888\n" +
+				"spring.thymeleaf.view-names[1]=hello"
 		);
 		assertProblems(editor,
 				"bork|Integer",
 				"[|matching ']'",
 				"crap|extra text",
-				"[0]|[...] notation is invalid"
+				"[0]|[...] notation is invalid",
+				"[1]|[...] notation is invalid"
 				//no other problems
 		);
 	}

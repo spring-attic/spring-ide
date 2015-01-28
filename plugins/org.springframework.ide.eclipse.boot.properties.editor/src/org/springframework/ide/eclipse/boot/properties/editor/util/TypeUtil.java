@@ -59,21 +59,19 @@ public class TypeUtil {
 	 * for properties of this type.
 	 */
 	public static boolean isBracketable(String type) {
-		if (type.endsWith("[]")) {
-			return true;
-		} else {
-			String erasure = TypeUtil.typeErasure(type);
-			//Note: to be really correct we should use JDT infrastructure to resolve
-			//type in project classpath instead of using Java reflection.
-			//However, use reflection here is okay assuming types we care about
-			//are part of JRE standard libraries.
-			try {
-				Class<?> erasureClass = Class.forName(erasure);
-				return List.class.isAssignableFrom(erasureClass);
-			} catch (Exception e) {
-				//type not resolveable assume its not 'array like'
-				return false;
-			}
+		//Note array types are no longer considered 'Bracketable'
+		//see: STS-4031
+		String erasure = TypeUtil.typeErasure(type);
+		//Note: to be really correct we should use JDT infrastructure to resolve
+		//type in project classpath instead of using Java reflection.
+		//However, use reflection here is okay assuming types we care about
+		//are part of JRE standard libraries.
+		try {
+			Class<?> erasureClass = Class.forName(erasure);
+			return List.class.isAssignableFrom(erasureClass);
+		} catch (Exception e) {
+			//type not resolveable assume its not 'array like'
+			return false;
 		}
 	}
 
