@@ -15,6 +15,7 @@ import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfiguratio
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setProfile;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +70,7 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 
 		@Override
 		protected String[] compute() {
-			ArrayList<String> profiles = new ArrayList<String>();
+			LinkedHashSet<String> profiles = new LinkedHashSet<String>();
 			discoverValidProfiles(profiles);
 			addHistoricProfiles(profiles);
 			return profiles.toArray(new String[profiles.size()]);
@@ -80,7 +81,7 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 		 * past with the selected project. Add these profiles to
 		 * the provided List.
 		 */
-		private void addHistoricProfiles(ArrayList<String> profiles) {
+		private void addHistoricProfiles(LinkedHashSet<String> profiles) {
 			for (String p : profileHistory.getHistory(project.getValue())) {
 				profiles.add(p);
 			}
@@ -89,7 +90,7 @@ public class ProfileLaunchTabSection extends LaunchConfigurationTabSection {
 		/**
 		 * @param profiles discovered profiles are added to this array.
 		 */
-		private void discoverValidProfiles(ArrayList<String> profiles) {
+		private void discoverValidProfiles(LinkedHashSet<String> profiles) {
 			try {
 				for (IContainer srcFolder : JavaProjectUtil.getSourceFolders(project.getValue())) {
 					for (IResource rsrc : srcFolder.members()) {
