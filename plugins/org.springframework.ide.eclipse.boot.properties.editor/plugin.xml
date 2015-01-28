@@ -35,7 +35,7 @@
            point="org.eclipse.m2e.core.projectConfigurators">
         <configurator
               class="org.springframework.ide.eclipse.boot.properties.editor.maven.EnableJdtAptM2EProjectConfigurator"
-              id="org.springframework.ide.eclipse.propertiesfileeditor.maven.EnableJdtAptM2EProjectConfigurator"
+              id="org.springframework.ide.eclipse.boot.properties.editor.maven.EnableJdtAptM2EProjectConfigurator"
               name="Configure JDT Apt for spring-boot-configuration-processor"
               secondaryTo="org.eclipse.m2e.jdt.javaConfigurator">
         </configurator>
@@ -46,7 +46,7 @@
       <menuContribution
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
             <menu
-                  id="org.springframework.ide.eclipse.properties.file.menu"
+                  id="org.springframework.ide.eclipse.boot.properties.file.menu"
                   label="Spring Properties">
   <!--              <visibleWhen
                     checkEnabled="false">
@@ -61,8 +61,8 @@
 	              </and>
                 </visibleWhen> -->
 	            <command
-	                  commandId="org.springframework.ide.eclipse.properties.file.editor.enable"
-	                  id="org.springframework.ide.eclipse.properties.file.editor.enable"
+	                  commandId="org.springframework.ide.eclipse.boot.properties.editor.enable"
+	                  id="org.springframework.ide.eclipse.boot.properties.editor.enable"
 	                  label="Enable Spring Properties Editor"
 	                  mnemonic="E">
 	                  <visibleWhen
@@ -70,8 +70,8 @@
 	                  </visibleWhen>
 	            </command>
 	            <command
-	                  commandId="org.springframework.ide.eclipse.properties.file.editor.disable"
-	                  id="org.springframework.ide.eclipse.properties.file.editor.disable"
+	                  commandId="org.springframework.ide.eclipse.boot.properties.editor.disable"
+	                  id="org.springframework.ide.eclipse.boot.properties.editor.disable"
 	                  label="Disable Spring Properties Editor"
 	                  mnemonic="D">
 	                  <visibleWhen
@@ -86,7 +86,7 @@
          point="org.eclipse.ui.handlers">
       <handler
             class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:enable"
-            commandId="org.springframework.ide.eclipse.properties.file.editor.enable">
+            commandId="org.springframework.ide.eclipse.boot.properties.editor.enable">
             <enabledWhen>
               <and>
 	             <count value="1"/>
@@ -101,7 +101,7 @@
       </handler>
       <handler
             class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:disable"
-            commandId="org.springframework.ide.eclipse.properties.file.editor.disable">
+            commandId="org.springframework.ide.eclipse.boot.properties.editor.disable">
             <enabledWhen>
               <and>
 	             <count value="1"/>
@@ -119,16 +119,16 @@
   <extension
         point="org.eclipse.ui.commands">
         <category
-              id="org.springframework.ide.eclipse.properties.file.editor.category"
+              id="org.springframework.ide.eclipse.boot.properties.editor.category"
               name="Spring Properties Editor">
         </category>
      <command
-           id="org.springframework.ide.eclipse.properties.file.editor.enable"
-           categoryId="org.springframework.ide.eclipse.properties.file.editor.category"
+           id="org.springframework.ide.eclipse.boot.properties.editor.enable"
+           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
            name="Enable/Disable Spring Properties Editor"/>
      <command
-           id="org.springframework.ide.eclipse.properties.file.editor.disable"
-           categoryId="org.springframework.ide.eclipse.properties.file.editor.category"
+           id="org.springframework.ide.eclipse.boot.properties.editor.disable"
+           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
            name="Enable/Disable Spring Properties Editor"/>
   </extension>
   
@@ -138,7 +138,7 @@
 	         name="Annotation Processing"
 	         category="org.springsource.ide.eclipse.commons.preferencePage"
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage"
-	         id="org.springframework.ide.eclipse.propertiesfileeditor.preferences.AnotationProcessingPreferencesPage">
+	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage">
 	   </page>
    </extension>  
    
@@ -152,8 +152,8 @@
       point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
        <configurator
              after="org.springframework.ide.eclipse.springproject"
-             class="org.springframework.ide.eclipse.propertiesfileeditor.gradle.EnableJdtAptGradleProjectConfigurator"
-             id="org.springframework.ide.eclipse.propertiesfileeditor.gradle.EnableJdtAptGradleProjectConfigurator"
+             class="org.springframework.ide.eclipse.boot.properties.editor.gradle.EnableJdtAptGradleProjectConfigurator"
+                id="org.springframework.ide.eclipse.boot.properties.editor.gradle.EnableJdtAptGradleProjectConfigurator"
              name="Spring">
        </configurator>
 </extension>     

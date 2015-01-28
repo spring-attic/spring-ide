@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.propertiesfileeditor.test;
+package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -9,11 +9,11 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.propertiesfileeditor.test"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.properties.editor.test"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
-	
+
 	/**
 	 * The constructor
 	 */

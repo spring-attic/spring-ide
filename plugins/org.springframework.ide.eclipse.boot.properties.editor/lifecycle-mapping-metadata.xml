@@ -13,7 +13,7 @@
 			</pluginExecutionFilter>
 			<action>
 				<configurator>
-					<id>org.springframework.ide.eclipse.propertiesfileeditor.maven.EnableJdtAptM2EProjectConfigurator</id>
+					<id>org.springframework.ide.eclipse.boot.properties.editor.maven.EnableJdtAptM2EProjectConfigurator</id>
 				</configurator>
 			</action>
 		</pluginExecution>

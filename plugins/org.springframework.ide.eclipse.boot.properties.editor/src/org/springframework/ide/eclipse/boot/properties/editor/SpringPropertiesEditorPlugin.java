@@ -25,11 +25,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropert
 public class SpringPropertiesEditorPlugin extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.properties.editor"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.properties.editor"; //$NON-NLS-1$
 
 	// The shared instance
 	private static SpringPropertiesEditorPlugin plugin;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -70,16 +70,16 @@ public class SpringPropertiesEditorPlugin extends AbstractUIPlugin {
 	public static void warning(String msg) {
 		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, msg, null));
 	}
-	
+
 	private static ListenerManager<ClasspathListener> classpathListeners;
-	
+
 	public static synchronized ListenerManager<ClasspathListener> getClasspathListeners() {
 		if (classpathListeners==null) {
 			classpathListeners = new ClasspathListenerManager();
 		}
 		return classpathListeners;
 	}
-	
+
 	private static SpringPropertiesIndexManager indexManager;
 
 	public static SpringPropertiesIndexManager getIndexManager() {
