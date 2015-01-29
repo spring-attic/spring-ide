@@ -20,9 +20,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -100,22 +103,24 @@ public class StsConfigMetadataRepositoryJsonLoader {
 
 	private void loadFromOutputFolder(IJavaProject project) {
 		try {
-			File outputFolder = ResourcesPlugin.getWorkspace().getRoot().getLocation().append(project.getOutputLocation()).toFile();
-			for (String mdLoc : META_DATA_LOCATIONS) {
-				File mdf = new File(outputFolder, mdLoc);
-				loadFromJsonFile(mdf);
+			IPath outputLoc = project.getOutputLocation();
+			if (outputLoc!=null) {
+				IFolder outputFolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(outputLoc);
+				for (String mdLoc : META_DATA_LOCATIONS) {
+					IFile mdf = outputFolder.getFile(new Path(mdLoc));
+					loadFromJsonFile(mdf);
+				}
 			}
-			
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 	}
 
-	private void loadFromJsonFile(File jsonFile) {
-		if (jsonFile.exists()) {
+	private void loadFromJsonFile(IFile mdf) {
+		if (mdf.exists()) {
 			InputStream is = null;
 			try {
-				is = new FileInputStream(jsonFile);
+				is = mdf.getContents(true);
 				loadFromInputStream(is);
 			} catch (Exception e) {
 				SpringPropertiesEditorPlugin.log(e);
@@ -154,7 +159,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			}
 		}
 	}
-	
+
 
 	private void loadFrom(JarFile jarFile, ZipEntry ze) {
 		InputStream is = null;
@@ -206,7 +211,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			return ""+ekind;
 		}
 	}
-	
+
 	private void jarDump(JarFile jarFile) {
 		Enumeration<JarEntry> entries = jarFile.entries();
 		while (entries.hasMoreElements()) {
@@ -215,8 +220,8 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		}
 	}
 
-	
-	
+
+
 //	/**
 //	 * Load the {@link ConfigMetadataRepository} with the metadata defined by
 //	 * the specified {@code resources}. If the same config metadata items is
