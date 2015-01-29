@@ -63,6 +63,8 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 public class SpringPropertiesCompletionEngine {
 
 	private static final boolean DEBUG = false;
+	public static final boolean DEFAULT_VALUE_INCLUDED = false; //might make sense to make this user configurable
+
 //	private static final boolean DEBUG =
 //			(""+Platform.getLocation()).contains("kdvolder") ||
 //			(""+Platform.getLocation()).contains("bamboo");
@@ -479,7 +481,7 @@ public class SpringPropertiesCompletionEngine {
 		private String getCompletion() {
 			StringBuilder completion = new StringBuilder(match.data.getId());
 			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
+			if (defaultValue!=null && DEFAULT_VALUE_INCLUDED) {
 				completion.append("=");
 				completion.append(defaultValue);
 			} else {

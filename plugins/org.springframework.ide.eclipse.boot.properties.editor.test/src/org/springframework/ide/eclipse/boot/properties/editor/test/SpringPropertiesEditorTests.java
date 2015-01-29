@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
@@ -27,7 +28,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
-		assertCompletion("ser<*>", "server.port=8080<*>");
+		if (SpringPropertiesCompletionEngine.DEFAULT_VALUE_INCLUDED) {
+			assertCompletion("ser<*>", "server.port=8080<*>");
+		} else {
+			assertCompletion("ser<*>", "server.port=<*>");
+		}
 		assertCompletionDisplayString("ser<*>", "server.port=8080 : int Port where server listens for http.");
 	}
 
@@ -51,7 +56,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("some.defaulted.array", "java.lang.String[]", new String[] {"a", "b", "c"} , "Stuff.");
 
 		assertCompletion("spring.freemarker.vn<*>", "spring.freemarker.view-names=<*>");
-		assertCompletion("some.d.a<*>", "some.defaulted.array=a,b,c<*>");
+		if (SpringPropertiesCompletionEngine.DEFAULT_VALUE_INCLUDED) {
+			assertCompletion("some.d.a<*>", "some.defaulted.array=a,b,c<*>");
+		} else {
+			assertCompletion("some.d.a<*>", "some.defaulted.array=<*>");
+		}
 	}
 
 	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
