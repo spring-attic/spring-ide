@@ -215,50 +215,10 @@ public class MainTypeLaunchTabSection extends LaunchConfigurationTabSection {
 
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		BootLaunchConfigurationDelegate.setMainType(config, fMainText.getText().trim());
+		getDirtyState().setValue(false);
 	}
 
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
-		//TODO: initialize from current IJavaElement selected in workbench or active editor.
-		//BootLaunchConfigurationDelegate.setMainTypeName(config, "");
 	}
-
-	/**
-	 * Returns the current Java element context in the active workbench page
-	 * or <code>null</code> if none.
-	 *
-	 * @return current Java element in the active page or <code>null</code>
-	 */
-	protected IJavaElement getContext() {
-		IWorkbenchPage page = JDIDebugUIPlugin.getActivePage();
-		if (page != null) {
-			ISelection selection = page.getSelection();
-			if (selection instanceof IStructuredSelection) {
-				IStructuredSelection ss = (IStructuredSelection)selection;
-				if (!ss.isEmpty()) {
-					Object obj = ss.getFirstElement();
-					if (obj instanceof IJavaElement) {
-						return (IJavaElement)obj;
-					}
-					if (obj instanceof IResource) {
-						IJavaElement je = JavaCore.create((IResource)obj);
-						if (je == null) {
-							IProject pro = ((IResource)obj).getProject();
-							je = JavaCore.create(pro);
-						}
-						if (je != null) {
-							return je;
-						}
-					}
-				}
-			}
-			IEditorPart part = page.getActiveEditor();
-			if (part != null) {
-				IEditorInput input = part.getEditorInput();
-				return (IJavaElement) input.getAdapter(IJavaElement.class);
-			}
-		}
-		return null;
-	}
-
 
 }

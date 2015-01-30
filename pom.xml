@@ -184,6 +184,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.launch.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
 
