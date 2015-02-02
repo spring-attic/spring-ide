@@ -27,23 +27,23 @@ import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurationRequest
 import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurator;
 
 /**
- * Configures Spring project for Gradle integration
+ * Configures JDT APT for a Gradle project that has 'spring-boot-configuration-processor' on its classpath.
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 public class EnableJdtAptGradleProjectConfigurator implements IProjectConfigurator {
 
 	public void configure(IProjectConfigurationRequest request, IProgressMonitor monitor) throws Exception {
 		if (
 			isJavaProject(request.getProject()) &&
-			isPreferenceEnabled(request.getProject()) && 
+			isPreferenceEnabled(request.getProject()) &&
 			shouldEnableApt(request.getGradleModel())
 		) {
 			AptUtils.enableApt(JavaCore.create(request.getProject()));
 		}
 	}
-	
+
 	private boolean isJavaProject(IProject project) {
 		try {
 			return project.isAccessible() && project.hasNature(JavaCore.NATURE_ID);
@@ -54,7 +54,7 @@ public class EnableJdtAptGradleProjectConfigurator implements IProjectConfigurat
 	}
 
 	private boolean isPreferenceEnabled(IProject p) {
-		return Platform.getPreferencesService().getBoolean(SpringPropertiesEditorPlugin.PLUGIN_ID, 
+		return Platform.getPreferencesService().getBoolean(SpringPropertiesEditorPlugin.PLUGIN_ID,
 				AUTO_CONFIGURE_APT_GRADLE_PREF, AUTO_CONFIGURE_APT_GRADLE_DEFAULT, null);
 	}
 
@@ -63,7 +63,7 @@ public class EnableJdtAptGradleProjectConfigurator implements IProjectConfigurat
 			GradleModuleVersion a = d.getGradleModuleVersion();
 			if (
 				a!=null &&
-				"org.springframework.boot".equals(a.getGroup()) &&  
+				"org.springframework.boot".equals(a.getGroup()) &&
 				"spring-boot-configuration-processor".equals(a.getName())
 			) {
 				return true;
@@ -72,5 +72,5 @@ public class EnableJdtAptGradleProjectConfigurator implements IProjectConfigurat
 		return false;
 	}
 
-	
+
 }
