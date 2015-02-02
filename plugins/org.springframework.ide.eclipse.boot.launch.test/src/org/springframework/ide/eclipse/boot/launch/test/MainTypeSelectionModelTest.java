@@ -22,12 +22,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 /**
  * @author Kris De Volder
  */
-public class MainTypeSelectionModelTest extends StsTestCase {
-
-	@Override
-	protected String getBundleName() {
-		return "org.springframework.ide.eclipse.boot.launch.test";
-	}
+public class MainTypeSelectionModelTest extends BootLaunchTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -84,20 +79,5 @@ public class MainTypeSelectionModelTest extends StsTestCase {
 			fail("Not found: "+needle+"\n in \n"+haystack);
 		}
  	}
-
-	/**
-	 * Create an empty project no nature, no nothing
-	 */
-	private void createGeneralProject(String name) throws Exception {
-		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-		p.create(new NullProgressMonitor());
-		p.open(new NullProgressMonitor());
-		assertTrue(p.exists());
-		assertTrue(p.isAccessible());
-	}
-
-	public void testFailure() {
-		fail("should fail");
-	}
 
 }

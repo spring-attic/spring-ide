@@ -67,7 +67,7 @@ public class ProfileHistory {
 	}
 
 	/**
-	 * Adds a newProfile to the history. May remove oldest profile if
+	 * Adds a new profile to the history. May remove oldest profile if
 	 * the maxHistory limit is exceeded.
 	 */
 	public void updateHistory(IProject project, String profile) {
