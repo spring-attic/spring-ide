@@ -208,7 +208,7 @@ public class JdtConfigurationClassPostProcessor implements IBeansConfigPostProce
 					newBeanDefinition.setBeanClassName(className);
 					
 					registry.registerBeanDefinition(beanName, newBeanDefinition);
-					super.registerBeanDefinition(beanName, beanDefinition);
+					super.registerBeanDefinition(beanName, newBeanDefinition);
 					
 					Map<String, Object> profileAnnotationMetadata = newBeanDefinition.getMetadata().
 							getAnnotationAttributes("org.springframework.context.annotation.Profile");
