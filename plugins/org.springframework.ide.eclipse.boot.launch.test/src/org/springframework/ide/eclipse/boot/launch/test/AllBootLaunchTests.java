@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	MainTypeSelectionModelTest.class,
+	BootLaunchUIModelTest.class,
 	ProfileHistoryTest.class
 })
 public class AllBootLaunchTests {

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
-import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -19,10 +18,18 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 /**
  * Model for the 'main type' selection widgetry on a launchconfiguration tab.
+ * <p>
+ * Contains the 'logic' for the UI except for the widgets themselves.
+ * Can be unit tested without having to instantiate launch configuration dialogs
+ * etc.
  *
  * @author Kris De Volder
  */
-public class MainTypeSelectionModel {
+public class BootLaunchUIModel {
+
+	// TODO pulling out all of the logic for regression testing is a work in progress.
+	//   Only some of the UI elements are represented in here. The other ones
+	//   still are 'tangled' with the UI widgetry code.
 
 	public static class MainTypeValidator extends Validator {
 
@@ -42,14 +49,10 @@ public class MainTypeSelectionModel {
 		}
 	}
 
-	public final SelectionModel<IProject> project;
+	public final SelectProjectLaunchTabModel project = SelectProjectLaunchTabModel.create();
 	public final SelectionModel<String> mainTypeName;
 
-	public MainTypeSelectionModel() {
-		LiveVariable<IProject> p = new LiveVariable<IProject>();
-		ExistingBootProjectSelectionValidator pv = new ExistingBootProjectSelectionValidator(p);
-		project = new SelectionModel<IProject>(p, pv);
-
+	public BootLaunchUIModel() {
 		LiveVariable<String> n = new LiveVariable<String>("");
 		MainTypeValidator nv = new MainTypeValidator(n);
 		mainTypeName = new SelectionModel<String>(n, nv);

@@ -42,10 +42,10 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 
 	@Override
 	protected List<IPageSection> createSections() {
-		MainTypeSelectionModel model = new MainTypeSelectionModel();
+		BootLaunchUIModel model = new BootLaunchUIModel();
 		return Arrays.asList(new IPageSection[] {
-				new SelectProjectLaunchTabSection(this, model.project),
-				new MainTypeLaunchTabSection(this, model),
+				SelectProjectLaunchTabSection.create(this, model.project),
+				new MainTypeLaunchTabSection(this, model.project.selection, model.mainTypeName),
 				new ProfileLaunchTabSection(this, model.project.selection),
 				new HLineSection(this),
 				new EnableDebugSection(this),

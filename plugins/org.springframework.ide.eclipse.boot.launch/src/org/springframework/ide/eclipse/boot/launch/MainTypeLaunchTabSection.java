@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -65,28 +66,29 @@ import org.springsource.ide.eclipse.commons.livexp.ui.UIConstants;
 @SuppressWarnings("restriction")
 public class MainTypeLaunchTabSection extends LaunchConfigurationTabSection {
 
+	private LiveVariable<IProject> project;
+	private SelectionModel<String> mainTypeName;
 
 	protected Text fMainText;
 	private Button fSearchButton;
-	private MainTypeSelectionModel model;
 
 	private LiveVariable<String> mainTypeName() {
-		return model.mainTypeName.selection;
+		return mainTypeName.selection;
 	}
 	private LiveVariable<IProject> project() {
-		return model.project.selection;
+		return project;
 	}
 
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
-		return model.mainTypeName.validator;
+		return mainTypeName.validator;
 	}
 
-	public MainTypeLaunchTabSection(IPageWithSections owner, MainTypeSelectionModel model) {
+	public MainTypeLaunchTabSection(IPageWithSections owner, LiveVariable<IProject> project, SelectionModel<String> mainTypeName) {
 		super(owner);
-		this.model = model;
+		this.project = project;
+		this.mainTypeName = mainTypeName;
 	}
-
 	public void createContents(Composite parent) {
 		String label = "Main type";
 		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false);
