@@ -17,8 +17,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchUIModel;
+import org.springframework.ide.eclipse.boot.launch.MainTypeNameLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -33,6 +35,8 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
+
+	///// project ////////////////////////////////////////////////////////////
 
 	public void testProjectValidator() throws Exception {
 		createPredefinedProject("empty-boot-project");
@@ -111,14 +115,17 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertEquals(null, BootLaunchConfigurationDelegate.getProject(wc));
 	}
 
-	protected ILaunchConfigurationWorkingCopy createWorkingCopy()
-			throws CoreException {
-		String name = DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName("test");
-		ILaunchConfigurationWorkingCopy wc = DebugPlugin.getDefault().getLaunchManager()
-			.getLaunchConfigurationType(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID)
-			.newInstance(null, name);
-		return wc;
+	public void testProjectDirtyState() throws Exception {
+		BootLaunchUIModel model = new BootLaunchUIModel();
+		SelectProjectLaunchTabModel project = model.project;
+		LiveVariable<Boolean> dirtyState = model.project.getDirtyState();
+
+		dirtyState.setValue(false);
+		project.selection.setValue(getProject("nono"));
+		assertTrue(dirtyState.getValue());
 	}
+
+	////// main type //////////////////////////////////////////////////////////
 
 	public void testMainTypeValidator() throws Exception {
 		BootLaunchUIModel model = new BootLaunchUIModel();
@@ -128,8 +135,68 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertOk(model.mainTypeName.validator);
 	}
 
-	private void assertOk(LiveExpression<ValidationResult> validator) {
-		assertTrue("Should be 'OK'", validator.getValue().isOk());
+	public void testMainTypeInitializeFrom() throws Exception {
+		BootLaunchUIModel model = new BootLaunchUIModel();
+		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		LiveVariable<Boolean> dirtyState = model.mainTypeName.getDirtyState();
+
+		BootLaunchConfigurationDelegate.setMainType(wc, "Snuggem");
+		dirtyState.setValue(true);
+
+		mainTypeName.initializeFrom(wc);
+
+		assertFalse(dirtyState.getValue());
+		assertEquals("Snuggem", mainTypeName.selection.getValue());
+	}
+
+	public void testMainTypePerformApply() throws Exception {
+		BootLaunchUIModel model = new BootLaunchUIModel();
+		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		LiveVariable<Boolean> dirtyState = model.mainTypeName.getDirtyState();
+
+		mainTypeName.selection.setValue("Koko");
+		assertTrue(dirtyState.getValue());
+
+		mainTypeName.performApply(wc);
+		assertEquals("Koko", getMainTypeName(wc));
+		assertFalse(dirtyState.getValue());
+	}
+
+	public void testMainTypeSetDefaults() throws Exception {
+		BootLaunchUIModel model = new BootLaunchUIModel();
+		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
+
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		mainTypeName.setDefaults(wc);
+		assertEquals("", getMainTypeName(wc));
+	}
+
+	protected String getMainTypeName(ILaunchConfigurationWorkingCopy wc)
+			throws CoreException {
+		return wc.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+	}
+
+	public void testMainTypeDirtyState() throws Exception {
+		BootLaunchUIModel model = new BootLaunchUIModel();
+		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
+		LiveVariable<Boolean> dirtyState = model.mainTypeName.getDirtyState();
+
+		dirtyState.setValue(false);
+		mainTypeName.selection.setValue("something");
+		assertTrue(dirtyState.getValue());
+	}
+
+	////// support code ///////////////////////////////////////////////////////
+
+	protected ILaunchConfigurationWorkingCopy createWorkingCopy()
+			throws CoreException {
+		String name = DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName("test");
+		ILaunchConfigurationWorkingCopy wc = DebugPlugin.getDefault().getLaunchManager()
+			.getLaunchConfigurationType(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID)
+			.newInstance(null, name);
+		return wc;
 	}
 
 	private IProject getProject(String name) {
@@ -147,5 +214,10 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 			fail("Not found: "+needle+"\n in \n"+haystack);
 		}
  	}
+
+	private void assertOk(LiveExpression<ValidationResult> validator) {
+		assertTrue("Should be 'OK'", validator.getValue().isOk());
+	}
+
 
 }

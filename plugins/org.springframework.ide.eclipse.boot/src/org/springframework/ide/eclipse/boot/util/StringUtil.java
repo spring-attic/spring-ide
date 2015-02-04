@@ -21,6 +21,13 @@ public class StringUtil {
 		return name!=null && !name.trim().equals("");
 	}
 
+	public static String trim(String s) {
+		if (s!=null) {
+			return s.trim();
+		}
+		return null;
+	}
+
 	public static int commonPrefixLength(String s, String t) {
 		int shortestStringLen = Math.min(s.length(), t.length());
 		for (int i = 0; i < shortestStringLen; i++) {

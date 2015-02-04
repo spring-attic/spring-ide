@@ -50,12 +50,9 @@ public class BootLaunchUIModel {
 	}
 
 	public final SelectProjectLaunchTabModel project = SelectProjectLaunchTabModel.create();
-	public final SelectionModel<String> mainTypeName;
+	public final MainTypeNameLaunchTabModel mainTypeName = MainTypeNameLaunchTabModel.create();
 
 	public BootLaunchUIModel() {
-		LiveVariable<String> n = new LiveVariable<String>("");
-		MainTypeValidator nv = new MainTypeValidator(n);
-		mainTypeName = new SelectionModel<String>(n, nv);
 	}
 
 }
