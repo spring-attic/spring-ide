@@ -216,7 +216,10 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
  	}
 
 	private void assertOk(LiveExpression<ValidationResult> validator) {
-		assertTrue("Should be 'OK'", validator.getValue().isOk());
+		ValidationResult status = validator.getValue();
+		if (!status.isOk()) {
+			fail(status.toString());
+		}
 	}
 
 
