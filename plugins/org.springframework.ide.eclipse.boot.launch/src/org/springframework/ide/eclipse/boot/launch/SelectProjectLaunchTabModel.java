@@ -17,26 +17,19 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class SelectProjectLaunchTabModel extends LaunchTabSelectionModel<IProject> {
-	protected SelectProjectLaunchTabModel(LiveVariable<IProject> p,
-			ExistingBootProjectSelectionValidator pv) {
-		super(p, pv);
-		p.addListener(new ValueListener<IProject>() {
-			@Override
-			public void gotValue(LiveExpression<IProject> exp, IProject value) {
-				getDirtyState().setValue(true);
-			}
-		});
-	}
 
 	public static SelectProjectLaunchTabModel create() {
 		LiveVariable<IProject> project = new LiveVariable<IProject>();
 		ExistingBootProjectSelectionValidator validator = new ExistingBootProjectSelectionValidator(project);
 		return new SelectProjectLaunchTabModel(project, validator);
+	}
+
+	protected SelectProjectLaunchTabModel(LiveVariable<IProject> p,
+			ExistingBootProjectSelectionValidator pv) {
+		super(p, pv);
 	}
 
 	@Override

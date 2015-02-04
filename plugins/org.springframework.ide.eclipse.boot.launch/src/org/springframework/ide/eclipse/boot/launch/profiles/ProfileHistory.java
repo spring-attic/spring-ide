@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.launch.IProfileHistory;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 
 /**
@@ -28,7 +29,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
  *
  * @author Kris De Volder
  */
-public class ProfileHistory {
+public class ProfileHistory implements IProfileHistory {
 
 	private static final String PROFILE_HISTORY = "spring.boot.launch.profile.history";
 	private static final String[] NO_PROFILES = new String[0];

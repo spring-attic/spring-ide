@@ -27,9 +27,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
  */
 public class DelegatingLaunchConfigurationTabSection extends WizardPageSection implements ILaunchConfigurationTabSection {
 
-	//TODO: refactor code to get use this instead of LaunchConfigurationTabSection
-	//Then delete LaunchConfigurationTabSection and rename this class to take its place
-
 	private ILaunchConfigurationTabModel model;
 	private IPageSection ui;
 

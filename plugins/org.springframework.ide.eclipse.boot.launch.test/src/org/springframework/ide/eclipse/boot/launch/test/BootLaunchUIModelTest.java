@@ -10,30 +10,61 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchUIModel;
+import org.springframework.ide.eclipse.boot.launch.IProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.MainTypeNameLaunchTabModel;
+import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 /**
  * @author Kris De Volder
  */
 public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
+	private static final String[] NO_PROFILES =  new String[0];
+
+	public class TestProfileHistory implements IProfileHistory {
+
+		private Map<String, String[]> map = new HashMap<String, String[]>();
+
+		@Override
+		public String[] getHistory(IProject value) {
+			String[] h = map.get(value);
+			if (h!=null) {
+				return h;
+			}
+			return NO_PROFILES;
+		}
+
+		public void setHistory(IProject p, String... history) {
+			map.put(p.getName(), history);
+		}
+
+	}
+
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
+	}
+
+	protected BootLaunchUIModel model;
+	protected TestProfileHistory profileHistory;
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		profileHistory = new TestProfileHistory();
+		model = new BootLaunchUIModel(profileHistory);
 	}
 
 	///// project ////////////////////////////////////////////////////////////
@@ -41,7 +72,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	public void testProjectValidator() throws Exception {
 		createPredefinedProject("empty-boot-project");
 		createGeneralProject("general");
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		assertError("No project selected", model.project.validator);
 
 		model.project.selection.setValue(getProject("non-existant"));
@@ -64,7 +94,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	public void testProjectInitializeFrom() throws Exception {
 		IProject fooProject = getProject("foo");
 
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		SelectProjectLaunchTabModel project = model.project;
 		LiveVariable<Boolean> dirtyState = model.project.getDirtyState();
 
@@ -85,7 +114,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	public void testProjectPerformApply() throws Exception {
 		IProject fooProject = getProject("foo");
 
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		SelectProjectLaunchTabModel project = model.project;
 		LiveVariable<Boolean> dirtyState = model.project.getDirtyState();
 
@@ -105,7 +133,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	public void testProjectSetDefaults() throws Exception {
 		IProject fooProject = getProject("foo");
 
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		SelectProjectLaunchTabModel project = model.project;
 
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
@@ -116,7 +143,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	}
 
 	public void testProjectDirtyState() throws Exception {
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		SelectProjectLaunchTabModel project = model.project;
 		LiveVariable<Boolean> dirtyState = model.project.getDirtyState();
 
@@ -128,7 +154,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	////// main type //////////////////////////////////////////////////////////
 
 	public void testMainTypeValidator() throws Exception {
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		assertEquals("", model.mainTypeName.selection.getValue());
 		assertError("No Main type selected", model.mainTypeName.validator);
 		model.mainTypeName.selection.setValue("something");
@@ -136,7 +161,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	}
 
 	public void testMainTypeInitializeFrom() throws Exception {
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 		LiveVariable<Boolean> dirtyState = model.mainTypeName.getDirtyState();
@@ -151,7 +175,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	}
 
 	public void testMainTypePerformApply() throws Exception {
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 		LiveVariable<Boolean> dirtyState = model.mainTypeName.getDirtyState();
@@ -160,12 +183,12 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertTrue(dirtyState.getValue());
 
 		mainTypeName.performApply(wc);
+
 		assertEquals("Koko", getMainTypeName(wc));
 		assertFalse(dirtyState.getValue());
 	}
 
 	public void testMainTypeSetDefaults() throws Exception {
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
 
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
@@ -179,7 +202,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	}
 
 	public void testMainTypeDirtyState() throws Exception {
-		BootLaunchUIModel model = new BootLaunchUIModel();
 		MainTypeNameLaunchTabModel mainTypeName = model.mainTypeName;
 		LiveVariable<Boolean> dirtyState = model.mainTypeName.getDirtyState();
 
@@ -188,39 +210,63 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertTrue(dirtyState.getValue());
 	}
 
-	////// support code ///////////////////////////////////////////////////////
+	////// profile ////////////////////////////////////////////////////////////////////
 
-	protected ILaunchConfigurationWorkingCopy createWorkingCopy()
-			throws CoreException {
-		String name = DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName("test");
-		ILaunchConfigurationWorkingCopy wc = DebugPlugin.getDefault().getLaunchManager()
-			.getLaunchConfigurationType(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID)
-			.newInstance(null, name);
-		return wc;
+	public void testProfileValidator() throws Exception {
+		assertEquals(Validator.OK, model.profile.validator);
+		//not much to test here, we don't validate profiles at all.
 	}
 
-	private IProject getProject(String name) {
-		return ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+	public void testProfileSetDefaults() throws Exception {
+		ProfileLaunchTabModel profile = model.profile;
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		profile.setDefaults(wc);
+		assertEquals("", BootLaunchConfigurationDelegate.getProfile(wc));
 	}
 
-	private void assertError(String snippet, LiveExpression<ValidationResult> validator) {
-		ValidationResult value = validator.getValue();
-		assertEquals(IStatus.ERROR, value.status);
-		assertContains(snippet, value.msg);
+	public void testProfileInitializeFrom() throws Exception {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		ProfileLaunchTabModel profile = model.profile;
+		LiveVariable<Boolean> dirty = profile.getDirtyState();
+
+		dirty.setValue(true);
+		BootLaunchConfigurationDelegate.setProfile(wc,"some-profile");
+		profile.initializeFrom(wc);
+		assertFalse(dirty.getValue());
+		assertEquals("some-profile", BootLaunchConfigurationDelegate.getProfile(wc));
 	}
 
-	public void assertContains(String needle, String haystack) {
-		if (haystack==null || !haystack.contains(needle)) {
-			fail("Not found: "+needle+"\n in \n"+haystack);
-		}
- 	}
+	public void testProfilePerformApply() throws Exception {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		ProfileLaunchTabModel profile = model.profile;
+		LiveVariable<Boolean> dirty = profile.getDirtyState();
 
-	private void assertOk(LiveExpression<ValidationResult> validator) {
-		ValidationResult status = validator.getValue();
-		if (!status.isOk()) {
-			fail(status.toString());
-		}
+		profile.selection.setValue("some-other-profile");
+		assertTrue(dirty.getValue());
+
+		profile.performApply(wc);
+
+		assertFalse(dirty.getValue());
+		assertEquals("some-other-profile", BootLaunchConfigurationDelegate.getProfile(wc));
 	}
+
+	public void testProfileDirtyState() throws Exception {
+		ProfileLaunchTabModel profile = model.profile;
+		LiveVariable<Boolean> dirty = profile.getDirtyState();
+		dirty.setValue(false);
+
+		profile.selection.setValue("olla-polla");
+
+		assertTrue(dirty.getValue());
+	}
+
+//	public void testProfilePulldownOptions() throws Exception {
+//		fail("Not implemented");
+//	}
+
+	// profile history
+	// inferred profiles
+	// integrate inferred profiles and history
 
 
 }

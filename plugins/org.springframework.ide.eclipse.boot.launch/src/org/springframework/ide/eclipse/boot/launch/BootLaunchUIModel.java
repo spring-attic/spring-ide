@@ -49,10 +49,14 @@ public class BootLaunchUIModel {
 		}
 	}
 
-	public final SelectProjectLaunchTabModel project = SelectProjectLaunchTabModel.create();
-	public final MainTypeNameLaunchTabModel mainTypeName = MainTypeNameLaunchTabModel.create();
+	public final SelectProjectLaunchTabModel project;
+	public final MainTypeNameLaunchTabModel mainTypeName;
+	public final ProfileLaunchTabModel profile;
 
-	public BootLaunchUIModel() {
+	public BootLaunchUIModel(IProfileHistory profileHistory) {
+		project = SelectProjectLaunchTabModel.create();
+		mainTypeName = MainTypeNameLaunchTabModel.create();
+		profile = ProfileLaunchTabModel.create(project.selection, profileHistory);
 	}
 
 }

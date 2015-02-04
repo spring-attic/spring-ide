@@ -12,7 +12,14 @@ package org.springframework.ide.eclipse.boot.launch.test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 
 /**
@@ -35,6 +42,37 @@ public class BootLaunchTestCase extends StsTestCase {
 	@Override
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.boot.launch.test";
+	}
+
+	protected ILaunchConfigurationWorkingCopy createWorkingCopy() throws CoreException {
+		String name = DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName("test");
+		ILaunchConfigurationWorkingCopy wc = DebugPlugin.getDefault().getLaunchManager()
+			.getLaunchConfigurationType(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID)
+			.newInstance(null, name);
+		return wc;
+	}
+
+	public IProject getProject(String name) {
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+	}
+
+	public void assertError(String snippet, LiveExpression<ValidationResult> validator) {
+		ValidationResult value = validator.getValue();
+		assertEquals(IStatus.ERROR, value.status);
+		assertContains(snippet, value.msg);
+	}
+
+	public void assertContains(String needle, String haystack) {
+		if (haystack==null || !haystack.contains(needle)) {
+			fail("Not found: "+needle+"\n in \n"+haystack);
+		}
+	}
+
+	public void assertOk(LiveExpression<ValidationResult> validator) {
+		ValidationResult status = validator.getValue();
+		if (!status.isOk()) {
+			fail(status.toString());
+		}
 	}
 
 }

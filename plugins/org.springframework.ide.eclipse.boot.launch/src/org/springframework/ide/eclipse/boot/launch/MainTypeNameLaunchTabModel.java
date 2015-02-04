@@ -19,7 +19,6 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  * @author Kris De Volder
@@ -29,11 +28,6 @@ public class MainTypeNameLaunchTabModel extends LaunchTabSelectionModel<String> 
 	private MainTypeNameLaunchTabModel(LiveVariable<String> selection,
 			LiveExpression<ValidationResult> validator) {
 		super(selection, validator);
-		selection.addListener(new ValueListener<String>() {
-			public void gotValue(LiveExpression<String> exp, String value) {
-				getDirtyState().setValue(true);
-			}
-		});
 	}
 
 	public static MainTypeNameLaunchTabModel create() {

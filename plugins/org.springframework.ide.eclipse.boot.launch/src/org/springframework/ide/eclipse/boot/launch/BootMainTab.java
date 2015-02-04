@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableLiveBeanSupportSection;
+import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
@@ -42,11 +43,11 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 
 	@Override
 	protected List<IPageSection> createSections() {
-		BootLaunchUIModel model = new BootLaunchUIModel();
+		BootLaunchUIModel model = new BootLaunchUIModel(new ProfileHistory());
 		return Arrays.asList(new IPageSection[] {
 				SelectProjectLaunchTabSection.create(this, model.project),
 				new MainTypeLaunchTabSection(this, model.project.selection, model.mainTypeName),
-				new ProfileLaunchTabSection(this, model.project.selection),
+				new ProfileLaunchTabSection(this, model.profile),
 				new HLineSection(this),
 				new EnableDebugSection(this),
 				new EnableLiveBeanSupportSection(this),
