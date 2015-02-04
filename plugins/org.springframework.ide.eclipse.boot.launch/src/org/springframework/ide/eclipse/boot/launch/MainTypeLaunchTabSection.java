@@ -66,14 +66,11 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 public class MainTypeLaunchTabSection extends DelegatingLaunchConfigurationTabSection {
 
 	public MainTypeLaunchTabSection(IPageWithSections owner, LiveVariable<IProject> project, MainTypeNameLaunchTabModel model) {
-		super(owner, model, createUi(owner, model));
+		super(owner, model, createUi(owner, project, model));
 	}
 
-	private static IPageSection createUi(IPageWithSections owner, SelectionModel<String> model) {
+	private static IPageSection createUi(IPageWithSections owner, final LiveVariable<IProject> project, final SelectionModel<String> mainTypeName) {
 		return new WizardPageSection(owner) {
-
-			private LiveVariable<IProject> project;
-			private MainTypeNameLaunchTabModel mainTypeName;
 
 			private Text fMainText;
 			private Button fSearchButton;
