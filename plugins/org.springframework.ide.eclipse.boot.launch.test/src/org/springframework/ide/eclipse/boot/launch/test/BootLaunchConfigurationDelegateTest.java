@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+/**
+ * @author Kris De Volder
+ */
+public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
-@RunWith(Suite.class)
-@SuiteClasses({
-	BootLaunchUIModelTest.class,
-	ProfileHistoryTest.class,
-	BootLaunchConfigurationDelegateTest.class
-})
-public class AllBootLaunchTests {
+	//TODO:
+	//  - test accesors in BootLaunchConfigurationDelegate class
+	//  - Test that launching  launch conf with the various options set has the desired effect
+	//     on the launched process.
+
+	public void testFake() {
+		fail("Should fail: just checking if it really gets executed.");
+	}
 
 }
