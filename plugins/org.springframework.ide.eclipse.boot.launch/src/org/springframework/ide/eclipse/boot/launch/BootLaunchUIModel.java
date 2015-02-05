@@ -52,11 +52,13 @@ public class BootLaunchUIModel {
 	public final SelectProjectLaunchTabModel project;
 	public final MainTypeNameLaunchTabModel mainTypeName;
 	public final ProfileLaunchTabModel profile;
+	public final LaunchTabSelectionModel<Boolean> enableDebug;
 
 	public BootLaunchUIModel(IProfileHistory profileHistory) {
 		project = SelectProjectLaunchTabModel.create();
 		mainTypeName = MainTypeNameLaunchTabModel.create();
 		profile = ProfileLaunchTabModel.create(project.selection, profileHistory);
+		enableDebug = EnableDebugLaunchTabModel.create();
 	}
 
 }

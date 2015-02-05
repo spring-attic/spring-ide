@@ -18,7 +18,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -32,7 +31,6 @@ import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.StringInputStream;
 
 /**
@@ -295,15 +293,38 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertPulldown(profile, "foo", "bar", "old", "older");
 
 		profileHistory.setHistory(bootProject, "new", "newer", "foo");
-		profile.profileOptions().refresh(); // See [*]
+		profile.profileOptions().refresh(); // See [*] below
 		assertPulldown(profile, "foo", "bar", "new", "newer"); //only a single 'foo'!
 
 		// [*] Changing only the history doesn't trigger pull-down options to recompute.
 		//This is fine since its not possible to change the history while launch dialog is open.
 		//However, it means test code must force a refresh in cases where only the history
 		//changed.
-
 	}
+
+	///// EnableDebugSection///////////////////////////////////////////////////////
+
+	public void testDebugValidator() throws Exception {
+		assertEquals(Validator.OK, model.enableDebug.validator);
+	}
+
+	// TODO:
+	//   setDefault
+	//   initializeFrom
+	//   performApply
+	//   dirtyState
+
+	///// EnableLiveBeanSupportSection/////////////////////////////////////////////
+
+	// TODO:
+	//   validator
+	//   setDefault
+	//   initializeFrom
+	//   performApply
+	//   dirtyState
+
+	///// PropertiesTableSection ??? can't be tested in its current form (no separate 'model' to test)
+
 
 	/**
 	 * Verify contents of 'pulldown' menu. This ignores the order of the elements
