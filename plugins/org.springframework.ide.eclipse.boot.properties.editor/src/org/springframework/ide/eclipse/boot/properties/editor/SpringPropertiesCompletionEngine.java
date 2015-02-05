@@ -111,7 +111,7 @@ public class SpringPropertiesCompletionEngine {
 			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
 				int order1 = ((ValueProposal)p1).sortingOrder;
 				int order2 = ((ValueProposal)p2).sortingOrder;
-				return Integer.compare(order1, order2);
+				return Integer.valueOf(order1).compareTo(Integer.valueOf(order2));
 			}
 			return 0;
 		}
