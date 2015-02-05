@@ -45,7 +45,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 		private Map<String, String[]> map = new HashMap<String, String[]>();
 
-		@Override
 		public String[] getHistory(IProject project) {
 			String[] h = map.get(project.getName());
 			if (h!=null) {

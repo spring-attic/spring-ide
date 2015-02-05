@@ -20,7 +20,6 @@
 
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="3.6.4" />
-      <import feature="org.eclipse.m2e.feature" version="1.4.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
