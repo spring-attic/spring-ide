@@ -79,7 +79,7 @@ public class ProfileLaunchTabModel extends LaunchTabSelectionModel<String> {
 	/**
 	 * Live expression that computes list of profiles to show in pull-down menu.
 	 */
-	public LiveExpression<String[]> profiles() {
+	public LiveExpression<String[]> profileOptions() {
 		return profiles;
 	}
 
@@ -115,8 +115,11 @@ public class ProfileLaunchTabModel extends LaunchTabSelectionModel<String> {
 		 * the provided List.
 		 */
 		private void addHistoricProfiles(LinkedHashSet<String> profiles) {
-			for (String p : profileHistory.getHistory(project.getValue())) {
-				profiles.add(p);
+			IProject proj = project.getValue();
+			if (proj!=null) {
+				for (String profile : profileHistory.getHistory(proj)) {
+					profiles.add(profile);
+				}
 			}
 		}
 

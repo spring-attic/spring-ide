@@ -29,7 +29,7 @@ public class ProfileLaunchTabSection extends DelegatingLaunchConfigurationTabSec
 	private static IPageSection createUI(IPageWithSections owner,
 			ProfileLaunchTabModel model) {
 		ChooseOneSectionCombo<String> profileChooser = new ChooseOneSectionCombo<String>(owner, "Profile",
-				model, model.profiles());
+				model, model.profileOptions());
 		profileChooser.allowTextEdits(Parser.IDENTITY);
 		return profileChooser;
 	}

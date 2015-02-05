@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
+import static org.junit.Assert.assertArrayEquals;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -26,6 +32,8 @@ import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.StringInputStream;
 
 /**
  * @author Kris De Volder
@@ -39,8 +47,8 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		private Map<String, String[]> map = new HashMap<String, String[]>();
 
 		@Override
-		public String[] getHistory(IProject value) {
-			String[] h = map.get(value);
+		public String[] getHistory(IProject project) {
+			String[] h = map.get(project.getName());
 			if (h!=null) {
 				return h;
 			}
@@ -260,13 +268,59 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertTrue(dirty.getValue());
 	}
 
-//	public void testProfilePulldownOptions() throws Exception {
-//		fail("Not implemented");
-//	}
+	public void testProfilePulldownOptions() throws Exception {
+		IProject bootProject = createPredefinedProject("empty-boot-project");
+		IProject generalProject = createGeneralProject("general");
 
-	// profile history
-	// inferred profiles
-	// integrate inferred profiles and history
+		LiveVariable<IProject> project = model.project.selection;
+		ProfileLaunchTabModel profile = model.profile;
 
+		assertPulldown(profile /*empty*/);
+
+		createFile(bootProject, "src/main/resources/application-foo.properties");
+		createFile(bootProject, "src/main/resources/application-bar.properties");
+
+		project.setValue(bootProject);
+		assertPulldown(profile, "foo", "bar");
+
+		project.setValue(getProject("invalid"));
+		assertPulldown(profile /*empty*/);
+
+		profileHistory.setHistory(generalProject, "something", "borker");
+		project.setValue(generalProject);
+		assertPulldown(profile, "something", "borker");
+
+		profileHistory.setHistory(bootProject, "old", "older");
+		project.setValue(bootProject);
+		assertPulldown(profile, "foo", "bar", "old", "older");
+
+		profileHistory.setHistory(bootProject, "new", "newer", "foo");
+		profile.profileOptions().refresh(); // See [*]
+		assertPulldown(profile, "foo", "bar", "new", "newer"); //only a single 'foo'!
+
+		// [*] Changing only the history doesn't trigger pull-down options to recompute.
+		//This is fine since its not possible to change the history while launch dialog is open.
+		//However, it means test code must force a refresh in cases where only the history
+		//changed.
+
+	}
+
+	/**
+	 * Verify contents of 'pulldown' menu. This ignores the order of the elements
+	 * because discovered elements may come in different orders... but does not
+	 * ignore when there are duplicates.
+	 */
+	private void assertPulldown(ProfileLaunchTabModel profile, String... expecteds) {
+		Arrays.sort(expecteds);
+		String [] actuals = profile.profileOptions().getValue();
+		actuals = Arrays.copyOf(actuals, actuals.length);
+		Arrays.sort(actuals);
+		assertArrayEquals(expecteds, actuals);
+	}
+
+	private void createFile(IProject project, String path) throws CoreException {
+		IFile file = project.getFile(new Path(path));
+		file.create(new StringInputStream(""), true, new NullProgressMonitor());
+	}
 
 }
