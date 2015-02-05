@@ -26,6 +26,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchUIModel;
 import org.springframework.ide.eclipse.boot.launch.IProfileHistory;
+import org.springframework.ide.eclipse.boot.launch.LaunchTabSelectionModel;
 import org.springframework.ide.eclipse.boot.launch.MainTypeNameLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
@@ -66,6 +67,7 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 	protected BootLaunchUIModel model;
 	protected TestProfileHistory profileHistory;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -308,11 +310,65 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertEquals(Validator.OK, model.enableDebug.validator);
 	}
 
-	// TODO:
-	//   setDefault
-	//   initializeFrom
-	//   performApply
-	//   dirtyState
+	public void testDebugSetDefaults() throws Exception {
+		LaunchTabSelectionModel<Boolean> enableDebug = model.enableDebug;
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		enableDebug.setDefaults(wc);
+		assertEquals(false, BootLaunchConfigurationDelegate.getEnableDebugOutput(wc));
+	}
+
+	public void testDebugInitializeFrom() throws Exception {
+		LaunchTabSelectionModel<Boolean> enableDebug = model.enableDebug;
+		LiveVariable<Boolean> dirty = enableDebug.getDirtyState();
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+
+		BootLaunchConfigurationDelegate.setEnableDebugOutput(wc, true);
+		dirty.setValue(true);
+
+		enableDebug.initializeFrom(wc);
+		assertFalse(dirty.getValue());
+		assertTrue(enableDebug.selection.getValue());
+
+		dirty.setValue(true);
+		BootLaunchConfigurationDelegate.setEnableDebugOutput(wc, false);
+
+		enableDebug.initializeFrom(wc);
+
+		assertFalse(dirty.getValue());
+		assertFalse(enableDebug.selection.getValue());
+	}
+
+	public void testDebugPerformApply() throws Exception {
+		LaunchTabSelectionModel<Boolean> enableDebug = model.enableDebug;
+		LiveVariable<Boolean> dirty = enableDebug.getDirtyState();
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+
+		enableDebug.selection.setValue(true);
+		assertTrue(dirty.getValue());
+
+		enableDebug.performApply(wc);
+
+		assertFalse(dirty.getValue());
+		assertTrue(BootLaunchConfigurationDelegate.getEnableDebugOutput(wc));
+
+		enableDebug.selection.setValue(false);
+		assertTrue(dirty.getValue());
+
+		enableDebug.performApply(wc);
+
+		assertFalse(dirty.getValue());
+		assertFalse(BootLaunchConfigurationDelegate.getEnableDebugOutput(wc));
+	}
+
+	public void testDebugDirtyState() throws Exception {
+		LaunchTabSelectionModel<Boolean> enableDebug = model.enableDebug;
+		LiveVariable<Boolean> dirty = enableDebug.getDirtyState();
+		dirty.setValue(false);
+
+		enableDebug.selection.setValue(true);
+
+		assertTrue(dirty.getValue());
+	}
 
 	///// EnableLiveBeanSupportSection/////////////////////////////////////////////
 
