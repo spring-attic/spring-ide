@@ -13,7 +13,9 @@ package org.springframework.ide.eclipse.boot.launch.util;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.widgets.Composite;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -66,6 +68,11 @@ public class DelegatingLaunchConfigurationTabSection extends WizardPageSection i
 	@Override
 	public void createContents(Composite page) {
 		ui.createContents(page);
+	}
+
+	@Override
+	public LiveExpression<ValidationResult> getValidator() {
+		return ui.getValidator();
 	}
 
 

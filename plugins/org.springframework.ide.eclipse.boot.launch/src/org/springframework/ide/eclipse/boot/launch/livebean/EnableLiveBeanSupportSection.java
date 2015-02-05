@@ -13,6 +13,10 @@ package org.springframework.ide.eclipse.boot.launch.livebean;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -20,6 +24,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.launch.EnableLiveBeanSupportModel;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.UIConstants;
@@ -34,8 +39,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationTabSection {
 
 	static class UI extends WizardPageSection {
-		private Button enableLiveBeans;
-		private Text port;
+		private Button checkbox;
+		private Text portWidget;
 		private EnableLiveBeanSupportModel model;
 
 		public UI(IPageWithSections owner, EnableLiveBeanSupportModel model) {
@@ -47,19 +52,39 @@ public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationT
 		public void createContents(Composite page) {
 			Composite row = new Composite(page, SWT.NONE);
 			row.setLayout(GridLayoutFactory.fillDefaults().numColumns(3).create());
-			enableLiveBeans = new Button(row, SWT.CHECK);
-			enableLiveBeans.setText("Enable Live Bean support.");
-			enableLiveBeans.setToolTipText(computeTooltipText());
+			checkbox = new Button(row, SWT.CHECK);
+			checkbox.setText("Enable Live Bean support.");
+			checkbox.setToolTipText(computeTooltipText());
 			Label label = new Label(row, SWT.NONE);
 			label.setText("JMX Port:");
-			port = new Text(row, SWT.BORDER);
-			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(port, 6), SWT.DEFAULT)
-				.applyTo(port);
+			portWidget = new Text(row, SWT.BORDER);
+			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 6), SWT.DEFAULT)
+				.applyTo(portWidget);
 
 			model.enabled.addListener(new ValueListener<Boolean>() {
 				public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
-					boolean enable = enableLiveBeans.getSelection();
-					port.setEnabled(enable);
+					boolean enable = value!=null && value;
+					checkbox.setSelection(enable);
+					portWidget.setEnabled(enable);
+				}
+			});
+			checkbox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					model.enabled.setValue(checkbox.getSelection());
+				}
+			});
+
+			model.port.addListener(new ValueListener<String>() {
+				public void gotValue(LiveExpression<String> exp, String value) {
+					String oldValue = portWidget.getText();
+					if (!oldValue.equals(value)) {
+						portWidget.setText(value);
+					}
+				}
+			});
+			portWidget.addModifyListener(new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					model.port.setValue(portWidget.getText());
 				}
 			});
 		}
@@ -67,6 +92,11 @@ public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationT
 		private String computeTooltipText() {
 			return "Enables support for Live Beans Graph View by adding vm args:\n" +
 					LiveBeanSupport.liveBeanVmArgs("${jmxPort}");
+		}
+
+		@Override
+		public LiveExpression<ValidationResult> getValidator() {
+			return model.getValidator();
 		}
 	}
 
