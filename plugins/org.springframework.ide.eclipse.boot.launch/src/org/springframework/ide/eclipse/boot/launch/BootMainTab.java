@@ -50,7 +50,7 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 				new ProfileLaunchTabSection(this, model.profile),
 				new HLineSection(this),
 				new EnableDebugSection(this, model.enableDebug),
-				new EnableLiveBeanSupportSection(this),
+				new EnableLiveBeanSupportSection(this, model.enableLiveBean),
 				new HLineSection(this),
 				new PropertiesTableSection(this, model.project.selection)
 		});
