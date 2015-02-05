@@ -31,10 +31,12 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: org.springframework.ide.eclipse.maven,
  org.springframework.ide.eclipse.maven.internal.legacyconversion
-Import-Package: org.codehaus.plexus.util.xml,
- org.eclipse.core.runtime,
+Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,
  org.eclipse.osgi.util,
  org.osgi.framework
-DynamicImport-Package: org.apache.maven.*, org.apache.maven.*; provider=m2e
+DynamicImport-Package: org.apache.maven.*,
+ org.apache.maven.*; provider=m2e,
+ org.codehaus.plexus.util.*,
+ org.codehaus.plexus.util.*; provider=m2e
