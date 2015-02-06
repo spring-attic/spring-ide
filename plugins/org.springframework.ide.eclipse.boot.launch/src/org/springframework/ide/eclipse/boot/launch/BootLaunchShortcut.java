@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.launch;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -23,6 +22,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -70,6 +70,13 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 				if (e instanceof IType) {
 					if (hasMainMethod((IType) e)) {
 						return new IType[] {(IType)e};
+					}
+				}
+				if (e instanceof ICompilationUnit) {
+					for (IType t : ((ICompilationUnit) e).getAllTypes()) {
+						if (hasMainMethod(t)) {
+							return new IType[] {t};
+						}
 					}
 				}
 				final IJavaProject jp = ((IJavaElement)e).getJavaProject();

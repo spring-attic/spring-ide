@@ -10,12 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getEnableDebugOutput;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getEnableLiveBeanSupport;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getJMXPort;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getProfile;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getProperties;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -27,9 +38,6 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
-
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
-import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.*;
 
 /**
  * @author Kris De Volder
@@ -83,6 +91,23 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		);
 	}
 
+	public void testMainClassSourceFileFindTypes() throws Exception {
+		IJavaProject project = JavaCore.create(createLaunchReadyProject(PROJECT));
+		IResource target = project.findType(ALT_MAIN_TYPE).getUnderlyingResource();
+		assertElements(findTypes(target),
+				ALT_MAIN_TYPE
+		);
+	}
+
+	public void testMainClassCompilationUnitFindTypes() throws Exception {
+		IJavaProject project = JavaCore.create(createLaunchReadyProject(PROJECT));
+		ICompilationUnit target = JavaCore.createCompilationUnitFrom(
+				(IFile) project.findType(ALT_MAIN_TYPE).getUnderlyingResource());
+		assertElements(findTypes(target),
+				ALT_MAIN_TYPE
+		);
+	}
+
 	public void testCreateConfiguration() throws Exception {
 		IJavaProject project = JavaCore.create(createLaunchReadyProject(PROJECT));
 		IType mainType = project.findType(MAIN_TYPE);
@@ -100,12 +125,6 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 				/*empty*/
 		);
 	}
-
-	//TODO: test that launching the same thing twice will reuse existing launch config.
-	//  thing is one of:
-	//      - project
-	//      - some other resource in project
-	//      - maintype, or method in project
 
 	public void testLaunch() throws Exception {
 		IJavaProject project = JavaCore.create(createLaunchReadyProject(PROJECT));
