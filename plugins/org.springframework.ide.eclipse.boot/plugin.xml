@@ -73,6 +73,14 @@
           type="org.eclipse.core.resources.IResource">
     <!--       type="java.lang.Object" -->
     </propertyTester>
+    <propertyTester
+          class="org.springframework.ide.eclipse.boot.core.BootJavaElementPropertyTester"
+          id="org.springframework.ide.eclipse.boot.core.BootJavaElementPropertyTester"
+          namespace="org.springsource.ide.eclipse.boot.javaelement"
+          properties="isInBootProject"
+          type="org.eclipse.jdt.core.IJavaElement">
+    <!--       type="java.lang.Object" -->
+    </propertyTester>
  </extension>
  
    <!-- TODO this extension point won't allow us to provide discovery on a per project basis. So it isn't quite right but

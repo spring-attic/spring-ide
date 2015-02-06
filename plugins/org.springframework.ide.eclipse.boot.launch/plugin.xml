@@ -16,12 +16,17 @@
            <enablement>
              <count value="1"/>
              <iterate>
-           	   <adapt type="org.eclipse.core.resources.IResource">
-           	      <test
-                        property="org.springsource.ide.eclipse.boot.isBootResource"
-                        value="true">
-           	      </test>
-           	   </adapt>
+                 <and>
+                  <adapt type="org.eclipse.jdt.core.IJavaElement">
+                  	<test property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject"/>
+                  </adapt>
+               	  <or>
+               	    <test property="org.eclipse.jdt.launching.hasMain"/>
+               	    <test property="org.eclipse.jdt.launching.isContainer"/>
+               	    <test property="org.eclipse.jdt.launching.isPackageFragment"/>
+               	    <test property="org.eclipse.jdt.launching.isPackageFragmentRoot"/>
+               	  </or>
+                 </and>
              </iterate>
            </enablement>
         </contextualLaunch>
