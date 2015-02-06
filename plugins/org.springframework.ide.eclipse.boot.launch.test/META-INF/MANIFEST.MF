@@ -12,6 +12,6 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.livexp,
  org.eclipse.debug.core,
  org.eclipse.jdt.launching
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.
