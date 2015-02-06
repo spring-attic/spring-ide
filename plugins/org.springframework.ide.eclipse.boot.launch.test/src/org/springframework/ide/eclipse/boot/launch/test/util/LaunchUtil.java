@@ -69,7 +69,6 @@ public class LaunchUtil {
 		synchronized (stream) {
 			out.append(stream.getContents());
 			stream.addListener(new IStreamListener() {
-				@Override
 				public void streamAppended(String text, IStreamMonitor monitor) {
 					out.append(text);
 				}
