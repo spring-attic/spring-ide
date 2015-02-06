@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -27,7 +23,6 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * @author Kris De Volder
@@ -264,19 +259,6 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertEquals(expected.trim(), found.trim());
 	}
 
-	/**
-	 * Tests that want to launch something from a project should use this rather to
-	 * make sure project is built and has no errors.
-	 * <p>
-	 * Projects with errors shouldn't be launched as they will just cause launcher tests to
-	 * fail in confusing and unpredictabled ways.
-	 */
-	private IProject createLaunchReadyProject(String projectName) throws Exception {
-		IProject project = createPredefinedProject(projectName);
-		StsTestUtil.assertNoErrors(project);
-		return project;
-	}
-
 	private ILaunchConfigurationWorkingCopy createBaseWorkingCopy() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 
@@ -294,26 +276,8 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
 	///////////////////////////////////////////////////////////////////////////////
 
-	public static void assertOk(LaunchResult result) {
-		assertEquals(0, result.terminationCode);
-	}
-
 	public static void assertProperties(List<PropVal> actual, PropVal... expect) {
-		Set<PropVal> expectedSet = new HashSet<PropVal>(Arrays.asList(expect));
-
-		for (PropVal propVal : actual) {
-			if (!expectedSet.remove(propVal)) {
-				fail("Unexpected element: "+propVal);
-			}
-		}
-
-		if (!expectedSet.isEmpty()) {
-			StringBuilder missing = new StringBuilder();
-			for (PropVal propVal : expectedSet) {
-				missing.append(propVal+"\n");
-			}
-			fail("Missing elements: \n"+missing);
-		}
+		assertElements(actual, expect);
 	}
 
 
