@@ -29,6 +29,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -94,8 +95,45 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 		@Override
 		public String toString() {
-			return name + "="+ value;
+			return (isChecked?"[X] ":"[ ] ") +
+					name + "="+ value;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (isChecked ? 1231 : 1237);
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((value == null) ? 0 : value.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PropVal other = (PropVal) obj;
+			if (isChecked != other.isChecked)
+				return false;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			if (value == null) {
+				if (other.value != null)
+					return false;
+			} else if (!value.equals(other.value))
+				return false;
+			return true;
+		}
+
+
 	}
 
 	@Override
@@ -165,6 +203,19 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			throw new IllegalArgumentException("property name shouldn't contain '=':"+name);
 		}
 		return "--"+name + "=" +value;
+	}
+
+	/**
+	 * Sets minimal default values to create a runnable launch configuration.
+	 */
+	public static void setDefaults(ILaunchConfigurationWorkingCopy wc,
+			IProject project,
+			String mainType
+	) {
+		setProject(wc, project);
+		setMainType(wc, mainType);
+		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		setJMXPort(wc, ""+LiveBeanSupport.randomPort());
 	}
 
 	public static void setMainType(ILaunchConfigurationWorkingCopy config, String typeName) {
@@ -288,11 +339,11 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	public static String getJMXPort(ILaunchConfiguration conf) {
 		try {
-			return conf.getAttribute(JMX_PORT, (String)null);
+			return conf.getAttribute(JMX_PORT, "");
 		} catch (CoreException e) {
 			BootActivator.log(e);
 		}
-		return null;
+		return "";
 	}
 
 	public static void setEnableLiveBeanSupport(ILaunchConfigurationWorkingCopy conf, boolean value) {

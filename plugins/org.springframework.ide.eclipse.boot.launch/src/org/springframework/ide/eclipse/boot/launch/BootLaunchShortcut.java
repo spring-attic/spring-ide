@@ -28,12 +28,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaApplicationLaunchShortcut;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
@@ -95,16 +93,15 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 	@Override
 	protected ILaunchConfiguration createConfiguration(IType type) {
 		ILaunchConfiguration config = null;
-		ILaunchConfigurationWorkingCopy wc = null;
 		try {
+			ILaunchConfigurationWorkingCopy wc = null;
 			ILaunchConfigurationType configType = getConfigurationType();
+			IProject project = type.getJavaProject().getProject();
 			String projectName = type.getJavaProject().getElementName();
+			String typeName = type.getTypeQualifiedName('.');
 			wc = configType.newInstance(null, getLaunchManager().generateLaunchConfigurationName(
-					projectName+" - "+type.getTypeQualifiedName('.')));
-			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
-			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
-			BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
-			BootLaunchConfigurationDelegate.setJMXPort(wc, ""+LiveBeanSupport.randomPort());
+					projectName+" - "+typeName));
+			BootLaunchConfigurationDelegate.setDefaults(wc, project, typeName);
 			wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
 			config = wc.doSave();
 		} catch (CoreException exception) {
