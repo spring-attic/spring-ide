@@ -156,6 +156,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	 * be.
 	 */
 	public static double match(String pattern, String data) {
+		int sortIndex = 0;
 		int ppos = 0; //pos of next char in pattern to look for
 		int dpos = 0; //pos of next char in data not yet matched
 		int gaps = 0; //number of 'gaps' in the match. A gap is any non-empty run of consecutive characters in the data that are not used by the match
@@ -189,12 +190,19 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			//tend to favor matches at the end of the string over matches in the middle.
 			skips+=dlen-dpos; //but do count the extra chars at end => more extra = worse score
 		}
-		return score(gaps, skips);
+		return score(gaps, skips, sortIndex++);
 	}
 
-	private static double score(int gaps, int skips) {
-		double badness = 1+gaps + skips/1000.0; // higher is worse
-		return -badness; //higher is better
+	private static double score(int gaps, int skips, int sortIndex) {
+		if (gaps==0) {
+			//gaps == 0 means a prefix match, ignore 'skips' at end of String and just sort
+			// alphabetic (see STS-4049)
+			double badness = 1+gaps + sortIndex/10000.0; // higher is worse
+			return -badness; //higher is better
+		} else {
+			double badness = 1+gaps + skips/10000.0; // higher is worse
+			return -badness; //higher is better
+		}
 	}
 
 	public boolean isEmpty() {
