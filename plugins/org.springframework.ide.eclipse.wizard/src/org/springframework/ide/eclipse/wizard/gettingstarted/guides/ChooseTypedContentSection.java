@@ -272,7 +272,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
 		}
-		GridDataFactory grab = GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 150);
+		GridDataFactory grab = GridDataFactory.fillDefaults().hint(SWT.DEFAULT, 150);
 		grab.applyTo(field);
 		grab.applyTo(treeviewer.getControl());
 
