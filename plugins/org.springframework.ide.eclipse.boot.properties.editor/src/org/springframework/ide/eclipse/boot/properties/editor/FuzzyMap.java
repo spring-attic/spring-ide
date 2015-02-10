@@ -197,7 +197,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		if (gaps==0) {
 			//gaps == 0 means a prefix match, ignore 'skips' at end of String and just sort
 			// alphabetic (see STS-4049)
-			double badness = 1+gaps + sortIndex/10000.0; // higher is worse
+			double badness = sortIndex; // higher is worse
 			return -badness; //higher is better
 		} else {
 			double badness = 1+gaps + skips/10000.0; // higher is worse
