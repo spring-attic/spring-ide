@@ -175,10 +175,16 @@ public class SpringPropertiesReconcileEngine {
 													}
 												}
 												if (rbrack<fullName.length()-1) {
-													problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-															"Expecting no extra text after ']'",
-															trimmedRegion.getOffset()+rbrack+1,fullName.length()-rbrack-1
-													));
+													char nextchar = fullName.charAt(rbrack+1);
+													String domainType = TypeUtil.bracketedDomainType(validProperty.getType());
+													if (TypeUtil.isDotable(domainType) && nextchar=='.') {
+														//okay
+													} else {
+														problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
+																"Expecting no extra text after ']'",
+																trimmedRegion.getOffset()+rbrack+1,fullName.length()-rbrack-1
+														));
+													}
 												}
 											}
 										}

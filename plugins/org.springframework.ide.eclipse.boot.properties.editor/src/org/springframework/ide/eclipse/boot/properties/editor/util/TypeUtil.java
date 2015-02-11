@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 /**
  * Utilities to work with types represented as Strings as returned by
  * Spring config metadata apis.
@@ -75,6 +77,21 @@ public class TypeUtil {
 		}
 	}
 
+	/**
+	 * Assuming that 'type' is a 'bracketable' type. Retrieve the type that is expected
+	 * after dereferening using [] notation.
+	 */
+	public static String bracketedDomainType(String type) {
+		Assert.isLegal(isBracketable(type));
+		int langle = type.indexOf('<');
+		Assert.isLegal(langle>=0, "Bracketabled type without '<'");
+		int rangle = type.lastIndexOf('>');
+		Assert.isLegal(rangle>=0, "Bracketabled type without '>'");
+		Assert.isLegal(langle<rangle);
+		String domainType = type.substring(langle+1, rangle);
+		return domainType;
+	}
+
 	public static boolean isAssignableType(String type) {
 		return ASSIGNABLE_TYPES.contains(TypeUtil.typeErasure(type)) || isBracketable(type);
 	}
@@ -106,6 +123,9 @@ public class TypeUtil {
 	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
 
 	private static final Map<String, String> PRIMITIVE_TYPES = new HashMap<String, String>();
+
+	private static final String STRING_TYPE = String.class.getName();
+
 	static {
 		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Boolean", "boolean");
 		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Integer", "int");
@@ -114,6 +134,16 @@ public class TypeUtil {
 		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Double", "double");
 		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Float", "float");
 		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Character", "char");
+	}
+
+	/**
+	 * @return true if it is reasonable to navigate given type with '.' notation. This returns true
+	 * by default except for some specific cases we assume are not 'dotable' such as Primitive types
+	 * and String
+	 */
+	public static boolean isDotable(String type) {
+		boolean isSimple = type.equals(STRING_TYPE) || PRIMITIVE_TYPES.containsKey(type);
+		return !isSimple;
 	}
 
 }

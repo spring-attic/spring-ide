@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import junit.framework.AssertionFailedError;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -264,6 +266,37 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"ogus.no.good|unknown property"
 		);
 
+	}
+
+	public void testReconcilePojoArray() throws Exception {
+		createPredefinedProject("demo-list-of-pojo");
+		data("volder.foo.list", "java.util.List<demo.Foo>", null, "A list of Foo pojos");
+		MockEditor editor = new MockEditor(
+				"token.bad.guy=problem\n"+
+				"volder.foo.list[0].name=Kris\n" +
+				"volder.foo.list[0].description=Kris\n" +
+				"volder.foo.list[0]garbage=Grable\n"+
+				"volder.foo.list[0].bogus=Bad\n"
+		);
+
+		try {
+			//This is the more ambitious requirement but it is not implemented yet.
+			assertProblems(editor,
+					"token.bad.guy|unknown property",
+					//'name' is ok
+					//'description' is ok
+					"garbage|extra text",
+					"bogus|unknown property"
+			);
+		} catch (AssertionFailedError e) {
+			//This is the minimum requirement (detect that follow up with '.' after ']'
+			// is acceptable for Pojo but do not attempt to check the pojo properties.
+			assertProblems(editor,
+					"token.bad.guy|unknown property",
+					//..[0].<whatever> is okay
+					"garbage|extra text"
+			);
+		}
 	}
 
 	public void testReconcileArrayNotation() throws Exception {
