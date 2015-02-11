@@ -454,7 +454,7 @@ public class SpringPropertiesCompletionEngine {
 				String newPrefix = document.get(prefixStart, offset-prefixStart);
 				double newScore = FuzzyMap.match(newPrefix, match.data.getId());
 				if (newScore!=0.0) {
-					match.score = newScore; //Score might change, but I don't think Eclipse CA will re-sort results after incremental.
+					match.score = newScore;
 					return true;
 				}
 			} catch (BadLocationException x) {

@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
+import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 
 public class FuzzyMapTests extends TestCase {
-	
+
 	public void testMatches() {
 		assertMatch(true, "", "");
 		assertMatch(true, "", "abc");
@@ -24,16 +29,41 @@ public class FuzzyMapTests extends TestCase {
 		assertMatch(true, "sport", "server.port");
 		assertMatch(false, "spox", "server.port");
 	}
-	
+
 	public void testOrder() {
-		assertMatchOrder("port", 
+		assertMatchOrder("port",
 				"port",
 				"server.port",
 				"server.port-mapping",
 				"piano.sorting"
 		);
 	}
-	
+
+	public void testPrefixAlfaOrder() {
+		//all matches are prefix matches so should come in alpha order
+		assertMatchOrder("spring",
+				"spring.abracdabra",
+				"spring.boot",
+				"spring.candel",
+				"spring.shoe",
+				"spring.springer"
+		);
+	}
+
+	public void testPrefixMixedOrder() {
+		assertMatchOrder("spring",
+				//prefix matches first
+				"spring.abracdabra",
+				"spring.boot",
+				"spring.candel",
+				"spring.shoe",
+				"spring.springer",
+				//non prefix matches after prefix matches in 'similarity order'
+				"zspring",
+				"asprouting"
+		);
+	}
+
 	public class TestMap extends FuzzyMap<String> {
 		public TestMap(String... entries) {
 			for (String e : entries) {
@@ -44,7 +74,7 @@ public class FuzzyMapTests extends TestCase {
 			return entry;
 		}
 	}
-	
+
 	public void testCommonPrefix() {
 		String[] entries = {
 				"a",
@@ -76,7 +106,7 @@ public class FuzzyMapTests extends TestCase {
 			assertTrue(prefixEntry.length()>prefix.length());
 		}
 	}
-	
+
 	public void testCommonPrefixWithExactMatch() {
 		String[] entries = {
 				"a",
@@ -92,7 +122,7 @@ public class FuzzyMapTests extends TestCase {
 			assertEquals(find, found);
 		}
 	}
-	
+
 	public void testCommonPrefixEmptyMap() {
 		TestMap empty = new TestMap();
 		assertEquals(null, empty.findValidPrefix("foo"));
@@ -100,15 +130,32 @@ public class FuzzyMapTests extends TestCase {
 		assertEquals(null, empty.findLongestCommonPrefixEntry("aaa"));
 		assertEquals(null, empty.findLongestCommonPrefixEntry(""));
 	}
-	
+
 
 	private void assertMatchOrder(String pattern, String... datas) {
-		double previousScore = FuzzyMap.match(pattern, datas[0]);
+		TestMap map = new TestMap(datas);
+		List<Match<String>> found = map.find(pattern);
+
+		//Note that found elements are scored but not sorted.
+		Collections.sort(found, new Comparator<Match<String>>() {
+			public int compare(Match<String> o1, Match<String> o2) {
+				return Double.valueOf(o2.score).compareTo(o1.score);
+			}
+		});
+
+		//all the datas should be found and be in the order given.
+		assertEquals(found.size(), datas.length);
+		for (int i = 0; i < datas.length; i++) {
+			assertEquals(datas[i], found.get(i).data);
+		}
+
+		// also check that scores are decreasing.
+		double previousScore = found.get(0).score;
 		assertTrue(previousScore!=0.0);
 		for (int i = 1; i < datas.length; i++) {
 			String data = datas[i];
-			double score = FuzzyMap.match(pattern, data);
-			assertTrue("Wrong score order: '"+datas[i-1]+"'["+previousScore+"] '"+data+"' ["+score+"]", previousScore>score);
+			double score = found.get(i).score;
+			assertTrue("Wrong score order: '"+datas[i-1]+"'["+previousScore+"] '"+data+"' ["+score+"]", previousScore>=score);
 			previousScore = score;
 		}
 	}

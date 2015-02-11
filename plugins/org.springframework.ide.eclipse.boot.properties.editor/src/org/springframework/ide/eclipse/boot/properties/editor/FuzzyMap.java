@@ -77,6 +77,9 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	/**
 	 * Search for pattern. A pattern is just a sequence of characters which have to found in
 	 * an entrie's key in the same order as they are in the pattern.
+	 * <p>
+	 * Note that returned list doesn't yet have elements sorted according to score (instead they
+	 * are sorted lexicographically thanks to the fact we use a Tree representation).
 	 */
 	public List<Match<E>> find(String pattern) {
 		if ("".equals(pattern)) {
@@ -190,14 +193,14 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			//tend to favor matches at the end of the string over matches in the middle.
 			skips+=dlen-dpos; //but do count the extra chars at end => more extra = worse score
 		}
-		return score(gaps, skips, sortIndex++);
+		return score(gaps, skips);
 	}
 
-	private static double score(int gaps, int skips, int sortIndex) {
+	private static double score(int gaps, int skips) {
 		if (gaps==0) {
 			//gaps == 0 means a prefix match, ignore 'skips' at end of String and just sort
 			// alphabetic (see STS-4049)
-			double badness = sortIndex; // higher is worse
+			double badness = 0.1; // all scored equally, assumes using a 'stable' sorter.
 			return -badness; //higher is better
 		} else {
 			double badness = 1+gaps + skips/10000.0; // higher is worse
