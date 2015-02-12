@@ -275,6 +275,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"token.bad.guy=problem\n"+
 				"volder.foo.list[0].name=Kris\n" +
 				"volder.foo.list[0].description=Kris\n" +
+				"volder.foo.list[0].roles[0]=Developer\n"+
 				"volder.foo.list[0]garbage=Grable\n"+
 				"volder.foo.list[0].bogus=Bad\n"
 		);

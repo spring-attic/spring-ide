@@ -157,7 +157,7 @@ public class SpringPropertiesReconcileEngine {
 													trimmedRegion,
 													validProperty, validPrefix);
 										} else {
-											int rbrack = fullName.lastIndexOf(']');
+											int rbrack = fullName.indexOf(']', lbrack);
 											if (rbrack<0) {
 												problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 														"No matching ']'",
@@ -368,7 +368,7 @@ public class SpringPropertiesReconcileEngine {
 	 * 'prefix' is not allowed to end in the middle of a 'segment'.
 	 */
 	private PropertyInfo findLongestValidProperty(FuzzyMap<PropertyInfo> index, String name) {
-		int bracketPos = name.lastIndexOf('[');
+		int bracketPos = name.indexOf('[');
 		int endPos = bracketPos>=0?bracketPos:name.length();
 		PropertyInfo prop = null;
 		String prefix = null;

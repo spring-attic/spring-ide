@@ -3,10 +3,11 @@ package demo;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 @ConfigurationProperties("volder.foo")
-@Component
+@Configuration
 public class FooProperties {
 
 	private List<Foo> list;

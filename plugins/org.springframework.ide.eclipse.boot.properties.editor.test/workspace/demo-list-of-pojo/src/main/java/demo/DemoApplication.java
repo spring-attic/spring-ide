@@ -24,6 +24,9 @@ public class DemoApplication implements CommandLineRunner {
 			System.out.println("===================");
 			System.out.println("name = "+foo.getName());
 			System.out.println("desc = "+foo.getDescription());
+			for (String string : foo.getRoles()) {
+				System.out.println("  role: "+string);
+			}
 		}
 	}
 }

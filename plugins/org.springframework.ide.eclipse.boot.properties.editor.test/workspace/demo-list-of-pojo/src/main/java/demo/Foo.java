@@ -1,5 +1,7 @@
 package demo;
 
+import java.util.List;
+
 public class Foo {
 	
 	private String name;
@@ -16,6 +18,15 @@ public class Foo {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	private List<String> roles;
+
+	public List<String> getRoles() {
+		return roles;
+	}
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
 	}
 
 }
