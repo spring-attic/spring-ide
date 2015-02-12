@@ -256,7 +256,15 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		int beg = out.indexOf(BEG)+BEG.length();
 		int end = out.indexOf(END);
 		String found = out.substring(beg, end);
-		assertEquals(expected.trim(), found.trim());
+		assertEquals(windozify(expected), windozify(found));
+	}
+
+	/**
+	 * Normalize crlf to just single newline for windoze's sake.
+	 */
+	private String windozify(String text) {
+		text = text.trim();
+		return text.replaceAll("\r", "");
 	}
 
 	private ILaunchConfigurationWorkingCopy createBaseWorkingCopy() throws Exception {
