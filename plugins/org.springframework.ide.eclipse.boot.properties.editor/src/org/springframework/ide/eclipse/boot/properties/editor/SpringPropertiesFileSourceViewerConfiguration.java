@@ -171,7 +171,8 @@ extends PropertiesFileSourceViewerConfiguration {
 		}
 		try {
 			indexProvider = getEngine().getIndexProvider();
-			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, getEngine().getIndexProvider());
+			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer,
+					getEngine().getIndexProvider(), getEngine().getTypeUtil());
 			strategy = compose(strategy, propertyChecker);
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);

@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 
 /**
  * Reconcile strategy used for spell checking.
@@ -144,13 +145,14 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 * Creates a new comment reconcile strategy.
 	 *
 	 * @param viewer the source viewer
+	 * @param typeUtil
 	 * @param spellingService the spelling service to use
 	 */
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, Provider<FuzzyMap<PropertyInfo>> provider) {
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		Assert.isNotNull(viewer);
 		Assert.isNotNull(provider);
 		fViewer= viewer;
-		fEngine = new SpringPropertiesReconcileEngine(provider);
+		fEngine = new SpringPropertiesReconcileEngine(provider, typeUtil);
 	}
 
 	/*

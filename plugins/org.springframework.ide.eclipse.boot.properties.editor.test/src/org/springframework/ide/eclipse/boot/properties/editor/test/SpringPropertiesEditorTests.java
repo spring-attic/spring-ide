@@ -261,7 +261,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"bogus.no.good=true\n"
 		);
 		assertProblems(editor,
-				".extracrap|Supbproperties are invalid",
+				".extracrap|Subproperties are invalid",
 				"snuggem|unknown property",
 				"ogus.no.good|unknown property"
 		);
@@ -359,7 +359,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		assertProblems(editor,
 				"notBoolean|Boolean",
-				".subprop|Supbproperties are invalid"
+				".subprop|Subproperties are invalid"
 		);
 	}
 
@@ -419,10 +419,50 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"bogus.no.good=  true\n"
 		);
 		assertProblems(editor,
-				".extracrap|Supbproperties are invalid",
+				".extracrap|Subproperties are invalid",
 				"snuggem|unknown property",
 				"ogus.no.good|unknown property"
 		);
 	}
+
+	public void testEnumPropertyCompletion() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+
+		data("foo.color", "demo.Color", null, "A foonky colour");
+
+		assertCompletion("foo.c<*>", "foo.color=<*>"); //Should add the '=' because enums are 'simple' values.
+
+		assertCompletion("foo.color=R<*>", "foo.color=RED<*>");
+		assertCompletion("foo.color=G<*>", "foo.color=GREEN<*>");
+		assertCompletion("foo.color=B<*>", "foo.color=BLUE<*>");
+		assertAllCompletions("foo.color=<*>",
+				"RED", "GREEN", "BLUE"
+		);
+	}
+
+	public void testEnumPropertyReconciling() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+
+		data("foo.color", "demo.Color", null, "A foonky colour");
+		MockEditor editor = new MockEditor(
+				"foo.color=BLUE\n"+
+				"foo.color=RED\n"+
+				"foo.color=GREEN\n"+
+				"foo.color.bad=BLUE\n"+
+				"foo.color=Bogus\n"
+		);
+
+		assertProblems(editor,
+				".bad|Subproperties are invalid",
+				"Bogus|Color"
+		);
+	}
+
 
 }

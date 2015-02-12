@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.formatJavaType;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.getValues;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
@@ -120,6 +119,7 @@ public class SpringPropertiesCompletionEngine {
 
 	private DocumentContextFinder documentContextFinder = null;
 	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
+	private TypeUtil typeUtil = null;
 
 	/**
 	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
@@ -130,6 +130,8 @@ public class SpringPropertiesCompletionEngine {
 	 */
 	public SpringPropertiesCompletionEngine() {
 	}
+
+
 
 	/**
 	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal
@@ -142,6 +144,7 @@ public class SpringPropertiesCompletionEngine {
 			}
 		};
 		this.documentContextFinder = DocumentContextFinder.DEFAULT;
+		this.typeUtil = new TypeUtil(jp);
 
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
 //		dumpAsTestData();
@@ -220,7 +223,7 @@ public class SpringPropertiesCompletionEngine {
 			if (propertyName!=null) {
 				PropertyInfo prop = getIndex().get(propertyName);
 				if (prop!=null) {
-					String[] valueCompletions = getValues(prop.getType());
+					String[] valueCompletions = typeUtil.getValues(prop.getType());
 					if (valueCompletions!=null && valueCompletions.length>0) {
 						ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 						for (int i = 0; i < valueCompletions.length; i++) {
@@ -480,18 +483,12 @@ public class SpringPropertiesCompletionEngine {
 
 		private String getCompletion() {
 			StringBuilder completion = new StringBuilder(match.data.getId());
-			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null && DEFAULT_VALUE_INCLUDED) {
+			String type = match.data.getType();
+			if (typeUtil.isAssignableType(type)) {
 				completion.append("=");
-				completion.append(defaultValue);
 			} else {
-				String type = match.data.getType();
-				if (TypeUtil.isAssignableType(type)) {
-					completion.append("=");
-				} else {
-					//assume some kind of 'Object' type
-					completion.append(".");
-				}
+				//assume some kind of 'Object' type
+				completion.append(".");
 			}
 			return completion.toString();
 		}
@@ -697,6 +694,14 @@ public class SpringPropertiesCompletionEngine {
 
 	public void setIndexProvider(Provider<FuzzyMap<PropertyInfo>> it) {
 		this.indexProvider = it;
+	}
+
+	public void setTypeUtil(TypeUtil it) {
+		this.typeUtil = it;
+	}
+
+	public TypeUtil getTypeUtil() {
+		return typeUtil;
 	}
 
 

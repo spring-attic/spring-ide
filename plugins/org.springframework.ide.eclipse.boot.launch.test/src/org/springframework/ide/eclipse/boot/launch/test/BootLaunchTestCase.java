@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -48,28 +43,6 @@ public class BootLaunchTestCase extends StsTestCase {
 
 	public static void assertOk(LaunchResult result) {
 		assertEquals(0, result.terminationCode);
-	}
-
-	public static <T> void assertElements(T[] actual, T... expect) {
-		assertElements(Arrays.asList(actual), expect);
-	}
-
-	public static <T> void assertElements(Collection<T> actual, T... expect) {
-		Set<T> expectedSet = new HashSet<T>(Arrays.asList(expect));
-
-		for (T propVal : actual) {
-			if (!expectedSet.remove(propVal)) {
-				fail("Unexpected element: "+propVal);
-			}
-		}
-
-		if (!expectedSet.isEmpty()) {
-			StringBuilder missing = new StringBuilder();
-			for (T propVal : expectedSet) {
-				missing.append(propVal+"\n");
-			}
-			fail("Missing elements: \n"+missing);
-		}
 	}
 
 	@Override

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -26,6 +31,14 @@ import org.eclipse.core.runtime.Assert;
  * @author Kris De Volder
  */
 public class TypeUtil {
+
+	private IJavaProject javaProject;
+
+	public TypeUtil(IJavaProject jp) {
+		//Note javaProject is allowed to be null, but only in unit testing context
+		// (This is so some tests can be run without an explicit jp needing to be created)
+		this.javaProject = jp;
+	}
 
 	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
@@ -50,8 +63,33 @@ public class TypeUtil {
 	 * @return An array of known values for a given type, or null if there's no
 	 * list.
 	 */
-	public static final String[] getValues(String type) {
-		return TYPE_VALUES.get(type);
+	public final String[] getValues(String name) {
+		try {
+			String[] values = TYPE_VALUES.get(name);
+			if (values!=null) {
+				return values;
+			}
+			if (javaProject!=null) {
+				IType type = javaProject.findType(name);
+				if (type!=null && type.isEnum()) {
+					IField[] fields = type.getFields();
+
+					if (fields!=null) {
+						ArrayList<String> enums = new ArrayList<String>(fields.length);
+						for (int i = 0; i < fields.length; i++) {
+							IField f = fields[i];
+							if (f.isEnumConstant()) {
+								enums.add(f.getElementName());
+							}
+						}
+						return enums.toArray(new String[enums.size()]);
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return null;
 	}
 
 
@@ -92,8 +130,24 @@ public class TypeUtil {
 		return domainType;
 	}
 
-	public static boolean isAssignableType(String type) {
-		return ASSIGNABLE_TYPES.contains(TypeUtil.typeErasure(type)) || isBracketable(type);
+	public boolean isAssignableType(String type) {
+		return ASSIGNABLE_TYPES.contains(TypeUtil.typeErasure(type))
+				|| isBracketable(type) //TODO?? Not all bracktable things are assinable are they?
+				|| isEnum(type);
+	}
+
+	public boolean isEnum(String typeName) {
+		try {
+			if (javaProject!=null) {
+				IType type = javaProject.findType(typeName);
+				if (type!=null) {
+					return type.isEnum();
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return false;
 	}
 
 	public static String typeErasure(String type) {

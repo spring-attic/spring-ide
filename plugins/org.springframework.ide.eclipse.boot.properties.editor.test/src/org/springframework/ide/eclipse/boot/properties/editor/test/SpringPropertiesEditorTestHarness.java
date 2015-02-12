@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -115,10 +116,11 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 				return index;
 			}
 		});
+		engine.setTypeUtil(new TypeUtil(javaProject));
 	}
 
 	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
-		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndexProvider());
+		SpringPropertiesReconcileEngine reconciler = new SpringPropertiesReconcileEngine(engine.getIndexProvider(), engine.getTypeUtil());
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
 		return problems.getAllProblems();
@@ -308,6 +310,16 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		}
 	}
 
+	public void assertAllCompletions(String editorText, String... completionsLabels) throws Exception {
+		MockEditor editor = new MockEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		String[] actualLabels = new String[completions.length];
+		for (int i = 0; i < actualLabels.length; i++) {
+			actualLabels[i] = completions[i].getDisplayString();
+		}
+		assertElements(actualLabels, completionsLabels);
+	}
+
 	/**
 	 * Uses the given IJavaProject as the 'context' for the editor and populates engine test-data
 	 * from this project's classpath as well.
@@ -315,9 +327,8 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	public void useProject(final IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
 		this.index = new SpringPropertyIndex(jp);
+		this.engine.setTypeUtil(new TypeUtil(jp));
 	}
-
-
 
 	/**
 	 * Call this method to add some default test data to the Completion engine's index.

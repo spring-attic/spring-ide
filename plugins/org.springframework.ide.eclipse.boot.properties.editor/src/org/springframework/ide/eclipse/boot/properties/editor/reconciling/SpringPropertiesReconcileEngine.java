@@ -94,6 +94,7 @@ public class SpringPropertiesReconcileEngine {
 	}
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
+	private TypeUtil typeUtil;
 
 	public interface IProblemCollector {
 
@@ -104,8 +105,9 @@ public class SpringPropertiesReconcileEngine {
 	}
 
 
-	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider) {
-		fIndexProvider = provider;
+	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
+		this.fIndexProvider = provider;
+		this.typeUtil = typeUtil;
 	}
 
 	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon) {
@@ -188,7 +190,7 @@ public class SpringPropertiesReconcileEngine {
 												}
 											}
 										}
-									} else if (TypeUtil.isAssignableType(validProperty.getType())) {
+									} else if (typeUtil.isAssignableType(validProperty.getType())) {
 										//assignable, but not 'array like'
 										if ('['==fullName.charAt(validProperty.getId().length())) {
 											problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
@@ -233,7 +235,7 @@ public class SpringPropertiesReconcileEngine {
 			IRegion trimmedRegion, PropertyInfo validProperty,
 			String validPrefix) {
 		problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-				"Supbproperties are invalid for property "+
+				"Subproperties are invalid for property "+
 						"'"+validPrefix+"' with type '"+validProperty.getType()+"'",
 						trimmedRegion.getOffset()+validPrefix.length(),
 						trimmedRegion.getLength()-validPrefix.length()
@@ -286,21 +288,50 @@ public class SpringPropertiesReconcileEngine {
 			}
 			if (errorRegion!=null) {
 				problems.accept(new SpringPropertyProblem(ERROR_TYPE,
-						"Expecting '"+shortTypeName(expectType)+"' for property '"+validProperty.getId()+"'",
+						"Expecting '"+niceTypeName(expectType)+"' for property '"+validProperty.getId()+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}
 		}
 	}
 
-	private String shortTypeName(String type) {
+	private String niceTypeName(String type) {
 		if (type.startsWith("java.lang.")) {
 			return type.substring("java.lang.".length());
+		}
+		if (typeUtil.isEnum(type)) {
+			String[] values = typeUtil.getValues(type);
+			if (values!=null && values.length>0) {
+				StringBuilder name = new StringBuilder();
+				name.append(type+"[");
+				int max = Math.min(4, values.length);
+				for (int i = 0; i < max; i++) {
+					if (i>0) {
+						name.append(", ");
+					}
+					name.append(values[i]);
+				}
+				if (max!=values.length) {
+					name.append(", ...");
+				}
+				name.append("]");
+				return name.toString();
+			}
 		}
 		return type;
 	}
 
 	private ValueParser getValueParser(String type) {
-		return VALUE_PARSERS.get(type);
+		ValueParser simpleParser = VALUE_PARSERS.get(type);
+		if (simpleParser!=null) {
+			return simpleParser;
+		}
+		if (typeUtil.isEnum(type)) {
+			String[] enumValues = typeUtil.getValues(type);
+			if (enumValues!=null && enumValues.length>0) {
+				return new EnumValueParser(type, typeUtil.getValues(type));
+			}
+		}
+		return null;
 	}
 
 	/**
