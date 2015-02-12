@@ -16,10 +16,10 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	BootLaunchShortcutTest.class,
 	BootLaunchUIModelTest.class,
 	ProfileHistoryTest.class,
-	BootLaunchConfigurationDelegateTest.class
+	BootLaunchConfigurationDelegateTest.class,
+	BootLaunchShortcutTest.class
 })
 public class AllBootLaunchTests {
 
