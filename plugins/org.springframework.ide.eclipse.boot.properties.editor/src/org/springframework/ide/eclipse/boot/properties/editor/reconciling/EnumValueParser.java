@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.ValueParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 
 /**
  * Parser for checking a 'Enum' type value in the {@link SpringPropertiesReconcileEngine}.

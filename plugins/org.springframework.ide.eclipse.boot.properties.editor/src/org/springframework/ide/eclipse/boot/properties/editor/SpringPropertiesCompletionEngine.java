@@ -52,6 +52,8 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
@@ -219,27 +221,44 @@ public class SpringPropertiesCompletionEngine {
 				valuePrefix = "";
 			}
 			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
-					//because value partition includes whitespace around the assignment
+											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				PropertyInfo prop = getIndex().get(propertyName);
-				if (prop!=null) {
-					String[] valueCompletions = typeUtil.getValues(prop.getType());
-					if (valueCompletions!=null && valueCompletions.length>0) {
-						ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-						for (int i = 0; i < valueCompletions.length; i++) {
-							String valueCandidate = valueCompletions[i];
-							if (valueCandidate.startsWith(valuePrefix)) {
-								proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i));
-							}
+				Type type = getValueType(propertyName);
+				String[] valueCompletions = typeUtil.getValues(type);
+				if (valueCompletions!=null && valueCompletions.length>0) {
+					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+					for (int i = 0; i < valueCompletions.length; i++) {
+						String valueCandidate = valueCompletions[i];
+						if (valueCandidate.startsWith(valuePrefix)) {
+							proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i));
 						}
-						return proposals;
 					}
+					return proposals;
 				}
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Determine the value type for a give propertyName.
+	 */
+	protected Type getValueType(String propertyName) {
+		PropertyInfo prop = getIndex().get(propertyName);
+		if (prop!=null) {
+			return TypeParser.parse(prop.getType());
+		} else {
+			prop = getIndex().findLongestCommonPrefixEntry(propertyName);
+			if (prop!=null) {
+				Type type = TypeParser.parse(prop.getType());
+				if (typeUtil.isMap(type)) {
+					return typeUtil.getDomainType(type);
+				}
+			}
+		}
+		return null;
 	}
 
 	private int findValueStart(IDocument doc, int pos) {
@@ -483,7 +502,7 @@ public class SpringPropertiesCompletionEngine {
 
 		private String getCompletion() {
 			StringBuilder completion = new StringBuilder(match.data.getId());
-			String type = match.data.getType();
+			Type type = TypeParser.parse(match.data.getType());
 			if (typeUtil.isAssignableType(type)) {
 				completion.append("=");
 			} else {

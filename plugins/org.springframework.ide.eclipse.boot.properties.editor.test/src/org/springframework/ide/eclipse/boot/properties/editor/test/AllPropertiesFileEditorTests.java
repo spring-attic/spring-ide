@@ -15,14 +15,15 @@ import junit.framework.TestSuite;
 
 public class AllPropertiesFileEditorTests {
 
-	
+
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(AllPropertiesFileEditorTests.class.getName());
 
 		suite.addTestSuite(SpringPropertiesEditorTests.class);
 		suite.addTestSuite(FuzzyMapTests.class);
-		
+		suite.addTestSuite(TypeParserTest.class);
+
 		return suite;
 	}
-	
+
 }

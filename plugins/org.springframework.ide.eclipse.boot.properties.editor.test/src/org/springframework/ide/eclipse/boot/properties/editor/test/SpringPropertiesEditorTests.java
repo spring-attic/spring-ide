@@ -438,7 +438,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("foo.color=R<*>", "foo.color=RED<*>");
 		assertCompletion("foo.color=G<*>", "foo.color=GREEN<*>");
 		assertCompletion("foo.color=B<*>", "foo.color=BLUE<*>");
-		assertAllCompletions("foo.color=<*>",
+		assertCompletionsDisplayString("foo.color=<*>",
 				"RED", "GREEN", "BLUE"
 		);
 	}
@@ -464,5 +464,37 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testEnumMapValueCompletion() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
+		assertNotNull(jp.findType("demo.Color"));
 
+		assertCompletions("foo.nam<*>", "foo.name-colors.<*>");
+
+		assertCompletionsDisplayString("foo.name-colors.something=<*>",
+				"RED", "GREEN", "BLUE"
+		);
+		assertCompletions("foo.name-colors.something=G<*>", "foo.name-colors.something=GREEN<*>");
+	}
+
+	public void testEnumMapValueReconciling() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
+
+		assertNotNull(jp.findType("demo.Color"));
+
+		MockEditor editor = new MockEditor(
+				"foo.name-colors.jacket=BLUE\n" +
+				"foo.name-colors.hat=RED\n" +
+				"foo.name-colors.pants=GREEN\n" +
+				"foo.name-colors.wrong=NOT_A_COLOR\n"
+		);
+		assertProblems(editor,
+				"NOT_A_COLOR|Color"
+		);
+	}
 }

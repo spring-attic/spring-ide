@@ -310,7 +310,7 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		}
 	}
 
-	public void assertAllCompletions(String editorText, String... completionsLabels) throws Exception {
+	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
 		MockEditor editor = new MockEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		String[] actualLabels = new String[completions.length];

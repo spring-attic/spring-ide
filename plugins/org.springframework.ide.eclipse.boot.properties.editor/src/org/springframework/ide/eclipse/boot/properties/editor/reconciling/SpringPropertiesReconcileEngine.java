@@ -33,6 +33,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 
 /**
@@ -147,10 +149,12 @@ public class SpringPropertiesReconcileEngine {
 								if (validProperty.getId().length()==fullName.length()) {
 									//exact match. Do not complain about key, but try to reconcile assigned value
 									reconcileType(doc, validProperty, regions, i, problemCollector);
-								} else { //found a 'validPrefix' which is shorter than the fullName.
+								} else {
+									//found a 'validPrefix' which is shorter than the fullName.
 									//check if it looks okay to continue with sub-properties based on property type
 									String validPrefix = validProperty.getId();
-									if (TypeUtil.isBracketable(validProperty.getType())) {
+									Type validPropertyType = TypeParser.parse(validProperty.getType());
+									if (TypeUtil.isBracketable(validPropertyType)) {
 										//can go 'deeper' in collection type using array notation: foo.bar[123]=...
 										int lbrack = validPrefix.length();
 										if (fullName.charAt(lbrack)!='[') {
@@ -178,7 +182,7 @@ public class SpringPropertiesReconcileEngine {
 												}
 												if (rbrack<fullName.length()-1) {
 													char nextchar = fullName.charAt(rbrack+1);
-													String domainType = TypeUtil.bracketedDomainType(validProperty.getType());
+													Type domainType = TypeUtil.getDomainType(validPropertyType);
 													if (TypeUtil.isDotable(domainType) && nextchar=='.') {
 														//okay
 													} else {
@@ -190,12 +194,12 @@ public class SpringPropertiesReconcileEngine {
 												}
 											}
 										}
-									} else if (typeUtil.isAssignableType(validProperty.getType())) {
+									} else if (typeUtil.isAssignableType(validPropertyType)) {
 										//assignable, but not 'array like'
 										if ('['==fullName.charAt(validProperty.getId().length())) {
 											problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
 													"[...] notation is invalid for property "+
-															"'"+validPrefix+"' with type '"+validProperty.getType()+"'",
+															"'"+validPrefix+"' with type '"+validPropertyType+"'",
 															trimmedRegion.getOffset()+validPrefix.length(),
 															trimmedRegion.getLength()-validPrefix.length()
 													));
@@ -247,7 +251,7 @@ public class SpringPropertiesReconcileEngine {
 	}
 
 	private void reconcileType(IDocument doc, PropertyInfo validProperty, ITypedRegion[] regions, int i, IProblemCollector problems) {
-		String expectType = validProperty.getType();
+		Type expectType = TypeParser.parse(validProperty.getType());
 		ValueParser parser = getValueParser(expectType);
 		if (parser!=null) {
 			String escapedValue = getAssignedValue(doc, regions, i);
@@ -294,15 +298,19 @@ public class SpringPropertiesReconcileEngine {
 		}
 	}
 
-	private String niceTypeName(String type) {
-		if (type.startsWith("java.lang.")) {
-			return type.substring("java.lang.".length());
+	private String niceTypeName(Type _type) {
+		//TODO: this doesn't 'nicify' type parameters in the same way as the base type.
+		// Proper way to do this is walk the type and apply the same 'nicification' to
+		// all the types including parameters.
+		String typeStr = _type.toString();
+		if (typeStr.startsWith("java.lang.")) {
+			return typeStr.substring("java.lang.".length());
 		}
-		if (typeUtil.isEnum(type)) {
-			String[] values = typeUtil.getValues(type);
+		if (typeUtil.isEnum(_type)) {
+			String[] values = typeUtil.getValues(_type);
 			if (values!=null && values.length>0) {
 				StringBuilder name = new StringBuilder();
-				name.append(type+"[");
+				name.append(typeStr+"[");
 				int max = Math.min(4, values.length);
 				for (int i = 0; i < max; i++) {
 					if (i>0) {
@@ -317,18 +325,18 @@ public class SpringPropertiesReconcileEngine {
 				return name.toString();
 			}
 		}
-		return type;
+		return typeStr;
 	}
 
-	private ValueParser getValueParser(String type) {
-		ValueParser simpleParser = VALUE_PARSERS.get(type);
+	private ValueParser getValueParser(Type type) {
+		ValueParser simpleParser = VALUE_PARSERS.get(type.getErasure());
 		if (simpleParser!=null) {
 			return simpleParser;
 		}
 		if (typeUtil.isEnum(type)) {
 			String[] enumValues = typeUtil.getValues(type);
 			if (enumValues!=null && enumValues.length>0) {
-				return new EnumValueParser(type, typeUtil.getValues(type));
+				return new EnumValueParser(niceTypeName(type), typeUtil.getValues(type));
 			}
 		}
 		return null;

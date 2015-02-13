@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.*;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -63,27 +67,25 @@ public class TypeUtil {
 	 * @return An array of known values for a given type, or null if there's no
 	 * list.
 	 */
-	public final String[] getValues(String name) {
+	public final String[] getValues(Type enumType) {
 		try {
-			String[] values = TYPE_VALUES.get(name);
+			String[] values = TYPE_VALUES.get(enumType.getErasure());
 			if (values!=null) {
 				return values;
 			}
-			if (javaProject!=null) {
-				IType type = javaProject.findType(name);
-				if (type!=null && type.isEnum()) {
-					IField[] fields = type.getFields();
+			IType type = findType(enumType.getErasure());
+			if (type!=null && type.isEnum()) {
+				IField[] fields = type.getFields();
 
-					if (fields!=null) {
-						ArrayList<String> enums = new ArrayList<String>(fields.length);
-						for (int i = 0; i < fields.length; i++) {
-							IField f = fields[i];
-							if (f.isEnumConstant()) {
-								enums.add(f.getElementName());
-							}
+				if (fields!=null) {
+					ArrayList<String> enums = new ArrayList<String>(fields.length);
+					for (int i = 0; i < fields.length; i++) {
+						IField f = fields[i];
+						if (f.isEnumConstant()) {
+							enums.add(f.getElementName());
 						}
-						return enums.toArray(new String[enums.size()]);
 					}
+					return enums.toArray(new String[enums.size()]);
 				}
 			}
 		} catch (Exception e) {
@@ -98,14 +100,18 @@ public class TypeUtil {
 	 * use the notation <name>[<index>]=<value> in property file
 	 * for properties of this type.
 	 */
-	public static boolean isBracketable(String type) {
+	public static boolean isBracketable(Type type) {
+		//Note: map types are bracketable although the notation isn't really useful
+		// for them (and a bit broken see https://github.com/spring-projects/spring-boot/issues/2386).
+
 		//Note array types are no longer considered 'Bracketable'
 		//see: STS-4031
-		String erasure = TypeUtil.typeErasure(type);
+		String erasure = type.getErasure();
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
 		//However, use reflection here is okay assuming types we care about
-		//are part of JRE standard libraries.
+		//are part of JRE standard libraries. Using eclipse 'type hirearchy' would
+		//also potentialy be very slow.
 		try {
 			Class<?> erasureClass = Class.forName(erasure);
 			return List.class.isAssignableFrom(erasureClass);
@@ -115,34 +121,40 @@ public class TypeUtil {
 		}
 	}
 
-	/**
-	 * Assuming that 'type' is a 'bracketable' type. Retrieve the type that is expected
-	 * after dereferening using [] notation.
-	 */
-	public static String bracketedDomainType(String type) {
-		Assert.isLegal(isBracketable(type));
-		int langle = type.indexOf('<');
-		Assert.isLegal(langle>=0, "Bracketabled type without '<'");
-		int rangle = type.lastIndexOf('>');
-		Assert.isLegal(rangle>=0, "Bracketabled type without '>'");
-		Assert.isLegal(langle<rangle);
-		String domainType = type.substring(langle+1, rangle);
-		return domainType;
+	public boolean isMap(Type type) {
+		//Note: to be really correct we should use JDT infrastructure to resolve
+		//type in project classpath instead of using Java reflection.
+		//However, use reflection here is okay assuming types we care about
+		//are part of JRE standard libraries. Using eclipse 'type hirearchy' would
+		//also potentialy be very slow.
+		String erasure = type.getErasure();
+		try {
+			Class<?> erasureClass = Class.forName(erasure);
+			return Map.class.isAssignableFrom(erasureClass);
+		} catch (Exception e) {
+			//type not resolveable
+			return false;
+		}
 	}
 
-	public boolean isAssignableType(String type) {
-		return ASSIGNABLE_TYPES.contains(TypeUtil.typeErasure(type))
-				|| isBracketable(type) //TODO?? Not all bracktable things are assinable are they?
+	/**
+	 * Get domain type for a map or list generic type.
+	 */
+	public static Type getDomainType(Type type) {
+		return lastElement(type.getParams());
+	}
+
+	public boolean isAssignableType(Type type) {
+		return ASSIGNABLE_TYPES.contains(type.getErasure())
+				|| isBracketable(type) //TODO?? Not all bracketable things are assignable are they?
 				|| isEnum(type);
 	}
 
-	public boolean isEnum(String typeName) {
+	public boolean isEnum(Type type) {
 		try {
-			if (javaProject!=null) {
-				IType type = javaProject.findType(typeName);
-				if (type!=null) {
-					return type.isEnum();
-				}
+			IType eclipseType = findType(type.getErasure());
+			if (eclipseType!=null) {
+				return eclipseType.isEnum();
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
@@ -150,17 +162,20 @@ public class TypeUtil {
 		return false;
 	}
 
-	public static String typeErasure(String type) {
-		int paramStarts = type.indexOf('<');
-		if (paramStarts>=0) {
-			return type.substring(0,paramStarts);
+	private IType findType(String typeName) {
+		try {
+			if (javaProject!=null) {
+				return javaProject.findType(typeName);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
-		return type;
+		return null;
 	}
 
 	public static String formatJavaType(String type) {
 		if (type!=null) {
-			String primitive = TypeUtil.PRIMITIVE_TYPES.get(type);
+			String primitive = TypeUtil.PRIMITIVE_TYPE_NAMES.get(type);
 			if (primitive!=null) {
 				return primitive;
 			}
@@ -176,18 +191,18 @@ public class TypeUtil {
 	private static final String JAVA_LANG = "java.lang.";
 	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
 
-	private static final Map<String, String> PRIMITIVE_TYPES = new HashMap<String, String>();
+	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
 
-	private static final String STRING_TYPE = String.class.getName();
+	private static final String STRING_TYPE_NAME = String.class.getName();
 
 	static {
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Boolean", "boolean");
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Integer", "int");
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Long", "short");
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Short", "int");
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Double", "double");
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Float", "float");
-		TypeUtil.PRIMITIVE_TYPES.put("java.lang.Character", "char");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
+		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
 	}
 
 	/**
@@ -195,9 +210,12 @@ public class TypeUtil {
 	 * by default except for some specific cases we assume are not 'dotable' such as Primitive types
 	 * and String
 	 */
-	public static boolean isDotable(String type) {
-		boolean isSimple = type.equals(STRING_TYPE) || PRIMITIVE_TYPES.containsKey(type);
+	public static boolean isDotable(Type type) {
+		String typeName = type.getErasure();
+		boolean isSimple = typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName);
 		return !isSimple;
 	}
+
+
 
 }
