@@ -254,7 +254,7 @@ public class SpringPropertiesCompletionEngine {
 			if (prop!=null) {
 				Type type = TypeParser.parse(prop.getType());
 				if (typeUtil.isMap(type)) {
-					return typeUtil.getDomainType(type);
+					return TypeUtil.getDomainType(type);
 				}
 			}
 		}

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
-import java.io.Reader;
-import java.io.StringReader;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,13 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-
-import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.*;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -68,28 +65,30 @@ public class TypeUtil {
 	 * list.
 	 */
 	public final String[] getValues(Type enumType) {
-		try {
-			String[] values = TYPE_VALUES.get(enumType.getErasure());
-			if (values!=null) {
-				return values;
-			}
-			IType type = findType(enumType.getErasure());
-			if (type!=null && type.isEnum()) {
-				IField[] fields = type.getFields();
-
-				if (fields!=null) {
-					ArrayList<String> enums = new ArrayList<String>(fields.length);
-					for (int i = 0; i < fields.length; i++) {
-						IField f = fields[i];
-						if (f.isEnumConstant()) {
-							enums.add(f.getElementName());
-						}
-					}
-					return enums.toArray(new String[enums.size()]);
+		if (enumType!=null) {
+			try {
+				String[] values = TYPE_VALUES.get(enumType.getErasure());
+				if (values!=null) {
+					return values;
 				}
+				IType type = findType(enumType.getErasure());
+				if (type!=null && type.isEnum()) {
+					IField[] fields = type.getFields();
+
+					if (fields!=null) {
+						ArrayList<String> enums = new ArrayList<String>(fields.length);
+						for (int i = 0; i < fields.length; i++) {
+							IField f = fields[i];
+							if (f.isEnumConstant()) {
+								enums.add(f.getElementName());
+							}
+						}
+						return enums.toArray(new String[enums.size()]);
+					}
+				}
+			} catch (Exception e) {
+				BootActivator.log(e);
 			}
-		} catch (Exception e) {
-			BootActivator.log(e);
 		}
 		return null;
 	}

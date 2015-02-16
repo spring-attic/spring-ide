@@ -146,73 +146,11 @@ public class SpringPropertiesReconcileEngine {
 							}
 							PropertyInfo validProperty = findLongestValidProperty(index, fullName);
 							if (validProperty!=null) {
-								if (validProperty.getId().length()==fullName.length()) {
-									//exact match. Do not complain about key, but try to reconcile assigned value
-									reconcileType(doc, validProperty, regions, i, problemCollector);
-								} else {
-									//found a 'validPrefix' which is shorter than the fullName.
-									//check if it looks okay to continue with sub-properties based on property type
-									String validPrefix = validProperty.getId();
-									Type validPropertyType = TypeParser.parse(validProperty.getType());
-									if (TypeUtil.isBracketable(validPropertyType)) {
-										//can go 'deeper' in collection type using array notation: foo.bar[123]=...
-										int lbrack = validPrefix.length();
-										if (fullName.charAt(lbrack)!='[') {
-											subpropertiesInvalidError(
-													problemCollector,
-													trimmedRegion,
-													validProperty, validPrefix);
-										} else {
-											int rbrack = fullName.indexOf(']', lbrack);
-											if (rbrack<0) {
-												problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-														"No matching ']'",
-														trimmedRegion.getOffset()+lbrack, 1));
-											} else {
-												String indexStr = fullName.substring(lbrack+1, rbrack);
-												if (!indexStr.contains("${")) {
-													try {
-														Integer.parseInt(indexStr);
-													} catch (Exception e) {
-														problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-															"Expecting 'Integer' for '[...]' notation '"+validProperty.getId()+"'",
-															trimmedRegion.getOffset()+lbrack+1, rbrack-lbrack-1
-														));
-													}
-												}
-												if (rbrack<fullName.length()-1) {
-													char nextchar = fullName.charAt(rbrack+1);
-													Type domainType = TypeUtil.getDomainType(validPropertyType);
-													if (TypeUtil.isDotable(domainType) && nextchar=='.') {
-														//okay
-													} else {
-														problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-																"Expecting no extra text after ']'",
-																trimmedRegion.getOffset()+rbrack+1,fullName.length()-rbrack-1
-														));
-													}
-												}
-											}
-										}
-									} else if (typeUtil.isAssignableType(validPropertyType)) {
-										//assignable, but not 'array like'
-										if ('['==fullName.charAt(validProperty.getId().length())) {
-											problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-													"[...] notation is invalid for property "+
-															"'"+validPrefix+"' with type '"+validPropertyType+"'",
-															trimmedRegion.getOffset()+validPrefix.length(),
-															trimmedRegion.getLength()-validPrefix.length()
-													));
-										} else {
-											subpropertiesInvalidError(
-													problemCollector,
-													trimmedRegion, validProperty,
-													validPrefix);
-										}
-									} else { //type is not a known directly assignable type
-										//accessing sub-properties may be ok in this case.
-										// So do not complain
-									}
+								int offset = validProperty.getId().length() + trimmedRegion.getOffset();
+								PropertyNavigator navigator = new PropertyNavigator(doc, problemCollector, typeUtil, trimmedRegion);
+								Type valueType = navigator.navigate(offset, TypeParser.parse(validProperty.getType()));
+								if (valueType!=null) {
+									reconcileType(doc, valueType, regions, i, problemCollector);
 								}
 							} else { //validProperty==null
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
@@ -250,8 +188,7 @@ public class SpringPropertiesReconcileEngine {
 		return fIndexProvider.get();
 	}
 
-	private void reconcileType(IDocument doc, PropertyInfo validProperty, ITypedRegion[] regions, int i, IProblemCollector problems) {
-		Type expectType = TypeParser.parse(validProperty.getType());
+	private void reconcileType(IDocument doc, Type expectType, ITypedRegion[] regions, int i, IProblemCollector problems) {
 		ValueParser parser = getValueParser(expectType);
 		if (parser!=null) {
 			String escapedValue = getAssignedValue(doc, regions, i);
@@ -292,7 +229,7 @@ public class SpringPropertiesReconcileEngine {
 			}
 			if (errorRegion!=null) {
 				problems.accept(new SpringPropertyProblem(ERROR_TYPE,
-						"Expecting '"+niceTypeName(expectType)+"' for property '"+validProperty.getId()+"'",
+						"Expecting '"+niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}
 		}

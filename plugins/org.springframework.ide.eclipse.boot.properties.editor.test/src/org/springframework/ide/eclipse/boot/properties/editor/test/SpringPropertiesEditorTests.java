@@ -261,7 +261,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"bogus.no.good=true\n"
 		);
 		assertProblems(editor,
-				".extracrap|Subproperties are invalid",
+				".extracrap|Can't use '.' navigation",
 				"snuggem|unknown property",
 				"ogus.no.good|unknown property"
 		);
@@ -286,7 +286,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 					"token.bad.guy|unknown property",
 					//'name' is ok
 					//'description' is ok
-					"garbage|extra text",
+					"garbage|'.' or '['",
 					"bogus|unknown property"
 			);
 		} catch (AssertionFailedError e) {
@@ -295,7 +295,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 			assertProblems(editor,
 					"token.bad.guy|unknown property",
 					//..[0].<whatever> is okay
-					"garbage|extra text"
+					"garbage|'.' or '['"
 			);
 		}
 	}
@@ -325,9 +325,9 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertProblems(editor,
 				"bork|Integer",
 				"[|matching ']'",
-				"crap|extra text",
-				"[0]|[...] notation is invalid",
-				"[1]|[...] notation is invalid"
+				"crap|'.' or '['",
+				"[0]|Can't use '[..]'",
+				"[1]|Can't use '[..]'"
 				//no other problems
 		);
 	}
@@ -359,7 +359,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		assertProblems(editor,
 				"notBoolean|Boolean",
-				".subprop|Subproperties are invalid"
+				".subprop|Can't use '.' navigation"
 		);
 	}
 
@@ -419,7 +419,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"bogus.no.good=  true\n"
 		);
 		assertProblems(editor,
-				".extracrap|Subproperties are invalid",
+				".extracrap|Can't use '.' navigation",
 				"snuggem|unknown property",
 				"ogus.no.good|unknown property"
 		);
@@ -459,7 +459,6 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 
 		assertProblems(editor,
-				".bad|Subproperties are invalid",
 				"Bogus|Color"
 		);
 	}
