@@ -12,6 +12,7 @@ public class FooProperties {
 	private Color color;
 	private Map<Color,String> colorNames;
 	private Map<String,Color> nameColors;
+	private Map<Color, ColorData> colorData;
 
 	public Color getColor() {
 		return color;
@@ -31,5 +32,11 @@ public class FooProperties {
 	}
 	public void setNameColors(Map<String,Color> nameColors) {
 		this.nameColors = nameColors;
+	}
+	public Map<Color, ColorData> getColorData() {
+		return colorData;
+	}
+	public void setColorData(Map<Color, ColorData> colorData) {
+		this.colorData = colorData;
 	}
 }

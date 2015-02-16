@@ -54,7 +54,7 @@ public class PropertyNavigator {
 
 	public PropertyNavigator(IDocument doc, IProblemCollector problemCollector, TypeUtil typeUtil, IRegion region) throws BadLocationException {
 		this.doc = doc;
-		this.problemCollector = problemCollector;
+		this.problemCollector = problemCollector==null?IProblemCollector.NULL:problemCollector;
 		this.typeUtil = typeUtil;
 		this.region = region;
 		this.regionText = doc.get(region.getOffset(), region.getLength());

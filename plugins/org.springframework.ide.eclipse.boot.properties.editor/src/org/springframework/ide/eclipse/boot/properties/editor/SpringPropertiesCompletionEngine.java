@@ -14,6 +14,7 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUt
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,6 +34,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -49,8 +51,11 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -63,8 +68,60 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 @SuppressWarnings("restriction")
 public class SpringPropertiesCompletionEngine {
 
+	private static abstract class PrefixFinder {
+		public String getPrefix(IDocument doc, int offset) {
+			try {
+				if (doc == null || offset > doc.getLength())
+					return null;
+				int prefixStart= offset;
+				while (prefixStart > 0 && isPrefixChar(doc.getChar(prefixStart-1))) {
+					prefixStart--;
+				}
+				return doc.get(prefixStart, offset-prefixStart);
+			} catch (BadLocationException e) {
+				return null;
+			}
+		}
+		protected abstract boolean isPrefixChar(char c);
+	}
+
 	private static final boolean DEBUG = false;
 	public static final boolean DEFAULT_VALUE_INCLUDED = false; //might make sense to make this user configurable
+
+	private static final PrefixFinder fuzzySearchPrefix = new PrefixFinder() {
+		protected boolean isPrefixChar(char c) {
+			return !Character.isWhitespace(c);
+		}
+	};
+
+	private static final PrefixFinder navigationPrefixFinder = new PrefixFinder() {
+		public String getPrefix(IDocument doc, int offset) {
+			String prefix = super.getPrefix(doc, offset);
+			//Check if character before looks like 'navigation'.. otherwise don't
+			// return a navigationPrefix.
+			char charBefore = getCharBefore(doc, prefix, offset);
+			if (charBefore=='.' || charBefore==']') {
+				return prefix;
+			}
+			return null;
+		}
+		private char getCharBefore(IDocument doc, String prefix, int offset) {
+			try {
+				if (prefix!=null) {
+					int offsetBefore = offset-prefix.length()-1;
+					if (offsetBefore>=0) {
+						return doc.getChar(offsetBefore);
+					}
+				}
+			} catch (BadLocationException e) {
+				//ignore
+			}
+			return 0;
+		}
+		protected boolean isPrefixChar(char c) {
+			return !Character.isWhitespace(c) && c!=']' && c!=']' && c!='.';
+		}
+	};
 
 //	private static final boolean DEBUG =
 //			(""+Platform.getLocation()).contains("kdvolder") ||
@@ -133,8 +190,6 @@ public class SpringPropertiesCompletionEngine {
 	public SpringPropertiesCompletionEngine() {
 	}
 
-
-
 	/**
 	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal
 	 * Eclipse runtime.
@@ -154,21 +209,6 @@ public class SpringPropertiesCompletionEngine {
 
 	}
 
-	private String getPrefix(IDocument doc, int offset) throws BadLocationException {
-		if (doc == null || offset > doc.getLength())
-			return null;
-		int prefixStart= offset;
-		while (prefixStart > 0 && isPrefixChar(doc.getChar(prefixStart-1))) {
-			prefixStart--;
-		}
-
-		return doc.get(prefixStart, offset-prefixStart);
-	}
-
-	private boolean isPrefixChar(char c) {
-		return !Character.isWhitespace(c);
-	}
-
 	/**
 	 * Create completions proposals in the context of a properties text editor.
 	 */
@@ -180,6 +220,67 @@ public class SpringPropertiesCompletionEngine {
 			return getPropertyCompletions(doc, offset);
 		} else if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
 			return getValueCompletions(doc, offset, partition);
+		}
+		return Collections.emptyList();
+	}
+
+	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, int offset) {
+		String navPrefix = navigationPrefixFinder.getPrefix(doc, offset);
+		try {
+			if (navPrefix!=null) {
+				int navOffset = offset-navPrefix.length()-1; //offset of 'nav' operator char (i.e. '.' or ']').
+				navPrefix = fuzzySearchPrefix.getPrefix(doc, navOffset);
+				if (navPrefix!=null && !navPrefix.isEmpty()) {
+					PropertyInfo prop = getIndex().findLongestCommonPrefixEntry(navPrefix);
+					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, new Region(navOffset-navPrefix.length(), prop.getId().length()));
+					Type type = navigator.navigate(navOffset, TypeParser.parse(prop.getType()));
+					if (type!=null) {
+						return getNavigationProposals(doc, type, navOffset, offset);
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * @param type Type of the expression leading upto the 'nav' operator
+	 * @param navOffset Offset of the nav operator (either ']' or '.'
+	 * @param offset Offset of the cursor where CA was requested.
+	 * @return
+	 */
+	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, Type type, int navOffset, int offset) {
+		try {
+			char navOp = doc.getChar(navOffset);
+			if (navOp=='.') {
+				String prefix = doc.get(navOffset+1, offset-(navOffset+1));
+				List<TypedProperty> objectProperties = typeUtil.getProperties(type);
+				if (objectProperties!=null && !objectProperties.isEmpty()) {
+					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+					int sorting = 1;
+					for (TypedProperty prop : objectProperties) {
+						if (prop.getName().startsWith(prefix)) {
+							Type valueType = prop.getType();
+							String postFix = "";
+							if (valueType!=null) {
+								if (typeUtil.isAssignableType(valueType)) {
+									postFix = "=";
+								} else if (TypeUtil.isDotable(valueType)) {
+									postFix = ".";
+								}
+							}
+							proposals.add(new ValueProposal(navOffset+1, prefix, prop.getName(), sorting++, postFix));
+						}
+					}
+					return proposals;
+				}
+			} else {
+				//TODO: other cases ']' or '[' ?
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
 		return Collections.emptyList();
 	}
@@ -220,7 +321,7 @@ public class SpringPropertiesCompletionEngine {
 				startOfValue = offset;
 				valuePrefix = "";
 			}
-			String propertyName = getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
+			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
 				Type type = getValueType(propertyName);
@@ -286,7 +387,16 @@ public class SpringPropertiesCompletionEngine {
 	}
 
 	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
-		String prefix = getPrefix(doc, offset);
+		Collection<ICompletionProposal> navProposals = getNavigationProposals(doc, offset);
+		if (!navProposals.isEmpty()) {
+			return navProposals;
+		}
+		return getFuzzyCompletions(doc, offset);
+	}
+
+	protected Collection<ICompletionProposal> getFuzzyCompletions(
+			IDocument doc, int offset) {
+		String prefix = fuzzySearchPrefix.getPrefix(doc, offset);
 		if (prefix != null) {
 			Collection<Match<PropertyInfo>> matches = findMatches(prefix);
 			if (matches!=null && !matches.isEmpty()) {
@@ -330,25 +440,31 @@ public class SpringPropertiesCompletionEngine {
 		return NO_CONTENT_PROPOSALS;
 	}
 
-
 	private final class ValueProposal implements ICompletionProposal {
 
 		private int valueStart;
 		private String valuePrefix;
-		private String value;
+		private String substitution;
+		private String valuePostFix = "";
 		private int sortingOrder;
+		private String displayString;
 
-		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
+		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder, String valuePostFix) {
 			this.valueStart = valueStart;
 			this.valuePrefix = valuePrefix;
-			this.value = value;
+			this.displayString = value;
 			this.sortingOrder = sortingOrder;
+			this.substitution = value + valuePostFix;
+		}
+
+		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
+			this(valueStart, valuePrefix, value, sortingOrder, "");
 		}
 
 		@Override
 		public void apply(IDocument document) {
 			try {
-				document.replace(valueStart, valuePrefix.length(), value);
+				document.replace(valueStart, valuePrefix.length(), substitution);
 			} catch (BadLocationException e) {
 				SpringPropertiesEditorPlugin.log(e);
 			}
@@ -356,7 +472,7 @@ public class SpringPropertiesCompletionEngine {
 
 		@Override
 		public Point getSelection(IDocument document) {
-			return new Point(valueStart+value.length(), 0);
+			return new Point(valueStart+substitution.length(), 0);
 		}
 
 		@Override
@@ -366,7 +482,7 @@ public class SpringPropertiesCompletionEngine {
 
 		@Override
 		public String getDisplayString() {
-			return value;
+			return displayString;
 		}
 
 		@Override
@@ -382,12 +498,9 @@ public class SpringPropertiesCompletionEngine {
 
 		@Override
 		public String toString() {
-			return "<"+valuePrefix+">"+value;
+			return "<"+valuePrefix+">"+substitution;
 		}
-
 	}
-
-
 
 	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6

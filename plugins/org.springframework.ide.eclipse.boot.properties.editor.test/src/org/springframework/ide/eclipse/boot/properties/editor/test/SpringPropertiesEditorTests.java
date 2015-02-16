@@ -496,4 +496,65 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"NOT_A_COLOR|Color"
 		);
 	}
+
+	public void testEnumMapKeyCompletion() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
+		data("foo.color-data", "java.util.Map<demo.Color,demo.ColorData>", null, "Map with colors in its keys, and pojo in values");
+		assertNotNull(jp.findType("demo.Color"));
+		assertNotNull(jp.findType("demo.ColorData"));
+
+		//Map Enum -> String:
+		assertCompletions("foo.colnam<*>", "foo.color-names.<*>");
+		assertCompletions("foo.color-names.<*>",
+				"foo.color-names.RED=<*>",
+				"foo.color-names.GREEN=<*>",
+				"foo.color-names.BLUE=<*>"
+		);
+		assertCompletionsDisplayString("foo.color-names.<*>",
+				"RED", "GREEN", "BLUE"
+		);
+		assertCompletions("foo.color-names.B<*>",
+				"foo.color-names.BLUE=<*>"
+		);
+
+		//Map Enum -> Pojo:
+		assertCompletions("foo.coldat<*>", "foo.color-data.<*>");
+		assertCompletions("foo.color-data.<*>",
+				"foo.color-data.RED.<*>",
+				"foo.color-data.GREEN.<*>",
+				"foo.color-data.BLUE.<*>"
+		);
+		assertCompletions("foo.color-data.B<*>",
+				"foo.color-data.BLUE.<*>"
+		);
+		assertCompletionsDisplayString("foo.color-data.<*>",
+				"RED", "GREEN", "BLUE"
+		);
+	}
+
+	public void testEnumMapKeyReconciling() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
+		data("foo.color-data", "java.util.Map<demo.Color,demo.ColorData>", null, "Map with colors in its keys, and pojo in values");
+		assertNotNull(jp.findType("demo.Color"));
+		assertNotNull(jp.findType("demo.ColorData"));
+
+		MockEditor editor = new MockEditor(
+				"foo.color-names.RED=Rood\n"+
+				"foo.color-names.GREEN=Groen\n"+
+				"foo.color-names.BLUE=Blauw\n" +
+				"foo.color-names.NOT_A_COLOR=Wrong\n" +
+				"foo.color-names.BLUE.bad=Blauw\n"
+		);
+		assertProblems(editor,
+				"NOT_A_COLOR|Color",
+				"BLUE.bad|Color" //because value type is not dotable the dots will be taken to be part of map key
+		);
+	}
+
 }

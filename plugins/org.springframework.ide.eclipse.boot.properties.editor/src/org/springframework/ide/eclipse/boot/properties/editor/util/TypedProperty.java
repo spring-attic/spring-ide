@@ -11,26 +11,37 @@
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
 /**
+ * Represents a property on a Type that can be accessed by name.
+ *
  * @author Kris De Volder
  */
-public class ArrayUtils {
+public class TypedProperty {
 
-	public static <T> boolean hasElements(T[] arr) {
-		return arr!=null && arr.length>0;
+	/**
+	 * The name of the property
+	 */
+	private final String name;
+
+	/**
+	 * The type of value associated with the property.
+	 */
+	private final Type type;
+
+	public TypedProperty(String name, Type type) {
+		this.name = name;
+		this.type = type;
 	}
 
-	public static <T> T lastElement(T[] arr) {
-		if (hasElements(arr)) {
-			return arr[arr.length-1];
-		}
-		return null;
+	public String getName() {
+		return name;
 	}
 
+	public Type getType() {
+		return type;
+	}
 
-	public static <T> T firstElement(T[] arr) {
-		if (hasElements(arr)) {
-			return arr[0];
-		}
-		return null;
+	@Override
+	public String toString() {
+		return name + "::" + type;
 	}
 }

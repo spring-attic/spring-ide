@@ -31,6 +31,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -104,6 +105,17 @@ public class SpringPropertiesReconcileEngine {
 		void endCollecting();
 		void accept(SpringPropertyProblem springPropertyProblem);
 
+		/**
+		 * Problem collector that simply ignores/discards anything passed to it.
+		 */
+		IProblemCollector NULL = new IProblemCollector() {
+			public void beginCollecting() {
+			}
+			public void endCollecting() {
+			}
+			public void accept(SpringPropertyProblem springPropertyProblem) {
+			}
+		};
 	}
 
 
@@ -289,7 +301,7 @@ public class SpringPropertiesReconcileEngine {
 	private String getAssignedValue(IDocument doc, ITypedRegion[] regions, int i) {
 		try {
 			int valueRegionIndex = i+1;
-			if (i<regions.length) {
+			if (valueRegionIndex<regions.length) {
 				ITypedRegion valueRegion = regions[valueRegionIndex];
 				if (valueRegion.getType()==IPropertiesFilePartitions.PROPERTY_VALUE) {
 					String regionText = doc.get(valueRegion.getOffset(), valueRegion.getLength());

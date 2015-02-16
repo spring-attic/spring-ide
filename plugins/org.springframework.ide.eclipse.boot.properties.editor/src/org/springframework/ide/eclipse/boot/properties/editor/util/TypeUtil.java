@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -143,6 +144,10 @@ public class TypeUtil {
 		return lastElement(type.getParams());
 	}
 
+	public static Type getKeyType(Type mapType) {
+		return firstElement(mapType.getParams());
+	}
+
 	public boolean isAssignableType(Type type) {
 		return ASSIGNABLE_TYPES.contains(type.getErasure())
 				|| isBracketable(type) //TODO?? Not all bracketable things are assignable are they?
@@ -213,6 +218,27 @@ public class TypeUtil {
 		String typeName = type.getErasure();
 		boolean isSimple = typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName);
 		return !isSimple;
+	}
+
+
+	public List<TypedProperty> getProperties(Type type) {
+		if (type!=null) {
+			if (isMap(type)) {
+				Type keyType = getKeyType(type);
+				if (keyType!=null) {
+					String[] keyValues = getValues(keyType);
+					if (hasElements(keyValues)) {
+						Type valueType = getDomainType(type);
+						ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
+						for (String propName : keyValues) {
+							properties.add(new TypedProperty(propName, valueType));
+						}
+						return properties;
+					}
+				}
+			}
+		}
+		return Collections.emptyList();
 	}
 
 

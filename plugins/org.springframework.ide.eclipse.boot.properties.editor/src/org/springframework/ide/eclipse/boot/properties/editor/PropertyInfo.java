@@ -16,8 +16,6 @@ import java.util.List;
 
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.configurationmetadata.ConfigurationMetadataSource;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 
 /**
  * Information about a spring property, basically, this is the same as
