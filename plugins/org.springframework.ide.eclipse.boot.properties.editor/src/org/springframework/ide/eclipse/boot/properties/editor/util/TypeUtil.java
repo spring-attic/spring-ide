@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -61,11 +62,74 @@ public class TypeUtil {
 		TYPE_VALUES.put("java.lang.Boolean", new String[] { "true", "false" });
 	}
 
+	private static final Map<String,ValueParser> VALUE_PARSERS = new HashMap<String, ValueParser>();
+	static {
+		VALUE_PARSERS.put(Integer.class.getName(), new ValueParser() {
+			public Object parse(String str) {
+				return Integer.parseInt(str);
+			}
+		});
+		VALUE_PARSERS.put(Long.class.getName(), new ValueParser() {
+			public Object parse(String str) {
+				return Long.parseLong(str);
+			}
+		});
+		VALUE_PARSERS.put(Short.class.getName(), new ValueParser() {
+			public Object parse(String str) {
+				return Short.parseShort(str);
+			}
+		});
+		VALUE_PARSERS.put(Double.class.getName(), new ValueParser() {
+			public Object parse(String str) {
+				return Double.parseDouble(str);
+			}
+		});
+		VALUE_PARSERS.put(Float.class.getName(), new ValueParser() {
+			public Object parse(String str) {
+				return Float.parseFloat(str);
+			}
+		});
+		VALUE_PARSERS.put(Boolean.class.getName(), new ValueParser() {
+			public Object parse(String str) {
+				//The 'more obvious' implementation is too liberal and accepts anything as okay.
+				//return Boolean.parseBoolean(str);
+				str = str.toLowerCase();
+				if (str.equals("true")) {
+					return true;
+				} else if (str.equals("false")) {
+					return false;
+				}
+				throw new IllegalArgumentException("Value should be 'true' or 'false'");
+			}
+		});
+	}
+
+	public interface ValueParser {
+		Object parse(String str);
+	}
+
+	public ValueParser getValueParser(Type type) {
+		ValueParser simpleParser = VALUE_PARSERS.get(type.getErasure());
+		if (simpleParser!=null) {
+			return simpleParser;
+		}
+		String[] enumValues = getAllowedValues(type);
+		if (enumValues!=null) {
+			//Note, technically if 'enumValues is empty array' this means something different
+			// from when it is null. An empty array means a type that has no values, so
+			// assigning anything to it is an error.
+			return new EnumValueParser(niceTypeName(type), getAllowedValues(type));
+		}
+		return null;
+	}
+
 	/**
-	 * @return An array of known values for a given type, or null if there's no
-	 * list.
+	 * @return An array of allowed values for a given type. If an array is returned then
+	 * *only* values in the array are valid and using any other value constitutes an error.
+	 * This may return null if allowedValues list is unknown or the type is not characterizable
+	 * as a simple enumaration of allowed values.
 	 */
-	public final String[] getValues(Type enumType) {
+	public final String[] getAllowedValues(Type enumType) {
 		if (enumType!=null) {
 			try {
 				String[] values = TYPE_VALUES.get(enumType.getErasure());
@@ -94,6 +158,35 @@ public class TypeUtil {
 		return null;
 	}
 
+	public String niceTypeName(Type _type) {
+		//TODO: this doesn't 'nicify' type parameters in the same way as the base type.
+		// Proper way to do this is walk the type and apply the same 'nicification' to
+		// all the types including parameters.
+		String typeStr = _type.toString();
+		if (typeStr.startsWith("java.lang.")) {
+			return typeStr.substring("java.lang.".length());
+		}
+		if (isEnum(_type)) {
+			String[] values = getAllowedValues(_type);
+			if (values!=null && values.length>0) {
+				StringBuilder name = new StringBuilder();
+				name.append(typeStr+"[");
+				int max = Math.min(4, values.length);
+				for (int i = 0; i < max; i++) {
+					if (i>0) {
+						name.append(", ");
+					}
+					name.append(values[i]);
+				}
+				if (max!=values.length) {
+					name.append(", ...");
+				}
+				name.append("]");
+				return name.toString();
+			}
+		}
+		return typeStr;
+	}
 
 	/**
 	 * Check if it is valid to
@@ -226,7 +319,7 @@ public class TypeUtil {
 			if (isMap(type)) {
 				Type keyType = getKeyType(type);
 				if (keyType!=null) {
-					String[] keyValues = getValues(keyType);
+					String[] keyValues = getAllowedValues(keyType);
 					if (hasElements(keyValues)) {
 						Type valueType = getDomainType(type);
 						ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);

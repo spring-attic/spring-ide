@@ -20,8 +20,10 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
+import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 
 /**
  * Helper class for {@link SpringPropertiesReconcileEngine} and {@link SpringPropertiesCompletionEngine}.
@@ -158,7 +160,8 @@ public class PropertyNavigator {
 	 */
 	private Type dotNavigate(int offset, Type type) {
 		if (typeUtil.isMap(type)) {
-			//int keyStart = offset+1;
+			int keyStart = offset+1;
+
 			Type domainType = TypeUtil.getDomainType(type);
 			int keyEnd = -1;
 			if (isDotable(domainType)) {
@@ -168,16 +171,22 @@ public class PropertyNavigator {
 			if (keyEnd<0) {
 				keyEnd = getEnd(region);
 			}
-			//String key = textBetween(keyStart, keyEnd);
-			//TODO validate the key
+			String key = textBetween(keyStart, keyEnd);
+			Type keyType = TypeUtil.getKeyType(type);
+			if (keyType!=null) {
+				ValueParser keyParser = typeUtil.getValueParser(keyType);
+				if (keyParser!=null) {
+					try {
+						keyParser.parse(key);
+					} catch (Exception e) {
+						problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE, "Expecting "+typeUtil.niceTypeName(keyType), keyStart, keyEnd-keyStart));
+					}
+				}
+			}
 			return navigate(keyEnd, domainType);
 		}
 		//TODO: object property navigation.
 		return null;
-	}
-
-	private IRegion skip(IRegion region, int count) {
-		return new Region(region.getOffset()+1, Math.max(0, region.getLength()-1));
 	}
 
 	private char getChar(int offset) {

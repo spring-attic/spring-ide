@@ -13,15 +13,14 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.ValueParser;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 
 /**
  * Parser for checking a 'Enum' type value in the {@link SpringPropertiesReconcileEngine}.
  *
  * @author Kris De Volder
  */
-public class EnumValueParser extends ValueParser {
+public class EnumValueParser implements ValueParser {
 
 	private String typeName;
 	private HashSet<String> values;
@@ -31,8 +30,7 @@ public class EnumValueParser extends ValueParser {
 		this.values = new HashSet<String>(Arrays.asList(values));
 	}
 
-	@Override
-	Object parse(String str) {
+	public Object parse(String str) {
 		if (values.contains(str)) {
 			return str;
 		} else {

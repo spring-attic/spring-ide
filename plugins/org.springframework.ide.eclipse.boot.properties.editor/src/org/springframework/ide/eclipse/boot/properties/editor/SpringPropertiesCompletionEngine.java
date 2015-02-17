@@ -325,7 +325,7 @@ public class SpringPropertiesCompletionEngine {
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
 				Type type = getValueType(propertyName);
-				String[] valueCompletions = typeUtil.getValues(type);
+				String[] valueCompletions = typeUtil.getAllowedValues(type);
 				if (valueCompletions!=null && valueCompletions.length>0) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (int i = 0; i < valueCompletions.length; i++) {

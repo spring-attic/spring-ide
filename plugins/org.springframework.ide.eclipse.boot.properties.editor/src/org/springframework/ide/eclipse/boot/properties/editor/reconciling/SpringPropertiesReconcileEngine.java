@@ -16,9 +16,6 @@ import static org.springframework.ide.eclipse.boot.properties.editor.reconciling
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
@@ -31,12 +28,12 @@ import org.eclipse.jface.text.TextUtilities;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
@@ -49,52 +46,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
  */
 @SuppressWarnings("restriction")
 public class SpringPropertiesReconcileEngine {
-
-	public static abstract class ValueParser {
-		abstract Object parse(String str);
-	}
-
-	private static final Map<String,ValueParser> VALUE_PARSERS = new HashMap<String, ValueParser>();
-	static {
-		VALUE_PARSERS.put(Integer.class.getName(), new ValueParser() {
-			Object parse(String str) {
-				return Integer.parseInt(str);
-			}
-		});
-		VALUE_PARSERS.put(Long.class.getName(), new ValueParser() {
-			Object parse(String str) {
-				return Long.parseLong(str);
-			}
-		});
-		VALUE_PARSERS.put(Short.class.getName(), new ValueParser() {
-			Object parse(String str) {
-				return Short.parseShort(str);
-			}
-		});
-		VALUE_PARSERS.put(Double.class.getName(), new ValueParser() {
-			Object parse(String str) {
-				return Double.parseDouble(str);
-			}
-		});
-		VALUE_PARSERS.put(Float.class.getName(), new ValueParser() {
-			Object parse(String str) {
-				return Float.parseFloat(str);
-			}
-		});
-		VALUE_PARSERS.put(Boolean.class.getName(), new ValueParser() {
-			Object parse(String str) {
-				//The 'more obvious' implementation is too liberal and accepts anything as okay.
-				//return Boolean.parseBoolean(str);
-				str = str.toLowerCase();
-				if (str.equals("true")) {
-					return true;
-				} else if (str.equals("false")) {
-					return false;
-				}
-				throw new IllegalArgumentException("Value should be 'true' or 'false'");
-			}
-		});
-	}
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
@@ -185,23 +136,12 @@ public class SpringPropertiesReconcileEngine {
 		}
 	}
 
-	private void subpropertiesInvalidError(IProblemCollector problemCollector,
-			IRegion trimmedRegion, PropertyInfo validProperty,
-			String validPrefix) {
-		problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
-				"Subproperties are invalid for property "+
-						"'"+validPrefix+"' with type '"+validProperty.getType()+"'",
-						trimmedRegion.getOffset()+validPrefix.length(),
-						trimmedRegion.getLength()-validPrefix.length()
-				));
-	}
-
 	private FuzzyMap<PropertyInfo> getIndex() {
 		return fIndexProvider.get();
 	}
 
 	private void reconcileType(IDocument doc, Type expectType, ITypedRegion[] regions, int i, IProblemCollector problems) {
-		ValueParser parser = getValueParser(expectType);
+		ValueParser parser = typeUtil.getValueParser(expectType);
 		if (parser!=null) {
 			String escapedValue = getAssignedValue(doc, regions, i);
 			IRegion errorRegion = null;
@@ -241,54 +181,10 @@ public class SpringPropertiesReconcileEngine {
 			}
 			if (errorRegion!=null) {
 				problems.accept(new SpringPropertyProblem(ERROR_TYPE,
-						"Expecting '"+niceTypeName(expectType)+"'",
+						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}
 		}
-	}
-
-	private String niceTypeName(Type _type) {
-		//TODO: this doesn't 'nicify' type parameters in the same way as the base type.
-		// Proper way to do this is walk the type and apply the same 'nicification' to
-		// all the types including parameters.
-		String typeStr = _type.toString();
-		if (typeStr.startsWith("java.lang.")) {
-			return typeStr.substring("java.lang.".length());
-		}
-		if (typeUtil.isEnum(_type)) {
-			String[] values = typeUtil.getValues(_type);
-			if (values!=null && values.length>0) {
-				StringBuilder name = new StringBuilder();
-				name.append(typeStr+"[");
-				int max = Math.min(4, values.length);
-				for (int i = 0; i < max; i++) {
-					if (i>0) {
-						name.append(", ");
-					}
-					name.append(values[i]);
-				}
-				if (max!=values.length) {
-					name.append(", ...");
-				}
-				name.append("]");
-				return name.toString();
-			}
-		}
-		return typeStr;
-	}
-
-	private ValueParser getValueParser(Type type) {
-		ValueParser simpleParser = VALUE_PARSERS.get(type.getErasure());
-		if (simpleParser!=null) {
-			return simpleParser;
-		}
-		if (typeUtil.isEnum(type)) {
-			String[] enumValues = typeUtil.getValues(type);
-			if (enumValues!=null && enumValues.length>0) {
-				return new EnumValueParser(niceTypeName(type), typeUtil.getValues(type));
-			}
-		}
-		return null;
 	}
 
 	/**
