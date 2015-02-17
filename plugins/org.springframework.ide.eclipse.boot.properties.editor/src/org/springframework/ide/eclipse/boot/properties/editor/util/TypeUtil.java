@@ -331,6 +331,7 @@ public class TypeUtil {
 				}
 			}
 		}
+		//TODO: Pojo properties from setters.
 		return Collections.emptyList();
 	}
 
