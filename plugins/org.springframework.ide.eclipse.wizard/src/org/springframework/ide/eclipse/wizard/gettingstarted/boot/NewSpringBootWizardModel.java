@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
+import java.beans.Expression;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +34,9 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
@@ -66,7 +70,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
  */
 public class NewSpringBootWizardModel {
 
-	private static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2+json";
+	private static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
@@ -102,6 +106,8 @@ public class NewSpringBootWizardModel {
 	private final String JSON_URL;
 	private final String CONTENT_TYPE;
 
+	private final Map<String, LiveExpression<Boolean>> dependencyEnablement = new HashMap<String, LiveExpression<Boolean>>();
+
 	public NewSpringBootWizardModel() throws Exception {
 		this(new URLConnectionFactory(), StsProperties.getInstance(new NullProgressMonitor()));
 	}
@@ -118,8 +124,8 @@ public class NewSpringBootWizardModel {
 		baseUrl = new LiveVariable<String>("<computed>");
 		baseUrlValidator = new UrlValidator("Base Url", baseUrl);
 
-		discoverOptions(stringInputs, style);
-		style.sort();
+		discoverOptions(stringInputs, dependencies);
+		dependencies.sort();
 
 		projectName = stringInputs.getField("name");
 		projectName.validator(new NewProjectNameValidator(projectName.getVariable()));
@@ -131,7 +137,7 @@ public class NewSpringBootWizardModel {
 		for (FieldModel<String> param : stringInputs) {
 			computedUrl.addField(param);
 		}
-		computedUrl.addField(style);
+		computedUrl.addField(dependencies);
 		for (RadioGroup group : radioGroups.getGroups()) {
 			computedUrl.addField(group);
 		}
@@ -170,7 +176,7 @@ public class NewSpringBootWizardModel {
 			//The fields need to be discovered by parsing web form.
 	);
 
-	public final MultiSelectionFieldModel<String> style = new MultiSelectionFieldModel<String>(String.class, "dependencies")
+	public final MultiSelectionFieldModel<Dependency> dependencies = new MultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
 			.label("Dependencies");
 
 	private final FieldModel<String> projectName; //an alias for stringFields.getField("name");
@@ -185,6 +191,7 @@ public class NewSpringBootWizardModel {
 	public final LiveVariable<String> downloadUrl = new LiveVariable<String>();
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
 	private RadioGroups radioGroups = new RadioGroups();
+	private RadioGroup bootVersion;
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
@@ -262,7 +269,7 @@ public class NewSpringBootWizardModel {
 	/**
 	 * Dynamically discover input fields and 'style' options by parsing initializr form.
 	 */
-	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<String> style) throws Exception {
+	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<Dependency> dependencies) throws Exception {
 		InitializrServiceSpec serviceSpec = parseJsonFrom(new URL(JSON_URL));
 
 		Map<String, String> textInputs = serviceSpec.getTextInputs();
@@ -306,14 +313,44 @@ public class NewSpringBootWizardModel {
 			RadioGroup group = radioGroups.ensureGroup(groupName);
 			group.label(e.getValue());
 			addOptions(group, serviceSpec.getSingleSelectOptions(groupName));
+			if (groupName.equals("bootVersion")) {
+				this.bootVersion = group;
+			}
 		}
 
 		//styles
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
 			for (Dependency dep : dgroup.getContent()) {
-				style.choice(dep.getName(), dep.getId(), dep.getDescription());
+				dependencies.choice(dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep.getVersionRange()));
 			}
 		}
+	}
+
+	private LiveExpression<Boolean> createEnablementExp(final RadioGroup bootVersion, String versionRange) {
+		try {
+			if (StringUtils.hasText(versionRange)) {
+				final VersionRange range = new VersionRange(versionRange);
+				return new LiveExpression<Boolean>() {
+					{ dependsOn(bootVersion.getSelection().selection); }
+					@Override
+					protected Boolean compute() {
+						try {
+							String versionStr = bootVersion.getSelection().selection.getValue().getValue();
+							if (versionStr!=null) {
+								Version version = new Version(versionStr);
+								return range.includes(version);
+							}
+						} catch (Exception e) {
+							WizardPlugin.log(e);
+						}
+						return true;
+					}
+				};
+			}
+		} catch (Exception e) {
+			WizardPlugin.log(e);
+		}
+		return LiveExpression.TRUE;
 	}
 
 	private void addOptions(RadioGroup group, Option[] options) {
@@ -382,6 +419,10 @@ public class NewSpringBootWizardModel {
 
 	public RadioGroups getRadioGroups() {
 		return this.radioGroups;
+	}
+
+	public RadioGroup getBootVersion() {
+		return bootVersion;
 	}
 
 }

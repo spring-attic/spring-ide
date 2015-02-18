@@ -26,6 +26,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.ChooseOneSectionCombo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.DescriptionSection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -118,7 +119,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			}
 
 			sections.add(
-				new CheckBoxesSection<String>(this, model.style)
+				new CheckBoxesSection<Dependency>(this, model.dependencies)
 					.columns(4)
 			);
 

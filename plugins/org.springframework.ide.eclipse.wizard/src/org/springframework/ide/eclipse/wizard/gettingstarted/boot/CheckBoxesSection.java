@@ -15,6 +15,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Group;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
@@ -55,7 +57,12 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final T value;
 		private final String label;
 		private final String tooltip;
+		private LiveExpression<Boolean> enablement;
 
+		public CheckBox(IPageWithSections owner, T value, String label, String tooltip, LiveExpression<Boolean> enablement) {
+			this(owner, value, label, tooltip);
+			this.enablement = enablement;
+		}
 		public CheckBox(IPageWithSections owner, T value, String label, String tooltip) {
 			super(owner);
 			this.value = value;
@@ -98,6 +105,15 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 						}
 					}
 				});
+				if (enablement!=null) {
+					enablement.addListener(new ValueListener<Boolean>() {
+						public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+							if (value!=null) {
+								cb.setEnabled(value);
+							}
+						}
+					});
+				}
 			}
 		}
 
@@ -142,7 +158,8 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 
 		for (int i = 0; i < options.length; i++) {
-			subsections[i] = new CheckBox(owner, options[i], model.getLabel(options[i]), model.getTooltip(options[i]));
+			T option = options[i];
+			subsections[i] = new CheckBox(owner, option, model.getLabel(option), model.getTooltip(option), model.getEnablement(option));
 			subsections[i].createContents(group);
 		}
 	}

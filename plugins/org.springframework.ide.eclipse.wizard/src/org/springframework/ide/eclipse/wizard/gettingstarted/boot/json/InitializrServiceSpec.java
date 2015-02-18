@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.TypeOccurrenceCollector;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Option;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
@@ -68,8 +70,11 @@ public class InitializrServiceSpec {
 		}
 	}
 
-	public static class Dependency extends Nameable {
+	public static class Dependency extends Nameable implements IdAble{
+
 		private String id;
+		private String description;
+		private String versionRange;
 
 		public String getId() {
 			return id;
@@ -78,8 +83,6 @@ public class InitializrServiceSpec {
 		public void setId(String id) {
 			this.id = id;
 		}
-
-		private String description;
 
 		public String getDescription() {
 			return description;
@@ -97,9 +100,19 @@ public class InitializrServiceSpec {
 				deps[i].setId(obj.getString("id"));
 				deps[i].setName(obj.optString("name"));
 				deps[i].setDescription(obj.optString("description"));
+				deps[i].setVersionRange(obj.optString("versionRange"));
 			}
 			return deps;
 		}
+
+		public void setVersionRange(String range) {
+			this.versionRange = range;
+		}
+
+		public String getVersionRange() {
+			return versionRange;
+		}
+
 	}
 
 	public static class DependencyGroup extends Nameable {

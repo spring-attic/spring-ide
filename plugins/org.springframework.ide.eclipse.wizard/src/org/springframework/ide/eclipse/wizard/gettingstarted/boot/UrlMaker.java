@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.IdAble;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -22,7 +24,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 public class UrlMaker extends LiveExpression<String> {
 
 	private final List<FieldModel<String>> inputs = new ArrayList<FieldModel<String>>();
-	private final List<MultiSelectionFieldModel<String>> multiInputs = new ArrayList<MultiSelectionFieldModel<String>>();
+	private final List<MultiSelectionFieldModel<IdAble>> multiInputs = new ArrayList<MultiSelectionFieldModel<IdAble>>();
 	private final List<FieldModel<RadioInfo>> radioInputs = new ArrayList<FieldModel<RadioInfo>>();
 
 	private final LiveExpression<String> baseUrl;
@@ -42,8 +44,9 @@ public class UrlMaker extends LiveExpression<String> {
 		return this;
 	}
 
-	public UrlMaker addField(MultiSelectionFieldModel<String> param) {
-		multiInputs.add(param);
+	@SuppressWarnings("unchecked")
+	public UrlMaker addField(MultiSelectionFieldModel<? extends IdAble> param) {
+		multiInputs.add((MultiSelectionFieldModel<IdAble>) param);
 		dependsOn(param.getSelecteds()); //Recompute my value when the input changes.
 		return this;
 	}
@@ -80,10 +83,15 @@ public class UrlMaker extends LiveExpression<String> {
 			}
 		}
 
-		for (MultiSelectionFieldModel<String> mf : multiInputs) {
+		for (MultiSelectionFieldModel<IdAble> mf : multiInputs) {
 			String name = mf.getName();
-			for (String selectedValue : mf.getSelecteds().getValues()) {
-				builder.addParameter(name, selectedValue);
+			for (IdAble selectedValue : mf.getSelecteds().getValues()) {
+				//Note that it is possible for values to be selected and disabled at the same time
+				// (i.e. a checkbox can be checked and 'greyed' out at the same time)
+				//We must therefore check enablement before adding a selection to the URI.
+				if (mf.getEnablement(selectedValue).getValue()) {
+					builder.addParameter(name, selectedValue.getId());
+				}
 			}
 		}
 

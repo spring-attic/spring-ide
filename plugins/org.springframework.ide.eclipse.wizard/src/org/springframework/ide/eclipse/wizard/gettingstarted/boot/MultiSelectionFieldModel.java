@@ -32,6 +32,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
  */
 public class MultiSelectionFieldModel<T> {
 
+	private static final LiveExpression<Boolean> ALLWAYS_ENABLED = LiveExpression.constant(true);
+
 	private Class<T> type; //Type of data stored in the field.
 	private String name; // used to submit value to some service that handles the form
 	private String label; // Label to display in forms
@@ -41,6 +43,12 @@ public class MultiSelectionFieldModel<T> {
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
 	private Map<T,String> tooltips = null; //don't allocate unless used.
 	private boolean mustSort;
+
+	private Map<T, LiveExpression<Boolean>> enablements = null;
+
+	public interface EnablementProvider<T> {
+		LiveExpression<Boolean> getEnablement(T choice);
+	}
 
 	public MultiSelectionFieldModel(Class<T> type, String name) {
 		this.type = type;
@@ -102,6 +110,14 @@ public class MultiSelectionFieldModel<T> {
 		setTooltip(value, tooltipText);
 	}
 
+	public void choice(String label, T value, String tooltipText, LiveExpression<Boolean> enablement) {
+		choice(label, value, tooltipText);
+		if (enablements==null) {
+			enablements = new HashMap<T, LiveExpression<Boolean>>();
+		}
+		enablements.put(value, enablement);
+	}
+
 	public void setTooltip(T value, String tooltipText) {
 		if (tooltips==null) {
 			tooltips = new HashMap<T, String>();
@@ -141,5 +157,14 @@ public class MultiSelectionFieldModel<T> {
 		mustSort = true;
 	}
 
+	public LiveExpression<Boolean> getEnablement(T choice) {
+		if (enablements!=null) {
+			LiveExpression<Boolean> e = enablements.get(choice);
+			if (e!=null) {
+				return e;
+			}
+		}
+		return ALLWAYS_ENABLED;
+	}
 
 }
