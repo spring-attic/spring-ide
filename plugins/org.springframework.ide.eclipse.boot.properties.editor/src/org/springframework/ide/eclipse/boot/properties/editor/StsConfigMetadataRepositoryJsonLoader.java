@@ -77,8 +77,6 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			} else if (ekind==IClasspathEntry.CPE_PROJECT) {
 				loadFromProjectDependency(e);
 			} else {
-				//TODO: project dependencies?
-				//TODO: source folders?
 				debug("Skipped: "+ekind(ekind)+" "+ckind(ckind)+": "+path);
 			}
 		}

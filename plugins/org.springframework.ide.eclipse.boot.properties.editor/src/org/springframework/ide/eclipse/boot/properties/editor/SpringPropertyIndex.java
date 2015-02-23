@@ -23,13 +23,14 @@ public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 	public SpringPropertyIndex(IJavaProject jp) {
 		try {
 			StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
-			ConfigurationMetadataRepository metadata = loader.load(jp); //TODO: is this fast enough? Or should it be done in background?
-			
+			ConfigurationMetadataRepository metadata = loader.load(jp);
+			//^^^ Should be done in bg? It seems fast enough for now.
+
 			Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
 			for (ConfigurationMetadataProperty item : allEntries) {
 				add(new PropertyInfo(item));
 			}
-			
+
 			for (ConfigurationMetadataGroup group : metadata.getAllGroups().values()) {
 				for (ConfigurationMetadataSource source : group.getSources().values()) {
 					for (ConfigurationMetadataProperty prop : source.getProperties().values()) {
@@ -38,12 +39,10 @@ public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 					}
 				}
 			}
-			
+
 	//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
 	//		dumpAsTestData();
 	//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
-	
-			// TODO Auto-generated method stub
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}

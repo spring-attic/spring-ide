@@ -27,16 +27,16 @@ import org.eclipse.swt.widgets.Shell;
 
 /**
  * IInformationControlCreator for 'hover information' associated with Spring properties. This control is
- * used in two different contexts. 
- *  
- *    - tooltip info shown when hovering over a property 
- *    - side view for content assist that proposes property completions.  
+ * used in two different contexts.
+ *
+ *    - tooltip info shown when hovering over a property
+ *    - side view for content assist that proposes property completions.
  */
 @SuppressWarnings("restriction")
 public class SpringPropertiesInformationControlCreator implements IInformationControlCreator {
 
 	/**
-	 * Status text shown in the bottom 'status' area of the control (but it is only shown on the 
+	 * Status text shown in the bottom 'status' area of the control (but it is only shown on the
 	 * non-enriched version of the control)
 	 */
 	private String statusText;
@@ -90,7 +90,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 	private void fillToolbar(ToolBarManager tbm, BrowserInformationControl infoControl) {
 		tbm.add(new OpenDeclarationAction(infoControl));
 	}
-	
+
 	/**
 	 * Action that opens the current hover input element.
 	 *
@@ -102,7 +102,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 		public OpenDeclarationAction(BrowserInformationControl infoControl) {
 			fInfoControl= infoControl;
 			setText("Open Declaration");
-			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$ //TODO: better images
+			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$
 		}
 
 		/*
@@ -127,5 +127,5 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 			}
 		}
 	}
-	
+
 }

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -126,6 +129,15 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		return problems.getAllProblems();
 	}
 
+
+	@Override
+	protected IProject createPredefinedProject(String projectName)
+			throws CoreException, IOException {
+		StsTestUtil.setAutoBuilding(false);
+		IProject p = super.createPredefinedProject(projectName);
+		StsTestUtil.assertNoErrors(p);
+		return p;
+	}
 
 	/**
 	 * Basic 'simulated' editor. Contains text and a cursor position / selection.
@@ -300,14 +312,21 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	 */
 	public void assertCompletionsBasic(String textBefore, String... expectTextAfter) throws Exception {
 		MockEditor editor = new MockEditor(textBefore);
+		StringBuilder expect = new StringBuilder();
+		StringBuilder actual = new StringBuilder();
+		for (String after : expectTextAfter) {
+			expect.append(after);
+			expect.append("\n-------------------\n");
+		}
+
 		ICompletionProposal[] completions = getCompletions(editor);
-		String[] completed = new String[completions.length];
-		assertEquals(expectTextAfter.length, completions.length);
-		for (int i = 0; i < completed.length; i++) {
+		for (int i = 0; i < completions.length; i++) {
 			editor = new MockEditor(textBefore);
 			editor.apply(completions[i]);
-			assertEquals(expectTextAfter[i], editor.getText());
+			actual.append(editor.getText());
+			actual.append("\n-------------------\n");
 		}
+		assertEquals(expect.toString(), actual.toString());
 	}
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {

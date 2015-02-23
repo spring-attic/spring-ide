@@ -159,7 +159,6 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	 * be.
 	 */
 	public static double match(String pattern, String data) {
-		int sortIndex = 0;
 		int ppos = 0; //pos of next char in pattern to look for
 		int dpos = 0; //pos of next char in data not yet matched
 		int gaps = 0; //number of 'gaps' in the match. A gap is any non-empty run of consecutive characters in the data that are not used by the match

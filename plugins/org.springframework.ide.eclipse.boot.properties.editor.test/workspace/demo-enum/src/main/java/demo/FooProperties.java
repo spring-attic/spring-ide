@@ -9,11 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("foo")
 public class FooProperties {
 
+	//Enum
 	private Color color;
+	
+	//Map Enum -> Atomic
 	private Map<Color,String> colorNames;
+	
+	//Map Atomic -> Enum  
 	private Map<String,Color> nameColors;
+	
+	//Map Enum -> Pojo
 	private Map<Color, ColorData> colorData;
 
+	//Pojo
+	private ColorData data;
+	
 	public Color getColor() {
 		return color;
 	}
@@ -38,5 +48,11 @@ public class FooProperties {
 	}
 	public void setColorData(Map<Color, ColorData> colorData) {
 		this.colorData = colorData;
+	}
+	public ColorData getData() {
+		return data;
+	}
+	public void setData(ColorData data) {
+		this.data = data;
 	}
 }

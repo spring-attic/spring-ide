@@ -19,5 +19,5 @@ public class FooProperties {
 	public void setList(List<Foo> foo) {
 		this.list = foo;
 	}
-	
+
 }

@@ -21,11 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -49,10 +53,9 @@ public class TypeUtil {
 			"java.lang.Short",
 			"java.lang.Integer",
 			"java.lang.Long",
-			"java.lan.Double",
+			"java.lang.Double",
 			"java.lang.Float",
 			"java.lang.Character",
-			"java.util.List",
 			"java.net.InetAddress",
 			"java.lang.String[]"
 	));
@@ -188,6 +191,29 @@ public class TypeUtil {
 		return typeStr;
 	}
 
+
+	/**
+	 * @return true if it is reasonable to navigate given type with '.' notation. This returns true
+	 * by default except for some specific cases we assume are not 'dotable' such as Primitive types
+	 * and String
+	 */
+	public boolean isDotable(Type type) {
+		String typeName = type.getErasure();
+		if (typeName.equals("java.lang.Object")) {
+			//special case. Treat as 'non dotable' type. This mainly for stuff like logging.level
+			// declared as Map<String,Object> so it would 'eat' the dots into the key.
+			// also it makes sense to treat Object as 'non-dotable' since we cannot determine properties
+			// for such an abstract type (as Object itself has no setters).
+			return false;
+		}
+		return !isAtomic(type);
+	}
+
+	protected boolean isAtomic(Type type) {
+		String typeName = type.getErasure();
+		return typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName) || isEnum(type);
+	}
+
 	/**
 	 * Check if it is valid to
 	 * use the notation <name>[<index>]=<value> in property file
@@ -243,8 +269,18 @@ public class TypeUtil {
 
 	public boolean isAssignableType(Type type) {
 		return ASSIGNABLE_TYPES.contains(type.getErasure())
-				|| isBracketable(type) //TODO?? Not all bracketable things are assignable are they?
-				|| isEnum(type);
+				|| isEnum(type)
+				|| isAssignableList(type);
+	}
+
+	private boolean isAssignableList(Type type) {
+		//TODO: isBracketable means 'isList' right now, but this may not be
+		// the case in the future.
+		if (isBracketable(type)) {
+			Type domainType = getDomainType(type);
+			return isAtomic(domainType);
+		}
+		return false;
 	}
 
 	public boolean isEnum(Type type) {
@@ -293,48 +329,98 @@ public class TypeUtil {
 	private static final String STRING_TYPE_NAME = String.class.getName();
 
 	static {
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
-		TypeUtil.PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
 	}
 
 	/**
-	 * @return true if it is reasonable to navigate given type with '.' notation. This returns true
-	 * by default except for some specific cases we assume are not 'dotable' such as Primitive types
-	 * and String
+	 * Determine properties that are setable on object of given type.
+	 * <p>
+	 * Note that this may return both null or an empty list, but they mean
+	 * different things. Null means that the properties on the object are not known,
+	 * and therefore reconciling should not check property validity. On the other hand
+	 * returning an empty list means that there are no properties. In this case,
+	 * accessing properties is invalid and reconciler should show an error message
+	 * for any property access.
+	 *
+	 * @return A list of known properties or null if the list of properties is unknown.
 	 */
-	public static boolean isDotable(Type type) {
-		String typeName = type.getErasure();
-		boolean isSimple = typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName);
-		return !isSimple;
-	}
-
-
 	public List<TypedProperty> getProperties(Type type) {
-		if (type!=null) {
-			if (isMap(type)) {
-				Type keyType = getKeyType(type);
-				if (keyType!=null) {
-					String[] keyValues = getAllowedValues(keyType);
-					if (hasElements(keyValues)) {
-						Type valueType = getDomainType(type);
-						ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
-						for (String propName : keyValues) {
-							properties.add(new TypedProperty(propName, valueType));
-						}
-						return properties;
+		if (type==null) {
+			return null;
+		}
+		if (!isDotable(type)) {
+			//If dot navigation is not valid then really this is just like saying the type has no properties.
+			return Collections.emptyList();
+		}
+		if (isMap(type)) {
+			Type keyType = getKeyType(type);
+			if (keyType!=null) {
+				String[] keyValues = getAllowedValues(keyType);
+				if (hasElements(keyValues)) {
+					Type valueType = getDomainType(type);
+					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
+					for (String propName : keyValues) {
+						properties.add(new TypedProperty(propName, valueType));
 					}
+					return properties;
+				}
+			}
+		} else {
+			String typename = type.getErasure();
+			IType eclipseType = findType(typename);
+
+			//TODO: handle type parameters.
+			if (eclipseType!=null) {
+				List<IMethod> setters = getSetterMethods(eclipseType);
+				//TODO: setters inherited from super classes?
+				if (setters!=null && !setters.isEmpty()) {
+					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(setters.size());
+					for (IMethod m : setters) {
+						Type propType = Type.fromSignature(m.getParameterTypes()[0], eclipseType);
+						properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType));
+					}
+					return properties;
 				}
 			}
 		}
-		//TODO: Pojo properties from setters.
-		return Collections.emptyList();
+		return null;
 	}
 
+	private String setterNameToProperty(String name) {
+		Assert.isLegal(name.startsWith("set"));
+		String camelName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
+		return StringUtil.camelCaseToHyphens(camelName);
+	}
 
-
+	private List<IMethod> getSetterMethods(IType eclipseType) {
+		try {
+			if (eclipseType!=null && eclipseType.isClass()) {
+				IMethod[] allMethods = eclipseType.getMethods();
+				if (ArrayUtils.hasElements(allMethods)) {
+					ArrayList<IMethod> setters = new ArrayList<IMethod>();
+					for (IMethod m : allMethods) {
+						String mname = m.getElementName();
+						if (mname.startsWith("set") && mname.length()>=4) {
+							//Need at least 4 chars or the property name will be empty.
+							String sig = m.getSignature();
+							int numParams = Signature.getParameterCount(sig);
+							if (numParams==1) {
+								setters.add(m);
+							}
+						}
+					}
+					return setters;
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return null;
+	}
 }

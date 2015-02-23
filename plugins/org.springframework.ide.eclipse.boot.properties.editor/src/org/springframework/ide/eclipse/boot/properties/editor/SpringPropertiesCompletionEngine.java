@@ -29,9 +29,11 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jface.fieldassist.ContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
@@ -232,8 +234,9 @@ public class SpringPropertiesCompletionEngine {
 				navPrefix = fuzzySearchPrefix.getPrefix(doc, navOffset);
 				if (navPrefix!=null && !navPrefix.isEmpty()) {
 					PropertyInfo prop = getIndex().findLongestCommonPrefixEntry(navPrefix);
-					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, new Region(navOffset-navPrefix.length(), prop.getId().length()));
-					Type type = navigator.navigate(navOffset, TypeParser.parse(prop.getType()));
+					int regionStart = navOffset-navPrefix.length();
+					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, region(regionStart, navOffset));
+					Type type = navigator.navigate(regionStart+prop.getId().length(), TypeParser.parse(prop.getType()));
 					if (type!=null) {
 						return getNavigationProposals(doc, type, navOffset, offset);
 					}
@@ -243,6 +246,10 @@ public class SpringPropertiesCompletionEngine {
 			BootActivator.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	private IRegion region(int start, int end) {
+		return new Region(start, end-start);
 	}
 
 	/**
@@ -263,14 +270,7 @@ public class SpringPropertiesCompletionEngine {
 					for (TypedProperty prop : objectProperties) {
 						if (prop.getName().startsWith(prefix)) {
 							Type valueType = prop.getType();
-							String postFix = "";
-							if (valueType!=null) {
-								if (typeUtil.isAssignableType(valueType)) {
-									postFix = "=";
-								} else if (TypeUtil.isDotable(valueType)) {
-									postFix = ".";
-								}
-							}
+							String postFix = propertyCompletionPostfix(valueType);
 							proposals.add(new ValueProposal(navOffset+1, prefix, prop.getName(), sorting++, postFix));
 						}
 					}
@@ -283,6 +283,20 @@ public class SpringPropertiesCompletionEngine {
 			BootActivator.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	protected String propertyCompletionPostfix(Type type) {
+		String postfix = "";
+		if (type!=null) {
+			if (typeUtil.isAssignableType(type)) {
+				postfix = "=";
+			} else if (TypeUtil.isBracketable(type)) {
+				postfix = "[";
+			} else if (typeUtil.isDotable(type)) {
+				postfix = ".";
+			}
+		}
+		return postfix;
 	}
 
 	public static boolean isAssign(char assign) {
@@ -347,17 +361,20 @@ public class SpringPropertiesCompletionEngine {
 	 * Determine the value type for a give propertyName.
 	 */
 	protected Type getValueType(String propertyName) {
-		PropertyInfo prop = getIndex().get(propertyName);
-		if (prop!=null) {
-			return TypeParser.parse(prop.getType());
-		} else {
-			prop = getIndex().findLongestCommonPrefixEntry(propertyName);
+		try {
+			PropertyInfo prop = getIndex().get(propertyName);
 			if (prop!=null) {
-				Type type = TypeParser.parse(prop.getType());
-				if (typeUtil.isMap(type)) {
-					return TypeUtil.getDomainType(type);
+				return TypeParser.parse(prop.getType());
+			} else {
+				prop = getIndex().findLongestCommonPrefixEntry(propertyName); //TODO: doesn't understand relaxed names.
+				if (prop!=null) {
+					Document doc = new Document(propertyName);
+					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, new Region(0, doc.getLength()));
+					return navigator.navigate(prop.getId().length(), TypeParser.parse(prop.getType()));
 				}
 			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
 		return null;
 	}
@@ -445,7 +462,6 @@ public class SpringPropertiesCompletionEngine {
 		private int valueStart;
 		private String valuePrefix;
 		private String substitution;
-		private String valuePostFix = "";
 		private int sortingOrder;
 		private String displayString;
 
@@ -492,7 +508,6 @@ public class SpringPropertiesCompletionEngine {
 
 		@Override
 		public IContextInformation getContextInformation() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -571,9 +586,8 @@ public class SpringPropertiesCompletionEngine {
 				String replacement= getCompletion();
 				int start = this.fOffset-fPrefix.length();
 				document.replace(start, offset-start, replacement);
-			} catch (BadLocationException x) {
-				// TODO Auto-generated catch block
-				x.printStackTrace();
+			} catch (BadLocationException e) {
+				BootActivator.log(e);
 			}
 		}
 
@@ -616,12 +630,7 @@ public class SpringPropertiesCompletionEngine {
 		private String getCompletion() {
 			StringBuilder completion = new StringBuilder(match.data.getId());
 			Type type = TypeParser.parse(match.data.getType());
-			if (typeUtil.isAssignableType(type)) {
-				completion.append("=");
-			} else {
-				//assume some kind of 'Object' type
-				completion.append(".");
-			}
+			completion.append(propertyCompletionPostfix(type));
 			return completion.toString();
 		}
 

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.junit.Assert.assertNotEquals;
+
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 
@@ -65,6 +67,14 @@ public class TypeParserTest extends TestCase {
 		assertTrue(type.isGeneric());
 
 		assertEquals("Map<Foo,List<Bar>>", type.toString());
+	}
+
+	public void testTypeEquality() throws Exception {
+		Type type1 = TypeParser.parse("Map<Foo,List<Bar>>");
+		Type type2 = TypeParser.parse("Map<Foo,List<Bar>>");
+		Type type3 = TypeParser.parse("Map<Bar,List<Bar>>");
+		assertEquals(type1, type2);
+		assertNotEquals(type1, type3);
 	}
 
 }

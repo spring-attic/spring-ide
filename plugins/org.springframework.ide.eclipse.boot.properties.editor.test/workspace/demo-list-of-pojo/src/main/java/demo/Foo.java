@@ -6,6 +6,7 @@ public class Foo {
 	
 	private String name;
 	private String description;
+	private List<String> roles;
 	
 	public String getName() {
 		return name;
@@ -20,8 +21,6 @@ public class Foo {
 		this.description = description;
 	}
 	
-	private List<String> roles;
-
 	public List<String> getRoles() {
 		return roles;
 	}

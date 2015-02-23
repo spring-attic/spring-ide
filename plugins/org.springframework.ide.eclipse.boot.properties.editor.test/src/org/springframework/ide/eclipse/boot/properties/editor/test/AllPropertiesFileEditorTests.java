@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ public class AllPropertiesFileEditorTests {
 		TestSuite suite = new TestSuite(AllPropertiesFileEditorTests.class.getName());
 
 		suite.addTestSuite(SpringPropertiesEditorTests.class);
+		suite.addTestSuite(TypeUtilTests.class);
 		suite.addTestSuite(FuzzyMapTests.class);
 		suite.addTestSuite(TypeParserTest.class);
 

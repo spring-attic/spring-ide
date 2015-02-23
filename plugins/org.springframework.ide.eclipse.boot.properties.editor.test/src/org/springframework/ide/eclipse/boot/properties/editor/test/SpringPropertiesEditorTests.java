@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import junit.framework.AssertionFailedError;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -24,9 +22,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
-
-	//TODO: List type is assignable (but parametric),
-	//  - handle this in reconciling?
 
 	public void testServerPortCompletion() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
@@ -269,8 +264,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testReconcilePojoArray() throws Exception {
-		createPredefinedProject("demo-list-of-pojo");
-		data("volder.foo.list", "java.util.List<demo.Foo>", null, "A list of Foo pojos");
+		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Foo"));
+
 		MockEditor editor = new MockEditor(
 				"token.bad.guy=problem\n"+
 				"volder.foo.list[0].name=Kris\n" +
@@ -280,24 +278,34 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"volder.foo.list[0].bogus=Bad\n"
 		);
 
-		try {
-			//This is the more ambitious requirement but it is not implemented yet.
-			assertProblems(editor,
-					"token.bad.guy|unknown property",
-					//'name' is ok
-					//'description' is ok
-					"garbage|'.' or '['",
-					"bogus|unknown property"
-			);
-		} catch (AssertionFailedError e) {
-			//This is the minimum requirement (detect that follow up with '.' after ']'
-			// is acceptable for Pojo but do not attempt to check the pojo properties.
-			assertProblems(editor,
-					"token.bad.guy|unknown property",
-					//..[0].<whatever> is okay
-					"garbage|'.' or '['"
-			);
-		}
+		//This is the more ambitious requirement but it is not implemented yet.
+		assertProblems(editor,
+				"token.bad.guy|unknown property",
+				//'name' is ok
+				//'description' is ok
+				"garbage|'.' or '['",
+				"bogus|has no property"
+		);
+	}
+
+	public void testPojoArrayCompletions() throws Exception {
+		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Foo"));
+
+		assertCompletions("volder.foo.l<*>", "volder.foo.list[<*>");
+		assertCompletionsDisplayString("volder.foo.list[0].<*>", "name", "description", "roles");
+
+		assertCompletions("volder.foo.list[0].n<*>",
+				"volder.foo.list[0].name=<*>"
+		);
+		assertCompletions("volder.foo.list[0].d<*>",
+				"volder.foo.list[0].description=<*>"
+		);
+		assertCompletions("volder.foo.list[0].r<*>",
+				"volder.foo.list[0].roles=<*>"
+		);
 	}
 
 	public void testReconcileArrayNotation() throws Exception {
@@ -459,6 +467,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 
 		assertProblems(editor,
+				".bad|Can't use '.' navigation",
 				"Bogus|Color"
 		);
 	}
@@ -467,10 +476,12 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		IProject p = createPredefinedProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
-		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
 		assertNotNull(jp.findType("demo.Color"));
 
-		assertCompletions("foo.nam<*>", "foo.name-colors.<*>");
+		assertCompletions("foo.nam<*>",
+				"foo.name-colors.<*>",
+				"foo.color-names.<*>"
+		);
 
 		assertCompletionsDisplayString("foo.name-colors.something=<*>",
 				"RED", "GREEN", "BLUE"
@@ -539,8 +550,6 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		IProject p = createPredefinedProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
-		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
-		data("foo.color-data", "java.util.Map<demo.Color,demo.ColorData>", null, "Map with colors in its keys, and pojo in values");
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
@@ -556,5 +565,133 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"BLUE.bad|Color" //because value type is not dotable the dots will be taken to be part of map key
 		);
 	}
+
+	public void testPojoCompletions() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+		assertNotNull(jp.findType("demo.ColorData"));
+
+		assertCompletion("foo.dat<*>", "foo.data.<*>");
+
+		assertCompletionsDisplayString("foo.data.",
+				"wavelen", "name", "next", "nested", "children",
+				"mapped-children", "color-children", "tags"
+		);
+
+		assertCompletions("foo.data.wav<*>", "foo.data.wavelen=<*>");
+		assertCompletions("foo.data.nam<*>", "foo.data.name=<*>");
+		assertCompletions("foo.data.nex<*>", "foo.data.next=<*>");
+		assertCompletions("foo.data.nes<*>", "foo.data.nested.<*>");
+		assertCompletions("foo.data.chi<*>", "foo.data.children[<*>");
+		assertCompletions("foo.data.tag<*>", "foo.data.tags=<*>");
+		assertCompletions("foo.data.map<*>", "foo.data.mapped-children.<*>");
+		assertCompletions("foo.data.col<*>", "foo.data.color-children.<*>");
+	}
+
+	public void testPojoReconciling() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+		assertNotNull(jp.findType("demo.ColorData"));
+
+		MockEditor editor = new MockEditor(
+			"foo.data.bogus=Something\n" +
+			"foo.data.wavelen=3.0\n" +
+			"foo.data.wavelen=not a double\n" +
+			"foo.data.wavelen.more=3.0\n" +
+			"foo.data.wavelen[0]=3.0\n"
+		);
+		assertProblems(editor,
+				"bogus|no property",
+				"not a double|Double",
+				".more|Can't use '.' navigation",
+				"[0]|Can't use '[..]' navigation"
+		);
+	}
+
+	public void testListOfAtomicCompletions() throws Exception {
+		data("foo.slist", "java.util.List<java.lang.String>", null, "list of strings");
+		data("foo.ulist", "java.util.List<Unknown>", null, "list of strings");
+		data("foo.dlist", "java.util.List<java.lang.Double>", null, "list of doubles");
+		assertCompletions("foo.u<*>", "foo.ulist[<*>");
+		assertCompletions("foo.d<*>", "foo.dlist=<*>");
+		assertCompletions("foo.sl<*>", "foo.slist=<*>");
+	}
+
+	public void testMapKeyDotInterpretation() throws Exception {
+		//Interpretation of '.' changes depending on the domain type (i.e. when domain type is
+		//is a simple type got which '.' navigation is invalid then the '.' is 'eaten' by the key.
+
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+		assertNotNull(jp.findType("demo.ColorData"));
+
+		data("atommap", "java.util.Map<java.lang.String,java.lang.Integer>", null, "map of atomic data");
+		data("objectmap", "java.util.Map<java.lang.String,java.lang.Object>", null, "map of atomic object (recursive map)");
+		data("enummap", "java.util.Map<java.lang.String,demo.Color>", null, "map of enums");
+		data("pojomap", "java.util.Map<java.lang.String,demo.ColorData>", null, "map of pojos");
+
+		MockEditor editor = new MockEditor(
+				"atommap.something.with.dots=Vaporize\n" +
+				"atommap.something.with.bracket[0]=Brackelate\n" +
+				"objectmap.other.with.dots=Objectify\n" +
+				"enummap.more.dots=Enumerate\n" +
+				"pojomap.do.some.dots=Pojodot\n" +
+				"pojomap.bracket.and.dots[1]=lala\n" +
+				"pojomap.zozo[2]=lala\n"
+		);
+		assertProblems(editor,
+				"Vaporize|Integer",
+				"[0]|Can't use '[..]'",
+				//objectmap okay
+				"Enumerate|Color",
+				"some|no property",
+				"and|no property",
+				"[2]|Can't use '[..]'"
+		);
+
+		assertCompletions("enummap.more.dots=R<*>", "enummap.more.dots=RED<*>");
+	}
+
+	public void testMapKeyDotInterpretationInPojo() throws Exception {
+		//Similar to testMapKeyDotInterpretation but this time maps are not attached to property
+		// directly but via a pojo property
+
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+		assertNotNull(jp.findType("demo.ColorData"));
+
+		MockEditor editor = new MockEditor(
+				"foo.color-names.BLUE.dot=Blauw\n"+
+				"foo.color-data.RED.name=Good\n"+
+				"foo.color-data.GREEN.bad=Bad\n"+
+				"foo.color-data.GREEN.wrong[1]=Wrong\n"
+		);
+		assertProblems(editor,
+				"BLUE.dot|Color", //dot is eaten so this is an error
+				"bad|no property", //dot not eaten so '.bad' is accessing a property
+				"wrong|no property"
+		);
+
+		assertCompletions("foo.color-data.RED.ch<*>", "foo.color-data.RED.children[<*>");
+	}
+
+//	public void testContentAssistAfterRBrack() throws Exception {
+//		//TODO: content assist after ] (auto insert leading '.' if necessary)
+//	}
+
+	//public void
+
+
+	//TODO: relaxed names for navigation operations (i.e. object properties and enum map keys)
+
+
 
 }

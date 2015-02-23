@@ -40,7 +40,7 @@ public class DocumentUtil {
 		}
 		return null;
 	}
-	
+
 	public static IProject getProject(IDocument doc) {
 		IPath location = getLocation(doc);
 		if (location!=null) {
@@ -51,7 +51,7 @@ public class DocumentUtil {
 		}
 		return null;
 	}
-	
+
 	public static IJavaProject getJavaProject(IDocument doc) {
 		try {
 			if (doc!=null) {
@@ -96,23 +96,23 @@ public class DocumentUtil {
 		return -1;
 	}
 
-	public static IRegion trim(IDocument doc, IRegion region) {
-		if (region.getLength()==0) {
-			//Special case avoid doing any work for empty region trimming.
-			return region;
-		}
-		int start = firstNonWhitespaceCharOfRegion(doc, region);
-		if (start>=0) {
-			int end = lastNonWhitespaceCharOfRegion(doc, region);
-			if (end>=start) {
-				return new Region(start, end-start+1); //+1 because 'end' character should be included.
-			}
-		}
-		//No non-whitespace chars found. It is somewhat ambiguous how to trim
-		// the region down to 'nothing'. We can essentially pick any offset within the
-		// region as the start of the empty region. We decided to just pick the start
-		// of the region (so trim from the end).
-		return new Region(region.getOffset(), 0);
-	}
-	
+//	public static IRegion trim(IDocument doc, IRegion region) {
+//		if (region.getLength()==0) {
+//			//Special case avoid doing any work for empty region trimming.
+//			return region;
+//		}
+//		int start = firstNonWhitespaceCharOfRegion(doc, region);
+//		if (start>=0) {
+//			int end = lastNonWhitespaceCharOfRegion(doc, region);
+//			if (end>=start) {
+//				return new Region(start, end-start+1); //+1 because 'end' character should be included.
+//			}
+//		}
+//		//No non-whitespace chars found. It is somewhat ambiguous how to trim
+//		// the region down to 'nothing'. We can essentially pick any offset within the
+//		// region as the start of the empty region. We decided to just pick the start
+//		// of the region (so trim from the end).
+//		return new Region(region.getOffset(), 0);
+//	}
+
 }

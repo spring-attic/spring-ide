@@ -12,18 +12,19 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation.ERROR_TYPE;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.isBracketable;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.isDotable;
+
+import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
-import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
  * Helper class for {@link SpringPropertiesReconcileEngine} and {@link SpringPropertiesCompletionEngine}.
@@ -75,7 +76,7 @@ public class PropertyNavigator {
 			if (offset<getEnd(region)) {
 				char navOp = getChar(offset);
 				if (navOp=='.') {
-					if (isDotable(type)) {
+					if (typeUtil.isDotable(type)) {
 						return dotNavigate(offset, type);
 					} else {
 						problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
@@ -161,15 +162,14 @@ public class PropertyNavigator {
 	private Type dotNavigate(int offset, Type type) {
 		if (typeUtil.isMap(type)) {
 			int keyStart = offset+1;
-
 			Type domainType = TypeUtil.getDomainType(type);
 			int keyEnd = -1;
-			if (isDotable(domainType)) {
-				//key is only upto the next '.'
-				keyEnd = indexOf('.', offset+1);
-			}
-			if (keyEnd<0) {
-				keyEnd = getEnd(region);
+			if (typeUtil.isDotable(domainType)) {
+				//'.' should be interpreted as navigation.
+				keyEnd = nextNavOp(".[", offset+1);
+			} else {
+				//'.' should *not* be interpreted as navigation.
+				keyEnd = nextNavOp("[", offset+1);
 			}
 			String key = textBetween(keyStart, keyEnd);
 			Type keyType = TypeUtil.getKeyType(type);
@@ -179,14 +179,57 @@ public class PropertyNavigator {
 					try {
 						keyParser.parse(key);
 					} catch (Exception e) {
-						problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE, "Expecting "+typeUtil.niceTypeName(keyType), keyStart, keyEnd-keyStart));
+						problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
+								"Expecting "+typeUtil.niceTypeName(keyType),
+								keyStart, keyEnd-keyStart));
 					}
 				}
 			}
 			return navigate(keyEnd, domainType);
+		} else {
+			// dot navigation into object properties
+			int keyStart = offset+1;
+			int	keyEnd = nextNavOp(".[", offset+1);
+			if (keyEnd<0) {
+				keyEnd = getEnd(region);
+			}
+			String key = StringUtil.camelCaseToHyphens(textBetween(keyStart, keyEnd));
+
+			List<TypedProperty> properties = typeUtil.getProperties(type);
+			if (properties!=null) {
+				TypedProperty prop = null;
+				for (TypedProperty p : properties) {
+					if (p.getName().equals(key)) {
+						prop = p;
+						break;
+					}
+				}
+				if (prop==null) {
+					problemCollector.accept(new SpringPropertyProblem(ERROR_TYPE,
+							"Type '"+typeUtil.niceTypeName(type)+"' has no property '"+key+"'",
+							keyStart, keyEnd-keyStart));
+				} else {
+					return navigate(keyEnd, prop.getType());
+				}
+			}
 		}
-		//TODO: object property navigation.
 		return null;
+	}
+
+	/**
+	 * Skip ahead from give position until reaching the next 'navigation' operator (or the end
+	 * of the navigation chain region).
+	 *
+	 * @param navops Each character in this string is considered a 'navigation operator'.
+	 * @param pos current position in the document.
+	 * @return position of next navop if found, or the position at the end of the region if not found.
+	 */
+	private int nextNavOp(String navops, int pos) {
+		int end = getEnd(region);
+		while (pos < end && navops.indexOf(getChar(pos))<0) {
+			pos++;
+		}
+		return Math.min(pos, end); //ensure never past the end
 	}
 
 	private char getChar(int offset) {
@@ -201,6 +244,4 @@ public class PropertyNavigator {
 	private int getEnd(IRegion region) {
 		return region.getOffset()+region.getLength();
 	}
-
-
 }

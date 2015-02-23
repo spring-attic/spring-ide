@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.properties.editor.util;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+
 /**
  * Converts types in notation used by spring properties metadata into a 'Structured' form
  *
@@ -70,7 +72,10 @@ public class TypeParser {
 	}
 
 	public static Type parse(String str) {
-		return new TypeParser(str).parseType();
+		if (StringUtil.hasText(str)) {
+			return new TypeParser(str).parseType();
+		}
+		return null;
 	}
 
 	private Type parseType() {
