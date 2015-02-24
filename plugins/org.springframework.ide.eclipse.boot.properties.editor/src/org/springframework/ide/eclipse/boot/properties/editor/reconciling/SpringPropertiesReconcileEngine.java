@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation.ERROR_TYPE;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation.WARNING_TYPE;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +26,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
@@ -107,7 +107,7 @@ public class SpringPropertiesReconcileEngine {
 									continue;
 								}
 							}
-							PropertyInfo validProperty = findLongestValidProperty(index, fullName);
+							PropertyInfo validProperty = SpringPropertiesCompletionEngine.findLongestValidProperty(index, fullName);
 							if (validProperty!=null) {
 								int offset = validProperty.getId().length() + trimmedRegion.getOffset();
 								PropertyNavigator navigator = new PropertyNavigator(doc, problemCollector, typeUtil, trimmedRegion);
@@ -244,32 +244,6 @@ public class SpringPropertiesReconcileEngine {
 			//happens if looking for assignment char outside the document
 			return false;
 		}
-	}
-
-	/**
-	 * Find the longest known property that is a prefix of the given name. Here prefix does not mean
-	 * 'string prefix' but a prefix in the sense of treating '.' as a kind of separators. So
-	 * 'prefix' is not allowed to end in the middle of a 'segment'.
-	 */
-	private PropertyInfo findLongestValidProperty(FuzzyMap<PropertyInfo> index, String name) {
-		int bracketPos = name.indexOf('[');
-		int endPos = bracketPos>=0?bracketPos:name.length();
-		PropertyInfo prop = null;
-		String prefix = null;
-		while (endPos>0 && prop==null) {
-			prefix = name.substring(0, endPos);
-			String canonicalPrefix = camelCaseToHyphens(prefix);
-			prop = index.get(canonicalPrefix);
-			if (prop==null) {
-				endPos = name.lastIndexOf('.', endPos-1);
-			}
-		}
-		if (prop!=null) {
-			//We should meet caller's expectation that matched properties returned by this method
-			// match the names exactly even if we found them using relaxed name matching.
-			return prop.withId(prefix);
-		}
-		return null;
 	}
 
 }

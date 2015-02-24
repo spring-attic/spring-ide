@@ -757,9 +757,26 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletions("foo.color-data.red.na<*>", "foo.color-data.red.name=<*>");
 	}
 
-	//TODO: navigation proposal working after relaxed property name?
+	public void testNavigationProposalAfterRelaxedPropertyName() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
 
-	//TODO: upper/lower case content assist for enums.
+		assertCompletions("foo.colorData.r<*>", "foo.colorData.red.<*>");
+		assertCompletions("foo.colorData.red.na<*>", "foo.colorData.red.name=<*>");
+	}
+
+	public void testValueProposalAssignedToRelaxedPropertyName() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+
+		data("relaxed-color", "demo.Color", null, "A soothing color");
+
+		assertCompletion("relaxed-color=b<*>", "relaxed-color=blue<*>");
+		assertCompletion("relaxedColor=b<*>", "relaxedColor=blue<*>");
+	}
+
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

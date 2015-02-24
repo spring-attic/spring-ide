@@ -76,8 +76,6 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 		assertNull(getPropertyType(data, "not-a-color"));
 	}
 
-	//TODO need some enum related tests
-
 	private Type getPropertyType(Type type, String propName) {
 		return getPropertyType(type, propName, EnumCaseMode.ALIASED);
 	}
