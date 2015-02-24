@@ -86,4 +86,11 @@ public class StringUtil {
 		return buf.toString();
 	}
 
+	public static String upperCaseToHyphens(String v) {
+		if (v!=null) {
+			return v.toLowerCase().replace('_', '-');
+		}
+		return null;
+	}
+
 }

@@ -14,7 +14,6 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUt
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,11 +56,12 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -69,6 +69,8 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 @SuppressWarnings("restriction")
 public class SpringPropertiesCompletionEngine {
+
+	private boolean preferLowerCaseEnums = true;
 
 	private static abstract class PrefixFinder {
 		public String getPrefix(IDocument doc, int offset) {
@@ -263,7 +265,8 @@ public class SpringPropertiesCompletionEngine {
 			char navOp = doc.getChar(navOffset);
 			if (navOp=='.') {
 				String prefix = doc.get(navOffset+1, offset-(navOffset+1));
-				List<TypedProperty> objectProperties = typeUtil.getProperties(type);
+				EnumCaseMode caseMode = caseMode(prefix);
+				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode);
 				if (objectProperties!=null && !objectProperties.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					int sorting = 1;
@@ -283,6 +286,19 @@ public class SpringPropertiesCompletionEngine {
 			BootActivator.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Determines the EnumCaseMode used to generate completion candidates based on prefix.
+	 */
+	protected EnumCaseMode caseMode(String prefix) {
+		EnumCaseMode caseMode;
+		if ("".equals(prefix)) {
+			caseMode = preferLowerCaseEnums?EnumCaseMode.LOWER_CASE:EnumCaseMode.ORIGNAL;
+		} else {
+			caseMode = Character.isLowerCase(prefix.charAt(0))?EnumCaseMode.LOWER_CASE:EnumCaseMode.ORIGNAL;
+		}
+		return caseMode;
 	}
 
 	protected String propertyCompletionPostfix(Type type) {
@@ -328,18 +344,19 @@ public class SpringPropertiesCompletionEngine {
 		int regionStart = valuePartition.getOffset();
 		int startOfValue = findValueStart(doc, regionStart);
 		try {
-			String valuePrefix = "";
+			String valuePrefix;
 			if (startOfValue>=0 && startOfValue<offset) {
 				valuePrefix = doc.get(startOfValue, offset-startOfValue);
 			} else {
 				startOfValue = offset;
 				valuePrefix = "";
 			}
+			EnumCaseMode caseMode = caseMode(valuePrefix);
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
 				Type type = getValueType(propertyName);
-				String[] valueCompletions = typeUtil.getAllowedValues(type);
+				String[] valueCompletions = typeUtil.getAllowedValues(type, caseMode);
 				if (valueCompletions!=null && valueCompletions.length>0) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (int i = 0; i < valueCompletions.length; i++) {
@@ -843,6 +860,14 @@ public class SpringPropertiesCompletionEngine {
 
 	public TypeUtil getTypeUtil() {
 		return typeUtil;
+	}
+
+	public boolean getPreferLowerCaseEnums() {
+		return preferLowerCaseEnums;
+	}
+
+	public void setPreferLowerCaseEnums(boolean preferLowerCaseEnums) {
+		this.preferLowerCaseEnums = preferLowerCaseEnums;
 	}
 
 

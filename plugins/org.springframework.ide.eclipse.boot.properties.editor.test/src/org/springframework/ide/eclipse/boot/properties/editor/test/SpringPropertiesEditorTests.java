@@ -447,7 +447,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("foo.color=G<*>", "foo.color=GREEN<*>");
 		assertCompletion("foo.color=B<*>", "foo.color=BLUE<*>");
 		assertCompletionsDisplayString("foo.color=<*>",
-				"RED", "GREEN", "BLUE"
+				"red", "green", "blue"
 		);
 	}
 
@@ -484,7 +484,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 
 		assertCompletionsDisplayString("foo.name-colors.something=<*>",
-				"RED", "GREEN", "BLUE"
+				"red", "green", "blue"
 		);
 		assertCompletions("foo.name-colors.something=G<*>", "foo.name-colors.something=GREEN<*>");
 	}
@@ -520,12 +520,12 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Map Enum -> String:
 		assertCompletions("foo.colnam<*>", "foo.color-names.<*>");
 		assertCompletions("foo.color-names.<*>",
-				"foo.color-names.RED=<*>",
-				"foo.color-names.GREEN=<*>",
-				"foo.color-names.BLUE=<*>"
+				"foo.color-names.red=<*>",
+				"foo.color-names.green=<*>",
+				"foo.color-names.blue=<*>"
 		);
 		assertCompletionsDisplayString("foo.color-names.<*>",
-				"RED", "GREEN", "BLUE"
+				"red", "green", "blue"
 		);
 		assertCompletions("foo.color-names.B<*>",
 				"foo.color-names.BLUE=<*>"
@@ -534,15 +534,15 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Map Enum -> Pojo:
 		assertCompletions("foo.coldat<*>", "foo.color-data.<*>");
 		assertCompletions("foo.color-data.<*>",
-				"foo.color-data.RED.<*>",
-				"foo.color-data.GREEN.<*>",
-				"foo.color-data.BLUE.<*>"
+				"foo.color-data.red.<*>",
+				"foo.color-data.green.<*>",
+				"foo.color-data.blue.<*>"
 		);
 		assertCompletions("foo.color-data.B<*>",
 				"foo.color-data.BLUE.<*>"
 		);
 		assertCompletionsDisplayString("foo.color-data.<*>",
-				"RED", "GREEN", "BLUE"
+				"red", "green", "blue"
 		);
 	}
 
@@ -682,6 +682,84 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		assertCompletions("foo.color-data.RED.ch<*>", "foo.color-data.RED.children[<*>");
 	}
+
+	public void testEnumsInLowerCaseReconciling() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.ClothingSize"));
+
+		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
+
+		MockEditor editor = new MockEditor(
+				"simple.pants.size=NOT_A_SIZE\n"+
+				"simple.pants.size=EXTRA_SMALL\n"+
+				"simple.pants.size=extra-small\n"+
+				"simple.pants.size=small\n"+
+				"simple.pants.size=SMALL\n"
+		);
+		assertProblems(editor,
+				"NOT_A_SIZE|ClothingSize"
+		);
+
+		editor = new MockEditor(
+				"foo.color-names.red=Rood\n"+
+				"foo.color-names.green=Groen\n"+
+				"foo.color-names.blue=Blauw\n" +
+				"foo.color-names.not-a-color=Wrong\n" +
+				"foo.color-names.blue.bad=Blauw\n"
+		);
+		assertProblems(editor,
+				"not-a-color|Color",
+				"blue.bad|Color" //because value type is not dotable the dots will be taken to be part of map key
+		);
+
+		editor = new MockEditor(
+				"foo.color-data.red.next=green\n" +
+				"foo.color-data.red.next=not a color\n" +
+				"foo.color-data.red.bogus=green\n" +
+				"foo.color-data.red.name=Rood\n"
+		);
+		assertProblems(editor,
+				"not a color|Color",
+				"bogus|no property"
+		);
+	}
+
+	public void testEnumsInLowerCaseContentAssist() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.ClothingSize"));
+
+		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
+
+		assertCompletions("simple.pants.size=S<*>", "simple.pants.size=SMALL<*>");
+		assertCompletions("simple.pants.size=s<*>", "simple.pants.size=small<*>");
+		assertCompletions("simple.pants.size=ex<*>",
+				"simple.pants.size=extra-small<*>",
+				"simple.pants.size=extra-large<*>"
+		);
+		assertCompletions("simple.pants.size=EX<*>",
+				"simple.pants.size=EXTRA_SMALL<*>",
+				"simple.pants.size=EXTRA_LARGE<*>"
+		);
+		assertCompletionsDisplayString("foo.color=<*>", "red", "green", "blue");
+
+		assertCompletions("foo.color-data.R<*>", "foo.color-data.RED.<*>");
+		assertCompletions("foo.color-data.r<*>", "foo.color-data.red.<*>");
+		assertCompletions("foo.color-data.<*>",
+				"foo.color-data.red.<*>",
+				"foo.color-data.green.<*>",
+				"foo.color-data.blue.<*>"
+		);
+
+		assertCompletions("foo.color-data.red.na<*>", "foo.color-data.red.name=<*>");
+	}
+
+	//TODO: navigation proposal working after relaxed property name?
+
+	//TODO: upper/lower case content assist for enums.
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

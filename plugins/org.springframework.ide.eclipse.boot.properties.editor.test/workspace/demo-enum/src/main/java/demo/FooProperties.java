@@ -11,19 +11,19 @@ public class FooProperties {
 
 	//Enum
 	private Color color;
-	
+
 	//Map Enum -> Atomic
 	private Map<Color,String> colorNames;
-	
-	//Map Atomic -> Enum  
+
+	//Map Atomic -> Enum
 	private Map<String,Color> nameColors;
-	
+
 	//Map Enum -> Pojo
 	private Map<Color, ColorData> colorData;
 
 	//Pojo
 	private ColorData data;
-	
+
 	public Color getColor() {
 		return color;
 	}

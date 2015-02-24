@@ -39,6 +39,12 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 public class TypeUtil {
 
+	public enum EnumCaseMode {
+		LOWER_CASE, //convert enum names to lower case
+		ORIGNAL,    //keep orignal enum name
+		ALIASED     //use both lower-cased and original names as aliases of one another
+	}
+
 	private IJavaProject javaProject;
 
 	public TypeUtil(IJavaProject jp) {
@@ -116,12 +122,12 @@ public class TypeUtil {
 		if (simpleParser!=null) {
 			return simpleParser;
 		}
-		String[] enumValues = getAllowedValues(type);
+		String[] enumValues = getAllowedValues(type, EnumCaseMode.ALIASED);
 		if (enumValues!=null) {
 			//Note, technically if 'enumValues is empty array' this means something different
 			// from when it is null. An empty array means a type that has no values, so
 			// assigning anything to it is an error.
-			return new EnumValueParser(niceTypeName(type), getAllowedValues(type));
+			return new EnumValueParser(niceTypeName(type), enumValues);
 		}
 		return null;
 	}
@@ -131,8 +137,10 @@ public class TypeUtil {
 	 * *only* values in the array are valid and using any other value constitutes an error.
 	 * This may return null if allowedValues list is unknown or the type is not characterizable
 	 * as a simple enumaration of allowed values.
+	 * @param caseMode determines whether Enum values are returned in 'lower case form', 'orignal form',
+	 * or 'aliased' (meaning both forms are returned).
 	 */
-	public final String[] getAllowedValues(Type enumType) {
+	public String[] getAllowedValues(Type enumType, EnumCaseMode caseMode) {
 		if (enumType!=null) {
 			try {
 				String[] values = TYPE_VALUES.get(enumType.getErasure());
@@ -145,10 +153,18 @@ public class TypeUtil {
 
 					if (fields!=null) {
 						ArrayList<String> enums = new ArrayList<String>(fields.length);
+						boolean addOriginal = caseMode==EnumCaseMode.ORIGNAL||caseMode==EnumCaseMode.ALIASED;
+						boolean addLowerCased = caseMode==EnumCaseMode.LOWER_CASE||caseMode==EnumCaseMode.ALIASED;
 						for (int i = 0; i < fields.length; i++) {
 							IField f = fields[i];
 							if (f.isEnumConstant()) {
-								enums.add(f.getElementName());
+								String rawName = f.getElementName();
+								if (addOriginal) {
+									enums.add(rawName);
+								}
+								if (addLowerCased) {
+									enums.add(StringUtil.upperCaseToHyphens(rawName));
+								}
 							}
 						}
 						return enums.toArray(new String[enums.size()]);
@@ -170,7 +186,7 @@ public class TypeUtil {
 			return typeStr.substring("java.lang.".length());
 		}
 		if (isEnum(_type)) {
-			String[] values = getAllowedValues(_type);
+			String[] values = getAllowedValues(_type, EnumCaseMode.ORIGNAL);
 			if (values!=null && values.length>0) {
 				StringBuilder name = new StringBuilder();
 				name.append(typeStr+"[");
@@ -350,7 +366,7 @@ public class TypeUtil {
 	 *
 	 * @return A list of known properties or null if the list of properties is unknown.
 	 */
-	public List<TypedProperty> getProperties(Type type) {
+	public List<TypedProperty> getProperties(Type type, EnumCaseMode mode) {
 		if (type==null) {
 			return null;
 		}
@@ -361,7 +377,7 @@ public class TypeUtil {
 		if (isMap(type)) {
 			Type keyType = getKeyType(type);
 			if (keyType!=null) {
-				String[] keyValues = getAllowedValues(keyType);
+				String[] keyValues = getAllowedValues(keyType, mode);
 				if (hasElements(keyValues)) {
 					Type valueType = getDomainType(type);
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
@@ -423,4 +439,5 @@ public class TypeUtil {
 		}
 		return null;
 	}
+
 }

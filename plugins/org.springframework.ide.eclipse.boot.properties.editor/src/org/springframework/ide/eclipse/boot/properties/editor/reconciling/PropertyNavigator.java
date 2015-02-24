@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCo
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -195,7 +196,7 @@ public class PropertyNavigator {
 			}
 			String key = StringUtil.camelCaseToHyphens(textBetween(keyStart, keyEnd));
 
-			List<TypedProperty> properties = typeUtil.getProperties(type);
+			List<TypedProperty> properties = typeUtil.getProperties(type, EnumCaseMode.ALIASED);
 			if (properties!=null) {
 				TypedProperty prop = null;
 				for (TypedProperty p : properties) {
