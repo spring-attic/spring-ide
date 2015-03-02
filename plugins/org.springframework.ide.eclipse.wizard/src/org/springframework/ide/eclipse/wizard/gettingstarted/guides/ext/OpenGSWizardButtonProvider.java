@@ -29,7 +29,9 @@ public class OpenGSWizardButtonProvider extends IEclipseToBrowserFunction.Extens
 	@Override
 	public String getDynamicArgumentValue(String id) {
 		if (id.equals("html")) {
-			return getGuideA("Getting Started Guide") + LF + getGuideA("Tutorial Guide") + LF + getGuideA("Reference App") + LF;
+			return getGuideA("Getting Started Guide") + LF
+					//+ getGuideA("Tutorial Guide") + LF
+					+ getGuideA("Reference App") + LF;
 		}
 		return null;
 	}
