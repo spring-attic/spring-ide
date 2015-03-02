@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1053,13 +1053,17 @@ public class JdtUtils {
 		SearchPattern importPattern = SearchPattern.createPattern("org.springframework.context.annotation.Import",
 				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
+		SearchPattern enableAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
+				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.SpringBootApplication",
 				IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 
 		SearchPattern pattern = SearchPattern.createOrPattern(configurationPattern, componentPattern);
 		pattern = SearchPattern.createOrPattern(pattern, beanPattern);
 		pattern = SearchPattern.createOrPattern(pattern, importPattern);
+		pattern = SearchPattern.createOrPattern(pattern, enableAutoConfigPattern);
 		pattern = SearchPattern.createOrPattern(pattern, bootAutoConfigPattern);
 		return searchForJavaConfigs(pattern, scope);
 	}

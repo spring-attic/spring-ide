@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2015 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ *      Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
@@ -36,10 +36,17 @@ public class AutoConfigurationJavaConfigLocator extends AbstractJavaConfigLocato
 		if (javaProj != null) {
 			IJavaSearchScope sources = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj }, 
 					IJavaSearchScope.SOURCES);
-			SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
+			
+			SearchPattern enableAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.EnableAutoConfiguration",
 					IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-			Set<IType> candidates = org.springframework.ide.eclipse.core.java.JdtUtils.searchForJavaConfigs(bootAutoConfigPattern, sources);
+			SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.SpringBootApplication",
+					IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+
+			SearchPattern pattern = SearchPattern.createOrPattern(enableAutoConfigPattern, bootAutoConfigPattern);
+
+			Set<IType> candidates = org.springframework.ide.eclipse.core.java.JdtUtils.searchForJavaConfigs(pattern, sources);
 			for (IType candidate : candidates) {
 				if (!candidate.getElementName().contains("Test")) {
 					types.add(candidate);
