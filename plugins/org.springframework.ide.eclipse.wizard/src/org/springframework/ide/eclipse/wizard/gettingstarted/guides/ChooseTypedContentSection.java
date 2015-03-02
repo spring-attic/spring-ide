@@ -251,10 +251,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
 		field.setLayout(layout);
 
+
 		searchBox = new Text(field, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 		searchBox.setMessage("Type pattern to match");
-
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(searchBox);
 
 		Label fieldNameLabel = null;
 		if (sectionLabel!=null) {
@@ -263,18 +262,21 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 
 		treeviewer = new TreeViewer(field, SWT.SINGLE|SWT.BORDER|SWT.V_SCROLL);
+
 		treeviewer.addFilter(filter = new ChoicesFilter());
 		treeviewer.setLabelProvider(labelProvider);
 		treeviewer.setContentProvider(contentProvider);
 		treeviewer.setInput(content);
 		treeviewer.expandAll();
 
+		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false);
+		GridDataFactory fixHeight = GridDataFactory.fillDefaults().hint(SWT.DEFAULT, 200);
+		grabHor.applyTo(field);
+		grabHor.applyTo(searchBox);
+		fixHeight.applyTo(treeviewer.getControl());
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
 		}
-		GridDataFactory grab = GridDataFactory.fillDefaults().hint(SWT.DEFAULT, 150);
-		grab.applyTo(field);
-		grab.applyTo(treeviewer.getControl());
 
 		whenVisible(treeviewer.getControl(), new Runnable() {
 			public void run() {
