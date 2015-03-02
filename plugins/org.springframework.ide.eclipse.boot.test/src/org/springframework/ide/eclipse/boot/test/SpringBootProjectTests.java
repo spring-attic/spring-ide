@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
@@ -45,7 +45,7 @@ public class SpringBootProjectTests extends TestCase {
 	 * The version number in here should be the version of spring boot used by projects created 
 	 * via the spring intializer app.
 	 */
-	private static final String BOOT_STARTER_VERSION = "1.2.1.RELEASE";
+	private static final String BOOT_STARTER_VERSION = "1.2.2.RELEASE";
 
 	private static final long MAVEN_POM_REFRESH_TIMEOUT = 3*60*1000;
 	
