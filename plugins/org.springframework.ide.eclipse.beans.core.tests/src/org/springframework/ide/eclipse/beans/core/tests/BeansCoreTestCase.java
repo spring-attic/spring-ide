@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.tests;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ConcurrentModificationException;
+import java.util.Set;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -235,6 +239,16 @@ public abstract class BeansCoreTestCase {
 			}
 		}
 		return buffer.toString();
+	}
+
+	public static void assertNoMarkers(Set<IMarker> markers) throws Exception {
+		if (markers.size()>0) {
+			StringBuilder messages = new StringBuilder("Expected no markers but found: \n");
+			for (IMarker m : markers) {
+				messages.append(m.getAttribute(IMarker.MESSAGE)+"\n");
+			}
+			fail(messages.toString());
+		}
 	}
 
 	protected IProject getProject(String project) {

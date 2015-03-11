@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -34,6 +35,10 @@ public class BeansComponent extends AbstractBeansModelElement implements
 	/** List of all beans which are defined within this component */
 	private Set<IBean> beans = new LinkedHashSet<IBean>();
 
+	/** Names of all the beans in 'beans'. Only computed when first needed and kept up-to-date
+	 * thereafter. */
+	private Set<String> beanNames;
+
 	/** List of all inner components which are defined within this component */
 	private Set<IBeansComponent> components =
 			new LinkedHashSet<IBeansComponent>();
@@ -56,6 +61,20 @@ public class BeansComponent extends AbstractBeansModelElement implements
 
 	public void addBean(IBean bean) {
 		beans.add(bean);
+		if (beanNames!=null) {
+			beanNames.add(bean.getElementName());
+		}
+	}
+
+	public boolean hasBean(String beanName) {
+		if (beans!=null && !beans.isEmpty()) {
+			for (IBean bean : beans) {
+				if (beanName.equals(bean.getElementName())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public Set<IBean> getBeans() {
@@ -95,13 +114,13 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		text.append(components);
 		return text.toString();
 	}
-	
+
 	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// Visit only this element
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
-			
+
 			for (IBeansComponent carg : getComponents()) {
 				carg.accept(visitor, monitor);
 				if (monitor.isCanceled()) {

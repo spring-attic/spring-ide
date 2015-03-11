@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -39,11 +41,11 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  * Imported Spring configuration file.
  * @author Christian Dupuis
  * @since 2.0.3
- */ 
+ */
 public class ImportedBeansConfig extends AbstractBeansConfig implements IImportedBeansConfig {
 
 	private IModelElement[] children = null;
-	
+
 	public ImportedBeansConfig(IBeansImport beansImport, Resource resource, Type type) {
 		super(beansImport, resource.getFilename(), type);
 		init(resource);
@@ -67,7 +69,7 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 				components = new LinkedHashSet<IBeansComponent>();
 				beans = new LinkedHashMap<String, IBean>();
 				problems = new CopyOnWriteArraySet<ValidationProblem>();
-			} 
+			}
 			finally {
 				w.unlock();
 			}
@@ -76,7 +78,7 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 
 	protected void readFinish() {
 		isModelPopulated = true;
-		
+
 		List<ISourceModelElement> allChildren = new ArrayList<ISourceModelElement>(imports);
 		allChildren.addAll(aliases.values());
 		allChildren.addAll(components);
@@ -133,5 +135,9 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 		else {
 			modificationTimestamp = file.getModificationStamp();
 		}
+	}
+
+	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
+		return null;
 	}
 }

@@ -12,6 +12,9 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -80,13 +83,13 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 
 	/**
 	 * Register an {@link IBeansConfigEventListener} with the {@link IBeansConfig}.
-	 * @since 2.2.5 
+	 * @since 2.2.5
 	 */
 	void registerEventListener(IBeansConfigEventListener configEventListener);
-	
+
 	/**
 	 * Un-register an {@link IBeansConfigEventListener} with the {@link IBeansConfig}.
-	 * @since 2.2.5 
+	 * @since 2.2.5
 	 */
 	void unregisterEventListener(IBeansConfigEventListener configEventListener);
 
@@ -95,5 +98,17 @@ public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
 	 * @since 3.4.0
 	 */
 	boolean doesAnnotationScanning();
+
+	/**
+	 * Gets the 'raw' bean definitions that were recorded in a given context. This information
+	 * is used to discover implicitly defined beans (i.e beans that were
+	 * registered to the BeanDefinitionRegistry indirectly rather than directly defined by an
+	 * xml configuration element. Implementors of this interface may
+	 * choose not to implement raw bean definition recording, in which case they
+	 * can simply return null from this method.
+	 *
+	 * @since 3.7.0
+	 */
+	BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context);
 
 }

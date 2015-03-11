@@ -16,6 +16,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -71,8 +72,26 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 					}
 				}
 			}
+			addImplicitBeans(component, (CompositeComponentDefinition) definition, config);
 		}
 		return component;
+	}
+
+
+	private void addImplicitBeans(BeansComponent component, CompositeComponentDefinition context, IBeansConfig config) {
+		BeanDefinitionRegistry rawBeans = config.getRawBeanDefinitions(context);
+		if (rawBeans!=null) {
+			for (String beanName : rawBeans.getBeanDefinitionNames()) {
+				if (!component.hasBean(beanName)) {
+					IBean bean = createBean(component, beanName, rawBeans.getBeanDefinition(beanName));
+					component.addBean(bean);
+				}
+			}
+		}
+	}
+
+	private IBean createBean(BeansComponent parent, String beanName, BeanDefinition beanDefinition) {
+		return new Bean(parent, new BeanDefinitionHolder(beanDefinition, beanName));
 	}
 
 	private IBean createBean(IBeansModelElement parent, ComponentDefinition definition) {
@@ -89,4 +108,6 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 		}
 		return null;
 	}
+
+
 }

@@ -59,7 +59,7 @@ public class ValidationProblem {
 	}
 
 	/**
-	 * Returns the ID of the errorÊwhich raised this problem
+	 * Returns the ID of the errorï¿½which raised this problem
 	 * or <code>null</code> if no error was involved.
 	 */
 	public String getErrorId() {
@@ -79,9 +79,9 @@ public class ValidationProblem {
 	public String getMessage() {
 		return message;
 	}
-	
+
 	/**
-	 * Returns the underlying resource. 
+	 * Returns the underlying resource.
 	 */
 	public IResource getResource() {
 		return resource;
@@ -131,5 +131,10 @@ public class ValidationProblem {
 		if (!ObjectUtils.nullSafeEquals(this.attributes, that.attributes)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.resource, that.resource)) return false;
 		return super.equals(other);
+	}
+
+	@Override
+	public String toString() {
+		return "ValidationProblem("+message+")";
 	}
 }

@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.rule
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRuleTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleTest;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleTest_INT_3674;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleWithConfigSetAndProfileTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRuleWithConfigSetTest;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.NamespaceElementsRuleTest;
@@ -59,6 +60,7 @@ import org.springframework.ide.eclipse.core.java.TypeHierarchyEngineTest;
 	BeanInitDestroyMethodRuleTest.class,
 	RequiredPropertyRuleTest.class,
 	BeanReferenceRuleTest.class,
+	BeanReferenceRuleTest_INT_3674.class,
 	BeanReferenceRuleWithConfigSetTest.class,
 	BeanReferenceRuleWithConfigSetAndProfileTest.class,
 	NamespaceElementsRuleTest.class,

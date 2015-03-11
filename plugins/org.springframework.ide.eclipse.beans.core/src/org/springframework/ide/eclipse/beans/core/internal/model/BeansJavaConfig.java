@@ -44,12 +44,14 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationBeanNameGenerator;
@@ -79,12 +81,11 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-
 import org.apache.commons.logging.LogFactory;
 
 /**
  * This class defines a Spring beans configuration based on a Spring JavaConfig class.
- * 
+ *
  * @author Martin Lippert
  * @since 3.3.0
  */
@@ -100,15 +101,15 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 
 	/** Internal cache for all children */
 	private transient IModelElement[] children;
-	
+
 	public BeansJavaConfig(IBeansProject project, IType configClass, String configClassName, Type type) {
 		super(project, BeansConfigFactory.JAVA_CONFIG_TYPE + configClassName, type);
-		
+
 		this.configClass = configClass;
 		this.configClassName = configClassName;
 
 		modificationTimestamp = IResource.NULL_STAMP;
-		
+
 		if (this.configClass != null) {
 			IResource resource = this.configClass.getResource();
 			if (resource != null && resource instanceof IFile) {
@@ -116,7 +117,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			}
 			else {
 				IClassFile classFile = configClass.getClassFile();
-				
+
 				PackageFragment pkg = (PackageFragment) configClass.getPackageFragment();
 				IPackageFragmentRoot root = (IPackageFragmentRoot) pkg.getParent();
 
@@ -129,7 +130,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				}
 			}
 		}
-		
+
 		if (file == null || !file.exists()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans Java config class '" + configClassName + "' not accessible";
@@ -145,7 +146,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	public IType getConfigClass() {
 		return this.configClass;
 	}
-	
+
 	public String getConfigClassName() {
 		return this.configClassName;
 	}
@@ -167,12 +168,12 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			r.unlock();
 		}
 	}
-	
+
 	@Override
 	public Set<IBeansImport> getImports() {
 		return Collections.emptySet();
 	}
-	
+
 	@Override
 	public int getElementStartLine() {
 		return JdtUtils.getLineNumber(configClass);
@@ -187,39 +188,39 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				w.unlock();
 				return;
 			}
-			
+
 			try {
 				if (this.configClass == null) {
 					return;
 				}
-				
+
 				IBeansProject beansProject = BeansModelUtils.getParentOfClass(this, IBeansProject.class);
 				if (beansProject == null) {
 					return;
 				}
-				
+
 				final ClassLoader cl = JdtUtils.getClassLoader(beansProject.getProject(), ApplicationContext.class.getClassLoader());
-				
+
 				if (cl.getResource(this.configClass.getFullyQualifiedName().replace('.', '/') + ".class") == null) {
 					return;
 				}
-					
+
 				Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 					public Integer call() throws Exception {
 						// Obtain thread context classloader and override with the project classloader
 						ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
 						Thread.currentThread().setContextClassLoader(cl);
-	
+
 						// Create special ReaderEventListener that essentially just passes through component definitions
 						ReaderEventListener eventListener = new BeansConfigPostProcessorReaderEventListener();
 						problemReporter = new BeansConfigProblemReporter();
 						beanNameGenerator = new UniqueBeanNameGenerator(BeansJavaConfig.this);
 						registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
-	
+
 						try {
 							registerAnnotationProcessors(eventListener);
 							registerBean(eventListener, cl);
-	
+
 							IBeansConfigPostProcessor[] postProcessors = BeansConfigPostProcessorFactory.createPostProcessor(ConfigurationClassPostProcessor.class.getName());
 							for (IBeansConfigPostProcessor postProcessor : postProcessors) {
 								executePostProcessor(postProcessor, eventListener);
@@ -264,7 +265,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 					}
 				});
 				this.children = allChildren.toArray(new IModelElement[allChildren.size()]);
-				
+
 				this.isModelPopulated = true;
 				w.unlock();
 			}
@@ -391,7 +392,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 	 */
 	protected void registerAnnotationProcessors(ReaderEventListener eventListener) {
 		Set<BeanDefinitionHolder> processorDefinitions = AnnotationConfigUtils.registerAnnotationConfigProcessors(registry, null);
-		
+
 		// Nest the concrete beans in the surrounding component.
 		for (BeanDefinitionHolder processorDefinition : processorDefinitions) {
 			eventListener.componentRegistered(new BeanComponentDefinition(processorDefinition));
@@ -448,6 +449,10 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 
 	public boolean doesAnnotationScanning() {
 		return true;
+	}
+
+	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
+		return null;
 	}
 
 }

@@ -18,6 +18,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
@@ -262,7 +264,7 @@ public class BeansValidationContext extends AbstractValidationContext implements
 		IResourceModelElement context = getContextElement();
 		if (context != null && context.getElementResource() != null) {
 			String projectName = context.getElementResource().getProject().getName();
-			
+
 			// Only decorate the context if the context element is a config set as otherwise the context
 			// should be clear from the marker/problems view -> it is the file being displayed
 			if (context instanceof IBeansConfigSet) {

@@ -177,8 +177,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 	/** Internal cache for all children */
 	private transient IModelElement[] children;
-	
-	private transient Stack<CompositeComponentDefinition> componentDefinitions = new Stack<CompositeComponentDefinition>();
+
+	private BeanRegistrationContextTracker beanRegistrationTracker = new BeanRegistrationContextTracker();
 
 	/**
 	 * Creates a new {@link BeansConfig}.
@@ -232,8 +232,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				beanClassesMap.clear();
 				problems.clear();
 				children = null;
-				
-				componentDefinitions.clear();
+
+				beanRegistrationTracker.clear();
 
 			}
 			finally {
@@ -311,13 +311,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 			long start = System.currentTimeMillis();
 			long count = 0;
-			
+
 			w.lock();
 			if (this.isModelPopulated) {
 				w.unlock();
 				return;
 			}
-			
+
 			final ClassLoader projectIncludingClassloader = getProjectRelatedClassLoader();
 
 			try {
@@ -327,7 +327,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				}
 
 				if (file != null && file.exists()) {
-					
+
 					// Only install Eclipse-based resource loader if enabled in project properties
 					// IMPORTANT: the following block needs to stay before the w.lock()
 					// as it could otherwise create a runtime deadlock
@@ -365,7 +365,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					final SourceExtractor sourceExtractor = new DelegatingSourceExtractor(file.getProject());
 					final BeansConfigReaderEventListener eventListener = new BeansConfigReaderEventListener(this, resource, sourceExtractor, documentAccessor);
 					final NamespaceHandlerResolver namespaceHandlerResolver = new DelegatingNamespaceHandlerResolver(namespaceResolvingClassloader, this,	documentAccessor);
-					
+
 					problemReporter = new BeansConfigProblemReporter();
 					beanNameGenerator = new UniqueBeanNameGenerator(this);
 
@@ -408,13 +408,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 								documentAccessor.popDocument();
 							}
 						}
-						
+
 						@Override
 						public XmlReaderContext createReaderContext(Resource resource) {
 							return new ProfileAwareReaderContext(resource, problemReporter, eventListener,
 									sourceExtractor, this, namespaceHandlerResolver);
 						}
-						
+
 						@Override
 						protected BeanDefinitionDocumentReader createBeanDefinitionDocumentReader() {
 							return new ToolingFriendlyBeanDefinitionDocumentReader(BeansConfig.this);
@@ -432,17 +432,17 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 					reader.setNamespaceHandlerResolver(namespaceHandlerResolver);
 					reader.setBeanNameGenerator(beanNameGenerator);
 					reader.setEnvironment(new ToolingAwareEnvironment());
-					
+
 					final Map<Throwable, Integer> throwables = new HashMap<Throwable, Integer>();
 					try {
 						Callable<Integer> loadBeanDefinitionOperation = new Callable<Integer>() {
 
 							public Integer call() {
-								
+
 								// Obtain thread context classloader and override with the project classloader
 								ClassLoader threadClassLoader = Thread.currentThread().getContextClassLoader();
 								Thread.currentThread().setContextClassLoader(resourceLoader.getClassLoader());
-					
+
 								try {
 									// Load bean definitions
 									int count = reader.loadBeanDefinitions(resource);
@@ -660,7 +660,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 	private void addBeansFromCompoent(IBeansComponent component, List<IBean> beansClone) {
 		beansClone.addAll(component.getBeans());
-		
+
 		for (IBeansComponent bc : component.getComponents()) {
 			addBeansFromCompoent(bc, beansClone);
 		}
@@ -697,7 +697,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 * <p>
 	 * If this config has already been populated only the given {@link IBeansConfigPostProcessor} will be executed;
 	 * otherwise executing is deferred until the model gets populated
-	 * @param classloader 
+	 * @param classloader
 	 */
 	protected void addExternalPostProcessor(IBeansConfigPostProcessor postProcessor, IBeansConfig config) {
 		try {
@@ -757,11 +757,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 			public void run() throws Exception {
 				ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-				
+
 				if (classloader != null) {
 					Thread.currentThread().setContextClassLoader(classloader);
 				}
-				
+
 				try {
 					postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
 							beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
@@ -1217,6 +1217,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		@Override
 		public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 				throws BeanDefinitionStoreException {
+			beanRegistrationTracker.registerBean(beanName, beanDefinition);
 			if (beanDefinition instanceof ScannedGenericBeanDefinition) {
 				super.registerBeanDefinition(beanName, new InternalScannedGenericBeanDefinition(
 						(ScannedGenericBeanDefinition) beanDefinition));
@@ -1254,7 +1255,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		public MethodMetadata getFactoryMethodMetadata() {
 			return factoryMethodMetadata;
 		}
-	
+
 	}
 
 	/**
@@ -1265,7 +1266,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	static class ToolingFriendlyBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
 
 		private Environment environment;
-		
+
 		private BeanDefinitionParserDelegate delegate;
 
 		private BeansConfig beansConfig;
@@ -1279,7 +1280,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			super.setEnvironment(environment);
 			this.environment = environment;
 		}
-		
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1332,7 +1333,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 			}
 		}
-		
+
 		@Override
 		protected void doRegisterBeanDefinitions(Element root) {
 			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
@@ -1340,13 +1341,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			if (StringUtils.hasText(profileSpec)) {
 				specifiedProfiles = StringUtils.tokenizeToStringArray(profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			}
-			
+
 			// Spring 3.1 profile support; register composite component definition to carry nested beans
-			ProfileAwareCompositeComponentDefinition cd = new ProfileAwareCompositeComponentDefinition(root.getNodeName(), 
+			ProfileAwareCompositeComponentDefinition cd = new ProfileAwareCompositeComponentDefinition(root.getNodeName(),
 					getReaderContext().extractSource(root), specifiedProfiles);
-			beansConfig.componentDefinitions.push(cd);
+			beansConfig.beanRegistrationTracker.enter(cd);
 			try {
-				
+
 				// any nested <beans> elements will cause recursion in this method. In
 				// order to propagate and preserve <beans> default-* attributes correctly,
 				// keep track of the current (parent) delegate, which may be null. Create
@@ -1355,41 +1356,42 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				// this behavior emulates a stack of delegates without actually necessitating one.
 				BeanDefinitionParserDelegate parent = this.delegate;
 				this.delegate = createDelegate(getReaderContext(), root, parent);
-	
+
 				preProcessXml(root);
 				parseBeanDefinitions(root, this.delegate);
 				postProcessXml(root);
-	
+
 				this.delegate = parent;
 			}
 			finally {
-				beansConfig.componentDefinitions.pop();
+				beansConfig.beanRegistrationTracker.exit(cd);
 				getReaderContext().fireComponentRegistered(cd);
 			}
 		}
 	}
-	
+
 	class ProfileAwareReaderContext extends XmlReaderContext {
 
 		private ReaderEventListener eventListener;
-		
+
 		public ProfileAwareReaderContext(Resource resource, ProblemReporter problemReporter,
 				ReaderEventListener eventListener, SourceExtractor sourceExtractor, XmlBeanDefinitionReader reader,
 				NamespaceHandlerResolver namespaceHandlerResolver) {
 			super(resource, problemReporter, eventListener, sourceExtractor, reader, namespaceHandlerResolver);
 			this.eventListener = eventListener;
 		}
-		
+
 		@Override
 		public void fireComponentRegistered(ComponentDefinition componentDefinition) {
-			if (!componentDefinitions.empty()) {
-				componentDefinitions.peek().addNestedComponent(componentDefinition);
+			CompositeComponentDefinition currentContext = beanRegistrationTracker.currentContext();
+			if (currentContext!=null) {
+				currentContext.addNestedComponent(componentDefinition);
 			}
 			else {
 				eventListener.componentRegistered(componentDefinition);
 			}
 		}
-		
+
 	}
 
 	/**
@@ -1430,4 +1432,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			return super.parseCustomElement(ele, containingBd);
 		}
 	}
-}	
+
+	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
+		return beanRegistrationTracker.getRegistry(context);
+	}
+}
