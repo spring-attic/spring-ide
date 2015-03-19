@@ -104,4 +104,35 @@
    		</page>
    	</extension>
    	
+   	<extension
+       point="org.springframework.ide.eclipse.core.validators">
+    <validator
+          class="org.springframework.ide.eclipse.boot.validation.SpringBootValidator"
+          enabledByDefault="true"
+          id="bootvalidator"
+          markerId="problemmarker"
+          name="%dataValidator.name">
+    </validator>
+    <rules
+          validatorId="org.springframework.ide.eclipse.boot.bootvalidator">
+       <rule
+             class="org.springframework.ide.eclipse.boot.validation.MissingConfigurationProcessor"
+             description="Verify that spring-boot-configuration-processor is on classpath when @ConfigurationProperties is used"
+             enabledByDefault="true"
+             id="missingConfigurationProcessor"
+             name="Missing Configuration Processor">
+          <message id="MISSING_CONFIGURATION_PROCESSOR" label="Missing Configuration Processor" severity="WARNING" />
+       </rule>
+    </rules>
+ </extension>
+   		<extension point="org.eclipse.core.resources.markers"
+			id="problemmarker"
+			name="Spring Boot Problem">
+		<super type="org.springframework.ide.eclipse.core.problemmarker" />
+		<attribute name="ruleId"/>
+		<attribute name="errorId"/>
+		<persistent value="true" />
+	</extension>
+   	
+   	
 </plugin>

@@ -163,7 +163,7 @@
 		<persistent value="true" />
 	</extension>
 	
- <extension
+<extension
        point="org.springframework.ide.eclipse.core.validators">
     <validator
           class="org.springframework.ide.eclipse.data.internal.validation.SpringDataValidator"
