@@ -11,13 +11,17 @@
 package org.springframework.ide.eclipse.boot.launch.test;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
@@ -250,6 +254,70 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertOk(result);
 	}
 
+	public void testRuntimeClasspathNoTestStuff() throws Exception {
+		createLaunchReadyProject(TEST_PROJECT);
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
+		String[] cp = getClasspath(new BootLaunchConfigurationDelegate(), wc);
+		assertClasspath(cp,
+				"target/classes",
+				"spring-boot-starter-1.2.1.RELEASE.jar",
+				"spring-boot-1.2.1.RELEASE.jar",
+				"spring-context-4.1.4.RELEASE.jar",
+				"spring-aop-4.1.4.RELEASE.jar",
+				"aopalliance-1.0.jar",
+				"spring-beans-4.1.4.RELEASE.jar",
+				"spring-expression-4.1.4.RELEASE.jar",
+				"spring-boot-autoconfigure-1.2.1.RELEASE.jar",
+				"spring-boot-starter-logging-1.2.1.RELEASE.jar",
+				"jcl-over-slf4j-1.7.8.jar",
+				"slf4j-api-1.7.8.jar",
+				"jul-to-slf4j-1.7.8.jar",
+				"log4j-over-slf4j-1.7.8.jar",
+				"logback-classic-1.1.2.jar",
+				"logback-core-1.1.2.jar",
+				"spring-core-4.1.4.RELEASE.jar",
+				"snakeyaml-1.14.jar"
+		);
+	}
+
+	private static void assertClasspath(String[] cp, String... expected) {
+		for (String e : expected) {
+			assertClasspathHasEntry(cp, e);
+		}
+		for (String e : cp) {
+			assertClasspathEntryExpected(e, expected);
+		}
+	}
+
+	private static void assertClasspathEntryExpected(String e, String[] expected) {
+		for (String expect : expected) {
+			if (e.endsWith(expect)) {
+				return;
+			}
+		}
+		fail("Unexpected classpath entry: "+e);
+	}
+
+	private static  void assertClasspathHasEntry(String[] cp, String expect) {
+		for (String actual : cp) {
+			if (actual.endsWith(expect)) {
+				return;
+			}
+		}
+		fail("Missing classpath entry: "+expect);
+	}
+
+	private String[] getClasspath(JavaLaunchDelegate delegate,
+			ILaunchConfigurationWorkingCopy wc) throws CoreException {
+		System.out.println("\n====classpath according to "+delegate.getClass().getSimpleName());
+		String[] classpath = delegate.getClasspath(wc);
+		for (String element : classpath) {
+			int chop = element.lastIndexOf('/');
+			System.out.println('"'+element.substring(chop+1)+"\",");
+		}
+		return classpath;
+	}
+
 	private void assertPropertyDump(String out, String expected) {
 		String BEG = ">>>properties";
 		String END = "<<<properties";
@@ -269,9 +337,8 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
 	private ILaunchConfigurationWorkingCopy createBaseWorkingCopy() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		BootLaunchConfigurationDelegate.setDefaults(wc, getProject(TEST_PROJECT), TEST_MAIN_CLASS);
 
-		BootLaunchConfigurationDelegate.setProject(wc, getProject(TEST_PROJECT));
-		BootLaunchConfigurationDelegate.setMainType(wc, TEST_MAIN_CLASS);
 		//Explictly set all options in the config to 'disabled' irrespective of
 		// their default values (tests will be more robust w.r.t changing of the defaults).
 		BootLaunchConfigurationDelegate.setEnableDebugOutput(wc, false);

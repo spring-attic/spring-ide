@@ -28,8 +28,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -43,7 +44,10 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	//private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
+	private static final String M2E_CLASSPATH_PROVIDER = "org.eclipse.m2e.launchconfig.classpathProvider";
+	private static final String M2E_SOURCEPATH_PROVIDER = "org.eclipse.m2e.launchconfig.sourcepathProvider";
 	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
+	private static final String JAVA_LAUNCH_CONFIG_TYPE_ID = IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
 
 	/**
 	 * Spring boot properties are stored as launch confiuration properties with
@@ -71,13 +75,9 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
 
-	private ProfileHistory profileHistory = new ProfileHistory();
+	private static final String MAVEN_NATURE = "org.eclipse.m2e.core.maven2Nature";
 
-//	static void debug(ILaunchConfiguration c, String msg) {
-//		if (DEBUG) {
-//			System.out.println(c+"#"+ c.hashCode()+ ": "+msg);
-//		}
-//	}
+	private ProfileHistory profileHistory = new ProfileHistory();
 
 	public static class PropVal {
 		public String name;
@@ -141,6 +141,40 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		profileHistory.updateHistory(getProject(conf), getProfile(conf));
 		super.launch(conf, mode, launch, monitor);
+	}
+
+	@Override
+	public String[] getClasspath(ILaunchConfiguration conf) throws CoreException {
+		try {
+			//Must do exactly what a Java Launch config would do. It is not enough to simply
+			// call super. Me must also pass a launch config exactly like the JDT one, including
+			// its type and some 'magic' attributes added for m2e
+			ILaunchConfigurationWorkingCopy wc = copyAs(conf, JAVA_LAUNCH_CONFIG_TYPE_ID);
+			enableMavenClasspathProvider(wc);
+			return super.getClasspath(wc);
+		} catch (Exception e) {
+			//In case the hacky stuff above fails, do something that mostly works, even if
+			// it does gets a classpath polluted with test dependencies.
+			// See https://issuetracker.springsource.com/browse/STS-4085
+			BootActivator.log(e);
+			return super.getClasspath(conf);
+		}
+	}
+
+	/**
+	 * Copy a given launch config into a 'clone' that has all the same attributes but
+	 * a different type id.
+	 * @throws CoreException
+	 */
+	private static ILaunchConfigurationWorkingCopy copyAs(ILaunchConfiguration conf,
+			String newType) throws CoreException {
+		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+		ILaunchConfigurationType launchConfigurationType = launchManager
+				.getLaunchConfigurationType(newType);
+		ILaunchConfigurationWorkingCopy wc = launchConfigurationType.newInstance(null,
+				launchManager.generateLaunchConfigurationName(conf.getName()));
+		wc.setAttributes(conf.getAttributes());
+		return wc;
 	}
 
 	@Override
@@ -211,7 +245,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public static void setDefaults(ILaunchConfigurationWorkingCopy wc,
 			IProject project,
 			String mainType
-	) {
+			) {
 		setProject(wc, project);
 		setMainType(wc, mainType);
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
@@ -259,7 +293,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		}
 		clearProperties(conf);
 		int oid = 0; //unique id appended to each stored key, otherwise we loose
-					 //entries with identical keys.
+		//entries with identical keys.
 		for (PropVal p : props) {
 			//Don't store stuff with 'empty keys'. These are likely just
 			// 'empty' entries user added but never filled in.
@@ -365,6 +399,30 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	public static void setProfile(ILaunchConfigurationWorkingCopy conf, String profile) {
 		conf.setAttribute(PROFILE, profile);
+	}
+
+	/**
+	 * Enable maven classpath provider if applicable to this conf.
+	 * Addresses https://issuetracker.springsource.com/browse/STS-4085
+	 */
+	private static void enableMavenClasspathProvider(ILaunchConfigurationWorkingCopy conf) {
+		try {
+			if (conf.getType().getIdentifier().equals(JAVA_LAUNCH_CONFIG_TYPE_ID)) {
+				//Take care not to add this a 'real' Boot launch config or it will cause m2e to throw exceptions
+				//These 'magic' attributes should only be added to a 'cloned' copy of our config with the right type.
+				IProject p = getProject(conf);
+				if (p!=null && p.hasNature(MAVEN_NATURE)) {
+					if (!conf.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER)) {
+						conf.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, M2E_CLASSPATH_PROVIDER);
+					}
+					if (!conf.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER)) {
+						conf.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, M2E_SOURCEPATH_PROVIDER);
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
 	}
 
 }
