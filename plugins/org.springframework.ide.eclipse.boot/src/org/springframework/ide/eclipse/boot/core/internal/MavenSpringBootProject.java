@@ -19,6 +19,9 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElementWithText;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.format;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.OPTIONAL;
 
 import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 
@@ -194,8 +197,17 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 	}
 
+
 	@Override
 	public void addMavenDependency(final MavenCoordinates dep, final boolean preferManagedVersion) throws CoreException {
+		addMavenDependency(dep, preferManagedVersion, false);
+	}
+
+	@Override
+	public void addMavenDependency(
+			final MavenCoordinates dep,
+			final boolean preferManagedVersion, final boolean optional
+	) throws CoreException {
 		try {
 			IFile file = getPomFile();
 			performOnDOMDocument(new OperationTuple(file, new Operation() {
@@ -215,11 +227,15 @@ public class MavenSpringBootProject extends SpringBootProject {
 						} else {
 							//No managed version. We have to include a version in xml added to the pom.
 						}
-						PomHelper.createDependency(depsEl,
+						Element xmlDep = PomHelper.createDependency(depsEl,
 								dep.getGroupId(),
 								dep.getArtifactId(),
 								version
 						);
+						if (optional) {
+							createElementWithText(xmlDep, OPTIONAL, "true");
+							format(xmlDep);
+						}
 					}
 				}
 			}));
@@ -299,4 +315,5 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 		return SpringBootCore.getDefaultBootVersion();
 	}
+
 }

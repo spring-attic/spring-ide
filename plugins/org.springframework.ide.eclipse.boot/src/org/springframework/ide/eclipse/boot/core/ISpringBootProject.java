@@ -76,6 +76,12 @@ public interface ISpringBootProject {
 	public void addMavenDependency(MavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
 
 	/**
+	 * @since 3.7.0
+	 */
+	public void addMavenDependency(MavenCoordinates depConfigurationProcessor, boolean preferManagedVersion, boolean optional) throws CoreException;
+
+
+	/**
 	 * Version of spring boot on this project's classpath. (This is determined by looking for artifact with id "spring-boot".
 	 * The base version of that artifact will then be used.
 	 */
@@ -87,5 +93,6 @@ public interface ISpringBootProject {
 	 * asynchronous.
 	 */
 	void updateProjectConfiguration();
+
 
 }

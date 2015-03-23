@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.quickfix.MarkerResolutionRegistry;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
 
 /**
  * Validation rule that checks
@@ -47,7 +48,7 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  */
 public class MissingConfigurationProcessorRule extends BootValidationRule {
 
-	private static final String PROBLEM_ID = MissingConfigurationProcessorRule.class.getName();
+	private static final String PROBLEM_ID = "MISSING_CONFIGURATION_PROCESSOR";
 	private static final MavenCoordinates DEP_CONFIGURATION_PROCESSOR =
 			new MavenCoordinates("org.springframework.boot", "spring-boot-configuration-processor", null);
 
@@ -67,7 +68,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 							@Override
 							public void run(IMarker marker) {
 								try {
-									project.addMavenDependency(DEP_CONFIGURATION_PROCESSOR, true);
+									project.addMavenDependency(DEP_CONFIGURATION_PROCESSOR, true, true);
 									project.updateProjectConfiguration(); //needed to actually enable APT, m2e does not
 															// automatically trigger this if a dependency gets added
 								} catch (Exception e) {
@@ -174,8 +175,13 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 
 		void warn(String msg, ISourceRange location) {
 			if (location!=null) {
-				context.addProblems(new ValidationProblem(PROBLEM_ID, IMarker.SEVERITY_WARNING,
-						msg, cu.getElementResource(), location));
+				context.warning(cu, PROBLEM_ID, msg,
+						new ValidationProblemAttribute(IMarker.CHAR_START, location.getOffset()),
+						new ValidationProblemAttribute(IMarker.CHAR_END, location.getOffset()+location.getLength())
+				);
+
+//				context.addProblems(new ValidationProblem(PROBLEM_ID, IMarker.SEVERITY_WARNING,
+//						msg, cu.getElementResource(), location));
 			}
 		}
 
