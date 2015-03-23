@@ -54,5 +54,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Localization: plugin
 Import-Package: org.apache.commons.logging,
  org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
  org.osgi.framework
 Bundle-Activator: org.springframework.ide.eclipse.data.internal.DataCorePlugin
