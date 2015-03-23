@@ -5,8 +5,7 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.boot;singleton:=true
 Bundle-Vendor: Pivotal Software Inc.
 Bundle-Version: 3.7.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.core.BootActivator
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.resources,
+Require-Bundle: org.eclipse.core.resources,
  org.eclipse.m2e.core,
  org.eclipse.m2e.maven.runtime,
  org.eclipse.m2e.core.ui,
@@ -28,7 +27,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.ui,
  org.springframework.ide.eclipse.beans.ui.livegraph,
  org.springsource.ide.eclipse.commons.ui,
- org.springframework.ide.eclipse.core
+ org.springframework.ide.eclipse.core,
+ org.eclipse.ui.ide,
+ org.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core,

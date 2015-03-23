@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.validation;
 
-public interface IBootModelElementTypes {
-	/**
-	 * Constant representing a compilation unit. A model element with this type
-	 * can be safely cast to {@link SpringCompilationUnit}.
-	 */
-	int COMPILATION_UNIT_TYPE = 2;
-	// starts with 2 because 1 is reserved for the model
+import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+
+/**
+ * Abstract superclass for Spring Boot related validation rules. Not much here yet
+ * as there's only rule at the moment. As more rules are implemented common
+ * infrastructure can be put in this class.
+ *
+ * @author Kris De Volder
+ */
+public abstract class BootValidationRule implements IValidationRule<SpringCompilationUnit, SpringBootValidationContext> {
+
 }

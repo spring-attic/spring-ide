@@ -116,7 +116,7 @@
     <rules
           validatorId="org.springframework.ide.eclipse.boot.bootvalidator">
        <rule
-             class="org.springframework.ide.eclipse.boot.validation.MissingConfigurationProcessor"
+             class="org.springframework.ide.eclipse.boot.validation.MissingConfigurationProcessorRule"
              description="Verify that spring-boot-configuration-processor is on classpath when @ConfigurationProperties is used"
              enabledByDefault="true"
              id="missingConfigurationProcessor"
@@ -134,5 +134,11 @@
 		<persistent value="true" />
 	</extension>
    	
-   	
+   	<extension
+	point="org.eclipse.ui.ide.markerResolution">
+	<markerResolutionGenerator
+		markerType="org.springframework.ide.eclipse.boot.problemmarker"
+		class="org.springframework.ide.eclipse.boot.quickfix.BootMarkerResolutionGenerator">
+	</markerResolutionGenerator>
+</extension>
 </plugin>

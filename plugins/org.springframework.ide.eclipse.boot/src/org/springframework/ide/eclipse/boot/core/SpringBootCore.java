@@ -19,9 +19,9 @@ import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 public class SpringBootCore {
 
-	private static final String M2E_NATURE = "org.eclipse.m2e.core.maven2Nature";
+	public static final String M2E_NATURE = "org.eclipse.m2e.core.maven2Nature";
 	private static final StsProperties stsProps = StsProperties.getInstance();
-	
+
 	/**
 	 * @return a SpringBoot centric view on a eclipse project.
 	 */
@@ -44,5 +44,5 @@ public class SpringBootCore {
 	public static String getDefaultBootVersion() {
 		return stsProps.get("spring.boot.default.version");
 	}
-	
+
 }

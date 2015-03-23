@@ -32,9 +32,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationElementL
 
 public class SpringBootValidator extends AbstractValidator {
 
-	//TODO: This class is mostly just copied from SpringDataValidator. We don't want a dependency from boot support on
-	// spring data support, but perhaps code should be refactored so that both can reuse a common implementation.
-
 	public SpringBootValidator() {
 	}
 
@@ -75,7 +72,7 @@ public class SpringBootValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		if (element instanceof CompilationUnit) {
+		if (element instanceof SpringCompilationUnit) {
 			return true;
 		}
 		return false;
@@ -105,7 +102,7 @@ public class SpringBootValidator extends AbstractValidator {
 			IModelElement parent = new SpringProject(SpringCore.getModel(),
 					resource.getProject());
 			String name = resource.getName();
-			rootElement = new CompilationUnit(cu, parent, name);
+			rootElement = new SpringCompilationUnit(cu, parent, name);
 		}
 
 		private ICompilationUnit getCompilationUnit(IResource resource) {

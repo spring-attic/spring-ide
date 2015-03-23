@@ -34,6 +34,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 
@@ -74,8 +75,6 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
-
-	private static final String MAVEN_NATURE = "org.eclipse.m2e.core.maven2Nature";
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
@@ -411,7 +410,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 				//Take care not to add this a 'real' Boot launch config or it will cause m2e to throw exceptions
 				//These 'magic' attributes should only be added to a 'cloned' copy of our config with the right type.
 				IProject p = getProject(conf);
-				if (p!=null && p.hasNature(MAVEN_NATURE)) {
+				if (p!=null && p.hasNature(SpringBootCore.M2E_NATURE)) {
 					if (!conf.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER)) {
 						conf.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, M2E_CLASSPATH_PROVIDER);
 					}

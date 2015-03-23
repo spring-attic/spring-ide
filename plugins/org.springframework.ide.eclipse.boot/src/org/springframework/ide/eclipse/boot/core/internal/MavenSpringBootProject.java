@@ -20,6 +20,8 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
 
+import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,14 +60,11 @@ import org.w3c.dom.Element;
  */
 @SuppressWarnings("restriction")
 public class MavenSpringBootProject extends SpringBootProject {
-	
+
 	//TODO: all of the starter manipulation code completely ignores the version infos in SpringBootStarter objects.
 	// This is ok assuming that versions always follow the 'managed' version in parent pom.
 	// If that is not the case then... ??
-	
-	//TODO: the code adding raw maven deps has the oposite problem. It includes version numbers even
-	//  when they are unnecessary (managed by parent pom).
-	
+
 	//TODO: properly handle pom manipulation when pom file is open / dirty in an editor.
 	// minimum requirement: detect and prohibit by throwing an error.
 
@@ -91,7 +90,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	 *         discovered dynamically based on project contents. E.g. for maven
 	 *         projects we examine the 'dependencyManagement' section of the
 	 *         project's effective pom.
-	 * 
+	 *
 	 * @throws CoreException
 	 */
 	@Override
@@ -163,7 +162,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 			throw ExceptionUtil.coreException(e);
 		}
 	}
-	
+
 	/**
 	 * Determine the 'managed' version, if any, associate with a given dependency.
 	 * @return Version string or null.
@@ -188,7 +187,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 		return null;
 	}
-	
+
 	private void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -211,13 +210,13 @@ public class MavenSpringBootProject extends SpringBootProject {
 						if (managedVersion!=null) {
 							//Decide whether we can/should inherit the managed version or override it.
 							if (preferManagedVersion || managedVersion.equals(version)) {
-								version = null; 
+								version = null;
 							}
 						} else {
 							//No managed version. We have to include a version in xml added to the pom.
 						}
 						PomHelper.createDependency(depsEl,
-								dep.getGroupId(), 
+								dep.getGroupId(),
 								dep.getArtifactId(),
 								version
 						);
@@ -228,7 +227,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 			throw ExceptionUtil.coreException(e);
 		}
 	}
-	
+
 	@Override
 	public void setStarters(Collection<SpringBootStarter> _starters) throws CoreException {
 		try {
@@ -236,7 +235,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 			for (SpringBootStarter s : _starters) {
 				starters.add(s.getId());
 			}
-			
+
 			IFile file = getPomFile();
 			performOnDOMDocument(new OperationTuple(file, new Operation() {
 				public void process(Document document) {
@@ -260,13 +259,13 @@ public class MavenSpringBootProject extends SpringBootProject {
 							}
 						}
 					}
-					
-					//if 'starters' is not empty at this point, it contains remaining ids we have not seen 
+
+					//if 'starters' is not empty at this point, it contains remaining ids we have not seen
 					// in the pom, so we need to add them.
 					for (StarterId s : starters) {
 						PomHelper.createDependency(depsEl,
 								s.getGroupId(), s.getArtifactId(),
-								null);						
+								null);
 					}
 				}
 			}));
@@ -274,6 +273,13 @@ public class MavenSpringBootProject extends SpringBootProject {
 			throw ExceptionUtil.coreException(e);
 		}
 	}
+
+	@Override
+	public void updateProjectConfiguration() {
+		new UpdateMavenProjectJob(new IProject[] {
+				getProject()
+		}).schedule();
+ 	}
 
 	@Override
 	public String getBootVersion() {

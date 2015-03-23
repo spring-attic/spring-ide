@@ -19,29 +19,29 @@ import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 
 /**
  * SpringBoot-centric view on an IProject instance.
- * 
+ *
  * @author Kris De Volder
  */
 public interface ISpringBootProject {
 
-  
+
 	/**
 	 * @return corresponding Eclipse project.
 	 */
 	public IProject getProject();
-  
+
 	/**
 	 * @return List of maven coordinates for known boot starters. These are discovered dynamically
 	 * based on project contents. E.g. for maven projects we examine the 'dependencyManagement'
 	 * section of the project's effective pom.
-	 * 
-	 * @throws CoreException 
+	 *
+	 * @throws CoreException
 	 */
 	public List<SpringBootStarter> getKnownStarters() throws CoreException;
 
 	/**
 	 * Gets a list of bootstarters that are currently applied to the project.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public List<SpringBootStarter> getBootStarters() throws CoreException;
 
@@ -49,7 +49,7 @@ public interface ISpringBootProject {
 	 * Modify project classpath, adding a SpringBootStarter. Note that this has to be done indirectly,
 	 * by modifying the project's build scripts or pom rather than by directly modifying the classpath
 	 * itself.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public void addStarter(SpringBootStarter webStarter) throws CoreException;
 
@@ -63,7 +63,7 @@ public interface ISpringBootProject {
 	/**
 	 * Modify project classpath adding and/or removing starters to make them match the given
 	 * set of starters. Note that versions of starters are generally ignored by this operation.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	public void setStarters(Collection<SpringBootStarter> values) throws CoreException;
 
@@ -80,5 +80,12 @@ public interface ISpringBootProject {
 	 * The base version of that artifact will then be used.
 	 */
 	public String getBootVersion();
-	
+
+	/**
+	 * Equivalent of triggering a 'update project' operation on a Maven project. I.e. re-apply whatever configuration
+	 * gets done based on pom.xml or its equivalent. Client calling this should beware that this operation may be
+	 * asynchronous.
+	 */
+	void updateProjectConfiguration();
+
 }

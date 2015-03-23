@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.model.validation;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.ISourceRange;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -48,6 +50,13 @@ public class ValidationProblem {
 		this.resource = resource;
 		this.attributes = attributes;
 		this.errorId = errorId;
+	}
+
+	public ValidationProblem(String errorId, int severity, String message, IResource resource, ISourceRange location) {
+		this(null, errorId, severity, message, resource, -1, new ValidationProblemAttribute[] {
+				new ValidationProblemAttribute(IMarker.CHAR_START, location.getOffset()),
+				new ValidationProblemAttribute(IMarker.CHAR_END, location.getOffset()+location.getLength())
+		});
 	}
 
 	/**
