@@ -32,7 +32,6 @@ import org.springframework.ide.eclipse.data.jdt.core.SpringDataCompilationPartic
  *
  * @author Olivier Gierke
  * @author Tomasz Zarna
- *
  */
 @SuppressWarnings("deprecation")
 public class InvalidDerivedQueryRule implements IValidationRule<CompilationUnit, SpringDataValidationContext> {

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012, 2015 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.data.internal.validation;
 
 import java.lang.reflect.Method;
@@ -23,7 +33,6 @@ import org.springframework.ide.eclipse.data.jdt.core.RepositoryInformation;
 /**
  * @author Terry Denney
  * @since 3.2.0
- *
  */
 public class InvalidParameterTypeRule implements
 		IValidationRule<CompilationUnit, SpringDataValidationContext> {
@@ -124,7 +133,10 @@ public class InvalidParameterTypeRule implements
 										IMarker.CHAR_END, paramSourceRange.getOffset() + paramSourceRange.getLength());
 								ValidationProblemAttribute problemId = new ValidationProblemAttribute(IMarker.PROBLEM, PROBLEM_ID);
 								ValidationProblemAttribute propertyType = new ValidationProblemAttribute(PROPERTY_TYPE_ATTR, propertyReturnType.getSimpleName());
-								ValidationProblemAttribute propertyTypePackage = new ValidationProblemAttribute(PROPERTY_TYPE_PACKAGE_ATTR, propertyReturnType.getPackage().getName());
+								
+								String packageName = propertyReturnType.getPackage() != null ? propertyReturnType.getPackage().getName() : "";
+								ValidationProblemAttribute propertyTypePackage = new ValidationProblemAttribute(PROPERTY_TYPE_PACKAGE_ATTR, packageName);
+
 								context.warning(element, "SpringDataProbleMarker",
 										"Parameter type (" + paramSimpleType + ") does not match domain class property definition (" + propertySimpleType + ").",
 										new ValidationProblemAttribute[] {start, end, problemId, propertyType, propertyTypePackage});
