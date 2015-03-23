@@ -236,11 +236,13 @@ public class SpringPropertiesCompletionEngine {
 				navPrefix = fuzzySearchPrefix.getPrefix(doc, navOffset);
 				if (navPrefix!=null && !navPrefix.isEmpty()) {
 					PropertyInfo prop = findLongestValidProperty(getIndex(), navPrefix);
-					int regionStart = navOffset-navPrefix.length();
-					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, region(regionStart, navOffset));
-					Type type = navigator.navigate(regionStart+prop.getId().length(), TypeParser.parse(prop.getType()));
-					if (type!=null) {
-						return getNavigationProposals(doc, type, navOffset, offset);
+					if (prop!=null) {
+						int regionStart = navOffset-navPrefix.length();
+						PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, region(regionStart, navOffset));
+						Type type = navigator.navigate(regionStart+prop.getId().length(), TypeParser.parse(prop.getType()));
+						if (type!=null) {
+							return getNavigationProposals(doc, type, navOffset, offset);
+						}
 					}
 				}
 			}
