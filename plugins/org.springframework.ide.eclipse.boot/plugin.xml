@@ -109,9 +109,10 @@
     <validator
           class="org.springframework.ide.eclipse.boot.validation.SpringBootValidator"
           enabledByDefault="true"
+          icon="resources/icons/boot-icon.png"
           id="bootvalidator"
           markerId="problemmarker"
-          name="%dataValidator.name">
+          name="Boot Validator">
     </validator>
     <rules
           validatorId="org.springframework.ide.eclipse.boot.bootvalidator">
