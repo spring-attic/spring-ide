@@ -5,8 +5,10 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ SpringBootProjectTests.class, 
-		NewSpringBootWizardModelTest.class
+@SuiteClasses({
+		SpringBootProjectTests.class,
+		NewSpringBootWizardModelTest.class,
+		SpringBootValidationTest.class
 })
 public class AllSpringBootTests {
 
