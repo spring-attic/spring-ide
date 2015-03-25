@@ -14,6 +14,8 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -84,6 +86,10 @@ public abstract class AbstractBootValidationTest {
 		IProject project = getProject(projectName);
 		project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 		return project;
+	}
+
+	public static void assertNoMarkers(IMarker[] markers) throws Exception {
+		assertNoMarkers(new LinkedHashSet<IMarker>(Arrays.asList(markers)));
 	}
 
 	public static void assertNoMarkers(Set<IMarker> markers) throws Exception {

@@ -119,7 +119,7 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		quickfix.run(marker);
 		assertThat(getContents(pom), containsString("<artifactId>spring-boot-configuration-processor</artifactId>"));
 		buildProject(p);
-		assertThat(getAllMarkers(r, MARKER_TYPE), arrayWithSize(0));
+		assertNoMarkers(getAllMarkers(r, MARKER_TYPE));
 	}
 
 	private void buildProject(IProject p) throws Exception {
