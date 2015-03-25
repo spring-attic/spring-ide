@@ -135,12 +135,10 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 	private Matcher<IMarkerResolution> resolutionWithLabel(final String snippet) {
 		return new TypeSafeMatcher<IMarkerResolution>() {
 
-			@Override
 			public void describeTo(Description description) {
 				description.appendText("resolutionWithLabel("+snippet+")");
 			}
 
-			@Override
 			protected void describeMismatchSafely(IMarkerResolution item,
 					Description mismatchDescription) {
 				String actual = item.getLabel();
@@ -150,7 +148,7 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 				mismatchDescription.appendText(actual);
 				mismatchDescription.appendText("]");
 			}
-			@Override
+
 			protected boolean matchesSafely(IMarkerResolution item) {
 				String actual = item.getLabel();
 				return actual.equals(snippet);
