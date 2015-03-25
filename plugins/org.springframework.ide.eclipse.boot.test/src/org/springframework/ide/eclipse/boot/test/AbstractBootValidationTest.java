@@ -102,13 +102,10 @@ public abstract class AbstractBootValidationTest {
 	 */
 	public static Matcher<IMarker> markerWithAreaCovering(final String expectedTextInMarkerRange) {
 		return new TypeSafeMatcher<IMarker>(IMarker.class) {
-
-			@Override
 			public void describeTo(Description description) {
 				description.appendText("markerWithAreaCovering("+expectedTextInMarkerRange+")");
 			}
 
-			@Override
 			public void describeMismatchSafely(IMarker item, Description description) {
 				try {
 					int start = (Integer) item.getAttribute(IMarker.CHAR_START);
@@ -124,7 +121,6 @@ public abstract class AbstractBootValidationTest {
 				}
 			}
 
-			@Override
 			protected boolean matchesSafely(IMarker item) {
 				try {
 					int start = (Integer) item.getAttribute(IMarker.CHAR_START);
