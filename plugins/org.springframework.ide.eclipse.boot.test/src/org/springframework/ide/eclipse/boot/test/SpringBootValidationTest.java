@@ -34,6 +34,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 @SuppressWarnings("unchecked")
 public class SpringBootValidationTest extends AbstractBootValidationTest {
@@ -91,9 +92,9 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		String projectName = "simple-boot-project";
 		String resourcePath = "src/main/java/demo/FooProperties.java";
 
-		IProject p = createPredefinedProject(projectName);
+		final IProject p = createPredefinedProject(projectName);
 
-		IFile r = (IFile) p.findMember(resourcePath);
+		final IFile r = (IFile) p.findMember(resourcePath);
 		IMarker[] markers = getAllMarkers(r, MARKER_TYPE);
 
 		//Finds @ConfigrationProperties on Class?
@@ -118,8 +119,13 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		IMarkerResolution quickfix = resolutions[0];
 		quickfix.run(marker);
 		assertThat(getContents(pom), containsString("<artifactId>spring-boot-configuration-processor</artifactId>"));
-		buildProject(p);
-		assertNoMarkers(getAllMarkers(r, MARKER_TYPE));
+		new ACondition("marker disapears after quickfix") {
+			public boolean test() throws Exception {
+				buildProject(p);
+				assertNoMarkers(getAllMarkers(r, MARKER_TYPE));
+				return true;
+			}
+		}.waitFor(10000);
 	}
 
 	private void buildProject(IProject p) throws Exception {
