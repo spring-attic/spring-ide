@@ -146,12 +146,10 @@ public abstract class AbstractBootValidationTest {
 	public static Matcher<IMarker> markerWithMessageSnippet(final String expectSnippet) {
 		return new TypeSafeMatcher<IMarker>(IMarker.class) {
 
-			@Override
 			public void describeTo(Description description) {
 				description.appendText("markerWithMessageSnippet("+expectSnippet+")");
 			}
 
-			@Override
 			public boolean matchesSafely(IMarker item) {
 				try {
 					String actualMessage = (String)item.getAttribute(IMarker.MESSAGE);
