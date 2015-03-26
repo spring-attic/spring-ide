@@ -133,7 +133,6 @@ public class GradleStrategy extends ImportStrategy {
 				//2:
 				GradleImportOperation importOp = GradleImportOperation.importAll(rootFolder);
 				importOp.setEnableDependencyManagement(false);
-				importOp.setEnableDSLD(false);
 
 				ErrorHandler eh = ErrorHandler.forImportWizard();
 				importOp.perform(eh, new SubProgressMonitor(monitor, 1));
