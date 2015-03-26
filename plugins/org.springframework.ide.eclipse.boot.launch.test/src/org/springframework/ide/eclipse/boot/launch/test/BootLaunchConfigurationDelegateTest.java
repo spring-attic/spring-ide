@@ -299,12 +299,15 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 
 	private static  void assertClasspathHasEntry(String[] cp, String expect) {
+		StringBuilder found = new StringBuilder();
 		for (String actual : cp) {
+			found.append(actual+"\n");
 			if (actual.endsWith(expect)) {
 				return;
 			}
 		}
-		fail("Missing classpath entry: "+expect);
+		fail("Missing classpath entry: "+expect+"\n"
+				+ "found: "+found);
 	}
 
 	private String[] getClasspath(JavaLaunchDelegate delegate,
