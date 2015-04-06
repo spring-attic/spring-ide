@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spring Boot Yaml
+Bundle-SymbolicName: org.springframework.ide.eclipse.yaml.editor;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.yaml.editor.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.dadacoalition.yedit;bundle-version="1.0.16",
+ org.eclipse.ui.editors,
+ org.eclipse.text,
+ org.eclipse.jface.text,
+ org.yaml.snakeyaml,
+ org.springframework.ide.eclipse.boot.properties.editor,
+ org.eclipse.jdt.core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy

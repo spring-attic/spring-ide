@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.dadacoalition.yedit.sourceViewerConfigurationContribution">
+    	<sourceViewerConfiguration class="org.springframework.ide.eclipse.yaml.editor.SpringYeditSourceViewerConfiguration"/>
+   </extension>
+</plugin>
