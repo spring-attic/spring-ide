@@ -24,6 +24,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
+import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
 
 import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
@@ -36,7 +37,7 @@ import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
+public class SpringPropertyHoverInfo extends HoverInfo {
 
 	private static final String[] NO_ARGS = new String[0];
 
@@ -51,7 +52,6 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 	private PropertyInfo data;
 
 	public SpringPropertyHoverInfo(IJavaProject project, PropertyInfo data) {
-		super(null);
 		this.javaProject = project;
 		this.data = data;
 	}
@@ -116,16 +116,6 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public Object getInputElement() {
-		return this;
-	}
-
-	@Override
-	public String getInputName() {
-		return "";
 	}
 
 	public PropertyInfo getElement() {
@@ -261,17 +251,6 @@ public class SpringPropertyHoverInfo extends BrowserInformationControlInput {
 			}
 		}
 		return null;
-	}
-
-	public void openDeclaration() {
-		try {
-			List<IJavaElement> elements = getJavaElements();
-			if (elements!=null && !elements.isEmpty()) {
-				JavaUI.openInEditor(elements.get(0));
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
 	}
 
 }

@@ -57,6 +57,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -68,7 +69,7 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class SpringPropertiesCompletionEngine {
+public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvider {
 
 	private boolean preferLowerCaseEnums = true;
 
@@ -696,26 +697,30 @@ public class SpringPropertiesCompletionEngine {
 
 	}
 
-	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, int offset, String contentType) {
-		debug("getHoverInfo("+offset+", "+contentType+")");
-		try {
-			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-				ITypedRegion r = getHoverRegion(doc, offset);
-				debug("hoverRegion = "+r);
-				PropertyInfo best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
-				if (best!=null) {
-					return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
-				}
+	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, IRegion region) {
+		debug("getHoverInfo("+region+")");
+		//The delegate 'getHoverRegion' for spring propery editor will return smaller word regions.
+		// we must ensure to use our own region finder to identify correct property name.
+		region = getHoverRegion(doc, region.getOffset());
+		if (region!=null) {
+			try {
+	//			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+					debug("hoverRegion = "+region);
+					PropertyInfo best = findBestHoverMatch(doc.get(region.getOffset(), region.getLength()).trim());
+					if (best!=null) {
+						return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
+					}
+	//			}
+			} catch (Exception e) {
+				SpringPropertiesEditorPlugin.log(e);
 			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
 		}
 		return null;
 	}
 
-	public List<IJavaElement> getSourceElements(IDocument doc, int offset) {
+	public List<IJavaElement> getSourceElements(IDocument doc, IRegion region) {
 		debug("getSourceElements");
-		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, offset, IDocument.DEFAULT_CONTENT_TYPE);
+		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, region);
 		if (hoverinfo!=null) {
 			return hoverinfo.getJavaElements();
 		} else {
@@ -724,13 +729,16 @@ public class SpringPropertiesCompletionEngine {
 		return Collections.emptyList();
 	}
 
-	public ITypedRegion getHoverRegion(IDocument document, int offset) {
+	public IRegion getHoverRegion(IDocument document, int offset) {
     	try {
-    		return getPartition(document, offset);
+    		ITypedRegion candidate = getPartition(document, offset);
+    		if (candidate!=null && candidate.getType()==IDocument.DEFAULT_CONTENT_TYPE) {
+    			return candidate;
+    		}
     	} catch (Exception e) {
     		SpringPropertiesEditorPlugin.log(e);
-    		return null;
     	}
+		return null;
 	}
 
 	/**

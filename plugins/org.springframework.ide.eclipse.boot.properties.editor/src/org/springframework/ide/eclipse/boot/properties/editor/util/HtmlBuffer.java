@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.boot.properties.editor.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.swt.graphics.FontData;
 import org.osgi.framework.Bundle;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 
 /**
  * Helper class to make it a little easier to create simple html page (for display in

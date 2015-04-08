@@ -14,15 +14,17 @@ import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
-import org.eclipse.jface.text.ITextInputListener;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.springframework.ide.eclipse.boot.properties.editor.AbstractSpringPropertiesCompletionEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
+import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
+import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
+import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.yaml.snakeyaml.Yaml;
 
 public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration {
@@ -31,23 +33,23 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		System.out.println(string);
 	}
 
-	public IContentAssistant getContentAssistant(ISourceViewer viewer) {
-		IContentAssistant a = super.getContentAssistant(viewer);
-
-		if (a instanceof ContentAssistant) {
-			//IContentAssistProcessor processor = assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
-			//if (processor!=null) {
-			//TODO: don't overwrite existing processor but wrap it so
-			// we combine our proposals with existing propopals
-			//}
-			((ContentAssistant) a).enableAutoActivation(true);
-			SpringYamlContentAssistProcessor processor = new SpringYamlContentAssistProcessor();
-			((ContentAssistant) a).setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-		}
-
-
-		return a;
-	}
+//	public IContentAssistant getContentAssistant(ISourceViewer viewer) {
+//		IContentAssistant a = super.getContentAssistant(viewer);
+//
+//		if (a instanceof ContentAssistant) {
+//			//IContentAssistProcessor processor = assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
+//			//if (processor!=null) {
+//			//TODO: don't overwrite existing processor but wrap it so
+//			// we combine our proposals with existing propopals
+//			//}
+//			((ContentAssistant) a).enableAutoActivation(true);
+//			SpringYamlContentAssistProcessor processor = new SpringYamlContentAssistProcessor();
+//			((ContentAssistant) a).setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+//		}
+//
+//
+//		return a;
+//	}
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
@@ -55,57 +57,36 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	}
 
 	private Yaml yaml = new Yaml();
-
-	private Provider<AbstractSpringPropertiesCompletionEngine> engineProvider(final ISourceViewer viewer) {
-		debug("Create engine provider");
-		return new Provider<AbstractSpringPropertiesCompletionEngine>() {
-
-			private SpringYamlCompletionEngine engine = createEngineFor(viewer.getDocument());
-
-			{
-				viewer.addTextInputListener(new ITextInputListener() {
-
-					@Override
-					public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
-						//don't care
-					}
-
-					@Override
-					public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-						engine = createEngineFor(newInput);
-					}
-				});
+	private YamlASTProvider astProvider = new YamlASTProvider(yaml);
+	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
+		@Override
+		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
+			IJavaProject jp = DocumentUtil.getJavaProject(doc);
+			if (jp!=null) {
+				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
 			}
+			return null;
+		}
 
-			@Override
-			public AbstractSpringPropertiesCompletionEngine get() {
-				return engine;
-			}
-
-			private SpringYamlCompletionEngine createEngineFor(IDocument doc) {
-				if (doc!=null) {
-					IJavaProject jp = DocumentUtil.getJavaProject(doc);
-					if (jp!=null) {
-						return new SpringYamlCompletionEngine(yaml, jp);
-					}
-				}
-				return null;
-			}
-
-		};
-	}
+	};
+	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, DocumentContextFinder.DEFAULT);
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		ITextHover delegate = super.getTextHover(sourceViewer, contentType, stateMask);
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-				return new SpringPropertiesTextHover(sourceViewer, contentType, engineProvider(sourceViewer), delegate);
+				return new SpringPropertiesTextHover(sourceViewer, hoverProvider, delegate);
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return delegate;
+	}
+
+	@Override
+	public IReconciler getReconciler(ISourceViewer sourceViewer) {
+		return null;
 	}
 
 }

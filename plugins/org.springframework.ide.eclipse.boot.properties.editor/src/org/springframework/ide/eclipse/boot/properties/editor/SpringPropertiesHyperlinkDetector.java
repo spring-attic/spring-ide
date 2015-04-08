@@ -77,9 +77,9 @@ public class SpringPropertiesHyperlinkDetector extends AbstractHyperlinkDetector
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		IDocument doc = textViewer.getDocument();
 		if (doc!=null) {
-			ITypedRegion linkRegion = engine.getHoverRegion(doc, region.getOffset());
-			if (linkRegion.getType()==IDocument.DEFAULT_CONTENT_TYPE) {
-				List<IJavaElement> targets = engine.getSourceElements(doc, linkRegion.getOffset());
+			IRegion linkRegion = engine.getHoverRegion(doc, region.getOffset());
+//			if (linkRegion.getType()==IDocument.DEFAULT_CONTENT_TYPE) {
+				List<IJavaElement> targets = engine.getSourceElements(doc, linkRegion);
 				if (!targets.isEmpty()) {
 					IHyperlink[] links = new IHyperlink[targets.size()];
 					for (int i = 0; i < links.length; i++) {
@@ -87,7 +87,7 @@ public class SpringPropertiesHyperlinkDetector extends AbstractHyperlinkDetector
 					}
 					return links;
 				}
-			}
+//			}
 		}
 		return NO_LINKS;
 	}

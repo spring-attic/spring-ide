@@ -27,14 +27,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.swt.graphics.Point;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
@@ -140,84 +138,6 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	}
 
 	/**
-	 * Basic 'simulated' editor. Contains text and a cursor position / selection.
-	 */
-	public class MockEditor {
-
-		private int selectionStart;
-		private int selectionEnd;
-		private Document document;
-
-		public Document getDocument() {
-			return document;
-		}
-
-		/**
-		 * Create mock editor. Selection position is initialized by looking for the CURSOR string.
-		 * <p>
-		 * THe cursor string is not actually considered part of the text, but only a marker for
-		 * the cursor position.
-		 * <p>
-		 * If one 'cursor' marker is present in the text the selection
-		 * is length 0 and starts at the marker.
-		 * <p>
-		 * If two markers are present the selection is between the two
-		 * markers.
-		 * <p>
-		 * If no markers are present the cursor is placed at the very end of the document.
-		 */
-		public MockEditor(String text) {
-			selectionStart = text.indexOf(CURSOR);
-			if (selectionStart>=0) {
-				text = text.substring(0,selectionStart) + text.substring(selectionStart+CURSOR.length());
-				selectionEnd = text.indexOf(CURSOR, selectionStart);
-				if (selectionEnd>=0) {
-					text = text.substring(0, selectionEnd) + text.substring(selectionEnd+CURSOR.length());
-				}
-			} else {
-				//No CURSOR markers found
-				selectionStart = text.length();
-				selectionEnd = text.length();
-			}
-			this.document = new Document(text);
-			PropertiesFileDocumentSetupParticipant.setupDocument(document);
-		}
-
-		/**
-		 * Get the editor text, with cursor markers inserted (for easy textual comparison
-		 * after applying a proposal)
-		 */
-		public String getText() {
-			String text = document.get();
-			text = text.substring(0, selectionEnd) + CURSOR + text.substring(selectionEnd);
-			if (selectionStart<selectionEnd) {
-				text = text.substring(0,selectionStart) + CURSOR + text.substring(selectionStart);
-			}
-			return text;
-		}
-
-		/**
-		 * Set selection based on result returned by ICompletionProposal getSelection method.
-		 */
-		public void setSelection(Point selection) {
-			if (selection!=null) {
-				selectionStart = selection.x;
-				selectionEnd = selectionStart+selection.y;
-			}
-		}
-
-		public void apply(ICompletionProposal completion) {
-			completion.apply(document);
-			setSelection(completion.getSelection(document));
-		}
-
-		public String getText(int offset, int length) throws BadLocationException {
-			return document.get(offset, length);
-		}
-
-	}
-
-	/**
 	 * Compute hover text when mouse hovers at the end of the first occurence of
 	 * a given String in the editor contents.
 	 */
@@ -226,9 +146,9 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 		if (pos>=0) {
 			pos += atString.length();
 		}
-		ITypedRegion region = engine.getHoverRegion(editor.document, pos);
+		IRegion region = engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
-			return engine.getHoverInfo(editor.document, pos, region.getType()).getHtml();
+			return engine.getHoverInfo(editor.document, region).getHtml();
 		}
 		return null;
 	}
@@ -843,16 +763,22 @@ public abstract class SpringPropertiesEditorTestHarness extends StsTestCase {
 	}
 
 	private List<PropertySource> getRawLinkTargets(MockEditor editor, int pos) {
-		SpringPropertyHoverInfo hover = engine.getHoverInfo(editor.document, pos, IDocument.DEFAULT_CONTENT_TYPE);
-		if (hover!=null) {
-			return hover.getSources();
+		IRegion region = engine.getHoverRegion(editor.document, pos);
+		if (region!=null) {
+			SpringPropertyHoverInfo hover = engine.getHoverInfo(editor.document, region);
+			if (hover!=null) {
+				return hover.getSources();
+			}
 		}
-
 		return Collections.emptyList();
 	}
 
 	protected List<IJavaElement> getLinkTargets(MockEditor editor, int pos) {
-		return engine.getSourceElements(editor.document, pos);
+		IRegion region = engine.getHoverRegion(editor.document, pos);
+		if (region!=null) {
+			return engine.getSourceElements(editor.document, region);
+		}
+		return Collections.emptyList();
 	}
 
 	public static String getContents(IFile file) throws Exception {

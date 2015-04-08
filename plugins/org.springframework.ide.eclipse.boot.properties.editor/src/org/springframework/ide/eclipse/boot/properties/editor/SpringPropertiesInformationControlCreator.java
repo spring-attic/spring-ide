@@ -111,7 +111,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 		@Override
 		public void run() {
 			try {
-				SpringPropertyHoverInfo infoInput= (SpringPropertyHoverInfo) fInfoControl.getInput();
+				HoverInfo infoInput= (HoverInfo) fInfoControl.getInput();
 				if (infoInput!=null) {
 					List<IJavaElement> elements = infoInput.getJavaElements();
 					//TODO: This only opens the first element, if there's more than one should offer a choice/

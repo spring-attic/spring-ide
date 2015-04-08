@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
@@ -18,63 +19,71 @@ import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlUtil;
 
+@SuppressWarnings("restriction")
 public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
-	private String contentType;
-	private SpringPropertiesCompletionEngine engine;
+	private IPropertyHoverInfoProvider _hovers;
 	private ITextHover delegate;
 
-	public SpringPropertiesTextHover(ISourceViewer sourceViewer, String contentType, SpringPropertiesCompletionEngine engine, ITextHover delegate) {
-		this.contentType = contentType;
-		this.engine = engine;
+	public SpringPropertiesTextHover(ISourceViewer sourceViewer, IPropertyHoverInfoProvider hoverInfoProvider, ITextHover delegate) {
+		this._hovers = hoverInfoProvider;
 		this.delegate = delegate;
 	}
-	
-    public IRegion getHoverRegion(ITextViewer tv, int offset) {
-    	//Note that we ask the 'delegate' first. This is because it handles info about 
-    	// error markers from annotations model. And this info should 'override'
-    	// information about property
-    	IRegion r = delegate.getHoverRegion(tv, offset);
-    	if (r!=null) {
-    		return r;
-    	}
-    	return engine.getHoverRegion(tv.getDocument(), offset);
-     }
-    
-     public String getHoverInfo(ITextViewer tv, IRegion r) {
-     	String s = delegate.getHoverInfo(tv, r);
-     	if (s!=null) {
-     		return text2html(s);
-     	}
-     	return engine.getHoverInfo(tv.getDocument(), r.getOffset(), contentType).getHtml();
-     }
-     
- 	private String text2html(String s) {
-		HtmlBuffer buf = new HtmlBuffer();
-		buf.text(s);
-		return buf.toString();
+
+	public IRegion getHoverRegion(ITextViewer tv, int offset) {
+		//Note that we ask the 'delegate' first. This is because it handles info about
+		// error markers from annotations model. And this info should 'override'
+		// information about property
+		if (delegate!=null) {
+			IRegion r = delegate.getHoverRegion(tv, offset);
+			if (r!=null) {
+				return r;
+			}
+		}
+		return hovers_getHoverRegion(tv.getDocument(), offset);
+	}
+
+	public String getHoverInfo(ITextViewer tv, IRegion r) {
+		String s = delegate.getHoverInfo(tv, r);
+		if (s!=null) {
+			return HtmlUtil.text2html(s);
+		}
+		return hovers_getHoverInfo(tv.getDocument(), r).getHtml();
 	}
 
 	@Override
- 	public Object getHoverInfo2(ITextViewer tv, IRegion r) {
- 		if (delegate instanceof ITextHoverExtension2) {
- 			Object it = ((ITextHoverExtension2) delegate).getHoverInfo2(tv, r);
- 			if (it!=null) {
- 				if (it instanceof String) {
- 					return text2html((String)it);
- 				} else {
- 					return it;
- 				}
- 			}
- 		}
- 		return engine.getHoverInfo(tv.getDocument(), r.getOffset(), contentType);
- 	}
-     
+	public Object getHoverInfo2(ITextViewer tv, IRegion r) {
+		if (delegate instanceof ITextHoverExtension2) {
+			Object it = ((ITextHoverExtension2) delegate).getHoverInfo2(tv, r);
+			if (it!=null) {
+				if (it instanceof String) {
+					return HtmlUtil.text2html((String)it);
+				} else {
+					return it;
+				}
+			}
+		}
+		return hovers_getHoverInfo(tv.getDocument(), r);
+	}
 
 	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		return new SpringPropertiesInformationControlCreator(EditorsUI.getTooltipAffordanceString());
 	}
-	
+
+
+	private IRegion hovers_getHoverRegion(IDocument document, int offset) {
+		IRegion r = _hovers.getHoverRegion(document, offset);
+//		System.out.println("getHRegion("+offset+") => "+r);
+		return r;
+	}
+	private HoverInfo hovers_getHoverInfo(IDocument document, IRegion r) {
+		HoverInfo result = _hovers.getHoverInfo(document, r);
+//		System.out.println("getHInfo("+r+") => "+result);
+		return result;
+	}
+
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,7 +121,7 @@ extends PropertiesFileSourceViewerConfiguration {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
 				if (engine!=null) {
-					return new SpringPropertiesTextHover(sourceViewer, contentType, engine, delegate);
+					return new SpringPropertiesTextHover(sourceViewer, engine, delegate);
 				}
 			}
 		} catch (Exception e) {
@@ -159,7 +159,6 @@ extends PropertiesFileSourceViewerConfiguration {
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		IReconcilingStrategy strategy = null;
-		Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
 		if (EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
 			IReconcilingStrategy spellcheck = new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
 				@Override
@@ -170,7 +169,6 @@ extends PropertiesFileSourceViewerConfiguration {
 			strategy = compose(strategy, spellcheck);
 		}
 		try {
-			indexProvider = getEngine().getIndexProvider();
 			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer,
 					getEngine().getIndexProvider(), getEngine().getTypeUtil());
 			strategy = compose(strategy, propertyChecker);
