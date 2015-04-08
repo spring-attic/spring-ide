@@ -30,25 +30,10 @@ import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 
+/**
+ * @author Kris De Volder
+ */
 public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
-
-	public class ExpBuilder {
-
-		private StringBuilder buf;
-
-		public void append(String value) {
-			if (buf.length()>0) {
-				buf.append(".");
-			}
-		}
-
-		@Override
-		public String toString() {
-			return buf.toString();
-		}
-
-	}
-
 
 	private YamlASTProvider astProvider;
 	private SpringPropertyIndexProvider indexProvider;
@@ -59,18 +44,6 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 		this.indexProvider = indexProvider;
 		this.contextFinder = contextFinder;
 	}
-
-
-//	@Override
-//	public HoverInfo getHoverInfo(IDocument doc, IRegion r) {
-//		//Creates a mock text hover for now
-//		try {
-//			return HoverInfo.withText("Hovering over: "+doc.get(r.getOffset(), r.getLength()));
-//		} catch (Exception e) {
-//			return HoverInfo.withText("Error: "+e.getMessage());
-//		}
-//	}
-
 
 	@Override
 	public HoverInfo getHoverInfo(IDocument doc, IRegion r) {
@@ -90,21 +63,6 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 		}
 		return null;
 	}
-
-//	private String asPropertyExp(List<Node> path) {
-//		ExpBuilder exp = new ExpBuilder();
-//		for (Node node : path) {
-//			switch (node.getNodeId())) {
-//			case scalar:
-//				exp.append(((ScalarNode)node).getValue());
-//				break;
-//
-//			default:
-//				break;
-//			}
-//		}
-//	}
-
 
 	@Override
 	public IRegion getHoverRegion(IDocument document, int offset) {
