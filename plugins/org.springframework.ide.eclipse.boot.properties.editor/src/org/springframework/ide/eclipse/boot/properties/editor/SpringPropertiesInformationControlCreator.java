@@ -19,6 +19,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -111,15 +112,18 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 		@Override
 		public void run() {
 			try {
-				HoverInfo infoInput= (HoverInfo) fInfoControl.getInput();
-				if (infoInput!=null) {
-					List<IJavaElement> elements = infoInput.getJavaElements();
-					//TODO: This only opens the first element, if there's more than one should offer a choice/
-					if (!elements.isEmpty()) {
-						IJavaElement je = elements.get(0);
-						fInfoControl.notifyDelayedInputChange(null);
-						fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
-						JavaUI.openInEditor(je);
+				BrowserInformationControlInput input = fInfoControl.getInput();
+				if (input instanceof HoverInfo) {
+					HoverInfo infoInput= (HoverInfo) input;
+					if (infoInput!=null) {
+						List<IJavaElement> elements = infoInput.getJavaElements();
+						//TODO: This only opens the first element, if there's more than one should offer a choice/
+						if (!elements.isEmpty()) {
+							IJavaElement je = elements.get(0);
+							fInfoControl.notifyDelayedInputChange(null);
+							fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
+							JavaUI.openInEditor(je);
+						}
 					}
 				}
 			} catch (Exception e) {

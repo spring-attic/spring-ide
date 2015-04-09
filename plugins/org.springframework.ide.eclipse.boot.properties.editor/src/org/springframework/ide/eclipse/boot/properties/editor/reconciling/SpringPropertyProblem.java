@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
-import org.eclipse.core.runtime.IStatus;
-
 /**
  * @author Kris De Volder
  */
@@ -20,15 +18,15 @@ public class SpringPropertyProblem {
 	private String msg;
 	private int length;
 	private int offset;
-	
+
 	private String severity = SpringPropertyAnnotation.ERROR_TYPE;
-	
+
 	/**
 	 * Create a SpringProperty file annotation with a given severity.
 	 * The severity should be one of the XXX_TYPE constants defined in
 	 * {@link SpringPropertyAnnotation}.
 	 */
-	public SpringPropertyProblem(String severity, String msg, int offset, int length) {
+	private SpringPropertyProblem(String severity, String msg, int offset, int length) {
 		this.msg = msg;
 		this.offset = offset;
 		this.length = length;
@@ -55,5 +53,12 @@ public class SpringPropertyProblem {
 	public String getSeverity() {
 		return severity;
 	}
-	
+
+	public static SpringPropertyProblem error(String message, int offset, int len) {
+		return new SpringPropertyProblem(SpringPropertyAnnotation.ERROR_TYPE, message, offset, len);
+	}
+	public static SpringPropertyProblem warning(String message, int offset, int len) {
+		return new SpringPropertyProblem(SpringPropertyAnnotation.WARNING_TYPE, message, offset, len);
+	}
+
 }

@@ -718,17 +718,6 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		return null;
 	}
 
-	public List<IJavaElement> getSourceElements(IDocument doc, IRegion region) {
-		debug("getSourceElements");
-		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, region);
-		if (hoverinfo!=null) {
-			return hoverinfo.getJavaElements();
-		} else {
-			debug("hoverInfo = null");
-		}
-		return Collections.emptyList();
-	}
-
 	public IRegion getHoverRegion(IDocument document, int offset) {
     	try {
     		ITypedRegion candidate = getPartition(document, offset);

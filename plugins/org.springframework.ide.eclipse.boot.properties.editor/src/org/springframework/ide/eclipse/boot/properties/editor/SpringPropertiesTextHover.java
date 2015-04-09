@@ -17,11 +17,12 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlUtil;
 
-@SuppressWarnings("restriction")
 public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
 	private IPropertyHoverInfoProvider _hovers;
@@ -63,6 +64,11 @@ public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtensio
 				} else {
 					return it;
 				}
+			}
+		} else if (delegate instanceof ITextHover) {
+			String it = delegate.getHoverInfo(tv, r);
+			if (it!=null) {
+				return HtmlUtil.text2html(it);
 			}
 		}
 		return hovers_getHoverInfo(tv.getDocument(), r);

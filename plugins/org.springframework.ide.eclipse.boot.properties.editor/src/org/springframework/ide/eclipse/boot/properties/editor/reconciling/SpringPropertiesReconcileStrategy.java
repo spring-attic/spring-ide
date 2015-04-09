@@ -139,20 +139,20 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	private ProblemCollector fProblemCollector;
 
-	private SpringPropertiesReconcileEngine fEngine;
+	private IReconcileEngine fEngine;
 
 	/**
 	 * Creates a new comment reconcile strategy.
 	 *
 	 * @param viewer the source viewer
+	 * @param engine
 	 * @param typeUtil
 	 * @param spellingService the spelling service to use
 	 */
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine) {
 		Assert.isNotNull(viewer);
-		Assert.isNotNull(provider);
 		fViewer= viewer;
-		fEngine = new SpringPropertiesReconcileEngine(provider, typeUtil);
+		fEngine = engine;
 	}
 
 	/*

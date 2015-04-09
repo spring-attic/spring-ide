@@ -10,55 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef;
 import org.springframework.ide.eclipse.yaml.editor.ast.PathUtil;
-import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
-import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
  * @author Kris De Volder
  */
-public class YamlASTTests {
-
-	protected Yaml yaml = new Yaml();
-	protected YamlASTProvider parser = new YamlASTProvider(yaml);
-
-	public class YamlEditor extends MockEditor {
-		public YamlEditor(String string) {
-			super(string);
-		}
-
-		public YamlFileAST parse() {
-			return parser.getAST(this.document);
-		}
-
-		public int startOf(String nodeText) {
-			return document.get().indexOf(nodeText);
-		}
-
-		public int endOf(String nodeText) {
-			return document.get().indexOf(nodeText)+nodeText.length();
-		}
-
-		public int middleOf(String nodeText) {
-			return startOf(nodeText) + nodeText.length()/2;
-		}
-
-		public String textUnder(Node node) throws Exception {
-			int start = node.getStartMark().getIndex();
-			int end = node.getEndMark().getIndex();
-			return document.get(start, end-start);
-		}
-
-	}
-
+public class YamlASTTests extends YamlEditorTestHarness {
 
 	/**
 	 * Check that node at given offset exactly covers the expected text
@@ -95,7 +58,6 @@ public class YamlASTTests {
 		assertNodeTextAt(input, input.middleOf(nodeText), nodeText);
 	}
 
-	@Test
 	public void testFindPath() throws Exception {
 		YamlEditor input = new YamlEditor(
 				"foo:\n" +
@@ -114,7 +76,6 @@ public class YamlASTTests {
 				"ROOT[0]@val['server']@val['port']");
 	}
 
-	@Test
 	public void testPathToPropertyString() {
 		YamlEditor input = new YamlEditor(
 				"spring:\n" +
@@ -134,7 +95,6 @@ public class YamlASTTests {
 		assertPropertyString(input, "plica", "spring.application");
 	}
 
-	@Test
 	public void testPathToPropertyWithSequence() {
 		YamlEditor input = new YamlEditor(
 				"services:\n" +
@@ -176,7 +136,6 @@ public class YamlASTTests {
 		);
 	}
 
-	@Test
 	public void testSequencePath() {
 		YamlEditor input = new YamlEditor(
 				"fooList:\n"+

@@ -11,8 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation.ERROR_TYPE;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation.WARNING_TYPE;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.*;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,7 +44,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Valu
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class SpringPropertiesReconcileEngine {
+public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
@@ -119,7 +118,7 @@ public class SpringPropertiesReconcileEngine {
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
 								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
 								String validPrefix = commonPrefix(similarEntry.getId(), fullName);
-								problemCollector.accept(new SpringPropertyProblem(WARNING_TYPE,
+								problemCollector.accept(warning(
 										"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
 										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
 							} //end: validProperty==null
@@ -180,7 +179,7 @@ public class SpringPropertiesReconcileEngine {
 				}
 			}
 			if (errorRegion!=null) {
-				problems.accept(new SpringPropertyProblem(ERROR_TYPE,
+				problems.accept(error(
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}

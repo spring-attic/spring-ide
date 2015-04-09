@@ -24,6 +24,8 @@ public class AllPropertiesFileEditorTests {
 		suite.addTestSuite(FuzzyMapTests.class);
 		suite.addTestSuite(TypeParserTest.class);
 
+		suite.addTestSuite(YamlASTTests.class);
+		suite.addTestSuite(YamlEditorTests.class);
 		return suite;
 	}
 

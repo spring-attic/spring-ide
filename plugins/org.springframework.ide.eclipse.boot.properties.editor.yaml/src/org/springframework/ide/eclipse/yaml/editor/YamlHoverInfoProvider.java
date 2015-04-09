@@ -55,7 +55,7 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 				List<NodeRef<?>> path = ast.findPath(r.getOffset());
 				String propExp = PathUtil.toPropertyPrefixString(path);
 				PropertyInfo info = index.findLongestCommonPrefixEntry(propExp);
-				if (propExp.equals(info.getId())) {
+				if (info!=null && propExp.equals(info.getId())) {
 					return new SpringPropertyHoverInfo(jp, info);
 				}
 				//return HoverInfo.withText(propExp);
