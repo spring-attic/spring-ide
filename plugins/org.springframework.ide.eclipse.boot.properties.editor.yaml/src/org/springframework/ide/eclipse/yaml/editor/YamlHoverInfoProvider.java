@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.parser.ParserException;
 
 /**
  * @author Kris De Volder
@@ -80,7 +81,12 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 
 
 	private YamlFileAST getAst(IDocument doc) {
-		return astProvider.getAST(doc);
+		try {
+			return astProvider.getAST(doc);
+		} catch (ParserException e) {
+			//ignore, the user just typed some crap
+		}
+		return null;
 	}
 
 }

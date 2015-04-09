@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IRecon
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
+import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
 
 public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration {
@@ -95,9 +96,8 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, DocumentContextFinder.DEFAULT);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
-		@Override
 		protected IReconcileEngine createEngine() throws Exception {
-			return new BadWordReconcileEngine();
+			return new SpringYamlReconcileEngine(astProvider, indexProvider);
 		}
 	};
 

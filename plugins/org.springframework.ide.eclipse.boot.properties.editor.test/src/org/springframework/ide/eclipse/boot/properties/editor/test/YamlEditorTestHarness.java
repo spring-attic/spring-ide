@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -22,13 +23,15 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.yaml.editor.YamlHoverInfoProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
+import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
 
@@ -36,13 +39,26 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
 	protected Yaml yaml = new Yaml();
 	protected YamlASTProvider parser = new YamlASTProvider(yaml);
+	protected IJavaProject javaProject = null;
+
 	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
 		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
 			return index;
 		}
 	};
 
+	private TypeUtilProvider typeUtil = new TypeUtilProvider() {
+		public TypeUtil getTypeUtil(IDocument doc) {
+			return new TypeUtil(javaProject);
+		}
+	};
+
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
+
+	protected SpringYamlReconcileEngine createReconcileEngine() {
+		return new SpringYamlReconcileEngine(parser, indexProvider);
+	}
+
 
 	public class YamlEditor extends MockEditor {
 		public YamlEditor(String string) {
@@ -152,13 +168,5 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		}
 		return Collections.emptyList();
 	}
-
-	@Override
-	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
-		//TODO: implement
-		return Collections.emptyList();
-	}
-
-
 
 }

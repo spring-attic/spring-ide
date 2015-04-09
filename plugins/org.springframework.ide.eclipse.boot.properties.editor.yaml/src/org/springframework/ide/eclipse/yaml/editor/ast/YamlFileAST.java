@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef.RootRef;
 import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef.SeqRef;
 import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef.TupleKeyRef;
@@ -65,7 +66,9 @@ public class YamlFileAST {
 	}
 
 	/**
-	 * Find smallest node that is a child of 'n' that contains 'offset'.
+	 * Find smallest node that is a child of 'n' that contains 'offset'. Each visited
+	 * node containing the offset, from the down to the found node are
+	 * passed to the pathRequestor.
 	 */
 	private void findPath(Node n, int offset, IRequestor<NodeRef<?>> pathRequestor) {
 		//TODO: avoid lots of garbage production by not using 'getChildren'
@@ -85,7 +88,7 @@ public class YamlFileAST {
 		}
 	}
 
-	private List<NodeRef<?>> getChildren(Node n) {
+	public static List<NodeRef<?>> getChildren(Node n) {
 		switch (n.getNodeId()) {
 		case scalar:
 			return NO_CHILDREN;
@@ -101,8 +104,11 @@ public class YamlFileAST {
 		return null;
 	}
 
+	public List<Node> getNodes() {
+		return nodes;
+	}
 
-	private List<NodeRef<?>> getChildren(SequenceNode seq) {
+	private static List<NodeRef<?>> getChildren(SequenceNode seq) {
 		int nodes = seq.getValue().size();
 		ArrayList<NodeRef<?>> children = new ArrayList<>(nodes);
 		for (int i = 0; i < nodes; i++) {
@@ -111,7 +117,7 @@ public class YamlFileAST {
 		return children;
 	}
 
-	private List<NodeRef<?>> getChildren(MappingNode map) {
+	private static List<NodeRef<?>> getChildren(MappingNode map) {
 		int entries = map.getValue().size();
 		ArrayList<NodeRef<?>> children = new ArrayList<>(entries*2);
 		for (int i = 0; i < entries; i++) {
@@ -142,5 +148,6 @@ public class YamlFileAST {
 	public void put(int index, Node value) {
 		nodes.set(index, value);
 	}
+
 
 }

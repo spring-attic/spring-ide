@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -23,6 +24,7 @@ import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
@@ -510,7 +512,14 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 				return p;
 			}
 
-	public abstract List<SpringPropertyProblem> reconcile(MockEditor editor);
+	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
+		IReconcileEngine reconciler = createReconcileEngine();
+		MockProblemCollector problems=new MockProblemCollector();
+		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
+		return problems.getAllProblems();
+	}
+
+	protected abstract IReconcileEngine createReconcileEngine();
 
 	/**
 	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are

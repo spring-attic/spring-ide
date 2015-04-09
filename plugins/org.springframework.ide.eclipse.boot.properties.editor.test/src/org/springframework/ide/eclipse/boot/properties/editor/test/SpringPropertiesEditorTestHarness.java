@@ -68,14 +68,6 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		engine.setTypeUtil(new TypeUtil(javaProject));
 	}
 
-	@Override
-	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
-		IReconcileEngine reconciler = createReconcileEngine();
-		MockProblemCollector problems=new MockProblemCollector();
-		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
-		return problems.getAllProblems();
-	}
-
 	protected SpringPropertiesReconcileEngine createReconcileEngine() {
 		return new SpringPropertiesReconcileEngine(engine.getIndexProvider(), engine.getTypeUtil());
 	}

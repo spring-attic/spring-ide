@@ -93,8 +93,8 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 		assertProblems(editor,
 				"extracrap: 8080|Expecting Integer for 'server.port'",
-				"snuggem|unknown property",
-				"bogus|unknown property"
+				"snuggem|Unknown property",
+				"bogus|Unknown property"
 		);
 
 	}
