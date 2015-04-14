@@ -10,22 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.reconcile;
 
+import static org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil.asScalar;
+
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
+import org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
-
-import static org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST.*;
-
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
-
-import static org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil.*;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 
 /**
  * @author Kris De Volder
@@ -33,9 +38,11 @@ import static org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil.*;
 public class YamlASTReconciler {
 
 	private IProblemCollector problems;
+	private TypeUtil typeUtil;
 
-	public YamlASTReconciler(IProblemCollector problems) {
+	public YamlASTReconciler(IProblemCollector problems, TypeUtil typeUtil) {
 		this.problems = problems;
+		this.typeUtil = typeUtil;
 	}
 
 	public void reconcile(YamlFileAST ast, IndexNavigator nav, IProgressMonitor mon) {
@@ -81,8 +88,8 @@ public class YamlASTReconciler {
 				//This ambiguity is hard to deal with and we choose not to do so for now
 				return;
 			} else if (match!=null) {
-				//TODO: from here on down we should reconcile based on the type of
-				// the selected property.
+				Type type = TypeParser.parse(match.getType());
+				reconcile(entry.getValueNode(), type);
 			} else if (extension!=null) {
 				//We don't really care about the extension only about the fact that it
 				// exists and so it is meaningful to continue checking...
@@ -96,8 +103,108 @@ public class YamlASTReconciler {
 		}
 	}
 
+	/**
+	 * Reconcile a node given the type that we expect the node to be.
+	 */
+	private void reconcile(Node node, Type type) {
+		if (type!=null) {
+			switch (node.getNodeId()) {
+			case scalar:
+				reconcile((ScalarNode)node, type);
+				break;
+			case sequence:
+				reconcile((SequenceNode)node, type);
+				break;
+			case mapping:
+				reconcile((MappingNode)node, type);
+				break;
+			case anchor:
+				//TODO: what should we do with anchor nodes
+				break;
+			default:
+				throw new IllegalStateException("Missing switch case");
+			}
+		}
+	}
+
+	private void reconcile(MappingNode mapping, Type type) {
+		if (typeUtil.isAtomic(type)) {
+			expectType(type, mapping);
+		} else if (TypeUtil.isMap(type) || TypeUtil.isArrayLike(type)) {
+			Type keyType = TypeUtil.getKeyType(type);
+			Type valueType = TypeUtil.getDomainType(type);
+			if (keyType!=null) {
+				for (NodeTuple entry : mapping.getValue()) {
+					reconcile(entry.getKeyNode(), keyType);
+				}
+			}
+			if (valueType!=null) {
+				for (NodeTuple entry : mapping.getValue()) {
+					reconcile(entry.getValueNode(), valueType);
+				}
+			}
+		} else {
+			// Neither atomic, map or sequence-like => bean-like
+			Map<String, Type> props = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED);
+			if (props!=null) {
+				for (NodeTuple entry : mapping.getValue()) {
+					Node keyNode = entry.getKeyNode();
+					String key = NodeUtil.asScalar(keyNode);
+					if (key==null) {
+						expectBeanPropertyName(keyNode, type);
+					} else if (!props.containsKey(key)) {
+						unknownBeanProperty(keyNode, type, key);
+					}
+
+					if (key!=null) {
+						Node valNode = entry.getValueNode();
+						reconcile(valNode, props.get(key));
+					}
+				}
+			}
+		}
+	}
+
+	private void reconcile(SequenceNode seq, Type type) {
+		if (typeUtil.isAtomic(type)) {
+			expectType(type, seq);
+		} else if (TypeUtil.isArrayLike(type)) {
+			Type domainType = TypeUtil.getDomainType(type);
+			if (domainType!=null) {
+				for (Node element : seq.getValue()) {
+					reconcile(element, domainType);
+				}
+			}
+		} else {
+			expectType(type, seq);
+		}
+	}
+
+	private void reconcile(ScalarNode scalar, Type type) {
+		String stringValue = scalar.getValue();
+		if (!stringValue.contains("${")) { //don't check anything with ${} expressions in it as we
+											// don't know its actual value
+			ValueParser valueParser = typeUtil.getValueParser(type);
+			if (valueParser!=null) {
+				// Tag tag = scalar.getTag(); //use the tag? Actually, boot tolerates String values
+				//  even if integeger etc are expected. It has its ways of parsing the String to the
+				//  expected type
+				try {
+					valueParser.parse(stringValue);
+				} catch (Exception e) {
+					//Couldn't parse
+					expectType(type, scalar);
+				}
+			}
+		}
+	}
+
 	private void unkownProperty(Node node, String name) {
-		warning(node, "Unkown property '"+name+"'");
+		warning(node, "Unknown property '"+name+"'");
+	}
+
+	private void expectType(Type type, Node node) {
+		error(node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node));
 	}
 
 	private void expectScalar(Node node) {
@@ -106,6 +213,15 @@ public class YamlASTReconciler {
 
 	protected void expectMapping(Node node) {
 		error(node, "Expecting a 'Mapping' node but got "+describe(node));
+	}
+
+	private void expectBeanPropertyName(Node keyNode, Type type) {
+		error(keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
+				+ "but got "+describe(keyNode));
+	}
+
+	private void unknownBeanProperty(Node keyNode, Type type, String name) {
+		error(keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'");
 	}
 
 	protected void warning(Node node, String msg) {

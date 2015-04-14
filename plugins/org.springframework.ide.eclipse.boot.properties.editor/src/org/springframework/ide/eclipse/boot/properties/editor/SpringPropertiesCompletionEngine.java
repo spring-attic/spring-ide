@@ -309,7 +309,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		if (type!=null) {
 			if (typeUtil.isAssignableType(type)) {
 				postfix = "=";
-			} else if (TypeUtil.isBracketable(type)) {
+			} else if (TypeUtil.isArrayLike(type)) {
 				postfix = "[";
 			} else if (typeUtil.isDotable(type)) {
 				postfix = ".";
@@ -760,67 +760,6 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		return best;
 	}
 
-	/**
-	 * Dumps out 'test data' based on the current contents of the index. This is not meant to be
-	 * used in 'production' code. The idea is to call this method during development to dump a
-	 * 'snapshot' of the index onto System.out. The data is printed in a forma so that it can be easily
-	 * pasted/used into JUNit testing code.
-	 */
-	public void dumpAsTestData() {
-		List<Match<PropertyInfo>> allData = getIndex().find("");
-		for (Match<PropertyInfo> match : allData) {
-			PropertyInfo d = match.data;
-			System.out.println("data("
-					+dumpString(d.getId())+", "
-					+dumpString(d.getType())+", "
-					+dumpString(d.getDefaultValue())+", "
-					+dumpString(d.getDescription()) +");"
-			);
-			for (PropertySource source : d.getSources()) {
-				String st = source.getSourceType();
-				String sm = source.getSourceMethod();
-				if (sm!=null) {
-					System.out.println(d.getId() +" from: "+st+"::"+sm);
-				}
-			}
-		}
-	}
-
-	private String dumpString(Object v) {
-		if (v==null) {
-			return "null";
-		}
-		return dumpString(""+v);
-	}
-
-	private String dumpString(String s) {
-		if (s==null) {
-			return "null";
-		} else {
-			StringBuilder buf = new StringBuilder("\"");
-			for (char c : s.toCharArray()) {
-				switch (c) {
-				case '\r':
-					buf.append("\\r");
-					break;
-				case '\n':
-					buf.append("\\n");
-					break;
-				case '\\':
-					buf.append("\\\\");
-					break;
-				case '\"':
-					buf.append("\\\"");
-					break;
-				default:
-					buf.append(c);
-					break;
-				}
-			}
-			buf.append("\"");
-			return buf.toString();
-		}
-	}
 
 	public FuzzyMap<PropertyInfo> getIndex() {
 		return indexProvider.get();

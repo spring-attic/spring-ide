@@ -39,6 +39,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTe
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
@@ -91,13 +93,19 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		}
 
 	};
-
+	private TypeUtilProvider typeUtilProvider = new TypeUtilProvider() {
+		@Override
+		public TypeUtil getTypeUtil(IDocument doc) {
+			return new TypeUtil(DocumentUtil.getJavaProject(doc));
+		}
+	};
 
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, DocumentContextFinder.DEFAULT);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
+
 		protected IReconcileEngine createEngine() throws Exception {
-			return new SpringYamlReconcileEngine(astProvider, indexProvider);
+			return new SpringYamlReconcileEngine(astProvider, indexProvider, typeUtilProvider);
 		}
 	};
 

@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  * @author Kris De Volder
@@ -83,7 +84,7 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 	private YamlFileAST getAst(IDocument doc) {
 		try {
 			return astProvider.getAST(doc);
-		} catch (ParserException e) {
+		} catch (ParserException|ScannerException e) {
 			//ignore, the user just typed some crap
 		}
 		return null;

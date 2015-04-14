@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -39,15 +38,13 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
 	protected Yaml yaml = new Yaml();
 	protected YamlASTProvider parser = new YamlASTProvider(yaml);
-	protected IJavaProject javaProject = null;
-
 	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
 		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
 			return index;
 		}
 	};
 
-	private TypeUtilProvider typeUtil = new TypeUtilProvider() {
+	private TypeUtilProvider typeUtilProvider = new TypeUtilProvider() {
 		public TypeUtil getTypeUtil(IDocument doc) {
 			return new TypeUtil(javaProject);
 		}
@@ -56,7 +53,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {
-		return new SpringYamlReconcileEngine(parser, indexProvider);
+		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
 	}
 
 

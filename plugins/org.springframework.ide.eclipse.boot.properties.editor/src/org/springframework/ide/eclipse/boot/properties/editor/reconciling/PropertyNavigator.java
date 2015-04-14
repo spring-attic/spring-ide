@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.*;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.isBracketable;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.*;
 
 import java.util.List;
 
@@ -85,7 +85,7 @@ public class PropertyNavigator {
 								offset, getEnd(region)-offset));
 					}
 				} else if (navOp=='[') {
-					if (isBracketable(type)) {
+					if (isArrayLike(type)) {
 						return bracketNavigate(offset, type);
 					} else {
 						problemCollector.accept(error(
@@ -161,7 +161,7 @@ public class PropertyNavigator {
 	 * checked to be 'dotable'.
 	 */
 	private Type dotNavigate(int offset, Type type) {
-		if (typeUtil.isMap(type)) {
+		if (TypeUtil.isMap(type)) {
 			int keyStart = offset+1;
 			Type domainType = TypeUtil.getDomainType(type);
 			int keyEnd = -1;

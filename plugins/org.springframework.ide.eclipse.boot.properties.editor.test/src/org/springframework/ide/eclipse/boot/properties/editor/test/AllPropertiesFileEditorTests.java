@@ -25,6 +25,7 @@ public class AllPropertiesFileEditorTests {
 		suite.addTestSuite(TypeParserTest.class);
 
 		suite.addTestSuite(YamlASTTests.class);
+		suite.addTestSuite(IndexNavigatorTest.class);
 		suite.addTestSuite(YamlEditorTests.class);
 		return suite;
 	}

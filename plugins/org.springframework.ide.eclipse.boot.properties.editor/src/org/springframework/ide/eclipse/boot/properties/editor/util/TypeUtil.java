@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -38,6 +39,8 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  * @author Kris De Volder
  */
 public class TypeUtil {
+
+	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
 
 	public enum EnumCaseMode {
 		LOWER_CASE, //convert enum names to lower case
@@ -178,33 +181,47 @@ public class TypeUtil {
 	}
 
 	public String niceTypeName(Type _type) {
-		//TODO: this doesn't 'nicify' type parameters in the same way as the base type.
-		// Proper way to do this is walk the type and apply the same 'nicification' to
-		// all the types including parameters.
-		String typeStr = _type.toString();
+		StringBuilder buf = new StringBuilder();
+		niceTypeName(_type, buf);
+		return buf.toString();
+	}
+
+	public void niceTypeName(Type type, StringBuilder buf) {
+		String typeStr = type.getErasure();
 		if (typeStr.startsWith("java.lang.")) {
-			return typeStr.substring("java.lang.".length());
+			buf.append(typeStr.substring("java.lang.".length()));
+		} else if (typeStr.startsWith("java.util.")) {
+			buf.append(typeStr.substring("java.util.".length()));
+		} else {
+			buf.append(typeStr);
 		}
-		if (isEnum(_type)) {
-			String[] values = getAllowedValues(_type, EnumCaseMode.ORIGNAL);
+		if (isEnum(type)) {
+			String[] values = getAllowedValues(type, EnumCaseMode.ORIGNAL);
 			if (values!=null && values.length>0) {
-				StringBuilder name = new StringBuilder();
-				name.append(typeStr+"[");
+				buf.append("[");
 				int max = Math.min(4, values.length);
 				for (int i = 0; i < max; i++) {
 					if (i>0) {
-						name.append(", ");
+						buf.append(", ");
 					}
-					name.append(values[i]);
+					buf.append(values[i]);
 				}
 				if (max!=values.length) {
-					name.append(", ...");
+					buf.append(", ...");
 				}
-				name.append("]");
-				return name.toString();
+				buf.append("]");
 			}
+		} else if (type.isGeneric()) {
+			Type[] params = type.getParams();
+			buf.append("<");
+			for (int i = 0; i < params.length; i++) {
+				if (i>0) {
+					buf.append(", ");
+				}
+				niceTypeName(params[i], buf);
+			}
+			buf.append(">");
 		}
-		return typeStr;
 	}
 
 
@@ -225,7 +242,7 @@ public class TypeUtil {
 		return !isAtomic(type);
 	}
 
-	protected boolean isAtomic(Type type) {
+	public boolean isAtomic(Type type) {
 		String typeName = type.getErasure();
 		return typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName) || isEnum(type);
 	}
@@ -235,7 +252,7 @@ public class TypeUtil {
 	 * use the notation <name>[<index>]=<value> in property file
 	 * for properties of this type.
 	 */
-	public static boolean isBracketable(Type type) {
+	public static boolean isArrayLike(Type type) {
 		//Note: map types are bracketable although the notation isn't really useful
 		// for them (and a bit broken see https://github.com/spring-projects/spring-boot/issues/2386).
 
@@ -256,7 +273,7 @@ public class TypeUtil {
 		}
 	}
 
-	public boolean isMap(Type type) {
+	public static boolean isMap(Type type) {
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
 		//However, use reflection here is okay assuming types we care about
@@ -279,8 +296,13 @@ public class TypeUtil {
 		return lastElement(type.getParams());
 	}
 
-	public static Type getKeyType(Type mapType) {
-		return firstElement(mapType.getParams());
+	public static Type getKeyType(Type mapOrArrayType) {
+		if (isArrayLike(mapOrArrayType)) {
+			return INTEGER_TYPE;
+		} else {
+			//assumed to be a map
+			return firstElement(mapOrArrayType.getParams());
+		}
 	}
 
 	public boolean isAssignableType(Type type) {
@@ -292,7 +314,7 @@ public class TypeUtil {
 	private boolean isAssignableList(Type type) {
 		//TODO: isBracketable means 'isList' right now, but this may not be
 		// the case in the future.
-		if (isBracketable(type)) {
+		if (isArrayLike(type)) {
 			Type domainType = getDomainType(type);
 			return isAtomic(domainType);
 		}
@@ -436,6 +458,20 @@ public class TypeUtil {
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
+		}
+		return null;
+	}
+
+	public Map<String,Type> getPropertiesMap(Type type, EnumCaseMode mode) {
+		//TODO: optimize, produce directly as a map instead of
+		// first creating list and then coverting it.
+		List<TypedProperty> list = getProperties(type, mode);
+		if (list!=null) {
+			Map<String, Type> map = new HashMap<>();
+			for (TypedProperty p : list) {
+				map.put(p.getName(), p.getType());
+			}
+			return map;
 		}
 		return null;
 	}

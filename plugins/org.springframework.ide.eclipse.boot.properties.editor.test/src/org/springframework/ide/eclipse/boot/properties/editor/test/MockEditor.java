@@ -90,6 +90,10 @@ public class MockEditor {
 	}
 
 	public String getText(int offset, int length) throws BadLocationException {
+		if (offset>=document.getLength()) {
+			//no bad location exception please. There's no text past the end of doc so return "". This is quite logical, thank you very much.
+			return "";
+		}
 		return document.get(offset, length);
 	}
 

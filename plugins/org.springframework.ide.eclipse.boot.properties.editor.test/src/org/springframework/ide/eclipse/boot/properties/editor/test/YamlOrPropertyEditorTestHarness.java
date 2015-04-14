@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
@@ -88,6 +90,10 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 	public void useProject(IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
 		this.index = new SpringPropertyIndex(jp);
+	}
+
+	public void useProject(IProject p) throws Exception {
+		useProject(JavaCore.create(p));
 	}
 
 	/**
@@ -557,6 +563,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 				StringBuilder buf = new StringBuilder();
 				for (SpringPropertyProblem p : actualProblems) {
 					buf.append("\n----------------------\n");
+
 					String snippet = editor.getText(p.getOffset(), p.getLength());
 					buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
 					buf.append("   "+p.getMessage());
@@ -570,7 +577,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		String badSnippet = parts[0];
 		String messageSnippet = parts[1];
 		try {
-			String actualBadSnippet = editor.getText(actual.getOffset(), actual.getLength());
+			String actualBadSnippet = editor.getText(actual.getOffset(), actual.getLength()).trim();
 			return actualBadSnippet.equals(badSnippet)
 					&& actual.getMessage().contains(messageSnippet);
 		} catch (BadLocationException e) {

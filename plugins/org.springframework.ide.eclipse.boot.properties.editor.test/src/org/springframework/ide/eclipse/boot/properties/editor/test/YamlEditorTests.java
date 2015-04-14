@@ -92,11 +92,222 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    good: true\n"
 		);
 		assertProblems(editor,
-				"extracrap: 8080|Expecting Integer for 'server.port'",
+				"extracrap: 8080|Expecting a 'Integer' but got a 'Mapping' node",
 				"snuggem|Unknown property",
 				"bogus|Unknown property"
 		);
 
+	}
+
+	public void testReconcileIntegerScalar() throws Exception {
+		data("server.port", "java.lang.Integer", null, "Port of server");
+		data("server.threads", "java.lang.Integer", null, "Number of threads for server threadpool");
+		MockEditor editor = new MockEditor(
+				"server:\n" +
+				"  port: \n" +
+				"    8888\n" +
+				"  threads:\n" +
+				"    not-a-number\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'Integer'"
+		);
+	}
+
+	public void testReconcileExpectMapping() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor(
+				"server:\n" +
+				"  - a\n" +
+				"  - b\n"
+		);
+		assertProblems(editor,
+				"- a\n  - b|Expecting a 'Mapping' node but got a 'Sequence' node"
+		);
+	}
+
+	public void testReconcileExpectScalar() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor(
+				"server:\n" +
+				"  ? - a\n" +
+				"    - b\n" +
+				"  : c"
+		);
+		assertProblems(editor,
+				"- a\n    - b|Expecting a 'Scalar' node but got a 'Sequence' node"
+		);
+	}
+
+	public void testReconcileBeanPropName() throws Exception {
+		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Foo"));
+		data("some-foo", "demo.Foo", null, "some Foo pojo property");
+		MockEditor editor = new MockEditor(
+				"some-foo:\n" +
+				"  name: Good\n" +
+				"  bogus: Bad\n" +
+				"  ? - a\n"+
+				"    - b\n"+
+				"  : Weird\n"
+		);
+		assertProblems(editor,
+				"bogus|Unknown property 'bogus' for type 'demo.Foo'",
+				"- a\n    - b|Expecting a bean-property name for object of type 'demo.Foo' "
+							+ "but got a 'Sequence' node"
+		);
+	}
+
+	public void testIgnoreSpringExpression() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor(
+				"server:\n" +
+				"  port: ${random.int}\n" + //should not be an error
+				"  bad: wrong\n"
+		);
+		assertProblems(editor,
+				"bad|Unknown property"
+		);
+	}
+
+	public void testReconcilePojoArray() throws Exception {
+		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Foo"));
+
+		{
+			MockEditor editor = new MockEditor(
+					"token-bad-guy: problem\n"+
+					"volder:\n" +
+					"  foo:\n" +
+					"    list:\n"+
+					"      - name: Kris\n" +
+					"        description: Kris\n" +
+					"        roles:\n" +
+					"          - Developer\n" +
+					"          - Admin\n" +
+					"        bogus: Bad\n"
+			);
+
+			assertProblems(editor,
+					"token-bad-guy|Unknown property",
+					//'name' is ok
+					//'description' is ok
+					"bogus|Unknown property 'bogus' for type 'demo.Foo'"
+			);
+		}
+
+		{ //Pojo array can also be entered as a map with integer keys
+
+			MockEditor editor = new MockEditor(
+					"token-bad-guy: problem\n"+
+					"volder:\n" +
+					"  foo:\n" +
+					"    list:\n"+
+					"      0:\n"+
+					"        name: Kris\n" +
+					"        description: Kris\n" +
+					"        roles:\n" +
+					"          0: Developer\n" +
+					"          one: Admin\n" +
+					"        bogus: Bad\n"
+			);
+
+			assertProblems(editor,
+					"token-bad-guy|Unknown property",
+					"one|Expecting a 'Integer' but got 'one'",
+					"bogus|Unknown property 'bogus' for type 'demo.Foo'"
+			);
+
+		}
+
+	}
+
+	public void testReconcileSequenceGotAtomicType() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    - element\n"
+		);
+		assertProblems(editor,
+				"- element|Expecting a 'Boolean' but got a 'Sequence' node"
+		);
+	}
+
+	public void testReconcileSequenceGotMapType() throws Exception {
+		data("the-map", "java.util.Map<java.lang.String,java.lang.String>", null, "Nice mappy");
+		MockEditor editor = new MockEditor(
+				"the-map:\n" +
+				"  - a\n" +
+				"  - b\n"
+		);
+		assertProblems(editor,
+				"- a\n  - b|Expecting a 'Map<String, String>' but got a 'Sequence' node"
+		);
+	}
+
+	public void testEnumPropertyReconciling() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+
+		data("foo.color", "demo.Color", null, "A foonky colour");
+		MockEditor editor = new MockEditor(
+				"foo:\n"+
+				"  color: BLUE\n" +
+				"  color: RED\n" + //technically not allowed to bind same key twice but we don' check this
+				"  color: GREEN\n" +
+				"  color:\n" +
+				"    bad: BLUE\n" +
+				"  color: Bogus\n"
+		);
+
+		assertProblems(editor,
+				"bad: BLUE|Expecting a 'demo.Color[RED, GREEN, BLUE]' but got a 'Mapping' node",
+				"Bogus|Expecting a 'demo.Color[RED, GREEN, BLUE]' but got 'Bogus'"
+		);
+	}
+
+	public void testReconcileSkipIfNoMetadata() throws Exception {
+		MockEditor editor = new MockEditor(
+				"foo:\n"+
+				"  color: BLUE\n" +
+				"  color: RED\n" + //technically not allowed to bind same key twice but we don' check this
+				"  color: GREEN\n" +
+				"  color:\n" +
+				"    bad: BLUE\n" +
+				"  color: Bogus\n"
+		);
+		assertTrue(index.isEmpty());
+		assertProblems(editor
+				//nothing
+		);
+	}
+
+	public void testReconcileCatchesParseError() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor(
+				"somemap: val\n"+
+				"- sequence"
+		);
+		assertProblems(editor,
+				"-|expected <block end>"
+		);
+	}
+
+	public void testReconcileCatchesScannerError() throws Exception {
+		defaultTestData();
+		MockEditor editor = new MockEditor(
+				"somemap: \"quotes not closed\n"
+		);
+		assertProblems(editor,
+				"|unexpected end of stream"
+		);
 	}
 
 }
