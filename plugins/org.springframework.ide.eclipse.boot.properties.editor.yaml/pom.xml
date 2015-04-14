@@ -9,7 +9,7 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
-	<artifactId>org.springframework.ide.eclipse.yaml.editor</artifactId>
+	<artifactId>org.springframework.ide.eclipse.boot.properties.editor.yaml</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>
