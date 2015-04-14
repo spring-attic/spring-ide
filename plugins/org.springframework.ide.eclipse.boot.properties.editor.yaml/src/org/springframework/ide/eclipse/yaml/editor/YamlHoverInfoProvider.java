@@ -84,7 +84,9 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 	private YamlFileAST getAst(IDocument doc) {
 		try {
 			return astProvider.getAST(doc);
-		} catch (ParserException|ScannerException e) {
+		} catch (ParserException e) {
+			//ignore, the user just typed some crap
+		} catch (ScannerException e) {
 			//ignore, the user just typed some crap
 		}
 		return null;

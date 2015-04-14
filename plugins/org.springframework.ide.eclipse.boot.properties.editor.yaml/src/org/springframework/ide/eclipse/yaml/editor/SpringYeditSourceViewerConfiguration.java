@@ -47,7 +47,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration {
 
-	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<>();
+	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
 	static {
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.error");

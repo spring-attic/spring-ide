@@ -36,7 +36,7 @@ public class YamlFileAST {
 	private List<Node> nodes;
 
 	public YamlFileAST(Iterable<Node> iter) {
-		nodes = new ArrayList<>();
+		nodes = new ArrayList<Node>();
 		for (Node node : iter) {
 			nodes.add(node);
 		}
@@ -110,7 +110,7 @@ public class YamlFileAST {
 
 	private static List<NodeRef<?>> getChildren(SequenceNode seq) {
 		int nodes = seq.getValue().size();
-		ArrayList<NodeRef<?>> children = new ArrayList<>(nodes);
+		ArrayList<NodeRef<?>> children = new ArrayList<NodeRef<?>>(nodes);
 		for (int i = 0; i < nodes; i++) {
 			children.add(new SeqRef(seq, i));
 		}
@@ -119,7 +119,7 @@ public class YamlFileAST {
 
 	private static List<NodeRef<?>> getChildren(MappingNode map) {
 		int entries = map.getValue().size();
-		ArrayList<NodeRef<?>> children = new ArrayList<>(entries*2);
+		ArrayList<NodeRef<?>> children = new ArrayList<NodeRef<?>>(entries*2);
 		for (int i = 0; i < entries; i++) {
 			children.add(new TupleKeyRef(map, i));
 			children.add(new TupleValueRef(map, i));
@@ -128,7 +128,7 @@ public class YamlFileAST {
 	}
 
 	public NodeRef<?> findNodeRef(int offset) {
-		RememberLast<NodeRef<?>> lastNode = new RememberLast<>();
+		RememberLast<NodeRef<?>> lastNode = new RememberLast<NodeRef<?>>();
 		findPath(offset, lastNode);
 		return lastNode.get();
 	}

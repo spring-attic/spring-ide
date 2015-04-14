@@ -28,7 +28,7 @@ public class Collector<T> implements IRequestor<T> {
 	@Override
 	public void accept(T node) {
 		if (nodes==Collections.EMPTY_LIST) {
-			nodes = new ArrayList<>();
+			nodes = new ArrayList<T>();
 		}
 		nodes.add(node);
 	}

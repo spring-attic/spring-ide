@@ -18,7 +18,7 @@
 		<encoding>UTF-8</encoding>
 	</properties>
 	
-    <build>
+	<build>
 		<plugins>
 
 			<plugin>
@@ -66,7 +66,6 @@
 					</execution>
 				</executions>
 			</plugin>
-	  
 		</plugins>
 	</build>
 	

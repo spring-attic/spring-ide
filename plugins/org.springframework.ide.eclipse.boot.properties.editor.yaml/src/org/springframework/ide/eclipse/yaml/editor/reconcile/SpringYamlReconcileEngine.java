@@ -49,7 +49,11 @@ public class SpringYamlReconcileEngine implements IReconcileEngine {
 				YamlASTReconciler reconciler = new YamlASTReconciler(problemCollector, typeUtilProvider.getTypeUtil(doc));
 				reconciler.reconcile(ast, nav, mon);
 			}
-		} catch (ParserException|ScannerException e) {
+		} catch (ParserException e) {
+			String msg = e.getProblem();
+			Mark mark = e.getProblemMark();
+			problemCollector.accept(SpringPropertyProblem.error(msg, mark.getIndex(), 1));
+		} catch (ScannerException e) {
 			String msg = e.getProblem();
 			Mark mark = e.getProblemMark();
 			problemCollector.accept(SpringPropertyProblem.error(msg, mark.getIndex(), 1));
