@@ -467,7 +467,7 @@ public class TypeUtil {
 		// first creating list and then coverting it.
 		List<TypedProperty> list = getProperties(type, mode);
 		if (list!=null) {
-			Map<String, Type> map = new HashMap<>();
+			Map<String, Type> map = new HashMap<String, Type>();
 			for (TypedProperty p : list) {
 				map.put(p.getName(), p.getType());
 			}
