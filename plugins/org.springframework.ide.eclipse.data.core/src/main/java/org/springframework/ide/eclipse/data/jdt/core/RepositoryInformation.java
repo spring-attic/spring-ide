@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Spring IDE Developers
+ * Copyright (c) 2012, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -244,8 +245,7 @@ public class RepositoryInformation {
 
 		try {
 			for (IMethod method : type.getMethods()) {
-
-				if (!isCrudMethod(method) && !hasQueryAnnotation(method)) {
+				if (!isCrudMethod(method) && !hasQueryAnnotation(method) && !Flags.isDefaultMethod(method.getFlags())) {
 					result.add(method);
 				}
 			}
