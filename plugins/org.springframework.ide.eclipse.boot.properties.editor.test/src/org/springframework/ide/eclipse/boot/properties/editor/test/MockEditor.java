@@ -75,6 +75,13 @@ public class MockEditor {
 	}
 
 	/**
+	 * Get the editor text, as is, without cursor markers.
+	 */
+	public String getRawText() {
+		return document.get();
+	}
+
+	/**
 	 * Set selection based on result returned by ICompletionProposal getSelection method.
 	 */
 	public void setSelection(Point selection) {

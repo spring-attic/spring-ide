@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
@@ -54,10 +53,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
-import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -69,28 +67,17 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvider {
+public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvider, ICompletionEngine {
 
 	private boolean preferLowerCaseEnums = true;
 
-	private static abstract class PrefixFinder {
-		public String getPrefix(IDocument doc, int offset) {
-			try {
-				if (doc == null || offset > doc.getLength())
-					return null;
-				int prefixStart= offset;
-				while (prefixStart > 0 && isPrefixChar(doc.getChar(prefixStart-1))) {
-					prefixStart--;
-				}
-				return doc.get(prefixStart, offset-prefixStart);
-			} catch (BadLocationException e) {
-				return null;
-			}
+	private static final boolean DEBUG = false;
+	public static void debug(String msg) {
+		if (DEBUG) {
+			System.out.println("SpringPropertiesCompletionEngine: "+msg);
 		}
-		protected abstract boolean isPrefixChar(char c);
 	}
 
-	private static final boolean DEBUG = false;
 	public static final boolean DEFAULT_VALUE_INCLUDED = false; //might make sense to make this user configurable
 
 	private static final PrefixFinder fuzzySearchPrefix = new PrefixFinder() {
@@ -128,36 +115,24 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		}
 	};
 
-//	private static final boolean DEBUG =
-//			(""+Platform.getLocation()).contains("kdvolder") ||
-//			(""+Platform.getLocation()).contains("bamboo");
-
-	public static void debug(String msg) {
-		if (DEBUG) {
-			System.out.println("SpringPropertiesCompletionEngine: "+msg);
-		}
-	}
-
-	public Styler JAVA_STRING_COLOR = new Styler() {
+	private Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_STRING);
 		}
 	};
-	public Styler JAVA_KEYWORD_COLOR = new Styler() {
+	private Styler JAVA_KEYWORD_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_KEYWORD);
 		}
 	};
-	public Styler JAVA_OPERATOR_COLOR = new Styler() {
+	private Styler JAVA_OPERATOR_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_OPERATOR);
 		}
 	};
-
-
 
 	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
@@ -179,6 +154,227 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 			return 0;
 		}
 	};
+
+	private final class ValueProposal implements ICompletionProposal {
+
+		private int valueStart;
+		private String valuePrefix;
+		private String substitution;
+		private int sortingOrder;
+		private String displayString;
+
+		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder, String valuePostFix) {
+			this.valueStart = valueStart;
+			this.valuePrefix = valuePrefix;
+			this.displayString = value;
+			this.sortingOrder = sortingOrder;
+			this.substitution = value + valuePostFix;
+		}
+
+		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
+			this(valueStart, valuePrefix, value, sortingOrder, "");
+		}
+
+		@Override
+		public void apply(IDocument document) {
+			try {
+				document.replace(valueStart, valuePrefix.length(), substitution);
+			} catch (BadLocationException e) {
+				SpringPropertiesEditorPlugin.log(e);
+			}
+		}
+
+		@Override
+		public Point getSelection(IDocument document) {
+			return new Point(valueStart+substitution.length(), 0);
+		}
+
+		@Override
+		public String getAdditionalProposalInfo() {
+			return null;
+		}
+
+		@Override
+		public String getDisplayString() {
+			return displayString;
+		}
+
+		@Override
+		public Image getImage() {
+			return null;
+		}
+
+		@Override
+		public IContextInformation getContextInformation() {
+			return null;
+		}
+
+		@Override
+		public String toString() {
+			return "<"+valuePrefix+">"+substitution;
+		}
+	}
+
+	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
+	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
+	{
+
+		private final String fPrefix;
+		private final int fOffset;
+		private Match<PropertyInfo> match;
+		private IDocument fDoc;
+
+		public PropertyProposal(IDocument doc, String prefix, int offset, Match<PropertyInfo> match) {
+			fDoc = doc;
+			fPrefix= prefix;
+			fOffset= offset;
+			this.match = match;
+		}
+
+		public Point getSelection(IDocument document) {
+			return new Point(fOffset - fPrefix.length() + getCompletion().length(), 0);
+		}
+
+		public String getAdditionalProposalInfo() {
+			PropertyInfo data = match.data;
+			return SpringPropertyHoverInfo.getHtmlHoverText(data);
+		}
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
+		}
+
+
+		public String getDisplayString() {
+			StyledString styledText = getStyledDisplayString();
+			return styledText.getString();
+		}
+
+		public Image getImage() {
+			return null;
+		}
+
+		public IContextInformation getContextInformation() {
+			return null;
+		}
+
+		public boolean isValidFor(IDocument document, int offset) {
+			return validate(document, offset, null);
+		}
+
+		public char[] getTriggerCharacters() {
+			return null;
+		}
+
+		public int getContextInformationPosition() {
+			return 0;
+		}
+
+		public void apply(IDocument document) {
+			apply(document, '\0', fOffset);
+		}
+
+		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+			apply(viewer.getDocument(), trigger, offset);
+		}
+
+		public void apply(IDocument document, char trigger, int offset) {
+			try {
+				String replacement= getCompletion();
+				int start = this.fOffset-fPrefix.length();
+				document.replace(start, offset-start, replacement);
+			} catch (BadLocationException e) {
+				BootActivator.log(e);
+			}
+		}
+
+		public void selected(ITextViewer viewer, boolean smartToggle) {
+		}
+
+		public void unselected(ITextViewer viewer) {
+		}
+
+		public boolean validate(IDocument document, int offset, DocumentEvent event) {
+			try {
+				int prefixStart= fOffset - fPrefix.length();
+				String newPrefix = document.get(prefixStart, offset-prefixStart);
+				double newScore = FuzzyMap.match(newPrefix, match.data.getId());
+				if (newScore!=0.0) {
+					match.score = newScore;
+					return true;
+				}
+			} catch (BadLocationException x) {
+			}
+			return false;
+		}
+
+		public IInformationControlCreator getInformationControlCreator() {
+			return null;
+		}
+
+		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+			return match.data.getId();
+		}
+
+		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
+			return fOffset - fPrefix.length();
+		}
+
+		public boolean isAutoInsertable() {
+			return true;
+		}
+
+		private String getCompletion() {
+			StringBuilder completion = new StringBuilder(match.data.getId());
+			Type type = TypeParser.parse(match.data.getType());
+			completion.append(propertyCompletionPostfix(type));
+			return completion.toString();
+		}
+
+		@Override
+		public StyledString getStyledDisplayString() {
+			StyledString result = new StyledString();
+			result.append(match.data.getId());
+			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
+			if (defaultValue!=null) {
+				result.append("=", JAVA_OPERATOR_COLOR);
+				result.append(defaultValue, JAVA_STRING_COLOR);
+			}
+			String type = formatJavaType(match.data.getType());
+			if (type!=null) {
+				result.append(" : ");
+				result.append(type, JAVA_KEYWORD_COLOR);
+			}
+			String description = getShortDescription();
+			if (description!=null && !"".equals(description.trim())) {
+				result.append(" ");
+				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
+			}
+			return result;
+		}
+
+		private String getShortDescription() {
+			String description = match.data.getDescription();
+			if (description!=null) {
+				int dotPos = description.indexOf('.');
+				if (dotPos>=0) {
+					description = description.substring(0, dotPos+1);
+				}
+				description = description.replaceAll("\\p{Cntrl}", ""); //mostly here to remove line breaks, these mess with the layout in the popup control.
+				return description;
+			}
+			return null;
+		}
+
+
+		@Override
+		public String toString() {
+			return "<"+fPrefix+">"+match.data.getId();
+		}
+
+	}
+
 	private static final IContentProposal[] NO_CONTENT_PROPOSALS = new IContentProposal[0];
 
 	private DocumentContextFinder documentContextFinder = null;
@@ -477,225 +673,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		return NO_CONTENT_PROPOSALS;
 	}
 
-	private final class ValueProposal implements ICompletionProposal {
 
-		private int valueStart;
-		private String valuePrefix;
-		private String substitution;
-		private int sortingOrder;
-		private String displayString;
-
-		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder, String valuePostFix) {
-			this.valueStart = valueStart;
-			this.valuePrefix = valuePrefix;
-			this.displayString = value;
-			this.sortingOrder = sortingOrder;
-			this.substitution = value + valuePostFix;
-		}
-
-		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
-			this(valueStart, valuePrefix, value, sortingOrder, "");
-		}
-
-		@Override
-		public void apply(IDocument document) {
-			try {
-				document.replace(valueStart, valuePrefix.length(), substitution);
-			} catch (BadLocationException e) {
-				SpringPropertiesEditorPlugin.log(e);
-			}
-		}
-
-		@Override
-		public Point getSelection(IDocument document) {
-			return new Point(valueStart+substitution.length(), 0);
-		}
-
-		@Override
-		public String getAdditionalProposalInfo() {
-			return null;
-		}
-
-		@Override
-		public String getDisplayString() {
-			return displayString;
-		}
-
-		@Override
-		public Image getImage() {
-			return null;
-		}
-
-		@Override
-		public IContextInformation getContextInformation() {
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return "<"+valuePrefix+">"+substitution;
-		}
-	}
-
-	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
-	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
-	{
-
-		private final String fPrefix;
-		private final int fOffset;
-		private Match<PropertyInfo> match;
-		private IDocument fDoc;
-
-		public PropertyProposal(IDocument doc, String prefix, int offset, Match<PropertyInfo> match) {
-			fDoc = doc;
-			fPrefix= prefix;
-			fOffset= offset;
-			this.match = match;
-		}
-
-		public Point getSelection(IDocument document) {
-			return new Point(fOffset - fPrefix.length() + getCompletion().length(), 0);
-		}
-
-		public String getAdditionalProposalInfo() {
-			PropertyInfo data = match.data;
-			return SpringPropertyHoverInfo.getHtmlHoverText(data);
-		}
-
-		@Override
-		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
-		}
-
-
-		public String getDisplayString() {
-			StyledString styledText = getStyledDisplayString();
-			return styledText.getString();
-		}
-
-		public Image getImage() {
-			return null;
-		}
-
-		public IContextInformation getContextInformation() {
-			return null;
-		}
-
-		public boolean isValidFor(IDocument document, int offset) {
-			return validate(document, offset, null);
-		}
-
-		public char[] getTriggerCharacters() {
-			return null;
-		}
-
-		public int getContextInformationPosition() {
-			return 0;
-		}
-
-		public void apply(IDocument document) {
-			apply(document, '\0', fOffset);
-		}
-
-		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-			apply(viewer.getDocument(), trigger, offset);
-		}
-
-		public void apply(IDocument document, char trigger, int offset) {
-			try {
-				String replacement= getCompletion();
-				int start = this.fOffset-fPrefix.length();
-				document.replace(start, offset-start, replacement);
-			} catch (BadLocationException e) {
-				BootActivator.log(e);
-			}
-		}
-
-		public void selected(ITextViewer viewer, boolean smartToggle) {
-		}
-
-		public void unselected(ITextViewer viewer) {
-		}
-
-		public boolean validate(IDocument document, int offset, DocumentEvent event) {
-			try {
-				int prefixStart= fOffset - fPrefix.length();
-				String newPrefix = document.get(prefixStart, offset-prefixStart);
-				double newScore = FuzzyMap.match(newPrefix, match.data.getId());
-				if (newScore!=0.0) {
-					match.score = newScore;
-					return true;
-				}
-			} catch (BadLocationException x) {
-			}
-			return false;
-		}
-
-		public IInformationControlCreator getInformationControlCreator() {
-			return null;
-		}
-
-		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-			return match.data.getId();
-		}
-
-		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
-			return fOffset - fPrefix.length();
-		}
-
-		public boolean isAutoInsertable() {
-			return true;
-		}
-
-		private String getCompletion() {
-			StringBuilder completion = new StringBuilder(match.data.getId());
-			Type type = TypeParser.parse(match.data.getType());
-			completion.append(propertyCompletionPostfix(type));
-			return completion.toString();
-		}
-
-		@Override
-		public StyledString getStyledDisplayString() {
-			StyledString result = new StyledString();
-			result.append(match.data.getId());
-			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
-				result.append("=", JAVA_OPERATOR_COLOR);
-				result.append(defaultValue, JAVA_STRING_COLOR);
-			}
-			String type = formatJavaType(match.data.getType());
-			if (type!=null) {
-				result.append(" : ");
-				result.append(type, JAVA_KEYWORD_COLOR);
-			}
-			String description = getShortDescription();
-			if (description!=null && !"".equals(description.trim())) {
-				result.append(" ");
-				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
-			}
-			return result;
-		}
-
-		private String getShortDescription() {
-			String description = match.data.getDescription();
-			if (description!=null) {
-				int dotPos = description.indexOf('.');
-				if (dotPos>=0) {
-					description = description.substring(0, dotPos+1);
-				}
-				description = description.replaceAll("\\p{Cntrl}", ""); //mostly here to remove line breaks, these mess with the layout in the popup control.
-				return description;
-			}
-			return null;
-		}
-
-
-		@Override
-		public String toString() {
-			return "<"+fPrefix+">"+match.data.getId();
-		}
-
-	}
 
 	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, IRegion region) {
 		debug("getHoverInfo("+region+")");

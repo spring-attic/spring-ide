@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,8 +21,10 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
@@ -30,6 +35,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvi
 import org.springframework.ide.eclipse.yaml.editor.YamlHoverInfoProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
+import org.springframework.ide.eclipse.yaml.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlCompletionEngine;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlDocument;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
@@ -51,6 +62,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	};
 
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
@@ -58,12 +70,19 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
 
 	public class YamlEditor extends MockEditor {
+		private YamlDocument ymlDoc;
+
 		public YamlEditor(String string) {
 			super(string);
+			ymlDoc = new YamlDocument(document);
 		}
 
 		public YamlFileAST parse() {
 			return parser.getAST(this.document);
+		}
+
+		public SRootNode parseStructure() throws Exception {
+			return new YamlStructureParser(this.document).parse();
 		}
 
 		public int startOf(String nodeText) {
@@ -92,6 +111,12 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 			return document.get(start, end-start);
 		}
 
+		public String textUnder(SNode node) throws Exception {
+			int start = node.getStart();
+			int end = node.getTreeEnd();
+			return document.get(start, end-start);
+		}
+
 		public String textUnder(IRegion r) throws BadLocationException {
 			return document.get(r.getOffset(), r.getLength());
 		}
@@ -106,6 +131,10 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 				return hoverProvider.getHoverInfo(document, r);
 			}
 			return null;
+		}
+
+		public String textBetween(int start, int end) throws Exception {
+			return ymlDoc.textBetween(start, end);
 		}
 	}
 
@@ -164,6 +193,35 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 			return ((SpringPropertyHoverInfo)hover).getSources();
 		}
 		return Collections.emptyList();
+	}
+
+	public ICompletionProposal getFirstCompletion(MockEditor editor)
+			throws Exception {
+		return getCompletions(editor)[0];
+	}
+
+	public ICompletionProposal[] getCompletions(MockEditor editor)
+			throws Exception {
+		Collection<ICompletionProposal> _completions = completionEngine.getCompletions(editor.document, editor.selectionStart);
+		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
+		Arrays.sort(completions, COMPARATOR);
+		return completions;
+	}
+
+	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
+		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
+			return PropertyCompletionFactory.SORTER.compare(p1, p2);
+		}
+	};
+
+	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
+		MockEditor editor = new MockEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		String[] actualLabels = new String[completions.length];
+		for (int i = 0; i < actualLabels.length; i++) {
+			actualLabels[i] = completions[i].getDisplayString();
+		}
+		assertElements(actualLabels, completionsLabels);
 	}
 
 }

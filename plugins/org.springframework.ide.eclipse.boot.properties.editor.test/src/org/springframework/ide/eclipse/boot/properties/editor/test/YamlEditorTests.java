@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 /**
  * @author Kris De Volder
@@ -308,6 +309,49 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		assertProblems(editor,
 				"|unexpected end of stream"
 		);
+	}
+
+	public void DISABLED_testContentAssistSimple() throws Exception {
+		defaultTestData();
+		assertBasicCompletion("port<*>",
+				"server:\n"+
+				"  port: <*>");
+	}
+
+	public void DISABLED_testContentAssistNested() throws Exception {
+		defaultTestData();
+		assertBasicCompletion(
+					"server:\n"+
+					"  <*>"
+					,
+					"server:\n"+
+					"  port: <*>"
+		);
+	}
+
+//		assertCompletionsDisplayString(
+//				"#This is a commment, and it shouldn't be erased\n" +
+//				"server:\n" +
+//				"  <*>",
+//
+//				"port",
+//				"address"
+//		);
+
+		//TODO: content assist cases
+		/*
+		 foo:
+		   <*>
+		 more
+
+		 */
+
+	private void assertBasicCompletion(String before, String after) throws Exception {
+		MockEditor editor = new MockEditor(before);
+		ICompletionProposal completion = getFirstCompletion(editor);
+		editor.apply(completion);
+		String actual = editor.getText();
+		assertEquals(after, actual);
 	}
 
 }

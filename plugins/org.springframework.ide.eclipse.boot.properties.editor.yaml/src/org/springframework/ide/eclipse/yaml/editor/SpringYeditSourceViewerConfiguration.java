@@ -17,22 +17,24 @@ import java.util.Set;
 
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
+import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
@@ -42,11 +44,19 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropert
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
+import org.springframework.ide.eclipse.yaml.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.ui.PlatformUI;
 
 public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration {
 
+	private static final String DIALOG_SETTINGS_KEY = SpringYeditSourceViewerConfiguration.class.getName();
+
+	private static final DocumentContextFinder documentContextFinder = DocumentContextFinder.DEFAULT;
 	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
 	static {
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");
@@ -57,23 +67,23 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		System.out.println(string);
 	}
 
-	//	public IContentAssistant getContentAssistant(ISourceViewer viewer) {
-	//		IContentAssistant a = super.getContentAssistant(viewer);
-	//
-	//		if (a instanceof ContentAssistant) {
-	//			//IContentAssistProcessor processor = assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
-	//			//if (processor!=null) {
-	//			//TODO: don't overwrite existing processor but wrap it so
-	//			// we combine our proposals with existing propopals
-	//			//}
-	//			((ContentAssistant) a).enableAutoActivation(true);
-	//			SpringYamlContentAssistProcessor processor = new SpringYamlContentAssistProcessor();
-	//			((ContentAssistant) a).setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-	//		}
-	//
-	//
-	//		return a;
-	//	}
+	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
+		IDialogSettings existing = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		if (existing!=null) {
+			return existing;
+		}
+		IDialogSettings created = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
+		int suggestW = (int)(windowBounds.width*0.35);
+		int suggestH = (int)(suggestW*0.6);
+		if (suggestW>300) {
+			created.put(ContentAssistant.STORE_SIZE_X, suggestW);
+			created.put(ContentAssistant.STORE_SIZE_Y, suggestH);
+		}
+		return created;
+	}
+
+
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
@@ -100,7 +110,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		}
 	};
 
-	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, DocumentContextFinder.DEFAULT);
+	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 
@@ -108,7 +118,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 			return new SpringYamlReconcileEngine(astProvider, indexProvider, typeUtilProvider);
 		}
 	};
-
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder);
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
@@ -154,5 +164,31 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 				myDetector
 				);
 	}
+
+
+	public IContentAssistant getContentAssistant(ISourceViewer viewer) {
+		IContentAssistant _a = super.getContentAssistant(viewer);
+
+		if (_a instanceof ContentAssistant) {
+			ContentAssistant a = (ContentAssistant)_a;
+			//IContentAssistProcessor processor = assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
+			//if (processor!=null) {
+			//TODO: don't overwrite existing processor but wrap it so
+			// we combine our proposals with existing propopals
+			//}
+
+		    a.setInformationControlCreator(getInformationControlCreator(viewer));
+		    a.enableColoredLabels(true);
+		    a.enablePrefixCompletion(false);
+		    a.enableAutoInsert(true);
+		    a.enableAutoActivation(true);
+			a.setRestoreCompletionProposalSize(getDialogSettings(viewer, DIALOG_SETTINGS_KEY));
+			SpringPropertiesProposalProcessor processor = new SpringPropertiesProposalProcessor(completionEngine);
+			a.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+			a.setSorter(PropertyCompletionFactory.SORTER);
+		}
+		return _a;
+	}
+
 
 }

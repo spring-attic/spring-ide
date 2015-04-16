@@ -14,12 +14,12 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 
 import java.util.Collection;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 
 public class SpringPropertiesProposalProcessor implements IContentAssistProcessor {
 
@@ -27,9 +27,9 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
 	public static final char[] AUTO_ACTIVATION_CHARS = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
 
-	private final SpringPropertiesCompletionEngine fEngine;
+	private final ICompletionEngine fEngine;
 
-	public SpringPropertiesProposalProcessor(SpringPropertiesCompletionEngine engine) throws Exception {
+	public SpringPropertiesProposalProcessor(ICompletionEngine engine) {
 		this.fEngine = engine;
 	}
 
@@ -44,8 +44,8 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 			} else {
 				return proposals.toArray(new ICompletionProposal[proposals.size()]);
 			}
-		} catch (BadLocationException x) {
-			// ignore and return no proposals
+		} catch (Exception e) {
+			BootActivator.log(e);
 			return NO_PROPOSALS;
 		}
 	}
