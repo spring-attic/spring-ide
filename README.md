@@ -36,7 +36,7 @@
   If you want to live on the bleading egde, you can also install always up-to-date continuous
   integration buids from this update site:
 
-  http://dist.springframework.org/snapshot/IDE/nightly/
+  http://dist.springsource.com/snapshot/STS/nightly-distributions.html
 
   But take care, those builds could be broken from time to time and might contain non-ship-ready
   features that might never appear in the milestone or release builds.
