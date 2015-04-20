@@ -14,14 +14,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.annotation.processing.Completion;
-
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.AtScalarKey;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
 
 /**
@@ -46,21 +47,37 @@ public abstract class YamlAssistContext {
 		}
 
 		@Override
-		public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) {
-			String query = prefixfinder.getPrefix(doc, offset);
+		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) {
+			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
 			Collection<Match<PropertyInfo>> matchingProps = indexNav.findMatching(query);
 			if (!matchingProps.isEmpty()) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
-				for (Match<PropertyInfo> match : matchingProps) {
-					completions.add(completionFactory.property(
-							doc, offset,
-							completionFactory.replace(offset-query.length(), query, match.data.getId()+": "),
-							match
-					));
-				}
+//				for (Match<PropertyInfo> match : matchingProps) {
+//					completions.add(completionFactory.property(
+//							doc.getDocument(), offset,
+//							new YamlDocumentModifier(doc)
+//								.delete(offset-query.length(), query)
+//								.createPath(YamlPath.fromProperty(match.data.getId())),
+//							match
+//					));
+//				}
 				return completions;
 			}
 			return Collections.emptyList();
+		}
+
+		@Override
+		protected YamlAssistContext navigate(YamlPathSegment s) {
+			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
+				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
+				if (subIndex.getExtensionCandidate()!=null) {
+					return new IndexContext(subIndex, completionFactory);
+				} else if (subIndex.getExactMatch()!=null) {
+					//TODO: transition to a 'TypeContext' for the type the property is bound to
+				}
+			}
+			//Unsuported navigation => no context for assist
+			return null;
 		}
 
 	}
@@ -69,6 +86,17 @@ public abstract class YamlAssistContext {
 		return new IndexContext(IndexNavigator.with(index), completionFactory);
 	}
 
-	public abstract Collection<ICompletionProposal> getCompletions(IDocument doc, int offset);
+	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset);
+
+	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory) {
+		YamlAssistContext context = YamlAssistContext.global(index, completionFactory);
+		for (YamlPathSegment s : contextPath.getSegments()) {
+			if (context==null) return null;
+			context = context.navigate(s);
+		}
+		return context;
+	}
+
+	protected abstract YamlAssistContext navigate(YamlPathSegment s);
 
 }

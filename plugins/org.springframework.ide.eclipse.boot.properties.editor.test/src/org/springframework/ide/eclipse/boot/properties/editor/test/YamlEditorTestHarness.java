@@ -41,12 +41,17 @@ import org.springframework.ide.eclipse.yaml.editor.completions.YamlDocument;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureProvider;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
 
+/**
+ * @author Kris De Volder
+ */
 public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
+	protected YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
 	protected Yaml yaml = new Yaml();
 	protected YamlASTProvider parser = new YamlASTProvider(yaml);
 	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
@@ -62,19 +67,18 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	};
 
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
-	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder);
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
 	}
-
 
 	public class YamlEditor extends MockEditor {
 		private YamlDocument ymlDoc;
 
 		public YamlEditor(String string) {
 			super(string);
-			ymlDoc = new YamlDocument(document);
+			ymlDoc = new YamlDocument(document, structureProvider);
 		}
 
 		public YamlFileAST parse() {
@@ -82,7 +86,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		}
 
 		public SRootNode parseStructure() throws Exception {
-			return new YamlStructureParser(this.document).parse();
+			return new YamlStructureParser(ymlDoc).parse();
 		}
 
 		public int startOf(String nodeText) {

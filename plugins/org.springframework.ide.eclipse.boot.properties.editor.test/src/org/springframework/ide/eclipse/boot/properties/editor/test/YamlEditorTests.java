@@ -311,14 +311,14 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	public void DISABLED_testContentAssistSimple() throws Exception {
+	public void testContentAssistSimple() throws Exception {
 		defaultTestData();
 		assertBasicCompletion("port<*>",
 				"server:\n"+
 				"  port: <*>");
 	}
 
-	public void DISABLED_testContentAssistNested() throws Exception {
+	public void testContentAssistNested() throws Exception {
 		defaultTestData();
 		assertBasicCompletion(
 					"server:\n"+
@@ -328,6 +328,22 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 					"  port: <*>"
 		);
 	}
+
+	public void testContentAssistInsertCompletionElsewhere() throws Exception {
+		defaultTestData();
+		assertBasicCompletion(
+					"server:\n"+
+					"  address: localhost\n"+
+					"something: nice\n"+
+					"po<*>"
+					,
+					"server:\n"+
+					"  address: localhost\n"+
+					"  port: <*>" +
+					"something: nice\n"
+		);
+	}
+
 
 //		assertCompletionsDisplayString(
 //				"#This is a commment, and it shouldn't be erased\n" +

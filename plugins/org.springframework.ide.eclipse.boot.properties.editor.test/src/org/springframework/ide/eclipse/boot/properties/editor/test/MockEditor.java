@@ -15,6 +15,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.yaml.editor.completions.DocumentModifier;
+import org.springframework.ide.eclipse.yaml.editor.completions.ProposalApplier;
 
 /**
  * Basic 'simulated' editor. Contains text and a cursor position / selection.
@@ -102,6 +104,18 @@ public class MockEditor {
 			return "";
 		}
 		return document.get(offset, length);
+	}
+
+	public void apply(ProposalApplier edit) throws Exception {
+		edit.apply(document);
+		Point sel = edit.getSelection(document);
+		selectionStart = sel.x;
+		selectionEnd = selectionStart+sel.y;
+	}
+
+	@Override
+	public String toString() {
+		return "===== editor ====\n"+getText()+"\n===============\n";
 	}
 
 }

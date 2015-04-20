@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
 
@@ -120,7 +121,106 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    vancouver:\n" +
 				"      salmon\n"
 		);
+
+		node = getNodeAtPath(root, 0, 0, 1, 0);
+		assertTreeText(editor, node,
+				"beer"
+		);
 	}
+
+	public void testTreeEndKeyNodeNoChildren() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"world:\n" +
+				"  europe:\n" +
+				"  canada:\n" +
+				"    montreal: poutine\n" +
+				"    vancouver:\n" +
+				"      salmon\n" +
+				"moon:\n" +
+				"  moonbase-alfa:\n" +
+				"    moonstone\n"
+		);
+		SRootNode root = editor.parseStructure();
+		SNode node = getNodeAtPath(root, 0, 0);
+		assertTreeText(editor, node,
+				"  europe:"
+		);
+	}
+
+	public void testFind() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"world:\n" +
+				"  europe:\n" +
+				"    france:\n" +
+				"      cheese\n" +
+				"    belgium:\n" +
+				"    beer\n" + //At same level as key, technically this is a syntax error but we tolerate it
+				"  canada:\n" +
+				"    montreal: poutine\n" +
+				"    vancouver:\n" +
+				"      salmon\n" +
+				"moon:\n" +
+				"  moonbase-alfa:\n" +
+				"    moonstone\n"
+		);
+		SRootNode root = editor.parseStructure();
+
+		assertFind(editor, root, "world:", 					0);
+		assertFind(editor, root, "  europe:", 				0, 0);
+		assertFind(editor, root, "    france:",				0, 0, 0);
+		assertFind(editor, root, "      cheese",			0, 0, 0, 0);
+		assertFind(editor, root, "    belgium:",			0, 0, 1);
+		assertFind(editor, root, "    beer",				0, 0, 1, 0);
+		assertFind(editor, root, "  canada:",				0, 1);
+		assertFind(editor, root, "    montreal: poutine",	0, 1, 0);
+		assertFind(editor, root, "    vancouver:",			0, 1, 1);
+		assertFind(editor, root, "      salmon",			0, 1, 1, 0);
+		assertFind(editor, root, "moon:",					1);
+		assertFind(editor, root, "  moonbase-alfa:",		1, 0);
+		assertFind(editor, root, "    moonstone",			1, 0, 0);
+	}
+
+	public void testGetKey() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"world:\n" +
+				"  europe:\n" +
+				"    france:\n" +
+				"      cheese\n" +
+				"    belgium:\n" +
+				"    beer\n" + //At same level as key, technically this is a syntax error but we tolerate it
+				"  canada:\n" +
+				"    montreal: poutine\n" +
+				"    vancouver:\n" +
+				"      salmon\n" +
+				"moon:\n" +
+				"  moonbase-alfa:\n" +
+				"    moonstone\n"
+		);
+		SRootNode root = editor.parseStructure();
+		assertKey(editor, root, "world:", 					"world");
+		assertKey(editor, root, "  europe:", 				"europe");
+		assertKey(editor, root, "    montreal: poutine",	"montreal");
+	}
+
+
+	private void assertKey(YamlEditor editor, SRootNode root, String nodeText, String expectedKey) throws Exception {
+		int start = editor.getText().indexOf(nodeText);
+		SKeyNode node = (SKeyNode) root.find(start);
+		assertEquals(expectedKey, node.getKey());
+	}
+
+	private void assertFind(YamlEditor editor, SRootNode root, String snippet, int... expectPath) {
+		int start = editor.getText().indexOf(snippet);
+		int end = start+snippet.length();
+		int middle = (start+end) / 2;
+
+		SNode expectNode = getNodeAtPath(root, expectPath);
+
+		assertEquals(expectNode, root.find(start));
+		assertEquals(expectNode, root.find(middle));
+		assertEquals(expectNode, root.find(end));
+	}
+
 
 	private void assertTreeText(YamlEditor editor, SNode node, String expected) throws Exception {
 		String actual = editor.textBetween(node.getStart(), node.getTreeEnd());

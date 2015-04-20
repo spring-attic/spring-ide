@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
 
 /**
  * Wraps around a IDocument which is presumed to contain YML content and provides
@@ -24,13 +25,23 @@ import org.eclipse.jface.text.IRegion;
 public class YamlDocument {
 
 	private IDocument doc;
+	private YamlStructureProvider structureProvider;
+	private SRootNode structure;
 
-	public YamlDocument(IDocument _doc) {
+	public YamlDocument(IDocument _doc, YamlStructureProvider structureProvider) {
 		this.doc = _doc;
+		this.structureProvider = structureProvider;
 	}
 
 	public IDocument getDocument() {
 		return doc;
+	}
+
+	public SRootNode getStructure() throws Exception {
+		if (this.structure==null) {
+			this.structure = structureProvider.getStructure(this);
+		}
+		return structure;
 	}
 
 	public int getLineOfOffset(int offset) throws BadLocationException {

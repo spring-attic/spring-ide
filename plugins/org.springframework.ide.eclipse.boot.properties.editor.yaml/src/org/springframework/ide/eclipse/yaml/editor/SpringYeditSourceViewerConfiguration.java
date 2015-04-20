@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvi
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlCompletionEngine;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureProvider;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
 import org.yaml.snakeyaml.Yaml;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -118,7 +119,9 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 			return new SpringYamlReconcileEngine(astProvider, indexProvider, typeUtilProvider);
 		}
 	};
-	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder);
+
+	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider);
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {

@@ -8,20 +8,19 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.yaml.editor.completions;
+package org.springframework.ide.eclipse.yaml.editor.ast.path;
 
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.swt.graphics.Point;
+import org.yaml.snakeyaml.nodes.Node;
 
 /**
- * Interface that represents the methods that one needs to implement in order
- * to define how  content assist proposal is applied to a IDocument
+ * A NodeNavigator is an operation that goes from a 'current'
+ * node to a related node. As such it can be represented
+ * abstractly as a function Node -> Node.
  *
  * @author Kris De Volder
  */
-public interface ProposalApplier {
-
-	Point getSelection(IDocument document) throws Exception;
-	void apply(IDocument doc) throws Exception;
-
+public interface NodeNavigator {
+	Node apply(Node node);
+	String toNavString();
+	String toPropString();
 }

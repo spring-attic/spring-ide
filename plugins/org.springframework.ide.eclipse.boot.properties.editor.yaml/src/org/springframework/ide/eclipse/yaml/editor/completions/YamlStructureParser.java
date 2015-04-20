@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 
 /**
  * A robust, coarse-grained parser that guesses the structure of a
@@ -55,23 +57,19 @@ public class YamlStructureParser {
 	 * Pattern that matches a line starting with a 'simple key'
 	 */
 	public static final Pattern SIMPLE_KEY_LINE = Pattern.compile(
-			"^(\\s*)(\\w(\\w|-)*):.*");
+			"^( *)(\\w(\\w|-)*):.*");
+	//TODO: the parrern above is too selective (e.g. in real yaml one can have
+	//spaces in simple keys and lots of other characters that this pattern does not
+	//allow. For now it is good enough because we are only interested in spring property
+	//names which typically do not contain spaces and other funky characters.
 
-	/* for simple key we recognize
-
- 	ns-plain-single(flow-key)
- 	   ::= ( ns-plain-first-char(c)
-             ( nb-plain-char(c)* ns-plain-char(c) )? )
-
-
-
-	 */
+//	public static final Pattern SEQ_LINE = Pattern.compile(
+//			"^( *)- .*");
 
 	public static enum SNodeType {
-		ROOT, KEY, RAW
+		ROOT, KEY, /*SEQ,*/ RAW
 	}
 
-	private YamlDocument doc;
 	private YamlLineReader input;
 
 	public static class YamlLine {
@@ -126,13 +124,7 @@ public class YamlStructureParser {
 		}
 	}
 
-
-	public YamlStructureParser(IDocument _doc) {
-		this(new YamlDocument(_doc));
-	}
-
 	public YamlStructureParser(YamlDocument doc) {
-		this.doc = doc;
 		this.input = new YamlLineReader(doc);
 	}
 
@@ -178,6 +170,15 @@ public class YamlStructureParser {
 		}
 
 		public abstract SNodeType getNodeType();
+		public abstract SNode find(int offset);
+
+		public boolean nodeContains(int offset) {
+			return getStart()<=offset && offset<=getNodeEnd();
+		}
+
+		public boolean treeContains(int offset) {
+			return getStart()<=offset && offset<=getTreeEnd();
+		}
 
 		/**
 		 * Get the raw text of the node itself, this does not include the text
@@ -190,6 +191,7 @@ public class YamlStructureParser {
 		}
 
 		protected abstract void dump(Writer out, int indent) throws Exception;
+
 	}
 
 	public static class SRootNode extends SChildBearingNode {
@@ -210,7 +212,7 @@ public class YamlStructureParser {
 
 		@Override
 		public String getRawNodeText() {
-			//Root node ha no text of its own
+			//Root node has no text of its own
 			return "";
 		}
 
@@ -262,7 +264,20 @@ public class YamlStructureParser {
 			}
 		}
 
-}
+		@Override
+		public SNode find(int offset) {
+			if (!treeContains(offset)) {
+				return null;
+			}
+			for (SNode c : getChildren()) {
+				SNode fromChild = c.find(offset);
+				if (fromChild!=null) {
+					return fromChild;
+				}
+			}
+			return this;
+		}
+	}
 
 	public abstract class SLeafNode extends SNode {
 
@@ -284,6 +299,14 @@ public class YamlStructureParser {
 			out.write("): ");
 			out.write(getIndentedText());
 			out.write('\n');
+		}
+
+		@Override
+		public SNode find(int offset) {
+			if (nodeContains(offset)) {
+				return this;
+			}
+			return null;
 		}
 	}
 
@@ -351,10 +374,12 @@ public class YamlStructureParser {
 	public class SKeyNode extends SChildBearingNode {
 
 		private YamlLine line;
+		private int colonOffset;
 
 		public SKeyNode(SChildBearingNode parent, YamlLine line) throws Exception {
 			super(parent, line.getStart(), line.getEnd());
 			this.line = line;
+			this.colonOffset = line.getText().indexOf(':');
 		}
 
 		@Override
@@ -370,6 +395,17 @@ public class YamlStructureParser {
 		@Override
 		public String getRawNodeText() throws Exception {
 			return line.getText();
+		}
+
+		public String getKey() throws Exception {
+			String lineText = line.getText();
+			int start = getIndent();
+			int end = colonOffset;
+			return lineText.substring(start, end);
+		}
+
+		public boolean isInKey(int offset) throws Exception {
+			return offset>=line.getStart() && offset < colonOffset;
 		}
 	}
 }

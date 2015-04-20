@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.*;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.firstElement;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.hasElements;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**

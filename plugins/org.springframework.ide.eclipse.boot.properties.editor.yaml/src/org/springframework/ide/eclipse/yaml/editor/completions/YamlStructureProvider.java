@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
 
 /**
- * Interface that represents the methods that one needs to implement in order
- * to define how  content assist proposal is applied to a IDocument
- *
  * @author Kris De Volder
  */
-public interface ProposalApplier {
+public abstract class YamlStructureProvider {
+	public abstract SRootNode getStructure(YamlDocument doc) throws Exception;
 
-	Point getSelection(IDocument document) throws Exception;
-	void apply(IDocument doc) throws Exception;
-
+	public static final YamlStructureProvider DEFAULT = new YamlStructureProvider() {
+		public SRootNode getStructure(YamlDocument doc) throws Exception {
+			return new YamlStructureParser(doc).parse();
+		}
+	};
 }

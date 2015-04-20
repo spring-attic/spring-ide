@@ -126,7 +126,12 @@ public class PropertyCompletionFactory {
 		}
 
 		public Point getSelection(IDocument document) {
-			return proposalApplier.getSelection(document);
+			try {
+				return proposalApplier.getSelection(document);
+			} catch (Exception e) {
+				BootActivator.log(e);
+				return null;
+			}
 		}
 
 		public String getAdditionalProposalInfo() {
