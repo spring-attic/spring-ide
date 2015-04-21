@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
  */
 public interface IRooInstall {
 
-	String SUPPORTED_VERSION = "[1.1.0.RELEASE, 3.0)";
+	String SUPPORTED_VERSION = "[1.1.0.RELEASE,)";
 
 	URL[] getClasspath();
 
