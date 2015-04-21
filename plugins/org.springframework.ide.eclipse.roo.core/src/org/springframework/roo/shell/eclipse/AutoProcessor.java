@@ -295,17 +295,8 @@ public class AutoProcessor {
 			if (filename.startsWith("org.springframework.roo.shell.eclipse-1.2.0")) {
 				return matchesVersion("1.2.0", rooVersion);
 			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.1.2")) {
-				return matchesVersion("[1.1.2, 1.1.5)", rooVersion);
-			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.1.5")) { 				
-				return matchesVersion("[1.1.5, 1.2.0)", rooVersion);
-			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.2.0")) {
-				return matchesVersion("[1.2.0, 1.2.1)", rooVersion);
-			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.2.1")) {
-				return matchesVersion("1.2.1", rooVersion);
+			if (filename.startsWith("org.springframework.roo.shell.eclipse-2.0.0")) {
+				return matchesVersion("2.0.0", rooVersion);
 			}
 		}
 		return false;
