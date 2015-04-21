@@ -425,6 +425,50 @@
 		</profile>
 		
 		<profile>
+			<id>e45</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.5</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e45</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.5/</url>
+				</repository>
+				<repository>
+					<id>mars</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/mars/</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/45/dev/update</url>
+				</repository>
+				<repository>
+					<id>orbit-mars</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/S20150316021154/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
+				</repository>
+			</repositories>
+		</profile>
+		
+		<profile>
 			<id>bamboo-signing</id>
 			<properties>
 				<signing.store.password>${env.bamboo_signing_store_password}</signing.store.password>
@@ -620,11 +664,6 @@
 						<pomDependencies>consider</pomDependencies>
 						<ignoreTychoRepositories>true</ignoreTychoRepositories>
 						<environments>
-							<environment>
-								<os>macosx</os>
-								<ws>cocoa</ws>
-								<arch>x86</arch>
-							</environment>
 							<environment>
 								<os>macosx</os>
 								<ws>cocoa</ws>

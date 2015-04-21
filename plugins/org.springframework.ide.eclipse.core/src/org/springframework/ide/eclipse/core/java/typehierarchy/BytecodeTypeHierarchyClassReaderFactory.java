@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,8 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 			}
 		}
 		
-		return new BytecodeTypeHierarchyClassReader((ClasspathElement[]) locations.toArray(new ClasspathElement[locations.size()]));
+		ClasspathLookup classpathLookup = new ClasspathLookup((ClasspathElement[]) locations.toArray(new ClasspathElement[locations.size()]));
+		return new BytecodeTypeHierarchyClassReader(classpathLookup);
 	}
 
 }
