@@ -37,7 +37,7 @@ import org.eclipse.text.edits.TextEdit;
  *
  * @author Kris De Volder
  */
-public class DocumentModifier implements ProposalApplier {
+public class DocumentEdits implements ProposalApplier {
 
 	// Note: for small number of edits this implementation is okay.
 	// for large number of edits it is potentially slow because of the
@@ -224,7 +224,7 @@ public class DocumentModifier implements ProposalApplier {
 
 	private ArrayList<Edit> edits = new ArrayList<Edit>();
 
-	public DocumentModifier() {
+	public DocumentEdits() {
 	}
 
 	public void delete(int start, int end) {

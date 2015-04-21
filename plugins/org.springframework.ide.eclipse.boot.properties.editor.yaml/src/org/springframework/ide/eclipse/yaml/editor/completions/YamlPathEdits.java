@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructurePars
  *
  * @author Kris De Volder
  */
-public class YamlPathEdits extends DocumentModifier {
+public class YamlPathEdits extends DocumentEdits {
 
 	private static final int INDENT_BY = 2; // number of spaces to add when indenting a child, relative to parent indentation.
 	private YamlDocument doc;
@@ -77,7 +77,7 @@ public class YamlPathEdits extends DocumentModifier {
 		int indent = getChildIndent(parent);
 		int insertionPoint = getNewPathInsertionOffset(parent);
 		boolean startOnNewLine = true;
-		this.insert(insertionPoint, createPathInsertionText(path, indent, startOnNewLine));
+		insert(insertionPoint, createPathInsertionText(path, indent, startOnNewLine));
 	}
 
 	protected String createPathInsertionText(YamlPath path, int indent, boolean startOnNewLine) {

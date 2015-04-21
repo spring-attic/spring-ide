@@ -72,17 +72,6 @@ public class PropertyCompletionFactory {
 		return new PropertyProposal(doc, offset, applier, prop);
 	}
 
-	public ProposalApplier replace(final int offset, final String beforeText, final String afterText) {
-		return new ProposalApplier() {
-			public Point getSelection(IDocument document) {
-				return new Point(offset + afterText.length(), 0);
-			}
-			public void apply(IDocument doc) throws Exception {
-				doc.replace(offset, beforeText.length(), afterText);
-			}
-		};
-	}
-
 	private Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
@@ -293,7 +282,6 @@ public class PropertyCompletionFactory {
 		@Override
 		public int getPrefixCompletionStart(IDocument document,
 				int completionOffset) {
-			// TODO Auto-generated method stub
 			return completionOffset;
 		}
 

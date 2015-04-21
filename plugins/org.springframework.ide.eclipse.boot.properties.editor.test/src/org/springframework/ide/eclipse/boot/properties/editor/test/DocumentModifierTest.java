@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import junit.framework.TestCase;
 
-import org.springframework.ide.eclipse.yaml.editor.completions.DocumentModifier;
+import org.springframework.ide.eclipse.yaml.editor.completions.DocumentEdits;
 
 /**
  * @author Kris De Volder
@@ -21,7 +21,7 @@ public class DocumentModifierTest extends TestCase {
 
 	class TestSubject {
 		private MockEditor editor;
-		private DocumentModifier edits = new DocumentModifier();
+		private DocumentEdits edits = new DocumentEdits();
 		private String orgText;
 
 		public TestSubject(String contents) {
