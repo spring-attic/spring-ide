@@ -21,6 +21,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
@@ -45,9 +48,33 @@ public abstract class YamlAssistContext {
 //	protected final Kind contextKind;
 
 	protected final YamlPath contextPath;
+	protected final TypeUtil typeUtil;
 
-	public YamlAssistContext(YamlPath contextPath) {
+	public YamlAssistContext(YamlPath contextPath, TypeUtil typeUtil) {
 		this.contextPath = contextPath;
+		this.typeUtil = typeUtil;
+	}
+
+	/**
+	 * Computes the text that should be appended at the end of a completion
+	 * proposal depending on what type of value is expected.
+	 */
+	protected String appendTextFor(Type type) {
+		//Note that proper indentation after each \n" is added automatically
+		//so the strings created here do not need to contain indentation spaces.
+		if (TypeUtil.isMap(type)) {
+			//ready to enter nested map key on next line
+			return "\n";
+		} if (TypeUtil.isArrayLike(type)) {
+			//ready to enter sequence element on next line
+			return "\n- ";
+		} else if (typeUtil.isAtomic(type)) {
+			//ready to enter whatever on the same line
+			return " ";
+		} else {
+			//Assume its some kind of pojo bean
+			return "\n";
+		}
 	}
 
 	private static class IndexContext extends YamlAssistContext {
@@ -61,8 +88,9 @@ public abstract class YamlAssistContext {
 		private IndexNavigator indexNav;
 		PropertyCompletionFactory completionFactory;
 
-		public IndexContext(YamlPath contextPath, IndexNavigator indexNav, PropertyCompletionFactory completionFactory) {
-			super(contextPath);
+		public IndexContext(YamlPath contextPath, IndexNavigator indexNav,
+				PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+			super(contextPath, typeUtil);
 			this.indexNav = indexNav;
 			this.completionFactory = completionFactory;
 		}
@@ -106,13 +134,15 @@ public abstract class YamlAssistContext {
 					// context. If it doesn't we can create it as any child of the context
 					// so that includes, right at place the user is typing now.
 					SNode existingNode = contextNode.traverse(nextSegment);
+					String appendText = appendTextFor(TypeParser.parse(match.data.getType()));
 					if (existingNode==null) {
-						edits.createPathInPlace(contextNode, relativePath, queryOffset);
+						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendText);
 					} else {
-						edits.createPath(YamlPath.fromProperty(match.data.getId()));
+						edits.createPath(YamlPath.fromProperty(match.data.getId()), appendText);
 					}
 					return edits;
 				}
+
 			};
 		}
 
@@ -121,7 +151,7 @@ public abstract class YamlAssistContext {
 			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
 				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
 				if (subIndex.getExtensionCandidate()!=null) {
-					return new IndexContext(contextPath.append(s), subIndex, completionFactory);
+					return new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);
 				} else if (subIndex.getExactMatch()!=null) {
 					//TODO: transition to a 'TypeContext' for the type the property is bound to
 				}
@@ -137,14 +167,14 @@ public abstract class YamlAssistContext {
 
 	}
 
-	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory) {
-		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory);
+	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
 	}
 
 	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
 
-	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory) {
-		YamlAssistContext context = YamlAssistContext.global(index, completionFactory);
+	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		YamlAssistContext context = YamlAssistContext.global(index, completionFactory, typeUtil);
 		for (YamlPathSegment s : contextPath.getSegments()) {
 			if (context==null) return null;
 			context = context.navigate(s);

@@ -67,7 +67,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	};
 
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
-	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider);
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider, typeUtilProvider);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);

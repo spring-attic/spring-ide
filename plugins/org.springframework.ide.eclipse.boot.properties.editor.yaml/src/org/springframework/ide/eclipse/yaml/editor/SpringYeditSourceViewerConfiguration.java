@@ -121,7 +121,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	};
 
 	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
-	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider);
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider, typeUtilProvider);
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {

@@ -10,12 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.AtScalarKey;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
@@ -31,69 +26,58 @@ import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructurePars
  */
 public class YamlPathEdits extends DocumentEdits {
 
-	private static final int INDENT_BY = 2; // number of spaces to add when indenting a child, relative to parent indentation.
 	private YamlDocument doc;
-	final private String NEWLINE;
+	private IndentUtil indentUtil;
 
 	public YamlPathEdits(YamlDocument doc) {
 		this.doc = doc;
-		IDocument d = doc.getDocument();
-		if (d instanceof IDocumentExtension4) {
-			this.NEWLINE = ((IDocumentExtension4) d).getDefaultLineDelimiter();
-		} else {
-			this.NEWLINE = "\n"; //This shouldn't really happen.
-		}
+		this.indentUtil = new IndentUtil(doc);
 	}
 
 	/**
 	 * Create the necessary edits to ensure that a given property
-	 * path exists, placing cursor at the right place to start typing
+	 * path exists, placing cursor right after that the right place to start typing
 	 * the property value.
-	 *
-	 * @param fromProperty
-	 * @throws Exception
 	 */
-	public void createPath(YamlPath path) throws Exception {
+	public void createPath(YamlPath path, String appendText) throws Exception {
 		SRootNode root = doc.getStructure();
-		createPath(root, path);
+		createPath(root, path, appendText);
 	}
 
-	private void createPath(SChildBearingNode node, YamlPath path) throws Exception {
+	private void createPath(SChildBearingNode node, YamlPath path, String appendText) throws Exception {
 		if (!path.isEmpty()) {
 			YamlPathSegment s = path.getSegment(0);
 			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
 				String key = s.toPropString();
 				SKeyNode existing = findChildForKey(node, key);
 				if (existing==null) {
-					createNewPath(node, path);
+					createNewPath(node, path, appendText);
 				} else {
-					createPath(existing, path.tail());
+					createPath(existing, path.tail(), appendText);
 				}
 			}
 		}
 	}
 
-	private void createNewPath(SChildBearingNode parent, YamlPath path) {
+	private void createNewPath(SChildBearingNode parent, YamlPath path, String appendText) {
 		int indent = getChildIndent(parent);
 		int insertionPoint = getNewPathInsertionOffset(parent);
 		boolean startOnNewLine = true;
-		insert(insertionPoint, createPathInsertionText(path, indent, startOnNewLine));
+		insert(insertionPoint, createPathInsertionText(path, indent, startOnNewLine, appendText));
 	}
 
-	protected String createPathInsertionText(YamlPath path, int indent, boolean startOnNewLine) {
+	protected String createPathInsertionText(YamlPath path, int indent, boolean startOnNewLine, String appendText) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < path.size(); i++) {
 			if (startOnNewLine||i>0) {
-				buf.append(NEWLINE);
-				addIndent(indent, buf);
+				indentUtil.addNewlineWithIndent(indent, buf);
 			}
 			String key = path.getSegment(i).toPropString();
 			buf.append(key);
 			buf.append(":");
-			indent += INDENT_BY;
+			indent += IndentUtil.INDENT_BY;
 		}
-		//TODO: should do something different based on what's expected next
-		buf.append(" "); //add a space after last line since it doesn't have newline yet.
+		buf.append(indentUtil.applyIndentation(appendText, indent));
 		return buf.toString();
 	}
 
@@ -101,7 +85,7 @@ public class YamlPathEdits extends DocumentEdits {
 		if (parent.getNodeType()==SNodeType.ROOT) {
 			return parent.getIndent();
 		} else {
-			return parent.getIndent()+INDENT_BY;
+			return parent.getIndent()+IndentUtil.INDENT_BY;
 		}
 	}
 
@@ -111,12 +95,6 @@ public class YamlPathEdits extends DocumentEdits {
 			insertAfter = parent;
 		}
 		return insertAfter.getNodeEnd();
-	}
-
-	private void addIndent(int indent, StringBuilder buf) {
-		for (int i = 0; i < indent; i++) {
-			buf.append(' ');
-		}
 	}
 
 	private SKeyNode findChildForKey(SChildBearingNode node, String key) throws Exception {
@@ -132,9 +110,9 @@ public class YamlPathEdits extends DocumentEdits {
 		return null;
 	}
 
-	public void createPathInPlace(SNode contextNode, YamlPath relativePath, int insertionPoint) throws Exception {
+	public void createPathInPlace(SNode contextNode, YamlPath relativePath, int insertionPoint, String appendText) throws Exception {
 		int indent = getChildIndent(contextNode);
-		insert(insertionPoint, createPathInsertionText(relativePath, indent, lineHasTextBefore(insertionPoint)));
+		insert(insertionPoint, createPathInsertionText(relativePath, indent, lineHasTextBefore(insertionPoint), appendText));
 	}
 
 	private boolean lineHasTextBefore(int insertionPoint) throws Exception {

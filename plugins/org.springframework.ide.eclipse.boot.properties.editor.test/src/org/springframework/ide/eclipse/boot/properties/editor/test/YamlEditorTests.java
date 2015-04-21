@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -327,7 +329,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testContentAssistNested() throws Exception {
 		data("server.port", "java.lang.Integer", null, "Server http port");
-		data("server.address", "String", "localhost", "Server host address");
+		data("server.address", "java.lang.String", "localhost", "Server host address");
 
 		assertCompletion(
 				"server:\n"+
@@ -431,17 +433,138 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 		assertCompletion(
 				"server:\n"+
-				"  server:\n"+
-				"    port: 8888\n" +
+				"  port: 8888\n" +
 				"  address: localhost\n"+
 				"something: nice\n"+
 				"po<*>"
 				,
 				"server:\n"+
-				"  server:\n"+
-				"    port: <*>8888\n" +
+				"  port: <*>8888\n" +
 				"  address: localhost\n"+
 				"something: nice\n"
+		);
+	}
+
+
+	public void testContentAssistPropertyWithMapType() throws Exception {
+		data("foo.mapping", "java.util.Map<java.lang.String,java.lang.String>", null, "Nice little map");
+
+		//Try in-pace completion
+		assertCompletion(
+				"map<*>"
+				,
+				"foo:\n"+
+				"  mapping:\n"+
+				"    <*>"
+		);
+
+		//Try 'elswhere' completion
+		assertCompletion(
+				"foo:\n" +
+				"  something:\n" +
+				"more: stuff\n" +
+				"map<*>"
+				,
+				"foo:\n" +
+				"  something:\n" +
+				"  mapping:\n" +
+				"    <*>\n" +
+				"more: stuff\n"
+		);
+	}
+
+	public void testContentAssistPropertyWithArrayType() throws Exception {
+		data("foo.list", "java.util.List<java.lang.String>", null, "Nice little list");
+
+		//Try in-pace completion
+		assertCompletion(
+				"lis<*>"
+				,
+				"foo:\n"+
+				"  list:\n"+
+				"    - <*>"
+		);
+
+		//Try 'elsewhere' completion
+		assertCompletion(
+				"foo:\n" +
+				"  something:\n" +
+				"more: stuff\n" +
+				"lis<*>"
+				,
+				"foo:\n" +
+				"  something:\n" +
+				"  list:\n" +
+				"    - <*>\n" +
+				"more: stuff\n"
+		);
+	}
+
+	public void testContentAssistPropertyWithPojoType() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+		//Try in-pace completion
+		assertCompletion(
+				"foo.d<*>"
+				,
+				"foo:\n" +
+				"  data:\n" +
+				"    <*>"
+		);
+
+		//Try 'elsewhere' completion
+		assertCompletion(
+				"foo:\n" +
+				"  something:\n" +
+				"more: stuff\n" +
+				"foo.d<*>"
+				,
+				"foo:\n" +
+				"  something:\n" +
+				"  data:\n" +
+				"    <*>\n" +
+				"more: stuff\n"
+		);
+	}
+
+	public void testContentAssistPropertyWithEnumType() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+		//Try in-pace completion
+		assertCompletion(
+				"foo.co<*>"
+				,
+				"foo:\n" +
+				"  color: <*>"
+		);
+
+		//Try 'elsewhere' completion
+		assertCompletion(
+				"foo:\n" +
+				"  something:\n" +
+				"more: stuff\n" +
+				"foo.co<*>"
+				,
+				"foo:\n" +
+				"  something:\n" +
+				"  color: <*>\n" +
+				"more: stuff\n"
+		);
+	}
+
+	public void testNoCompletionsInsideComments() throws Exception {
+		defaultTestData();
+
+		//Ensure this test is not trivially passing because of missing test data
+		assertCompletion(
+				"po<*>"
+				,
+				"server:\n"+
+				"  port: <*>"
+		);
+
+		assertNoCompletions(
+				"#po<*>"
 		);
 	}
 
@@ -462,6 +585,11 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		 more
 
 		 */
+
+	private void assertNoCompletions(String text) throws Exception {
+		MockEditor editor = new MockEditor(text);
+		assertEquals(0, getCompletions(editor).length);
+	}
 
 	private void assertCompletion(String before, String after) throws Exception {
 		MockEditor editor = new MockEditor(before);

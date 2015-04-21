@@ -21,6 +21,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
@@ -35,17 +37,20 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	private DocumentContextFinder contextFinder;
 	private YamlStructureProvider structureProvider;
 	private PropertyCompletionFactory completionFactory;
+	private TypeUtilProvider typeUtilProvider;
 
 	public YamlCompletionEngine(Yaml yaml,
 			SpringPropertyIndexProvider indexProvider,
 			DocumentContextFinder documentContextFinder,
-			YamlStructureProvider structureProvider
+			YamlStructureProvider structureProvider,
+			TypeUtilProvider typeUtilProvider
 	) {
 		this.yaml = yaml;
 		this.indexProvider = indexProvider;
 		this.contextFinder = documentContextFinder;
 		this.structureProvider = structureProvider;
 		this.completionFactory = new PropertyCompletionFactory(contextFinder);
+		this.typeUtilProvider = typeUtilProvider;
 	}
 
 	@Override
@@ -66,17 +71,18 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	}
 
 	private YamlAssistContext getContext(YamlDocument doc, SNode node, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
+		TypeUtil typeUtil = typeUtilProvider.getTypeUtil(doc.getDocument());
 		if (node==null) {
-			return YamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory);
+			return YamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory, typeUtil);
 		}
 		if (node.getNodeType()==SNodeType.KEY) {
 			//slight complication. The area in the key and value of a key node represent different
 			// contexts for content assistance
 			SKeyNode keyNode = (SKeyNode)node;
 			if (keyNode.isInKey(offset)) {
-				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory);
+				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory, typeUtil);
 			} else {
-				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory);
+				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory, typeUtil);
 			}
 		} else if (node.getNodeType()==SNodeType.RAW) {
 			//Treat raw node as a 'key node'. This is basically assuming that is misclasified
@@ -89,13 +95,13 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			// than the structur-tree to determine the 'context' node.
 			int cursorIndent = doc.getColumn(offset);
 			int nodeIndent = node.getIndent();
-			int currentIndent = YamlStructureParser.minIndent(cursorIndent, nodeIndent);
+			int currentIndent = IndentUtil.minIndent(cursorIndent, nodeIndent);
 			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getParent()!=null)) {
 				node = node.getParent();
 			}
-			return YamlAssistContext.forPath(getContextPath(node), index, completionFactory);
+			return YamlAssistContext.forPath(getContextPath(node), index, completionFactory, typeUtil);
 		} else if (node.getNodeType()==SNodeType.ROOT) {
-			return  YamlAssistContext.forPath(getContextPath(node), index, completionFactory);
+			return  YamlAssistContext.forPath(getContextPath(node), index, completionFactory, typeUtil);
 		} else {
 			throw new IllegalStateException("Missing case");
 		}
