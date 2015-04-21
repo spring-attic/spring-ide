@@ -41,14 +41,14 @@ public class SpringBootProjectTests extends TestCase {
 	 * The version we expect to see for boot starters. Some tests will fail if this doesn't match.
 	 * But the infrastructure itself assumes no specific version (should work with different versions
 	 * of spring-boot.
-	 * 
-	 * The version number in here should be the version of spring boot used by projects created 
+	 *
+	 * The version number in here should be the version of spring boot used by projects created
 	 * via the spring intializer app.
 	 */
-	private static final String BOOT_STARTER_VERSION = "1.2.2.RELEASE";
+	private static final String BOOT_STARTER_VERSION = "1.2.3.RELEASE";
 
 	private static final long MAVEN_POM_REFRESH_TIMEOUT = 3*60*1000;
-	
+
 	private static String projectName;
 	private static ISpringBootProject project;
 	private static Map<String, SpringBootStarter> knownStarters;
@@ -62,14 +62,14 @@ public class SpringBootProjectTests extends TestCase {
 			projectName = wizard.getProjectName().getValue();
 			wizard.performFinish(new NullProgressMonitor());
 			project = SpringBootCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName));
-			
+
 			knownStarters = new HashMap<String, SpringBootStarter>();
-			
+
 			for (SpringBootStarter s : project.getKnownStarters()) {
 				knownStarters.put(s.getName(), s);
 			}
 			assertFalse(knownStarters.isEmpty());
-			
+
 			assertInitialStarters(project);
 			project.setStarters(Collections.<SpringBootStarter> emptySet());
 			new ACondition("all starters removed") {
@@ -80,16 +80,16 @@ public class SpringBootProjectTests extends TestCase {
 			}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
 		}
 	}
-	
+
 	public void testGetKnownBootStarters() throws Exception {
 		List<SpringBootStarter> starters = project.getKnownStarters();
-		assertContainsStarters(starters, 
+		assertContainsStarters(starters,
 				"web",
 				"actuator",
 				"jdbc"
 		);
 	}
-	
+
 	public void testAddAndRemoveBootStarter() throws Exception {
 //		List<SpringBootStarter> starters = project.getBootStarters();
 		//spring initializer now produces a spring-boot project with the 'test' starter applied by default.
@@ -103,9 +103,9 @@ public class SpringBootProjectTests extends TestCase {
 				return true;
 			}
 		}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
-		
+
 		project.removeStarter(knownStarters.get("web"));
-		
+
 		new ACondition("web starter removed") {
 			public boolean test() throws Exception {
 				assertTrue(project.getBootStarters().isEmpty()); //starter should be removed again.
@@ -117,7 +117,7 @@ public class SpringBootProjectTests extends TestCase {
 	private void assertInitialStarters(ISpringBootProject project) throws Exception {
 		//Old: initial project has no starters applied
 		//assertTrue(project.getBootStarters().isEmpty());
-		
+
 		//Now: the 'test' starter is applied by default.
 		assertStarters(project, Arrays.asList(knownStarters.get("test")));
 	}
@@ -144,10 +144,10 @@ public class SpringBootProjectTests extends TestCase {
 			fail(msg.toString());
 		}
 	}
-	
+
 	public void testSetStarters() throws Exception {
 		assertTrue(project.getBootStarters().isEmpty());
-		
+
 		project.setStarters(knownStarters.values());
 		new ACondition("all known starters added") {
 			public boolean test() throws Exception {
@@ -155,7 +155,7 @@ public class SpringBootProjectTests extends TestCase {
 				return true;
 			}
 		}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
-		
+
 		project.setStarters(new ArrayList<SpringBootStarter>());
 		new ACondition("all starters removed") {
 			public boolean test() throws Exception {
@@ -163,12 +163,12 @@ public class SpringBootProjectTests extends TestCase {
 				return true;
 			}
 		}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
-		
+
 	}
 
 	private void assertStarters(ISpringBootProject project, Collection<SpringBootStarter> _expected) throws Exception {
 		HashSet<SpringBootStarter> expected = new HashSet<SpringBootStarter>(_expected);
-		
+
 		StringBuilder unexpected = new StringBuilder();
 		StringBuilder missing = new StringBuilder();
 		for (SpringBootStarter s : project.getBootStarters()) {
@@ -176,7 +176,7 @@ public class SpringBootProjectTests extends TestCase {
 				unexpected.append("   "+s+"\n");
 			}
 		}
-		
+
 		for (SpringBootStarter s : expected) {
 			missing.append("    "+s+"\n");
 		}
@@ -188,6 +188,6 @@ public class SpringBootProjectTests extends TestCase {
 			);
 		}
 	}
-	
-	
+
+
 }
