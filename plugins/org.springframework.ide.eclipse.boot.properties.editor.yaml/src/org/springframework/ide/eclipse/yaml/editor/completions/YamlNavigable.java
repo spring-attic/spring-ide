@@ -15,7 +15,8 @@ import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructurePars
 
 /**
  * Different types of things (e.g. {@link YamlAssistContext}, {@link SNode} ...) can
- * be traversed interpeting {@link YamlPath} as 'navigation operations'
+ * be traversed interpeting {@link YamlPath} as 'navigation operations'. To faciliate
+ * 'reusable' traversal code, they can implement this interface.
  */
 public interface YamlNavigable<T> {
 	T traverse(YamlPathSegment s) throws Exception;
