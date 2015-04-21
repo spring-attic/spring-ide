@@ -102,10 +102,16 @@ public class DocumentModifier implements ProposalApplier {
 		void apply(DocumentState doc) throws BadLocationException {
 			doc.insert(offset, text);
 		}
+
+		@Override
+		public String toString() {
+			return "ins("+text+"@"+offset+")";
+		}
 	}
 
 	private abstract class Edit {
 		abstract void apply(DocumentState doc) throws BadLocationException;
+		public abstract String toString();
 	}
 
 	private class Deletion extends Edit {
@@ -202,6 +208,18 @@ public class DocumentModifier implements ProposalApplier {
 			}
 			selection = tStart;
 		}
+
+		@Override
+		public String toString() {
+			if (doc==null) {
+				return super.toString();
+			}
+			StringBuilder buf = new StringBuilder();
+			buf.append("DocumentState(\n");
+			buf.append(doc.get()+"\n");
+			buf.append(")\n");
+			return buf.toString();
+		}
 	}
 
 	private ArrayList<Edit> edits = new ArrayList<Edit>();
@@ -240,6 +258,17 @@ public class DocumentModifier implements ProposalApplier {
 		for (Edit edit : edits) {
 			edit.apply(doc);
 		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append("DocumentModifier(\n");
+		for (Edit edit : edits) {
+			buf.append("   "+edit);
+		}
+		buf.append(")\n");
+		return buf.toString();
 	}
 
 }

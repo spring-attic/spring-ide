@@ -123,4 +123,9 @@ public class IndexNavigator {
 		return Collections.emptyList();
 	}
 
+	@Override
+	public String toString() {
+		return "IndexNavigator("+prefix+")";
+	}
+
 }

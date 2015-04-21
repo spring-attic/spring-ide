@@ -15,7 +15,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.springframework.ide.eclipse.yaml.editor.completions.DocumentModifier;
 import org.springframework.ide.eclipse.yaml.editor.completions.ProposalApplier;
 
 /**
@@ -53,6 +52,8 @@ public class MockEditor {
 			selectionEnd = text.indexOf(SpringPropertiesEditorTestHarness.CURSOR, selectionStart);
 			if (selectionEnd>=0) {
 				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+SpringPropertiesEditorTestHarness.CURSOR.length());
+			} else {
+				selectionEnd = selectionStart;
 			}
 		} else {
 			//No CURSOR markers found

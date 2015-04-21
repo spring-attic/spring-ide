@@ -10,24 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
-import org.springframework.ide.eclipse.yaml.editor.ast.YamlFileAST;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
@@ -41,6 +34,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	private SpringPropertyIndexProvider indexProvider;
 	private DocumentContextFinder contextFinder;
 	private YamlStructureProvider structureProvider;
+	private PropertyCompletionFactory completionFactory;
 
 	public YamlCompletionEngine(Yaml yaml,
 			SpringPropertyIndexProvider indexProvider,
@@ -51,19 +45,18 @@ public class YamlCompletionEngine implements ICompletionEngine {
 		this.indexProvider = indexProvider;
 		this.contextFinder = documentContextFinder;
 		this.structureProvider = structureProvider;
+		this.completionFactory = new PropertyCompletionFactory(contextFinder);
 	}
 
 	@Override
 	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
 		YamlDocument doc = new YamlDocument(_doc, structureProvider);
-		PropertyCompletionFactory completionFactory = new PropertyCompletionFactory(contextFinder);
 		if (!doc.isCommented(offset)) {
 			FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc.getDocument());
 			if (index!=null && !index.isEmpty()) {
 				SRootNode root = doc.getStructure();
 				SNode current = root.find(offset);
-				YamlPath contextPath = getContextPath(current, offset);
-				YamlAssistContext context = YamlAssistContext.forPath(contextPath, index, completionFactory);
+				YamlAssistContext context = getContext(doc, current, offset, index);
 				if (context!=null) {
 					return context.getCompletions(doc, offset);
 				}
@@ -72,21 +65,39 @@ public class YamlCompletionEngine implements ICompletionEngine {
 		return Collections.emptyList();
 	}
 
-	private YamlPath getContextPath(SNode node, int offset) throws Exception {
+	private YamlAssistContext getContext(YamlDocument doc, SNode node, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
 		if (node==null) {
-			return YamlPath.EMPTY;
+			return YamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory);
 		}
 		if (node.getNodeType()==SNodeType.KEY) {
 			//slight complication. The area in the key and value of a key node represent different
 			// contexts for content assistance
 			SKeyNode keyNode = (SKeyNode)node;
 			if (keyNode.isInKey(offset)) {
-				return getContextPath(keyNode.getParent());
+				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory);
 			} else {
-				return getContextPath(keyNode);
+				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory);
 			}
+		} else if (node.getNodeType()==SNodeType.RAW) {
+			//Treat raw node as a 'key node'. This is basically assuming that is misclasified
+			// by structure parser because the ':' was not yet typed into the document.
+
+			//Complication: if line with cursor is empty or the cursor is inside the indentation
+			// area then the structure may not reflect correctly the context. This is because
+			// the correct context depends on text the user has not typed yet.(which will change the
+			// indentation level of the current line. So we must use the cursorIndentation
+			// than the structur-tree to determine the 'context' node.
+			int cursorIndent = doc.getColumn(offset);
+			int nodeIndent = node.getIndent();
+			int currentIndent = YamlStructureParser.minIndent(cursorIndent, nodeIndent);
+			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getParent()!=null)) {
+				node = node.getParent();
+			}
+			return YamlAssistContext.forPath(getContextPath(node), index, completionFactory);
+		} else if (node.getNodeType()==SNodeType.ROOT) {
+			return  YamlAssistContext.forPath(getContextPath(node), index, completionFactory);
 		} else {
-			return getContextPath(node);
+			throw new IllegalStateException("Missing case");
 		}
 	}
 
@@ -104,102 +115,6 @@ public class YamlCompletionEngine implements ICompletionEngine {
 				segments.add(YamlPathSegment.at(key));
 			}
 		}
-	}
-
-	/**
-	 * Parse text between startLine (inclusive) and endLine (exclusive).
-	 */
-	private YamlFileAST parseLines(YamlDocument doc, int startLine, int endLine) throws Exception {
-		try {
-			int start = doc.getLineOffset(startLine);
-			int end = doc.getLineOffset(endLine);
-			Reader input = new StringReader(doc.textBetween(start, end));
-			return new YamlFileAST(yaml.composeAll(input));
-		} catch (Exception e) {
-			//Most likely garbage input... ignore
-			return null;
-		}
-	}
-
-//	/**
-//	 * This finds the starting line for content assist purposes. Basically, we try
-//	 * to make the parser more robust and efficient by only trying to parse
-//	 * a portion of the document rather than the whole thing.
-//	 * <p>
-//	 * Basically, we try to find a the closest line of text at or before the
-//	 * given offset that is not-indented. (In this search we ignore fully commented lines
-//	 * as and empty lines)
-//	 */
-//	private int findStartLine(YamlDocument doc, int offset) throws Exception {
-//		int line = doc.getLineOfOffset(offset);
-//		IRegion region = doc.getLineInformation(line);
-//		int cursorColumn = offset - region.getOffset();
-//		if (cursorColumn==0) {
-//			//special case, as cursor is at the start of the line, the current line
-//			//would be 0 indented if we started typing here.
-//			return line;
-//		}
-//		while (line>=0) {
-//			int indentation = doc.getLineIndentation(line);
-//			if (indentation==0) {
-//				return line;
-//			}
-//			line--;
-//		}
-//		return 0; //no non-indented line found, start parsing from begining of document.
-//	}
-
-
-	/////////////////// THe 'simpleCompletions' stuff isn't really useful, except for quickly creating
-	/// a silly 'fake' CA implementation to determine whether the engine is wired up correctly.
-
-	private Collection<ICompletionProposal> simpleCompletions(int offset, String... strings) {
-		ArrayList<ICompletionProposal> props = new ArrayList<ICompletionProposal>();
-
-		for (int i = 0; i < strings.length; i++) {
-			props.add(simpleCompletion(offset, strings[i]));
-		}
-
-		return props;
-	}
-
-	private ICompletionProposal simpleCompletion(final int offset, final String string) {
-		return new ICompletionProposal() {
-
-			@Override
-			public Point getSelection(IDocument document) {
-				return new Point(offset+string.length(), 0);
-			}
-
-			@Override
-			public Image getImage() {
-				return null;
-			}
-
-			@Override
-			public String getDisplayString() {
-				return string;
-			}
-
-			@Override
-			public IContextInformation getContextInformation() {
-				return null;
-			}
-
-			@Override
-			public String getAdditionalProposalInfo() {
-				return null;
-			}
-
-			@Override
-			public void apply(IDocument document) {
-				try {
-					document.replace(offset, 0, string);
-				} catch (Exception e) {
-					BootActivator.log(e);
-				}
-			}
-		};
 	}
 
 }

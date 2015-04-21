@@ -138,21 +138,18 @@ public class YamlDocument {
 		return doc.get(start, end-start);
 	}
 
-	/**
-	 * Computes the line indentation for a given offset. This is the indentation
-	 * level computed for the line assuming that
-	 */
-	public int getLineIndentationAtOffset(int offset) throws BadLocationException {
-		int line = doc.getLineOfOffset(offset);
-		IRegion r = doc.getLineInformation(line);
-		int currentColumn = offset - r.getOffset();
-		int rawIndentation = getLineIndentation(line);
-		if (rawIndentation==-1) {
-			return currentColumn;
-		} else {
-			return Math.min(rawIndentation, currentColumn);
-		}
+	public int getColumn(int offset) throws Exception {
+		IRegion r = doc.getLineInformationOfOffset(offset);
+		return offset - r.getOffset();
 	}
 
+	/**
+	 * Fetct text between a given offset and the start of the line that
+	 * offset belongs to.
+	 */
+	public String getLineTextBefore(int offset) throws Exception {
+		IRegion l = doc.getLineInformationOfOffset(offset);
+		return textBetween(l.getOffset(), offset);
+	}
 
 }

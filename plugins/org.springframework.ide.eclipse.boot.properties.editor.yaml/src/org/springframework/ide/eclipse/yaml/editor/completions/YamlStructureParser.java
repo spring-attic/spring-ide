@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -21,6 +22,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 
 /**
@@ -134,7 +137,7 @@ public class YamlStructureParser {
 		}
 	}
 
-	public static abstract class SNode {
+	public static abstract class SNode implements YamlNavigable<SNode> {
 		private SChildBearingNode parent;
 		private int start;
 		private int end;
@@ -190,6 +193,16 @@ public class YamlStructureParser {
 			return getRawNodeText().substring(Math.max(0, getIndent()));
 		}
 
+		/**
+		 * Default implementation, doesn't support any type of traversal operation.
+		 * Subclasses must override and implement where appropriate.
+		 * @throws Exception
+		 */
+		@Override
+		public SNode traverse(YamlPathSegment s) throws Exception {
+			return null;
+		}
+
 		protected abstract void dump(Writer out, int indent) throws Exception;
 
 	}
@@ -199,7 +212,6 @@ public class YamlStructureParser {
 		public SRootNode() {
 			super(null, 0,0);
 		}
-
 		@Override
 		public int getIndent() {
 			return 0;
@@ -240,7 +252,10 @@ public class YamlStructureParser {
 		}
 		public SNode getLastChild() {
 			List<SNode> cs = getChildren();
-			return cs.get(cs.size()-1);
+			if (!cs.isEmpty()) {
+				return cs.get(cs.size()-1);
+			}
+			return null;
 		}
 		@Override
 		public int getTreeEnd() {
@@ -277,6 +292,29 @@ public class YamlStructureParser {
 			}
 			return this;
 		}
+
+		@Override
+		public SNode traverse(YamlPathSegment s) throws Exception {
+			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
+				return this.getChildWithKey(s.toPropString());
+			}
+			return null;
+		}
+
+		private SNode getChildWithKey(String key) throws Exception {
+			//TODO: index based on keys? May not be worth it for small number of keys
+			for (SNode node: getChildren()) {
+				if (node.getNodeType()==SNodeType.KEY) {
+					String nodeKey = ((SKeyNode)node).getKey();
+					if (key.equals(nodeKey)) {
+						return node;
+					}
+				}
+			}
+			return null;
+		}
+
+
 	}
 
 	public abstract class SLeafNode extends SNode {
@@ -309,8 +347,6 @@ public class YamlStructureParser {
 			return null;
 		}
 	}
-
-
 
 	public class SRawNode extends SLeafNode {
 
@@ -367,7 +403,6 @@ public class YamlStructureParser {
 		while (indent<node.getIndent()) {
 			node = node.getParent();
 		}
-		//node never null because RootNode always has indent 0
 		return node;
 	}
 
@@ -406,6 +441,21 @@ public class YamlStructureParser {
 
 		public boolean isInKey(int offset) throws Exception {
 			return offset>=line.getStart() && offset < colonOffset;
+		}
+
+	}
+
+	/**
+	 * Determine the 'known minimum' of two indentation levels. Correctly handle
+	 * when either one or both indent levels are '-1' (unknown).
+	 */
+	public static int minIndent(int a, int b) {
+		if (a==-1) {
+			return b;
+		} else if (b==-1) {
+			return a;
+		} else {
+			return Math.min(a, b);
 		}
 	}
 }

@@ -313,25 +313,106 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testContentAssistSimple() throws Exception {
 		defaultTestData();
-		assertBasicCompletion("port<*>",
+		assertCompletion("port<*>",
 				"server:\n"+
 				"  port: <*>");
+		assertCompletion(
+				"#A comment\n" +
+				"port<*>",
+				"#A comment\n" +
+				"server:\n"+
+				"  port: <*>");
+
 	}
 
 	public void testContentAssistNested() throws Exception {
-		defaultTestData();
-		assertBasicCompletion(
+		data("server.port", "java.lang.Integer", null, "Server http port");
+		data("server.address", "String", "localhost", "Server host address");
+
+		assertCompletion(
+				"server:\n"+
+				"  port: 8888\n" +
+				"  <*>"
+				,
+				"server:\n"+
+				"  port: 8888\n" +
+				"  address: <*>"
+		);
+
+		assertCompletion(
 					"server:\n"+
 					"  <*>"
 					,
 					"server:\n"+
-					"  port: <*>"
+					"  address: <*>"
+		);
+
+		assertCompletion(
+				"server:\n"+
+				"  a<*>"
+				,
+				"server:\n"+
+				"  address: <*>"
+		);
+
+		assertCompletion(
+				"server:\n"+
+				"  <*>\n" +
+				"  port: 8888"
+				,
+				"server:\n"+
+				"  address: <*>\n" +
+				"  port: 8888"
+		);
+
+		assertCompletion(
+				"server:\n"+
+				"  a<*>\n" +
+				"  port: 8888"
+				,
+				"server:\n"+
+				"  address: <*>\n" +
+				"  port: 8888"
+		);
+
+	}
+
+	public void testContentAssistNestedSameLine() throws Exception {
+		data("server.port", "java.lang.Integer", null, "Server http port");
+
+		assertCompletion(
+				"server: <*>"
+				,
+				"server: \n" +
+				"  port: <*>"
 		);
 	}
 
 	public void testContentAssistInsertCompletionElsewhere() throws Exception {
 		defaultTestData();
-		assertBasicCompletion(
+
+		assertCompletion(
+				"server:\n" +
+				"  port: 8888\n" +
+				"  address: \n" +
+				"  servlet-path: \n" +
+				"spring:\n" +
+				"  activemq:\n" +
+				"something-else: great\n" +
+				"aopauto<*>"
+			,
+				"server:\n" +
+				"  port: 8888\n" +
+				"  address: \n" +
+				"  servlet-path: \n" +
+				"spring:\n" +
+				"  activemq:\n" +
+				"  aop:\n" +
+				"    auto: <*>\n" +
+				"something-else: great\n"
+		);
+
+		assertCompletion(
 					"server:\n"+
 					"  address: localhost\n"+
 					"something: nice\n"+
@@ -339,8 +420,28 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 					,
 					"server:\n"+
 					"  address: localhost\n"+
-					"  port: <*>" +
+					"  port: <*>\n" +
 					"something: nice\n"
+		);
+	}
+
+	public void DISABLED_testContentAssistInsertCompletionElsewhereThatAlreadyExists() throws Exception {
+		data("server.port", "java.lang.Integer", null, "Server http port");
+		data("server.address", "String", "localhost", "Server host address");
+
+		assertCompletion(
+				"server:\n"+
+				"  server:\n"+
+				"    port: 8888\n" +
+				"  address: localhost\n"+
+				"something: nice\n"+
+				"po<*>"
+				,
+				"server:\n"+
+				"  server:\n"+
+				"    port: <*>8888\n" +
+				"  address: localhost\n"+
+				"something: nice\n"
 		);
 	}
 
@@ -362,7 +463,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 		 */
 
-	private void assertBasicCompletion(String before, String after) throws Exception {
+	private void assertCompletion(String before, String after) throws Exception {
 		MockEditor editor = new MockEditor(before);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
