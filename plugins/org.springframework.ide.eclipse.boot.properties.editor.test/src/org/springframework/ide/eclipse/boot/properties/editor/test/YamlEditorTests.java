@@ -963,8 +963,27 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testEnumValueCompletion() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+		data("foo.color", "demo.Color", null, "A foonky colour");
 
+		assertCompletion("foo.c<*>",
+				"foo:\n" +
+				"  color: <*>" //Should complete on same line because enums are 'simple' values.
+		);
 
+		assertCompletion("foo:\n  color: R<*>", "foo:\n  color: RED<*>");
+		assertCompletion("foo:\n  color: G<*>", "foo:\n  color: GREEN<*>");
+		assertCompletion("foo:\n  color: B<*>", "foo:\n  color: BLUE<*>");
+
+		assertCompletion("foo:\n  color: r<*>", "foo:\n  color: red<*>");
+		assertCompletion("foo:\n  color: g<*>", "foo:\n  color: green<*>");
+		assertCompletion("foo:\n  color: b<*>", "foo:\n  color: blue<*>");
+
+		assertCompletionsDisplayString("foo:\n  color: <*>",
+				"red", "green", "blue"
+		);
+	}
 
 	///////////////// crufts
 	private void generateNestedProperties(int levels, String[] names, String prefix) {

@@ -26,6 +26,7 @@ public class MockEditor {
 	int selectionStart;
 	private int selectionEnd;
 	Document document;
+	public static final String CURSOR = "<*>";
 
 	public Document getDocument() {
 		return document;
@@ -46,12 +47,12 @@ public class MockEditor {
 	 * If no markers are present the cursor is placed at the very end of the document.
 	 */
 	public MockEditor(String text) {
-		selectionStart = text.indexOf(SpringPropertiesEditorTestHarness.CURSOR);
+		selectionStart = text.indexOf(MockEditor.CURSOR);
 		if (selectionStart>=0) {
-			text = text.substring(0,selectionStart) + text.substring(selectionStart+SpringPropertiesEditorTestHarness.CURSOR.length());
-			selectionEnd = text.indexOf(SpringPropertiesEditorTestHarness.CURSOR, selectionStart);
+			text = text.substring(0,selectionStart) + text.substring(selectionStart+MockEditor.CURSOR.length());
+			selectionEnd = text.indexOf(MockEditor.CURSOR, selectionStart);
 			if (selectionEnd>=0) {
-				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+SpringPropertiesEditorTestHarness.CURSOR.length());
+				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+MockEditor.CURSOR.length());
 			} else {
 				selectionEnd = selectionStart;
 			}
@@ -70,9 +71,9 @@ public class MockEditor {
 	 */
 	public String getText() {
 		String text = document.get();
-		text = text.substring(0, selectionEnd) + SpringPropertiesEditorTestHarness.CURSOR + text.substring(selectionEnd);
+		text = text.substring(0, selectionEnd) + MockEditor.CURSOR + text.substring(selectionEnd);
 		if (selectionStart<selectionEnd) {
-			text = text.substring(0,selectionStart) + SpringPropertiesEditorTestHarness.CURSOR + text.substring(selectionStart);
+			text = text.substring(0,selectionStart) + MockEditor.CURSOR + text.substring(selectionStart);
 		}
 		return text;
 	}

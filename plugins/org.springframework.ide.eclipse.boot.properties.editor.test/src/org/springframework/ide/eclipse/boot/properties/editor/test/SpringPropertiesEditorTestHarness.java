@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -32,9 +31,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -51,8 +48,6 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	public static final String INTEGER = Integer.class.getName();
 	public static final String BOOLEAN = Boolean.class.getName();
 	public static final String STRING = String.class.getName();
-	public static final String CURSOR = "<*>";
-
 	protected SpringPropertiesCompletionEngine engine;
 
 	@Override

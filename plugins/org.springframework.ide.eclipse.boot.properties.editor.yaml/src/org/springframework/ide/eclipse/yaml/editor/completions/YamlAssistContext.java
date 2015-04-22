@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
@@ -28,14 +26,17 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.*;
 
 /**
  * Represents a context relative to which we can provide content assistance.
  */
 public abstract class YamlAssistContext {
+
+	private boolean preferLowerCasedEnums = true; //make user configurable?
 
 // This may prove useful later but we don't need it for now
 	//	/**
@@ -99,7 +100,13 @@ public abstract class YamlAssistContext {
 		@Override
 		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
 			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
-			String[] values = typeUtil.getAllowedValues(type, EnumCaseMode.ALIASED);
+			EnumCaseMode enumCaseMode;
+			if (query.isEmpty()) {
+				enumCaseMode = preferLowerCasedEnums?LOWER_CASE:ORIGNAL;
+			} else {
+				enumCaseMode = ALIASED; // will match candidates from both lower and original based on what user typed
+			}
+			String[] values = typeUtil.getAllowedValues(type, enumCaseMode);
 			if (values!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				int sortingOrder = 0;

@@ -69,7 +69,7 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 @SuppressWarnings("restriction")
 public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvider, ICompletionEngine {
 
-	private boolean preferLowerCaseEnums = true;
+	private boolean preferLowerCaseEnums = true; //might make sense to make this user configurable
 
 	private static final boolean DEBUG = false;
 	public static void debug(String msg) {
