@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import java.util.Map;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * @author Kris De Volder
@@ -523,7 +519,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testContentAssistPropertyWithMapType() throws Exception {
 		data("foo.mapping", "java.util.Map<java.lang.String,java.lang.String>", null, "Nice little map");
 
-		//Try in-pace completion
+		//Try in-place completion
 		assertCompletion(
 				"map<*>"
 				,
@@ -550,7 +546,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testContentAssistPropertyWithArrayType() throws Exception {
 		data("foo.list", "java.util.List<java.lang.String>", null, "Nice little list");
 
-		//Try in-pace completion
+		//Try in-place completion
 		assertCompletion(
 				"lis<*>"
 				,
@@ -577,7 +573,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testContentAssistPropertyWithPojoType() throws Exception {
 		useProject(createPredefinedProject("demo-enum"));
 
-		//Try in-pace completion
+		//Try in-place completion
 		assertCompletion(
 				"foo.d<*>"
 				,
@@ -604,7 +600,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testContentAssistPropertyWithEnumType() throws Exception {
 		useProject(createPredefinedProject("demo-enum"));
 
-		//Try in-pace completion
+		//Try in-place completion
 		assertCompletion(
 				"foo.co<*>"
 				,
@@ -879,6 +875,98 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	}
 
+	public void testBooleanValueCompletion() throws Exception {
+		defaultTestData();
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled: <*>",
+				"liquibase:\n" +
+				"  enabled: true<*>",
+				"liquibase:\n" +
+				"  enabled: false<*>"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:<*>",
+				"liquibase:\n" +
+				"  enabled:true<*>",
+				"liquibase:\n" +
+				"  enabled:false<*>"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    <*>",
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    true<*>",
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    false<*>"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled: f<*>\n",
+				"liquibase:\n" +
+				"  enabled: false<*>\n"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled: t<*>\n",
+				"liquibase:\n" +
+				"  enabled: true<*>\n"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:f<*>\n",
+				"liquibase:\n" +
+				"  enabled:false<*>\n"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:t<*>\n",
+				"liquibase:\n" +
+				"  enabled:true<*>\n"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    f<*>\n",
+				"liquibase:\n" +
+				"  enabled:\n"+
+				"    false<*>\n"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    t<*>\n",
+				"liquibase:\n" +
+				"  enabled:\n"+
+				"    true<*>\n"
+		);
+
+		//one more... for special char like '-' in the name
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  check-change-log-location: t<*>",
+				"liquibase:\n" +
+				"  check-change-log-location: true<*>"
+		);
+	}
+
+
+
+
+	///////////////// crufts
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
 		if (levels==0) {
 			data(prefix, "java.lang.String", null, "Property "+prefix);

@@ -201,13 +201,8 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		return Collections.emptyList();
 	}
 
-	public ICompletionProposal getFirstCompletion(MockEditor editor)
-			throws Exception {
-		return getCompletions(editor)[0];
-	}
-
-	public ICompletionProposal[] getCompletions(MockEditor editor)
-			throws Exception {
+	@Override
+	public ICompletionProposal[] getCompletions(MockEditor editor) throws Exception {
 		Collection<ICompletionProposal> _completions = completionEngine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
 		Arrays.sort(completions, COMPARATOR);

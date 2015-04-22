@@ -35,11 +35,66 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesInformationControlCreator;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 
 public class PropertyCompletionFactory {
 
 	//TODO: move to a place where this can be shared with SpringProperties completion engine
 	// and use it instead of almost duplicated code.
+
+	private static class ValueProposal implements ICompletionProposal {
+
+		private String value;
+		private int sortingOrder;
+		private ProposalApplier applier;
+
+		public ValueProposal(String value, Type type, int sortingOrder, ProposalApplier applier) {
+			this.value = value;
+			this.sortingOrder = sortingOrder;
+			this.applier = applier;
+		}
+
+		@Override
+		public void apply(IDocument doc) {
+			try {
+				applier.apply(doc);
+			} catch (Exception e) {
+				BootActivator.log(e);
+			}
+		}
+
+		@Override
+		public Point getSelection(IDocument doc) {
+			try {
+				return applier.getSelection(doc);
+			} catch (Exception e) {
+				BootActivator.log(e);
+			}
+			return null;
+		}
+
+		@Override
+		public String getAdditionalProposalInfo() {
+			//TODO: display JavaDoc info for the type if available.
+			return null;
+		}
+
+		@Override
+		public String getDisplayString() {
+			return value;
+		}
+
+		@Override
+		public Image getImage() {
+			return null;
+		}
+
+		@Override
+		public IContextInformation getContextInformation() {
+			return null;
+		}
+
+	}
 
 	/**
 	 * A sorter suitable for sorting proposals created by this factory
@@ -56,11 +111,10 @@ public class PropertyCompletionFactory {
 				} else {
 					return Double.compare(s2, s1);
 				}
-//TODO: sorting value propoals
-//			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
-//				int order1 = ((ValueProposal)p1).sortingOrder;
-//				int order2 = ((ValueProposal)p2).sortingOrder;
-//				return Integer.valueOf(order1).compareTo(Integer.valueOf(order2));
+			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
+				int order1 = ((ValueProposal)p1).sortingOrder;
+				int order2 = ((ValueProposal)p2).sortingOrder;
+				return Integer.valueOf(order1).compareTo(Integer.valueOf(order2));
 			}
 			return 0;
 		}
@@ -70,6 +124,10 @@ public class PropertyCompletionFactory {
 
 	public ICompletionProposal property(IDocument doc, int offset, ProposalApplier applier, Match<PropertyInfo> prop) {
 		return new PropertyProposal(doc, offset, applier, prop);
+	}
+
+	public ICompletionProposal valueProposal(String value, Type type, int sortingOrder, ProposalApplier applier) {
+		return new ValueProposal(value, type, sortingOrder, applier);
 	}
 
 	private Styler JAVA_STRING_COLOR = new Styler() {
@@ -286,6 +344,5 @@ public class PropertyCompletionFactory {
 		}
 
 	}
-
 
 }

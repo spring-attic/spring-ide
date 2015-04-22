@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
@@ -37,16 +38,16 @@ import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
 public abstract class YamlAssistContext {
 
 // This may prove useful later but we don't need it for now
-//	/**
-//	 * AssistContextKind is an classification of the different kinds of
-//	 * syntactic context that CA can be invoked from.
-//	 */
-//	public static enum Kind {
-//		SKEY_KEY, /* CA called from a SKeyNode and node.isInKey(cursor)==true */
-//		SKEY_VALUE, /* CA called from a SKeyNode and node.isInKey(cursor)==false */
-//		SRAW /* CA called from a SRawNode */
-//	}
-//	protected final Kind contextKind;
+	//	/**
+	//	 * AssistContextKind is an classification of the different kinds of
+	//	 * syntactic context that CA can be invoked from.
+	//	 */
+	//	public static enum Kind {
+	//		SKEY_KEY, /* CA called from a SKeyNode and node.isInKey(cursor)==true */
+	//		SKEY_VALUE, /* CA called from a SKeyNode and node.isInKey(cursor)==false */
+	//		SRAW /* CA called from a SRawNode */
+	//	}
+	//	protected final Kind contextKind;
 
 	protected final YamlPath contextPath;
 	protected final TypeUtil typeUtil;
@@ -78,13 +79,54 @@ public abstract class YamlAssistContext {
 		}
 	}
 
-	private static class IndexContext extends YamlAssistContext {
+	private static PrefixFinder prefixfinder = new PrefixFinder() {
+		protected boolean isPrefixChar(char c) {
+			return !Character.isWhitespace(c) && c!=':';
+		}
+	};
 
-		private static PrefixFinder prefixfinder = new PrefixFinder() {
-			protected boolean isPrefixChar(char c) {
-				return !Character.isWhitespace(c);
+	public class TypeContext extends YamlAssistContext {
+
+		private PropertyCompletionFactory completionFactory;
+		private Type type;
+
+		public TypeContext(YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+			super(contextPath, typeUtil);
+			this.completionFactory = completionFactory;
+			this.type = type;
+		}
+
+		@Override
+		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
+			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
+			String[] values = typeUtil.getAllowedValues(type, EnumCaseMode.ALIASED);
+			if (values!=null) {
+				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
+				int sortingOrder = 0;
+				for (String value : values) {
+					if (value.startsWith(query)) {
+						DocumentEdits edits = new DocumentEdits(doc.getDocument());
+						edits.delete(offset-query.length(), offset);
+						edits.insert(offset, value);
+						completions.add(completionFactory.valueProposal(value, type, sortingOrder++, edits));
+					}
+				}
+				return completions;
 			}
-		};
+			return Collections.emptyList();
+		}
+
+		@Override
+		protected YamlAssistContext navigate(YamlPathSegment s) {
+			//TODO: implement
+			return null;
+		}
+
+	}
+
+
+
+	private static class IndexContext extends YamlAssistContext {
 
 		private IndexNavigator indexNav;
 		PropertyCompletionFactory completionFactory;
@@ -158,7 +200,8 @@ public abstract class YamlAssistContext {
 				if (subIndex.getExtensionCandidate()!=null) {
 					return new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);
 				} else if (subIndex.getExactMatch()!=null) {
-					//TODO: transition to a 'TypeContext' for the type the property is bound to
+					PropertyInfo prop = subIndex.getExactMatch();
+					return new TypeContext(contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil);
 				}
 			}
 			//Unsuported navigation => no context for assist
@@ -169,7 +212,6 @@ public abstract class YamlAssistContext {
 		public String toString() {
 			return "YamlAssistIndexContext("+indexNav+")";
 		}
-
 	}
 
 	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {

@@ -89,11 +89,6 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		return null;
 	}
 
-	public ICompletionProposal getFirstCompletion(MockEditor editor)
-			throws BadLocationException {
-		return getCompletions(editor)[0];
-	}
-
 	public ICompletionProposal[] getCompletions(MockEditor editor)
 			throws BadLocationException {
 		Collection<ICompletionProposal> _completions = engine.getCompletions(editor.document, editor.selectionStart);
@@ -119,32 +114,21 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	}
 
 	/**
-	 * Simulates applying the first completion to a text buffer and checks the result.
-	 */
-	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
-		ICompletionProposal completion = getFirstCompletion(editor);
-		editor.apply(completion);
-		assertEquals(expectTextAfter, editor.getText());
-	}
-
-
-	/**
 	 * Like 'assertCompletionsBasic' but places the 'textBefore' in a context
 	 * with other text around it... trying several different variations of
 	 * text before and after the 'interesting' line.
 	 */
-	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
+	public void assertCompletionsVariations(String textBefore, String... expectTextAfter) throws Exception {
 		//Variation 1: by itself
-		assertCompletionsBasic(textBefore, expectTextAfter);
+		assertCompletions(textBefore, expectTextAfter);
 		//Variation 2: comment text before and after
-		assertCompletionsBasic("#comment\n"+textBefore+"\n#comment", wrap("#comment\n", expectTextAfter, "\n#comment"));
+		assertCompletions("#comment\n"+textBefore+"\n#comment", wrap("#comment\n", expectTextAfter, "\n#comment"));
 		//Variation 3: empty lines of text before and after
-		assertCompletionsBasic("\n"+textBefore+"\n\n", wrap("\n", expectTextAfter, "\n\n"));
+		assertCompletions("\n"+textBefore+"\n\n", wrap("\n", expectTextAfter, "\n\n"));
 		//Variation 3.b: empty lines of text before and single newline after
-		assertCompletionsBasic("\n"+textBefore+"\n", wrap("\n", expectTextAfter, "\n"));
+		assertCompletions("\n"+textBefore+"\n", wrap("\n", expectTextAfter, "\n"));
 		//Variation 4: property assignment before and after
-		assertCompletionsBasic("foo=bar\n"+textBefore+"\nnol=brol", wrap("foo=bar\n", expectTextAfter, "\nnol=brol"));
+		assertCompletions("foo=bar\n"+textBefore+"\nnol=brol", wrap("foo=bar\n", expectTextAfter, "\nnol=brol"));
 	}
 
 	private String[] wrap(String before, String[] middle, String after) {
@@ -154,39 +138,6 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 			result[i] =  before+middle[i]+after;
 		}
 		return result;
-	}
-
-	/**
-	 * Checks that applying completions to a given 'textBefore' editor content produces the
-	 * expected results.
-	 */
-	public void assertCompletionsBasic(String textBefore, String... expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
-		StringBuilder expect = new StringBuilder();
-		StringBuilder actual = new StringBuilder();
-		for (String after : expectTextAfter) {
-			expect.append(after);
-			expect.append("\n-------------------\n");
-		}
-
-		ICompletionProposal[] completions = getCompletions(editor);
-		for (int i = 0; i < completions.length; i++) {
-			editor = new MockEditor(textBefore);
-			editor.apply(completions[i]);
-			actual.append(editor.getText());
-			actual.append("\n-------------------\n");
-		}
-		assertEquals(expect.toString(), actual.toString());
-	}
-
-	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
-		MockEditor editor = new MockEditor(editorText);
-		ICompletionProposal[] completions = getCompletions(editor);
-		String[] actualLabels = new String[completions.length];
-		for (int i = 0; i < actualLabels.length; i++) {
-			actualLabels[i] = completions[i].getDisplayString();
-		}
-		assertElements(actualLabels, completionsLabels);
 	}
 
 	/**

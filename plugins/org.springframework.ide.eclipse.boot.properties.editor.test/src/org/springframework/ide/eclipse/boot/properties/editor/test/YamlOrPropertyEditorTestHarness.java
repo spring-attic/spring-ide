@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
@@ -585,5 +586,54 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		}
 	}
 
+	public ICompletionProposal getFirstCompletion(MockEditor editor) throws Exception {
+		return getCompletions(editor)[0];
+	}
+
+	public abstract ICompletionProposal[] getCompletions(MockEditor editor) throws Exception;
+
+	/**
+	 * Simulates applying the first completion to a text buffer and checks the result.
+	 */
+	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
+		MockEditor editor = new MockEditor(textBefore);
+		ICompletionProposal completion = getFirstCompletion(editor);
+		editor.apply(completion);
+		assertEquals(expectTextAfter, editor.getText());
+	}
+
+	/**
+	 * Checks that applying completions to a given 'textBefore' editor content produces the
+	 * expected results.
+	 */
+	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
+		MockEditor editor = new MockEditor(textBefore);
+		StringBuilder expect = new StringBuilder();
+		StringBuilder actual = new StringBuilder();
+		for (String after : expectTextAfter) {
+			expect.append(after);
+			expect.append("\n-------------------\n");
+		}
+	
+		ICompletionProposal[] completions = getCompletions(editor);
+		for (int i = 0; i < completions.length; i++) {
+			editor = new MockEditor(textBefore);
+			editor.apply(completions[i]);
+			actual.append(editor.getText());
+			actual.append("\n-------------------\n");
+		}
+		assertEquals(expect.toString(), actual.toString());
+	}
+
+	public void assertCompletionsDisplayString(String editorText, String... completionsLabels)
+			throws Exception {
+				MockEditor editor = new MockEditor(editorText);
+				ICompletionProposal[] completions = getCompletions(editor);
+				String[] actualLabels = new String[completions.length];
+				for (int i = 0; i < actualLabels.length; i++) {
+					actualLabels[i] = completions[i].getDisplayString();
+				}
+				assertElements(actualLabels, completionsLabels);
+			}
 
 }
