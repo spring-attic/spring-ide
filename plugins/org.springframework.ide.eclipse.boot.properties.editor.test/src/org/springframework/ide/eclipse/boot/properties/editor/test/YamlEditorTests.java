@@ -16,6 +16,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * @author Kris De Volder
@@ -640,10 +643,252 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testCompletionsFromDeeplyNestedNode() throws Exception {
+		String[] names = {"foo", "nested", "bar"};
+		int levels = 4;
+		generateNestedProperties(levels, names, "");
 
-	//TODO: invoke CA from nested deeply nested context
+		assertCompletionCount(81, // 3^4
+				"<*>"
+		);
+
+		assertCompletionCount(27, // 3^3
+				"#comment\n" +
+				"foo:\n" +
+				"  <*>"
+		);
+
+		assertCompletionCount( 9, // 3^2
+				"#comment\n" +
+				"foo:\n" +
+				"  bar: <*>"
+		);
+
+		assertCompletionCount( 3,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"      <*>"
+		);
+
+		assertCompletionCount( 9,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"    <*>"
+		);
+
+		assertCompletionCount(27,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"  <*>"
+		);
+
+		assertCompletionCount(81,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"<*>"
+		);
+
+
+		assertCompletion(
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"      <*>"
+				,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"      bar: <*>"
+		);
+
+		assertCompletion(
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"    <*>"
+				,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"    bar:\n" +
+				"      bar: <*>"
+		);
+
+		assertCompletion(
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"  <*>"
+				,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"    bar:\n" +
+				"      bar: <*>\n" +
+				"  "
+		);
+
+		assertCompletion(
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"<*>"
+				,
+				"#comment\n" +
+				"foo:\n" +
+				"  bar:\n"+
+				"    nested:\n" +
+				"bar:\n" +
+				"  bar:\n" +
+				"    bar:\n" +
+				"      bar: <*>"
+		);
+	}
 
 	//TODO: insert CA suggestion into deeply nested node
+	public void testInsertCompletionIntoDeeplyNestedNode() throws Exception {
+		String[] names = {"foo", "nested", "bar"};
+		int levels = 4;
+		generateNestedProperties(levels, names, "");
+
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"bar.foo.nested.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"bar:\n" +
+				"  foo:\n" +
+				"    nested:\n" +
+				"      bar: <*>"
+		);
+
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"other:\n" +
+				"foo.foo.nested.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"  foo:\n" +
+				"    nested:\n" +
+				"      bar: <*>\n" +
+				"other:\n"
+		);
+
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"foo.foo.nested.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"  foo:\n" +
+				"    nested:\n" +
+				"      bar: <*>"
+		);
+
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"other:\n" +
+				"foo.nested.nested.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"    nested:\n" +
+				"      bar: <*>\n"+
+				"other:\n"
+		);
+
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"foo.nested.nested.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"    nested:\n" +
+				"      bar: <*>\n"
+		);
+
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"other:\n" +
+				"foo.nested.bar.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"      bar: <*>\n" +
+				"other:\n"
+		);
+
+	}
+
+	private void assertCompletionCount(int expected, String editorText) throws Exception {
+		YamlEditor editor = new YamlEditor(editorText);
+		assertEquals(expected, getCompletions(editor).length);
+	}
+
+	private void generateNestedProperties(int levels, String[] names, String prefix) {
+		if (levels==0) {
+			data(prefix, "java.lang.String", null, "Property "+prefix);
+		} else if (levels > 0) {
+			for (int i = 0; i < names.length; i++) {
+				generateNestedProperties(levels-1, names, join(prefix, names[i]));
+			}
+		}
+	}
+
+	private String join(String prefix, String string) {
+		if (StringUtil.hasText(prefix)) {
+			return prefix +"." + string;
+		}
+		return string;
+	}
+
 
 //		assertCompletionsDisplayString(
 //				"#This is a commment, and it shouldn't be erased\n" +
@@ -665,7 +910,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		String actual = editor.getText();
-		assertEquals(after, actual);
+		assertEquals(trimEnd(after), trimEnd(actual));
 	}
 
 }

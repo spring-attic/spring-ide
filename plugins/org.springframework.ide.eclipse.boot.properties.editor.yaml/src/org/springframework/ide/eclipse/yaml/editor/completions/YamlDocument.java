@@ -152,4 +152,13 @@ public class YamlDocument {
 		return textBetween(l.getOffset(), offset);
 	}
 
+	/**
+	 * Fetch the text of the line at a given offset (i.e. all text extending from
+	 * offset to the beginning and end of line)
+	 */
+	public String getLineTextAtOffset(int offset) throws Exception {
+		IRegion l = doc.getLineInformationOfOffset(offset);
+		return textBetween(l.getOffset(), l.getOffset()+l.getLength());
+	}
+
 }

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.springframework.ide.eclipse.yaml.editor.completions.DocumentEdits;
 
 /**
@@ -21,12 +22,17 @@ public class DocumentEditsTest extends TestCase {
 
 	class TestSubject {
 		private MockEditor editor;
-		private DocumentEdits edits = new DocumentEdits();
+		private DocumentEdits edits;
 		private String orgText;
 
 		public TestSubject(String contents) {
 			this.orgText = contents;
-			this.editor = new MockEditor(contents);
+			reset();
+		}
+
+		public void reset() {
+			this.editor = new MockEditor(orgText);
+			this.edits = new DocumentEdits(editor.document);
 		}
 
 		public void del(String snippet) {
@@ -46,6 +52,17 @@ public class DocumentEditsTest extends TestCase {
 			assertTrue(offset>=0);
 			edits.insert(offset, insert);
 		}
+
+		public void delLineAt(String snippet) throws Exception {
+			int offset = orgText.indexOf(snippet);
+			assertTrue(offset>=0);
+			edits.deleteLineBackwardAtOffset(offset);
+		}
+
+		public void delLine(int i) throws Exception {
+			edits.deleteLineBackward(0);
+		}
+
 	}
 
 	public void testDeletes() throws Exception {
@@ -103,6 +120,45 @@ public class DocumentEditsTest extends TestCase {
 		it.insBefore("fox", "A rabbit");//"A rabbit jumps ..."
 
 		it.expect("A rabbit<*> jumps over the dog!");
+	}
+
+	public void testDeleteLine() throws Exception {
+		TestSubject it;
+
+		it = new TestSubject(
+				"Line 0\n" +
+				"Line 1\n" +
+				"Line 2"
+		);
+
+		it.delLineAt("0");
+		it.expect(
+				"<*>Line 1\n" +
+				"Line 2"
+		);
+
+		it.reset();
+		it.delLineAt("1");
+		it.expect(
+				"Line 0<*>\n" +
+				"Line 2"
+		);
+
+		it.reset();
+		it.delLineAt("2");
+		it.expect(
+				"Line 0\n" +
+				"Line 1<*>"
+		);
+
+		it = new TestSubject("Line 0"); //special case: no newlines in document
+		it.delLineAt("0");
+		it.expect("<*>");
+
+		it = new TestSubject("");
+		it.delLine(0);
+		it.expect("<*>");
+
 	}
 
 }

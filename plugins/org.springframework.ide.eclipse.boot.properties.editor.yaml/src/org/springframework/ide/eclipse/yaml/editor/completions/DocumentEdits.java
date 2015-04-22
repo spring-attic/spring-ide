@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.text.edits.TextEdit;
 
@@ -223,8 +224,10 @@ public class DocumentEdits implements ProposalApplier {
 	}
 
 	private ArrayList<Edit> edits = new ArrayList<Edit>();
+	private IDocument doc;
 
-	public DocumentEdits() {
+	public DocumentEdits(IDocument doc) {
+		this.doc = doc;
 	}
 
 	public void delete(int start, int end) {
@@ -273,6 +276,44 @@ public class DocumentEdits implements ProposalApplier {
 
 	public void moveCursorTo(int newCursor) {
 		insert(newCursor, "");
+	}
+
+	public void deleteLineBackwardAtOffset(int offset) throws Exception {
+		int line = doc.getLineOfOffset(offset);
+		deleteLineBackward(line);
+	}
+
+	/**
+	 * Deletes the line of text with given line number, including either the following or
+	 * preceding newline. If there is a choice between the preceding or following newline,
+	 * the preceding newline is deleted. This will leave the cursor at the end of
+	 * the preceding line.
+	 * <p>
+	 * Note: a similar operation 'deleteLineForward' could be implemented prefering to
+	 * delete the following newline. This would be equivalent except that it will leave the
+	 * cursor at the start of the following line.
+	 */
+	public void deleteLineBackward(int lineNumber) throws BadLocationException {
+		IRegion line = doc.getLineInformation(lineNumber);
+		int startOfDeletion;
+		int endOfDeletion;
+		if (lineNumber>0) {
+			IRegion previousLine = doc.getLineInformation(lineNumber-1);
+			startOfDeletion = endOf(previousLine);
+			endOfDeletion = endOf(line);
+		} else if (lineNumber<doc.getNumberOfLines()-1) {
+			IRegion nextLine = doc.getLineInformation(lineNumber+1);
+			startOfDeletion = line.getOffset();
+			endOfDeletion = nextLine.getOffset();
+		} else {
+			startOfDeletion = line.getOffset();
+			endOfDeletion = endOf(line);
+		}
+		delete(startOfDeletion, endOfDeletion);
+	}
+
+	private int endOf(IRegion line) {
+		return line.getOffset()+line.getLength();
 	}
 
 }

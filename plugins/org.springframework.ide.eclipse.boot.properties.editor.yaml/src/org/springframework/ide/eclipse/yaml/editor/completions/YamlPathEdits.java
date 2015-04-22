@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
-import org.eclipse.jface.viewers.EditingSupport;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
@@ -32,6 +31,7 @@ public class YamlPathEdits extends DocumentEdits {
 	private IndentUtil indentUtil;
 
 	public YamlPathEdits(YamlDocument doc) {
+		super(doc.getDocument());
 		this.doc = doc;
 		this.indentUtil = new IndentUtil(doc);
 	}
@@ -112,7 +112,7 @@ public class YamlPathEdits extends DocumentEdits {
 		if (insertAfter==null) {
 			insertAfter = parent;
 		}
-		return insertAfter.getNodeEnd();
+		return insertAfter.getTreeEnd();
 	}
 
 	private SKeyNode findChildForKey(SChildBearingNode node, String key) throws Exception {

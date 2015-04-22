@@ -139,6 +139,10 @@ public abstract class YamlAssistContext {
 					if (existingNode==null) {
 						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendText);
 					} else {
+						String wholeLine = doc.getLineTextAtOffset(queryOffset);
+						if (wholeLine.trim().equals(query.trim())) {
+							edits.deleteLineBackwardAtOffset(queryOffset);
+						}
 						edits.createPath(YamlPath.fromProperty(match.data.getId()), appendText);
 					}
 					return edits;

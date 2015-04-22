@@ -28,6 +28,13 @@ public class StringUtil {
 		return null;
 	}
 
+	public static String trimEnd(String s) {
+		if (s!=null) {
+			s.replaceAll("\\s+\\z", "");
+		}
+		return null;
+	}
+
 	public static int commonPrefixLength(String s, String t) {
 		int shortestStringLen = Math.min(s.length(), t.length());
 		for (int i = 0; i < shortestStringLen; i++) {
