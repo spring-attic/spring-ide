@@ -17,7 +17,7 @@ import org.springframework.ide.eclipse.yaml.editor.completions.DocumentEdits;
 /**
  * @author Kris De Volder
  */
-public class DocumentModifierTest extends TestCase {
+public class DocumentEditsTest extends TestCase {
 
 	class TestSubject {
 		private MockEditor editor;

@@ -27,7 +27,7 @@ public class AllPropertiesFileEditorTests {
 		suite.addTestSuite(TypeParserTest.class);
 
 		suite.addTestSuite(YamlASTTests.class);
-		suite.addTestSuite(DocumentModifierTest.class);
+		suite.addTestSuite(DocumentEditsTest.class);
 		suite.addTestSuite(YamlStructureParserTest.class);
 		suite.addTestSuite(IndexNavigatorTest.class);
 		suite.addTestSuite(YamlEditorTests.class);
