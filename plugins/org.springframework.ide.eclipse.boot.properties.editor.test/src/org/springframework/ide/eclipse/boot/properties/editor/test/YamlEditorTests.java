@@ -15,7 +15,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
@@ -760,7 +759,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	//TODO: insert CA suggestion into deeply nested node
 	public void testInsertCompletionIntoDeeplyNestedNode() throws Exception {
 		String[] names = {"foo", "nested", "bar"};
 		int levels = 4;
@@ -865,11 +863,20 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"other:\n"
 		);
 
-	}
+		assertCompletion(
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"foo.nested.bar.b<*>"
+				,
+				"foo:\n" +
+				"  nested:\n" +
+				"    bar:\n" +
+				"      foo:\n" +
+				"      bar: <*>\n"
+		);
 
-	private void assertCompletionCount(int expected, String editorText) throws Exception {
-		YamlEditor editor = new YamlEditor(editorText);
-		assertEquals(expected, getCompletions(editor).length);
 	}
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
@@ -899,18 +906,5 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 //				"address"
 //		);
 
-
-	private void assertNoCompletions(String text) throws Exception {
-		MockEditor editor = new MockEditor(text);
-		assertEquals(0, getCompletions(editor).length);
-	}
-
-	private void assertCompletion(String before, String after) throws Exception {
-		MockEditor editor = new MockEditor(before);
-		ICompletionProposal completion = getFirstCompletion(editor);
-		editor.apply(completion);
-		String actual = editor.getText();
-		assertEquals(trimEnd(after), trimEnd(actual));
-	}
 
 }

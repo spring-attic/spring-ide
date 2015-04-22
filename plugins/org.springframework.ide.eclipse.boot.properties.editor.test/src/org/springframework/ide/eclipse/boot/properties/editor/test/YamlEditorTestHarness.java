@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -226,6 +228,25 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 			actualLabels[i] = completions[i].getDisplayString();
 		}
 		assertElements(actualLabels, completionsLabels);
+	}
+
+	public void assertCompletionCount(int expected, String editorText)
+			throws Exception {
+				YamlEditor editor = new YamlEditor(editorText);
+				assertEquals(expected, getCompletions(editor).length);
+			}
+
+	public void assertNoCompletions(String text) throws Exception {
+		MockEditor editor = new MockEditor(text);
+		assertEquals(0, getCompletions(editor).length);
+	}
+
+	public void assertCompletion(String before, String after) throws Exception {
+		MockEditor editor = new MockEditor(before);
+		ICompletionProposal completion = getFirstCompletion(editor);
+		editor.apply(completion);
+		String actual = editor.getText();
+		assertEquals(trimEnd(after), trimEnd(actual));
 	}
 
 }
