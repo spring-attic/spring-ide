@@ -271,4 +271,8 @@ public class DocumentEdits implements ProposalApplier {
 		return buf.toString();
 	}
 
+	public void moveCursorTo(int newCursor) {
+		insert(newCursor, "");
+	}
+
 }

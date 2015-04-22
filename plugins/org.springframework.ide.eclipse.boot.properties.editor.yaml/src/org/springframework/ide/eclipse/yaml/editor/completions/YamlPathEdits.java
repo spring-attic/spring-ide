@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
+import org.eclipse.jface.viewers.EditingSupport;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
@@ -54,6 +56,22 @@ public class YamlPathEdits extends DocumentEdits {
 					createNewPath(node, path, appendText);
 				} else {
 					createPath(existing, path.tail(), appendText);
+				}
+			}
+		} else {
+			//whole path already exists. Just try to move cursor somewhere
+			// sensible in the existing tail-end-node of the path.
+			SNode child = node.getFirstRealChild();
+			if (child!=null) {
+				moveCursorTo(child.getStart()+child.getIndent());
+			} else if (node.getNodeType()==SNodeType.KEY) {
+				SKeyNode keyNode = (SKeyNode) node;
+				int colonOffset = keyNode.getColonOffset();
+				char c = doc.getChar(colonOffset+1);
+				if (c==' ') {
+					moveCursorTo(colonOffset+2); //cursor after the ": "
+				} else {
+					moveCursorTo(colonOffset+1); //cursor after the ":"
 				}
 			}
 		}

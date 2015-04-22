@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.yaml.editor.ast.path;
 
 import org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlPath;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;

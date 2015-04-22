@@ -8,14 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.yaml.editor.completions;
+package org.springframework.ide.eclipse.yaml.editor.ast.path;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.ide.eclipse.yaml.editor.ast.path.NodeNavigator;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlNavigable;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
@@ -125,7 +124,7 @@ public class YamlPath implements NodeNavigator {
 			if (node==null) {
 				return null;
 			}
-			node = startNode.traverse(s);
+			node = node.traverse(s);
 		}
 		return node;
 	}

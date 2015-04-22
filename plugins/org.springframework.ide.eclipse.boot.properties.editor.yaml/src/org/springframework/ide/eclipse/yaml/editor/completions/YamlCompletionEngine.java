@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
@@ -82,7 +83,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			if (keyNode.isInKey(offset)) {
 				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory, typeUtil);
 			} else {
-				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory, typeUtil);
+				return YamlAssistContext.forPath(getContextPath(keyNode), index, completionFactory, typeUtil);
 			}
 		} else if (node.getNodeType()==SNodeType.RAW) {
 			//Treat raw node as a 'key node'. This is basically assuming that is misclasified

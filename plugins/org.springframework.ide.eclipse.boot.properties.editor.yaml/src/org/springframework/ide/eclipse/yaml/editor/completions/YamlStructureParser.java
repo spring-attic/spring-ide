@@ -301,14 +301,23 @@ public class YamlStructureParser {
 			return null;
 		}
 
-		private SNode getChildWithKey(String key) throws Exception {
+		public SKeyNode getChildWithKey(String key) throws Exception {
 			//TODO: index based on keys? May not be worth it for small number of keys
 			for (SNode node: getChildren()) {
 				if (node.getNodeType()==SNodeType.KEY) {
 					String nodeKey = ((SKeyNode)node).getKey();
 					if (key.equals(nodeKey)) {
-						return node;
+						return (SKeyNode) node;
 					}
+				}
+			}
+			return null;
+		}
+
+		public SNode getFirstRealChild() {
+			for (SNode c : getChildren()) {
+				if (c.getIndent()>=0) {
+					return c;
 				}
 			}
 			return null;
@@ -409,12 +418,12 @@ public class YamlStructureParser {
 	public class SKeyNode extends SChildBearingNode {
 
 		private YamlLine line;
-		private int colonOffset;
+		private int relativeColonOffset;
 
 		public SKeyNode(SChildBearingNode parent, YamlLine line) throws Exception {
 			super(parent, line.getStart(), line.getEnd());
 			this.line = line;
-			this.colonOffset = line.getText().indexOf(':');
+			this.relativeColonOffset = line.getText().indexOf(':');
 		}
 
 		@Override
@@ -435,12 +444,20 @@ public class YamlStructureParser {
 		public String getKey() throws Exception {
 			String lineText = line.getText();
 			int start = getIndent();
-			int end = colonOffset;
+			int end = relativeColonOffset;
 			return lineText.substring(start, end);
 		}
 
+		/**
+		 * Get the offset of the ':' character that separates the 'key' from the 'value' area.
+		 * @return Absolute offset (from beginning of document).
+		 */
+		public int getColonOffset() {
+			return getStart()+relativeColonOffset;
+		}
+
 		public boolean isInKey(int offset) throws Exception {
-			return offset>=line.getStart() && offset < colonOffset;
+			return offset>=line.getStart() && offset < getColonOffset();
 		}
 
 	}

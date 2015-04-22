@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import java.util.ArrayList;
+
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.AtScalarKey;
 
 
 public class YamlStructureParserTest extends YamlEditorTestHarness {
@@ -164,7 +169,6 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    moonstone\n"
 		);
 		SRootNode root = editor.parseStructure();
-
 		assertFind(editor, root, "world:", 					0);
 		assertFind(editor, root, "  europe:", 				0, 0);
 		assertFind(editor, root, "    france:",				0, 0, 0);
@@ -202,11 +206,95 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertKey(editor, root, "    montreal: poutine",	"montreal");
 	}
 
+	public void testTraverse() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"world:\n" +
+				"  europe:\n" +
+				"    france:\n" +
+				"      cheese\n" +
+				"    belgium:\n" +
+				"    beer\n" + //At same level as key, technically this is a syntax error but we tolerate it
+				"  canada:\n" +
+				"    montreal: poutine\n" +
+				"    vancouver:\n" +
+				"      salmon\n" +
+				"moon:\n" +
+				"  moonbase-alfa:\n" +
+				"    moonstone\n"
+		);
+
+
+		SRootNode root = editor.parseStructure();
+		YamlPath pathToFrance = pathWithKeys(
+				"world", "europe", "france"
+		);
+		assertEquals(
+				"KEY(4): france:\n"+
+				"  RAW(6): cheese\n",
+				pathToFrance.traverse((SNode)root).toString());
+
+		assertNull(pathWithKeys("world", "europe", "bogus").traverse((SNode)root));
+	}
+
+	public void testGetFirstRealChild() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"no-children:\n" +
+				"unreal-children:\n" +
+				"  #Unreal\n" +
+				"\n" +
+				"  #comment only\n" +
+				"real-child:\n" +
+				"  abc\n" +
+				"mixed-children:\n" +
+				"\n" +
+				"#comment\n" +
+				"  def"
+		);
+
+		assertFirstRealChild(editor, "no-children", null);
+		assertFirstRealChild(editor, "unreal-children", null);
+		assertFirstRealChild(editor, "real-child", "abc");
+		assertFirstRealChild(editor, "mixed-children", "def");
+
+	}
+
+	private void assertFirstRealChild(YamlEditor editor, String testNodeName, String expectedNodeSnippet) throws Exception {
+		SRootNode root = editor.parseStructure();
+		SKeyNode testNode = root.getChildWithKey(testNodeName);
+		assertNotNull(testNode);
+		SNode expected = null;
+		if (expectedNodeSnippet!=null) {
+			int offset = editor.getRawText().indexOf(expectedNodeSnippet);
+			expected = root.find(offset);
+			assertTrue(editor.textUnder(expected).contains(expectedNodeSnippet));
+		}
+
+		assertEquals(expected, testNode.getFirstRealChild());
+	}
+
+	private YamlPath pathWithKeys(String... keys) {
+		ArrayList<YamlPathSegment> segments = new ArrayList<YamlPathSegment>();
+		for (String key : keys) {
+			segments.add(new AtScalarKey(key));
+		}
+		return new YamlPath(segments);
+	}
 
 	private void assertKey(YamlEditor editor, SRootNode root, String nodeText, String expectedKey) throws Exception {
 		int start = editor.getText().indexOf(nodeText);
 		SKeyNode node = (SKeyNode) root.find(start);
-		assertEquals(expectedKey, node.getKey());
+		String key = node.getKey();
+		assertEquals(expectedKey, key);
+
+		//test the key range as well
+		int startOfKeyRange = node.getStart();
+		int keyRangeLen = node.getIndent()+key.length();
+		// char indices in a range are actually from 'start' of the range to 'start+len-1'
+		int lastKeyChar = startOfKeyRange + keyRangeLen - 1;
+		assertTrue(node.isInKey(startOfKeyRange));
+		assertFalse(node.isInKey(startOfKeyRange-1));
+		assertTrue(node.isInKey(lastKeyChar));
+		assertFalse(node.isInKey(lastKeyChar+1));
 	}
 
 	private void assertFind(YamlEditor editor, SRootNode root, String snippet, int... expectPath) {

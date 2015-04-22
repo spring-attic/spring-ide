@@ -388,6 +388,15 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"server: \n" +
 				"  port: <*>"
 		);
+
+		assertCompletion(
+				"#something before this stuff\n" +
+				"server: <*>"
+				,
+				"#something before this stuff\n" +
+				"server: \n" +
+				"  port: <*>"
+		);
 	}
 
 	public void testContentAssistInsertCompletionElsewhere() throws Exception {
@@ -427,9 +436,45 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	public void DISABLED_testContentAssistInsertCompletionElsewhereThatAlreadyExists() throws Exception {
+	public void testContentAssistInsertCompletionElsewhereInEmptyParent() throws Exception {
 		data("server.port", "java.lang.Integer", null, "Server http port");
 		data("server.address", "String", "localhost", "Server host address");
+
+		assertCompletion(
+				"#comment\n" +
+				"server:\n" +
+				"something:\n" +
+				"  more\n" +
+				"po<*>"
+				,
+				"#comment\n" +
+				"server:\n" +
+				"  port: <*>\n" +
+				"something:\n" +
+				"  more\n"
+		);
+	}
+
+	public void testContentAssistInsertCompletionElsewhereThatAlreadyExists() throws Exception {
+		data("server.port", "java.lang.Integer", null, "Server http port");
+		data("server.address", "String", "localhost", "Server host address");
+
+		//inserting something that already exists should just move the cursor to existing node
+
+		assertCompletion(
+				"server:\n"+
+				"  port:\n" +
+				"    8888\n"+
+				"  address: localhost\n"+
+				"something: nice\n"+
+				"po<*>"
+				,
+				"server:\n"+
+				"  port:\n"+
+				"    <*>8888\n" +
+				"  address: localhost\n"+
+				"something: nice\n"
+		);
 
 		assertCompletion(
 				"server:\n"+
@@ -443,6 +488,33 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"  address: localhost\n"+
 				"something: nice\n"
 		);
+
+		assertCompletion(
+				"server:\n"+
+				"  port:\n"+
+				"  address: localhost\n"+
+				"something: nice\n"+
+				"po<*>"
+				,
+				"server:\n"+
+				"  port:<*>\n" +
+				"  address: localhost\n"+
+				"something: nice\n"
+		);
+
+		assertCompletion(
+				"server:\n"+
+				"  port:8888\n"+
+				"  address: localhost\n"+
+				"something: nice\n"+
+				"po<*>"
+				,
+				"server:\n"+
+				"  port:<*>8888\n" +
+				"  address: localhost\n"+
+				"something: nice\n"
+		);
+
 	}
 
 
