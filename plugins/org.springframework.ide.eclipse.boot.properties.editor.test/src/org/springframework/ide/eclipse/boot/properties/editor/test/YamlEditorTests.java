@@ -641,6 +641,10 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 
+	//TODO: invoke CA from nested deeply nested context
+
+	//TODO: insert CA suggestion into deeply nested node
+
 //		assertCompletionsDisplayString(
 //				"#This is a commment, and it shouldn't be erased\n" +
 //				"server:\n" +
@@ -650,13 +654,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 //				"address"
 //		);
 
-		//TODO: content assist cases
-		/*
-		 foo:
-		   <*>
-		 more
-
-		 */
 
 	private void assertNoCompletions(String text) throws Exception {
 		MockEditor editor = new MockEditor(text);
