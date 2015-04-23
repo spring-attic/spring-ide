@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012- 2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.roo.shell.eclipse;
 
@@ -37,6 +38,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * original. All changes are noted with a
  * "**** CHANGE FROM ORIGINAL FELIX VERSION ****" comment.
  * @author Christian Dupuis
+ * @author Juan Carlos García
  * @since 1.1.0
  */
 public class Main {
