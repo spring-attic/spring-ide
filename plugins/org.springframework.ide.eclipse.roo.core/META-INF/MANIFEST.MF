@@ -40,7 +40,9 @@ Bundle-ClassPath: .,
  lib/org.apache.felix.framework-4.6.1.jar,
  lib/org.springframework.roo.felix-2.0.0.M1.jar,
  lib/org.springframework.roo.support-2.0.0.M1.jar,
- lib/org.springframework.roo.url.stream-2.0.0.M1.jar
+ lib/org.springframework.roo.url.stream-2.0.0.M1.jar,
+ lib/commons-io-2.4.jar,
+ lib/commons-lang3-3.3.2.jar
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,
