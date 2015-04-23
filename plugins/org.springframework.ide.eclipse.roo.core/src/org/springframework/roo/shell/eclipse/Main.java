@@ -217,7 +217,7 @@ public class Main {
 		configProps.put("org.osgi.framework.system.packages.extra", "org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins");
 		configProps.put("roobot.index.dowload", "false");
 		
-		if (shouldCleanCache(cacheDir)) {
+		if (shouldCleanCache(cacheDir, rooVersion)) {
 			configProps.put("org.osgi.framework.storage.clean", "onFirstInit");
 		}
 		
@@ -267,12 +267,24 @@ public class Main {
 //		return null;
 	}
 
-	private boolean shouldCleanCache(String cacheDir) throws FileNotFoundException {
+	private boolean shouldCleanCache(String cacheDir, String rooVersion) throws FileNotFoundException {
 		Properties props = new Properties();
+		
+		// cache directory to Spring Roo 2.0+ versions
+		String cacheName = "sts-cache";
+		
+		// cache directory to Spring Roo 1.x versions
+		if(rooVersion.startsWith("1")){
+			int index = cacheDir.lastIndexOf("sts-cache");
+			if (index > -1) {
+				cacheName = cacheDir.subSequence(index, cacheDir.length()).toString();
+			} else {
+				cacheName = "sts-cache";
+			}
+		}
 		
 		// check version
 		// store file in cache directories parent since the cache will get deleted
-		String cacheName = "sts-cache";
 		File versionFile = new File(new File(cacheDir).getParentFile(), "." + cacheName + "-version");
 		if (versionFile.exists()) {
 			try {

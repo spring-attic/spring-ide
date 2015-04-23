@@ -163,9 +163,18 @@ public class Bootstrap {
 		try {
 			this.appender = appender;
 			Main felixLauncher = new Main();
+			
+			// cache directory to Spring Roo 2.0+ versions
+			String cacheDir = "/sts-cache";
+			
+			// cache directory to Spring Roo 1.x versions
+			if(rooVersion.startsWith("1")){
+				cacheDir = "/sts-cache-" + projectName;
+			}
+			
 			framework = felixLauncher.start(new File(projectLocation).getCanonicalPath(),
 					new File(rooHome + "/bundle").getCanonicalPath(),
-					new File(rooHome + "/sts-cache").getCanonicalPath(), new File(rooHome
+					new File(rooHome + cacheDir).getCanonicalPath(), new File(rooHome
 							+ "/conf/config.properties").toURI().toURL().toString(), rooVersion);
 
 			new Thread(new RooShellExitMonitor()).start();
