@@ -270,13 +270,7 @@ public class Main {
 		
 		// check version
 		// store file in cache directories parent since the cache will get deleted
-		String cacheName;
-		int index = cacheDir.lastIndexOf("sts-cache");
-		if (index > -1) {
-			cacheName = cacheDir.subSequence(index, cacheDir.length()).toString();
-		} else {
-			cacheName = "sts-cache";
-		}
+		String cacheName = "cache";
 		File versionFile = new File(new File(cacheDir).getParentFile(), "." + cacheName + "-version");
 		if (versionFile.exists()) {
 			try {

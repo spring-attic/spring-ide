@@ -163,7 +163,7 @@ public class Bootstrap {
 			Main felixLauncher = new Main();
 			framework = felixLauncher.start(new File(projectLocation).getCanonicalPath(),
 					new File(rooHome + "/bundle").getCanonicalPath(),
-					new File(rooHome + "/sts-cache-" + projectName).getCanonicalPath(), new File(rooHome
+					new File(rooHome + "/cache").getCanonicalPath(), new File(rooHome
 							+ "/conf/config.properties").toURI().toURL().toString(), rooVersion);
 
 			new Thread(new RooShellExitMonitor()).start();
