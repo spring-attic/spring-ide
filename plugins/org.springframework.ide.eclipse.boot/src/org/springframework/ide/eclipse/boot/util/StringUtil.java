@@ -30,7 +30,7 @@ public class StringUtil {
 
 	public static String trimEnd(String s) {
 		if (s!=null) {
-			s.replaceAll("\\s+\\z", "");
+			return s.replaceAll("\\s+\\z", "");
 		}
 		return null;
 	}

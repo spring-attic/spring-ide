@@ -14,6 +14,7 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayU
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.hasElements;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,7 +42,11 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 public class TypeUtil {
 
+
 	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
+
+	private static final String STRING_TYPE_NAME = String.class.getName();
+	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
 
 	public enum EnumCaseMode {
 		LOWER_CASE, //convert enum names to lower case
@@ -57,6 +62,18 @@ public class TypeUtil {
 		this.javaProject = jp;
 	}
 
+
+	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
+	static {
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
+	}
+
 	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
 			"java.lang.String",
@@ -66,9 +83,15 @@ public class TypeUtil {
 			"java.lang.Double",
 			"java.lang.Float",
 			"java.lang.Character",
-			"java.net.InetAddress",
+			INET_ADDRESS_TYPE_NAME,
 			"java.lang.String[]"
 	));
+
+	private static final Set<String> ATOMIC_TYPES = new HashSet<String>(PRIMITIVE_TYPE_NAMES.keySet());
+	static {
+		ATOMIC_TYPES.add(INET_ADDRESS_TYPE_NAME);
+		ATOMIC_TYPES.add(STRING_TYPE_NAME);
+	}
 
 	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();
 	static {
@@ -245,7 +268,7 @@ public class TypeUtil {
 
 	public boolean isAtomic(Type type) {
 		String typeName = type.getErasure();
-		return typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName) || isEnum(type);
+		return ATOMIC_TYPES.contains(typeName) || isEnum(type);
 	}
 
 	/**
@@ -362,20 +385,6 @@ public class TypeUtil {
 
 	private static final String JAVA_LANG = "java.lang.";
 	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
-
-	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
-
-	private static final String STRING_TYPE_NAME = String.class.getName();
-
-	static {
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
-	}
 
 	/**
 	 * Determine properties that are setable on object of given type.

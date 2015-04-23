@@ -453,6 +453,35 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testContentAssistInetAddress() throws Exception {
+		//Test that InetAddress is treated as atomic w.r.t indentation
+
+		defaultTestData();
+		assertCompletion(
+				"#set address of server\n" +
+				"servadd<*>"
+				, //=>
+				"#set address of server\n" +
+				"server:\n"+
+				"  address: <*>"
+		);
+
+		assertCompletion(
+				"#set address of server\n" +
+				"server:\n"+
+				"  port: 888\n" +
+				"more: stuff\n" +
+				"servadd<*>"
+				, //=>
+				"#set address of server\n" +
+				"server:\n"+
+				"  port: 888\n" +
+				"  address: <*>\n" +
+				"more: stuff\n"
+		);
+
+	}
+
 	public void testContentAssistInsertCompletionElsewhereThatAlreadyExists() throws Exception {
 		data("server.port", "java.lang.Integer", null, "Server http port");
 		data("server.address", "String", "localhost", "Server host address");
@@ -512,7 +541,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"  address: localhost\n"+
 				"something: nice\n"
 		);
-
 	}
 
 
