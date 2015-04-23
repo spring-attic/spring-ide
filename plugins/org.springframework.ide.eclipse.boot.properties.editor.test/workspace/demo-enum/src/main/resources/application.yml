@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: foo
+    index: 12
+  activemq:
+    pooled: true
+    user: kdvolder
+    in-memory: true
+  redis:
+    database: 6
+    
+server:
+  port: 8888    
+foo:
+  color: Rood
+  color-data:
+    red:
+      color-children:
+        green:
+          nested:
+            children:
+              - 
