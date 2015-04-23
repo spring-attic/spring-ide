@@ -59,7 +59,7 @@ public class PropertyInfo {
 	final private String description;
 	private List<PropertySource> sources;
 
-	private PropertyInfo(String id, String type, String name,
+	public PropertyInfo(String id, String type, String name,
 			Object defaultValue, String description,
 			List<PropertySource> sources) {
 		super();

@@ -985,7 +985,190 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	///////////////// crufts
+	public void testEnumMapValueCompletion() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+//		assertCompletions(
+//				"foo:\n" +
+//				"  nam<*>",
+//				//==>
+//				"foo:\n" +
+//				"  name-colors:\n"+
+//				"    <*>",
+//				// or
+//				"foo:\n" +
+//				"  color-names:\n"+
+//				"    <*>"
+//		);
+		assertCompletionsDisplayString(
+				"foo:\n"+
+				"  name-colors:\n" +
+				"    something: <*>",
+				//=>
+				"red", "green", "blue"
+		);
+		assertCompletions(
+				"foo:\n"+
+				"  name-colors:\n" +
+				"    something: G<*>",
+				// =>
+				"foo:\n"+
+				"  name-colors:\n" +
+				"    something: GREEN<*>"
+		);
+	}
+
+	public void testEnumMapValueReconciling() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
+
+		MockEditor editor;
+
+		editor = new MockEditor(
+				"foo:\n"+
+				"  name-colors:\n" +
+				"    jacket: BLUE\n" +
+				"    hat: RED\n" +
+				"    pants: GREEN\n" +
+				"    wrong: NOT_A_COLOR\n"
+		);
+		assertProblems(editor,
+				"NOT_A_COLOR|Color"
+		);
+
+		//lowercase enums should work too
+		editor = new MockEditor(
+				"foo:\n"+
+				"  name-colors:\n" +
+				"    jacket: blue\n" +
+				"    hat: red\n" +
+				"    pants: green\n" +
+				"    wrong: NOT_A_COLOR\n"
+		);
+		assertProblems(editor,
+				"NOT_A_COLOR|Color"
+		);
+	}
+
+	public void testEnumMapKeyCompletion() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
+		data("foo.color-data", "java.util.Map<demo.Color,demo.ColorData>", null, "Map with colors in its keys, and pojo in values");
+
+		//Map Enum -> String:
+		assertCompletions("foo:\n  colnam<*>",
+				"foo:\n" +
+				"  color-names:\n" +
+				"    <*>");
+		assertCompletions(
+				"foo:\n" +
+				"  color-names:\n" +
+				"    <*>",
+				//=>
+				"foo:\n" +
+				"  color-names:\n" +
+				"    red: <*>",
+				"foo:\n" +
+				"  color-names:\n" +
+				"    green: <*>",
+				"foo:\n" +
+				"  color-names:\n" +
+				"    blue: <*>"
+		);
+
+		assertCompletionsDisplayString(
+				"foo:\n" +
+				"  color-names:\n" +
+				"    <*>",
+				//=>
+				"red", "green", "blue"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-names:\n" +
+				"    B<*>",
+				"foo:\n" +
+				"  color-names:\n" +
+				"    BLUE: <*>"
+		);
+
+		//Map Enum -> Pojo:
+		assertCompletions("foo.coldat<*>",
+				"foo:\n" +
+				"  color-data:\n" +
+				"    <*>");
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    <*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      <*>",
+				"foo:\n" +
+				"  color-data:\n" +
+				"    green:\n" +
+				"      <*>",
+				"foo:\n" +
+				"  color-data:\n" +
+				"    blue:\n" +
+				"      <*>");
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    B<*>",
+				//=>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    BLUE:\n" +
+				"      <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    b<*>",
+				//=>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    blue:\n" +
+				"      <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data: b<*>",
+				//=>
+				"foo:\n" +
+				"  color-data: \n" +
+				"    blue:\n" +
+				"      <*>"
+		);
+
+		assertCompletionsDisplayString(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    <*>",
+				"red", "green", "blue"
+		);
+
+		assertCompletionsDisplayString(
+				"foo:\n" +
+				"  color-data: <*>\n",
+				"red", "green", "blue"
+		);
+
+	}
+
+	//TODO: continue copying tests from
+	//   SpringPropertiesEditorTests.testPojoCompletions()
+	//   downwards
+
+	///////////////// cruft ////////////////////////////////////////////////////////
+
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
 		if (levels==0) {
 			data(prefix, "java.lang.String", null, "Property "+prefix);
@@ -1002,16 +1185,5 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		}
 		return string;
 	}
-
-
-//		assertCompletionsDisplayString(
-//				"#This is a commment, and it shouldn't be erased\n" +
-//				"server:\n" +
-//				"  <*>",
-//
-//				"port",
-//				"address"
-//		);
-
 
 }

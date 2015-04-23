@@ -10,9 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
+import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ALIASED;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.LOWER_CASE;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ORIGNAL;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
@@ -23,13 +29,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
-
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.*;
+import org.springframework.ide.eclipse.yaml.utils.CollectionUtil;
 
 /**
  * Represents a context relative to which we can provide content assistance.
@@ -100,12 +106,47 @@ public abstract class YamlAssistContext {
 		@Override
 		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
 			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
-			EnumCaseMode enumCaseMode;
-			if (query.isEmpty()) {
-				enumCaseMode = preferLowerCasedEnums?LOWER_CASE:ORIGNAL;
-			} else {
-				enumCaseMode = ALIASED; // will match candidates from both lower and original based on what user typed
+			EnumCaseMode enumCaseMode = enumCaseMode(query);
+			List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query, enumCaseMode);
+			if (!valueCompletions.isEmpty()) {
+				return valueCompletions;
 			}
+			return getKeyCompletions(doc, offset, query, enumCaseMode);
+		}
+
+		private EnumCaseMode enumCaseMode(String query) {
+			if (query.isEmpty()) {
+				return preferLowerCasedEnums?LOWER_CASE:ORIGNAL;
+			} else {
+				return ALIASED; // will match candidates from both lower and original based on what user typed
+			}
+		}
+
+		public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) throws Exception {
+			int queryOffset = offset - query.length();
+			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode);
+			if (CollectionUtil.hasElements(properties)) {
+				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
+				int sortingOrder = 0;
+				for (TypedProperty p : properties) {
+					String name = p.getName();
+					Type type = p.getType();
+					if (name.startsWith(query)) {
+						YamlPathEdits edits = new YamlPathEdits(doc);
+						edits.delete(queryOffset, query);
+
+						SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
+						YamlPath relativePath = YamlPath.fromSimpleProperty(name);
+						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
+						proposals.add(completionFactory.beanProperty(doc, queryOffset, contextPath, p, sortingOrder++, edits));
+					}
+				}
+				return proposals;
+			}
+			return Collections.emptyList();
+		}
+
+		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
 			String[] values = typeUtil.getAllowedValues(type, enumCaseMode);
 			if (values!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
@@ -125,7 +166,23 @@ public abstract class YamlAssistContext {
 
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
-			//TODO: implement
+			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
+				if (TypeUtil.isArrayLike(type) || TypeUtil.isMap(type)) {
+					return contextWith(s, TypeUtil.getDomainType(type));
+				}
+				String key = s.toPropString();
+				Map<String, Type> subproperties = typeUtil.getPropertiesMap(type, ALIASED);
+				if (subproperties!=null) {
+					return contextWith(s, subproperties.get(key));
+				}
+			}
+			return null;
+		}
+
+		private YamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
+			if (nextType!=null) {
+				return new TypeContext(contextPath.append(s), nextType, completionFactory, typeUtil);
+			}
 			return null;
 		}
 

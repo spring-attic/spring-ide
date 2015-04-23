@@ -36,19 +36,39 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesInformationControlCreator;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
+import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 
 public class PropertyCompletionFactory {
+
+	public ICompletionProposal property(IDocument doc, int offset, ProposalApplier applier, Match<PropertyInfo> prop) {
+		return new PropertyProposal(doc, offset, applier, prop);
+	}
+
+	public ICompletionProposal valueProposal(String value, Type type, int sortingOrder, ProposalApplier applier) {
+		return simpleProposal(value, sortingOrder, applier);
+	}
+
+	public ICompletionProposal beanProperty(YamlDocument doc, int offset, YamlPath contextPath, TypedProperty p, int sortingOrder, ProposalApplier applier) {
+		return simpleProposal(p.getName(), sortingOrder, applier);
+	}
+
 
 	//TODO: move to a place where this can be shared with SpringProperties completion engine
 	// and use it instead of almost duplicated code.
 
-	private static class ValueProposal implements ICompletionProposal {
+	private ICompletionProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
+		return new SimpleProposal(name, sortingOrder, applier);
+	}
+
+
+	private static class SimpleProposal implements ICompletionProposal {
 
 		private String value;
 		private int sortingOrder;
 		private ProposalApplier applier;
 
-		public ValueProposal(String value, Type type, int sortingOrder, ProposalApplier applier) {
+		public SimpleProposal(String value, int sortingOrder, ProposalApplier applier) {
 			this.value = value;
 			this.sortingOrder = sortingOrder;
 			this.applier = applier;
@@ -111,9 +131,9 @@ public class PropertyCompletionFactory {
 				} else {
 					return Double.compare(s2, s1);
 				}
-			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
-				int order1 = ((ValueProposal)p1).sortingOrder;
-				int order2 = ((ValueProposal)p2).sortingOrder;
+			} else if (p1 instanceof SimpleProposal && p2 instanceof SimpleProposal) {
+				int order1 = ((SimpleProposal)p1).sortingOrder;
+				int order2 = ((SimpleProposal)p2).sortingOrder;
 				return Integer.valueOf(order1).compareTo(Integer.valueOf(order2));
 			}
 			return 0;
@@ -121,14 +141,6 @@ public class PropertyCompletionFactory {
 	};
 
 	private DocumentContextFinder documentContextFinder;
-
-	public ICompletionProposal property(IDocument doc, int offset, ProposalApplier applier, Match<PropertyInfo> prop) {
-		return new PropertyProposal(doc, offset, applier, prop);
-	}
-
-	public ICompletionProposal valueProposal(String value, Type type, int sortingOrder, ProposalApplier applier) {
-		return new ValueProposal(value, type, sortingOrder, applier);
-	}
 
 	private Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
@@ -190,7 +202,6 @@ public class PropertyCompletionFactory {
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
 		}
-
 
 		public String getDisplayString() {
 			StyledString styledText = getStyledDisplayString();

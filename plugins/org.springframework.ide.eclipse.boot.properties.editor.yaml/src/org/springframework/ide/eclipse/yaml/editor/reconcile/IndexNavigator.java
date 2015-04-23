@@ -106,12 +106,12 @@ public class IndexNavigator {
 		if (!StringUtil.hasText(prefix)) {
 			return index.find(query);
 		} else {
-			List<Match<PropertyInfo>> candidates = index.find(prefix + query);
+			String dottedPrefix = prefix +".";
+			List<Match<PropertyInfo>> candidates = index.find(dottedPrefix + query);
 			if (!candidates.isEmpty()) {
 				//TODO: we can do better than this using treemap to narrow based on
 				// prefix
 				List<Match<PropertyInfo>> matches = new ArrayList<FuzzyMap.Match<PropertyInfo>>(candidates.size());
-				String dottedPrefix = prefix +".";
 				for (Match<PropertyInfo> match : candidates) {
 					if (match.data.getId().startsWith(dottedPrefix)){
 						matches.add(match);

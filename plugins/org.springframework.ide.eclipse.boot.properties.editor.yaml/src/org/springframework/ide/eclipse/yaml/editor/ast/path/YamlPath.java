@@ -33,7 +33,7 @@ public class YamlPath implements NodeNavigator {
 		this.segments = new YamlPathSegment[0];
 	}
 
-	public YamlPath(YamlPathSegment[] segments) {
+	public YamlPath(YamlPathSegment... segments) {
 		this.segments = segments;
 	}
 
@@ -86,6 +86,14 @@ public class YamlPath implements NodeNavigator {
 			segments.add(YamlPathSegment.at(s));
 		}
 		return new YamlPath(segments);
+	}
+
+	/**
+	 * Create a YamlPath with a single segment (i.e. like 'fromProperty', but does
+	 * not parse '.' as segment separators.
+	 */
+	public static YamlPath fromSimpleProperty(String name) {
+		return new YamlPath(YamlPathSegment.at(name));
 	}
 
 	@Override
@@ -150,5 +158,6 @@ public class YamlPath implements NodeNavigator {
 	public YamlPath tail() {
 		return dropFirst(1);
 	}
+
 
 }
