@@ -272,7 +272,7 @@ public class Main {
 		
 		// check version
 		// store file in cache directories parent since the cache will get deleted
-		String cacheName = "cache";
+		String cacheName = "sts-cache";
 		File versionFile = new File(new File(cacheDir).getParentFile(), "." + cacheName + "-version");
 		if (versionFile.exists()) {
 			try {
