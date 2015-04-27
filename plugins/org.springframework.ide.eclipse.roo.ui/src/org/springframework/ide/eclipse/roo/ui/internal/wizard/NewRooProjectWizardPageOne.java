@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2015 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal.wizard;
 
@@ -49,6 +50,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -89,6 +91,7 @@ import org.springframework.ide.eclipse.roo.ui.internal.wizard.NewRooProjectWizar
  * @author Steffen Pingel
  * @author Terry Denney
  * @author Leo Dos Santos
+ * @author Juan Carlos García
  */
 @SuppressWarnings("restriction")
 public class NewRooProjectWizardPageOne extends WizardPage {
@@ -468,6 +471,27 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 					c.setEnabled(enableFlag);
 				}
 			}
+			
+			
+			// Checks if Spring Roo 2.0+ version is selected
+			String version = null;
+			if (useDefaultRooInstall()) {
+				version = RooCoreActivator.getDefault().getInstallManager().getDefaultRooInstall().getVersion();
+			}
+			else {
+				String installName = getRooInstallName();
+				if (installName != null) {
+					version = RooCoreActivator.getDefault().getInstallManager().getRooInstall(installName).getVersion();
+				}
+			}
+			
+			// Roo Addon Suite generation only is available on Spring Roo 2.0+ version
+			if(!version.startsWith("2") && getProjectType().equals(ProjectType.ADDON_SUITE)){
+				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to use a functionality that is only available on Spring Roo 2.0+ versions."
+						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
+				fNameGroup.fTemplateField.selectItem(0);
+			}
+			
 		}
 
 		public void update(Observable o, Object arg) {
