@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
@@ -27,6 +28,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
@@ -49,9 +52,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.Y
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.ui.PlatformUI;
 
 public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration {
 
@@ -69,7 +69,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	}
 
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
-		IDialogSettings existing = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		IDialogSettings existing = Activator.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (existing!=null) {
 			return existing;
 		}
