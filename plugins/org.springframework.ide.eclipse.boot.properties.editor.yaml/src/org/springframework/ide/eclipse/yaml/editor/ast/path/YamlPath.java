@@ -20,7 +20,7 @@ import org.yaml.snakeyaml.nodes.Node;
 /**
  * @author Kris De Volder
  */
-public class YamlPath implements NodeNavigator {
+public class YamlPath {
 
 	public static final YamlPath EMPTY = new YamlPath();
 	private final YamlPathSegment[] segments;
@@ -37,18 +37,6 @@ public class YamlPath implements NodeNavigator {
 		this.segments = segments;
 	}
 
-	@Override
-	public Node apply(Node node) {
-		for (YamlPathSegment s : segments) {
-			node = s.apply(node);
-		}
-		return node;
-	}
-
-	/**
-	 * Turns a path into a property String.
-	 */
-	@Override
 	public String toPropString() {
 		StringBuilder buf = new StringBuilder();
 		boolean first = true;
@@ -63,7 +51,6 @@ public class YamlPath implements NodeNavigator {
 		return buf.toString();
 	}
 
-	@Override
 	public String toNavString() {
 		StringBuilder buf = new StringBuilder();
 		for (YamlPathSegment s : segments) {

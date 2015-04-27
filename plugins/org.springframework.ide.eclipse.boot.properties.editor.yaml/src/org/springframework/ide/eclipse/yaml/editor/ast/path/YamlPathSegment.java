@@ -25,7 +25,7 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
  *
  * @author Kris De Volder
  */
-public abstract class YamlPathSegment implements NodeNavigator {
+public abstract class YamlPathSegment {
 
 	public static enum YamlPathSegmentType {
 		AT_KEY, //Go to value associate with given key in a map.
@@ -40,23 +40,10 @@ public abstract class YamlPathSegment implements NodeNavigator {
 			this.index = index;
 		}
 
-		@Override
-		public Node apply(Node node) {
-			if (node instanceof SequenceNode) {
-				List<Node> children = ((SequenceNode) node).getValue();
-				if (index>=0 && index<children.size()) {
-					return children.get(index);
-				}
-			}
-			return null;
-		}
-
-		@Override
 		public String toNavString() {
 			return "["+index+"]";
 		}
 
-		@Override
 		public String toPropString() {
 			return "["+index+"]";
 		}
@@ -78,20 +65,6 @@ public abstract class YamlPathSegment implements NodeNavigator {
 
 		public AtKey(String key) {
 			this.key = key;
-		}
-
-		@Override
-		public Node apply(Node node) {
-			if (node instanceof MappingNode) {
-				MappingNode map = (MappingNode) node;
-				for (NodeTuple e : map.getValue()) {
-					String k = NodeUtil.asScalar(e.getKeyNode());
-					if (k!=null && k.equals(key)) {
-						return e.getValueNode();
-					}
-				}
-			}
-			return null;
 		}
 
 		@Override
@@ -125,6 +98,9 @@ public abstract class YamlPathSegment implements NodeNavigator {
 		return toNavString();
 	}
 
+	public abstract String toNavString();
+	public abstract String toPropString();
+
 	public abstract Integer toIndex();
 	public abstract YamlPathSegmentType getType();
 
@@ -134,4 +110,5 @@ public abstract class YamlPathSegment implements NodeNavigator {
 	public static YamlPathSegment at(int index) {
 		return new AtIndex(index);
 	}
+
 }
