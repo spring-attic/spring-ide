@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Spring Boot Yaml
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.properties.editor.yaml;singleton:=true
 Bundle-Version: 3.7.0.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.yaml.editor.Activator
+Bundle-Activator: org.springframework.ide.eclipse.boot.properties.editor.yaml.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.dadacoalition.yedit;bundle-version="1.0.16",
@@ -18,9 +18,9 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.yaml.editor,
- org.springframework.ide.eclipse.yaml.editor.ast,
- org.springframework.ide.eclipse.yaml.editor.completions,
- org.springframework.ide.eclipse.yaml.editor.path,
- org.springframework.ide.eclipse.yaml.editor.reconcile,
- org.springframework.ide.eclipse.yaml.editor.structure
+Export-Package: org.springframework.ide.eclipse.boot.properties.editor.yaml,
+ org.springframework.ide.eclipse.boot.properties.editor.yaml.ast,
+ org.springframework.ide.eclipse.boot.properties.editor.yaml.completions,
+ org.springframework.ide.eclipse.boot.properties.editor.yaml.path,
+ org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile,
+ org.springframework.ide.eclipse.boot.properties.editor.yaml.structure

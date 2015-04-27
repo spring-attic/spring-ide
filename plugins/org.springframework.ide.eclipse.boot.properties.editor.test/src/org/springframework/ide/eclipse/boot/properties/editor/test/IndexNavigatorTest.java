@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
 
 public class IndexNavigatorTest extends YamlEditorTestHarness {
 

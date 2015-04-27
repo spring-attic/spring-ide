@@ -12,13 +12,13 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.util.ArrayList;
 
-import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
-import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.AtKey;
-import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.AtKey;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 
 
 public class YamlStructureParserTest extends YamlEditorTestHarness {

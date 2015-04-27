@@ -15,7 +15,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.springframework.ide.eclipse.yaml.editor.completions.ProposalApplier;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ProposalApplier;
 
 /**
  * Basic 'simulated' editor. Contains text and a cursor position / selection.

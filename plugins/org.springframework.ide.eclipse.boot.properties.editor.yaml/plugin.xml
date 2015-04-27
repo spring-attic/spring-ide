@@ -3,6 +3,6 @@
 <plugin>
    <extension
          point="org.dadacoalition.yedit.sourceViewerConfigurationContribution">
-    	<sourceViewerConfiguration class="org.springframework.ide.eclipse.yaml.editor.SpringYeditSourceViewerConfiguration"/>
+    	<sourceViewerConfiguration class="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYeditSourceViewerConfiguration"/>
    </extension>
 </plugin>
