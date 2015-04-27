@@ -25,12 +25,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureProvider;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SSeqNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SSeqNode;
 import org.yaml.snakeyaml.Yaml;
 
 public class YamlCompletionEngine implements ICompletionEngine {
@@ -129,7 +129,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			SNodeType nodeType = node.getNodeType();
 			if (nodeType==SNodeType.KEY) {
 				String key = ((SKeyNode)node).getKey();
-				segments.add(YamlPathSegment.at(key));
+				segments.add(YamlPathSegment.valueAt(key));
 			} else if (nodeType==SNodeType.SEQ) {
 				int index = 0; //TODO: this wrong, but we don't really care about the precise index since
 									// for CA purposes all nodes in a seqeunce represent an equivalent context
@@ -137,7 +137,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 									// Formally correct would be: ((SSeqNode)node).getIndex();
 									// but that would require implementation of 'getIndex' (somehow assigning
 									// index to every SSeqNode at creation time)
-				segments.add(YamlPathSegment.at(index));
+				segments.add(YamlPathSegment.valueAt(index));
 			}
 		}
 	}

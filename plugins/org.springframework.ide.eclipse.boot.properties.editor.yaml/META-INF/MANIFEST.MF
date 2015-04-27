@@ -23,4 +23,4 @@ Export-Package: org.springframework.ide.eclipse.yaml.editor,
  org.springframework.ide.eclipse.yaml.editor.completions,
  org.springframework.ide.eclipse.yaml.editor.path,
  org.springframework.ide.eclipse.yaml.editor.reconcile,
- org.springframework.ide.eclipse.yaml.structure
+ org.springframework.ide.eclipse.yaml.editor.structure

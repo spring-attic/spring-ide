@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.YamlLine;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureProvider;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.YamlLine;
 
 /**
  * Wraps around a IDocument which is presumed to contain YML content and provides

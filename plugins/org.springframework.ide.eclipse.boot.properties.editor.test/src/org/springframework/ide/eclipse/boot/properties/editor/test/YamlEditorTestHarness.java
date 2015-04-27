@@ -41,10 +41,10 @@ import org.springframework.ide.eclipse.yaml.editor.completions.PropertyCompletio
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlDocument;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureProvider;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SRootNode;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
 

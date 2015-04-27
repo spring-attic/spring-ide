@@ -14,8 +14,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef;
+import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef.SeqRef;
+import org.springframework.ide.eclipse.yaml.editor.ast.NodeRef.TupleValueRef;
+import org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlNavigable;
-import org.yaml.snakeyaml.nodes.Node;
 
 /**
  * @author Kris De Volder
@@ -70,7 +73,7 @@ public class YamlPath {
 	public static YamlPath fromProperty(String propName) {
 		ArrayList<YamlPathSegment> segments = new ArrayList<YamlPathSegment>();
 		for (String s : propName.split("\\.")) {
-			segments.add(YamlPathSegment.at(s));
+			segments.add(YamlPathSegment.valueAt(s));
 		}
 		return new YamlPath(segments);
 	}
@@ -80,7 +83,7 @@ public class YamlPath {
 	 * not parse '.' as segment separators.
 	 */
 	public static YamlPath fromSimpleProperty(String name) {
-		return new YamlPath(YamlPathSegment.at(name));
+		return new YamlPath(YamlPathSegment.valueAt(name));
 	}
 
 	@Override
@@ -144,6 +147,47 @@ public class YamlPath {
 
 	public YamlPath tail() {
 		return dropFirst(1);
+	}
+
+	/**
+	 * Attempt to convert a path represented as a list of {@link NodeRef} into YamlPath.
+	 * <p>
+	 * Note that not all AST path can be converted into a YamlPath. Some paths in AST
+	 * do not have a corresponding YamlPath. For such cases this method may return null.
+	 */
+	public static YamlPath fromASTPath(List<NodeRef<?>> path) {
+		List<YamlPathSegment> segments = new ArrayList<YamlPathSegment>(path.size());
+		for (NodeRef<?> nodeRef : path) {
+			switch (nodeRef.getKind()) {
+			case ROOT:
+				// nothing to do, just pass throught to a 'real' node.
+				break;
+			case KEY: {
+				String key = NodeUtil.asScalar(nodeRef.get());
+				if (key==null) {
+					return null;
+				} else {
+					segments.add(YamlPathSegment.keyAt(key));
+				} }
+				break;
+			case VAL: {
+				TupleValueRef vref = (TupleValueRef) nodeRef;
+				String key = NodeUtil.asScalar(vref.getTuple().getKeyNode());
+				if (key==null) {
+					return null;
+				} else {
+					segments.add(YamlPathSegment.valueAt(key));
+				} }
+				break;
+			case SEQ:
+				SeqRef sref = ((SeqRef)nodeRef);
+				segments.add(YamlPathSegment.valueAt(sref.getIndex()));
+				break;
+			default:
+				return null;
+			}
+		}
+		return new YamlPath(segments);
 	}
 
 

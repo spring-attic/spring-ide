@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.yaml.structure;
+package org.springframework.ide.eclipse.yaml.editor.structure;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.yaml.editor.completions.YamlDocument;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlNavigable;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
 
 /**
  * A robust, coarse-grained parser that guesses the structure of a
@@ -333,9 +333,9 @@ public class YamlStructureParser {
 		@Override
 		public SNode traverse(YamlPathSegment s) throws Exception {
 			switch (s.getType()) {
-			case AT_KEY:
+			case VAL_AT_KEY:
 				return this.getChildWithKey(s.toPropString());
-			case AT_INDEX:
+			case VAL_AT_INDEX:
 				return this.getSeqChildWithIndex(s.toIndex());
 			default:
 				return null;

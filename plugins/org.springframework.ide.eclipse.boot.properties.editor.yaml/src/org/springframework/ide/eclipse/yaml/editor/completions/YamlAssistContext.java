@@ -34,8 +34,8 @@ import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.utils.CollectionUtil;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.utils.CollectionUtil;
 
 /**
  * Represents a context relative to which we can provide content assistance.
@@ -166,7 +166,7 @@ public abstract class YamlAssistContext {
 
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
-			if (s.getType()==YamlPathSegmentType.AT_KEY) {
+			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				if (TypeUtil.isArrayLike(type) || TypeUtil.isMap(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
@@ -175,7 +175,7 @@ public abstract class YamlAssistContext {
 				if (subproperties!=null) {
 					return contextWith(s, subproperties.get(key));
 				}
-			} else if (s.getType()==YamlPathSegmentType.AT_INDEX) {
+			} else if (s.getType()==YamlPathSegmentType.VAL_AT_INDEX) {
 				if (TypeUtil.isArrayLike(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
@@ -268,7 +268,7 @@ public abstract class YamlAssistContext {
 
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
-			if (s.getType()==YamlPathSegmentType.AT_KEY) {
+			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
 				if (subIndex.getExtensionCandidate()!=null) {
 					return new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);

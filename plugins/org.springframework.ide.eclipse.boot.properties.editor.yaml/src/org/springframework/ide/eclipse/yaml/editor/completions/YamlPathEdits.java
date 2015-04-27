@@ -13,11 +13,11 @@ package org.springframework.ide.eclipse.yaml.editor.completions;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SRootNode;
 
 /**
  * Helper class that provides methods for creating the edits in a YamlDocument that
@@ -49,7 +49,7 @@ public class YamlPathEdits extends DocumentEdits {
 	private void createPath(SChildBearingNode node, YamlPath path, String appendText) throws Exception {
 		if (!path.isEmpty()) {
 			YamlPathSegment s = path.getSegment(0);
-			if (s.getType()==YamlPathSegmentType.AT_KEY) {
+			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				String key = s.toPropString();
 				SKeyNode existing = findChildForKey(node, key);
 				if (existing==null) {

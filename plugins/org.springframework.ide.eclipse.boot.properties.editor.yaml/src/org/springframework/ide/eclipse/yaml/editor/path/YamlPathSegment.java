@@ -10,13 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.path;
 
-import java.util.List;
-
-import org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.SequenceNode;
 
 /**
  * A YamlPathSegment is a 'primitive' NodeNavigator operation.
@@ -28,8 +21,9 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 public abstract class YamlPathSegment {
 
 	public static enum YamlPathSegmentType {
-		AT_KEY, //Go to value associate with given key in a map.
-		AT_INDEX //Go to value associate with given index in a sequence
+		VAL_AT_KEY, //Go to value associate with given key in a map.
+		KEY_AT_KEY, //Go to the key node associated with a given key in a map.
+		VAL_AT_INDEX //Go to value associate with given index in a sequence
 	}
 
 	public static class AtIndex extends YamlPathSegment {
@@ -50,7 +44,7 @@ public abstract class YamlPathSegment {
 
 		@Override
 		public YamlPathSegmentType getType() {
-			return YamlPathSegmentType.AT_INDEX;
+			return YamlPathSegmentType.VAL_AT_INDEX;
 		}
 
 		@Override
@@ -84,7 +78,7 @@ public abstract class YamlPathSegment {
 
 		@Override
 		public YamlPathSegmentType getType() {
-			return YamlPathSegmentType.AT_KEY;
+			return YamlPathSegmentType.VAL_AT_KEY;
 		}
 
 		@Override
@@ -104,11 +98,14 @@ public abstract class YamlPathSegment {
 	public abstract Integer toIndex();
 	public abstract YamlPathSegmentType getType();
 
-	public static YamlPathSegment at(String key) {
+	public static YamlPathSegment valueAt(String key) {
 		return new AtKey(key);
 	}
-	public static YamlPathSegment at(int index) {
+	public static YamlPathSegment valueAt(int index) {
 		return new AtIndex(index);
+	}
+	public static YamlPathSegment keyAt(String key) {
+		return new AtKey(key);
 	}
 
 }

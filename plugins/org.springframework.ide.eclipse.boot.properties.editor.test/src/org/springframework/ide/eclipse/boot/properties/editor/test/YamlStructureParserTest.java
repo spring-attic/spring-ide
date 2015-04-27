@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.AtKey;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.editor.structure.YamlStructureParser.SRootNode;
 
 
 public class YamlStructureParserTest extends YamlEditorTestHarness {
@@ -676,9 +676,9 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		ArrayList<YamlPathSegment> segments = new ArrayList<YamlPathSegment>();
 		for (Object keyOrIndex : keysOrIndexes) {
 			if (keyOrIndex instanceof String) {
-				segments.add(YamlPathSegment.at((String)keyOrIndex));
+				segments.add(YamlPathSegment.valueAt((String)keyOrIndex));
 			} else if (keyOrIndex instanceof Integer) {
-				segments.add(YamlPathSegment.at((Integer)keyOrIndex));
+				segments.add(YamlPathSegment.valueAt((Integer)keyOrIndex));
 			} else {
 				fail("Unknown type of path element: "+keyOrIndex);
 			}
