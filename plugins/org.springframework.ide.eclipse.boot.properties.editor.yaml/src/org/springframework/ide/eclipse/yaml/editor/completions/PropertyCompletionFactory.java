@@ -37,7 +37,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesIn
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
 
 public class PropertyCompletionFactory {
 

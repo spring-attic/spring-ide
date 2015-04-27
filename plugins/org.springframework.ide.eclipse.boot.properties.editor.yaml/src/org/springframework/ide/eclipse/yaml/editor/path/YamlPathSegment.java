@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.yaml.editor.ast.path;
+package org.springframework.ide.eclipse.yaml.editor.path;
 
 import java.util.List;
 

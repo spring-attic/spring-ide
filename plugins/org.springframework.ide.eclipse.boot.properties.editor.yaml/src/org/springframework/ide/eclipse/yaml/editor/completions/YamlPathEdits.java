@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.completions;
 
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;

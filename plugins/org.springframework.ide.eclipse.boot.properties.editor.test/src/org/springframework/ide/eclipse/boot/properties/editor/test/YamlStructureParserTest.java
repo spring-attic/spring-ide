@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.util.ArrayList;
 
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.AtKey;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPath;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment;
+import org.springframework.ide.eclipse.yaml.editor.path.YamlPathSegment.AtKey;
 import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
