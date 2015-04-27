@@ -149,11 +149,20 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					monitor.worked(3);
 
 					ProjectType type = projectPage.getProjectType();
+					
+					// Command used to create new project
+					String createCommand = type.getCommand();
+					
+					// If maven project will be generated using Spring Roo 2.0+, is necessary to add
+					// setup instruction on command
+					if(createCommand.equals("project") && !install.getVersion().startsWith("1")){
+						createCommand = createCommand.concat(" setup");
+					}
 
 					// Create project
 					monitor.subTask(String.format("execute Spring Roo '%s' command", type.getCommand()));
 					StringBuilder builder = new StringBuilder();
-					builder.append(type.getCommand());
+					builder.append(createCommand);
 					builder.append(" --topLevelPackage ").append(projectPage.getPackageName());
 					if (type == ProjectType.PROJECT) {
 						builder.append(" --projectName ").append(projectPage.getProjectName());

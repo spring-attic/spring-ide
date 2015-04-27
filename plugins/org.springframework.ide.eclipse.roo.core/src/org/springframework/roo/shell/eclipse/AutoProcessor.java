@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.roo.shell.eclipse;
 
@@ -37,6 +38,7 @@ import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
  * For maximum compatibility with Felix, this class has no changes from the Felix original.
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Juan Carlos García
  */
 public class AutoProcessor {
 	/**
@@ -295,17 +297,8 @@ public class AutoProcessor {
 			if (filename.startsWith("org.springframework.roo.shell.eclipse-1.2.0")) {
 				return matchesVersion("1.2.0", rooVersion);
 			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.1.2")) {
-				return matchesVersion("[1.1.2, 1.1.5)", rooVersion);
-			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.1.5")) { 				
-				return matchesVersion("[1.1.5, 1.2.0)", rooVersion);
-			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.2.0")) {
-				return matchesVersion("[1.2.0, 1.2.1)", rooVersion);
-			}
-			if (filename.startsWith("org.springframework.roo.addon.roobot.eclipse.client-1.2.1")) {
-				return matchesVersion("1.2.1", rooVersion);
+			if (filename.startsWith("org.springframework.roo.shell.eclipse-2.0.0")) {
+				return matchesVersion("2.0.0", rooVersion);
 			}
 		}
 		return false;

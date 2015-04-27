@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 VMware, Inc.
+ *  Copyright (c) 2012 - 2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.roo.shell.eclipse;
 
@@ -45,6 +46,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins.Plu
 /**
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Juan Carlos García
  */
 public class Bootstrap {
 
@@ -161,9 +163,18 @@ public class Bootstrap {
 		try {
 			this.appender = appender;
 			Main felixLauncher = new Main();
+			
+			// cache directory to Spring Roo 2.0+ versions
+			String cacheDir = "/sts-cache";
+			
+			// cache directory to Spring Roo 1.x versions
+			if(rooVersion.startsWith("1")){
+				cacheDir = "/sts-cache-" + projectName;
+			}
+			
 			framework = felixLauncher.start(new File(projectLocation).getCanonicalPath(),
 					new File(rooHome + "/bundle").getCanonicalPath(),
-					new File(rooHome + "/sts-cache-" + projectName).getCanonicalPath(), new File(rooHome
+					new File(rooHome + cacheDir).getCanonicalPath(), new File(rooHome
 							+ "/conf/config.properties").toURI().toURL().toString(), rooVersion);
 
 			new Thread(new RooShellExitMonitor()).start();
