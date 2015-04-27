@@ -6,19 +6,20 @@ spring:
     pooled: true
     user: kdvolder
     in-memory: true
-  redis:
-    database: 6
-    
+  redis: 
+    database: 11
 server:
-  port: 8888    
-  address:
-    
+  port: 8888
+  address: null
 foo:
-  color: Rood
+  color: red
   color-data:
     red:
-      color-children:
-        green:
-          nested:
-            children:
-              - 
+      children:
+      - wavelen: 55
+        name: Great expectations
+      -  
+    green: 
+      name: Groen
+    blue:
+      wavelen: 5555

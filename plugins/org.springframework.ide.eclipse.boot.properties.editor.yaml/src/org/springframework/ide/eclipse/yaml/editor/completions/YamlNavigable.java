@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.yaml.editor.completions;
 
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
 
 /**
  * Different types of things (e.g. {@link YamlAssistContext}, {@link SNode} ...) can

@@ -13,11 +13,11 @@ package org.springframework.ide.eclipse.yaml.editor.completions;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
 
 /**
  * Helper class that provides methods for creating the edits in a YamlDocument that
@@ -49,7 +49,7 @@ public class YamlPathEdits extends DocumentEdits {
 	private void createPath(SChildBearingNode node, YamlPath path, String appendText) throws Exception {
 		if (!path.isEmpty()) {
 			YamlPathSegment s = path.getSegment(0);
-			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
+			if (s.getType()==YamlPathSegmentType.AT_KEY) {
 				String key = s.toPropString();
 				SKeyNode existing = findChildForKey(node, key);
 				if (existing==null) {
@@ -63,7 +63,7 @@ public class YamlPathEdits extends DocumentEdits {
 			// sensible in the existing tail-end-node of the path.
 			SNode child = node.getFirstRealChild();
 			if (child!=null) {
-				moveCursorTo(child.getStart()+child.getIndent());
+				moveCursorTo(child.getStart());
 			} else if (node.getNodeType()==SNodeType.KEY) {
 				SKeyNode keyNode = (SKeyNode) node;
 				int colonOffset = keyNode.getColonOffset();
@@ -130,7 +130,16 @@ public class YamlPathEdits extends DocumentEdits {
 
 	public void createPathInPlace(SNode contextNode, YamlPath relativePath, int insertionPoint, String appendText) throws Exception {
 		int indent = getChildIndent(contextNode);
-		insert(insertionPoint, createPathInsertionText(relativePath, indent, lineHasTextBefore(insertionPoint), appendText));
+		insert(insertionPoint, createPathInsertionText(relativePath, indent, needNewline(contextNode, insertionPoint), appendText));
+	}
+
+	private boolean needNewline(SNode contextNode, int insertionPoint) throws Exception {
+		if (contextNode.getNodeType()==SNodeType.SEQ) {
+			// after a '- ' its okay to put key on same line
+			return false;
+		} else {
+			return lineHasTextBefore(insertionPoint);
+		}
 	}
 
 	private boolean lineHasTextBefore(int insertionPoint) throws Exception {

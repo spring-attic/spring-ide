@@ -46,8 +46,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvi
 import org.springframework.ide.eclipse.yaml.editor.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.yaml.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.yaml.editor.completions.YamlCompletionEngine;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureProvider;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.SpringYamlReconcileEngine;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.graphics.Rectangle;

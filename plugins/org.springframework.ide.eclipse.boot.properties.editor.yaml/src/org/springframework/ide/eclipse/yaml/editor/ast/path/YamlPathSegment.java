@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.ast.path;
 
+import java.util.List;
+
 import org.springframework.ide.eclipse.yaml.editor.ast.NodeUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 
 /**
  * A YamlPathSegment is a 'primitive' NodeNavigator operation.
@@ -25,14 +28,55 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 public abstract class YamlPathSegment implements NodeNavigator {
 
 	public static enum YamlPathSegmentType {
-		AT_SCALAR_KEY //Go to value associated with a given Scalar key expressed as a String.
+		AT_KEY, //Go to value associate with given key in a map.
+		AT_INDEX //Go to value associate with given index in a sequence
 	}
 
-	public static class AtScalarKey extends YamlPathSegment {
+	public static class AtIndex extends YamlPathSegment {
+
+		private int index;
+
+		public AtIndex(int index) {
+			this.index = index;
+		}
+
+		@Override
+		public Node apply(Node node) {
+			if (node instanceof SequenceNode) {
+				List<Node> children = ((SequenceNode) node).getValue();
+				if (index>=0 && index<children.size()) {
+					return children.get(index);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public String toNavString() {
+			return "["+index+"]";
+		}
+
+		@Override
+		public String toPropString() {
+			return "["+index+"]";
+		}
+
+		@Override
+		public YamlPathSegmentType getType() {
+			return YamlPathSegmentType.AT_INDEX;
+		}
+
+		@Override
+		public Integer toIndex() {
+			return index;
+		}
+	}
+
+	public static class AtKey extends YamlPathSegment {
 
 		private String key;
 
-		public AtScalarKey(String key) {
+		public AtKey(String key) {
 			this.key = key;
 		}
 
@@ -67,7 +111,12 @@ public abstract class YamlPathSegment implements NodeNavigator {
 
 		@Override
 		public YamlPathSegmentType getType() {
-			return YamlPathSegmentType.AT_SCALAR_KEY;
+			return YamlPathSegmentType.AT_KEY;
+		}
+
+		@Override
+		public Integer toIndex() {
+			return null;
 		}
 	}
 
@@ -76,9 +125,13 @@ public abstract class YamlPathSegment implements NodeNavigator {
 		return toNavString();
 	}
 
+	public abstract Integer toIndex();
 	public abstract YamlPathSegmentType getType();
 
 	public static YamlPathSegment at(String key) {
-		return new AtScalarKey(key);
+		return new AtKey(key);
+	}
+	public static YamlPathSegment at(int index) {
+		return new AtIndex(index);
 	}
 }

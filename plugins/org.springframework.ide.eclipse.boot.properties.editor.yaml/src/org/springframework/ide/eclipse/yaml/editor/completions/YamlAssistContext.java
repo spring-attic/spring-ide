@@ -33,8 +33,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.editor.reconcile.IndexNavigator;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.yaml.utils.CollectionUtil;
 
 /**
@@ -166,7 +166,7 @@ public abstract class YamlAssistContext {
 
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
-			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
+			if (s.getType()==YamlPathSegmentType.AT_KEY) {
 				if (TypeUtil.isArrayLike(type) || TypeUtil.isMap(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
@@ -174,6 +174,10 @@ public abstract class YamlAssistContext {
 				Map<String, Type> subproperties = typeUtil.getPropertiesMap(type, ALIASED);
 				if (subproperties!=null) {
 					return contextWith(s, subproperties.get(key));
+				}
+			} else if (s.getType()==YamlPathSegmentType.AT_INDEX) {
+				if (TypeUtil.isArrayLike(type)) {
+					return contextWith(s, TypeUtil.getDomainType(type));
 				}
 			}
 			return null;
@@ -186,6 +190,11 @@ public abstract class YamlAssistContext {
 			return null;
 		}
 
+
+		@Override
+		public String toString() {
+			return "TypeContext("+contextPath.toPropString()+"::"+type+")";
+		}
 	}
 
 
@@ -259,7 +268,7 @@ public abstract class YamlAssistContext {
 
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
-			if (s.getType()==YamlPathSegmentType.AT_SCALAR_KEY) {
+			if (s.getType()==YamlPathSegmentType.AT_KEY) {
 				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
 				if (subIndex.getExtensionCandidate()!=null) {
 					return new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);

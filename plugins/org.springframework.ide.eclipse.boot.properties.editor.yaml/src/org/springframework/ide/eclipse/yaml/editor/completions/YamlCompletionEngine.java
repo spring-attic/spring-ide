@@ -25,10 +25,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPath;
 import org.springframework.ide.eclipse.yaml.editor.ast.path.YamlPathSegment;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SSeqNode;
 import org.yaml.snakeyaml.Yaml;
 
 public class YamlCompletionEngine implements ICompletionEngine {
@@ -80,10 +82,10 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			//slight complication. The area in the key and value of a key node represent different
 			// contexts for content assistance
 			SKeyNode keyNode = (SKeyNode)node;
-			if (keyNode.isInKey(offset)) {
-				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory, typeUtil);
-			} else {
+			if (keyNode.isInValue(offset)) {
 				return YamlAssistContext.forPath(getContextPath(keyNode), index, completionFactory, typeUtil);
+			} else {
+				return YamlAssistContext.forPath(getContextPath(keyNode.getParent()), index, completionFactory, typeUtil);
 			}
 		} else if (node.getNodeType()==SNodeType.RAW) {
 			//Treat raw node as a 'key node'. This is basically assuming that is misclasified
@@ -101,6 +103,13 @@ public class YamlCompletionEngine implements ICompletionEngine {
 				node = node.getParent();
 			}
 			return YamlAssistContext.forPath(getContextPath(node), index, completionFactory, typeUtil);
+		} else if (node.getNodeType()==SNodeType.SEQ) {
+			SSeqNode seqNode = (SSeqNode)node;
+			if (seqNode.isInValue(offset)) {
+				return YamlAssistContext.forPath(getContextPath(seqNode), index, completionFactory, typeUtil);
+			} else {
+				return YamlAssistContext.forPath(getContextPath(seqNode.getParent()), index, completionFactory, typeUtil);
+			}
 		} else if (node.getNodeType()==SNodeType.ROOT) {
 			return  YamlAssistContext.forPath(getContextPath(node), index, completionFactory, typeUtil);
 		} else {
@@ -117,9 +126,18 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	private void buildContextPath(SNode node, ArrayList<YamlPathSegment> segments) throws Exception {
 		if (node!=null) {
 			buildContextPath(node.getParent(), segments);
-			if (node.getNodeType()==SNodeType.KEY) {
+			SNodeType nodeType = node.getNodeType();
+			if (nodeType==SNodeType.KEY) {
 				String key = ((SKeyNode)node).getKey();
 				segments.add(YamlPathSegment.at(key));
+			} else if (nodeType==SNodeType.SEQ) {
+				int index = 0; //TODO: this wrong, but we don't really care about the precise index since
+									// for CA purposes all nodes in a seqeunce represent an equivalent context
+									// anyway
+									// Formally correct would be: ((SSeqNode)node).getIndex();
+									// but that would require implementation of 'getIndex' (somehow assigning
+									// index to every SSeqNode at creation time)
+				segments.add(YamlPathSegment.at(index));
 			}
 		}
 	}

@@ -22,11 +22,12 @@ public class IndentUtil {
 
 	/**
 	 * Number of indentation levels (spaces) added between a child and parent.
+	 * TODO: replace this constant by (existing!) yedit preference value
 	 */
 	public static final int INDENT_BY = 2;
 
 	/**
-	 * Some functions introduce line separators and this may depend on the context (i.e. defailt line separator
+	 * Some functions introduce line separators and this may depend on the context (i.e. default line separator
 	 * for the current document).
 	 */
 	public final String NEWLINE;
@@ -86,6 +87,17 @@ public class IndentUtil {
 	 */
 	public String applyIndentation(String text, int indentBy) {
 		return text.replaceAll("\\n", newlineWithIndent(indentBy));
+	}
+
+	/**
+	 * Increase offset by indentation. Take care when 'indent' is -1 (unkownn) to
+	 * just return offset unmodified.
+	 */
+	public static int addToOffset(int offset, int indent) {
+		if (indent==-1) {
+			return offset;
+		}
+		return offset + indent;
 	}
 
 }

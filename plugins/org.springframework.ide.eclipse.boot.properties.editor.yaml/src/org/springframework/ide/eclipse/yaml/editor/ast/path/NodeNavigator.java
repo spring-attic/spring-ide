@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.yaml.editor.ast.path;
 
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlNavigable;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
  * A NodeNavigator is an operation that goes from a 'current'
  * node to a related node. As such it can be represented
  * abstractly as a function Node -> Node.
+ *
+ * TODO: remove this. Should use {@link YamlNavigable} instead
  *
  * @author Kris De Volder
  */

@@ -8,9 +8,10 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.yaml.editor.completions;
+package org.springframework.ide.eclipse.yaml.structure;
 
-import org.springframework.ide.eclipse.yaml.editor.completions.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.yaml.editor.completions.YamlDocument;
+import org.springframework.ide.eclipse.yaml.structure.YamlStructureParser.SRootNode;
 
 /**
  * @author Kris De Volder

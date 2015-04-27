@@ -1016,18 +1016,18 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testEnumMapValueCompletion() throws Exception {
 		useProject(createPredefinedProject("demo-enum"));
 
-//		assertCompletions(
-//				"foo:\n" +
-//				"  nam<*>",
-//				//==>
-//				"foo:\n" +
-//				"  name-colors:\n"+
-//				"    <*>",
-//				// or
-//				"foo:\n" +
-//				"  color-names:\n"+
-//				"    <*>"
-//		);
+		assertCompletions(
+				"foo:\n" +
+				"  nam<*>",
+				//==>
+				"foo:\n" +
+				"  name-colors:\n"+
+				"    <*>",
+				// or
+				"foo:\n" +
+				"  color-names:\n"+
+				"    <*>"
+		);
 		assertCompletionsDisplayString(
 				"foo:\n"+
 				"  name-colors:\n" +
@@ -1191,9 +1191,270 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	}
 
-	//TODO: continue copying tests from
-	//   SpringPropertiesEditorTests.testPojoCompletions()
-	//   downwards
+	public void testPojoReconciling() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+		MockEditor editor = new MockEditor(
+			"foo:\n" +
+			"  data:\n" +
+			"    bogus: Something\n" +
+			"    wavelen: 3.0\n" +
+			"    wavelen: not a double\n" +
+			"    wavelen:\n"+
+			"      more: 3.0\n"+
+			"    wavelen:\n" +
+			"      - 3.0\n"
+		);
+		assertProblems(editor,
+				"bogus|Unknown property",
+				"not a double|Double",
+				"more: 3.0|Expecting a 'Double' but got a 'Mapping' node",
+				"- 3.0|Expecting a 'Double' but got a 'Sequence' node"
+		);
+	}
+
+
+	public void testListOfAtomicCompletions() throws Exception {
+		data("foo.slist", "java.util.List<java.lang.String>", null, "list of strings");
+		data("foo.ulist", "java.util.List<Unknown>", null, "list of strings");
+		data("foo.dlist", "java.util.List<java.lang.Double>", null, "list of doubles");
+		assertCompletions("foo:\n  u<*>", "foo:\n  ulist:\n    - <*>");
+		assertCompletions("foo:\n  d<*>", "foo:\n  dlist:\n    - <*>");
+		assertCompletions("foo:\n  sl<*>", "foo:\n  slist:\n    - <*>");
+	}
+
+	public void testEnumsInLowerCaseReconciling() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
+
+		MockEditor editor = new MockEditor(
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: NOT_A_SIZE\n"+
+				"    size: EXTRA_SMALL\n"+
+				"    size: extra-small\n"+
+				"    size: small\n"+
+				"    size: SMALL\n"
+		);
+		assertProblems(editor,
+				"NOT_A_SIZE|ClothingSize"
+		);
+
+		editor = new MockEditor(
+				"foo:\n" +
+				"  color-names:\n"+
+				"    red: Rood\n"+
+				"    green: Groen\n"+
+				"    blue: Blauw\n" +
+				"    not-a-color: Wrong\n" +
+				"    blue.bad: Blauw\n" +
+				"    blue:\n" +
+				"      bad: Blauw"
+		);
+		assertProblems(editor,
+				"not-a-color|Color",
+				"blue.bad|Color",
+				"bad: Blauw|Expecting a 'String' but got a 'Mapping'"
+		);
+
+		editor = new MockEditor(
+				"foo:\n" +
+				"  color-data:\n"+
+				"    red:\n" +
+				"      next: green\n" +
+				"      next: not a color\n" +
+				"      bogus: green\n" +
+				"      name: Rood\n"
+		);
+		assertProblems(editor,
+				"not a color|Color",
+				"bogus|Unknown property"
+		);
+	}
+
+	public void testEnumsInLowerCaseContentAssist() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.ClothingSize"));
+
+		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
+
+		assertCompletions(
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: S<*>",
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: SMALL<*>"
+		);
+
+		assertCompletions(
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: s<*>",
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: small<*>"
+		);
+
+		assertCompletions(
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: ex<*>",
+				// =>
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: extra-small<*>",
+				// or
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: extra-large<*>"
+		);
+
+		assertCompletions(
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: EX<*>",
+				// =>
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: EXTRA_SMALL<*>",
+				// or
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: EXTRA_LARGE<*>"
+		);
+
+		assertCompletionsDisplayString("foo:\n  color: <*>", "red", "green", "blue");
+
+		assertCompletions("foo:\n  color-data: R<*>", "foo:\n  color-data: \n    RED:\n      <*>");
+		assertCompletions("foo:\n  color-data: r<*>", "foo:\n  color-data: \n    red:\n      <*>");
+		assertCompletions("foo:\n  color-data: <*>",
+				"foo:\n  color-data: \n    red:\n      <*>",
+				"foo:\n  color-data: \n    green:\n      <*>",
+				"foo:\n  color-data: \n    blue:\n      <*>");
+
+		assertCompletions(
+				"foo:\n"+
+				"  color-data:\n"+
+				"    red: na<*>",
+				"foo:\n"+
+				"  color-data:\n"+
+				"    red: \n"+
+				"      name: <*>"
+		);
+	}
+
+	public void testPojoInListCompletion() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red: chi<*>"
+				,// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red: \n" +
+				"      children:\n" +
+				"        - <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"        - nex<*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"        - next: <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"        - nes<*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"        - nested:\n"+
+				"            <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"      - nex<*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"      - next: <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"      - nes<*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"      - nested:\n"+
+				"          <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"        - next: RED\n" +
+				"          wav<*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"        - next: RED\n" +
+				"          wavelen: <*>"
+		);
+
+		assertCompletions(
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"      - next: RED\n" +
+				"        wav<*>",
+				// =>
+				"foo:\n" +
+				"  color-data:\n" +
+				"    red:\n" +
+				"      children:\n" +
+				"      - next: RED\n" +
+				"        wavelen: <*>"
+		);
+
+	}
+
+	// TODO: allow relaxed property names in content assist and reconciling
 
 	///////////////// cruft ////////////////////////////////////////////////////////
 
