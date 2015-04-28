@@ -215,6 +215,9 @@
 		<bundle id="org.objectweb.asm" version="0.0.0"/>
 		<bundle id="org.objectweb.asm.source" version="0.0.0"/>
 
+		<bundle id="org.yaml.snakeyaml" version="0.0.0"/>
+		<bundle id="org.yaml.snakeyaml.source" version="0.0.0"/>
+        
 		<bundle id="org.springframework.aop" version="0.0.0"/>
 		<bundle id="org.springframework.aop.source" version="0.0.0"/>
 		<bundle id="org.springframework.beans" version="0.0.0"/>
