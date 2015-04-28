@@ -90,6 +90,14 @@
 
 	<modules>
 
+		<!-- boot -->
+		<module>plugins/org.springframework.ide.eclipse.boot</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.launch.test</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
+
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>
 		<module>plugins/org.springframework.ide.eclipse.doc</module>
@@ -179,14 +187,6 @@
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
-
-		<!-- boot -->
-		<module>plugins/org.springframework.ide.eclipse.boot</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.launch.test</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
