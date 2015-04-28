@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.*;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.firstElement;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.hasElements;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +42,12 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 public class TypeUtil {
 
+
+	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
+
+	private static final String STRING_TYPE_NAME = String.class.getName();
+	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
+
 	public enum EnumCaseMode {
 		LOWER_CASE, //convert enum names to lower case
 		ORIGNAL,    //keep orignal enum name
@@ -53,6 +62,18 @@ public class TypeUtil {
 		this.javaProject = jp;
 	}
 
+
+	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
+	static {
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
+	}
+
 	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
 			"java.lang.String",
@@ -62,9 +83,15 @@ public class TypeUtil {
 			"java.lang.Double",
 			"java.lang.Float",
 			"java.lang.Character",
-			"java.net.InetAddress",
+			INET_ADDRESS_TYPE_NAME,
 			"java.lang.String[]"
 	));
+
+	private static final Set<String> ATOMIC_TYPES = new HashSet<String>(PRIMITIVE_TYPE_NAMES.keySet());
+	static {
+		ATOMIC_TYPES.add(INET_ADDRESS_TYPE_NAME);
+		ATOMIC_TYPES.add(STRING_TYPE_NAME);
+	}
 
 	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();
 	static {
@@ -178,33 +205,47 @@ public class TypeUtil {
 	}
 
 	public String niceTypeName(Type _type) {
-		//TODO: this doesn't 'nicify' type parameters in the same way as the base type.
-		// Proper way to do this is walk the type and apply the same 'nicification' to
-		// all the types including parameters.
-		String typeStr = _type.toString();
+		StringBuilder buf = new StringBuilder();
+		niceTypeName(_type, buf);
+		return buf.toString();
+	}
+
+	public void niceTypeName(Type type, StringBuilder buf) {
+		String typeStr = type.getErasure();
 		if (typeStr.startsWith("java.lang.")) {
-			return typeStr.substring("java.lang.".length());
+			buf.append(typeStr.substring("java.lang.".length()));
+		} else if (typeStr.startsWith("java.util.")) {
+			buf.append(typeStr.substring("java.util.".length()));
+		} else {
+			buf.append(typeStr);
 		}
-		if (isEnum(_type)) {
-			String[] values = getAllowedValues(_type, EnumCaseMode.ORIGNAL);
+		if (isEnum(type)) {
+			String[] values = getAllowedValues(type, EnumCaseMode.ORIGNAL);
 			if (values!=null && values.length>0) {
-				StringBuilder name = new StringBuilder();
-				name.append(typeStr+"[");
+				buf.append("[");
 				int max = Math.min(4, values.length);
 				for (int i = 0; i < max; i++) {
 					if (i>0) {
-						name.append(", ");
+						buf.append(", ");
 					}
-					name.append(values[i]);
+					buf.append(values[i]);
 				}
 				if (max!=values.length) {
-					name.append(", ...");
+					buf.append(", ...");
 				}
-				name.append("]");
-				return name.toString();
+				buf.append("]");
 			}
+		} else if (type.isGeneric()) {
+			Type[] params = type.getParams();
+			buf.append("<");
+			for (int i = 0; i < params.length; i++) {
+				if (i>0) {
+					buf.append(", ");
+				}
+				niceTypeName(params[i], buf);
+			}
+			buf.append(">");
 		}
-		return typeStr;
 	}
 
 
@@ -225,9 +266,9 @@ public class TypeUtil {
 		return !isAtomic(type);
 	}
 
-	protected boolean isAtomic(Type type) {
+	public boolean isAtomic(Type type) {
 		String typeName = type.getErasure();
-		return typeName.equals(STRING_TYPE_NAME) || PRIMITIVE_TYPE_NAMES.containsKey(typeName) || isEnum(type);
+		return ATOMIC_TYPES.contains(typeName) || isEnum(type);
 	}
 
 	/**
@@ -235,7 +276,7 @@ public class TypeUtil {
 	 * use the notation <name>[<index>]=<value> in property file
 	 * for properties of this type.
 	 */
-	public static boolean isBracketable(Type type) {
+	public static boolean isArrayLike(Type type) {
 		//Note: map types are bracketable although the notation isn't really useful
 		// for them (and a bit broken see https://github.com/spring-projects/spring-boot/issues/2386).
 
@@ -256,7 +297,7 @@ public class TypeUtil {
 		}
 	}
 
-	public boolean isMap(Type type) {
+	public static boolean isMap(Type type) {
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
 		//However, use reflection here is okay assuming types we care about
@@ -279,8 +320,13 @@ public class TypeUtil {
 		return lastElement(type.getParams());
 	}
 
-	public static Type getKeyType(Type mapType) {
-		return firstElement(mapType.getParams());
+	public static Type getKeyType(Type mapOrArrayType) {
+		if (isArrayLike(mapOrArrayType)) {
+			return INTEGER_TYPE;
+		} else {
+			//assumed to be a map
+			return firstElement(mapOrArrayType.getParams());
+		}
 	}
 
 	public boolean isAssignableType(Type type) {
@@ -292,7 +338,7 @@ public class TypeUtil {
 	private boolean isAssignableList(Type type) {
 		//TODO: isBracketable means 'isList' right now, but this may not be
 		// the case in the future.
-		if (isBracketable(type)) {
+		if (isArrayLike(type)) {
 			Type domainType = getDomainType(type);
 			return isAtomic(domainType);
 		}
@@ -339,20 +385,6 @@ public class TypeUtil {
 
 	private static final String JAVA_LANG = "java.lang.";
 	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
-
-	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
-
-	private static final String STRING_TYPE_NAME = String.class.getName();
-
-	static {
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
-	}
 
 	/**
 	 * Determine properties that are setable on object of given type.
@@ -436,6 +468,20 @@ public class TypeUtil {
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
+		}
+		return null;
+	}
+
+	public Map<String,Type> getPropertiesMap(Type type, EnumCaseMode mode) {
+		//TODO: optimize, produce directly as a map instead of
+		// first creating list and then coverting it.
+		List<TypedProperty> list = getProperties(type, mode);
+		if (list!=null) {
+			Map<String, Type> map = new HashMap<String, Type>();
+			for (TypedProperty p : list) {
+				map.put(p.getName(), p.getType());
+			}
+			return map;
 		}
 		return null;
 	}

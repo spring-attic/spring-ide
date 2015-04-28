@@ -77,57 +77,57 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testValueCompletion() throws Exception {
 		defaultTestData();
-		assertCompletions("liquibase.enabled=<*>",
+		assertCompletionsVariations("liquibase.enabled=<*>",
 				"liquibase.enabled=true<*>",
 				"liquibase.enabled=false<*>"
 		);
 
-		assertCompletions("liquibase.enabled:<*>",
+		assertCompletionsVariations("liquibase.enabled:<*>",
 				"liquibase.enabled:true<*>",
 				"liquibase.enabled:false<*>"
 		);
 
-		assertCompletions("liquibase.enabled = <*>",
+		assertCompletionsVariations("liquibase.enabled = <*>",
 				"liquibase.enabled = true<*>",
 				"liquibase.enabled = false<*>"
 		);
 
-		assertCompletions("liquibase.enabled   <*>",
+		assertCompletionsVariations("liquibase.enabled   <*>",
 				"liquibase.enabled   true<*>",
 				"liquibase.enabled   false<*>"
 		);
 
-		assertCompletions("liquibase.enabled=f<*>",
+		assertCompletionsVariations("liquibase.enabled=f<*>",
 				"liquibase.enabled=false<*>"
 		);
 
-		assertCompletions("liquibase.enabled=t<*>",
+		assertCompletionsVariations("liquibase.enabled=t<*>",
 				"liquibase.enabled=true<*>"
 		);
 
-		assertCompletions("liquibase.enabled:f<*>",
+		assertCompletionsVariations("liquibase.enabled:f<*>",
 				"liquibase.enabled:false<*>"
 		);
 
-		assertCompletions("liquibase.enabled:t<*>",
+		assertCompletionsVariations("liquibase.enabled:t<*>",
 				"liquibase.enabled:true<*>"
 		);
 
-		assertCompletions("liquibase.enabled = f<*>",
+		assertCompletionsVariations("liquibase.enabled = f<*>",
 				"liquibase.enabled = false<*>"
 		);
 
-		assertCompletions("liquibase.enabled = t<*>",
+		assertCompletionsVariations("liquibase.enabled = t<*>",
 				"liquibase.enabled = true<*>"
 		);
 
-		assertCompletions("liquibase.enabled   t<*>",
+		assertCompletionsVariations("liquibase.enabled   t<*>",
 				"liquibase.enabled   true<*>"
 		);
 
 		//one more... for special char like '-' in the name
 
-		assertCompletions("liquibase.check-change-log-location=t<*>",
+		assertCompletionsVariations("liquibase.check-change-log-location=t<*>",
 				"liquibase.check-change-log-location=true<*>"
 		);
 	}
@@ -294,16 +294,16 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
 
-		assertCompletions("volder.foo.l<*>", "volder.foo.list[<*>");
+		assertCompletionsVariations("volder.foo.l<*>", "volder.foo.list[<*>");
 		assertCompletionsDisplayString("volder.foo.list[0].<*>", "name", "description", "roles");
 
-		assertCompletions("volder.foo.list[0].n<*>",
+		assertCompletionsVariations("volder.foo.list[0].n<*>",
 				"volder.foo.list[0].name=<*>"
 		);
-		assertCompletions("volder.foo.list[0].d<*>",
+		assertCompletionsVariations("volder.foo.list[0].d<*>",
 				"volder.foo.list[0].description=<*>"
 		);
-		assertCompletions("volder.foo.list[0].r<*>",
+		assertCompletionsVariations("volder.foo.list[0].r<*>",
 				"volder.foo.list[0].roles=<*>"
 		);
 	}
@@ -478,7 +478,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 
-		assertCompletions("foo.nam<*>",
+		assertCompletionsVariations("foo.nam<*>",
 				"foo.name-colors.<*>",
 				"foo.color-names.<*>"
 		);
@@ -486,7 +486,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletionsDisplayString("foo.name-colors.something=<*>",
 				"red", "green", "blue"
 		);
-		assertCompletions("foo.name-colors.something=G<*>", "foo.name-colors.something=GREEN<*>");
+		assertCompletionsVariations("foo.name-colors.something=G<*>", "foo.name-colors.something=GREEN<*>");
 	}
 
 	public void testEnumMapValueReconciling() throws Exception {
@@ -518,8 +518,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.ColorData"));
 
 		//Map Enum -> String:
-		assertCompletions("foo.colnam<*>", "foo.color-names.<*>");
-		assertCompletions("foo.color-names.<*>",
+		assertCompletionsVariations("foo.colnam<*>", "foo.color-names.<*>");
+		assertCompletionsVariations("foo.color-names.<*>",
 				"foo.color-names.red=<*>",
 				"foo.color-names.green=<*>",
 				"foo.color-names.blue=<*>"
@@ -527,18 +527,18 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletionsDisplayString("foo.color-names.<*>",
 				"red", "green", "blue"
 		);
-		assertCompletions("foo.color-names.B<*>",
+		assertCompletionsVariations("foo.color-names.B<*>",
 				"foo.color-names.BLUE=<*>"
 		);
 
 		//Map Enum -> Pojo:
-		assertCompletions("foo.coldat<*>", "foo.color-data.<*>");
-		assertCompletions("foo.color-data.<*>",
+		assertCompletionsVariations("foo.coldat<*>", "foo.color-data.<*>");
+		assertCompletionsVariations("foo.color-data.<*>",
 				"foo.color-data.red.<*>",
 				"foo.color-data.green.<*>",
 				"foo.color-data.blue.<*>"
 		);
-		assertCompletions("foo.color-data.B<*>",
+		assertCompletionsVariations("foo.color-data.B<*>",
 				"foo.color-data.BLUE.<*>"
 		);
 		assertCompletionsDisplayString("foo.color-data.<*>",
@@ -580,14 +580,14 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"mapped-children", "color-children", "tags"
 		);
 
-		assertCompletions("foo.data.wav<*>", "foo.data.wavelen=<*>");
-		assertCompletions("foo.data.nam<*>", "foo.data.name=<*>");
-		assertCompletions("foo.data.nex<*>", "foo.data.next=<*>");
-		assertCompletions("foo.data.nes<*>", "foo.data.nested.<*>");
-		assertCompletions("foo.data.chi<*>", "foo.data.children[<*>");
-		assertCompletions("foo.data.tag<*>", "foo.data.tags=<*>");
-		assertCompletions("foo.data.map<*>", "foo.data.mapped-children.<*>");
-		assertCompletions("foo.data.col<*>", "foo.data.color-children.<*>");
+		assertCompletionsVariations("foo.data.wav<*>", "foo.data.wavelen=<*>");
+		assertCompletionsVariations("foo.data.nam<*>", "foo.data.name=<*>");
+		assertCompletionsVariations("foo.data.nex<*>", "foo.data.next=<*>");
+		assertCompletionsVariations("foo.data.nes<*>", "foo.data.nested.<*>");
+		assertCompletionsVariations("foo.data.chi<*>", "foo.data.children[<*>");
+		assertCompletionsVariations("foo.data.tag<*>", "foo.data.tags=<*>");
+		assertCompletionsVariations("foo.data.map<*>", "foo.data.mapped-children.<*>");
+		assertCompletionsVariations("foo.data.col<*>", "foo.data.color-children.<*>");
 	}
 
 	public void testPojoReconciling() throws Exception {
@@ -616,9 +616,9 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("foo.slist", "java.util.List<java.lang.String>", null, "list of strings");
 		data("foo.ulist", "java.util.List<Unknown>", null, "list of strings");
 		data("foo.dlist", "java.util.List<java.lang.Double>", null, "list of doubles");
-		assertCompletions("foo.u<*>", "foo.ulist[<*>");
-		assertCompletions("foo.d<*>", "foo.dlist=<*>");
-		assertCompletions("foo.sl<*>", "foo.slist=<*>");
+		assertCompletionsVariations("foo.u<*>", "foo.ulist[<*>");
+		assertCompletionsVariations("foo.d<*>", "foo.dlist=<*>");
+		assertCompletionsVariations("foo.sl<*>", "foo.slist=<*>");
 	}
 
 	public void testMapKeyDotInterpretation() throws Exception {
@@ -655,7 +655,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"[2]|Can't use '[..]'"
 		);
 
-		assertCompletions("enummap.more.dots=R<*>", "enummap.more.dots=RED<*>");
+		assertCompletionsVariations("enummap.more.dots=R<*>", "enummap.more.dots=RED<*>");
 	}
 
 	public void testMapKeyDotInterpretationInPojo() throws Exception {
@@ -680,7 +680,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"wrong|no property"
 		);
 
-		assertCompletions("foo.color-data.RED.ch<*>", "foo.color-data.RED.children[<*>");
+		assertCompletionsVariations("foo.color-data.RED.ch<*>", "foo.color-data.RED.children[<*>");
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
@@ -734,27 +734,27 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
 
-		assertCompletions("simple.pants.size=S<*>", "simple.pants.size=SMALL<*>");
-		assertCompletions("simple.pants.size=s<*>", "simple.pants.size=small<*>");
-		assertCompletions("simple.pants.size=ex<*>",
+		assertCompletionsVariations("simple.pants.size=S<*>", "simple.pants.size=SMALL<*>");
+		assertCompletionsVariations("simple.pants.size=s<*>", "simple.pants.size=small<*>");
+		assertCompletionsVariations("simple.pants.size=ex<*>",
 				"simple.pants.size=extra-small<*>",
 				"simple.pants.size=extra-large<*>"
 		);
-		assertCompletions("simple.pants.size=EX<*>",
+		assertCompletionsVariations("simple.pants.size=EX<*>",
 				"simple.pants.size=EXTRA_SMALL<*>",
 				"simple.pants.size=EXTRA_LARGE<*>"
 		);
 		assertCompletionsDisplayString("foo.color=<*>", "red", "green", "blue");
 
-		assertCompletions("foo.color-data.R<*>", "foo.color-data.RED.<*>");
-		assertCompletions("foo.color-data.r<*>", "foo.color-data.red.<*>");
-		assertCompletions("foo.color-data.<*>",
+		assertCompletionsVariations("foo.color-data.R<*>", "foo.color-data.RED.<*>");
+		assertCompletionsVariations("foo.color-data.r<*>", "foo.color-data.red.<*>");
+		assertCompletionsVariations("foo.color-data.<*>",
 				"foo.color-data.red.<*>",
 				"foo.color-data.green.<*>",
 				"foo.color-data.blue.<*>"
 		);
 
-		assertCompletions("foo.color-data.red.na<*>", "foo.color-data.red.name=<*>");
+		assertCompletionsVariations("foo.color-data.red.na<*>", "foo.color-data.red.name=<*>");
 	}
 
 	public void testNavigationProposalAfterRelaxedPropertyName() throws Exception {
@@ -762,8 +762,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		assertCompletions("foo.colorData.r<*>", "foo.colorData.red.<*>");
-		assertCompletions("foo.colorData.red.na<*>", "foo.colorData.red.name=<*>");
+		assertCompletionsVariations("foo.colorData.r<*>", "foo.colorData.red.<*>");
+		assertCompletionsVariations("foo.colorData.red.na<*>", "foo.colorData.red.name=<*>");
 	}
 
 	public void testValueProposalAssignedToRelaxedPropertyName() throws Exception {

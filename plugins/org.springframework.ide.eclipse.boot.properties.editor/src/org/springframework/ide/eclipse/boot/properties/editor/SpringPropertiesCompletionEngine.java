@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.ui.JavaUI;
@@ -54,8 +53,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -68,28 +67,17 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class SpringPropertiesCompletionEngine {
+public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvider, ICompletionEngine {
 
-	private boolean preferLowerCaseEnums = true;
-
-	private static abstract class PrefixFinder {
-		public String getPrefix(IDocument doc, int offset) {
-			try {
-				if (doc == null || offset > doc.getLength())
-					return null;
-				int prefixStart= offset;
-				while (prefixStart > 0 && isPrefixChar(doc.getChar(prefixStart-1))) {
-					prefixStart--;
-				}
-				return doc.get(prefixStart, offset-prefixStart);
-			} catch (BadLocationException e) {
-				return null;
-			}
-		}
-		protected abstract boolean isPrefixChar(char c);
-	}
+	private boolean preferLowerCaseEnums = true; //might make sense to make this user configurable
 
 	private static final boolean DEBUG = false;
+	public static void debug(String msg) {
+		if (DEBUG) {
+			System.out.println("SpringPropertiesCompletionEngine: "+msg);
+		}
+	}
+
 	public static final boolean DEFAULT_VALUE_INCLUDED = false; //might make sense to make this user configurable
 
 	private static final PrefixFinder fuzzySearchPrefix = new PrefixFinder() {
@@ -127,36 +115,24 @@ public class SpringPropertiesCompletionEngine {
 		}
 	};
 
-//	private static final boolean DEBUG =
-//			(""+Platform.getLocation()).contains("kdvolder") ||
-//			(""+Platform.getLocation()).contains("bamboo");
-
-	public static void debug(String msg) {
-		if (DEBUG) {
-			System.out.println("SpringPropertiesCompletionEngine: "+msg);
-		}
-	}
-
-	public Styler JAVA_STRING_COLOR = new Styler() {
+	private Styler JAVA_STRING_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_STRING);
 		}
 	};
-	public Styler JAVA_KEYWORD_COLOR = new Styler() {
+	private Styler JAVA_KEYWORD_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_KEYWORD);
 		}
 	};
-	public Styler JAVA_OPERATOR_COLOR = new Styler() {
+	private Styler JAVA_OPERATOR_COLOR = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_OPERATOR);
 		}
 	};
-
-
 
 	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
@@ -178,303 +154,6 @@ public class SpringPropertiesCompletionEngine {
 			return 0;
 		}
 	};
-	private static final IContentProposal[] NO_CONTENT_PROPOSALS = new IContentProposal[0];
-
-	private DocumentContextFinder documentContextFinder = null;
-	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
-	private TypeUtil typeUtil = null;
-
-	/**
-	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
-	 * constructor that accepts an {@link IJavaProject}.
-	 * <p>
-	 * In a test context the test harness is responsible for injecting proper documentContextFinder
-	 * and indexProvider.
-	 */
-	public SpringPropertiesCompletionEngine() {
-	}
-
-	/**
-	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal
-	 * Eclipse runtime.
-	 */
-	public SpringPropertiesCompletionEngine(final IJavaProject jp) throws Exception {
-		this.indexProvider = new Provider<FuzzyMap<PropertyInfo>>() {
-			public FuzzyMap<PropertyInfo> get() {
-				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
-			}
-		};
-		this.documentContextFinder = DocumentContextFinder.DEFAULT;
-		this.typeUtil = new TypeUtil(jp);
-
-//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
-//		dumpAsTestData();
-//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
-
-	}
-
-	/**
-	 * Create completions proposals in the context of a properties text editor.
-	 */
-	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
-		ITypedRegion partition = getPartition(doc, offset);
-		String type = partition.getType();
-		if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-			//inside a property 'key'
-			return getPropertyCompletions(doc, offset);
-		} else if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
-			return getValueCompletions(doc, offset, partition);
-		}
-		return Collections.emptyList();
-	}
-
-	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, int offset) {
-		String navPrefix = navigationPrefixFinder.getPrefix(doc, offset);
-		try {
-			if (navPrefix!=null) {
-				int navOffset = offset-navPrefix.length()-1; //offset of 'nav' operator char (i.e. '.' or ']').
-				navPrefix = fuzzySearchPrefix.getPrefix(doc, navOffset);
-				if (navPrefix!=null && !navPrefix.isEmpty()) {
-					PropertyInfo prop = findLongestValidProperty(getIndex(), navPrefix);
-					if (prop!=null) {
-						int regionStart = navOffset-navPrefix.length();
-						PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, region(regionStart, navOffset));
-						Type type = navigator.navigate(regionStart+prop.getId().length(), TypeParser.parse(prop.getType()));
-						if (type!=null) {
-							return getNavigationProposals(doc, type, navOffset, offset);
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return Collections.emptyList();
-	}
-
-	private IRegion region(int start, int end) {
-		return new Region(start, end-start);
-	}
-
-	/**
-	 * @param type Type of the expression leading upto the 'nav' operator
-	 * @param navOffset Offset of the nav operator (either ']' or '.'
-	 * @param offset Offset of the cursor where CA was requested.
-	 * @return
-	 */
-	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, Type type, int navOffset, int offset) {
-		try {
-			char navOp = doc.getChar(navOffset);
-			if (navOp=='.') {
-				String prefix = doc.get(navOffset+1, offset-(navOffset+1));
-				EnumCaseMode caseMode = caseMode(prefix);
-				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode);
-				if (objectProperties!=null && !objectProperties.isEmpty()) {
-					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					int sorting = 1;
-					for (TypedProperty prop : objectProperties) {
-						if (prop.getName().startsWith(prefix)) {
-							Type valueType = prop.getType();
-							String postFix = propertyCompletionPostfix(valueType);
-							proposals.add(new ValueProposal(navOffset+1, prefix, prop.getName(), sorting++, postFix));
-						}
-					}
-					return proposals;
-				}
-			} else {
-				//TODO: other cases ']' or '[' ?
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return Collections.emptyList();
-	}
-
-	/**
-	 * Determines the EnumCaseMode used to generate completion candidates based on prefix.
-	 */
-	protected EnumCaseMode caseMode(String prefix) {
-		EnumCaseMode caseMode;
-		if ("".equals(prefix)) {
-			caseMode = preferLowerCaseEnums?EnumCaseMode.LOWER_CASE:EnumCaseMode.ORIGNAL;
-		} else {
-			caseMode = Character.isLowerCase(prefix.charAt(0))?EnumCaseMode.LOWER_CASE:EnumCaseMode.ORIGNAL;
-		}
-		return caseMode;
-	}
-
-	protected String propertyCompletionPostfix(Type type) {
-		String postfix = "";
-		if (type!=null) {
-			if (typeUtil.isAssignableType(type)) {
-				postfix = "=";
-			} else if (TypeUtil.isBracketable(type)) {
-				postfix = "[";
-			} else if (typeUtil.isDotable(type)) {
-				postfix = ".";
-			}
-		}
-		return postfix;
-	}
-
-	public static boolean isAssign(char assign) {
-		return assign==':'||assign=='=';
-	}
-
-	private ITypedRegion getPartition(IDocument doc, int offset) throws BadLocationException {
-		ITypedRegion part = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
-		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0) {
-			//A special case because when cursor at end of document and just after a '=' sign, then we get a DEFAULT content type
-			// with a empty region. We rather would get the non-empty 'Value' partition just before that (which has the assignment in it.
-			char assign = doc.getChar(offset-1);
-			if (isAssign(assign)) {
-				return new TypedRegion(offset-1, 1, IPropertiesFilePartitions.PROPERTY_VALUE);
-			} else {
-				//For a similar case but where there's extra spaces after the '='
-				ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, true);
-				int previousEnd = previousPart.getOffset()+previousPart.getLength();
-				if (previousEnd==offset) {
-					//prefer this over a 0 length partition ending at the same location
-					return previousPart;
-				}
-			}
-		}
-		return part;
-	}
-
-	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
-		int regionStart = valuePartition.getOffset();
-		int startOfValue = findValueStart(doc, regionStart);
-		try {
-			String valuePrefix;
-			if (startOfValue>=0 && startOfValue<offset) {
-				valuePrefix = doc.get(startOfValue, offset-startOfValue);
-			} else {
-				startOfValue = offset;
-				valuePrefix = "";
-			}
-			EnumCaseMode caseMode = caseMode(valuePrefix);
-			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
-											//because value partition includes whitespace around the assignment
-			if (propertyName!=null) {
-				Type type = getValueType(propertyName);
-				String[] valueCompletions = typeUtil.getAllowedValues(type, caseMode);
-				if (valueCompletions!=null && valueCompletions.length>0) {
-					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					for (int i = 0; i < valueCompletions.length; i++) {
-						String valueCandidate = valueCompletions[i];
-						if (valueCandidate.startsWith(valuePrefix)) {
-							proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i));
-						}
-					}
-					return proposals;
-				}
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return Collections.emptyList();
-	}
-
-	/**
-	 * Determine the value type for a give propertyName.
-	 */
-	protected Type getValueType(String propertyName) {
-		try {
-			PropertyInfo prop = getIndex().get(propertyName);
-			if (prop!=null) {
-				return TypeParser.parse(prop.getType());
-			} else {
-				prop = findLongestValidProperty(getIndex(), propertyName);
-				if (prop!=null) {
-					Document doc = new Document(propertyName);
-					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, new Region(0, doc.getLength()));
-					return navigator.navigate(prop.getId().length(), TypeParser.parse(prop.getType()));
-				}
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return null;
-	}
-
-	private int findValueStart(IDocument doc, int pos) {
-		try {
-			pos = skipWhiteSpace(doc, pos);
-			if (pos>=0) {
-				char assign = doc.getChar(pos);
-				if (!isAssign(assign)) {
-					return pos; //For the case where key and value are separated by whitespace instead of assignment
-				}
-				pos = skipWhiteSpace(doc, pos+1);
-				if (pos>=0) {
-					return pos;
-				}
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
-	}
-
-	private List<Match<PropertyInfo>> findMatches(String prefix) {
-		List<Match<PropertyInfo>> matches = getIndex().find(camelCaseToHyphens(prefix));
-		return matches;
-	}
-
-	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
-		Collection<ICompletionProposal> navProposals = getNavigationProposals(doc, offset);
-		if (!navProposals.isEmpty()) {
-			return navProposals;
-		}
-		return getFuzzyCompletions(doc, offset);
-	}
-
-	protected Collection<ICompletionProposal> getFuzzyCompletions(
-			IDocument doc, int offset) {
-		String prefix = fuzzySearchPrefix.getPrefix(doc, offset);
-		if (prefix != null) {
-			Collection<Match<PropertyInfo>> matches = findMatches(prefix);
-			if (matches!=null && !matches.isEmpty()) {
-				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
-				for (Match<PropertyInfo> match : matches) {
-					proposals.add(new PropertyProposal(doc, prefix, offset, match));
-				}
-				return proposals;
-			}
-		}
-		return Collections.emptyList();
-	}
-
-	/**
-	 * Create completions proposals for a field editor where property names can be entered.
-	 */
-	public IContentProposal[] getPropertyFieldProposals(String contents, int position) {
-		String prefix = contents.substring(0,position);
-		if (StringUtil.hasText(prefix)) {
-			List<Match<PropertyInfo>> matches = findMatches(prefix);
-			if (matches!=null && !matches.isEmpty()) {
-				IContentProposal[] proposals = new IContentProposal[matches.size()];
-				Collections.sort(matches, new Comparator<Match<PropertyInfo>>() {
-					@Override
-					public int compare(Match<PropertyInfo> o1, Match<PropertyInfo> o2) {
-						int scoreCompare = Double.compare(o2.score, o1.score);
-						if (scoreCompare!=0) {
-							return scoreCompare;
-						} else {
-							return o1.data.getId().compareTo(o2.data.getId());
-						}
-					}
-				});
-				int i = 0;
-				for (Match<PropertyInfo> m : matches) {
-					proposals[i++] = new ContentProposal(m.data.getId(), m.data.getDescription());
-				}
-				return proposals;
-			}
-		}
-		return NO_CONTENT_PROPOSALS;
-	}
 
 	private final class ValueProposal implements ICompletionProposal {
 
@@ -696,41 +375,337 @@ public class SpringPropertiesCompletionEngine {
 
 	}
 
-	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, int offset, String contentType) {
-		debug("getHoverInfo("+offset+", "+contentType+")");
+	private static final IContentProposal[] NO_CONTENT_PROPOSALS = new IContentProposal[0];
+
+	private DocumentContextFinder documentContextFinder = null;
+	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
+	private TypeUtil typeUtil = null;
+
+	/**
+	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
+	 * constructor that accepts an {@link IJavaProject}.
+	 * <p>
+	 * In a test context the test harness is responsible for injecting proper documentContextFinder
+	 * and indexProvider.
+	 */
+	public SpringPropertiesCompletionEngine() {
+	}
+
+	/**
+	 * Constructor used in 'production'. Wires up stuff properly for running inside a normal
+	 * Eclipse runtime.
+	 */
+	public SpringPropertiesCompletionEngine(final IJavaProject jp) throws Exception {
+		this.indexProvider = new Provider<FuzzyMap<PropertyInfo>>() {
+			public FuzzyMap<PropertyInfo> get() {
+				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
+			}
+		};
+		this.documentContextFinder = DocumentContextFinder.DEFAULT;
+		this.typeUtil = new TypeUtil(jp);
+
+//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
+//		dumpAsTestData();
+//		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
+
+	}
+
+	/**
+	 * Create completions proposals in the context of a properties text editor.
+	 */
+	public Collection<ICompletionProposal> getCompletions(IDocument doc, int offset) throws BadLocationException {
+		ITypedRegion partition = getPartition(doc, offset);
+		String type = partition.getType();
+		if (type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			//inside a property 'key'
+			return getPropertyCompletions(doc, offset);
+		} else if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
+			return getValueCompletions(doc, offset, partition);
+		}
+		return Collections.emptyList();
+	}
+
+	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, int offset) {
+		String navPrefix = navigationPrefixFinder.getPrefix(doc, offset);
 		try {
-			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
-				ITypedRegion r = getHoverRegion(doc, offset);
-				debug("hoverRegion = "+r);
-				PropertyInfo best = findBestHoverMatch(doc.get(r.getOffset(), r.getLength()).trim());
-				if (best!=null) {
-					return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
+			if (navPrefix!=null) {
+				int navOffset = offset-navPrefix.length()-1; //offset of 'nav' operator char (i.e. '.' or ']').
+				navPrefix = fuzzySearchPrefix.getPrefix(doc, navOffset);
+				if (navPrefix!=null && !navPrefix.isEmpty()) {
+					PropertyInfo prop = findLongestValidProperty(getIndex(), navPrefix);
+					if (prop!=null) {
+						int regionStart = navOffset-navPrefix.length();
+						PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, region(regionStart, navOffset));
+						Type type = navigator.navigate(regionStart+prop.getId().length(), TypeParser.parse(prop.getType()));
+						if (type!=null) {
+							return getNavigationProposals(doc, type, navOffset, offset);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	private IRegion region(int start, int end) {
+		return new Region(start, end-start);
+	}
+
+	/**
+	 * @param type Type of the expression leading upto the 'nav' operator
+	 * @param navOffset Offset of the nav operator (either ']' or '.'
+	 * @param offset Offset of the cursor where CA was requested.
+	 * @return
+	 */
+	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, Type type, int navOffset, int offset) {
+		try {
+			char navOp = doc.getChar(navOffset);
+			if (navOp=='.') {
+				String prefix = doc.get(navOffset+1, offset-(navOffset+1));
+				EnumCaseMode caseMode = caseMode(prefix);
+				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode);
+				if (objectProperties!=null && !objectProperties.isEmpty()) {
+					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+					int sorting = 1;
+					for (TypedProperty prop : objectProperties) {
+						if (prop.getName().startsWith(prefix)) {
+							Type valueType = prop.getType();
+							String postFix = propertyCompletionPostfix(valueType);
+							proposals.add(new ValueProposal(navOffset+1, prefix, prop.getName(), sorting++, postFix));
+						}
+					}
+					return proposals;
+				}
+			} else {
+				//TODO: other cases ']' or '[' ?
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Determines the EnumCaseMode used to generate completion candidates based on prefix.
+	 */
+	protected EnumCaseMode caseMode(String prefix) {
+		EnumCaseMode caseMode;
+		if ("".equals(prefix)) {
+			caseMode = preferLowerCaseEnums?EnumCaseMode.LOWER_CASE:EnumCaseMode.ORIGNAL;
+		} else {
+			caseMode = Character.isLowerCase(prefix.charAt(0))?EnumCaseMode.LOWER_CASE:EnumCaseMode.ORIGNAL;
+		}
+		return caseMode;
+	}
+
+	protected String propertyCompletionPostfix(Type type) {
+		String postfix = "";
+		if (type!=null) {
+			if (typeUtil.isAssignableType(type)) {
+				postfix = "=";
+			} else if (TypeUtil.isArrayLike(type)) {
+				postfix = "[";
+			} else if (typeUtil.isDotable(type)) {
+				postfix = ".";
+			}
+		}
+		return postfix;
+	}
+
+	public static boolean isAssign(char assign) {
+		return assign==':'||assign=='=';
+	}
+
+	private ITypedRegion getPartition(IDocument doc, int offset) throws BadLocationException {
+		ITypedRegion part = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
+		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0) {
+			//A special case because when cursor at end of document and just after a '=' sign, then we get a DEFAULT content type
+			// with a empty region. We rather would get the non-empty 'Value' partition just before that (which has the assignment in it.
+			char assign = doc.getChar(offset-1);
+			if (isAssign(assign)) {
+				return new TypedRegion(offset-1, 1, IPropertiesFilePartitions.PROPERTY_VALUE);
+			} else {
+				//For a similar case but where there's extra spaces after the '='
+				ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, true);
+				int previousEnd = previousPart.getOffset()+previousPart.getLength();
+				if (previousEnd==offset) {
+					//prefer this over a 0 length partition ending at the same location
+					return previousPart;
+				}
+			}
+		}
+		return part;
+	}
+
+	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
+		int regionStart = valuePartition.getOffset();
+		int startOfValue = findValueStart(doc, regionStart);
+		try {
+			String valuePrefix;
+			if (startOfValue>=0 && startOfValue<offset) {
+				valuePrefix = doc.get(startOfValue, offset-startOfValue);
+			} else {
+				startOfValue = offset;
+				valuePrefix = "";
+			}
+			EnumCaseMode caseMode = caseMode(valuePrefix);
+			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
+											//because value partition includes whitespace around the assignment
+			if (propertyName!=null) {
+				Type type = getValueType(propertyName);
+				String[] valueCompletions = typeUtil.getAllowedValues(type, caseMode);
+				if (valueCompletions!=null && valueCompletions.length>0) {
+					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+					for (int i = 0; i < valueCompletions.length; i++) {
+						String valueCandidate = valueCompletions[i];
+						if (valueCandidate.startsWith(valuePrefix)) {
+							proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i));
+						}
+					}
+					return proposals;
 				}
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Determine the value type for a give propertyName.
+	 */
+	protected Type getValueType(String propertyName) {
+		try {
+			PropertyInfo prop = getIndex().get(propertyName);
+			if (prop!=null) {
+				return TypeParser.parse(prop.getType());
+			} else {
+				prop = findLongestValidProperty(getIndex(), propertyName);
+				if (prop!=null) {
+					Document doc = new Document(propertyName);
+					PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, new Region(0, doc.getLength()));
+					return navigator.navigate(prop.getId().length(), TypeParser.parse(prop.getType()));
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
 		return null;
 	}
 
-	public List<IJavaElement> getSourceElements(IDocument doc, int offset) {
-		debug("getSourceElements");
-		SpringPropertyHoverInfo hoverinfo = getHoverInfo(doc, offset, IDocument.DEFAULT_CONTENT_TYPE);
-		if (hoverinfo!=null) {
-			return hoverinfo.getJavaElements();
-		} else {
-			debug("hoverInfo = null");
+	private int findValueStart(IDocument doc, int pos) {
+		try {
+			pos = skipWhiteSpace(doc, pos);
+			if (pos>=0) {
+				char assign = doc.getChar(pos);
+				if (!isAssign(assign)) {
+					return pos; //For the case where key and value are separated by whitespace instead of assignment
+				}
+				pos = skipWhiteSpace(doc, pos+1);
+				if (pos>=0) {
+					return pos;
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return -1;
+	}
+
+	private List<Match<PropertyInfo>> findMatches(String prefix) {
+		List<Match<PropertyInfo>> matches = getIndex().find(camelCaseToHyphens(prefix));
+		return matches;
+	}
+
+	private Collection<ICompletionProposal> getPropertyCompletions(IDocument doc, int offset) throws BadLocationException {
+		Collection<ICompletionProposal> navProposals = getNavigationProposals(doc, offset);
+		if (!navProposals.isEmpty()) {
+			return navProposals;
+		}
+		return getFuzzyCompletions(doc, offset);
+	}
+
+	protected Collection<ICompletionProposal> getFuzzyCompletions(
+			IDocument doc, int offset) {
+		String prefix = fuzzySearchPrefix.getPrefix(doc, offset);
+		if (prefix != null) {
+			Collection<Match<PropertyInfo>> matches = findMatches(prefix);
+			if (matches!=null && !matches.isEmpty()) {
+				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
+				for (Match<PropertyInfo> match : matches) {
+					proposals.add(new PropertyProposal(doc, prefix, offset, match));
+				}
+				return proposals;
+			}
 		}
 		return Collections.emptyList();
 	}
 
-	public ITypedRegion getHoverRegion(IDocument document, int offset) {
+	/**
+	 * Create completions proposals for a field editor where property names can be entered.
+	 */
+	public IContentProposal[] getPropertyFieldProposals(String contents, int position) {
+		String prefix = contents.substring(0,position);
+		if (StringUtil.hasText(prefix)) {
+			List<Match<PropertyInfo>> matches = findMatches(prefix);
+			if (matches!=null && !matches.isEmpty()) {
+				IContentProposal[] proposals = new IContentProposal[matches.size()];
+				Collections.sort(matches, new Comparator<Match<PropertyInfo>>() {
+					@Override
+					public int compare(Match<PropertyInfo> o1, Match<PropertyInfo> o2) {
+						int scoreCompare = Double.compare(o2.score, o1.score);
+						if (scoreCompare!=0) {
+							return scoreCompare;
+						} else {
+							return o1.data.getId().compareTo(o2.data.getId());
+						}
+					}
+				});
+				int i = 0;
+				for (Match<PropertyInfo> m : matches) {
+					proposals[i++] = new ContentProposal(m.data.getId(), m.data.getDescription());
+				}
+				return proposals;
+			}
+		}
+		return NO_CONTENT_PROPOSALS;
+	}
+
+
+
+	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, IRegion region) {
+		debug("getHoverInfo("+region+")");
+		//The delegate 'getHoverRegion' for spring propery editor will return smaller word regions.
+		// we must ensure to use our own region finder to identify correct property name.
+		region = getHoverRegion(doc, region.getOffset());
+		if (region!=null) {
+			try {
+	//			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+					debug("hoverRegion = "+region);
+					PropertyInfo best = findBestHoverMatch(doc.get(region.getOffset(), region.getLength()).trim());
+					if (best!=null) {
+						return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
+					}
+	//			}
+			} catch (Exception e) {
+				SpringPropertiesEditorPlugin.log(e);
+			}
+		}
+		return null;
+	}
+
+	public IRegion getHoverRegion(IDocument document, int offset) {
     	try {
-    		return getPartition(document, offset);
+    		ITypedRegion candidate = getPartition(document, offset);
+    		if (candidate!=null && candidate.getType()==IDocument.DEFAULT_CONTENT_TYPE) {
+    			return candidate;
+    		}
     	} catch (Exception e) {
     		SpringPropertiesEditorPlugin.log(e);
-    		return null;
     	}
+		return null;
 	}
 
 	/**
@@ -763,67 +738,6 @@ public class SpringPropertiesCompletionEngine {
 		return best;
 	}
 
-	/**
-	 * Dumps out 'test data' based on the current contents of the index. This is not meant to be
-	 * used in 'production' code. The idea is to call this method during development to dump a
-	 * 'snapshot' of the index onto System.out. The data is printed in a forma so that it can be easily
-	 * pasted/used into JUNit testing code.
-	 */
-	public void dumpAsTestData() {
-		List<Match<PropertyInfo>> allData = getIndex().find("");
-		for (Match<PropertyInfo> match : allData) {
-			PropertyInfo d = match.data;
-			System.out.println("data("
-					+dumpString(d.getId())+", "
-					+dumpString(d.getType())+", "
-					+dumpString(d.getDefaultValue())+", "
-					+dumpString(d.getDescription()) +");"
-			);
-			for (PropertySource source : d.getSources()) {
-				String st = source.getSourceType();
-				String sm = source.getSourceMethod();
-				if (sm!=null) {
-					System.out.println(d.getId() +" from: "+st+"::"+sm);
-				}
-			}
-		}
-	}
-
-	private String dumpString(Object v) {
-		if (v==null) {
-			return "null";
-		}
-		return dumpString(""+v);
-	}
-
-	private String dumpString(String s) {
-		if (s==null) {
-			return "null";
-		} else {
-			StringBuilder buf = new StringBuilder("\"");
-			for (char c : s.toCharArray()) {
-				switch (c) {
-				case '\r':
-					buf.append("\\r");
-					break;
-				case '\n':
-					buf.append("\\n");
-					break;
-				case '\\':
-					buf.append("\\\\");
-					break;
-				case '\"':
-					buf.append("\\\"");
-					break;
-				default:
-					buf.append(c);
-					break;
-				}
-			}
-			buf.append("\"");
-			return buf.toString();
-		}
-	}
 
 	public FuzzyMap<PropertyInfo> getIndex() {
 		return indexProvider.get();

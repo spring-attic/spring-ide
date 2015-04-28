@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.dadacoalition.yedit.yamlsource"
+            default-charset="UTF-8"
+            id="org.springframework.ide.eclipse.application.yml"
+            name="Spring Yaml Properties File"
+            priority="high">
+      </content-type>
+      <file-association
+            content-type="org.springframework.ide.eclipse.application.yml"
+            file-names="application.yml,bootstrap.yml">
+      </file-association>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Spring Yaml Properties Editor"
+            icon="icons/spring_obj.gif"
+            class="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor"
+            id="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor">
+            <contentTypeBinding
+               contentTypeId="org.springframework.ide.eclipse.application.yml"
+            /> 
+      </editor>
+   </extension>
+
+   <!-- the handlers below assume that commands/menu have been defined already -->
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:enable,org.springframework.ide.eclipse.application.yml"
+            commandId="org.springframework.ide.eclipse.boot.properties.editor.enable">
+            <enabledWhen>
+              <and>
+	             <count value="1"/>
+	             <iterate>
+	           	   <adapt type="org.eclipse.core.resources.IResource">
+	           	      <test property="org.eclipse.core.resources.contentTypeId" 
+   	        			value="org.eclipse.jdt.core.javaProperties"/>"
+	           	   </adapt>
+	             </iterate>
+              </and>
+            </enabledWhen>
+      </handler>
+      <handler
+            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:disable,org.springframework.ide.eclipse.application.yml"
+            commandId="org.springframework.ide.eclipse.boot.properties.editor.disable">
+            <enabledWhen>
+              <and>
+	             <count value="1"/>
+	             <iterate>
+	           	   <adapt type="org.eclipse.core.resources.IResource">
+	           	      <test property="org.eclipse.core.resources.contentTypeId" 
+   	        			value="org.springframework.ide.eclipse.applicationProperties"/>"
+	           	   </adapt>
+	             </iterate>
+              </and>
+            </enabledWhen>
+      </handler>
+   </extension>
+
+<!--
+   <extension
+         point="org.dadacoalition.yedit.sourceViewerConfigurationContribution">
+    	<sourceViewerConfiguration class="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYeditSourceViewerConfiguration"/>
+   </extension>
+ -->
+</plugin>

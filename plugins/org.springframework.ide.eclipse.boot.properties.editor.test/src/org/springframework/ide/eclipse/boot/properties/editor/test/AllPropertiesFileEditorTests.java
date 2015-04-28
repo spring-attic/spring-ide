@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+/**
+ * @author Kris De Volder
+ */
 public class AllPropertiesFileEditorTests {
-
 
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(AllPropertiesFileEditorTests.class.getName());
@@ -24,6 +26,11 @@ public class AllPropertiesFileEditorTests {
 		suite.addTestSuite(FuzzyMapTests.class);
 		suite.addTestSuite(TypeParserTest.class);
 
+		suite.addTestSuite(YamlASTTests.class);
+		suite.addTestSuite(DocumentEditsTest.class);
+		suite.addTestSuite(YamlStructureParserTest.class);
+		suite.addTestSuite(IndexNavigatorTest.class);
+		suite.addTestSuite(YamlEditorTests.class);
 		return suite;
 	}
 

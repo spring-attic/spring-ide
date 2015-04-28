@@ -12,8 +12,10 @@ package org.springframework.ide.eclipse.boot.properties.editor.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -33,7 +35,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 
 public class ContentTypeEnablerDisabler extends AbstractHandler implements IExecutableExtension {
 
-	private static final String CONTENT_TYPE_ID = "org.springframework.ide.eclipse.applicationProperties";
+	private String contentTypeId = "org.springframework.ide.eclipse.applicationProperties";
 	private boolean enable;
 
 	@Override
@@ -47,7 +49,7 @@ public class ContentTypeEnablerDisabler extends AbstractHandler implements IExec
 
 	protected void execute(IResource rsrc) throws ExecutionException {
 		try {
-			IContentType ctype = Platform.getContentTypeManager().getContentType(CONTENT_TYPE_ID);
+			IContentType ctype = Platform.getContentTypeManager().getContentType(contentTypeId);
 			if (enable) {
 				ctype.addFileSpec(rsrc.getName(), IContentType.FILE_NAME_SPEC);
 			} else {
@@ -94,13 +96,15 @@ public class ContentTypeEnablerDisabler extends AbstractHandler implements IExec
 				}
 			}
 			return selected;
-		}		
+		}
 		return Collections.emptyList();
 	}
 
 	@Override
 	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) throws CoreException {
-		enable = data.equals("enable");
+		String[] parts = ((String)data).split(",");
+		enable = parts[0].equals("enable");
+		contentTypeId = parts[1];
 	}
 
 }

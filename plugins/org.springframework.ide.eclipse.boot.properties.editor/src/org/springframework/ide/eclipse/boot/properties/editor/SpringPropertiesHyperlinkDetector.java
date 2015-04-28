@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -67,19 +68,29 @@ public class SpringPropertiesHyperlinkDetector extends AbstractHyperlinkDetector
 	}
 
 	private static final IHyperlink[] NO_LINKS = null; //Caller expects null rather than empty array
-	private SpringPropertiesCompletionEngine engine;
+	private IPropertyHoverInfoProvider engine;
 
-	public SpringPropertiesHyperlinkDetector(SpringPropertiesCompletionEngine engine) {
+	public SpringPropertiesHyperlinkDetector(IPropertyHoverInfoProvider engine) {
 		this.engine = engine;
 	}
+
+
+	public List<IJavaElement> getSourceElements(IDocument doc, IRegion region) {
+		HoverInfo hoverinfo = engine.getHoverInfo(doc, region);
+		if (hoverinfo!=null) {
+			return hoverinfo.getJavaElements();
+		}
+		return Collections.emptyList();
+	}
+
 
 	@Override
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		IDocument doc = textViewer.getDocument();
 		if (doc!=null) {
-			ITypedRegion linkRegion = engine.getHoverRegion(doc, region.getOffset());
-			if (linkRegion.getType()==IDocument.DEFAULT_CONTENT_TYPE) {
-				List<IJavaElement> targets = engine.getSourceElements(doc, linkRegion.getOffset());
+			IRegion linkRegion = engine.getHoverRegion(doc, region.getOffset());
+			if (linkRegion != null) {
+				List<IJavaElement> targets = getSourceElements(doc, linkRegion);
 				if (!targets.isEmpty()) {
 					IHyperlink[] links = new IHyperlink[targets.size()];
 					for (int i = 0; i < links.length; i++) {

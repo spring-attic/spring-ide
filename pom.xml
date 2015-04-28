@@ -96,6 +96,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.yaml</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
 
 		<!-- core -->
@@ -518,6 +519,23 @@
 			<id>mylyn-37</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/mylyn/releases/3.7</url>
+		</repository>
+		<repository>
+			<id>p2-thirdparty-bundles</id>
+			<layout>p2</layout>
+			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo</url>
+		</repository>
+		
+		<!--  TODO: we should use 'official' yedit site & release once PR is accepted and released -->
+<!-- 		<repository> -->
+<!-- 		   <id>yedit</id> -->
+<!-- 		   <layout>p2</layout> -->
+<!-- 		   <url>http://dadacoalition.org/yedit</url> -->
+<!-- 		</repository> -->
+		<repository>
+		  <id>yedit-patched</id>
+		  <layout>p2</layout>
+		  <url>https://raw.githubusercontent.com/kdvolder/yedit/publish-update-site/org.dadacoalition.yedit.update/target/site</url>
 		</repository>
 	</repositories>
 

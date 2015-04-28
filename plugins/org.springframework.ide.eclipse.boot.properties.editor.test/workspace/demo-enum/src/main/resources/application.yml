@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: foo
+    index: 12
+  activemq:
+    pooled: true
+    user: kdvolder
+    in-memory: true
+  redis: 
+    database: 11
+server:
+  port: 8888
+  address: null
+foo:
+  color: red
+  color-data:
+    red:
+      children:
+      - wavelen: 55
+        name: Great expectations
+      -  
+    green: 
+      name: Groen
+    blue:
+      wavelen: 5555
+      
+      

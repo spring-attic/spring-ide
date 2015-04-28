@@ -6,3 +6,4 @@ eclipse-base.tar.gz
 updatesite/
 jarjar/
 releng/org.springframework.ide.eclipse.releng/eclipse/
+/build.log

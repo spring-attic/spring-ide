@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,11 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
-import org.eclipse.jdt.internal.ui.text.CompositeReconcilingStrategy;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -30,43 +28,27 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
-import org.eclipse.ui.texteditor.spelling.SpellingService;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileStrategy;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
 extends PropertiesFileSourceViewerConfiguration {
 
-	/**
-	 * WE unforytunately must subclass this just to make it possible to call non
-	 * public method 'forceReconcile'.
-	 *
-	 * We need this to trigger a reconcile when live metadata has changed.
-	 */
-	public class SpringPropertiesReconciler extends MonoReconciler {
-
-		public SpringPropertiesReconciler(IReconcilingStrategy strategy) {
-			super(strategy, false);
-		}
-
-		public void forceReconcile() {
-			super.forceReconciling();
-		}
-
-	}
-
 	private static final String DIALOG_SETTINGS_KEY = PropertiesFileSourceViewerConfiguration.class.getName();
 	private SpringPropertiesCompletionEngine engine;
 	private SpringPropertiesReconciler fReconciler;
+	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
+		@Override
+		protected IReconcileEngine createEngine() throws Exception {
+			return new SpringPropertiesReconcileEngine(getEngine().getIndexProvider(), getEngine().getTypeUtil());
+		}
+	};
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
@@ -121,7 +103,7 @@ extends PropertiesFileSourceViewerConfiguration {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
 				if (engine!=null) {
-					return new SpringPropertiesTextHover(sourceViewer, contentType, engine, delegate);
+					return new SpringPropertiesTextHover(sourceViewer, engine, delegate);
 				}
 			}
 		} catch (Exception e) {
@@ -158,31 +140,10 @@ extends PropertiesFileSourceViewerConfiguration {
 
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
-		IReconcilingStrategy strategy = null;
-		Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
-		if (EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
-			IReconcilingStrategy spellcheck = new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
-				@Override
-				protected IContentType getContentType() {
-					return SpringPropertiesFileEditor.CONTENT_TYPE;
-				}
-			};
-			strategy = compose(strategy, spellcheck);
+		if (fReconciler==null) {
+			fReconciler = fReconcilerFactory.createReconciler(sourceViewer);
 		}
-		try {
-			indexProvider = getEngine().getIndexProvider();
-			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer,
-					getEngine().getIndexProvider(), getEngine().getTypeUtil());
-			strategy = compose(strategy, propertyChecker);
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		if (strategy!=null) {
-			fReconciler = new SpringPropertiesReconciler(strategy);
-			fReconciler.setDelay(500);
-			return fReconciler;
-		}
-		return null;
+		return fReconciler;
 	}
 
 	@Override
@@ -193,7 +154,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
-		return merge(
+		return HyperlinkDetectorUtil.merge(
 				super.getHyperlinkDetectors(sourceViewer),
 				myDetector
 		);
@@ -204,36 +165,11 @@ extends PropertiesFileSourceViewerConfiguration {
 //		return super.getHyperlinkPresenter(sourceViewer);
 //	}
 
-	protected java.util.Map<String,org.eclipse.core.runtime.IAdaptable> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
+	protected Map<String,IAdaptable> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
 		Map<String, IAdaptable> superTargets = super.getHyperlinkDetectorTargets(sourceViewer);
 		superTargets.remove("org.eclipse.jdt.ui.PropertiesFileEditor"); //This just adds a 'search for' link which never seems to return anything useful
 		return superTargets;
 	};
-
-	private IHyperlinkDetector[] merge(IHyperlinkDetector[] a, SpringPropertiesHyperlinkDetector b) {
-		if (a==null || a.length==0) {
-			return new IHyperlinkDetector[] {b};
-		}
-		if (b==null) {
-			return a;
-		}
-		IHyperlinkDetector[] merged = new IHyperlinkDetector[a.length+1];
-		System.arraycopy(a, 0, merged, 0, a.length);
-		merged[a.length] = b;
-		return merged;
-	}
-
-	private IReconcilingStrategy compose(IReconcilingStrategy s1, IReconcilingStrategy s2) {
-		if (s1==null) {
-			return s2;
-		}
-		if (s2==null) {
-			return s1;
-		}
-		CompositeReconcilingStrategy composite = new CompositeReconcilingStrategy();
-		composite.setReconcilingStrategies(new IReconcilingStrategy[] {s1, s2});
-		return composite;
-	}
 
 	public void forceReconcile() {
 		if (fReconciler!=null) {
