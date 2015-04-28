@@ -525,10 +525,17 @@
 			<layout>p2</layout>
 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo</url>
 		</repository>
+		
+		<!--  TODO: we should use 'official' yedit site & release once PR is accepted and released -->
+<!-- 		<repository> -->
+<!-- 		   <id>yedit</id> -->
+<!-- 		   <layout>p2</layout> -->
+<!-- 		   <url>http://dadacoalition.org/yedit</url> -->
+<!-- 		</repository> -->
 		<repository>
-		   <id>yedit</id>
-		   <layout>p2</layout>
-		   <url>http://dadacoalition.org/yedit</url>
+		  <id>yedit-patched</id>
+		  <layout>p2</layout>
+		  <url>https://raw.githubusercontent.com/kdvolder/yedit/publish-update-site/org.dadacoalition.yedit.update/target/site</url>
 		</repository>
 	</repositories>
 
