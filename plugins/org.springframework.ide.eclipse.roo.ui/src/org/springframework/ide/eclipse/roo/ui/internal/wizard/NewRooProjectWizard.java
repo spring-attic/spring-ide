@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2015 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal.wizard;
 
@@ -49,6 +50,7 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 /**
  * @author Christian Dupuis
  * @author Leo Dos Santos
+ * @author Juan Carlos García
  * @since 2.2.0
  */
 @SuppressWarnings("restriction")
@@ -171,7 +173,11 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 							builder.append(" --packaging ").append(packagingProvider);
 						}
 					}
-					else {
+					else if(type == ProjectType.ADDON_SUITE){
+						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --description \"").append(projectPage.getDescription()).append("\"");
+
+					}else{
 						builder.append(" --description \"").append(projectPage.getDescription()).append("\"");
 					}
 
@@ -316,7 +322,7 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 	public enum ProjectType {
 
-		PROJECT, ADDON_SIMPLE, ADDON_ADVANCED;
+		PROJECT, ADDON_SIMPLE, ADDON_ADVANCED, ADDON_SUITE;
 
 		public String getCommand() {
 			if (this == PROJECT) {
@@ -327,6 +333,9 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			}
 			else if (this == ADDON_ADVANCED) {
 				return "addon create advanced";
+				
+			}else if (this == ADDON_SUITE){
+				return "addon create suite";
 			}
 			return "";
 		}
@@ -340,6 +349,9 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			}
 			else if (this == ADDON_ADVANCED) {
 				return "Add-on advanced";
+				
+			}else if (this == ADDON_SUITE){
+				return "Roo Add-on Suite";
 			}
 			return null;
 		}
@@ -353,6 +365,9 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			}
 			else if (display.equals("Add-on advanced")) {
 				return ADDON_ADVANCED;
+				
+			}else if (display.equals("Roo Add-on Suite")){
+				return ADDON_SUITE;
 			}
 			return null;
 		}
