@@ -217,7 +217,7 @@
 
 		<bundle id="org.yaml.snakeyaml" version="0.0.0"/>
 		<bundle id="org.yaml.snakeyaml.source" version="0.0.0"/>
-		<bundle id="org.dadacoalition.yedit" version="1.0.17"/>
+		<bundle id="org.dadacoalition.yedit" version="0.0.0"/>
 
 		<bundle id="org.springframework.aop" version="0.0.0"/>
 		<bundle id="org.springframework.aop.source" version="0.0.0"/>
