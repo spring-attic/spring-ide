@@ -27,6 +27,8 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.ui.PlatformUI;
@@ -63,6 +65,17 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.error");
 	}
+	private static final Set<String> ANNOTIONS_SHOWN_IN_OVERVIEW_BAR = ANNOTIONS_SHOWN_IN_TEXT;
+
+	//TODO: the ANNOTIONS_SHOWN_IN_TEXT and ANNOTIONS_SHOWN_IN_OVERVIEW_BAR should be replaced with
+	// properly using preferences. An example of how to set this up can be found in the code
+	// of the Java properties file editor. Roughly these things need to happen:
+	//   1) use methods like 'isShownIntext' and 'isShownInOverviewRuler' which are defined in
+	//     our super class.
+	//   2) initialize the super class with a preference store (simialr to how java properties file does it)
+	//   3) To be able to do 2) it is necessary to add a constructor to YEditSourceViewerConfiguration which
+	//      accepts preference store and passes it to its super class. So this requires a patch to
+	//      YEdit source code.
 
 	public static void debug(String string) {
 		System.out.println(string);
@@ -83,8 +96,6 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		}
 		return created;
 	}
-
-
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,String contentType) {
@@ -114,7 +125,6 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
-
 		protected IReconcileEngine createEngine() throws Exception {
 			return new SpringYamlReconcileEngine(astProvider, indexProvider, typeUtilProvider);
 		}
@@ -145,6 +155,17 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 			return super.getTextHover(sourceViewer, contentType, stateMask);
 		}
 	}
+
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover() {
+			@Override
+			protected boolean isIncluded(Annotation annotation) {
+				return ANNOTIONS_SHOWN_IN_OVERVIEW_BAR.contains(annotation.getType());
+			}
+		};
+	}
+
 
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
