@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.util.ArrayList;
 
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.AtKey;
@@ -398,6 +399,47 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 
 		path = pathWith("foo", 2);
 		assertNull(path.traverse((SNode)root));
+	}
+
+	public void testFindAndTraverseSeqNode() throws Exception {
+		YamlEditor editor;
+
+		editor = new YamlEditor(
+				"foo:\n"+
+				"- abc\n" +
+				"- def\n" +
+				"- ghi\n"
+		);
+		findAndTraversPathPath(editor, "abc");
+		findAndTraversPathPath(editor, "def");
+		findAndTraversPathPath(editor, "ghi");
+
+		// nodes are position sensitive make sure that generated positions agree
+		// with traverse interpretation, even in case where it is not so well-defined
+		// how the indices should be interpreted:
+		editor = new YamlEditor(
+				"foo:\n"+
+				"  garbage\n" +
+				"  - abc\n" +
+				"  junk\n" +
+				"  - def\n" +
+				"  crap\n" +
+				" - ghi\n"
+		);
+		findAndTraversPathPath(editor, "abc");
+		findAndTraversPathPath(editor, "def");
+		findAndTraversPathPath(editor, "ghi");
+
+	}
+
+	private void findAndTraversPathPath(YamlEditor editor, String snippet) throws Exception {
+		SRootNode root = editor.parseStructure();
+		SNode node = root.find(editor.startOf(snippet));
+		assertNotNull(node);
+
+		YamlPath path = node.getPath();
+		SNode actualNode = path.traverse((SNode)root);
+		assertEquals(node, actualNode);
 	}
 
 	public void testTraverseSeqKey() throws Exception {

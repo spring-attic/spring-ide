@@ -25,6 +25,7 @@ import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.IndentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
@@ -252,6 +253,27 @@ public class YamlStructureParser {
 		}
 
 		protected abstract void dump(Writer out, int indent) throws Exception;
+
+		public YamlPath getPath() throws Exception {
+			ArrayList<YamlPathSegment> segments = new ArrayList<YamlPathSegment>();
+			buildPath(this, segments);
+			return new YamlPath(segments);
+		}
+
+		private static void buildPath(SNode node, ArrayList<YamlPathSegment> segments) throws Exception {
+			if (node!=null) {
+				buildPath(node.getParent(), segments);
+				SNodeType nodeType = node.getNodeType();
+				if (nodeType==SNodeType.KEY) {
+					String key = ((SKeyNode)node).getKey();
+					segments.add(YamlPathSegment.valueAt(key));
+				} else if (nodeType==SNodeType.SEQ) {
+					int index = ((SSeqNode)node).getIndex();
+					segments.add(YamlPathSegment.valueAt(index));
+				}
+			}
+		}
+
 
 	}
 
@@ -492,8 +514,20 @@ public class YamlStructureParser {
 	}
 
 	public class SSeqNode extends SChildBearingNode {
+
+		/**
+		 * position of this in its parent. I.e. index is chosen such that
+		 * parent.getChildren()[index] == this
+		 */
+		private int index;
+
 		public SSeqNode(SChildBearingNode parent, YamlDocument doc, int indent, int start, int end) throws Exception {
 			super(parent, doc, indent, start, end);
+			this.index = parent.getChildren().size()-1;
+		}
+
+		public int getIndex() {
+			return index;
 		}
 
 		@Override
