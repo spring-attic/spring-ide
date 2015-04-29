@@ -75,7 +75,11 @@ public class MockEditor {
 		if (selectionStart<selectionEnd) {
 			text = text.substring(0,selectionStart) + MockEditor.CURSOR + text.substring(selectionStart);
 		}
-		return text;
+		return deWindowsify(text);
+	}
+
+	private String deWindowsify(String text) {
+		return text.replaceAll("\\r\\n", "\n");
 	}
 
 	/**
