@@ -35,11 +35,13 @@ import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.Describable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
 /**
- * Wizard section to choose one element from list of elements. Uses a table viewer to allow selecting 
+ * Wizard section to choose one element from list of elements. Uses a table viewer to allow selecting
  * an element.
  * <p>
  * This class is very similar in functionality (from client's point of view) to {@link ChooseOneSectionCombo}.
@@ -49,19 +51,19 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 public class ChooseOneSectionTable<T> extends ChooseOneSection {
 
 	private class ChoicesFilter extends ViewerFilter {
-		
+
 		private StringMatcher matcher = null;
-		
+
 		public ChoicesFilter() {
 			if (searchBox!=null) {
 				setSearchTerm(searchBox.getText());
 			}
 		}
-		
+
 		public void setSearchTerm(String text) {
 			matcher = new StringMatcher(text, true, false);
 		}
-		
+
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (matcher==null) {
@@ -101,7 +103,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		this.selection = selection;
 		this.options = options;
 	}
-	
+
 
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
@@ -114,29 +116,29 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		int cols = label==null ? 1 : 2;
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
 		field.setLayout(layout);
-		
+
 		searchBox = new Text(field, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(searchBox);
-		
+
 		Label fieldNameLabel = null;
 		if (label!=null) {
 			fieldNameLabel = new Label(field, SWT.NONE);
 			fieldNameLabel.setText(label);
 		}
-		
+
 		final TableViewer tv = new TableViewer(field, SWT.SINGLE|SWT.BORDER|SWT.V_SCROLL);
 		tv.addFilter(filter = new ChoicesFilter());
 		tv.setLabelProvider(labelProvider);
 		tv.setContentProvider(ArrayContentProvider.getInstance());
 		tv.setInput(options);
-		
+
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
 		}
 		GridDataFactory grab = GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 150);
 		grab.applyTo(field);
 		grab.applyTo(tv.getTable());
-		
+
 		whenVisible(tv.getControl(), new Runnable() {
 			public void run() {
 				T preSelect = selection.selection.getValue();
@@ -147,7 +149,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 				}
 			}
 		});
-		
+
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
 			@SuppressWarnings("unchecked")
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -160,7 +162,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 				}
 			}
 		});
-		
+
 		searchBox.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				filter.setSearchTerm(searchBox.getText());
@@ -180,7 +182,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 	}
 
 //	private String[] getLabels() {
-//		String[] labels = new String[options.length]; 
+//		String[] labels = new String[options.length];
 //		for (int i = 0; i < labels.length; i++) {
 //			labels[i] = labelProvider.getText(options[i]);
 //		}

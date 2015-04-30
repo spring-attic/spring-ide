@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.IdAble;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -49,6 +48,12 @@ public class UrlMaker extends LiveExpression<String> {
 		multiInputs.add((MultiSelectionFieldModel<IdAble>) param);
 		dependsOn(param.getSelecteds()); //Recompute my value when the input changes.
 		return this;
+	}
+
+	public void addField(HierarchicalMultiSelectionFieldModel<? extends IdAble> param) {
+		for (String cat : param.getCategories()) {
+			addField(param.getContents(cat));
+		}
 	}
 
 	public UrlMaker addField(RadioGroup group) {

@@ -13,11 +13,8 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.ide.eclipse.wizard.gettingstarted.guides.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
+import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 
 public class RadioGroup extends FieldModel<RadioInfo> {
 

@@ -27,15 +27,18 @@ import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.wizard.gettingstarted.guides.ChooseOneSectionCombo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.DescriptionSection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
+import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 
 public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWizard {
 
@@ -46,6 +49,8 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	private IStructuredSelection selection;
 
 	private WorkingSetSection workingSetSection;
+
+	private ProjectDetailsPage projectPage;
 
 	public NewSpringBootWizard() throws Exception {
 		setDefaultPageImageDescriptor(IMAGE);
@@ -71,20 +76,30 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	@Override
 	public void addPages() {
 		super.addPages();
-		addPage(new PageOne());
-		addPage(new PageTwo());
+		addPage(projectPage = new ProjectDetailsPage());
+		addPage(new DependencyPage());
+		addPage(new PageThree());
+	}
+
+	@Override
+	public boolean canFinish() {
+		return super.canFinish() && getContainer().getCurrentPage()!=projectPage;
 	}
 
 	private WizardPageSection createRadioGroupsSection(WizardPageWithSections owner) {
 		boolean notEmpty = false;
+		RadioGroup bootVersion = model.getBootVersion(); //This is placed specifically somewhere else so must skip it here
 		ArrayList<WizardPageSection> radioSections = new ArrayList<WizardPageSection>();
 		for (RadioGroup radioGroup : model.getRadioGroups().getGroups()) {
-			if (radioGroup.getRadios().length>1) {
-				//Don't add a UI elements for something that offers no real choice
-				radioSections.add(
-					new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
-				);
-				notEmpty = true;
+			if (radioGroup!=bootVersion) {
+				if (radioGroup.getRadios().length>1) {
+					//Don't add a UI elements for something that offers no real choice
+					radioSections.add(
+						new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+						//new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+					);
+					notEmpty = true;
+				}
 			}
 		}
 		if (notEmpty) {
@@ -93,9 +108,9 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		return null;
 	}
 
-	public class PageOne extends WizardPageWithSections {
+	public class ProjectDetailsPage extends WizardPageWithSections {
 
-		protected PageOne() {
+		protected ProjectDetailsPage() {
 			super("page1", "New Spring Starter Project", null);
 		}
 
@@ -105,6 +120,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 			FieldModel<String> projectName = model.getProjectName();
 			sections.add(new StringFieldSection(this, projectName));
+			sections.add(new ProjectLocationSection(this, model.getLocation(), projectName.getVariable(), model.getLocationValidator()));
 
 			WizardPageSection radios = createRadioGroupsSection(this);
 			if (radios!=null) {
@@ -118,19 +134,16 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				}
 			}
 
-			sections.add(
-				new CheckBoxesSection<Dependency>(this, model.dependencies)
-					.columns(4)
-			);
+			sections.add(workingSetSection = new WorkingSetSection(this, selection));
 
 			return sections;
 		}
 
 	}
 
-	public class PageTwo extends WizardPageWithSections {
+	public class DependencyPage extends WizardPageWithSections {
 
-		protected PageTwo() {
+		protected DependencyPage() {
 			super("page2", "New Spring Starter Project", null);
 		}
 
@@ -138,9 +151,35 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
-			FieldModel<String> projectName = model.getProjectName();
-			sections.add(new ProjectLocationSection(this, model.getLocation(), projectName.getVariable(), model.getLocationValidator()));
-			sections.add(workingSetSection = new WorkingSetSection(this, selection));
+			RadioGroup bootVersion = model.getBootVersion();
+			sections.add(
+					new ChooseOneSectionCombo<RadioInfo>(this, bootVersion.getLabel(),
+							bootVersion.getSelection(), bootVersion.getRadios()));
+
+			sections.add(
+					new CommentSection(this, model.dependencies.getLabel())
+			);
+
+			for (String cat : model.dependencies.getCategories()) {
+				sections.add(
+						new CheckBoxesSection<Dependency>(this, model.dependencies.getContents(cat))
+							.columns(5)
+					);
+			}
+
+			return sections;
+		}
+	}
+
+	public class PageThree extends WizardPageWithSections {
+
+		protected PageThree() {
+			super("page3", "New Spring Starter Project", null);
+		}
+
+		@Override
+		protected List<WizardPageSection> createSections() {
+			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
 
 			sections.add(new GroupSection(this, "Site Info",
 					new StringFieldSection(this, "Base Url", model.baseUrl, model.baseUrlValidator),
@@ -172,6 +211,5 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		job.schedule();
 		return true;
 	}
-
 
 }

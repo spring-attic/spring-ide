@@ -46,10 +46,6 @@ public class MultiSelectionFieldModel<T> {
 
 	private Map<T, LiveExpression<Boolean>> enablements = null;
 
-	public interface EnablementProvider<T> {
-		LiveExpression<Boolean> getEnablement(T choice);
-	}
-
 	public MultiSelectionFieldModel(Class<T> type, String name) {
 		this.type = type;
 		this.name  = name;

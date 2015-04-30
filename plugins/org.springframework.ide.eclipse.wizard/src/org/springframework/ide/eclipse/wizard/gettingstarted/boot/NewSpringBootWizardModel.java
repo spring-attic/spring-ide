@@ -176,8 +176,8 @@ public class NewSpringBootWizardModel {
 			//The fields need to be discovered by parsing web form.
 	);
 
-	public final MultiSelectionFieldModel<Dependency> dependencies = new MultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
-			.label("Dependencies");
+	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
+			.label("Dependencies:");
 
 	private final FieldModel<String> projectName; //an alias for stringFields.getField("name");
 	private final LiveVariable<String> location;
@@ -269,7 +269,7 @@ public class NewSpringBootWizardModel {
 	/**
 	 * Dynamically discover input fields and 'style' options by parsing initializr form.
 	 */
-	private void discoverOptions(FieldArrayModel<String> fields, MultiSelectionFieldModel<Dependency> dependencies) throws Exception {
+	private void discoverOptions(FieldArrayModel<String> fields, HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
 		InitializrServiceSpec serviceSpec = parseJsonFrom(new URL(JSON_URL));
 
 		Map<String, String> textInputs = serviceSpec.getTextInputs();
@@ -320,8 +320,9 @@ public class NewSpringBootWizardModel {
 
 		//styles
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
+			String catName = dgroup.getName();
 			for (Dependency dep : dgroup.getContent()) {
-				dependencies.choice(dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep.getVersionRange()));
+				dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep.getVersionRange()));
 			}
 		}
 	}

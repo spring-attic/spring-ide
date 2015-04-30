@@ -17,6 +17,8 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,6 +29,8 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroups;
@@ -138,19 +142,33 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	public void testStarters() throws Exception {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
-		Dependency[] styles = model.dependencies.getChoices();
-		assertNotNull(styles);
-		assertTrue(styles.length>10);
 
-		String lastLabel = null; //check that style labels are sorted
-		for (Dependency choice : model.dependencies.getChoices()) {
-			String label = model.dependencies.getLabel(choice);
-			if (lastLabel!=null) {
-				assertTrue("Labels not sorted: '"+lastLabel+"' > '"+label+"'", lastLabel.compareTo(label)<0);
+		Collection<Dependency> styles = getAllChoices(model.dependencies);
+		assertNotNull(styles);
+		assertTrue(styles.size()>10);
+
+		for (String catName : model.dependencies.getCategories()) {
+			String lastLabel = null; //check that style labels are sorted within each category
+			MultiSelectionFieldModel<Dependency> cat = model.dependencies.getContents(catName);
+			for (Dependency choice : cat.getChoices()) {
+				String label = cat.getLabel(choice);
+				if (lastLabel!=null) {
+					assertTrue("Labels not sorted: '"+lastLabel+"' > '"+label+"'", lastLabel.compareTo(label)<0);
+				}
+				lastLabel = label;
+				assertNotNull("No tooltip for: "+choice+" ["+label+"]", cat.getTooltip(choice));
 			}
-			lastLabel = label;
-			assertNotNull("No tooltip for: "+choice+" ["+label+"]", model.dependencies.getTooltip(choice));
 		}
+	}
+
+	private <T> Collection<T> getAllChoices(
+			HierarchicalMultiSelectionFieldModel<T> dependencies) {
+		ArrayList<T> choices = new ArrayList<T>();
+		for (String catName : dependencies.getCategories()) {
+			MultiSelectionFieldModel<T> cat = dependencies.getContents(catName);
+			choices.addAll(Arrays.asList(cat.getChoices()));
+		}
+		return choices;
 	}
 
 	public void testVersionRanges() throws Exception {
@@ -172,8 +190,8 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioInfo older = bootVersion.getRadio("1.1.10.RELEASE");
 		RadioInfo newer = bootVersion.getRadio("1.2.1.RELEASE");
 
-		LiveExpression<Boolean> bitronixEnabled  = model.dependencies.getEnablement(bitronix);
-		LiveExpression<Boolean> thymeleafEnabled = model.dependencies.getEnablement(thymeleaf);
+		LiveExpression<Boolean> bitronixEnabled  = getEnablement(model.dependencies, bitronix);
+		LiveExpression<Boolean> thymeleafEnabled = getEnablement(model.dependencies, thymeleaf);
 
 		bootVersion.setValue(older);
 		assertFalse(bitronixEnabled.getValue());
@@ -185,14 +203,56 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		bootVersion.setValue(older);
 
-		LiveSet<Dependency> selectedDepedencies = model.dependencies.getSelecteds();
-		assertTrue(selectedDepedencies.getValue().isEmpty());
-		selectedDepedencies.addAll(new Dependency[] {bitronix, thymeleaf});
-		assertEquals(2, selectedDepedencies.getValue().size());
+		Set<Dependency> selectedDepedencies = getSelecteds(model.dependencies);
+		assertTrue(selectedDepedencies.isEmpty());
+		select(model.dependencies, bitronix);
+		select(model.dependencies, thymeleaf);
+
+		selectedDepedencies = getSelecteds(model.dependencies);
+		assertEquals(2, selectedDepedencies.size());
 
 		String url = model.downloadUrl.getValue();
 		assertContains("thymeleaf", url);
 		assertFalse(url.contains("bitronix"));
+	}
+
+	private void select(HierarchicalMultiSelectionFieldModel<Dependency> dependencies,
+			Dependency dep) {
+		String cat = getCategory(dependencies, dep);
+		LiveSet<Dependency> selecteds = dependencies.getContents(cat).getSelecteds();
+		selecteds.add(dep);
+	}
+
+	private Set<Dependency> getSelecteds(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
+		HashSet<Dependency> selecteds = new HashSet<InitializrServiceSpec.Dependency>();
+		for (String catName : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
+			selecteds.addAll(cat.getSelecteds().getValue());
+		}
+		return selecteds;
+	}
+
+	private LiveExpression<Boolean> getEnablement(HierarchicalMultiSelectionFieldModel<Dependency> dependencies, Dependency dep) {
+		String cat = getCategory(dependencies, dep);
+		return dependencies.getContents(cat).getEnablement(dep);
+	}
+
+	private String getCategory( HierarchicalMultiSelectionFieldModel<Dependency> dependencies, Dependency dep) {
+		for (String cat : dependencies.getCategories()) {
+			if (contains(dependencies.getContents(cat).getChoices(), dep)) {
+				return cat;
+			}
+		}
+		throw new Error("Shouldn't get here");
+	}
+
+	private boolean contains(Dependency[] deps, Dependency find) {
+		for (Dependency dep : deps) {
+			if (find.equals(dep)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void assertContains(String needle, String haystack) {
@@ -201,9 +261,8 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		}
  	}
 
-
 	private Dependency getDependencyById(NewSpringBootWizardModel model, String depId) {
-		for (Dependency dep : model.dependencies.getChoices()) {
+		for (Dependency dep : getAllChoices(model.dependencies)) {
 			if (dep.getId().equals(depId)) {
 				return dep;
 			}
