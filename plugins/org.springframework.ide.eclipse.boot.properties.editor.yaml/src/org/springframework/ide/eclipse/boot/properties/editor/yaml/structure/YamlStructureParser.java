@@ -14,21 +14,16 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.IndentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 
 /**
@@ -398,8 +393,6 @@ public class YamlStructureParser {
 			}
 			return null;
 		}
-
-
 	}
 
 	public abstract class SLeafNode extends SNode {

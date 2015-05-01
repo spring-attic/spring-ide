@@ -1451,6 +1451,58 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"      - next: RED\n" +
 				"        wavelen: <*>"
 		);
+	}
+
+	public void test_STS4111_NoEmptyLinesGapBeforeInsertedCompletion() throws Exception {
+		data("spring.application.name", "java.lang.String", null, "The name of the application");
+		data("spring.application.index", "java.lang.Integer", true, "App instance index");
+		data("spring.considerable.fun", "java.lang.Boolean", true, "Whether the spring fun is considerable");
+
+		assertCompletions(
+				"spring:\n" +
+				"  application:\n" +
+				"    index: 12\n" +
+				"\n" +
+				"server:\n" +
+				"  port: 8888\n" +
+				"appname<*>"
+				, //=>
+				"spring:\n" +
+				"  application:\n" +
+				"    index: 12\n" +
+				"    name: <*>\n" +
+				"\n" +
+				"server:\n" +
+				"  port: 8888"
+
+		);
+
+		//Also test that:
+		// - Fully commented lines also count as gaps
+		// - Gaps of more than one line are also handled correctly
+		assertCompletions(
+				"# spring stuff\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    index: 12\n" +
+				"\n" +
+				"#server stuff\n" +
+				"server:\n" +
+				"  port: 8888\n" +
+				"cfun<*>"
+				, //=>
+				"# spring stuff\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    index: 12\n" +
+				"  considerable:\n" +
+				"    fun: <*>\n" +
+				"\n" +
+				"#server stuff\n" +
+				"server:\n" +
+				"  port: 8888"
+
+		);
 
 	}
 

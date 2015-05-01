@@ -1,5 +1,6 @@
 package demo;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("foo")
 public class FooProperties {
 
+	//Pojo
+	private ColorData data; 
+	 
 	//Enum
 	private Color color;
 
@@ -20,9 +24,9 @@ public class FooProperties {
 
 	//Map Enum -> Pojo
 	private Map<Color, ColorData> colorData;
-
-	//Pojo
-	private ColorData data;
+	
+	//List
+	private List<String> list;
 
 	public Color getColor() {
 		return color;
@@ -54,5 +58,11 @@ public class FooProperties {
 	}
 	public void setData(ColorData data) {
 		this.data = data;
+	}
+	public List<String> getList() {
+		return list;
+	}
+	public void setList(List<String> list) {
+		this.list = list;
 	}
 }

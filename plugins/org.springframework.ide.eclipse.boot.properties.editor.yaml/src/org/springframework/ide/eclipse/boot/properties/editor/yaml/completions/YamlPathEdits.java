@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
@@ -77,7 +79,7 @@ public class YamlPathEdits extends DocumentEdits {
 		}
 	}
 
-	private void createNewPath(SChildBearingNode parent, YamlPath path, String appendText) {
+	private void createNewPath(SChildBearingNode parent, YamlPath path, String appendText) throws Exception {
 		int indent = getChildIndent(parent);
 		int insertionPoint = getNewPathInsertionOffset(parent);
 		boolean startOnNewLine = true;
@@ -107,12 +109,25 @@ public class YamlPathEdits extends DocumentEdits {
 		}
 	}
 
-	private int getNewPathInsertionOffset(SChildBearingNode parent) {
-		SNode insertAfter = parent.getLastChild();
-		if (insertAfter==null) {
-			insertAfter = parent;
+	private int getNewPathInsertionOffset(SChildBearingNode parent) throws Exception {
+		int insertAfterLine = doc.getLineOfOffset(parent.getTreeEnd());
+		while (insertAfterLine>=0 && doc.getLineIndentation(insertAfterLine)==-1) {
+			insertAfterLine--;
 		}
-		return insertAfter.getTreeEnd();
+		if (insertAfterLine<0) {
+			//This code is probably 'dead' because:
+			//   - it can only occur if all lines in the 'parent' are empty
+			//   - if parent is any other node than SRootNode then it must have at least one
+			//     non-emtpy line
+			//  => parent must be SRootNode and only contain comment or empty lines
+			//  But in that case we will never need to compute a 'new path insertion offset'
+			//  since we will always be in the case where completions are to be inserted
+			//  in place (i.e. at the current cursor).
+			return 0; //insert at beginning of document
+		} else {
+			IRegion r = doc.getLineInformation(insertAfterLine);
+			return r.getOffset() + r.getLength();
+		}
 	}
 
 	private SKeyNode findChildForKey(SChildBearingNode node, String key) throws Exception {

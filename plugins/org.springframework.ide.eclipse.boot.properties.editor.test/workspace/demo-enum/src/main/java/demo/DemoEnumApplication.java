@@ -34,5 +34,10 @@ public class DemoEnumApplication implements CommandLineRunner {
 			System.out.println(e.getKey() +" -> "+ e.getValue());
 		}
 
+    	System.out.println("---- list ----");
+    	for (String string : foo.getList()) {
+			System.out.println(string);
+		}
+    	
     }
 }
