@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import junit.framework.TestCase;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.DocumentEdits;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 
 /**
  * @author Kris De Volder

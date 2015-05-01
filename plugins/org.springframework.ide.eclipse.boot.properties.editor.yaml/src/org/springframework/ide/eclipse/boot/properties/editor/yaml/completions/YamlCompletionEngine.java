@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;

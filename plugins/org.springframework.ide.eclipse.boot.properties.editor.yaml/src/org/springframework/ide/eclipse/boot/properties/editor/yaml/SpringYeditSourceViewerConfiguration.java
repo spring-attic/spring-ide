@@ -43,13 +43,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesPr
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;

@@ -32,6 +32,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
@@ -132,7 +133,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		try {
 			Class<?> sorterInterface = Class.forName("org.eclipse.jface.text.contentassist.ICompletionProposalSorter");
 			Method m = ContentAssistant.class.getMethod("setSorter", sorterInterface);
-			m.invoke(a, SpringPropertiesCompletionEngine.SORTER);
+			m.invoke(a, PropertyCompletionFactory.SORTER);
 		} catch (Throwable e) {
 			//ignore, sorter not supported with Eclipse 3.7 API
 		}

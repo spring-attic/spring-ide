@@ -8,13 +8,11 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
+package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.formatJavaType;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -26,7 +24,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
@@ -38,7 +35,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesIn
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 
 public class PropertyCompletionFactory {
 
@@ -50,7 +46,7 @@ public class PropertyCompletionFactory {
 		return simpleProposal(value, sortingOrder, applier);
 	}
 
-	public ICompletionProposal beanProperty(YamlDocument doc, int offset, YamlPath contextPath, TypedProperty p, int sortingOrder, ProposalApplier applier) {
+	public ICompletionProposal beanProperty(IDocument doc, int offset, TypedProperty p, int sortingOrder, ProposalApplier applier) {
 		return simpleProposal(p.getName(), sortingOrder, applier);
 	}
 

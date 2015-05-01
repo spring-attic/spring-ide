@@ -16,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -38,12 +37,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEditorTestHarness {
-
-	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
-		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			return SpringPropertiesCompletionEngine.SORTER.compare(p1, p2);
-		}
-	};
 
 	public static final String INTEGER = Integer.class.getName();
 	public static final String BOOLEAN = Boolean.class.getName();

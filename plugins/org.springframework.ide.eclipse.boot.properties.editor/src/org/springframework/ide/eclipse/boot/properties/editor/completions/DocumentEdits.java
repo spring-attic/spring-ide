@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
+package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
 import java.util.ArrayList;
 

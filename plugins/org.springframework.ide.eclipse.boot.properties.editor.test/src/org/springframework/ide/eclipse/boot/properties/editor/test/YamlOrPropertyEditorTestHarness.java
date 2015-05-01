@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -27,6 +28,7 @@ import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
@@ -37,6 +39,12 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Kris De Volder
  */
 public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
+
+	protected static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
+		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
+			return PropertyCompletionFactory.SORTER.compare(p1, p2);
+		}
+	};
 
 	protected SpringPropertyIndex index = new SpringPropertyIndex();
 	protected IJavaProject javaProject = null;
@@ -614,7 +622,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 			expect.append(after);
 			expect.append("\n-------------------\n");
 		}
-	
+
 		ICompletionProposal[] completions = getCompletions(editor);
 		for (int i = 0; i < completions.length; i++) {
 			editor = new MockEditor(textBefore);

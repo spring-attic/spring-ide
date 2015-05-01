@@ -31,13 +31,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfo
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.YamlHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
@@ -208,12 +208,6 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		Arrays.sort(completions, COMPARATOR);
 		return completions;
 	}
-
-	private static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
-		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			return PropertyCompletionFactory.SORTER.compare(p1, p2);
-		}
-	};
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
 		MockEditor editor = new MockEditor(editorText);

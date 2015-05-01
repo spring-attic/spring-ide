@@ -31,6 +31,7 @@ Bundle-ClassPath: .,
  lib/json-20140107.jar
 Export-Package: org.springframework.configurationmetadata,
  org.springframework.ide.eclipse.boot.properties.editor,
+ org.springframework.ide.eclipse.boot.properties.editor.completions,
  org.springframework.ide.eclipse.boot.properties.editor.maven,
  org.springframework.ide.eclipse.boot.properties.editor.reconciling,
  org.springframework.ide.eclipse.boot.properties.editor.util

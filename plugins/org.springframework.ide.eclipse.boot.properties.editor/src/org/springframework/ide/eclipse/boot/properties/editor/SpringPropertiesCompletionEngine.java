@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.formatJavaType;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
@@ -19,40 +18,25 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jface.fieldassist.ContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
-import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.StyledString.Styler;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
@@ -115,271 +99,12 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		}
 	};
 
-	private Styler JAVA_STRING_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_STRING);
-		}
-	};
-	private Styler JAVA_KEYWORD_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_KEYWORD);
-		}
-	};
-	private Styler JAVA_OPERATOR_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_OPERATOR);
-		}
-	};
-
-	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
-		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			if (p1 instanceof PropertyProposal && p2 instanceof PropertyProposal) {
-				double s1 = ((PropertyProposal)p1).match.score;
-				double s2 = ((PropertyProposal)p2).match.score;
-				if (s1==s2) {
-					String name1 = ((PropertyProposal)p1).match.data.getId();
-					String name2 = ((PropertyProposal)p2).match.data.getId();
-					return name1.compareTo(name2);
-				} else {
-					return Double.compare(s2, s1);
-				}
-			} else if (p1 instanceof ValueProposal && p2 instanceof ValueProposal) {
-				int order1 = ((ValueProposal)p1).sortingOrder;
-				int order2 = ((ValueProposal)p2).sortingOrder;
-				return Integer.valueOf(order1).compareTo(Integer.valueOf(order2));
-			}
-			return 0;
-		}
-	};
-
-	private final class ValueProposal implements ICompletionProposal {
-
-		private int valueStart;
-		private String valuePrefix;
-		private String substitution;
-		private int sortingOrder;
-		private String displayString;
-
-		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder, String valuePostFix) {
-			this.valueStart = valueStart;
-			this.valuePrefix = valuePrefix;
-			this.displayString = value;
-			this.sortingOrder = sortingOrder;
-			this.substitution = value + valuePostFix;
-		}
-
-		public ValueProposal(int valueStart, String valuePrefix, String value, int sortingOrder) {
-			this(valueStart, valuePrefix, value, sortingOrder, "");
-		}
-
-		@Override
-		public void apply(IDocument document) {
-			try {
-				document.replace(valueStart, valuePrefix.length(), substitution);
-			} catch (BadLocationException e) {
-				SpringPropertiesEditorPlugin.log(e);
-			}
-		}
-
-		@Override
-		public Point getSelection(IDocument document) {
-			return new Point(valueStart+substitution.length(), 0);
-		}
-
-		@Override
-		public String getAdditionalProposalInfo() {
-			return null;
-		}
-
-		@Override
-		public String getDisplayString() {
-			return displayString;
-		}
-
-		@Override
-		public Image getImage() {
-			return null;
-		}
-
-		@Override
-		public IContextInformation getContextInformation() {
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return "<"+valuePrefix+">"+substitution;
-		}
-	}
-
-	private final class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
-	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
-	{
-
-		private final String fPrefix;
-		private final int fOffset;
-		private Match<PropertyInfo> match;
-		private IDocument fDoc;
-
-		public PropertyProposal(IDocument doc, String prefix, int offset, Match<PropertyInfo> match) {
-			fDoc = doc;
-			fPrefix= prefix;
-			fOffset= offset;
-			this.match = match;
-		}
-
-		public Point getSelection(IDocument document) {
-			return new Point(fOffset - fPrefix.length() + getCompletion().length(), 0);
-		}
-
-		public String getAdditionalProposalInfo() {
-			PropertyInfo data = match.data;
-			return SpringPropertyHoverInfo.getHtmlHoverText(data);
-		}
-
-		@Override
-		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
-		}
-
-
-		public String getDisplayString() {
-			StyledString styledText = getStyledDisplayString();
-			return styledText.getString();
-		}
-
-		public Image getImage() {
-			return null;
-		}
-
-		public IContextInformation getContextInformation() {
-			return null;
-		}
-
-		public boolean isValidFor(IDocument document, int offset) {
-			return validate(document, offset, null);
-		}
-
-		public char[] getTriggerCharacters() {
-			return null;
-		}
-
-		public int getContextInformationPosition() {
-			return 0;
-		}
-
-		public void apply(IDocument document) {
-			apply(document, '\0', fOffset);
-		}
-
-		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-			apply(viewer.getDocument(), trigger, offset);
-		}
-
-		public void apply(IDocument document, char trigger, int offset) {
-			try {
-				String replacement= getCompletion();
-				int start = this.fOffset-fPrefix.length();
-				document.replace(start, offset-start, replacement);
-			} catch (BadLocationException e) {
-				BootActivator.log(e);
-			}
-		}
-
-		public void selected(ITextViewer viewer, boolean smartToggle) {
-		}
-
-		public void unselected(ITextViewer viewer) {
-		}
-
-		public boolean validate(IDocument document, int offset, DocumentEvent event) {
-			try {
-				int prefixStart= fOffset - fPrefix.length();
-				String newPrefix = document.get(prefixStart, offset-prefixStart);
-				double newScore = FuzzyMap.match(newPrefix, match.data.getId());
-				if (newScore!=0.0) {
-					match.score = newScore;
-					return true;
-				}
-			} catch (BadLocationException x) {
-			}
-			return false;
-		}
-
-		public IInformationControlCreator getInformationControlCreator() {
-			return null;
-		}
-
-		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-			return match.data.getId();
-		}
-
-		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
-			return fOffset - fPrefix.length();
-		}
-
-		public boolean isAutoInsertable() {
-			return true;
-		}
-
-		private String getCompletion() {
-			StringBuilder completion = new StringBuilder(match.data.getId());
-			Type type = TypeParser.parse(match.data.getType());
-			completion.append(propertyCompletionPostfix(type));
-			return completion.toString();
-		}
-
-		@Override
-		public StyledString getStyledDisplayString() {
-			StyledString result = new StyledString();
-			result.append(match.data.getId());
-			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
-				result.append("=", JAVA_OPERATOR_COLOR);
-				result.append(defaultValue, JAVA_STRING_COLOR);
-			}
-			String type = formatJavaType(match.data.getType());
-			if (type!=null) {
-				result.append(" : ");
-				result.append(type, JAVA_KEYWORD_COLOR);
-			}
-			String description = getShortDescription();
-			if (description!=null && !"".equals(description.trim())) {
-				result.append(" ");
-				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
-			}
-			return result;
-		}
-
-		private String getShortDescription() {
-			String description = match.data.getDescription();
-			if (description!=null) {
-				int dotPos = description.indexOf('.');
-				if (dotPos>=0) {
-					description = description.substring(0, dotPos+1);
-				}
-				description = description.replaceAll("\\p{Cntrl}", ""); //mostly here to remove line breaks, these mess with the layout in the popup control.
-				return description;
-			}
-			return null;
-		}
-
-
-		@Override
-		public String toString() {
-			return "<"+fPrefix+">"+match.data.getId();
-		}
-
-	}
-
 	private static final IContentProposal[] NO_CONTENT_PROPOSALS = new IContentProposal[0];
 
 	private DocumentContextFinder documentContextFinder = null;
 	private Provider<FuzzyMap<PropertyInfo>> indexProvider = null;
 	private TypeUtil typeUtil = null;
+	private PropertyCompletionFactory completionFactory = null;
 
 	/**
 	 * Create an empty completion engine. Meant for unit testing. Real clients should use the
@@ -401,7 +126,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
 			}
 		};
-		this.documentContextFinder = DocumentContextFinder.DEFAULT;
+		setDocumentContextFinder(DocumentContextFinder.DEFAULT);
 		this.typeUtil = new TypeUtil(jp);
 
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
@@ -473,7 +198,11 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 						if (prop.getName().startsWith(prefix)) {
 							Type valueType = prop.getType();
 							String postFix = propertyCompletionPostfix(valueType);
-							proposals.add(new ValueProposal(navOffset+1, prefix, prop.getName(), sorting++, postFix));
+							DocumentEdits edits = new DocumentEdits(doc);
+							edits.delete(navOffset+1, offset);
+							edits.insert(offset, prop.getName()+postFix);
+							proposals.add(
+								completionFactory.beanProperty(doc, offset, prop, sorting++, edits));
 						}
 					}
 					return proposals;
@@ -561,7 +290,13 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 					for (int i = 0; i < valueCompletions.length; i++) {
 						String valueCandidate = valueCompletions[i];
 						if (valueCandidate.startsWith(valuePrefix)) {
-							proposals.add(new ValueProposal(startOfValue, valuePrefix, valueCandidate, i));
+							DocumentEdits edits = new DocumentEdits(doc);
+							edits.delete(startOfValue, offset);
+							edits.insert(offset, valueCandidate);
+							proposals.add(
+								completionFactory.valueProposal(valueCandidate, type, i, edits)
+									//new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)
+							);
 						}
 					}
 					return proposals;
@@ -628,14 +363,27 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 	}
 
 	protected Collection<ICompletionProposal> getFuzzyCompletions(
-			IDocument doc, int offset) {
-		String prefix = fuzzySearchPrefix.getPrefix(doc, offset);
+			final IDocument doc, final int offset) {
+		final String prefix = fuzzySearchPrefix.getPrefix(doc, offset);
 		if (prefix != null) {
 			Collection<Match<PropertyInfo>> matches = findMatches(prefix);
 			if (matches!=null && !matches.isEmpty()) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
-				for (Match<PropertyInfo> match : matches) {
-					proposals.add(new PropertyProposal(doc, prefix, offset, match));
+				for (final Match<PropertyInfo> match : matches) {
+					ProposalApplier edits = new LazyProposalApplier() {
+						@Override
+						protected ProposalApplier create() throws Exception {
+							Type type = TypeParser.parse(match.data.getType());
+							DocumentEdits edits = new DocumentEdits(doc);
+							edits.delete(offset-prefix.length(), offset);
+							edits.insert(offset, match.data.getId() + propertyCompletionPostfix(type));
+							return edits;
+						}
+					};
+					proposals.add(
+						completionFactory.property(doc, offset, edits, match)
+						//new PropertyProposal(doc, prefix, offset, match)
+					);
 				}
 				return proposals;
 			}
@@ -764,6 +512,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 
 	public void setDocumentContextFinder(DocumentContextFinder it) {
 		this.documentContextFinder = it;
+		this.completionFactory = new PropertyCompletionFactory(it);
 	}
 
 	public void setIndexProvider(Provider<FuzzyMap<PropertyInfo>> it) {

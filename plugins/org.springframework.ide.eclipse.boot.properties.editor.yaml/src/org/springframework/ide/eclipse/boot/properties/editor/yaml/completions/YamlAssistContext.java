@@ -24,6 +24,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -138,7 +142,7 @@ public abstract class YamlAssistContext {
 						SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
 						YamlPath relativePath = YamlPath.fromSimpleProperty(name);
 						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
-						proposals.add(completionFactory.beanProperty(doc, queryOffset, contextPath, p, sortingOrder++, edits));
+						proposals.add(completionFactory.beanProperty(doc.getDocument(), queryOffset, p, sortingOrder++, edits));
 					}
 				}
 				return proposals;

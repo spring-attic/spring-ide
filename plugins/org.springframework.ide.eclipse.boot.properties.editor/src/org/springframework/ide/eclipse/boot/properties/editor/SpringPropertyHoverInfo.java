@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
+import static org.springframework.ide.eclipse.boot.util.StringUtil.arrayToCommaDelimitedString;
+import static org.springframework.ide.eclipse.boot.util.StringUtil.collectionToCommaDelimitedString;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,13 +23,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
-
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information

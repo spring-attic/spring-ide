@@ -30,7 +30,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		} else {
 			assertCompletion("ser<*>", "server.port=<*>");
 		}
-		assertCompletionDisplayString("ser<*>", "server.port=8080 : int Port where server listens for http.");
+		assertCompletionDisplayString("ser<*>", "server.port : int");
 	}
 
 	public void testLoggingLevelCompletion() throws Exception {
