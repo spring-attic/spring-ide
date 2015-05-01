@@ -38,7 +38,10 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 	public static class Match<E> {
 		public double score;
 		public final E data;
-		public Match(double score, E e) {
+		private String pattern;
+
+		public Match(String pattern, double score, E e) {
+			this.pattern = pattern;
 			this.score = score;
 			this.data = e;
 		}
@@ -57,6 +60,9 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		@Override
 		public String toString() {
 			return "Match(score="+score+", data="+data+")";
+		}
+		public String getPattern() {
+			return pattern;
 		}
 	}
 
@@ -89,7 +95,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			// 2) want to use different way of sorting / scoring. See https://issuetracker.springsource.com/browse/STS-4008
 			ArrayList<Match<E>> matches = new ArrayList<Match<E>>(entries.size());
 			for (E v : entries.values()) {
-				matches.add(new Match<E>(1.0, v));
+				matches.add(new Match<E>(pattern, 1.0, v));
 			}
 			return matches;
 		} else {
@@ -99,7 +105,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 				String key = e.getKey();
 				double score = match(pattern, key);
 				if (score!=0.0) {
-					matches.add(new Match<E>(score, e.getValue()));
+					matches.add(new Match<E>(pattern, score, e.getValue()));
 				}
 			}
 			return matches;

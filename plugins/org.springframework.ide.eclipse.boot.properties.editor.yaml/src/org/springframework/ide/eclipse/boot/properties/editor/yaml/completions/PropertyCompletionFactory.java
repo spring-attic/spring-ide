@@ -26,6 +26,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
@@ -142,25 +143,11 @@ public class PropertyCompletionFactory {
 
 	private DocumentContextFinder documentContextFinder;
 
-	private Styler JAVA_STRING_COLOR = new Styler() {
-		@Override
+	private static final Styler UNDERLINE = new Styler() {
 		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_STRING);
-		}
+			textStyle.underline = true;
+		};
 	};
-	private Styler JAVA_KEYWORD_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_KEYWORD);
-		}
-	};
-	private Styler JAVA_OPERATOR_COLOR = new Styler() {
-		@Override
-		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_OPERATOR);
-		}
-	};
-
 
 	public PropertyCompletionFactory(DocumentContextFinder documentContextFinder) {
 		this.documentContextFinder = documentContextFinder;
@@ -170,15 +157,11 @@ public class PropertyCompletionFactory {
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
 	{
 
-//		private final String fPrefix;
-		private final int fOffset;
 		private Match<PropertyInfo> match;
 		private IDocument fDoc;
 		private ProposalApplier proposalApplier;
 
 		public PropertyProposal(IDocument doc, int offset, ProposalApplier applier,  Match<PropertyInfo> match) {
-//			fPrefix= prefix;
-			this.fOffset= offset;
 			this.match = match;
 			this.proposalApplier = applier;
 			this.fDoc = doc;
@@ -215,113 +198,38 @@ public class PropertyCompletionFactory {
 		public IContextInformation getContextInformation() {
 			return null;
 		}
-
-//		public boolean isValidFor(IDocument document, int offset) {
-//			return validate(document, offset, null);
-//		}
-
-//		public char[] getTriggerCharacters() {
-//			return null;
-//		}
-//
-//		public int getContextInformationPosition() {
-//			return 0;
-//		}
-
-//		public void apply(IDocument document) {
-//			apply(document, '\0', fOffset);
-//		}
-
-//		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-//			apply(viewer.getDocument(), trigger, offset);
-//		}
-
-//		public void apply(IDocument doc, char trigger, int offset) {
-//			try {
-//				proposalApplier.apply(doc);
-//			} catch (Exception e) {
-//				BootActivator.log(e);
-//			}
-//		}
-
-//		public void selected(ITextViewer viewer, boolean smartToggle) {
-//		}
-//
-//		public void unselected(ITextViewer viewer) {
-//		}
-//
-//		public boolean validate(IDocument document, int offset, DocumentEvent event) {
-//			try {
-//				int prefixStart= fOffset - fPrefix.length();
-//				String newPrefix = document.get(prefixStart, offset-prefixStart);
-//				double newScore = FuzzyMap.match(newPrefix, match.data.getId());
-//				if (newScore!=0.0) {
-//					match.score = newScore;
-//					return true;
-//				}
-//			} catch (BadLocationException x) {
-//			}
-//			return false;
-//		}
-
-//		public IInformationControlCreator getInformationControlCreator() {
-//			return null;
-//		}
-
-//		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-//			return match.data.getId();
-//		}
-
-//		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
-//			return fOffset - fPrefix.length();
-//		}
-
 		public boolean isAutoInsertable() {
 			return true;
 		}
 
-//		private String getCompletion() {
-//			StringBuilder completion = new StringBuilder(match.data.getId());
-//			Type type = TypeParser.parse(match.data.getType());
-//			completion.append(propertyCompletionPostfix(type));
-//			return completion.toString();
-//		}
-
 		@Override
 		public StyledString getStyledDisplayString() {
 			StyledString result = new StyledString();
-			result.append(match.data.getId());
-			String defaultValue = SpringPropertyHoverInfo.formatDefaultValue(match.data.getDefaultValue());
-			if (defaultValue!=null) {
-				result.append("=", JAVA_OPERATOR_COLOR);
-				result.append(defaultValue, JAVA_STRING_COLOR);
-			}
+			highlightPattern(match.getPattern(), match.data.getId(), result);
 			String type = formatJavaType(match.data.getType());
 			if (type!=null) {
-				result.append(" : ");
-				result.append(type, JAVA_KEYWORD_COLOR);
-			}
-			String description = getShortDescription();
-			if (description!=null && !"".equals(description.trim())) {
-				result.append(" ");
-				result.append(description.trim(), StyledString.DECORATIONS_STYLER);
+				result.append(" : "+type, StyledString.DECORATIONS_STYLER);
 			}
 			return result;
 		}
 
-		private String getShortDescription() {
-			String description = match.data.getDescription();
-			if (description!=null) {
-				int dotPos = description.indexOf('.');
-				if (dotPos>=0) {
-					description = description.substring(0, dotPos+1);
-				}
-				description = description.replaceAll("\\p{Cntrl}", ""); //mostly here to remove line breaks, these mess with the layout in the popup control.
-				return description;
-			}
-			return null;
-		}
+		private void highlightPattern(String pattern, String data, StyledString result) {
+			int dataPos = 0;	int dataLen = data.length();
+			int patternPos = 0; int patternLen = pattern.length();
 
+			while (dataPos<dataLen && patternPos<patternLen) {
+				int pChar = pattern.charAt(patternPos++);
+				int highlightPos = data.indexOf(pChar, dataPos);
+				if (dataPos<highlightPos) {
+					result.append(data.substring(dataPos, highlightPos));
+				}
+				result.append(data.charAt(highlightPos), UNDERLINE);
+				dataPos = highlightPos+1;
+			}
+			if (dataPos<dataLen) {
+				result.append(data.substring(dataPos));
+			}
+		}
 
 		@Override
 		public String toString() {
@@ -344,13 +252,11 @@ public class PropertyCompletionFactory {
 
 		@Override
 		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public int getPrefixCompletionStart(IDocument document,
-				int completionOffset) {
+		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 			return completionOffset;
 		}
 
