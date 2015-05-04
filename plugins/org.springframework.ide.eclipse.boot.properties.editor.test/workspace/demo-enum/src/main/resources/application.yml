@@ -15,6 +15,8 @@
 #      - Maps 
 
 spring:
+  cloud:
+    config:
   application: 
     name: foo
     index: 777

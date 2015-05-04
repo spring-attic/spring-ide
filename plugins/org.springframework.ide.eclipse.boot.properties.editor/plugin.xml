@@ -45,21 +45,9 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-            <menu
+<!--            <menu
                   id="org.springframework.ide.eclipse.boot.properties.file.menu"
-                  label="Spring Properties">
-  <!--              <visibleWhen
-                    checkEnabled="false">
-	              <and>
-		             <count value="1"/>
-		             <iterate>
-		           	   <adapt type="org.eclipse.core.resources.IResource">
-		           	      <test property="org.eclipse.core.resources.contentTypeId" 
-       	        			value="org.eclipse.jdt.core.javaProperties"/>"
-		           	   </adapt>
-		             </iterate>
-	              </and>
-                </visibleWhen> -->
+                  label="Spring Properties"> -->
 	            <command
 	                  commandId="org.springframework.ide.eclipse.boot.properties.editor.enable"
 	                  id="org.springframework.ide.eclipse.boot.properties.editor.enable"
@@ -78,7 +66,7 @@
 	                        checkEnabled="true">
 	                  </visibleWhen>
 	            </command>
-            </menu>
+<!--            </menu> -->
       </menuContribution>
    </extension>
    
@@ -125,11 +113,11 @@
      <command
            id="org.springframework.ide.eclipse.boot.properties.editor.enable"
            categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Enable/Disable Spring Properties Editor"/>
+           name="Enable Spring Properties Editor"/>
      <command
            id="org.springframework.ide.eclipse.boot.properties.editor.disable"
            categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Enable/Disable Spring Properties Editor"/>
+           name="Disable Spring Properties Editor"/>
   </extension>
   
   <extension
