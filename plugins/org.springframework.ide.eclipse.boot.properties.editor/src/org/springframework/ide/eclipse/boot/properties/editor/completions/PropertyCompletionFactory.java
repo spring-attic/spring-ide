@@ -46,18 +46,16 @@ public class PropertyCompletionFactory {
 		return simpleProposal(value, sortingOrder, applier);
 	}
 
-	public ICompletionProposal beanProperty(IDocument doc, int offset, TypedProperty p, int sortingOrder, ProposalApplier applier) {
-		return simpleProposal(p.getName(), sortingOrder, applier);
+	public ICompletionProposal beanProperty(IDocument doc, int offset, String contextProperty, String pattern, TypedProperty p, int sortingOrder, ProposalApplier applier) {
+		String description = null; //TODO: can we get JavaDoc from the bean's field, setter or getter method?
+		PropertyInfo prop = new PropertyInfo(contextProperty + "." + p.getName(), p.getType().toString(), p.getName(), null, description, null);
+		Match<PropertyInfo> match = new Match<PropertyInfo>(pattern, -(1+sortingOrder), prop);
+		return new BeanPropertyProposal(doc, offset, applier, match);
 	}
 
-
-	//TODO: move to a place where this can be shared with SpringProperties completion engine
-	// and use it instead of almost duplicated code.
-
-	private ICompletionProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
+	public ICompletionProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
 		return new SimpleProposal(name, sortingOrder, applier);
 	}
-
 
 	private static class SimpleProposal implements ICompletionProposal {
 
@@ -92,7 +90,6 @@ public class PropertyCompletionFactory {
 
 		@Override
 		public String getAdditionalProposalInfo() {
-			//TODO: display JavaDoc info for the type if available.
 			return null;
 		}
 
@@ -153,7 +150,7 @@ public class PropertyCompletionFactory {
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
 	{
 
-		private Match<PropertyInfo> match;
+		protected Match<PropertyInfo> match;
 		private IDocument fDoc;
 		private ProposalApplier proposalApplier;
 
@@ -201,12 +198,16 @@ public class PropertyCompletionFactory {
 		@Override
 		public StyledString getStyledDisplayString() {
 			StyledString result = new StyledString();
-			highlightPattern(match.getPattern(), match.data.getId(), result);
+			highlightPattern(match.getPattern(), getBaseDisplayString(), result);
 			String type = formatJavaType(match.data.getType());
 			if (type!=null) {
 				result.append(" : "+type, StyledString.DECORATIONS_STYLER);
 			}
 			return result;
+		}
+
+		protected String getBaseDisplayString() {
+			return match.data.getId();
 		}
 
 		private void highlightPattern(String pattern, String data, StyledString result) {
@@ -229,7 +230,7 @@ public class PropertyCompletionFactory {
 
 		@Override
 		public String toString() {
-			return match.data.getId();
+			return getBaseDisplayString();
 		}
 
 		@Override
@@ -254,6 +255,18 @@ public class PropertyCompletionFactory {
 		@Override
 		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 			return completionOffset;
+		}
+	}
+
+
+	private class BeanPropertyProposal extends PropertyProposal {
+		public BeanPropertyProposal(IDocument doc, int offset, ProposalApplier applier, Match<PropertyInfo> match) {
+			super(doc, offset, applier, match);
+		}
+
+		@Override
+		protected String getBaseDisplayString() {
+			return match.data.getName();
 		}
 
 	}

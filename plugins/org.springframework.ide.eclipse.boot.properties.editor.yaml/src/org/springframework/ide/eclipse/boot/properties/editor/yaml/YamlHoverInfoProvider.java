@@ -23,10 +23,14 @@ import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfo
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.PathUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlAssistContext;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.parser.ParserException;
@@ -54,13 +58,19 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 			IJavaProject jp = contextFinder.getJavaProject(doc); //Note in some contexts jp may be null
 			FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
 			if (index!=null) {
-				List<NodeRef<?>> path = ast.findPath(r.getOffset());
-				String propExp = PathUtil.toPropertyPrefixString(path);
-				PropertyInfo info = index.findLongestCommonPrefixEntry(propExp);
-				if (info!=null && propExp.equals(info.getId())) {
-					return new SpringPropertyHoverInfo(jp, info);
+				List<NodeRef<?>> astPath = ast.findPath(r.getOffset());
+				YamlPath path = YamlPath.fromASTPath(astPath);
+				if (path.pointsAtKey()) {
+					//When a path points at a key we must tramsform it to a 'value-terminating path'
+					// to be able to reuse the 'getHoverInfo' method on YamlAssistContext (as navigation
+					// into 'key' is not defined for YamlAssistContext.
+					String key = path.getLastSegment().toPropString();
+					path = path.dropLast().append(YamlPathSegment.valueAt(key));
 				}
-				//return HoverInfo.withText(propExp);
+				YamlAssistContext assistContext = YamlAssistContext.forPath(path, index, null, new TypeUtil(jp));
+				if (assistContext!=null) {
+					return assistContext.getHoverInfo();
+				}
 			}
 		}
 		return null;

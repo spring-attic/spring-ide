@@ -128,4 +128,8 @@ public class IndexNavigator {
 		return "IndexNavigator("+prefix+")";
 	}
 
+	public boolean isEmpty() {
+		return getExactMatch()==null && getExtensionCandidate()==null;
+	}
+
 }

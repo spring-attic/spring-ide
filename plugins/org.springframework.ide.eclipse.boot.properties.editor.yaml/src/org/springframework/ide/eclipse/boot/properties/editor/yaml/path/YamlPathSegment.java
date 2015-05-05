@@ -53,11 +53,11 @@ public abstract class YamlPathSegment {
 		}
 	}
 
-	public static class AtKey extends YamlPathSegment {
+	public static class ValAtKey extends YamlPathSegment {
 
 		private String key;
 
-		public AtKey(String key) {
+		public ValAtKey(String key) {
 			this.key = key;
 		}
 
@@ -87,6 +87,18 @@ public abstract class YamlPathSegment {
 		}
 	}
 
+	private static class KeyAtKey extends ValAtKey {
+
+		public KeyAtKey(String key) {
+			super(key);
+		}
+
+		@Override
+		public YamlPathSegmentType getType() {
+			return YamlPathSegmentType.KEY_AT_KEY;
+		}
+
+	}
 
 	public String toString() {
 		return toNavString();
@@ -99,13 +111,13 @@ public abstract class YamlPathSegment {
 	public abstract YamlPathSegmentType getType();
 
 	public static YamlPathSegment valueAt(String key) {
-		return new AtKey(key);
+		return new ValAtKey(key);
 	}
 	public static YamlPathSegment valueAt(int index) {
 		return new AtIndex(index);
 	}
 	public static YamlPathSegment keyAt(String key) {
-		return new AtKey(key);
+		return new KeyAtKey(key);
 	}
 
 }

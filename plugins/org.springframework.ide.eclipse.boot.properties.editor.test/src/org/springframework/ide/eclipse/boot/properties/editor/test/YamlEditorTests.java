@@ -1110,7 +1110,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"  color-names:\n" +
 				"    <*>",
 				//=>
-				"red", "green", "blue"
+				"red : String", "green : String", "blue : String"
 		);
 
 		assertCompletions(
@@ -1180,13 +1180,13 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"foo:\n" +
 				"  color-data:\n" +
 				"    <*>",
-				"red", "green", "blue"
+				"red : demo.ColorData", "green : demo.ColorData", "blue : demo.ColorData"
 		);
 
 		assertCompletionsDisplayString(
 				"foo:\n" +
 				"  color-data: <*>\n",
-				"red", "green", "blue"
+				"red : demo.ColorData", "green : demo.ColorData", "blue : demo.ColorData"
 		);
 
 	}

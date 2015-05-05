@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.AtKey;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.ValAtKey;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;

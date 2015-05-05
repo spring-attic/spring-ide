@@ -186,7 +186,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		return merge(
 				super.getHyperlinkDetectors(sourceViewer),
 				myDetector
-				);
+		);
 	}
 
 

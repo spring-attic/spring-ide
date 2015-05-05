@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.SeqRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
 
 /**
  * @author Kris De Volder
@@ -141,6 +142,25 @@ public class YamlPath {
 		return new YamlPath(newPath);
 	}
 
+	public YamlPath dropLast() {
+		return dropLast(1);
+	}
+
+	public YamlPath dropLast(int dropCount) {
+		if (dropCount>=size()) {
+			return EMPTY;
+		}
+		if (dropCount==0) {
+			return this;
+		}
+		YamlPathSegment[] newPath = new YamlPathSegment[segments.length-dropCount];
+		for (int i = 0; i < newPath.length; i++) {
+			newPath[i] = segments[i];
+		}
+		return new YamlPath(newPath);
+	}
+
+
 	public boolean isEmpty() {
 		return segments.length==0;
 	}
@@ -189,6 +209,34 @@ public class YamlPath {
 		}
 		return new YamlPath(segments);
 	}
+
+	public YamlPathSegment getLastSegment() {
+		if (!isEmpty()) {
+			return segments[segments.length-1];
+		}
+		return null;
+	}
+
+	/**
+	 * Attempt to interpret last segment of path as a bean property name.
+	 * @return The name of the property or null if not applicable.
+	 */
+	public String getBeanPropertyName() {
+		if (!isEmpty()) {
+			YamlPathSegment lastSegment = getLastSegment();
+			YamlPathSegmentType kind = lastSegment.getType();
+			if (kind==YamlPathSegmentType.KEY_AT_KEY ||  kind==YamlPathSegmentType.VAL_AT_KEY) {
+				return lastSegment.toPropString();
+			}
+		}
+		return null;
+	}
+
+	public boolean pointsAtKey() {
+		YamlPathSegment s = getLastSegment();
+		return s!=null && s.getType()==YamlPathSegmentType.KEY_AT_KEY;
+	}
+
 
 
 }

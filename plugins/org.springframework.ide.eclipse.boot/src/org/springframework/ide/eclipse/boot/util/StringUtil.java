@@ -100,4 +100,23 @@ public class StringUtil {
 		return null;
 	}
 
+	public static String hyphensToCamelCase(String propName, boolean startWithUpperCase) {
+		String [] parts = propName.split("-");
+		if (startWithUpperCase) {
+			parts[0] = upCaseFirstChar(parts[0]);
+		}
+		StringBuilder camelCased = new StringBuilder(parts[0]);
+		for (int i = 1; i < parts.length; i++) {
+			camelCased.append(upCaseFirstChar(parts[i]));
+		}
+		return camelCased.toString();
+	}
+
+	public static String upCaseFirstChar(String string) {
+		if (StringUtil.hasText(string)) {
+			return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+		}
+		return "";
+	}
+
 }

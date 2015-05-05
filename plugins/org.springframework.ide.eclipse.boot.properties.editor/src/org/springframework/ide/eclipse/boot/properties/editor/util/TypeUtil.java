@@ -26,10 +26,12 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
+import org.omg.CORBA.NO_PERMISSION;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -368,6 +370,11 @@ public class TypeUtil {
 		return null;
 	}
 
+	private IType findType(Type beanType) {
+		return findType(beanType.getErasure());
+	}
+
+
 	public static String formatJavaType(String type) {
 		if (type!=null) {
 			String primitive = TypeUtil.PRIMITIVE_TYPE_NAMES.get(type);
@@ -385,6 +392,8 @@ public class TypeUtil {
 
 	private static final String JAVA_LANG = "java.lang.";
 	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
+
+	private static final String[] NO_PARAMS = new String[0];
 
 	/**
 	 * Determine properties that are setable on object of given type.
@@ -482,6 +491,49 @@ public class TypeUtil {
 				map.put(p.getName(), p.getType());
 			}
 			return map;
+		}
+		return null;
+	}
+
+	/**
+	 * Maybe ne null in some contexts. In such context functionality will be limited because
+	 * types can not be resolved.
+	 */
+	public IJavaProject getJavaProject() {
+		return javaProject;
+	}
+
+	public IField getField(Type beanType, String propName) {
+		IType type = findType(beanType);
+		IField f = type.getField(StringUtil.hyphensToCamelCase(propName, false));
+		if (f.exists()) {
+			return f;
+		}
+		return null;
+	}
+
+	public IMethod getSetter(Type beanType, String propName) {
+		try {
+			String setterName = "set" + StringUtil.hyphensToCamelCase(propName, true);
+			IType type = findType(beanType);
+			for (IMethod m : type.getMethods()) {
+				if (setterName.equals(m.getElementName())) {
+					return m;
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return null;
+	}
+
+	public IJavaElement getGetter(Type beanType, String propName) {
+		String getterName = "get" + StringUtil.hyphensToCamelCase(propName, true);
+		IType type = findType(beanType);
+
+		IMethod m = type.getMethod(getterName, NO_PARAMS);
+		if (m.exists()) {
+			return m;
 		}
 		return null;
 	}

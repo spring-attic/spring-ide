@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
+import static org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2.getHTMLContent;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ALIASED;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.LOWER_CASE;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ORIGNAL;
@@ -20,14 +21,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
+import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -44,6 +52,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.Collect
 /**
  * Represents a context relative to which we can provide content assistance.
  */
+@SuppressWarnings("restriction")
 public abstract class YamlAssistContext {
 
 	private boolean preferLowerCasedEnums = true; //make user configurable?
@@ -96,13 +105,142 @@ public abstract class YamlAssistContext {
 		}
 	};
 
+	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
+	}
+
+	/**
+	 * @return the type expected at this context, may return null if unknown.
+	 */
+	protected abstract Type getType();
+
+	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
+
+	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		YamlAssistContext context = YamlAssistContext.global(index, completionFactory, typeUtil);
+		for (YamlPathSegment s : contextPath.getSegments()) {
+			if (context==null) return null;
+			context = context.navigate(s);
+		}
+		return context;
+	}
+
+	protected abstract YamlAssistContext navigate(YamlPathSegment s);
+
 	public class TypeContext extends YamlAssistContext {
+
+		private final class BeanPropertyHoverInfo extends HoverInfo {
+			private final String id;
+			private final String propName;
+
+			private BeanPropertyHoverInfo(String id, String propName) {
+				this.id = id;
+				this.propName = propName;
+			}
+
+			@Override
+			public String getHtml() {
+				HtmlBuffer html = new HtmlBuffer();
+
+				html.raw("<b>");
+					html.text(id);
+				html.raw("</b>");
+				html.raw("<br>");
+
+				String typeStr = type.toString();
+				if (typeStr==null) {
+					typeStr = Object.class.getName();
+				}
+				html.raw("<a href=\"");
+				html.url("type/"+type);
+				html.raw("\">");
+				html.text(typeStr);
+				html.raw("</a>");
+
+//					String deflt = formatDefaultValue(data.getDefaultValue());
+//					if (deflt!=null) {
+//						html.raw("<br><br>");
+//						html.text("Default: ");
+//						html.raw("<i>");
+//						html.text(deflt);
+//						html.raw("</i>");
+//					}
+
+				String description = getDescription();
+				if (description!=null) {
+					html.raw("<br><br>");
+					html.raw(description);
+				}
+
+				return html.toString();
+			}
+
+			private String getDescription() {
+				try {
+					List<IJavaElement> jes = getAllJavaElements();
+					if (jes!=null) {
+						for (IJavaElement je : jes) {
+							if (je instanceof IMember) {
+								String jdoc = getHTMLContent((IMember)je, true);
+								if (jdoc!=null) {
+									return jdoc;
+								}
+							}
+						}
+					}
+				} catch (Exception e) {
+					BootActivator.log(e);
+				}
+				return null;
+			}
+
+			@Override
+			public List<IJavaElement> getJavaElements() {
+				IJavaElement je;
+				Type beanType = parent.getType();
+				je = typeUtil.getSetter(beanType, propName);
+				if (je!=null) {
+					return Collections.singletonList(je);
+				}
+				je = typeUtil.getGetter(beanType, propName);
+				if (je!=null) {
+					return Collections.singletonList(je);
+				}
+				je = typeUtil.getField(beanType, propName);
+				if (je!=null) {
+					return Collections.singletonList(je);
+				}
+				return Collections.emptyList();
+			}
+
+			private List<IJavaElement> getAllJavaElements() {
+				if (propName!=null) {
+					Type beanType = parent.getType();
+					ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>(3);
+					maybeAdd(elements, typeUtil.getField(beanType, propName));
+					maybeAdd(elements, typeUtil.getSetter(beanType, propName));
+					maybeAdd(elements, typeUtil.getGetter(beanType, propName));
+					if (!elements.isEmpty()) {
+						return elements;
+					}
+				}
+				return Collections.emptyList();
+			}
+
+			private void maybeAdd(ArrayList<IJavaElement> elements, IJavaElement e) {
+				if (e!=null) {
+					elements.add(e);
+				}
+			}
+		}
 
 		private PropertyCompletionFactory completionFactory;
 		private Type type;
+		private YamlAssistContext parent;
 
-		public TypeContext(YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		public TypeContext(YamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
 			super(contextPath, typeUtil);
+			this.parent = parent;
 			this.completionFactory = completionFactory;
 			this.type = type;
 		}
@@ -142,7 +280,9 @@ public abstract class YamlAssistContext {
 						SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
 						YamlPath relativePath = YamlPath.fromSimpleProperty(name);
 						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
-						proposals.add(completionFactory.beanProperty(doc.getDocument(), queryOffset, p, sortingOrder++, edits));
+						proposals.add(completionFactory.beanProperty(
+								doc.getDocument(), queryOffset, contextPath.toPropString(), query,p, sortingOrder++, edits)
+						);
 					}
 				}
 				return proposals;
@@ -189,7 +329,7 @@ public abstract class YamlAssistContext {
 
 		private YamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
 			if (nextType!=null) {
-				return new TypeContext(contextPath.append(s), nextType, completionFactory, typeUtil);
+				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil);
 			}
 			return null;
 		}
@@ -199,9 +339,27 @@ public abstract class YamlAssistContext {
 		public String toString() {
 			return "TypeContext("+contextPath.toPropString()+"::"+type+")";
 		}
+
+
+		@Override
+		public HoverInfo getHoverInfo() {
+			if (parent instanceof IndexContext) {
+				//this context is in fact an 'alias' of its parent, representing the
+				// point in the context hierarchy where a we transition from navigating
+				// the index to navigating type/bean properties
+				return parent.getHoverInfo();
+			} else {
+				final String id = contextPath.toPropString();
+				final String propName = contextPath.getBeanPropertyName();
+				return new BeanPropertyHoverInfo(id, propName);
+			}
+		}
+
+		@Override
+		protected Type getType() {
+			return type;
+		}
 	}
-
-
 
 	private static class IndexContext extends YamlAssistContext {
 
@@ -277,8 +435,9 @@ public abstract class YamlAssistContext {
 				if (subIndex.getExtensionCandidate()!=null) {
 					return new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);
 				} else if (subIndex.getExactMatch()!=null) {
+					IndexContext asIndexContext = new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);
 					PropertyInfo prop = subIndex.getExactMatch();
-					return new TypeContext(contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil);
+					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil);
 				}
 			}
 			//Unsuported navigation => no context for assist
@@ -289,23 +448,26 @@ public abstract class YamlAssistContext {
 		public String toString() {
 			return "YamlAssistIndexContext("+indexNav+")";
 		}
-	}
 
-	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
-	}
-
-	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
-
-	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-		YamlAssistContext context = YamlAssistContext.global(index, completionFactory, typeUtil);
-		for (YamlPathSegment s : contextPath.getSegments()) {
-			if (context==null) return null;
-			context = context.navigate(s);
+		@Override
+		protected Type getType() {
+			PropertyInfo match = indexNav.getExactMatch();
+			if (match!=null) {
+				return TypeParser.parse(match.getType());
+			}
+			return null;
 		}
-		return context;
+
+		@Override
+		public HoverInfo getHoverInfo() {
+			PropertyInfo prop = indexNav.getExactMatch();
+			if (prop!=null) {
+				return new SpringPropertyHoverInfo(typeUtil.getJavaProject(), prop);
+			}
+			return null;
+		}
 	}
 
-	protected abstract YamlAssistContext navigate(YamlPathSegment s);
+	public abstract HoverInfo getHoverInfo();
 
 }

@@ -202,7 +202,8 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 							edits.delete(navOffset+1, offset);
 							edits.insert(offset, prop.getName()+postFix);
 							proposals.add(
-								completionFactory.beanProperty(doc, offset, prop, sorting++, edits));
+								completionFactory.simpleProposal(prop.getName(), sorting++, edits)
+							);
 						}
 					}
 					return proposals;
