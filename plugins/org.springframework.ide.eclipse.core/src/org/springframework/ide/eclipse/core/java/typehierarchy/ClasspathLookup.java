@@ -10,7 +10,15 @@
 *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
+import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * A simple lookup mechansim for finding resources on a number of directories and zip/jar files.
@@ -25,6 +33,36 @@ import java.io.InputStream;
 public class ClasspathLookup {
 	
 	private ClasspathElement[] cpElements;
+	
+	public ClasspathLookup(URL[] urls) {
+		List<ClasspathElement> locations = new ArrayList<ClasspathElement>();
+		
+		Set<URL> usedURLs = new HashSet<URL>();
+		for (URL url : urls) {
+			if (!usedURLs.contains(url)) {
+				if (url.toString().endsWith(".jar")) {
+					try {
+						String path = url.toURI().getPath();
+						locations.add(new ClasspathElementJar(path));
+						usedURLs.add(url);
+					} catch (Exception e) {
+						SpringCore.log(e);
+					}
+				}
+				else {
+					try {
+						File file = new File(url.toURI());
+						locations.add(new ClasspathElementDirectory(file));
+						usedURLs.add(url);
+					} catch (Exception e) {
+						SpringCore.log(e);
+					}
+				}
+			}
+		}
+		
+		this.cpElements = locations.toArray(new ClasspathElement[0]);
+	}
 
 	public ClasspathLookup(ClasspathElement[] cpElements) {
 		this.cpElements = cpElements;

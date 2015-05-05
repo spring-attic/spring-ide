@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,42 +18,42 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * @author Martin Lippert
  * @since 3.3.0
  */
-public class ClasspathElementZip implements ClasspathElement {
+public class ClasspathElementJar implements ClasspathElement {
 	
-	private ZipFile zipFile;
-	private String zipFileName;
+	private JarFile jarFile;
+	private String jarFileName;
 	private Set<String> knownPackageNames;
 	private long lastModified;
 
-	public ClasspathElementZip(String zipFileName) {
-		this.zipFileName = zipFileName;
+	public ClasspathElementJar(String jarFileName) {
+		this.jarFileName = jarFileName;
 	}
 
 	public InputStream getStream(String fullyQualifiedClassFileName, String packageName, String classFileName) throws Exception {
 		if (!isPackage(packageName)) return null;
 		
-		ZipEntry entry = zipFile.getEntry(fullyQualifiedClassFileName);
+		ZipEntry entry = jarFile.getEntry(fullyQualifiedClassFileName);
 		if (entry != null) {
-			return zipFile.getInputStream(entry);
+			return jarFile.getInputStream(entry);
 		}
 		return null;
 	}
 
 	public void cleanup() {
 		synchronized(this) {
-			if (this.zipFile != null) {
+			if (this.jarFile != null) {
 				try {
-					this.zipFile.close();
+					this.jarFile.close();
 				} catch(IOException e) { // ignore it
 				}
-				this.zipFile = null;
+				this.jarFile = null;
 			}
 			this.knownPackageNames = null;
 		}
@@ -61,7 +61,7 @@ public class ClasspathElementZip implements ClasspathElement {
 
 	public long lastModified() {
 		if (this.lastModified == 0)
-			this.lastModified = new File(this.zipFile.getName()).lastModified();
+			this.lastModified = new File(this.jarFile.getName()).lastModified();
 		return this.lastModified;
 	}
 
@@ -71,8 +71,8 @@ public class ClasspathElementZip implements ClasspathElement {
 
 		try {
 			synchronized(this) {
-				if (this.zipFile == null) {
-					this.zipFile = new ZipFile(this.zipFileName);
+				if (this.jarFile == null) {
+					this.jarFile = new JarFile(this.jarFileName);
 				}
 				this.knownPackageNames = findPackageSet();
 			}
@@ -84,14 +84,14 @@ public class ClasspathElementZip implements ClasspathElement {
 
 	private Set<String> findPackageSet() {
 		long lastModified = lastModified();
-		long fileSize = new File(zipFileName).length();
-		PackageCacheEntry cacheEntry = (PackageCacheEntry) PackageCache.get(zipFileName);
+		long fileSize = new File(jarFileName).length();
+		PackageCacheEntry cacheEntry = (PackageCacheEntry) PackageCache.get(jarFileName);
 		if (cacheEntry != null && cacheEntry.lastModified == lastModified && cacheEntry.fileSize == fileSize)
 			return cacheEntry.packageSet;
 		
 		Set<String> packageSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 		packageSet.add(""); //$NON-NLS-1$
-		nextEntry : for (Enumeration e = zipFile.entries(); e.hasMoreElements(); ) {
+		nextEntry : for (Enumeration e = jarFile.entries(); e.hasMoreElements(); ) {
 			String fileName = ((ZipEntry) e.nextElement()).getName();
 
 			// add the package name & all of its parent packages
@@ -105,7 +105,7 @@ public class ClasspathElementZip implements ClasspathElement {
 			}
 		}
 
-		PackageCache.put(zipFileName, new PackageCacheEntry(lastModified, fileSize, packageSet));
+		PackageCache.put(jarFileName, new PackageCacheEntry(lastModified, fileSize, packageSet));
 		return packageSet;
 	}
 	

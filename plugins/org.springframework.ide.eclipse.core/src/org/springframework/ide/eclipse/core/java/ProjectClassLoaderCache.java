@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2013 Spring IDE Developers
+ * Copyright (c) 2009, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,21 +11,17 @@
 package org.springframework.ide.eclipse.core.java;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.xbean.classloader.NonLockingJarFileClassLoader;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
@@ -61,7 +57,6 @@ public class ProjectClassLoaderCache {
 
 	private static final String FILE_SCHEME = "file";
 	private static final int CACHE_SIZE = 12;
-	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(new ArrayList<URL>());
 	private static final List<ClassLoaderCacheEntry> CLASSLOADER_CACHE = new ArrayList<ClassLoaderCacheEntry>(CACHE_SIZE);
 
 	private static final String DEBUG_OPTION = SpringCore.PLUGIN_ID + "/java/classloader/debug";
@@ -499,92 +494,6 @@ public class ProjectClassLoaderCache {
 		}
 	}
 	
-	/**
-	 * Extension to {@link NonLockingJarFileClassLoader} that filters resource loading attempts by
-	 * calling {@link ProjectClassLoaderCache#shouldFilter(String)} before delegating to the super
-	 * implementation.
-	 * @since 2.7.0
-	 */
-	static class FilteringNonLockingJarFileClassLoader extends NonLockingJarFileClassLoader {
-
-		public FilteringNonLockingJarFileClassLoader(String name, URL[] urls, ClassLoader parent) {
-			super(name, urls, parent);
-		}
-		
-		@Override
-		public URL findResource(String resourceName) {
-			if (shouldFilter(resourceName)) return null;
-			return super.findResource(resourceName);
-		}
-		
-		@Override
-		public Enumeration<URL> findResources(String resourceName) throws IOException {
-			if (shouldFilter(resourceName)) return EMPTY_ENUMERATION;
-			return super.findResources(resourceName);
-		}
-		
-		@Override
-		public URL getResource(String name) {
-			if (shouldFilter(name)) return null;
-			return super.getResource(name);
-		}
-		
-		@Override
-		public InputStream getResourceAsStream(String name) {
-			if (shouldFilter(name)) return null;
-			return super.getResourceAsStream(name);
-		}
-		
-		@Override
-		public Enumeration<URL> getResources(String name) throws IOException {
-			if (shouldFilter(name)) return EMPTY_ENUMERATION;
-			return super.getResources(name);
-		}
-	}
-
-	/**
-	 * Extension to {@link URLClassLoader} that filters resource loading attempts by
-	 * calling {@link ProjectClassLoaderCache#shouldFilter(String)} before delegating to the super
-	 * implementation.
-	 * @since 2.7.0
-	 */
-	static class FilteringURLClassLoader extends URLClassLoader {
-		
-		public FilteringURLClassLoader(URL[] urls, ClassLoader parent) {
-			super(urls, parent);
-		}
-		
-		@Override
-		public URL findResource(String resourceName) {
-			if (shouldFilter(resourceName)) return null;
-			return super.findResource(resourceName);
-		}
-		
-		@Override
-		public Enumeration<URL> findResources(String resourceName) throws IOException {
-			if (shouldFilter(resourceName)) return EMPTY_ENUMERATION;
-			return super.findResources(resourceName);
-		}
-		
-		@Override
-		public URL getResource(String name) {
-			if (shouldFilter(name)) return null;
-			return super.getResource(name);
-		}
-		
-		@Override
-		public InputStream getResourceAsStream(String name) {
-			if (shouldFilter(name)) return null;
-			return super.getResourceAsStream(name);
-		}
-		
-		@Override
-		public Enumeration<URL> getResources(String name) throws IOException {
-			if (shouldFilter(name)) return EMPTY_ENUMERATION;
-			return super.getResources(name);
-		}
-	}
-
 	/**
 	 * {@link IResourceChangeListener} to clear the cache whenever new source or output folders are being added.
 	 * @since 2.5.2
