@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
-import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ProjectClassLoaderCache;
 
 /**
@@ -29,33 +24,7 @@ public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyCla
 
 	public TypeHierarchyClassReader createClassReader(IProject project) {
 		List<URL> urls = ProjectClassLoaderCache.getClassPathUrls(project, null);
-		List<ClasspathElement> locations = new ArrayList<ClasspathElement>();
-		
-		Set<URL> usedURLs = new HashSet<URL>();
-		for (URL url : urls) {
-			if (!usedURLs.contains(url)) {
-				if (url.toString().endsWith(".jar") || url.toString().endsWith(".zip")) {
-					try {
-						String path = url.toURI().getPath();
-						locations.add(new ClasspathElementZip(path));
-						usedURLs.add(url);
-					} catch (Exception e) {
-						SpringCore.log(e);
-					}
-				}
-				else {
-					try {
-						File file = new File(url.toURI());
-						locations.add(new ClasspathElementDirectory(file));
-						usedURLs.add(url);
-					} catch (Exception e) {
-						SpringCore.log(e);
-					}
-				}
-			}
-		}
-		
-		ClasspathLookup classpathLookup = new ClasspathLookup((ClasspathElement[]) locations.toArray(new ClasspathElement[locations.size()]));
+		ClasspathLookup classpathLookup = new ClasspathLookup(urls.toArray(new URL[0]));
 		return new BytecodeTypeHierarchyClassReader(classpathLookup);
 	}
 
