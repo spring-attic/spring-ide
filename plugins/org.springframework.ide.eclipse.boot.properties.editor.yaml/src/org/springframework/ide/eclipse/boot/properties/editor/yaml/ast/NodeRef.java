@@ -39,6 +39,7 @@ public abstract class NodeRef<Parent> {
 	public Parent getParent() {
 		return parent;
 	}
+
 	public abstract Node get();
 	public abstract void put(Node value);
 

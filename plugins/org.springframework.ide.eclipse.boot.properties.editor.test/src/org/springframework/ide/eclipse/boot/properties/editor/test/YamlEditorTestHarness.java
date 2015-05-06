@@ -173,7 +173,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	//  abstract methods to MockEditor and make a subclass for SpringProperties harness.
 	protected List<IJavaElement> getLinkTargets(YamlEditor editor, int pos) {
 		HoverInfo info = editor.getHoverInfo(pos);
-		if (info!=null && info instanceof SpringPropertyHoverInfo) {
+		if (info!=null) {
 			return info.getJavaElements();
 		}
 		return Collections.emptyList();
@@ -183,8 +183,8 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		int pos = editor.middleOf(hoverOver);
 		assertTrue("Not found in editor: '"+hoverOver+"'", pos>=0);
 
-		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
-		assertEquals(expecteds.length, rawTargets.size());
+//		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
+//		assertEquals(expecteds.length, rawTargets.size());
 
 		List<IJavaElement> targets = getLinkTargets(editor, pos);
 		assertEquals(expecteds.length, targets.size());
@@ -193,13 +193,13 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		}
 	}
 
-	private List<PropertySource> getRawLinkTargets(YamlEditor editor, int pos) {
-		HoverInfo hover = editor.getHoverInfo(pos);
-		if (hover!=null && hover instanceof SpringPropertyHoverInfo) {
-			return ((SpringPropertyHoverInfo)hover).getSources();
-		}
-		return Collections.emptyList();
-	}
+//	private List<PropertySource> getRawLinkTargets(YamlEditor editor, int pos) {
+//		HoverInfo hover = editor.getHoverInfo(pos);
+//		if (hover!=null && hover instanceof SpringPropertyHoverInfo) {
+//			return ((SpringPropertyHoverInfo)hover).getSources();
+//		}
+//		return Collections.emptyList();
+//	}
 
 	@Override
 	public ICompletionProposal[] getCompletions(MockEditor editor) throws Exception {

@@ -26,7 +26,7 @@ spring:
 flyway:
   enabled: false
 server:
-  port: abc
+  port: 666
   address: locahost
 
 foo:
@@ -39,4 +39,3 @@ foo:
     red: Rood  
   name-colors:
     "Rood kleurtje": red
-      

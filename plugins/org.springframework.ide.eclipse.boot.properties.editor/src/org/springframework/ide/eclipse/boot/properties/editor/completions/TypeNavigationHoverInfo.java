@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 
 /** Example used as reference for explaingin the meaning of the instance variables:
@@ -128,19 +129,21 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 
 	@Override
 	public List<IJavaElement> getJavaElements() {
-		IJavaElement je;
-		Type beanType = parentType;
-		je = typeUtil.getSetter(beanType, propName);
-		if (je!=null) {
-			return Collections.singletonList(je);
-		}
-		je = typeUtil.getGetter(beanType, propName);
-		if (je!=null) {
-			return Collections.singletonList(je);
-		}
-		je = typeUtil.getField(beanType, propName);
-		if (je!=null) {
-			return Collections.singletonList(je);
+		if (propName!=null) {
+			IJavaElement je;
+			Type beanType = parentType;
+			je = typeUtil.getSetter(beanType, propName);
+			if (je!=null) {
+				return Collections.singletonList(je);
+			}
+			je = typeUtil.getGetter(beanType, propName);
+			if (je!=null) {
+				return Collections.singletonList(je);
+			}
+			je = typeUtil.getField(beanType, propName);
+			if (je!=null) {
+				return Collections.singletonList(je);
+			}
 		}
 		return Collections.emptyList();
 	}

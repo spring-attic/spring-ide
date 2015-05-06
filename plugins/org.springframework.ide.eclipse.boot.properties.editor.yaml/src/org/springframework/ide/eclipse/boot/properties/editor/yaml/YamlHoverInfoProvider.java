@@ -60,16 +60,18 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 			if (index!=null) {
 				List<NodeRef<?>> astPath = ast.findPath(r.getOffset());
 				YamlPath path = YamlPath.fromASTPath(astPath);
-				if (path.pointsAtKey()) {
-					//When a path points at a key we must tramsform it to a 'value-terminating path'
-					// to be able to reuse the 'getHoverInfo' method on YamlAssistContext (as navigation
-					// into 'key' is not defined for YamlAssistContext.
-					String key = path.getLastSegment().toPropString();
-					path = path.dropLast().append(YamlPathSegment.valueAt(key));
-				}
-				YamlAssistContext assistContext = YamlAssistContext.forPath(path, index, null, new TypeUtil(jp));
-				if (assistContext!=null) {
-					return assistContext.getHoverInfo();
+				if (path!=null) {
+					if (path.pointsAtKey()) {
+						//When a path points at a key we must tramsform it to a 'value-terminating path'
+						// to be able to reuse the 'getHoverInfo' method on YamlAssistContext (as navigation
+						// into 'key' is not defined for YamlAssistContext.
+						String key = path.getLastSegment().toPropString();
+						path = path.dropLast().append(YamlPathSegment.valueAt(key));
+					}
+					YamlAssistContext assistContext = YamlAssistContext.forPath(path, index, null, new TypeUtil(jp));
+					if (assistContext!=null) {
+						return assistContext.getHoverInfo();
+					}
 				}
 			}
 		}

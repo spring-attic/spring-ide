@@ -20,12 +20,20 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 public class YamlEditorTests extends YamlEditorTestHarness {
 
+	//TODO:
+	//  - YamlPath.fromASTPath missed cases
+	//  - IndexNavigator, return emptylist case
+	//  - Perform CA where YamlAssistContext is null
+	//  - Perform CA in key areay
+
 	public void testHovers() throws Exception {
 		defaultTestData();
 		YamlEditor editor = new YamlEditor(
 				"spring:\n" +
 				"  application:\n" +
 				"    name: foofoo\n" +
+				"  beyond:\n" +
+				"    the-valid: range\n" +
 				"    \n" +
 				"server:\n" +
 				"  port: 8888"
@@ -42,11 +50,50 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		assertHoverContains(editor, "port", "<b>server.port</b>");
 		assertHoverContains(editor, "8888", "<b>server.port</b>"); // hover over value show info about corresponding key. Is this logical?
 
+		assertNoHover(editor, "beyond");
+		assertNoHover(editor, "the-valid");
+		assertNoHover(editor, "range");
+
 		//TODO: these provide no hovers now, but maybe (some of them) should if we index proprty sources and not just the
 		// properties themselves.
 		assertNoHover(editor, "spring");
 		assertNoHover(editor, "application");
 		assertNoHover(editor, "server");
+
+
+		//Test for the case where we can't produc an AST for editor text
+		editor = new YamlEditor(
+				"- syntax\n" +
+				"error:\n"
+		);
+		assertNoHover(editor, "syntax");
+		assertNoHover(editor, "error");
+	}
+
+	public void testUserDefinedHoversandLinkTargets() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
+		YamlEditor editor = new YamlEditor(
+				"#A comment at the start\n" +
+				"foo:\n" +
+				"  data:\n" +
+				"    wavelen: 666\n" +
+				"    name: foo\n" +
+				"    next: green\n" +
+				"  link-tester:\n" +
+				"    has-it-all: nice\n" +
+				"    strange: weird\n" +
+				"    getter-only: getme\n"
+		);
+
+		assertHoverContains(editor, "data", "Pojo"); // description from json metadata
+		assertHoverContains(editor, "wavelen", "JavaDoc from field"); // javadoc from field
+		assertHoverContains(editor, "name", "Set the name"); // javadoc from setter
+		assertHoverContains(editor, "next", "Get the next"); // javadoc from getter
+
+		assertLinkTargets(editor, "data", "demo.FooProperties.setData(ColorData)");
+		assertLinkTargets(editor, "wavelen", "demo.ColorData.setWavelen(double)");
+
 	}
 
 	public void testHyperlinkTargets() throws Exception {
@@ -322,7 +369,17 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"#A comment\n" +
 				"server:\n"+
 				"  port: <*>");
+	}
 
+	public void testContentAssistNullContext() throws Exception {
+		defaultTestData();
+		assertCompletions("#A comment\n",
+				"foo:\n" +
+				"  data:\n" +
+				"    bogus:\n" +
+				"      <*>"
+				// => nothing
+		);
 	}
 
 	public void testContentAssistNested() throws Exception {

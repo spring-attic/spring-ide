@@ -6,7 +6,7 @@ import java.util.Map;
 public class ColorData {
 
 	/**
-	 * Wavelength of the <b>color</b> in nano meters.
+	 * Wavelength of the <b>color</b> in nano meters (JavaDoc from field).
 	 */
 	private double wavelen;
 	private String name;
@@ -25,7 +25,7 @@ public class ColorData {
 		return wavelen;
 	}
 	/**
-	 * Set the Wavelength of the <b>color</b> in nano meters. Junk &lt; &amp; &gt;
+	 * Set the Wavelength of the <b>color</b> in nano meters.
 	 */
 	public void setWavelen(double wavelen) {
 		this.wavelen = wavelen;
@@ -33,9 +33,17 @@ public class ColorData {
 	public String getName() {
 		return name;
 	}
+	
+	/**
+	 * Set the name of the color.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	/**
+	 * Get the next color
+	 */
 	public Color getNext() {
 		return next;
 	}

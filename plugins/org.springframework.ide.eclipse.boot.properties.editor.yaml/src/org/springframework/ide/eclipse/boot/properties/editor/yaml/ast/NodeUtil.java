@@ -48,12 +48,6 @@ public class NodeUtil {
 		return node.getEndMark().getIndex();
 	}
 
-	public static IRegion getRegion(Node node) {
-		int start = getStart(node);
-		int end = getEnd(node);
-		return new Region(start, end-start);
-	}
-
 	/**
 	 * Retrieve String value of a scalar node.
 	 * @return String value or null if node is not a Scalar node.

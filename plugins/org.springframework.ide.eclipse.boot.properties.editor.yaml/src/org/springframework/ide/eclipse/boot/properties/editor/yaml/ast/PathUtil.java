@@ -40,13 +40,10 @@ public class PathUtil {
 	 */
 	public static String toPropertyPrefixString(List<NodeRef<?>> path) {
 		YamlPath yamlPath = YamlPath.fromASTPath(path);
-		return yamlPath.toPropString();
-	}
-
-	private static void addDotMaybe(StringBuilder buf) {
-		if (buf.length()>0) {
-			buf.append(".");
+		if (yamlPath!=null) {
+			return yamlPath.toPropString();
 		}
+		return null;
 	}
 
 }

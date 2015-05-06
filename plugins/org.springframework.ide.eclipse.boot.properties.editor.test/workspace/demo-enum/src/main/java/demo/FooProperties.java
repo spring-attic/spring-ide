@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("foo")
 public class FooProperties {
 
-	//Pojo
+	/**
+	 * Pojo
+	 */
 	private ColorData data; 
 	 
 	//Enum
