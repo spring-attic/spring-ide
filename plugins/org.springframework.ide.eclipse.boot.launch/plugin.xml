@@ -76,10 +76,16 @@
              <count value="1"/>
              <iterate>
            	   <adapt type="org.eclipse.core.resources.IResource">
-	             <test
-	                   property="org.eclipse.core.resources.name"
-	                   value="app.groovy">
-	             </test>
+           	     <or>
+		             <test
+		                   property="org.eclipse.core.resources.name"
+		                   value="app.groovy">
+		             </test>
+		             <test
+		                   property="org.eclipse.core.resources.contentTypeId"
+		                   value="org.eclipse.jdt.groovy.core.groovySource">
+		             </test>
+		         </or>
            	   </adapt>
              </iterate>
            </enablement>
