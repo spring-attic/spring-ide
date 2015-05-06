@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
- *******************************************************************************/
+*******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
 import java.io.InputStream;
@@ -15,9 +15,19 @@ import java.io.InputStream;
 /**
  * @author Martin Lippert
  */
-public interface ClasspathLookup {
+public class ClasspathLookupClassloader implements ClasspathLookup {
+	
+	private ClassLoader loader;
 
-	InputStream getStream(String fullyQualifiedClassFileName, String packageName, String className);
-	void close();
+	public ClasspathLookupClassloader(ClassLoader loader) {
+		this.loader = loader;
+	}
+
+	public InputStream getStream(String fullyQualifiedClassFileName, String packageName, String className) {
+		return loader.getResourceAsStream(fullyQualifiedClassFileName);
+	}
+
+	public void close() {
+	}
 
 }
