@@ -90,6 +90,10 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		);
 	}
 
+	private ILaunchConfigurationWorkingCopy createWorkingCopy() throws CoreException {
+		return createWorkingCopy(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID);
+	}
+
 	private void doGetAndSetProps(ILaunchConfigurationWorkingCopy wc, PropVal... props) {
 		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(props));
 		List<PropVal> retrieved = BootLaunchConfigurationDelegate.getProperties(wc);

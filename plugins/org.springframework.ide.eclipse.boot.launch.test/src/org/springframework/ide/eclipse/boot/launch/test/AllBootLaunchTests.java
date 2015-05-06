@@ -19,7 +19,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	BootLaunchUIModelTest.class,
 	ProfileHistoryTest.class,
 	BootLaunchConfigurationDelegateTest.class,
-	BootLaunchShortcutTest.class
+	BootLaunchShortcutTest.class,
+	BootGroovyScriptLaunchConfigurationDelegateTest.class
 })
 public class AllBootLaunchTests {
 

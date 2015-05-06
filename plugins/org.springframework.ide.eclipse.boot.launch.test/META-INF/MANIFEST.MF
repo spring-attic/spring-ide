@@ -13,7 +13,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.core,
  org.eclipse.jdt.launching,
  org.eclipse.jdt.core,
- org.eclipse.jdt.debug.ui
+ org.eclipse.jdt.debug.ui,
+ org.springframework.ide.eclipse.boot,
+ org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

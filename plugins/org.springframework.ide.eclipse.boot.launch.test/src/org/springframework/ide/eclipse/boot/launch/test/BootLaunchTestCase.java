@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -23,6 +25,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.StringInputStream;
 
 /**
  * @author Kris De Volder
@@ -45,15 +48,27 @@ public class BootLaunchTestCase extends StsTestCase {
 		assertEquals(0, result.terminationCode);
 	}
 
+	public static void createEmptyFile(IProject project, String path)
+			throws CoreException {
+				IFile file = project.getFile(new Path(path));
+				file.create(new StringInputStream(""), true, new NullProgressMonitor());
+			}
+
+	public static void createFile(IProject project, String path, String data)
+			throws CoreException {
+				IFile file = project.getFile(new Path(path));
+				file.create(new StringInputStream(data), true, new NullProgressMonitor());
+			}
+
 	@Override
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.boot.launch.test";
 	}
 
-	protected ILaunchConfigurationWorkingCopy createWorkingCopy() throws CoreException {
+	protected ILaunchConfigurationWorkingCopy createWorkingCopy(String launchConfTypeId) throws CoreException {
 		String name = DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName("test");
 		ILaunchConfigurationWorkingCopy wc = DebugPlugin.getDefault().getLaunchManager()
-			.getLaunchConfigurationType(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID)
+			.getLaunchConfigurationType(launchConfTypeId)
 			.newInstance(null, name);
 		return wc;
 	}

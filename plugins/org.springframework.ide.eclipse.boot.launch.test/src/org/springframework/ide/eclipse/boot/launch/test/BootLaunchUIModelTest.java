@@ -16,11 +16,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -35,7 +33,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.StringInputStream;
 
 /**
  * @author Kris De Volder
@@ -99,6 +96,10 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 											// and it is okay since user can't open/close projects
 											// while using launch config dialog.
 		assertError("is closed", model.project.validator);
+	}
+
+	private ILaunchConfigurationWorkingCopy createWorkingCopy() throws CoreException {
+		return createWorkingCopy(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID);
 	}
 
 	public void testProjectInitializeFrom() throws Exception {
@@ -279,8 +280,8 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 		assertPulldown(profile /*empty*/);
 
-		createFile(bootProject, "src/main/resources/application-foo.properties");
-		createFile(bootProject, "src/main/resources/application-bar.properties");
+		createEmptyFile(bootProject, "src/main/resources/application-foo.properties");
+		createEmptyFile(bootProject, "src/main/resources/application-bar.properties");
 
 		project.setValue(bootProject);
 		assertPulldown(profile, "foo", "bar");
@@ -502,11 +503,6 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		actuals = Arrays.copyOf(actuals, actuals.length);
 		Arrays.sort(actuals);
 		assertArrayEquals(expecteds, actuals);
-	}
-
-	private void createFile(IProject project, String path) throws CoreException {
-		IFile file = project.getFile(new Path(path));
-		file.create(new StringInputStream(""), true, new NullProgressMonitor());
 	}
 
 }

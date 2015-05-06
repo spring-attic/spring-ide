@@ -31,39 +31,39 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 
 /**
  * Manages the boot installations that are configured in this workspace.
- * 
+ *
  * @author Kris De Volder
  */
 public class BootInstallManager implements IBootInstallFactory {
-	
+
 	private static final String BOOT_INSTALLS = "installs"; //Key used to store info in the prefs.
 
 	private static final String DEFAULT_BOOT_INSTALL = "default.install";
 
-	//TODO: should use preferences to store boot installation and 
+	//TODO: should use preferences to store boot installation and
 	// we should provide UI for the user to configure different installs etc.
 	//For now a trivial install manager only knows about one Spring boot instal
 	// and its location is injected via 'STSProperties'.
-	
+
 	private static BootInstallManager instance;
-	
+
 	private static File determineCacheDir() {
 		IPath stateLocation = BootActivator.getDefault().getStateLocation();
 		return stateLocation.append("installs").toFile();
 	}
-	
+
 	public static BootInstallManager getInstance() throws Exception {
 		if (instance==null) {
 			instance = new BootInstallManager();
 		}
 		return instance;
 	}
-	
+
 	private DownloadManager downloader;
-	
+
 	private List<IBootInstall> installs = null;
 	private IBootInstall defaultInstall;
-	
+
 	private BootInstallManager() throws Exception {
 		downloader = new DownloadManager(null, determineCacheDir());
 		installs = new ArrayList<IBootInstall>();
@@ -72,7 +72,7 @@ public class BootInstallManager implements IBootInstallFactory {
 			setDefaultInstall(newInstall(StsProperties.getInstance().get("spring.boot.install.url"), null));
 		}
 	}
-	
+
 	/**
 	 * Initializes the manager by reading Eclipse preferences.
 	 */
@@ -100,7 +100,7 @@ public class BootInstallManager implements IBootInstallFactory {
 	protected IEclipsePreferences getPrefs() {
 		return InstanceScope.INSTANCE.getNode(BootActivator.PLUGIN_ID);
 	}
-	
+
 	/**
 	 * Saves current installs by writing them into the Eclipse preferences.
 	 * This is not done automatically when values in the manager are set.
@@ -164,7 +164,7 @@ public class BootInstallManager implements IBootInstallFactory {
 	public synchronized IBootInstall getDefaultInstall() throws Exception {
 		return defaultInstall;
 	}
-	
+
 	public void setDefaultInstall(IBootInstall defaultInstall) {
 		if (!installs.contains(defaultInstall)) {
 			installs.add(defaultInstall);
@@ -178,6 +178,10 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	public Collection<IBootInstall> getInstalls() {
 		return new ArrayList<IBootInstall>(installs);
+	}
+
+	public DownloadManager getDownloader() {
+		return downloader;
 	}
 
 }
