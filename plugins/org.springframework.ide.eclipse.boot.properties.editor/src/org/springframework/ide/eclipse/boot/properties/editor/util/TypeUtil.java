@@ -214,7 +214,10 @@ public class TypeUtil {
 
 	public void niceTypeName(Type type, StringBuilder buf) {
 		String typeStr = type.getErasure();
-		if (typeStr.startsWith("java.lang.")) {
+		String primTypeName = PRIMITIVE_TYPE_NAMES.get(typeStr);
+		if (primTypeName!=null) {
+			buf.append(primTypeName);
+		} else if (typeStr.startsWith("java.lang.")) {
 			buf.append(typeStr.substring("java.lang.".length()));
 		} else if (typeStr.startsWith("java.util.")) {
 			buf.append(typeStr.substring("java.util.".length()));
@@ -373,25 +376,6 @@ public class TypeUtil {
 	private IType findType(Type beanType) {
 		return findType(beanType.getErasure());
 	}
-
-
-	public static String formatJavaType(String type) {
-		if (type!=null) {
-			String primitive = TypeUtil.PRIMITIVE_TYPE_NAMES.get(type);
-			if (primitive!=null) {
-				return primitive;
-			}
-			if (type.startsWith(JAVA_LANG)) {
-				return type.substring(JAVA_LANG_LEN);
-			}
-			return type;
-		}
-		return null;
-	}
-
-
-	private static final String JAVA_LANG = "java.lang.";
-	private static final int JAVA_LANG_LEN = JAVA_LANG.length();
 
 	private static final String[] NO_PARAMS = new String[0];
 

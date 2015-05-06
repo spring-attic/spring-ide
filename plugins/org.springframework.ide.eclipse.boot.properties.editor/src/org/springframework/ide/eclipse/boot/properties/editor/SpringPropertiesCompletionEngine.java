@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyPr
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -193,16 +194,16 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode);
 				if (objectProperties!=null && !objectProperties.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					int sorting = 1;
 					for (TypedProperty prop : objectProperties) {
-						if (prop.getName().startsWith(prefix)) {
+						double score = FuzzyMatcher.matchScore(prefix, prop.getName());
+						if (score!=0) {
 							Type valueType = prop.getType();
 							String postFix = propertyCompletionPostfix(valueType);
 							DocumentEdits edits = new DocumentEdits(doc);
 							edits.delete(navOffset+1, offset);
 							edits.insert(offset, prop.getName()+postFix);
 							proposals.add(
-								completionFactory.simpleProposal(prop.getName(), sorting++, edits)
+								completionFactory.simpleProposal(prop.getName(), score, edits)
 							);
 						}
 					}
@@ -290,12 +291,13 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (int i = 0; i < valueCompletions.length; i++) {
 						String valueCandidate = valueCompletions[i];
-						if (valueCandidate.startsWith(valuePrefix)) {
+						double score = FuzzyMatcher.matchScore(valuePrefix, valueCandidate);
+						if (score!=0) {
 							DocumentEdits edits = new DocumentEdits(doc);
 							edits.delete(startOfValue, offset);
 							edits.insert(offset, valueCandidate);
 							proposals.add(
-								completionFactory.valueProposal(valueCandidate, type, i, edits)
+								completionFactory.valueProposal(valueCandidate, type, score, edits)
 									//new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)
 							);
 						}
@@ -382,8 +384,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 						}
 					};
 					proposals.add(
-						completionFactory.property(doc, offset, edits, match)
-						//new PropertyProposal(doc, prefix, offset, match)
+						completionFactory.property(doc, edits, match, typeUtil)
 					);
 				}
 				return proposals;

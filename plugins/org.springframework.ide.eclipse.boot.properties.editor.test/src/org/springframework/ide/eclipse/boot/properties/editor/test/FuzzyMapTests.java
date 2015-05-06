@@ -18,6 +18,7 @@ import junit.framework.TestCase;
 
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 
 public class FuzzyMapTests extends TestCase {
 
@@ -161,7 +162,7 @@ public class FuzzyMapTests extends TestCase {
 	}
 
 	private void assertMatch(boolean expect, String pattern, String data) {
-		boolean actual = FuzzyMap.match(pattern, data)!=0.0;
+		boolean actual = FuzzyMatcher.matchScore(pattern, data)!=0.0;
 		assertEquals(expect, actual);
 	}
 

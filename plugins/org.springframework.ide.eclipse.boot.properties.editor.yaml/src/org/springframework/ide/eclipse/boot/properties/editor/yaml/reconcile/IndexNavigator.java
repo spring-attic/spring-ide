@@ -111,7 +111,7 @@ public class IndexNavigator {
 			if (!candidates.isEmpty()) {
 				//TODO: we can do better than this using treemap to narrow based on
 				// prefix
-				List<Match<PropertyInfo>> matches = new ArrayList<FuzzyMap.Match<PropertyInfo>>(candidates.size());
+				List<Match<PropertyInfo>> matches = new ArrayList<Match<PropertyInfo>>(candidates.size());
 				for (Match<PropertyInfo> match : candidates) {
 					if (match.data.getId().startsWith(dottedPrefix)){
 						matches.add(match);

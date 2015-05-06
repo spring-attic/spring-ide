@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
-import static org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2.getHTMLContent;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ALIASED;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.LOWER_CASE;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ORIGNAL;
@@ -21,11 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
@@ -35,7 +30,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.Docume
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
-import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.TypeNavigationHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -52,7 +48,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.Collect
 /**
  * Represents a context relative to which we can provide content assistance.
  */
-@SuppressWarnings("restriction")
 public abstract class YamlAssistContext {
 
 	private boolean preferLowerCasedEnums = true; //make user configurable?
@@ -129,111 +124,6 @@ public abstract class YamlAssistContext {
 
 	public class TypeContext extends YamlAssistContext {
 
-		private final class BeanPropertyHoverInfo extends HoverInfo {
-			private final String id;
-			private final String propName;
-
-			private BeanPropertyHoverInfo(String id, String propName) {
-				this.id = id;
-				this.propName = propName;
-			}
-
-			@Override
-			public String getHtml() {
-				HtmlBuffer html = new HtmlBuffer();
-
-				html.raw("<b>");
-					html.text(id);
-				html.raw("</b>");
-				html.raw("<br>");
-
-				String typeStr = type.toString();
-				if (typeStr==null) {
-					typeStr = Object.class.getName();
-				}
-				html.raw("<a href=\"");
-				html.url("type/"+type);
-				html.raw("\">");
-				html.text(typeStr);
-				html.raw("</a>");
-
-//					String deflt = formatDefaultValue(data.getDefaultValue());
-//					if (deflt!=null) {
-//						html.raw("<br><br>");
-//						html.text("Default: ");
-//						html.raw("<i>");
-//						html.text(deflt);
-//						html.raw("</i>");
-//					}
-
-				String description = getDescription();
-				if (description!=null) {
-					html.raw("<br><br>");
-					html.raw(description);
-				}
-
-				return html.toString();
-			}
-
-			private String getDescription() {
-				try {
-					List<IJavaElement> jes = getAllJavaElements();
-					if (jes!=null) {
-						for (IJavaElement je : jes) {
-							if (je instanceof IMember) {
-								String jdoc = getHTMLContent((IMember)je, true);
-								if (jdoc!=null) {
-									return jdoc;
-								}
-							}
-						}
-					}
-				} catch (Exception e) {
-					BootActivator.log(e);
-				}
-				return null;
-			}
-
-			@Override
-			public List<IJavaElement> getJavaElements() {
-				IJavaElement je;
-				Type beanType = parent.getType();
-				je = typeUtil.getSetter(beanType, propName);
-				if (je!=null) {
-					return Collections.singletonList(je);
-				}
-				je = typeUtil.getGetter(beanType, propName);
-				if (je!=null) {
-					return Collections.singletonList(je);
-				}
-				je = typeUtil.getField(beanType, propName);
-				if (je!=null) {
-					return Collections.singletonList(je);
-				}
-				return Collections.emptyList();
-			}
-
-			private List<IJavaElement> getAllJavaElements() {
-				if (propName!=null) {
-					Type beanType = parent.getType();
-					ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>(3);
-					maybeAdd(elements, typeUtil.getField(beanType, propName));
-					maybeAdd(elements, typeUtil.getSetter(beanType, propName));
-					maybeAdd(elements, typeUtil.getGetter(beanType, propName));
-					if (!elements.isEmpty()) {
-						return elements;
-					}
-				}
-				return Collections.emptyList();
-			}
-
-			private void maybeAdd(ArrayList<IJavaElement> elements, IJavaElement e) {
-				if (e!=null) {
-					elements.add(e);
-				}
-			}
-		}
-
 		private PropertyCompletionFactory completionFactory;
 		private Type type;
 		private YamlAssistContext parent;
@@ -269,19 +159,20 @@ public abstract class YamlAssistContext {
 			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode);
 			if (CollectionUtil.hasElements(properties)) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
-				int sortingOrder = 0;
 				for (TypedProperty p : properties) {
 					String name = p.getName();
 					Type type = p.getType();
-					if (name.startsWith(query)) {
+					double score = FuzzyMatcher.matchScore(query, name);
+					if (score!=0) {
 						YamlPathEdits edits = new YamlPathEdits(doc);
 						edits.delete(queryOffset, query);
 
 						SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
 						YamlPath relativePath = YamlPath.fromSimpleProperty(name);
 						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
-						proposals.add(completionFactory.beanProperty(
-								doc.getDocument(), queryOffset, contextPath.toPropString(), query,p, sortingOrder++, edits)
+						proposals.add(completionFactory.beanProperty(doc.getDocument(),
+								contextPath.toPropString(), getType(),
+								query, p, score, edits, typeUtil)
 						);
 					}
 				}
@@ -294,13 +185,13 @@ public abstract class YamlAssistContext {
 			String[] values = typeUtil.getAllowedValues(type, enumCaseMode);
 			if (values!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
-				int sortingOrder = 0;
 				for (String value : values) {
-					if (value.startsWith(query)) {
+					double score = FuzzyMatcher.matchScore(query, value);
+					if (score!=0) {
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
 						edits.delete(offset-query.length(), offset);
 						edits.insert(offset, value);
-						completions.add(completionFactory.valueProposal(value, type, sortingOrder++, edits));
+						completions.add(completionFactory.valueProposal(value, type, score, edits));
 					}
 				}
 				return completions;
@@ -349,9 +240,7 @@ public abstract class YamlAssistContext {
 				// the index to navigating type/bean properties
 				return parent.getHoverInfo();
 			} else {
-				final String id = contextPath.toPropString();
-				final String propName = contextPath.getBeanPropertyName();
-				return new BeanPropertyHoverInfo(id, propName);
+				return new TypeNavigationHoverInfo(contextPath.toPropString(), contextPath.getBeanPropertyName(), parent.getType(), getType(), typeUtil);
 			}
 		}
 
@@ -382,7 +271,7 @@ public abstract class YamlAssistContext {
 				for (Match<PropertyInfo> match : matchingProps) {
 					ProposalApplier edits = createEdits(doc, offset, query, match);
 					completions.add(completionFactory.property(
-							doc.getDocument(), offset, edits, match
+							doc.getDocument(), edits, match, typeUtil
 					));
 				}
 				return completions;

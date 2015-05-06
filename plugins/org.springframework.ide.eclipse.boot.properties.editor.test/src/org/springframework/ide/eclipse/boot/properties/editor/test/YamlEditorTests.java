@@ -93,7 +93,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    good: true\n"
 		);
 		assertProblems(editor,
-				"extracrap: 8080|Expecting a 'Integer' but got a 'Mapping' node",
+				"extracrap: 8080|Expecting a 'int' but got a 'Mapping' node",
 				"snuggem|Unknown property",
 				"bogus|Unknown property"
 		);
@@ -111,7 +111,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    not-a-number\n"
 		);
 		assertProblems(editor,
-				"not-a-number|Expecting a 'Integer'"
+				"not-a-number|Expecting a 'int'"
 		);
 	}
 
@@ -219,7 +219,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 			assertProblems(editor,
 					"token-bad-guy|Unknown property",
-					"one|Expecting a 'Integer' but got 'one'",
+					"one|Expecting a 'int' but got 'one'",
 					"bogus|Unknown property 'bogus' for type 'demo.Foo'"
 			);
 
@@ -235,7 +235,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    - element\n"
 		);
 		assertProblems(editor,
-				"- element|Expecting a 'Boolean' but got a 'Sequence' node"
+				"- element|Expecting a 'boolean' but got a 'Sequence' node"
 		);
 	}
 
@@ -909,18 +909,18 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"liquibase:\n" +
 				"  enabled: <*>",
 				"liquibase:\n" +
-				"  enabled: true<*>",
+				"  enabled: false<*>",
 				"liquibase:\n" +
-				"  enabled: false<*>"
+				"  enabled: true<*>"
 		);
 
 		assertCompletions(
 				"liquibase:\n" +
 				"  enabled:<*>",
 				"liquibase:\n" +
-				"  enabled:true<*>",
+				"  enabled:false<*>",
 				"liquibase:\n" +
-				"  enabled:false<*>"
+				"  enabled:true<*>"
 		);
 
 		assertCompletions(
@@ -929,10 +929,10 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    <*>",
 				"liquibase:\n" +
 				"  enabled:\n" +
-				"    true<*>",
+				"    false<*>",
 				"liquibase:\n" +
 				"  enabled:\n" +
-				"    false<*>"
+				"    true<*>"
 		);
 
 		assertCompletions(
@@ -1096,13 +1096,13 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				//=>
 				"foo:\n" +
 				"  color-names:\n" +
-				"    red: <*>",
+				"    blue: <*>",
 				"foo:\n" +
 				"  color-names:\n" +
 				"    green: <*>",
 				"foo:\n" +
 				"  color-names:\n" +
-				"    blue: <*>"
+				"    red: <*>"
 		);
 
 		assertCompletionsDisplayString(
@@ -1110,7 +1110,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"  color-names:\n" +
 				"    <*>",
 				//=>
-				"red : String", "green : String", "blue : String"
+				"blue : String", "green : String", "red : String"
 		);
 
 		assertCompletions(
@@ -1134,7 +1134,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				// =>
 				"foo:\n" +
 				"  color-data:\n" +
-				"    red:\n" +
+				"    blue:\n" +
 				"      <*>",
 				"foo:\n" +
 				"  color-data:\n" +
@@ -1142,8 +1142,9 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"      <*>",
 				"foo:\n" +
 				"  color-data:\n" +
-				"    blue:\n" +
-				"      <*>");
+				"    red:\n" +
+				"      <*>"
+		);
 		assertCompletions(
 				"foo:\n" +
 				"  color-data:\n" +
@@ -1207,9 +1208,9 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 		assertProblems(editor,
 				"bogus|Unknown property",
-				"not a double|Double",
-				"more: 3.0|Expecting a 'Double' but got a 'Mapping' node",
-				"- 3.0|Expecting a 'Double' but got a 'Sequence' node"
+				"not a double|'double'",
+				"more: 3.0|Expecting a 'double' but got a 'Mapping' node",
+				"- 3.0|Expecting a 'double' but got a 'Sequence' node"
 		);
 	}
 
@@ -1287,7 +1288,10 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    size: S<*>",
 				"simple:\n" +
 				"  pants:\n"+
-				"    size: SMALL<*>"
+				"    size: SMALL<*>",
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: EXTRA_SMALL<*>"
 		);
 
 		assertCompletions(
@@ -1296,7 +1300,10 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    size: s<*>",
 				"simple:\n" +
 				"  pants:\n"+
-				"    size: small<*>"
+				"    size: small<*>",
+				"simple:\n" +
+				"  pants:\n"+
+				"    size: extra-small<*>"
 		);
 
 		assertCompletions(
@@ -1306,11 +1313,11 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				// =>
 				"simple:\n" +
 				"  pants:\n"+
-				"    size: extra-small<*>",
+				"    size: extra-large<*>",
 				// or
 				"simple:\n" +
 				"  pants:\n"+
-				"    size: extra-large<*>"
+				"    size: extra-small<*>"
 		);
 
 		assertCompletions(
@@ -1320,21 +1327,22 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				// =>
 				"simple:\n" +
 				"  pants:\n"+
-				"    size: EXTRA_SMALL<*>",
+				"    size: EXTRA_LARGE<*>",
 				// or
 				"simple:\n" +
 				"  pants:\n"+
-				"    size: EXTRA_LARGE<*>"
+				"    size: EXTRA_SMALL<*>"
 		);
 
 		assertCompletionsDisplayString("foo:\n  color: <*>", "red", "green", "blue");
 
-		assertCompletions("foo:\n  color-data: R<*>", "foo:\n  color-data: \n    RED:\n      <*>");
-		assertCompletions("foo:\n  color-data: r<*>", "foo:\n  color-data: \n    red:\n      <*>");
+		assertCompletions("foo:\n  color-data: B<*>", "foo:\n  color-data: \n    BLUE:\n      <*>");
+		assertCompletions("foo:\n  color-data: b<*>", "foo:\n  color-data: \n    blue:\n      <*>");
 		assertCompletions("foo:\n  color-data: <*>",
-				"foo:\n  color-data: \n    red:\n      <*>",
+				"foo:\n  color-data: \n    blue:\n      <*>",
 				"foo:\n  color-data: \n    green:\n      <*>",
-				"foo:\n  color-data: \n    blue:\n      <*>");
+				"foo:\n  color-data: \n    red:\n      <*>"
+		);
 
 		assertCompletions(
 				"foo:\n"+
@@ -1350,7 +1358,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testPojoInListCompletion() throws Exception {
 		useProject(createPredefinedProject("demo-enum"));
 
-		assertCompletions(
+		assertCompletion(
 				"foo:\n" +
 				"  color-data:\n" +
 				"    red: chi<*>"

@@ -5,6 +5,9 @@ import java.util.Map;
 
 public class ColorData {
 
+	/**
+	 * Wavelength of the <b>color</b> in nano meters.
+	 */
 	private double wavelen;
 	private String name;
 	private Color next;
@@ -12,11 +15,18 @@ public class ColorData {
 	private List<ColorData> children;
 	private List<String> tags;
 	private Map<String, ColorData> mappedChildren;
+	
+	/**
+	 * Children of this node organized by color
+	 */
 	private Map<Color, ColorData> colorChildren;
 
 	public double getWavelen() {
 		return wavelen;
 	}
+	/**
+	 * Set the Wavelength of the <b>color</b> in nano meters. Junk &lt; &amp; &gt;
+	 */
 	public void setWavelen(double wavelen) {
 		this.wavelen = wavelen;
 	}

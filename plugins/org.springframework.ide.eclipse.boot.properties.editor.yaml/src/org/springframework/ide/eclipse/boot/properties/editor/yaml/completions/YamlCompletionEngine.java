@@ -34,7 +34,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class YamlCompletionEngine implements ICompletionEngine {
 
-	private Yaml yaml;
+	//private Yaml yaml;
 	private SpringPropertyIndexProvider indexProvider;
 	private DocumentContextFinder contextFinder;
 	private YamlStructureProvider structureProvider;
@@ -47,7 +47,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			YamlStructureProvider structureProvider,
 			TypeUtilProvider typeUtilProvider
 	) {
-		this.yaml = yaml;
+		//this.yaml = yaml;
 		this.indexProvider = indexProvider;
 		this.contextFinder = documentContextFinder;
 		this.structureProvider = structureProvider;

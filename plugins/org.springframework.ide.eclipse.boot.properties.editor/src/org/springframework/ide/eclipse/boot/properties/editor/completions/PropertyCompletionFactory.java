@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.formatJavaType;
-
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -30,42 +29,86 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesInformationControlCreator;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 public class PropertyCompletionFactory {
 
-	public ICompletionProposal property(IDocument doc, int offset, ProposalApplier applier, Match<PropertyInfo> prop) {
-		return new PropertyProposal(doc, offset, applier, prop);
+	public ICompletionProposal property(IDocument doc, ProposalApplier applier, Match<PropertyInfo> prop, TypeUtil typeUtil) {
+		return new PropertyProposal(doc, applier, prop, typeUtil);
 	}
 
-	public ICompletionProposal valueProposal(String value, Type type, int sortingOrder, ProposalApplier applier) {
-		return simpleProposal(value, sortingOrder, applier);
+	public ICompletionProposal valueProposal(String value, Type type, int order, ProposalApplier applier) {
+		return valueProposal(value, type, -(1.0+order), applier);
 	}
 
-	public ICompletionProposal beanProperty(IDocument doc, int offset, String contextProperty, String pattern, TypedProperty p, int sortingOrder, ProposalApplier applier) {
-		String description = null; //TODO: can we get JavaDoc from the bean's field, setter or getter method?
-		PropertyInfo prop = new PropertyInfo(contextProperty + "." + p.getName(), p.getType().toString(), p.getName(), null, description, null);
-		Match<PropertyInfo> match = new Match<PropertyInfo>(pattern, -(1+sortingOrder), prop);
-		return new BeanPropertyProposal(doc, offset, applier, match);
+	public ICompletionProposal valueProposal(String value, Type type, double score, ProposalApplier applier) {
+		return simpleProposal(value, score, applier);
+	}
+
+	public ICompletionProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty p, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
+		return new AbstractPropertyProposal(doc, applier, typeUtil) {
+
+			private HoverInfo hoverInfo;
+
+			@Override
+			public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
+				if (hoverInfo==null) {
+					hoverInfo = new TypeNavigationHoverInfo(contextProperty+"."+p.getName(), p.getName(), contextType, p.getType(), this.typeUtil);
+				}
+				return hoverInfo;
+			}
+
+			@Override
+			protected String getBaseDisplayString() {
+				return p.getName();
+			}
+
+			@Override
+			protected String getHighlightPattern() {
+				return pattern;
+			}
+
+			@Override
+			public double getScore() {
+				return score;
+			}
+
+			@Override
+			protected Type getType() {
+				return p.getType();
+			}
+		};
 	}
 
 	public ICompletionProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
-		return new SimpleProposal(name, sortingOrder, applier);
+		return simpleProposal(name, -(1.0+sortingOrder), applier);
 	}
 
-	private static class SimpleProposal implements ICompletionProposal {
+	public ICompletionProposal simpleProposal(String name, double score, ProposalApplier applier) {
+		return new SimpleProposal(name, score, applier);
+	}
+
+	private static abstract class ScoreableProposal implements ICompletionProposal {
+		public abstract double getScore();
+	}
+
+	private static class SimpleProposal extends ScoreableProposal {
 
 		private String value;
-		private int sortingOrder;
+		private double score;
 		private ProposalApplier applier;
 
-		public SimpleProposal(String value, int sortingOrder, ProposalApplier applier) {
+		public SimpleProposal(String value, double score, ProposalApplier applier) {
 			this.value = value;
-			this.sortingOrder = sortingOrder;
+			this.score = score;
 			this.applier = applier;
 		}
 
@@ -108,6 +151,11 @@ public class PropertyCompletionFactory {
 			return null;
 		}
 
+		@Override
+		public double getScore() {
+			return score;
+		}
+
 	}
 
 	/**
@@ -115,20 +163,16 @@ public class PropertyCompletionFactory {
 	 */
 	public static final ICompletionProposalSorter SORTER = new ICompletionProposalSorter() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			if (p1 instanceof PropertyProposal && p2 instanceof PropertyProposal) {
-				double s1 = ((PropertyProposal)p1).match.score;
-				double s2 = ((PropertyProposal)p2).match.score;
+			if (p1 instanceof ScoreableProposal && p2 instanceof ScoreableProposal) {
+				double s1 = ((ScoreableProposal)p1).getScore();
+				double s2 = ((ScoreableProposal)p2).getScore();
 				if (s1==s2) {
-					String name1 = ((PropertyProposal)p1).match.data.getId();
-					String name2 = ((PropertyProposal)p2).match.data.getId();
+					String name1 = ((ScoreableProposal)p1).getDisplayString();
+					String name2 = ((ScoreableProposal)p2).getDisplayString();
 					return name1.compareTo(name2);
 				} else {
 					return Double.compare(s2, s1);
 				}
-			} else if (p1 instanceof SimpleProposal && p2 instanceof SimpleProposal) {
-				int order1 = ((SimpleProposal)p1).sortingOrder;
-				int order2 = ((SimpleProposal)p2).sortingOrder;
-				return Integer.valueOf(order1).compareTo(Integer.valueOf(order2));
 			}
 			return 0;
 		}
@@ -146,18 +190,18 @@ public class PropertyCompletionFactory {
 		this.documentContextFinder = documentContextFinder;
 	}
 
-	private class PropertyProposal implements ICompletionProposal, ICompletionProposalExtension3,
+	private abstract class AbstractPropertyProposal extends ScoreableProposal implements ICompletionProposalExtension3,
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
 	{
 
-		protected Match<PropertyInfo> match;
-		private IDocument fDoc;
-		private ProposalApplier proposalApplier;
+		protected final IDocument fDoc;
+		private final ProposalApplier proposalApplier;
+		protected final TypeUtil typeUtil;
 
-		public PropertyProposal(IDocument doc, int offset, ProposalApplier applier,  Match<PropertyInfo> match) {
-			this.match = match;
+		public AbstractPropertyProposal(IDocument doc, ProposalApplier applier, TypeUtil typeUtil) {
 			this.proposalApplier = applier;
 			this.fDoc = doc;
+			this.typeUtil = typeUtil;
 		}
 
 		public Point getSelection(IDocument document) {
@@ -169,15 +213,18 @@ public class PropertyCompletionFactory {
 			}
 		}
 
+
+		@Override
 		public String getAdditionalProposalInfo() {
-			PropertyInfo data = match.data;
-			return SpringPropertyHoverInfo.getHtmlHoverText(data);
+			HoverInfo hoverInfo = getAdditionalProposalInfo(new NullProgressMonitor());
+			if (hoverInfo!=null) {
+				return hoverInfo.getHtml();
+			}
+			return null;
 		}
 
 		@Override
-		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
-		}
+		public abstract HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor);
 
 		public String getDisplayString() {
 			StyledString styledText = getStyledDisplayString();
@@ -198,33 +245,38 @@ public class PropertyCompletionFactory {
 		@Override
 		public StyledString getStyledDisplayString() {
 			StyledString result = new StyledString();
-			highlightPattern(match.getPattern(), getBaseDisplayString(), result);
-			String type = formatJavaType(match.data.getType());
+			highlightPattern(getHighlightPattern(), getBaseDisplayString(), result);
+			Type type = getType();
 			if (type!=null) {
-				result.append(" : "+type, StyledString.DECORATIONS_STYLER);
+				String typeStr = typeUtil.niceTypeName(type);
+				result.append(" : "+typeStr, StyledString.DECORATIONS_STYLER);
 			}
 			return result;
 		}
 
-		protected String getBaseDisplayString() {
-			return match.data.getId();
-		}
+		protected abstract Type getType();
+		protected abstract String getHighlightPattern();
+		protected abstract String getBaseDisplayString();
 
 		private void highlightPattern(String pattern, String data, StyledString result) {
-			int dataPos = 0;	int dataLen = data.length();
-			int patternPos = 0; int patternLen = pattern.length();
+			if (StringUtil.hasText(pattern)) {
+				int dataPos = 0;	int dataLen = data.length();
+				int patternPos = 0; int patternLen = pattern.length();
 
-			while (dataPos<dataLen && patternPos<patternLen) {
-				int pChar = pattern.charAt(patternPos++);
-				int highlightPos = data.indexOf(pChar, dataPos);
-				if (dataPos<highlightPos) {
-					result.append(data.substring(dataPos, highlightPos));
+				while (dataPos<dataLen && patternPos<patternLen) {
+					int pChar = pattern.charAt(patternPos++);
+					int highlightPos = data.indexOf(pChar, dataPos);
+					if (dataPos<highlightPos) {
+						result.append(data.substring(dataPos, highlightPos));
+					}
+					result.append(data.charAt(highlightPos), UNDERLINE);
+					dataPos = highlightPos+1;
 				}
-				result.append(data.charAt(highlightPos), UNDERLINE);
-				dataPos = highlightPos+1;
-			}
-			if (dataPos<dataLen) {
-				result.append(data.substring(dataPos));
+				if (dataPos<dataLen) {
+					result.append(data.substring(dataPos));
+				}
+			} else { //no pattern to highlight
+				result.append(data);
 			}
 		}
 
@@ -258,17 +310,43 @@ public class PropertyCompletionFactory {
 		}
 	}
 
+	private class PropertyProposal extends AbstractPropertyProposal {
+		private Match<PropertyInfo> match;
+		private Type type;
 
-	private class BeanPropertyProposal extends PropertyProposal {
-		public BeanPropertyProposal(IDocument doc, int offset, ProposalApplier applier, Match<PropertyInfo> match) {
-			super(doc, offset, applier, match);
+		public PropertyProposal(IDocument doc, ProposalApplier applier, Match<PropertyInfo> match,
+				TypeUtil typeUtil) {
+			super(doc, applier, typeUtil);
+			this.match = match;
+		}
+
+		@Override
+		public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(fDoc), match.data);
 		}
 
 		@Override
 		protected String getBaseDisplayString() {
-			return match.data.getName();
+			return match.data.getId();
 		}
 
+		@Override
+		public double getScore() {
+			return match.score;
+		}
+
+		@Override
+		protected Type getType() {
+			if (type==null) {
+				type = TypeParser.parse(match.data.getType());
+			}
+			return type;
+		}
+
+		@Override
+		protected String getHighlightPattern() {
+			return match.getPattern();
+		}
 	}
 
 }
