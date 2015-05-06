@@ -373,7 +373,8 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testContentAssistNullContext() throws Exception {
 		defaultTestData();
-		assertCompletions("#A comment\n",
+		assertCompletions(
+				"#A comment\n" +
 				"foo:\n" +
 				"  data:\n" +
 				"    bogus:\n" +
