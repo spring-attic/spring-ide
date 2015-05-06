@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.java.typehierarchy;
 
-import java.net.URL;
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.core.java.ProjectClassLoaderCache;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Martin Lippert
@@ -23,9 +20,13 @@ import org.springframework.ide.eclipse.core.java.ProjectClassLoaderCache;
 public class BytecodeTypeHierarchyClassReaderFactory implements TypeHierarchyClassReaderFactory {
 
 	public TypeHierarchyClassReader createClassReader(IProject project) {
-		List<URL> urls = ProjectClassLoaderCache.getClassPathUrls(project, null);
-		ClasspathLookup classpathLookup = new ClasspathLookup(urls.toArray(new URL[0]));
-		return new BytecodeTypeHierarchyClassReader(classpathLookup);
+//		List<URL> urls = ProjectClassLoaderCache.getClassPathUrls(project, null);
+//		ClasspathLookup lookup = new ClasspathLookupDirect(urls.toArray(new URL[0]));
+		
+		ClassLoader loader = JdtUtils.getClassLoader(project, null);
+		ClasspathLookup lookup = new ClasspathLookupClassloader(loader);
+
+		return new BytecodeTypeHierarchyClassReader(lookup);
 	}
 
 }
