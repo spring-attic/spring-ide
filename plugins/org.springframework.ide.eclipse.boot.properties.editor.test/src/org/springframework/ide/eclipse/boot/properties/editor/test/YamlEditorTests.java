@@ -22,8 +22,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	//TODO:
 	//  - YamlPath.fromASTPath missed cases
-	//  - IndexNavigator, return emptylist case
-	//  - Perform CA where YamlAssistContext is null
 	//  - Perform CA in key areay
 
 	public void testHovers() throws Exception {
@@ -369,6 +367,11 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"#A comment\n" +
 				"server:\n"+
 				"  port: <*>");
+		assertCompletions(
+				"server:\n" +
+				"  nonsense<*>\n"
+				//=> nothing
+		);
 	}
 
 	public void testContentAssistNullContext() throws Exception {
