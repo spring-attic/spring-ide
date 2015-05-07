@@ -1146,6 +1146,25 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    true<*>\n"
 		);
 
+		// booleans can also be completed in upper case?
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    T<*>\n",
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    TRUE<*>\n"
+		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    F<*>\n",
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    FALSE<*>\n"
+		);
+
 		//one more... for special char like '-' in the name
 
 		assertCompletions(
