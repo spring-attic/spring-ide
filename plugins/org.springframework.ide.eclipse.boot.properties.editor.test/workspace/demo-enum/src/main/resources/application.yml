@@ -4,8 +4,9 @@
 
 # Features:
 #  1) content assist completions
-#  2) information hovers
-#  3) problem markers
+#  2) problem markers
+#  3) information hovers
+#  4) hyperlink to Java code
 #  AND
 #    alwo works for user-defined Configurations, including those where properties
 #    are bound to

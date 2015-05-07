@@ -97,7 +97,7 @@ public class PropertyCompletionFactory {
 		return new SimpleProposal(name, score, applier);
 	}
 
-	public static abstract class ScoreableProposal implements ICompletionProposal {
+	public static abstract class ScoreableProposal implements ICompletionProposal, ICompletionProposalExtension4 {
 		private static final double DEEMP_VALUE = 100000; // should be large enough to move deemphasized stuff to bottom of list.
 
 		private double deemphasizedBy = 0.0;
@@ -111,6 +111,11 @@ public class PropertyCompletionFactory {
 		}
 		public boolean isDeemphasized() {
 			return deemphasizedBy > 0;
+		}
+
+		@Override
+		public boolean isAutoInsertable() {
+			return !isDeemphasized();
 		}
 	}
 
@@ -217,7 +222,6 @@ public class PropertyCompletionFactory {
 		};
 	};
 
-
 	public PropertyCompletionFactory(DocumentContextFinder documentContextFinder) {
 		this.documentContextFinder = documentContextFinder;
 	}
@@ -269,9 +273,6 @@ public class PropertyCompletionFactory {
 
 		public IContextInformation getContextInformation() {
 			return null;
-		}
-		public boolean isAutoInsertable() {
-			return true;
 		}
 
 		@Override
