@@ -36,14 +36,9 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 @SuppressWarnings("restriction")
 public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
-	//TODO:
-	//  - Test that launching  launch conf with the various options set has the desired effect
-	//     on the launched process.
-
 	private static final String TEST_MAIN_CLASS = "demo.DumpInfoApplication";
 	private static final String TEST_PROJECT = "dump-info";
 
-	@SuppressWarnings("restriction")
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();

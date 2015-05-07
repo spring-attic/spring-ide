@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
