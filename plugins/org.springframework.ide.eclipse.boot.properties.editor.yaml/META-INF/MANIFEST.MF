@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Spring Boot Yaml
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.properties.editor.yaml;singleton:=true
 Bundle-Version: 3.7.0.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.boot.properties.editor.yaml.Activator
+Bundle-Activator: org.springframework.ide.eclipse.boot.properties.editor.yaml.YamlEditorPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.dadacoalition.yedit;bundle-version="1.0.17",

@@ -11,11 +11,8 @@
 package org.springframework.ide.eclipse.boot.launch.test;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.eclipse.core.internal.resources.OS;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -28,7 +25,6 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
  * @author Kris De Volder

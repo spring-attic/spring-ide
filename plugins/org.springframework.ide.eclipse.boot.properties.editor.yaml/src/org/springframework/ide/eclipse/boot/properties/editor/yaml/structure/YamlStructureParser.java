@@ -14,7 +14,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
@@ -24,7 +26,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.Y
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
 
 /**
  * A robust, coarse-grained parser that guesses the structure of a
@@ -287,6 +289,7 @@ public class YamlStructureParser {
 
 	public static abstract class SChildBearingNode extends SNode {
 		private List<SNode> children = null;
+		private Map<String, SKeyNode> keyMap = null; //lazily constructed index of children children.
 
 		public SChildBearingNode(SChildBearingNode parent, YamlDocument doc, int indent, int start, int end) {
 			super(parent, doc, indent, start, end);
@@ -373,16 +376,28 @@ public class YamlStructureParser {
 		}
 
 		public SKeyNode getChildWithKey(String key) throws Exception {
-			//TODO: index based on keys? May not be worth it for small number of keys
-			for (SNode node: getChildren()) {
-				if (node.getNodeType()==SNodeType.KEY) {
-					String nodeKey = ((SKeyNode)node).getKey();
-					if (key.equals(nodeKey)) {
-						return (SKeyNode) node;
-					}
-				}
+			if (CollectionUtil.hasElements(children)) {
+				return keyMap().get(key);
 			}
 			return null;
+		}
+
+		private Map<String, SKeyNode> keyMap() throws Exception {
+			if (keyMap==null) {
+				HashMap<String, SKeyNode> index = new HashMap<String, SKeyNode>();
+				for (SNode node: getChildren()) {
+					if (node.getNodeType()==SNodeType.KEY) {
+						SKeyNode keyNode = (SKeyNode)node;
+						String key = ((SKeyNode)node).getKey();
+						SKeyNode existing = index.get(key);
+						if (existing==null) {
+							index.put(key, keyNode);
+						}
+					}
+				}
+				keyMap = index;
+			}
+			return keyMap;
 		}
 
 		public SNode getFirstRealChild() {

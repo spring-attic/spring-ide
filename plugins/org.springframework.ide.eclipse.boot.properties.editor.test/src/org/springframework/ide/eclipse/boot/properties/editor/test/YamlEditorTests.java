@@ -20,10 +20,6 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 public class YamlEditorTests extends YamlEditorTestHarness {
 
-	//TODO:
-	//  - YamlPath.fromASTPath missed cases
-	//  - Perform CA in key areay
-
 	public void testHovers() throws Exception {
 		defaultTestData();
 		YamlEditor editor = new YamlEditor(
@@ -710,6 +706,114 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"more: stuff\n"
 		);
 	}
+
+	public void testCompletionForExistingGlobalPropertiesAreDemoted() throws Exception {
+		data("foo.bar", "java.lang.String", null, null);
+		data("foo.buttar", "java.lang.String", null, null);
+		data("foo.baracks", "java.lang.String", null, null);
+		data("foo.zamfir", "java.lang.String", null, null);
+		assertCompletions(
+				"foo:\n" +
+				"  bar: nice\n" +
+				"  baracks: full\n" +
+				"something:\n" +
+				"  in: between\n"+
+				"bar<*>",
+				//=>
+				// buttar
+				"foo:\n" +
+				"  bar: nice\n" +
+				"  baracks: full\n" +
+				"  buttar: <*>\n" +
+				"something:\n" +
+				"  in: between",
+				// bar (already existed so becomes navigation)
+				"foo:\n" +
+				"  bar: <*>nice\n" +
+				"  baracks: full\n" +
+				"something:\n" +
+				"  in: between",
+				// baracks (already existed so becomes navigation)
+				"foo:\n" +
+				"  bar: nice\n" +
+				"  baracks: <*>full\n" +
+				"something:\n" +
+				"  in: between"
+		);
+	}
+
+	public void testCompletionForExistingBeanPropertiesAreDemoted() throws Exception {
+		useProject(createPredefinedProject("demo-enum"));
+		assertCompletions(
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    <*>",
+				///// non-existing ///
+				//color-children
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    color-children:\n"+
+				"      <*>",
+				//mapped-children
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    mapped-children:\n"+
+				"      <*>",
+				//nested
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    nested:\n"+
+				"      <*>",
+				//next
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    next: <*>",
+				//tags
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    tags:\n" +
+				"      - <*>",
+				//wavelen
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    wavelen: <*>",
+				///// existing ////
+				//children
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      <*>-\n" +
+				"    name: foo",
+				//name
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: <*>foo"
+		);
+	}
+
 
 	public void testNoCompletionsInsideComments() throws Exception {
 		defaultTestData();

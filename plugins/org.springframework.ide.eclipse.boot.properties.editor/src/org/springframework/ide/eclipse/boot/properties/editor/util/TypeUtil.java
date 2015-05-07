@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-import org.omg.CORBA.NO_PERMISSION;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -68,11 +67,15 @@ public class TypeUtil {
 	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
 	static {
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
+
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Byte", "byte");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
+
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
+
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
 	}
 
@@ -85,6 +88,7 @@ public class TypeUtil {
 			"java.lang.Double",
 			"java.lang.Float",
 			"java.lang.Character",
+			"java.lang.Byte",
 			INET_ADDRESS_TYPE_NAME,
 			"java.lang.String[]"
 	));

@@ -17,10 +17,13 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUt
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
@@ -29,6 +32,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHove
 import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory.ScoreableProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.TypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
@@ -42,6 +46,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
 
@@ -100,9 +106,6 @@ public abstract class YamlAssistContext {
 		}
 	};
 
-	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
-	}
 
 	/**
 	 * @return the type expected at this context, may return null if unknown.
@@ -110,6 +113,10 @@ public abstract class YamlAssistContext {
 	protected abstract Type getType();
 
 	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
+
+	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
+	}
 
 	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
 		YamlAssistContext context = YamlAssistContext.global(index, completionFactory, typeUtil);
@@ -121,6 +128,19 @@ public abstract class YamlAssistContext {
 	}
 
 	protected abstract YamlAssistContext navigate(YamlPathSegment s);
+
+	/**
+	 * Delete a content assist query from the document, and also the line of
+	 * text in the document that contains it, if that line of text contains just the
+	 * query surrounded by whitespace.
+	 */
+	private static void deleteQueryAndLine(YamlDocument doc, String query, int queryOffset, YamlPathEdits edits) throws Exception {
+		edits.delete(queryOffset, query);
+		String wholeLine = doc.getLineTextAtOffset(queryOffset);
+		if (wholeLine.trim().equals(query.trim())) {
+			edits.deleteLineBackwardAtOffset(queryOffset);
+		}
+	}
 
 	public class TypeContext extends YamlAssistContext {
 
@@ -159,26 +179,61 @@ public abstract class YamlAssistContext {
 			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode);
 			if (CollectionUtil.hasElements(properties)) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
+				SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
+				Set<String> definedProps = getDefinedProperties(contextNode);
 				for (TypedProperty p : properties) {
 					String name = p.getName();
-					Type type = p.getType();
 					double score = FuzzyMatcher.matchScore(query, name);
 					if (score!=0) {
-						YamlPathEdits edits = new YamlPathEdits(doc);
-						edits.delete(queryOffset, query);
-
-						SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
 						YamlPath relativePath = YamlPath.fromSimpleProperty(name);
-						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
-						proposals.add(completionFactory.beanProperty(doc.getDocument(),
-								contextPath.toPropString(), getType(),
-								query, p, score, edits, typeUtil)
-						);
+						YamlPathEdits edits = new YamlPathEdits(doc);
+						if (!definedProps.contains(name)) {
+							//property not yet defined
+							Type type = p.getType();
+							edits.delete(queryOffset, query);
+							edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
+							proposals.add(completionFactory.beanProperty(doc.getDocument(),
+									contextPath.toPropString(), getType(),
+									query, p, score, edits, typeUtil)
+							);
+						} else {
+							//property already defined
+							// instead of filtering, navigate to the place where its defined.
+							deleteQueryAndLine(doc, query, queryOffset, edits);
+							//Cast to SChildBearingNode cannot fail because otherwise definedProps would be the empty set.
+							edits.createPath((SChildBearingNode) contextNode, relativePath, "");
+							proposals.add(
+								completionFactory.beanProperty(doc.getDocument(),
+									contextPath.toPropString(), getType(),
+									query, p, score, edits, typeUtil)
+								.deemphasize() //deemphasize because it already exists
+							);
+						}
 					}
 				}
 				return proposals;
 			}
 			return Collections.emptyList();
+		}
+
+		private Set<String> getDefinedProperties(SNode contextNode) {
+			try {
+				if (contextNode instanceof SChildBearingNode) {
+					List<SNode> children = ((SChildBearingNode)contextNode).getChildren();
+					if (CollectionUtil.hasElements(children)) {
+						Set<String> keys = new HashSet<String>(children.size());
+						for (SNode c : children) {
+							if (c instanceof SKeyNode) {
+								keys.add(((SKeyNode) c).getKey());
+							}
+						}
+						return keys;
+					}
+				}
+			} catch (Exception e) {
+				BootActivator.log(e);
+			}
+			return Collections.emptySet();
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
@@ -270,9 +325,13 @@ public abstract class YamlAssistContext {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (Match<PropertyInfo> match : matchingProps) {
 					ProposalApplier edits = createEdits(doc, offset, query, match);
-					completions.add(completionFactory.property(
+					ScoreableProposal completion = completionFactory.property(
 							doc.getDocument(), edits, match, typeUtil
-					));
+					);
+					if (doc.exists(YamlPath.fromProperty(match.data.getId()))) {
+						completion.deemphasize();
+					}
+					completions.add(completion);
 				}
 				return completions;
 			}
@@ -358,5 +417,4 @@ public abstract class YamlAssistContext {
 	}
 
 	public abstract HoverInfo getHoverInfo();
-
 }

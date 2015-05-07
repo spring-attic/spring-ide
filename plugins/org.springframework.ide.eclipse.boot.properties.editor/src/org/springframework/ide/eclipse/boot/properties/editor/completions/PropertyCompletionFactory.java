@@ -27,6 +27,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.ColorManager;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
@@ -41,19 +42,19 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 public class PropertyCompletionFactory {
 
-	public ICompletionProposal property(IDocument doc, ProposalApplier applier, Match<PropertyInfo> prop, TypeUtil typeUtil) {
+	public ScoreableProposal property(IDocument doc, ProposalApplier applier, Match<PropertyInfo> prop, TypeUtil typeUtil) {
 		return new PropertyProposal(doc, applier, prop, typeUtil);
 	}
 
-	public ICompletionProposal valueProposal(String value, Type type, int order, ProposalApplier applier) {
+	public ScoreableProposal valueProposal(String value, Type type, int order, ProposalApplier applier) {
 		return valueProposal(value, type, -(1.0+order), applier);
 	}
 
-	public ICompletionProposal valueProposal(String value, Type type, double score, ProposalApplier applier) {
+	public ScoreableProposal valueProposal(String value, Type type, double score, ProposalApplier applier) {
 		return simpleProposal(value, score, applier);
 	}
 
-	public ICompletionProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty p, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
+	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty p, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
 		return new AbstractPropertyProposal(doc, applier, typeUtil) {
 
 			private HoverInfo hoverInfo;
@@ -77,38 +78,51 @@ public class PropertyCompletionFactory {
 			}
 
 			@Override
-			public double getScore() {
-				return score;
+			protected Type getType() {
+				return p.getType();
 			}
 
 			@Override
-			protected Type getType() {
-				return p.getType();
+			public double getBaseScore() {
+				return score;
 			}
 		};
 	}
 
-	public ICompletionProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
+	public ScoreableProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
 		return simpleProposal(name, -(1.0+sortingOrder), applier);
 	}
 
-	public ICompletionProposal simpleProposal(String name, double score, ProposalApplier applier) {
+	public ScoreableProposal simpleProposal(String name, double score, ProposalApplier applier) {
 		return new SimpleProposal(name, score, applier);
 	}
 
-	private static abstract class ScoreableProposal implements ICompletionProposal {
-		public abstract double getScore();
+	public static abstract class ScoreableProposal implements ICompletionProposal {
+		private static final double DEEMP_VALUE = 100000; // should be large enough to move deemphasized stuff to bottom of list.
+
+		private double deemphasizedBy = 0.0;
+		public abstract double getBaseScore();
+		public final double getScore() {
+			return getBaseScore() - deemphasizedBy;
+		}
+		public ScoreableProposal deemphasize() {
+			deemphasizedBy+= DEEMP_VALUE;
+			return this;
+		}
+		public boolean isDeemphasized() {
+			return deemphasizedBy > 0;
+		}
 	}
 
 	private static class SimpleProposal extends ScoreableProposal {
 
 		private String value;
-		private double score;
 		private ProposalApplier applier;
+		private double score;
 
 		public SimpleProposal(String value, double score, ProposalApplier applier) {
-			this.value = value;
 			this.score = score;
+			this.value = value;
 			this.applier = applier;
 		}
 
@@ -152,10 +166,9 @@ public class PropertyCompletionFactory {
 		}
 
 		@Override
-		public double getScore() {
+		public double getBaseScore() {
 			return score;
 		}
-
 	}
 
 	/**
@@ -185,6 +198,25 @@ public class PropertyCompletionFactory {
 			textStyle.underline = true;
 		};
 	};
+
+	private static final Styler GREY_UNDERLINE = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.GREY);
+			textStyle.underline = true;
+		};
+	};
+
+	private static final Styler GREY = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.GREY);
+		};
+	};
+
+	private static final Styler NULL_STYLER = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+		};
+	};
+
 
 	public PropertyCompletionFactory(DocumentContextFinder documentContextFinder) {
 		this.documentContextFinder = documentContextFinder;
@@ -259,6 +291,8 @@ public class PropertyCompletionFactory {
 		protected abstract String getBaseDisplayString();
 
 		private void highlightPattern(String pattern, String data, StyledString result) {
+			Styler highlightStyle = isDeemphasized()?GREY_UNDERLINE:UNDERLINE;
+			Styler plainStyle = isDeemphasized()?GREY:NULL_STYLER;
 			if (StringUtil.hasText(pattern)) {
 				int dataPos = 0;	int dataLen = data.length();
 				int patternPos = 0; int patternLen = pattern.length();
@@ -267,16 +301,16 @@ public class PropertyCompletionFactory {
 					int pChar = pattern.charAt(patternPos++);
 					int highlightPos = data.indexOf(pChar, dataPos);
 					if (dataPos<highlightPos) {
-						result.append(data.substring(dataPos, highlightPos));
+						result.append(data.substring(dataPos, highlightPos), plainStyle);
 					}
-					result.append(data.charAt(highlightPos), UNDERLINE);
+					result.append(data.charAt(highlightPos), highlightStyle);
 					dataPos = highlightPos+1;
 				}
 				if (dataPos<dataLen) {
-					result.append(data.substring(dataPos));
+					result.append(data.substring(dataPos), plainStyle);
 				}
 			} else { //no pattern to highlight
-				result.append(data);
+				result.append(data, plainStyle);
 			}
 		}
 
@@ -331,7 +365,7 @@ public class PropertyCompletionFactory {
 		}
 
 		@Override
-		public double getScore() {
+		public double getBaseScore() {
 			return match.score;
 		}
 

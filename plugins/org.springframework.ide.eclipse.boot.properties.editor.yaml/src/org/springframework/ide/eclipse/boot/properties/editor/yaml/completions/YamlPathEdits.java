@@ -49,7 +49,11 @@ public class YamlPathEdits extends DocumentEdits {
 		createPath(root, path, appendText);
 	}
 
-	private void createPath(SChildBearingNode node, YamlPath path, String appendText) throws Exception {
+	/**
+	 * Like createPath, but path is created relative to a parent node instead of
+	 * at the document root.
+	 */
+	public void createPath(SChildBearingNode node, YamlPath path, String appendText) throws Exception {
 		if (!path.isEmpty()) {
 			YamlPathSegment s = path.getSegment(0);
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {

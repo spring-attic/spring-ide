@@ -82,7 +82,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	}
 
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
-		IDialogSettings existing = Activator.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		IDialogSettings existing = YamlEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (existing!=null) {
 			return existing;
 		}
