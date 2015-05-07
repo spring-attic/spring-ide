@@ -44,6 +44,26 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 public class TypeUtil {
 
 
+	private static abstract class RadixableParser implements ValueParser {
+
+		protected abstract Object parse(String str, int radix);
+
+		@Override
+		public Object parse(String str) {
+			if (str.startsWith("0")) {
+				if (str.startsWith("0x")||str.startsWith("0X")) {
+					return parse(str.substring(2), 16);
+				} else if (str.startsWith("0b") || str.startsWith("0B")) {
+					return parse(str.substring(2), 2);
+				} else {
+					return parse(str, 8);
+				}
+			}
+			return parse(str, 10);
+		}
+
+	}
+
 	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
 
 	private static final String STRING_TYPE_NAME = String.class.getName();
@@ -69,9 +89,9 @@ public class TypeUtil {
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
 
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Byte", "byte");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "int");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer", "int");
-		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "short");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Short", "short");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Integer","int");
+		PRIMITIVE_TYPE_NAMES.put("java.lang.Long", "long");
 
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Double", "double");
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
@@ -106,19 +126,24 @@ public class TypeUtil {
 
 	private static final Map<String,ValueParser> VALUE_PARSERS = new HashMap<String, ValueParser>();
 	static {
-		VALUE_PARSERS.put(Integer.class.getName(), new ValueParser() {
-			public Object parse(String str) {
-				return Integer.parseInt(str);
+		VALUE_PARSERS.put(Byte.class.getName(), new RadixableParser() {
+			public Object parse(String str, int radix) {
+				return Byte.parseByte(str, radix);
 			}
 		});
-		VALUE_PARSERS.put(Long.class.getName(), new ValueParser() {
-			public Object parse(String str) {
-				return Long.parseLong(str);
+		VALUE_PARSERS.put(Integer.class.getName(), new RadixableParser() {
+			public Object parse(String str, int radix) {
+				return Integer.parseInt(str, radix);
 			}
 		});
-		VALUE_PARSERS.put(Short.class.getName(), new ValueParser() {
-			public Object parse(String str) {
-				return Short.parseShort(str);
+		VALUE_PARSERS.put(Long.class.getName(), new RadixableParser() {
+			public Object parse(String str, int radix) {
+				return Long.parseLong(str, radix);
+			}
+		});
+		VALUE_PARSERS.put(Short.class.getName(), new RadixableParser() {
+			public Object parse(String str, int radix) {
+				return Short.parseShort(str, radix);
 			}
 		});
 		VALUE_PARSERS.put(Double.class.getName(), new ValueParser() {
@@ -178,7 +203,15 @@ public class TypeUtil {
 			try {
 				String[] values = TYPE_VALUES.get(enumType.getErasure());
 				if (values!=null) {
-					return values;
+					if (caseMode==EnumCaseMode.ALIASED) {
+						String[] aliased = Arrays.copyOf(values, values.length*2);
+						for (int i = 0; i < values.length; i++) {
+							aliased[i+values.length] = values[i].toUpperCase();
+						}
+						return aliased;
+					} else {
+						return values;
+					}
 				}
 				IType type = findType(enumType.getErasure());
 				if (type!=null && type.isEnum()) {
