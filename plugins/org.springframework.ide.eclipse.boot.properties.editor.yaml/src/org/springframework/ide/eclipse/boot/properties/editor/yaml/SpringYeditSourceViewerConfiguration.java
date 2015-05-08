@@ -214,5 +214,11 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		return _a;
 	}
 
+	public void forceReconcile() {
+		if (fReconciler!=null) {
+			fReconciler.forceReconcile();
+		}
+	}
+
 
 }

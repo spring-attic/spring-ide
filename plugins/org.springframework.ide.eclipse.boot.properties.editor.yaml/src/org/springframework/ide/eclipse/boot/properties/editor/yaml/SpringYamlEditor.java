@@ -12,8 +12,13 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml;
 
 import org.dadacoalition.yedit.editor.YEdit;
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
+import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
 
-public class SpringYamlEditor extends YEdit {
+public class SpringYamlEditor extends YEdit implements Listener<SpringPropertiesIndexManager> {
+
+	private SpringYeditSourceViewerConfiguration sourceViewerConf;
 
 	public SpringYamlEditor() {
 		// TODO Auto-generated constructor stub
@@ -21,7 +26,25 @@ public class SpringYamlEditor extends YEdit {
 
 	@Override
 	protected YEditSourceViewerConfiguration createSourceViewerConfiguration() {
-		return new SpringYeditSourceViewerConfiguration();
+		return this.sourceViewerConf = new SpringYeditSourceViewerConfiguration();
 	}
 
+	@Override
+	protected void initializeEditor() {
+		super.initializeEditor();
+		SpringPropertiesEditorPlugin.getIndexManager().addListener(this);
+	}
+
+	@Override
+	public void changed(SpringPropertiesIndexManager info) {
+		if (sourceViewerConf!=null) {
+			sourceViewerConf.forceReconcile();
+		}
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		SpringPropertiesEditorPlugin.getIndexManager().removeListener(this);
+	}
 }
