@@ -23,6 +23,7 @@ import org.gradle.tooling.model.GradleModuleVersion;
 import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
+import org.springsource.ide.eclipse.gradle.core.GradleCore;
 import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurationRequest;
 import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurator;
 
@@ -38,10 +39,15 @@ public class EnableJdtAptGradleProjectConfigurator implements IProjectConfigurat
 		if (
 			isJavaProject(request.getProject()) &&
 			isPreferenceEnabled(request.getProject()) &&
-			shouldEnableApt(request.getGradleModel())
+			shouldConfigureApt(request.getGradleModel())
 		) {
-			AptUtils.enableApt(JavaCore.create(request.getProject()));
+			AptUtils.configureApt(JavaCore.create(request.getProject()));
 		}
+	}
+
+	protected boolean shouldConfigureApt(EclipseProject gradleModel) {
+		return AptUtils.isAptEnabled(GradleCore.create(gradleModel).getJavaProject())
+				|| shouldEnableApt(gradleModel);
 	}
 
 	private boolean isJavaProject(IProject project) {

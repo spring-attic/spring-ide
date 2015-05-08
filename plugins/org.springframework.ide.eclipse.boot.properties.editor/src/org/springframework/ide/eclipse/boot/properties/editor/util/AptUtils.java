@@ -30,7 +30,7 @@ public class AptUtils {
 	 * Enable's JDT APT on a JavaProject. Note: if the project's classpath contains
 	 * no APT services in jar-dependencies then this does nothing.
 	 */
-	public static void enableApt(IJavaProject jp) {
+	public static void configureApt(IJavaProject jp) {
 		boolean shouldEnable = false; //becomes true if we find at least one annotation processor.
 		try {
 			IFactoryPath factoryPath = AptConfig.getDefaultFactoryPath(jp);
@@ -49,6 +49,8 @@ public class AptUtils {
 			if (shouldEnable) {
 				AptConfig.setEnabled(jp, true);
 				AptConfig.setFactoryPath(jp, factoryPath);
+			} else {
+				AptConfig.setEnabled(jp, false);
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
@@ -56,16 +58,19 @@ public class AptUtils {
 	}
 
 	public static boolean isAptEnabled(IJavaProject jp) {
-		return AptConfig.isEnabled(jp);
+		if (jp!=null) {
+			return AptConfig.isEnabled(jp);
+		}
+		return false;
 	}
 
-	
+
 	/**
 	 * Attempt to use a classpath variable to make given absolutePath relative (this
 	 * is nicer for users because the paths end up getting stored in project settings in
 	 * the workspace and absolute paths are not 'portable' so is awkward to share
-	 * with other users via SCM. 
-	 * 
+	 * with other users via SCM.
+	 *
 	 * @return An equivalent path using classpath variable name as its first segment or null if
 	 *  no classpath variable is a prefix of the absolutePath.
 	 */

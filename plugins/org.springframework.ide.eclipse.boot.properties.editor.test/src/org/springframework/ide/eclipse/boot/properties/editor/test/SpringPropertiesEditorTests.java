@@ -198,7 +198,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
 		assertFalse(metadataFile.exists());
 
-		AptUtils.enableApt(jp);
+		AptUtils.configureApt(jp);
 		buildProject(jp);
 
 		assertTrue(AptUtils.isAptEnabled(jp));
