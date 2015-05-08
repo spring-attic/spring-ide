@@ -54,7 +54,9 @@ public class LaunchUtil {
 	}
 
 	public static LaunchResult synchLaunch(ILaunchConfiguration launchConf) throws CoreException {
-		ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
+		boolean register = false; //don't or the debug UI console will goble up the output whch creates
+								// a race condition
+		ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, register);
 		IProcess process = findProcess(l);
 		IStreamsProxy streams = process.getStreamsProxy();
 
