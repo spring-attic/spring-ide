@@ -242,7 +242,7 @@ public abstract class YamlAssistContext {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (String value : values) {
 					double score = FuzzyMatcher.matchScore(query, value);
-					if (score!=0) {
+					if (score!=0 && !value.equals(query)) {
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
 						edits.delete(offset-query.length(), offset);
 						edits.insert(offset, value);

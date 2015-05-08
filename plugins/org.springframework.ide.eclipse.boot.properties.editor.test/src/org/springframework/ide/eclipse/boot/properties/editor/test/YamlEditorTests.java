@@ -1165,6 +1165,14 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    FALSE<*>\n"
 		);
 
+		//Dont suggest completion for something that's already complete. Causes odd
+		// and annoying behavior, like a completion popup after you stopped typing 'true'
+		assertNoCompletions(
+				"liquibase:\n" +
+				"  enabled:\n" +
+				"    true<*>"
+		);
+
 		//one more... for special char like '-' in the name
 
 		assertCompletions(
