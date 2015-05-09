@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.xbean.classloader.NonLockingJarFileClassLoader;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
@@ -288,7 +289,12 @@ public class ProjectClassLoaderCache {
 	}
 
 	private static boolean useNonLockingClassLoader() {
-		return SpringCore.getDefault().getPluginPreferences().getBoolean(SpringCore.USE_NON_LOCKING_CLASSLOADER);
+		boolean useNonLockingClassloaderPreference = SpringCore.getDefault().getPluginPreferences().getBoolean(SpringCore.USE_NON_LOCKING_CLASSLOADER);
+		if (useNonLockingClassloaderPreference) {
+			NonLockingJarFileClassLoader.setCheckForUpdates(false);
+		}
+
+		return useNonLockingClassloaderPreference;
 	}
 
 	/**
