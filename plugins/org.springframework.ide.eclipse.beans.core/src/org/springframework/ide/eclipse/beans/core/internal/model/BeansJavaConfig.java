@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -399,6 +399,15 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		}
 	}
 
+	@Override
+	public boolean doesAnnotationScanning() {
+		return true;
+	}
+
+	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
+		return null;
+	}
+
 	class BeansConfigPostProcessorReaderEventListener extends EmptyReaderEventListener {
 
 		// Keep the contributed model element providers
@@ -410,8 +419,9 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			if (componentDefinition.getSource() == null) {
 				if (componentDefinition instanceof BeanComponentDefinition) {
 					try {
-						((AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition).getBeanDefinition())
-						.setSource(new JavaModelSourceLocation(configClass));
+						AbstractBeanDefinition abstractBeanDefinition = (AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition).getBeanDefinition();
+						abstractBeanDefinition.setSource(new JavaModelSourceLocation(configClass));
+						abstractBeanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 					} catch (JavaModelException e) {
 						SpringCore.log(e);
 					}
@@ -445,14 +455,6 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				super.registerBeanDefinition(beanName, beanDefinition);
 			}
 		}
-	}
-
-	public boolean doesAnnotationScanning() {
-		return true;
-	}
-
-	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
-		return null;
 	}
 
 }
