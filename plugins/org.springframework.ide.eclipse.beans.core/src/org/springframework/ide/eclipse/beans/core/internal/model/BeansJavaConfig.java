@@ -26,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -139,6 +140,12 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
+			try {
+				file.setSessionProperty(IBeansConfig.CONFIG_FILE_TAG, IBeansConfig.CONFIG_FILE_TAG_VALUE);
+			} catch (CoreException e) {
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, String.format(
+						"Error occured while tagging config file '%s'", file.getFullPath()), e));
+			}
 		}
 
 	}
