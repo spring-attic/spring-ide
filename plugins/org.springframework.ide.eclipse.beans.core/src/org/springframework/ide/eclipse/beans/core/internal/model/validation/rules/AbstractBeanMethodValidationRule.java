@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ public abstract class AbstractBeanMethodValidationRule extends AbstractBeanValid
 			Static statics, IBeansValidationContext context) {
 		if (methodName != null && !SpringCoreUtils.hasPlaceHolder(methodName)) {
 			try {
-				IMethod method = Introspector.findMethod(type, methodName, argCount, Public.DONT_CARE, statics);
+				IMethod method = Introspector.findMethod(type, methodName, argCount, Public.DONT_CARE, statics, getTypeHierarchyEngine(context));
 				// First check if we can find any matching method regardless of
 				// visibility, if not create error marker
 				if (method == null) {

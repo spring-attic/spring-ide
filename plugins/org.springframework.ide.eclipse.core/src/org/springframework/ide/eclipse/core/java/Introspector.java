@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -239,13 +239,27 @@ public final class Introspector {
 	 */
 	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics, Static statics)
 			throws JavaModelException {
-		for (IType itrType = type; itrType != null; itrType = getSuperType(itrType)) {
+		return findMethod(type, methodName, argCount, publics, statics, null);
+	}
+
+	/**
+	 * Finds a target methodName with specific number of arguments on the type hierarchy of given type.
+	 * @param type the Java type object on which to retrieve the method
+	 * @param methodName the name of the method
+	 * @param argCount the number of arguments for the desired method
+	 * @param isPublic <code>true</code> if public method is requested
+	 * @param statics one of the <code>Statics</code> constants
+	 */
+	public static IMethod findMethod(IType type, String methodName, int argCount, Public publics, Static statics,
+			TypeHierarchyEngine typeHierarchyEngine) throws JavaModelException {
+
+		for (IType itrType = type; itrType != null; itrType = getSuperType(itrType, typeHierarchyEngine)) {
 			IMethod method = findMethodOnType(itrType, methodName, argCount, publics, statics);
 			if (method != null) {
 				return method;
 			}
 		}
-		for (IType interfaceType : getAllImplementedInterfaces(type)) {
+		for (IType interfaceType : getAllImplementedInterfaces(type, typeHierarchyEngine)) {
 			IMethod method = findMethod(interfaceType, methodName, argCount, publics, statics);
 			if (method != null) {
 				return method;
@@ -307,6 +321,10 @@ public final class Introspector {
 	}
 
 	public static Set<IType> getAllImplementedInterfaces(IType type) {
+		return getAllImplementedInterfaces(type, null);
+	}
+
+	public static Set<IType> getAllImplementedInterfaces(IType type, TypeHierarchyEngine typeHierarchyEngine) {
 		Set<IType> allInterfaces = new HashSet<IType>();
 		try {
 			while (type != null) {
@@ -321,7 +339,7 @@ public final class Introspector {
 
 					}
 				}
-				type = getSuperType(type);
+				type = getSuperType(type, typeHierarchyEngine);
 			}
 		}
 		catch (JavaModelException e) {
@@ -445,6 +463,17 @@ public final class Introspector {
 	 * Returns the super type of the given type.
 	 */
 	public static IType getSuperType(IType type) throws JavaModelException {
+		TypeHierarchyEngine typeHierarchyEngine = System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")
+				? SpringCore.getTypeHierarchyEngine() : null;
+
+		return getSuperType(type, typeHierarchyEngine);
+	}
+
+	/**
+	 * Returns the super type of the given type.
+	 * This is using the type hierarchy engine that is passed as parameter, if not null
+	 */
+	public static IType getSuperType(IType type, TypeHierarchyEngine typeHierarchyEngine) throws JavaModelException {
 		if (type == null) {
 			return null;
 		}
@@ -456,18 +485,16 @@ public final class Introspector {
 			if (type.isBinary()) {
 				return type.getJavaProject().findType(name);
 			}
-			else {
-				if (System.getProperty(TypeHierarchyEngine.ENABLE_PROPERTY, "true").equals("true")) {
-					String supertype = SpringCore.getTypeHierarchyEngine().getSupertype(type);
-					if (supertype != null) {
-						return type.getJavaProject().findType(supertype);
-					}
+			else if (typeHierarchyEngine != null) {
+				String supertype = typeHierarchyEngine.getSupertype(type);
+				if (supertype != null) {
+					return type.getJavaProject().findType(supertype);
 				}
-				else {
-					String resolvedName = JdtUtils.resolveClassName(name, type);
-					if (resolvedName != null) {
-						return type.getJavaProject().findType(resolvedName);
-					}
+			}
+			else {
+				String resolvedName = JdtUtils.resolveClassName(name, type);
+				if (resolvedName != null) {
+					return type.getJavaProject().findType(resolvedName);
 				}
 			}
 		}
@@ -475,8 +502,12 @@ public final class Introspector {
 	}
 
 	public static IMethod getWritableProperty(IType type, String propertyName) throws JavaModelException {
+		return getWritableProperty(type, propertyName, null);
+	}
+
+	public static IMethod getWritableProperty(IType type, String propertyName, TypeHierarchyEngine typeHierarchyEngine) throws JavaModelException {
 		String base = capitalize(propertyName);
-		return findMethod(type, "set" + base, 1, Public.YES, Static.NO);
+		return findMethod(type, "set" + base, 1, Public.YES, Static.NO, typeHierarchyEngine);
 	}
 
 	public static Set<IMethod> getConstructors(IType type, int argCount, boolean isNonPublicAllowed) throws JavaModelException {
@@ -572,8 +603,18 @@ public final class Introspector {
 	 * @param propertyName the name of the property
 	 */
 	public static boolean hasWritableProperty(IType type, String propertyName) throws JavaModelException {
+		return hasWritableProperty(type, propertyName, null);
+	}
+
+	/**
+	 * Returns true if the given type has a public setter (one-argument method named "set" + property name with an
+	 * uppercase first character) for the specified property.
+	 * @param type the Java type object on which to retrieve the method
+	 * @param propertyName the name of the property
+	 */
+	public static boolean hasWritableProperty(IType type, String propertyName, TypeHierarchyEngine typeHierarchyEngine) throws JavaModelException {
 		String base = capitalize(propertyName);
-		return (findMethod(type, "set" + base, 1, Public.YES, Static.NO) != null);
+		return (findMethod(type, "set" + base, 1, Public.YES, Static.NO, typeHierarchyEngine) != null);
 	}
 
 	/**

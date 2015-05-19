@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,11 +81,11 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 
 		if (type != null && !mergedBd.isAbstract()
 				&& !JdtUtils.doesImplement(context.getRootElementResource(), type, ScriptFactory.class.getName(), typeEngine)) {
-			validateProperty(property, type, context);
+			validateProperty(property, type, context, typeEngine);
 		}
 	}
 
-	private void validateProperty(IBeanProperty property, IType type, IBeansValidationContext context) {
+	private void validateProperty(IBeanProperty property, IType type, IBeansValidationContext context, TypeHierarchyEngine typeHierarchyEngine) {
 		String propertyName = property.getElementName();
 
 		// Check for property accessor in given type
@@ -98,7 +98,7 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 				String nestedPropertyName = propertyName.substring(0, nestedIndex);
 				PropertyTokenHolder tokens = getPropertyNameTokens(nestedPropertyName);
 				String getterName = "get" + StringUtils.capitalize(tokens.actualName);
-				IMethod getter = Introspector.findMethod(type, getterName, 0, Public.YES, Static.NO);
+				IMethod getter = Introspector.findMethod(type, getterName, 0, Public.YES, Static.NO, typeHierarchyEngine);
 				if (getter == null) {
 					context.error(property, "NO_GETTER", "No getter found for nested property '" + nestedPropertyName
 							+ "' in class '" + className + "'", new ValidationProblemAttribute("CLASS", className),
@@ -129,7 +129,7 @@ public class BeanPropertyRule extends AbstractNonInfrastructureBeanValidationRul
 							new ValidationProblemAttribute("PROPERTY", propertyName),
 							new ValidationProblemAttribute("BEAN_NAME", ValidationRuleUtils.getBeanName(property)));
 				}
-				else if (!Introspector.hasWritableProperty(type, propertyName)) {
+				else if (!Introspector.hasWritableProperty(type, propertyName, typeHierarchyEngine)) {
 					context.error(property, "NO_SETTER", "No setter found for property '" + propertyName
 							+ "' in class '" + className + "'", new ValidationProblemAttribute("CLASS", className),
 							new ValidationProblemAttribute("PROPERTY", propertyName),

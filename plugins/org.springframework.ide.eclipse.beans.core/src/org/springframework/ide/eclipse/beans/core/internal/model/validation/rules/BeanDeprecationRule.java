@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 Spring IDE Developers
+ * Copyright (c) 2009, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.typehierarchy.TypeHierarchyEngine;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -102,12 +103,15 @@ public class BeanDeprecationRule extends AbstractNonInfrastructureBeanValidation
 		if (methodName != null && !SpringCoreUtils.hasPlaceHolder(methodName)) {
 			try {
 				IMethod method = null;
+				TypeHierarchyEngine typeHierarchyEngine = getTypeHierarchyEngine(context);
+
 				if (setter) {
-					method = Introspector.getWritableProperty(type, methodName);
+					method = Introspector.getWritableProperty(type, methodName, typeHierarchyEngine);
 				}
 				else {
-					method = Introspector.findMethod(type, methodName, 0, Public.DONT_CARE, Static.DONT_CARE);
+					method = Introspector.findMethod(type, methodName, 0, Public.DONT_CARE, Static.DONT_CARE, typeHierarchyEngine);
 				}
+
 				if (method != null && Flags.isDeprecated(method.getFlags())) {
 					context.warning(bean, "METHOD_IS_DEPRECATED", "Method '" + method.getElementName()
 							+ "' is marked deprecated", new ValidationProblemAttribute("CLASS", type
