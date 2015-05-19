@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.core.model.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
@@ -433,6 +434,52 @@ public class BeansProjectTest {
 		assertEquals(1, configs.size());
 		IBeansConfig importedConfig = configs.iterator().next();
 		assertEquals("advanced-bean-config.xml", importedConfig.getElementName());
+	}
+	
+	@Test
+	public void testAdvancedImportsWithConfigs() throws Exception {
+		beansProject.addConfig("importing-bean-config-advanced.xml", IBeansConfig.Type.MANUAL);
+		
+		IBeansConfig config = beansProject.getConfig("importing-bean-config-advanced.xml");
+		Set<IBeansImport> imports = config.getImports();
+		assertEquals(1, imports.size());
+		
+		IFile importedFile = (IFile) project.findMember("importing-bean-config-advanced-second.xml");
+		Set<IBeansConfig> configs = beansProject.getConfigs(importedFile, false);
+		assertEquals(0, configs.size());
+		
+		configs = beansProject.getConfigs(importedFile, true);
+		assertEquals(1, configs.size());
+		IBeansConfig importedConfig = configs.iterator().next();
+		assertEquals("importing-bean-config-advanced-second.xml", importedConfig.getElementName());
+		
+		assertTrue(beansProject.hasConfig(importedFile, "importing-bean-config-advanced-second.xml", true));
+		assertFalse(beansProject.hasConfig(importedFile, "importing-bean-config-advanced-second.xml", false));
+
+		IFile thirdFile = (IFile) project.findMember("importing-bean-config-advanced-third.xml");
+		assertTrue(beansProject.hasConfig(thirdFile, "importing-bean-config-advanced-third.xml", true));
+		assertFalse(beansProject.hasConfig(thirdFile, "importing-bean-config-advanced-third.xml", false));
+	}
+	
+	@Test
+	public void testAdvancedImportsWithManyImports() throws Exception {
+		beansProject.addConfig("importing-bean-config-many.xml", IBeansConfig.Type.MANUAL);
+		
+		IBeansConfig config = beansProject.getConfig("importing-bean-config-many.xml");
+		Set<IBeansImport> imports = config.getImports();
+		assertEquals(5, imports.size());
+		
+		IFile importedBaseConfigFile = (IFile) project.findMember("importing-bean-config-many-base.xml");
+		assertTrue(beansProject.hasConfig(importedBaseConfigFile, "importing-bean-config-many-base.xml", true));
+		assertFalse(beansProject.hasConfig(importedBaseConfigFile, "importing-bean-config-many-base.xml", false));
+
+		IFile many1 = (IFile) project.findMember("importing-bean-config-many1.xml");
+		assertTrue(beansProject.hasConfig(many1, "importing-bean-config-many1.xml", true));
+		assertFalse(beansProject.hasConfig(many1, "importing-bean-config-many1.xml", false));
+		
+		IFile otherFile = (IFile) project.findMember("basic-bean-config.xml");
+		assertFalse(beansProject.hasConfig(otherFile, "basic-bean-config.xml", true));
+		assertFalse(beansProject.hasConfig(otherFile, "basic-bean-config.xml", false));
 	}
 	
 }

@@ -547,14 +547,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
-				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(file)) {
-					beansConfigs.add(importedBc);
-				}
-				for (IBeansImport iBi : importedBc.getImports()) {
-					for (IBeansConfig iBc : iBi.getImportedBeansConfigs()) {
-						checkForImportedBeansConfig(file, iBc, beansConfigs);
-					}
-				}
+				checkForImportedBeansConfig(file, importedBc, beansConfigs);
 			}
 		}
 	}
@@ -566,15 +559,8 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 
 		for (IBeansImport bi : bc.getImports()) {
 			for (IBeansConfig importedBc : bi.getImportedBeansConfigs()) {
-				if (importedBc.getElementResource() != null && importedBc.getElementResource().equals(file)) {
+				if (hasImportedBeansConfig(file, importedBc)) {
 					return true;
-				}
-				for (IBeansImport iBi : importedBc.getImports()) {
-					for (IBeansConfig iBc : iBi.getImportedBeansConfigs()) {
-						if (hasImportedBeansConfig(file, iBc)) {
-							return true;
-						}
-					}
 				}
 			}
 		}
