@@ -18,9 +18,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.SpringProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -88,9 +92,12 @@ public class SpringBootValidator extends AbstractValidator {
 		}
 
 		public Set<IResourceModelElement> getContextElements() {
-			Set<IResourceModelElement> resources = new LinkedHashSet<IResourceModelElement>();
-			resources.add(getRootElement());
-			return resources;
+			if (getRootElement()!=null) {
+				Set<IResourceModelElement> resources = new LinkedHashSet<IResourceModelElement>();
+				resources.add(getRootElement());
+				return resources;
+			}
+			return Collections.emptySet();
 		}
 
 		public IResourceModelElement getRootElement() {
@@ -99,19 +106,28 @@ public class SpringBootValidator extends AbstractValidator {
 
 		public void init(IResource resource) {
 			ICompilationUnit cu = getCompilationUnit(resource);
-			IModelElement parent = new SpringProject(SpringCore.getModel(),
-					resource.getProject());
-			String name = resource.getName();
-			rootElement = new SpringCompilationUnit(cu, parent, name);
+			if (cu!=null) {
+				IModelElement parent = new SpringProject(SpringCore.getModel(),
+						resource.getProject());
+				String name = resource.getName();
+				rootElement = new SpringCompilationUnit(cu, parent, name);
+			}
 		}
 
+		@SuppressWarnings("restriction")
 		private ICompilationUnit getCompilationUnit(IResource resource) {
-			IJavaProject project = getJavaProject(resource);
-			if (project == null) {
-				return null;
-			}
-			if (resource.getType() == IResource.FILE) {
-				return (ICompilationUnit)JavaCore.create((IFile) resource);
+			try {
+				if (resource.getType() == IResource.FILE) {
+					IJavaProject project = getJavaProject(resource);
+					if (project.exists()) {
+						IPackageFragmentRoot pfr = ClasspathModifier.getFragmentRoot(resource, project, null);
+						if (pfr!=null && !ClasspathModifier.isExcluded(resource, project)) {
+							return (ICompilationUnit)JavaCore.create((IFile) resource);
+						}
+					}
+				}
+			} catch (Exception e) {
+				BootActivator.log(e);
 			}
 			return null;
 		}
@@ -121,4 +137,5 @@ public class SpringBootValidator extends AbstractValidator {
 			return JavaCore.create(project);
 		}
 	}
+
 }
