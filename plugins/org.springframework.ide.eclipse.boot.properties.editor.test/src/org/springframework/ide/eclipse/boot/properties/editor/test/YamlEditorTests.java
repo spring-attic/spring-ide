@@ -1706,7 +1706,26 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	}
 
-	// TODO: allow relaxed property names in content assist and reconciling
+
+	public void DISABLED_testDocumentSeparator() throws Exception {
+		//Test DISABLED because it doesn't work *yet*
+		defaultTestData();
+
+		assertCompletion(
+				"flyway:\n" +
+				"  encoding: utf8\n" +
+				"---\n" +
+				"flyena<*>",
+				// =>
+				"flyway:\n" +
+				"  encoding: utf8\n" +
+				"---\n" +
+				"flyway:\n" +
+				"  enabled: <*>"
+		);
+	}
+
+	// TODO: allow relaxed property names in reconciling
 
 	///////////////// cruft ////////////////////////////////////////////////////////
 
