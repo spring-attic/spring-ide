@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Spring IDE Developers
+ * Copyright (c) 2004, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,11 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
@@ -265,6 +268,19 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	public boolean isConfig(IFile configFile, boolean includeImported) {
 		if (configFile != null) {
+			
+			// check the config file tag to avoid looking deeper into the beans model
+			try {
+				if (configFile.isAccessible()) {
+					Object configFileTag = configFile.getSessionProperty(IBeansConfig.CONFIG_FILE_TAG);
+					if (! IBeansConfig.CONFIG_FILE_TAG_VALUE.equals(configFileTag))
+						return false;
+				}		
+			} catch (CoreException e) {
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, String.format(
+						"Error occured while reading the config file tag for file '%s'", configFile.getFullPath()), e));
+			}
+			
 			IBeansProject project = getProject(configFile.getProject());
 			
 			// check the project of the file itself first

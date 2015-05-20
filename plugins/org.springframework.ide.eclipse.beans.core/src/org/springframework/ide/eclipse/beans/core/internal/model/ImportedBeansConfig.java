@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Spring IDE Developers
+ * Copyright (c) 2008, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,14 +21,19 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
 import org.springframework.ide.eclipse.core.io.ExternalFile;
@@ -134,6 +139,12 @@ public class ImportedBeansConfig extends AbstractBeansConfig implements IImporte
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
+			try {
+				file.setSessionProperty(IBeansConfig.CONFIG_FILE_TAG, IBeansConfig.CONFIG_FILE_TAG_VALUE);
+			} catch (CoreException e) {
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, String.format(
+						"Error occured while tagging config file '%s'", file.getFullPath()), e));
+			}
 		}
 	}
 

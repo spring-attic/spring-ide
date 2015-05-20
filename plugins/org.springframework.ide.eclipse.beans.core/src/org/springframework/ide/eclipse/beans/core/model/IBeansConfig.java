@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Spring IDE Developers
+ * Copyright (c) 2004, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,10 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.eclipse.core.runtime.QualifiedName;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -24,6 +25,9 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * @author Martin Lippert
  */
 public interface IBeansConfig extends IBeansModelElement, IResourceModelElement, IBeanClassAware {
+	
+	public static final QualifiedName CONFIG_FILE_TAG = new QualifiedName(BeansCorePlugin.PLUGIN_ID, "configFileTag"); //$NON-NLS-1$\
+	public static final String CONFIG_FILE_TAG_VALUE  = "taggedAsPotentialConfigFile";
 
 	enum Type {
 		MANUAL, AUTO_DETECTED

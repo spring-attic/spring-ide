@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -139,6 +140,12 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
+			try {
+				file.setSessionProperty(IBeansConfig.CONFIG_FILE_TAG, IBeansConfig.CONFIG_FILE_TAG_VALUE);
+			} catch (CoreException e) {
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, String.format(
+						"Error occured while tagging config file '%s'", file.getFullPath()), e));
+			}
 		}
 
 	}
@@ -399,6 +406,15 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 		}
 	}
 
+	@Override
+	public boolean doesAnnotationScanning() {
+		return true;
+	}
+
+	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
+		return null;
+	}
+
 	class BeansConfigPostProcessorReaderEventListener extends EmptyReaderEventListener {
 
 		// Keep the contributed model element providers
@@ -410,8 +426,9 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			if (componentDefinition.getSource() == null) {
 				if (componentDefinition instanceof BeanComponentDefinition) {
 					try {
-						((AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition).getBeanDefinition())
-						.setSource(new JavaModelSourceLocation(configClass));
+						AbstractBeanDefinition abstractBeanDefinition = (AbstractBeanDefinition) ((BeanComponentDefinition) componentDefinition).getBeanDefinition();
+						abstractBeanDefinition.setSource(new JavaModelSourceLocation(configClass));
+						abstractBeanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 					} catch (JavaModelException e) {
 						SpringCore.log(e);
 					}
@@ -445,14 +462,6 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 				super.registerBeanDefinition(beanName, beanDefinition);
 			}
 		}
-	}
-
-	public boolean doesAnnotationScanning() {
-		return true;
-	}
-
-	public BeanDefinitionRegistry getRawBeanDefinitions(CompositeComponentDefinition context) {
-		return null;
 	}
 
 }

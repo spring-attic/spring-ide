@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 Spring IDE Developers
+ * Copyright (c) 2004, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,11 +34,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
@@ -299,6 +301,12 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
+			try {
+				file.setSessionProperty(IBeansConfig.CONFIG_FILE_TAG, IBeansConfig.CONFIG_FILE_TAG_VALUE);
+			} catch (CoreException e) {
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, String.format(
+						"Error occured while tagging config file '%s'", file.getFullPath()), e));
+			}
 		}
 	}
 
