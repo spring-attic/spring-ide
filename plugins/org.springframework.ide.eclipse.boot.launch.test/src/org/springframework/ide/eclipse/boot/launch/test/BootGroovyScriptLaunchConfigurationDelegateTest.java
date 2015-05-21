@@ -43,6 +43,7 @@ public class BootGroovyScriptLaunchConfigurationDelegateTest extends BootLaunchT
 				"@Component\n" +
 				"class App implements CommandLineRunner {\n" +
 				"   void run(String... args) {\n" +
+				"       sleep(1000)\n" +
 				"       println \"Hello, world!\"\n" +
 				"   }\n" +
 				"}"
