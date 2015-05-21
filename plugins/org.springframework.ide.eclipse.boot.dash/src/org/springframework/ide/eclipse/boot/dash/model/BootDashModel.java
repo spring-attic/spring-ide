@@ -67,7 +67,7 @@ public class BootDashModel  {
 
 	public synchronized LiveSet<BootDashElement> getElements() {
 		if (elements==null) {
-			this.elements = new LiveSet<>();
+			this.elements = new LiveSet<BootDashElement>();
 			createWorkspaceListener();
 			udpateElementsFromWorkspace();
 		}
