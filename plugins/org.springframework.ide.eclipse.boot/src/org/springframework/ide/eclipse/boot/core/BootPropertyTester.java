@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
 public class BootPropertyTester extends PropertyTester {
-	
+
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
