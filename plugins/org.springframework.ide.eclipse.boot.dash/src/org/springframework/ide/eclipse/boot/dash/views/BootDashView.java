@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
@@ -35,6 +36,8 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider.Boo
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
+
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 
 
 /**
@@ -141,8 +144,8 @@ public class BootDashView extends ViewPart {
 		c1viewer.setLabelProvider(new BootDashLabelProvider(BootDashColumn.PROJECT));
 		TableViewerColumn c2viewer = new TableViewerColumn(tv, SWT.LEFT);
 		c2viewer.getColumn().setWidth(100);
-		c2viewer.getColumn().setText("Another Column");
-		c2viewer.setLabelProvider(new BootDashLabelProvider(BootDashColumn.COL2));
+		c2viewer.getColumn().setText("State");
+		c2viewer.setLabelProvider(new BootDashLabelProvider(BootDashColumn.RUN_STATE));
 		new TableResizeHelper(tv).enableResizing();
 
 		// Create the help context id for the viewer's control
@@ -157,6 +160,16 @@ public class BootDashView extends ViewPart {
 			protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp,
 					Set<BootDashElement> value) {
 				tv.refresh();
+			}
+		});
+
+		model.addElementStateListener(new ElementStateListener() {
+			public void stateChanged(final BootDashElement e) {
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						tv.update(e, null);
+					}
+				});
 			}
 		});
 	}
@@ -202,6 +215,7 @@ public class BootDashView extends ViewPart {
 		refreshAction = new Action() {
 			public void run() {
 				model.refresh();
+				tv.refresh();
 			}
 		};
 		refreshAction.setText("Refresh");

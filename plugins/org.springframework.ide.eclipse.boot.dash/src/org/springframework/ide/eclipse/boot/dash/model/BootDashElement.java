@@ -16,4 +16,5 @@ import org.eclipse.jdt.core.IJavaProject;
 public interface BootDashElement {
 	IJavaProject getJavaProject();
 	IProject getProject();
+	RunState getRunState();
 }

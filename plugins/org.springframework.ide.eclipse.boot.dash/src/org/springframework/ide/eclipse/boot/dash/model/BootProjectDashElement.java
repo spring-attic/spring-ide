@@ -13,14 +13,18 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 
 /**
  * Concrete BootDashElement that wraps an IProject
  */
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
-	public BootProjectDashElement(IProject project) {
+	private ProjectRunStateTracker runStateTracker;
+
+	public BootProjectDashElement(IProject project, ProjectRunStateTracker runStateTracker) {
 		super(project);
+		this.runStateTracker = runStateTracker;
 	}
 
 	public IProject getProject() {
@@ -30,6 +34,11 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	@Override
 	public IJavaProject getJavaProject() {
 		return JavaCore.create(getProject());
+	}
+
+	@Override
+	public RunState getRunState() {
+		return runStateTracker.getState(getProject());
 	}
 
 }

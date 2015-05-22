@@ -15,7 +15,10 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
+import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
@@ -29,7 +32,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
  *
  * @author Kris De Volder
  */
-public class BootDashModel  {
+public class BootDashModel {
 
 	private IWorkspace workspace;
 	private ProjectOpenCloseListenerManager openCloseListenerManager;
@@ -37,11 +40,10 @@ public class BootDashModel  {
 	private BootDashElementFactory elementFactory;
 	private LiveSet<BootDashElement> elements; //lazy created
 	private WorkspaceListener listener; //lazy created
+	private ProjectRunStateTracker runStateTracker;
+	private ProjectRunStateListener runStateListener;
 
 	public class WorkspaceListener implements ProjectOpenCloseListener, ClasspathListener {
-
-		//TODO: smarter incremental updates of the model.
-		//  Currently whole model is refreshed for change that affects just one project
 
 		@Override
 		public void projectOpened(IProject project) {
@@ -62,7 +64,16 @@ public class BootDashModel  {
 		this.workspace = workspace;
 		this.openCloseListenerManager = new ProjectOpenCloseListenerManager(workspace);
 		this.classpathListenerManager = new ClasspathListenerManager();
-		this.elementFactory = new DefaultBootDashElementFactory();
+		this.runStateTracker = new ProjectRunStateTracker();
+		this.elementFactory = new DefaultBootDashElementFactory(runStateTracker);
+		runStateTracker.addListener(this.runStateListener = new ProjectRunStateListener() {
+			public void stateChanged(IProject project) {
+				BootDashElement element = elementFactory.create(project);
+				if (element!=null) {
+					notifyElementChanged(element);
+				}
+			}
+		});
 	}
 
 	public synchronized LiveSet<BootDashElement> getElements() {
@@ -99,6 +110,7 @@ public class BootDashModel  {
 		if (listener!=null) {
 			openCloseListenerManager.remove(listener);
 			classpathListenerManager.remove(listener);
+			runStateTracker.removeListener(runStateListener);
 			listener = null;
 		}
 	}
@@ -109,5 +121,31 @@ public class BootDashModel  {
 	public void refresh() {
 		udpateElementsFromWorkspace();
 	}
+
+	////////////// listener cruft ///////////////////////////
+
+	public interface ElementStateListener {
+		/**
+		 * Called when something about the element has changed.
+		 * <p>
+		 * Note this doesn't get called when elements are added / removed etc. Onlu when
+		 * some property of the element itself has changed.
+		 */
+		void stateChanged(BootDashElement e);
+	}
+
+	private ListenerList elementStateListeners = new ListenerList();
+
+	public void addElementStateListener(ElementStateListener l) {
+		elementStateListeners.add(l);
+	}
+
+	private void notifyElementChanged(BootDashElement element) {
+		for (Object l : elementStateListeners.getListeners()) {
+			((ElementStateListener)l).stateChanged(element);
+		}
+	}
+
+
 
 }

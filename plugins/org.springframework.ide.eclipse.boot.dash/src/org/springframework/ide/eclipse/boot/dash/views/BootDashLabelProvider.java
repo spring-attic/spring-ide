@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends CellLabelProvider {
@@ -22,7 +23,7 @@ public class BootDashLabelProvider extends CellLabelProvider {
 	AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 
 	public static enum BootDashColumn {
-		PROJECT, COL2
+		PROJECT, RUN_STATE
 	}
 
 	private BootDashColumn forColum;
@@ -44,10 +45,17 @@ public class BootDashLabelProvider extends CellLabelProvider {
 				cell.setText(""+e);
 			}
 			break;
-		default:
-			cell.setText(""+e);
+		case RUN_STATE:
+			cell.setText(""+getRunState(e));
 			break;
 		}
+	}
+
+	private RunState getRunState(Object e) {
+		if (e instanceof BootDashElement) {
+			return ((BootDashElement) e).getRunState();
+		}
+		return null;
 	}
 
 	private IJavaProject getJavaProject(Object e) {
