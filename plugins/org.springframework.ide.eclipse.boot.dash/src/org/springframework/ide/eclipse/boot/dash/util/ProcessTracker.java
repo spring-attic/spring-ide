@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.util;
 import static org.eclipse.debug.core.DebugEvent.CREATE;
 import static org.eclipse.debug.core.DebugEvent.TERMINATE;
 
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
@@ -31,9 +30,10 @@ public class ProcessTracker {
 	}
 
 	private IDebugEventSetListener debugListener;
-	private final ListenerList listeners = new ListenerList();
+	private ProcessListener listener;
 
-	protected ProcessTracker() {
+	protected ProcessTracker(ProcessListener listener) {
+		this.listener = listener;
 		//Pick up any processes already running
 		DebugPlugin.getDefault().addDebugEventListener(debugListener = new IDebugEventSetListener() {
 			@Override
@@ -77,30 +77,22 @@ public class ProcessTracker {
 	}
 
 	private void processCreated(IProcess process) {
-		for (Object l : listeners.getListeners()) {
-			((ProcessListener)l).processCreated(process);
-		}
+		listener.processCreated(process);
 	}
 
 	private void processTerminated(IProcess process) {
-		for (Object l : listeners.getListeners()) {
-			((ProcessListener)l).processTerminated(process);
-		}
-	}
-
-	public final void addListener(ProcessListener listener) {
-		listeners.add(listener);
-	}
-
-	public final void removeListener(ProcessListener listener) {
-		listeners.remove(listener);
+		listener.processTerminated(process);
 	}
 
 	/**
 	 * Call to free up or deregister stuff if we don't need it any more. (e.g disconnect debug event listeners)
 	 */
 	public void dispose() {
-		DebugPlugin.getDefault().removeDebugEventListener(debugListener);
+		if (debugListener!=null) {
+			DebugPlugin.getDefault().removeDebugEventListener(debugListener);
+			debugListener = null;
+			listener = null;
+		}
 	}
 
 }

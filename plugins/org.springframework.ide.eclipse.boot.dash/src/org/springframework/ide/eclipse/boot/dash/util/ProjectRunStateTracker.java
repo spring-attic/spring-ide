@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
@@ -34,38 +34,27 @@ public class ProjectRunStateTracker implements ProcessListener {
 	}
 
 	public synchronized RunState getState(final IProject project) {
-		init();
 		return getState(activeStates, project);
-	}
-
-	public void addListener(ProjectRunStateListener l) {
-		init();
-		this.listeners.add(l);
-	}
-
-	public void removeListener(ProjectRunStateListener l) {
-		this.listeners.remove(l);
 	}
 
 	///////////////////////// stuff below is implementation cruft ////////////////////
 
-	private ListenerList listeners;
 	private Map<IProject, RunState> activeStates = null;
-	private ProcessTracker processTracker = new ProcessTracker();
+	private ProcessTracker processTracker = new ProcessTracker(this);
+	private ProjectRunStateListener listener;
 
-	private void init() {
-		if (activeStates==null) {
-			listeners = new ListenerList();
-			activeStates = new HashMap<IProject, RunState>();
-			processTracker.addListener(this);
-			updateProjectStates();
-		}
+	public ProjectRunStateTracker() {
+		activeStates = new HashMap<IProject, RunState>();
+		processTracker = new ProcessTracker(this);
+		updateProjectStatesAndFireEvents();
 	}
 
-	private RunState getState(Map<IProject, RunState> activeStates2, IProject p) {
-		RunState state = activeStates.get(p);
-		if (state!=null) {
-			return state;
+	private RunState getState(Map<IProject, RunState> states, IProject p) {
+		if (activeStates!=null) {
+			RunState state = activeStates.get(p);
+			if (state!=null) {
+				return state;
+			}
 		}
 		return RunState.INACTIVE;
 	}
@@ -74,11 +63,12 @@ public class ProjectRunStateTracker implements ProcessListener {
 		Map<IProject, RunState> states = new HashMap<IProject, RunState>();
 		for (ILaunch l : launchManager().getLaunches()) {
 			if (!l.isTerminated()) {
-				IProject project = LaunchUtil.getProject(l);
-				states.put(project, LaunchUtil.isDebugging(l)
+				IProject p = LaunchUtil.getProject(l);
+				RunState s1 = getState(states, p);
+				RunState s2 = LaunchUtil.isDebugging(l)
 						? RunState.DEBUGGING
-						: RunState.RUNNING
-				);
+						: RunState.RUNNING;
+				states.put(p, s1.merge(s2));
 			}
 		}
 		return states;
@@ -89,18 +79,21 @@ public class ProjectRunStateTracker implements ProcessListener {
 	}
 
 	public void dispose() {
-		processTracker.removeListener(this);
-	}
-
-	private void  updateProjectStatesAndFireEvents() {
-		Set<IProject> affected = updateProjectStates();
-		for (IProject p : affected) {
-			notifyListeners(p);
+		if (processTracker!=null) {
+			processTracker.dispose();
+			processTracker = null;
 		}
 	}
-	private void notifyListeners(IProject p) {
-		for (Object l : listeners.getListeners()) {
-			((ProjectRunStateListener)l).stateChanged(p);
+
+	private void updateProjectStatesAndFireEvents() {
+		//Note that updateProjectStates is synchronized, but this method is not.
+		// Important not to keep locks while firing events.
+		Set<IProject> affected = updateProjectStates();
+		ProjectRunStateListener listener = this.listener;
+		if (listener!=null) {
+			for (IProject p : affected) {
+				listener.stateChanged(p);
+			}
 		}
 	}
 
@@ -109,8 +102,8 @@ public class ProjectRunStateTracker implements ProcessListener {
 		activeStates = getCurrentActiveStates();
 
 		// Compute set of projects who's state has changed
-		Set<IProject> affectedProjects = new HashSet<IProject>(oldStates.keySet());
-		affectedProjects.addAll(activeStates.keySet());
+		Set<IProject> affectedProjects = new HashSet<IProject>(keySet(oldStates));
+		affectedProjects.addAll(keySet(activeStates));
 		Iterator<IProject> iter = affectedProjects.iterator();
 		while (iter.hasNext()) {
 			IProject p = iter.next();
@@ -118,8 +111,17 @@ public class ProjectRunStateTracker implements ProcessListener {
 				iter.remove();
 			}
 		}
-
 		return affectedProjects;
+	}
+
+	/**
+	 * Null-safe 'keySet' fetcher for map.
+	 */
+	private <K,V> Set<K> keySet(Map<K, V> map) {
+		if (map==null) {
+			return Collections.emptySet();
+		}
+		return map.keySet();
 	}
 
 	@Override
@@ -132,4 +134,10 @@ public class ProjectRunStateTracker implements ProcessListener {
 		updateProjectStatesAndFireEvents();
 	}
 
+	public void setListener(ProjectRunStateListener listener) {
+		if (this.listener!=null) {
+			throw new IllegalStateException("Listener can only be set once");
+		}
+		this.listener = listener;
+	}
 }

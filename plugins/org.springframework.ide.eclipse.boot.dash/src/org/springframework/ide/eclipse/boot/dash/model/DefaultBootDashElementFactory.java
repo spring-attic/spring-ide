@@ -11,14 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 
 public class DefaultBootDashElementFactory implements BootDashElementFactory {
 
 	private ProjectRunStateTracker projectRunStates;
-	private ListenerList listeners = new ListenerList();
 
 	public DefaultBootDashElementFactory(ProjectRunStateTracker runStateTracker) {
 		this.projectRunStates = runStateTracker;
@@ -30,6 +28,10 @@ public class DefaultBootDashElementFactory implements BootDashElementFactory {
 			return new BootProjectDashElement(p, projectRunStates);
 		}
 		return null;
+	}
+
+	public void dispose() {
+		//Nothing todo
 	}
 
 }

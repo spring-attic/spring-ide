@@ -38,60 +38,68 @@ public class BootDashModel {
 	private ProjectOpenCloseListenerManager openCloseListenerManager;
 	private ClasspathListenerManager classpathListenerManager;
 	private BootDashElementFactory elementFactory;
-	private LiveSet<BootDashElement> elements; //lazy created
-	private WorkspaceListener listener; //lazy created
 	private ProjectRunStateTracker runStateTracker;
-	private ProjectRunStateListener runStateListener;
+	private LiveSet<BootDashElement> elements; //lazy created
 
 	public class WorkspaceListener implements ProjectOpenCloseListener, ClasspathListener {
 
 		@Override
 		public void projectOpened(IProject project) {
-			udpateElementsFromWorkspace();
+			updateElementsFromWorkspace();
 		}
 		@Override
 		public void projectClosed(IProject project) {
-			udpateElementsFromWorkspace();
+			updateElementsFromWorkspace();
 		}
 		@Override
 		public void classpathChanged(IJavaProject jp) {
-			udpateElementsFromWorkspace();
+			updateElementsFromWorkspace();
 		}
-
 	}
 
 	public BootDashModel(IWorkspace workspace) {
 		this.workspace = workspace;
-		this.openCloseListenerManager = new ProjectOpenCloseListenerManager(workspace);
-		this.classpathListenerManager = new ClasspathListenerManager();
-		this.runStateTracker = new ProjectRunStateTracker();
-		this.elementFactory = new DefaultBootDashElementFactory(runStateTracker);
-		runStateTracker.addListener(this.runStateListener = new ProjectRunStateListener() {
-			public void stateChanged(IProject project) {
-				BootDashElement element = elementFactory.create(project);
-				if (element!=null) {
-					notifyElementChanged(element);
-				}
-			}
-		});
 	}
 
 	public synchronized LiveSet<BootDashElement> getElements() {
-		if (elements==null) {
-			this.elements = new LiveSet<BootDashElement>();
-			createWorkspaceListener();
-			udpateElementsFromWorkspace();
-		}
+		init();
 		return elements;
 	}
 
-	private void createWorkspaceListener() {
-		listener = new WorkspaceListener();
-		openCloseListenerManager.add(listener);
-		classpathListenerManager.add(listener);
+	private void init() {
+		if (elements==null) {
+			this.elements = new LiveSet<BootDashElement>();
+			WorkspaceListener workspaceListener = new WorkspaceListener();
+			this.openCloseListenerManager = new ProjectOpenCloseListenerManager(workspace, workspaceListener);
+			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
+			this.runStateTracker = new ProjectRunStateTracker();
+			this.elementFactory = new DefaultBootDashElementFactory(runStateTracker);
+			runStateTracker.setListener(new ProjectRunStateListener() {
+				public void stateChanged(IProject p) {
+					BootDashElement e = elementFactory.create(p);
+					if (e!=null) {
+						notifyElementChanged(e);
+					}
+				}
+			});
+			updateElementsFromWorkspace();
+		}
 	}
 
-	private void udpateElementsFromWorkspace() {
+	/**
+	 * When no longer needed the model should be disposed, otherwise it will continue
+	 * listening for changes to the workspace in order to keep itself in synch.
+	 */
+	public void dispose() {
+		if (elements!=null) {
+			openCloseListenerManager.dispose();
+			elementFactory.dispose();
+			classpathListenerManager.dispose();
+			runStateTracker.dispose();
+		}
+	}
+
+	private void updateElementsFromWorkspace() {
 		Set<BootDashElement> newElements = new HashSet<BootDashElement>();
 		for (IProject p : this.workspace.getRoot().getProjects()) {
 			BootDashElement element = elementFactory.create(p);
@@ -103,23 +111,10 @@ public class BootDashModel {
 	}
 
 	/**
-	 * When no longer needed the model should be disposed, otherwise it will continue
-	 * listening for changes to the workspace in order to keep itself in synch.
-	 */
-	public void dispose() {
-		if (listener!=null) {
-			openCloseListenerManager.remove(listener);
-			classpathListenerManager.remove(listener);
-			runStateTracker.removeListener(runStateListener);
-			listener = null;
-		}
-	}
-
-	/**
 	 * Trigger manual model refresh.
 	 */
 	public void refresh() {
-		udpateElementsFromWorkspace();
+		updateElementsFromWorkspace();
 	}
 
 	////////////// listener cruft ///////////////////////////
@@ -128,7 +123,7 @@ public class BootDashModel {
 		/**
 		 * Called when something about the element has changed.
 		 * <p>
-		 * Note this doesn't get called when elements are added / removed etc. Onlu when
+		 * Note this doesn't get called when elements are added / removed etc. Only when
 		 * some property of the element itself has changed.
 		 */
 		void stateChanged(BootDashElement e);

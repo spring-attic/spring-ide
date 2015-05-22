@@ -14,4 +14,5 @@ import org.eclipse.core.resources.IProject;
 
 public interface BootDashElementFactory {
 	BootDashElement create(IProject p);
+	void dispose();
 }
