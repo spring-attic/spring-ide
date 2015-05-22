@@ -47,7 +47,7 @@
   SpringSource Tool Suite, which contains Spring IDE, and is therefore a good point to start
   if you never used Spring tooling before:
 
-  http://www.springsource.com/webinar/getting-started-spring-and-springsource-tool-suite
+  https://www.youtube.com/watch?v=eLkVPqxFJKM&list=PL7B74449D5224CC99
 
 ## Questions and bug reports:
 
