@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -273,31 +274,17 @@ public class BootDashView extends ViewPart {
 		refreshAction.setToolTipText("Manually trigger a view refresh");
 		refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
 
-		RunStateAction restartAction = new RunStateAction(RunState.RUNNING) {
-			public void run() {
-				final Collection<BootDashElement> selecteds = getSelectedElements();
-				if (!selecteds.isEmpty()) {
-					new Job("restart stuff") {
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
-							for (BootDashElement el : selecteds) {
-								try {
-									el.restart();
-								} catch (Exception e) {
-									BootActivator.log(e);
-								}
-							}
-							return Status.OK_STATUS;
-						}
-					}.schedule();
-				}
-			}
-		};
+		RunStateAction restartAction = new RunOrDebugStateAction(RunState.RUNNING);
 		restartAction.setText("(Re)start");
 		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
 		restartAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
 		restartAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+
+		RunStateAction rebugAction = new RunOrDebugStateAction(RunState.DEBUGGING);
+		rebugAction.setText("(Re)debug");
+		rebugAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode");
+		rebugAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
+		rebugAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 
 		RunStateAction stopAction = new RunStateAction(RunState.RUNNING) {
 			@Override
@@ -320,7 +307,7 @@ public class BootDashView extends ViewPart {
 		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.gif"));
 
 		runStateActions = new RunStateAction[] {
-			restartAction, stopAction
+			restartAction, rebugAction, stopAction
 		};
 
 //		action2 = new Action() {
@@ -362,4 +349,35 @@ public class BootDashView extends ViewPart {
 	public void setFocus() {
 		tv.getControl().setFocus();
 	}
+
+	private class RunOrDebugStateAction extends RunStateAction {
+
+		public RunOrDebugStateAction(RunState goalState) {
+			super(goalState);
+			Assert.isLegal(goalState==RunState.RUNNING || goalState==RunState.DEBUGGING);
+		}
+
+		public void run() {
+			final Collection<BootDashElement> selecteds = getSelectedElements();
+			if (!selecteds.isEmpty()) {
+				new Job("Restarting "+selecteds.size()+" Dash Elements") {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
+						for (BootDashElement el : selecteds) {
+							monitor.subTask("Restarting: "+el.getName());
+							try {
+								el.restart(goalState);
+							} catch (Exception e) {
+								BootActivator.log(e);
+							}
+							monitor.worked(1);
+						}
+						return Status.OK_STATUS;
+					}
+				}.schedule();
+			}
+		}
+	}
+
 }

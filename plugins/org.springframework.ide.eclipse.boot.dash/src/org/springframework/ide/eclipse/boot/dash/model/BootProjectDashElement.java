@@ -60,8 +60,17 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void restart() {
-		restart(ILaunchManager.RUN_MODE);
+	public void restart(RunState runningOrDebugging) {
+		switch (runningOrDebugging) {
+		case RUNNING:
+			restart(ILaunchManager.RUN_MODE);
+			break;
+		case DEBUGGING:
+			restart(ILaunchManager.DEBUG_MODE);
+			break;
+		default:
+			throw new IllegalArgumentException("Restart expects RUNNING or DEBUGGING as 'goal' state");
+		}
 	}
 
 	public void restart(final String runMode) {
@@ -111,5 +120,10 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		if (DEBUG) {
 			System.out.println(string);
 		}
+	}
+
+	@Override
+	public String getName() {
+		return getProject().getName();
 	}
 }

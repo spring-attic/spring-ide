@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
  */
 public class RunStateAction extends Action {
 
-	private RunState goalState;
+	protected final RunState goalState;
 
 	public RunStateAction(RunState goalState) {
 		this.goalState = goalState;
