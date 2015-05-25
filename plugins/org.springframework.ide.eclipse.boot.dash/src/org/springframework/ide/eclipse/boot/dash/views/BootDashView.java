@@ -10,15 +10,25 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -27,17 +37,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider.BootDashColumn;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
-
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 
 
 /**
@@ -70,6 +79,8 @@ public class BootDashView extends ViewPart {
 	private TableViewer tv;
 	private Action refreshAction;
 //	private Action doubleClickAction;
+
+	private RunStateAction[] runStateActions;
 
 	/*
 	 * The content provider class is responsible for
@@ -138,20 +149,18 @@ public class BootDashView extends ViewPart {
 		tv.getTable().setHeaderVisible(true);
 				tv.getTable().setLinesVisible(true);
 
-		TableViewerColumn c1viewer = new TableViewerColumn(tv, SWT.LEFT);
-		c1viewer.getColumn().setWidth(200);
-		c1viewer.getColumn().setText("Project");
-		c1viewer.setLabelProvider(new BootDashLabelProvider(BootDashColumn.PROJECT));
-		TableViewerColumn c2viewer = new TableViewerColumn(tv, SWT.LEFT);
-		c2viewer.getColumn().setWidth(100);
-		c2viewer.getColumn().setText("State");
-		c2viewer.setLabelProvider(new BootDashLabelProvider(BootDashColumn.RUN_STATE));
+		for (BootDashColumn columnType : BootDashColumn.values()) {
+			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
+			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
+			c1viewer.getColumn().setText(columnType.getLabel());
+			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
+		}
 		new TableResizeHelper(tv).enableResizing();
 
-		// Create the help context id for the viewer's control
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(), "org.springframework.ide.eclipse.boot.dash.viewer");
+		//Create the help context id for the viewer's control
+		//PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(), "org.springframework.ide.eclipse.boot.dash.viewer");
 		makeActions();
-		hookContextMenu();
+//		hookContextMenu();
 //		hookDoubleClickAction();
 		contributeToActionBars();
 
@@ -168,10 +177,45 @@ public class BootDashView extends ViewPart {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						tv.update(e, null);
+						updateActionEnablement();
 					}
 				});
 			}
 		});
+
+		tv.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateActionEnablement();
+			}
+		});
+
+		updateActionEnablement();
+	}
+
+	protected void updateActionEnablement() {
+		Collection<BootDashElement> selecteds = getSelectedElements();
+		for (RunStateAction a : runStateActions) {
+			a.updateEnablement(selecteds);
+		}
+	}
+
+	private Collection<BootDashElement> getSelectedElements() {
+		try {
+			IStructuredSelection selection = (IStructuredSelection)tv.getSelection();
+			Object[] array = selection.toArray();
+			if (array!=null && array.length>0) {
+				ArrayList<BootDashElement> result = new ArrayList<BootDashElement>();
+				for (Object o : array) {
+					if (o instanceof BootDashElement) {
+						result.add((BootDashElement) o);
+					}
+				}
+				return result;
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return Collections.emptySet();
 	}
 
 	private void hookContextMenu() {
@@ -184,7 +228,7 @@ public class BootDashView extends ViewPart {
 		});
 		Menu menu = menuMgr.createContextMenu(tv.getControl());
 		tv.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuMgr, tv);
+//		getSite().registerContextMenu(menuMgr, tv);
 	}
 
 	private void contributeToActionBars() {
@@ -200,6 +244,10 @@ public class BootDashView extends ViewPart {
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
+		for (RunStateAction a : runStateActions) {
+			manager.add(a);
+		}
+		manager.add(new Separator());
 		manager.add(refreshAction);
 //		manager.add(action2);
 		// Other plug-ins can contribute there actions here
@@ -207,6 +255,9 @@ public class BootDashView extends ViewPart {
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
+		for (RunStateAction a : runStateActions) {
+			manager.add(a);
+		}
 		manager.add(refreshAction);
 //		manager.add(action2);
 	}
@@ -221,6 +272,56 @@ public class BootDashView extends ViewPart {
 		refreshAction.setText("Refresh");
 		refreshAction.setToolTipText("Manually trigger a view refresh");
 		refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
+
+		RunStateAction restartAction = new RunStateAction(RunState.RUNNING) {
+			public void run() {
+				final Collection<BootDashElement> selecteds = getSelectedElements();
+				if (!selecteds.isEmpty()) {
+					new Job("restart stuff") {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
+							for (BootDashElement el : selecteds) {
+								try {
+									el.restart();
+								} catch (Exception e) {
+									BootActivator.log(e);
+								}
+							}
+							return Status.OK_STATUS;
+						}
+					}.schedule();
+				}
+			}
+		};
+		restartAction.setText("(Re)start");
+		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
+		restartAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
+		restartAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+
+		RunStateAction stopAction = new RunStateAction(RunState.RUNNING) {
+			@Override
+			protected boolean currentStateAcceptable(RunState s) {
+				return s==RunState.DEBUGGING || s==RunState.RUNNING;
+			}
+			public void run() {
+				for (BootDashElement el : getSelectedElements()) {
+					try {
+						el.stop();
+					} catch (Exception e) {
+						BootActivator.log(e);
+					}
+				}
+			}
+		};
+		stopAction.setText("Stop");
+		stopAction.setToolTipText("Stop the process(es) associated with the selected elements");
+		stopAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop.gif"));
+		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.gif"));
+
+		runStateActions = new RunStateAction[] {
+			restartAction, stopAction
+		};
 
 //		action2 = new Action() {
 //			public void run() {

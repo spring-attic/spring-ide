@@ -10,22 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends CellLabelProvider {
 
-	AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
-
-	public static enum BootDashColumn {
-		PROJECT, RUN_STATE
-	}
-
+	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	private BootDashColumn forColum;
 
 	public BootDashLabelProvider(BootDashColumn target) {
@@ -34,10 +28,10 @@ public class BootDashLabelProvider extends CellLabelProvider {
 
 	@Override
 	public void update(ViewerCell cell) {
-		Object e = cell.getElement();
+		BootDashElement e = (BootDashElement) cell.getElement();
 		switch (forColum) {
 		case PROJECT:
-			IJavaProject jp = getJavaProject(e);
+			IJavaProject jp = e.getJavaProject();
 			if (jp!=null) {
 				cell.setText(javaLabels.getText(jp));
 				cell.setImage(javaLabels.getImage(jp));
@@ -45,24 +39,20 @@ public class BootDashLabelProvider extends CellLabelProvider {
 				cell.setText(""+e);
 			}
 			break;
-		case RUN_STATE:
-			cell.setText(""+getRunState(e));
+		case RUN_TARGET:
+			cell.setText(e.getTarget().getName());
 			break;
+		case RUN_STATE:
+			cell.setText(e.getRunState().toString());
+			break;
+		default:
+			cell.setText("???");
 		}
 	}
 
-	private RunState getRunState(Object e) {
-		if (e instanceof BootDashElement) {
-			return ((BootDashElement) e).getRunState();
-		}
-		return null;
+	@Override
+	public void dispose() {
+		super.dispose();
+		javaLabels.dispose();
 	}
-
-	private IJavaProject getJavaProject(Object e) {
-		if (e instanceof BootDashElement) {
-			return ((BootDashElement) e).getJavaProject();
-		}
-		return null;
-	}
-
 }

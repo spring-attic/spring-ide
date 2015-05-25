@@ -10,14 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaProject;
+import java.util.EnumSet;
 
-public interface BootDashElement {
-	IJavaProject getJavaProject();
-	IProject getProject();
-	RunState getRunState();
-	RunTarget getTarget();
-	void restart() throws Exception;
-	void stop() throws Exception;
+/**
+ * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
+ *
+ * @author Kris De Volder
+ */
+public interface RunTarget extends IdAble, Nameable {
+
+	/**
+	 * @return Subset of the runstate that a user can request when changing a DashBoardElement's 'run-state'.
+	 * Essentially, this allows determining whether a given BootDahsElement can support the 'stop', 'run' and
+	 * 'debug' operations which request that the element be brought into a given run-state.
+	 */
+	public abstract EnumSet<RunState> supportedGoalStates();
 }

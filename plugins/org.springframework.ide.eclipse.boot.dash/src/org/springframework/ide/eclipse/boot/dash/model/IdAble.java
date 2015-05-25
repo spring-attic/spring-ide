@@ -10,14 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaProject;
+public interface IdAble {
 
-public interface BootDashElement {
-	IJavaProject getJavaProject();
-	IProject getProject();
-	RunState getRunState();
-	RunTarget getTarget();
-	void restart() throws Exception;
-	void stop() throws Exception;
+	String getId();
+
 }
