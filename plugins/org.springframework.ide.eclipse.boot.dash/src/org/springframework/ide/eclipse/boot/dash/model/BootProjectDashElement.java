@@ -76,7 +76,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	public void restart(final String runMode) {
 		stop(true);
 		debug("starting "+this+"...");
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				BootLaunchShortcut.launch(getProject(), runMode);
 				debug("starting "+this+" DONE");

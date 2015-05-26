@@ -12,10 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 
 /**
  * An action who's intended effect is to transition a BootDashElement to a
@@ -23,9 +27,15 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
  *
  * @author Kris De Volder
  */
-public class RunStateAction extends Action {
+public abstract class RunStateAction extends Action {
+
+	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
 
 	protected final RunState goalState;
+
+	protected void configureJob(Job job) {
+		job.setRule(SCEDULING_RULE);
+	}
 
 	public RunStateAction(RunState goalState) {
 		this.goalState = goalState;
@@ -68,6 +78,19 @@ public class RunStateAction extends Action {
 	@Override
 	public String toString() {
 		return "RunStateAction("+goalState+")";
+	}
+
+	/**
+	 * Subclass must override to define what 'work' this action does when it triggered.
+	 */
+	protected abstract Job createJob();
+
+	public final void run() {
+		Job job = createJob();
+		if (job!=null) {
+			configureJob(job);
+			job.schedule();
+		}
 	}
 
 }

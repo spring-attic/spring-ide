@@ -200,7 +200,7 @@ public class BootDashView extends ViewPart {
 		}
 	}
 
-	private Collection<BootDashElement> getSelectedElements() {
+	Collection<BootDashElement> getSelectedElements() {
 		try {
 			IStructuredSelection selection = (IStructuredSelection)tv.getSelection();
 			Object[] array = selection.toArray();
@@ -291,14 +291,31 @@ public class BootDashView extends ViewPart {
 			protected boolean currentStateAcceptable(RunState s) {
 				return s==RunState.DEBUGGING || s==RunState.RUNNING;
 			}
-			public void run() {
-				for (BootDashElement el : getSelectedElements()) {
-					try {
-						el.stop();
-					} catch (Exception e) {
-						BootActivator.log(e);
-					}
+			@Override
+			protected Job createJob() {
+				final Collection<BootDashElement> selecteds = getSelectedElements();
+				if (!selecteds.isEmpty()) {
+					return new Job("Stopping "+selecteds.size()+" Boot Dash Elements") {
+						protected IStatus run(IProgressMonitor monitor) {
+							monitor.beginTask("Stopping "+selecteds.size()+" Elements", selecteds.size());
+							try {
+								for (BootDashElement el : selecteds) {
+									monitor.subTask("Stopping: "+el.getName());
+									try {
+										el.stop();
+									} catch (Exception e) {
+										return BootActivator.createErrorStatus(e);
+									}
+									monitor.worked(1);
+								}
+								return Status.OK_STATUS;
+							} finally {
+								monitor.done();
+							}
+						}
+					};
 				}
+				return null;
 			}
 		};
 		stopAction.setText("Stop");
@@ -350,33 +367,39 @@ public class BootDashView extends ViewPart {
 		tv.getControl().setFocus();
 	}
 
-	private class RunOrDebugStateAction extends RunStateAction {
+	class RunOrDebugStateAction extends RunStateAction {
 
 		public RunOrDebugStateAction(RunState goalState) {
 			super(goalState);
 			Assert.isLegal(goalState==RunState.RUNNING || goalState==RunState.DEBUGGING);
 		}
 
-		public void run() {
+		@Override
+		protected Job createJob() {
 			final Collection<BootDashElement> selecteds = getSelectedElements();
 			if (!selecteds.isEmpty()) {
-				new Job("Restarting "+selecteds.size()+" Dash Elements") {
+				return new Job("Restarting "+selecteds.size()+" Dash Elements") {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
-						for (BootDashElement el : selecteds) {
-							monitor.subTask("Restarting: "+el.getName());
-							try {
-								el.restart(goalState);
-							} catch (Exception e) {
-								BootActivator.log(e);
+						try {
+							for (BootDashElement el : selecteds) {
+								monitor.subTask("Restarting: "+el.getName());
+								try {
+									el.restart(goalState);
+								} catch (Exception e) {
+									return BootActivator.createErrorStatus(e);
+								}
+								monitor.worked(1);
 							}
-							monitor.worked(1);
+							return Status.OK_STATUS;
+						} finally {
+							monitor.done();
 						}
-						return Status.OK_STATUS;
 					}
-				}.schedule();
+				};
 			}
+			return null;
 		}
 	}
 
