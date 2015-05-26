@@ -193,6 +193,12 @@
       </objectContribution>
    	</extension>
 
+    <extension point="org.eclipse.debug.core.processFactories">
+   <processFactory
+           id="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory"
+           class="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory">
+   </processFactory>
+ </extension>
    
  
 </plugin>

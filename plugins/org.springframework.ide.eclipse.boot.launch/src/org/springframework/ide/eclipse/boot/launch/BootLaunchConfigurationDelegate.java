@@ -36,7 +36,13 @@ import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
+import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
+
+import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
+import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
+
+import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
 /**
  * @author Kris De Volder
@@ -75,6 +81,8 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
+
+	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
@@ -201,6 +209,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public String getVMArguments(ILaunchConfiguration conf)
 			throws CoreException {
 		try {
+			String vmArgs = super.getVMArguments(conf);
 			if (getEnableLiveBeanSupport(conf)) {
 				int port = 0;
 				try {
@@ -212,8 +221,9 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 					port = LiveBeanSupport.randomPort();
 				}
 				String enableLiveBeanArgs = LiveBeanSupport.liveBeanVmArgs(getJMXPort(conf));
-				return enableLiveBeanArgs + super.getVMArguments(conf);
+				vmArgs = enableLiveBeanArgs + vmArgs;
 			}
+			return vmArgs;
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
@@ -245,10 +255,31 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			IProject project,
 			String mainType
 			) {
+		setProcessFactory(wc, BootProcessFactory.class);
 		setProject(wc, project);
 		setMainType(wc, mainType);
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setJMXPort(wc, ""+LiveBeanSupport.randomPort());
+		if (!OsUtils.isWindows()) {
+			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
+		}
+	}
+
+	private static void setVMArgs(ILaunchConfigurationWorkingCopy wc, String vmArgs) {
+		wc.setAttribute(ATTR_VM_ARGUMENTS, vmArgs);
+	}
+
+	/**
+	 * Notes:
+	 * <p>
+	 *  1. we are assuming that the processFactoryId is the same as the classname of
+	 *  the class that implements it. This is not a given, but a convenient and logical convention.
+	 *  <p>
+	 *  2. The class must be registered to this ID using plugin.xml (extension point
+	 *  org.eclipse.debug.core.processFactories)
+	 */
+	public static void setProcessFactory(ILaunchConfigurationWorkingCopy wc, Class<BootProcessFactory> klass) {
+		wc.setAttribute(ATTR_PROCESS_FACTORY_ID, klass.getName());
 	}
 
 	public static void setMainType(ILaunchConfigurationWorkingCopy config, String typeName) {
