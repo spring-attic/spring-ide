@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -28,6 +29,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.ide.eclipse.core.project.IProjectContributorState;
 
 /**
  * This rule checks for cases where it may be possible to simplify the
@@ -52,8 +54,6 @@ public class UseBeanInheritance implements IValidationRule<IBean, IBeansValidati
 
 	private int minNumSharedProperties = DEFAULT_MIN_NUM_SHARED_PROPERTIES;
 
-	private final List<IBean> beanList = new ArrayList<IBean>();
-
 	public void setMinNumSharedProperties(int minNumSharedProperties) {
 		this.minNumSharedProperties = minNumSharedProperties;
 	}
@@ -75,21 +75,34 @@ public class UseBeanInheritance implements IValidationRule<IBean, IBeansValidati
 	 */
 	public void validate(IBean bean, IBeansValidationContext validationContext, IProgressMonitor progressMonitor) {
 
+		IBean[] allBeans = null;
+		if (validationContext instanceof IProjectContributorState) {
+			AllBeansCache allBeansCache = ((IProjectContributorState) validationContext).get(AllBeansCache.class);
+			if (allBeansCache == null) {
+				allBeansCache = new AllBeansCache();
+				((IProjectContributorState) validationContext).hold(allBeansCache);
+			}
+
+			allBeans = allBeansCache.getAllBeans(validationContext.getRootElement());
+		}
+		else {
+			Set<IBean> beans = BeansModelUtils.getBeans(validationContext.getRootElement());
+			allBeans = beans.toArray(new IBean[beans.size()]);
+		}
+
 		List<IBean> similarBeanList = new ArrayList<IBean>();
-		for (IBean currBean : beanList) {
+		for (IBean currBean : allBeans) {
 			if (isSimilar(bean, currBean)) {
 				similarBeanList.add(currBean);
 			}
 		}
-		beanList.add(bean);
 
 		// Add one to the similar bean count because the current bean counts as
 		// one of the similar ones
 		if (similarBeanList.size() + 1 >= minNumSimilarBeanDefs) {
 			String similarBeanNames = getBeanNamesString(similarBeanList);
 			validationContext
-					.info(
-							bean,
+					.info(bean,
 							ERROR_ID,
 							"Consider using bean inheritance to simplify configuration of the "
 									+ bean.getElementName()
@@ -171,7 +184,7 @@ public class UseBeanInheritance implements IValidationRule<IBean, IBeansValidati
 	/**
 	 * Returns true if two beans are similar in the sense that some common
 	 * configuration can be factored out into a parent bean configuration.
-	 * 
+	 *
 	 * Beans are considered similar if they don't have different constructor
 	 * arguments or init methods and there are more than
 	 * <code>DEFAULT_MIN_NUM_SHARED_PROPERTIES</code> property-value pairs in
