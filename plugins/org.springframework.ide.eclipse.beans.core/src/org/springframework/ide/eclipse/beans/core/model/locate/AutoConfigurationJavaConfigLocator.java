@@ -43,8 +43,12 @@ public class AutoConfigurationJavaConfigLocator extends AbstractJavaConfigLocato
 			SearchPattern bootAutoConfigPattern = SearchPattern.createPattern("org.springframework.boot.autoconfigure.SpringBootApplication",
 					IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
 					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+			SearchPattern cloudConfigPattern = SearchPattern.createPattern("org.springframework.cloud.client.SpringCloudApplication",
+					IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 
 			SearchPattern pattern = SearchPattern.createOrPattern(enableAutoConfigPattern, bootAutoConfigPattern);
+			pattern = SearchPattern.createOrPattern(pattern, cloudConfigPattern);
 
 			Set<IType> candidates = org.springframework.ide.eclipse.core.java.JdtUtils.searchForJavaConfigs(pattern, sources);
 			for (IType candidate : candidates) {
