@@ -267,6 +267,7 @@ public class BootDashView extends ViewPart {
 		for (RunStateAction a : runStateActions) {
 			manager.add(a);
 		}
+		manager.add(openConsoleAction);
 		manager.add(refreshAction);
 //		manager.add(action2);
 	}
