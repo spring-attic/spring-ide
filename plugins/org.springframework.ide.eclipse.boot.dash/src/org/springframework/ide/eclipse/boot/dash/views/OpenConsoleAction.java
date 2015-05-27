@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 
+@SuppressWarnings("restriction")
 public class OpenConsoleAction extends AbstractBootDashAction {
 
 	public OpenConsoleAction(BootDashView owner) {
