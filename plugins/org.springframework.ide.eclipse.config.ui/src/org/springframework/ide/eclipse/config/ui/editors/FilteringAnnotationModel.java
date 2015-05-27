@@ -14,6 +14,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
@@ -30,8 +31,6 @@ import org.eclipse.wst.sse.ui.internal.reconcile.TemporaryAnnotation;
  * @author Martin Lippert
  */
 public class FilteringAnnotationModel implements IAnnotationModel {
-
-	public static final String QUICK_FIX_MARKER = "org.springframework.ide.eclipse.config.ui.editors.quickFixMarker";
 
 	private final IAnnotationModel model;
 
@@ -67,10 +66,16 @@ public class FilteringAnnotationModel implements IAnnotationModel {
 		return this.model.getAnnotationIterator();
 	}
 
+	/**
+	 * do not return a position if the message text is empty, but a quick assist
+	 * processor is attached
+	 */
 	public Position getPosition(Annotation annotation) {
 		if (annotation instanceof TemporaryAnnotation) {
 			TemporaryAnnotation tempAnnotation = (TemporaryAnnotation) annotation;
-			if (tempAnnotation.getAttributes() != null && tempAnnotation.getAttributes().containsKey(QUICK_FIX_MARKER)) {
+			if (tempAnnotation.getAttributes() != null
+					&& tempAnnotation.getAttributes().containsKey(IQuickAssistProcessor.class.getName())
+					&& tempAnnotation.getText() != null && tempAnnotation.getText().equals("")) {
 				return null;
 			}
 		}

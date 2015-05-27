@@ -18,7 +18,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.beans.ui.editor,
- org.springframework.ide.eclipse.quickfix,
  org.eclipse.wst.xml.ui,
  org.eclipse.jface.text,
  org.eclipse.ui.forms,
@@ -43,7 +42,8 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.gettingstarted;bundle-version="3.5.0";resolution:=optional,
  org.springsource.ide.eclipse.gradle.toolingapi;bundle-version="3.7.0";resolution:=optional,
  org.springsource.ide.eclipse.commons.browser;bundle-version="[3.5.0,4.0.0)";resolution:=optional,
- org.json;bundle-version="1.0.0"
+ org.json;bundle-version="1.0.0",
+ org.springframework.ide.eclipse.quickfix
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,

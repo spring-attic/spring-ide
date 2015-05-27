@@ -55,7 +55,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IImportedBeansConfig;
-import org.springframework.ide.eclipse.config.ui.editors.FilteringAnnotationModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -281,7 +280,6 @@ public class BeansEditorValidator implements ISourceValidator, IValidator {
 
 			if (processor != null) {
 				messageEmpty.setAttribute(IQuickAssistProcessor.class.getName(), processor);
-				messageEmpty.setAttribute(FilteringAnnotationModel.QUICK_FIX_MARKER, Boolean.TRUE);
 
 				AnnotationInfo info = new QuickfixAnnotationInfo(messageEmpty);
 
