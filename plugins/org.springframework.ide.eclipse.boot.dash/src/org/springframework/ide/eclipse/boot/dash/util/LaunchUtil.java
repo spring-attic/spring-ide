@@ -18,7 +18,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 public class LaunchUtil {
@@ -45,6 +47,32 @@ public class LaunchUtil {
 				}
 			}
 			return launches;
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Get all ILaunchConfigurations of the type for "Run As >> Spring Boot App" that are
+	 * associated with a given project.
+	 */
+	public static List<ILaunchConfiguration> getBootLaunchConfigs(IProject p) {
+		try {
+			ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType type = lm.getLaunchConfigurationType(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID);
+			if (type!=null) {
+				ILaunchConfiguration[] configs = lm.getLaunchConfigurations();
+				if (configs!=null && configs.length>0) {
+					ArrayList<ILaunchConfiguration> result = new ArrayList<ILaunchConfiguration>();
+					for (ILaunchConfiguration conf : configs) {
+						if (p.equals(BootLaunchConfigurationDelegate.getProject(conf))) {
+							result.add(conf);
+						}
+					}
+					return result;
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
 		return Collections.emptyList();
 	}

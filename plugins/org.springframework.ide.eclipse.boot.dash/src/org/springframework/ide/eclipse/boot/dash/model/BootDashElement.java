@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.swt.widgets.Shell;
 
 public interface BootDashElement extends Nameable {
 	IJavaProject getJavaProject();
@@ -20,4 +21,5 @@ public interface BootDashElement extends Nameable {
 	RunTarget getTarget();
 	void restart(RunState runingOrDebugging) throws Exception;
 	void stop() throws Exception;
+	void openConfig(Shell shell);
 }

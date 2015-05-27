@@ -16,10 +16,16 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
@@ -125,5 +131,31 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	@Override
 	public String getName() {
 		return getProject().getName();
+	}
+
+	@Override
+	public void openConfig(Shell shell) {
+		IProject p = getProject();
+		if (p!=null) {
+			List<ILaunchConfiguration> configs = LaunchUtil.getBootLaunchConfigs(p);
+			//TODO: if there's more than one, then how do we choose?
+			if (!configs.isEmpty()) {
+				ILaunchConfiguration conf = configs.get(0);
+				IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
+				DebugUITools.openLaunchConfigurationDialogOnGroup(shell, selection, getLaunchGroup());
+			}
+		}
+	}
+
+	private String getLaunchGroup() {
+		switch (getRunState()) {
+		case RUNNING:
+			return IDebugUIConstants.ID_RUN_LAUNCH_GROUP;
+		case DEBUGGING:
+			return IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP;
+		default:
+			//TODO: remember the last one used?
+			return IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP;
+		}
 	}
 }
