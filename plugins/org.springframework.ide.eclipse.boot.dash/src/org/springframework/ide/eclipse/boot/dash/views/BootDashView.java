@@ -83,6 +83,10 @@ public class BootDashView extends ViewPart {
 
 	private RunStateAction[] runStateActions;
 
+	private AbstractBootDashAction openConsoleAction;
+	private OpenLaunchConfigAction openConfigAction;
+
+
 	/*
 	 * The content provider class is responsible for
 	 * providing objects to the view. It can wrap
@@ -161,7 +165,7 @@ public class BootDashView extends ViewPart {
 		//Create the help context id for the viewer's control
 		//PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(), "org.springframework.ide.eclipse.boot.dash.viewer");
 		makeActions();
-//		hookContextMenu();
+		hookContextMenu();
 //		hookDoubleClickAction();
 		contributeToActionBars();
 
@@ -198,9 +202,11 @@ public class BootDashView extends ViewPart {
 		for (RunStateAction a : runStateActions) {
 			a.updateEnablement(selecteds);
 		}
+		openConsoleAction.updateEnablement(selecteds);
+		openConfigAction.updateEnablement(selecteds);
 	}
 
-	Collection<BootDashElement> getSelectedElements() {
+	public Collection<BootDashElement> getSelectedElements() {
 		try {
 			IStructuredSelection selection = (IStructuredSelection)tv.getSelection();
 			Object[] array = selection.toArray();
@@ -248,6 +254,8 @@ public class BootDashView extends ViewPart {
 		for (RunStateAction a : runStateActions) {
 			manager.add(a);
 		}
+		manager.add(openConfigAction);
+		manager.add(openConsoleAction);
 		manager.add(new Separator());
 		manager.add(refreshAction);
 //		manager.add(action2);
@@ -326,6 +334,9 @@ public class BootDashView extends ViewPart {
 		runStateActions = new RunStateAction[] {
 			restartAction, rebugAction, stopAction
 		};
+
+		openConfigAction = new OpenLaunchConfigAction(this);
+		openConsoleAction = new OpenConsoleAction(this);
 
 //		action2 = new Action() {
 //			public void run() {
