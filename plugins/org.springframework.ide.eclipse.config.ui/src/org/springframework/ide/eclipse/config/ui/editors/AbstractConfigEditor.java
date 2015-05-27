@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
+ *  Copyright (c) 2012, 2015 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -39,6 +39,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
+import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -57,6 +59,7 @@ import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.MultiPageEditorSite;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
@@ -94,6 +97,7 @@ import org.w3c.dom.Node;
 /**
  * @author Leo Dos Santos
  * @author Steffen Pingel
+ * @author Martin Lippert
  * @since 2.3.4
  */
 @SuppressWarnings("restriction")
@@ -328,6 +332,27 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 					setActiveEditor(sourceEditor);
 					super.selectAndReveal(start, length);
 				}
+
+				/**
+				 * overriden in order to create a specialized filtering overview
+				 * ruler to hide annotations that are created for quick fixes
+				 * only
+				 */
+				@Override
+				protected IOverviewRuler createOverviewRuler(ISharedTextColors sharedColors) {
+					IOverviewRuler ruler = new FilteringOverviewRuler(getAnnotationAccess(), VERTICAL_RULER_WIDTH,
+							sharedColors);
+
+					Iterator<?> e = getAnnotationPreferences().getAnnotationPreferences().iterator();
+					while (e.hasNext()) {
+						AnnotationPreference preference = (AnnotationPreference) e.next();
+						if (preference.contributesToHeader()) {
+							ruler.addHeaderAnnotationType(preference.getAnnotationType());
+						}
+					}
+					return ruler;
+				}
+
 			};
 
 			int index = addPage(sourceEditor, getEditorInput());
@@ -454,7 +479,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	/**
 	 * Returns the {@link IDOMDocument} representation of the XML source file.
-	 * 
+	 *
 	 * @return document object model of the XML source file
 	 */
 	public IDOMDocument getDomDocument() {
@@ -464,7 +489,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 	/**
 	 * Returns the {@link AbstractConfigFormPage} with the given id, or null if
 	 * no such page exists.
-	 * 
+	 *
 	 * @param id the id of the form page to search for
 	 * @return the form page with the given id
 	 */
@@ -505,7 +530,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 	/**
 	 * Returns the {@link AbstractConfigFormPage} for the given URI, or null if
 	 * no such page exists.
-	 * 
+	 *
 	 * @param uri the URI of the form page to search for
 	 * @return the form page for the given URI
 	 */
@@ -547,7 +572,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 	/**
 	 * Returns the {@link AbstractConfigGraphicalEditor} for the given URI, or
 	 * null if no such page exists.
-	 * 
+	 *
 	 * @param uri the URI of the graphical editor to search for
 	 * @return the graphical editor for the given URI
 	 */
@@ -584,7 +609,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	/**
 	 * Returns the {@link IFile} of the XML source.
-	 * 
+	 *
 	 * @return resource file of the XML source
 	 */
 	public IFile getResourceFile() {
@@ -593,7 +618,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	/**
 	 * Returns the page for the XML source editor.
-	 * 
+	 *
 	 * @return XML source editor page
 	 */
 	public StructuredTextEditor getSourcePage() {
@@ -602,7 +627,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	/**
 	 * Returns the text viewer for the XML source editor.
-	 * 
+	 *
 	 * @return XML source textviewer
 	 */
 	public StructuredTextViewer getTextViewer() {
@@ -615,7 +640,7 @@ public abstract class AbstractConfigEditor extends FormEditor implements IBeansX
 
 	/**
 	 * Returns a content assist processor for the XML source file.
-	 * 
+	 *
 	 * @return content assist processor for the XML source file
 	 */
 	public SpringConfigContentAssistProcessor getXmlProcessor() {

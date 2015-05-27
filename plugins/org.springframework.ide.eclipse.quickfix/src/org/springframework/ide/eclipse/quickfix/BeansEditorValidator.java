@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -65,12 +65,13 @@ import org.springframework.ide.eclipse.quickfix.validator.BeanValidatorVisitor;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
 /**
  * Source validator for beans XML editor.
+ *
  * @author Terry Denney
  * @author Leo Dos Santos
  * @author Christian Dupuis
+ * @author Martin Lippert
  * @since 2.0
  */
 public class BeansEditorValidator implements ISourceValidator, IValidator {
@@ -452,8 +453,8 @@ public class BeansEditorValidator implements ISourceValidator, IValidator {
 			return;
 		}
 
-		IStructuredDocumentRegion[] regions = ((IStructuredDocument) document).getStructuredDocumentRegions(dirtyRegion
-				.getOffset(), dirtyRegion.getLength());
+		IStructuredDocumentRegion[] regions = ((IStructuredDocument) document).getStructuredDocumentRegions(
+				dirtyRegion.getOffset(), dirtyRegion.getLength());
 
 		Set<IDOMNode> checkedNodes = new HashSet<IDOMNode>();
 
