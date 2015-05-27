@@ -22,8 +22,10 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -138,11 +140,21 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		IProject p = getProject();
 		if (p!=null) {
 			List<ILaunchConfiguration> configs = LaunchUtil.getBootLaunchConfigs(p);
-			//TODO: if there's more than one, then how do we choose?
-			if (!configs.isEmpty()) {
-				ILaunchConfiguration conf = configs.get(0);
-				IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
-				DebugUITools.openLaunchConfigurationDialogOnGroup(shell, selection, getLaunchGroup());
+			if (configs.isEmpty()) {
+				//TODO: create a lauch configuration
+				MessageDialog.open(MessageDialog.ERROR, shell,
+						"Couldn't Open Launch Configuration",
+						"A 'Run As Boot App' launch configuration for project '"+getName()+"' "
+						+ "doesn't exist.", SWT.NONE);
+			} else {
+				ILaunchConfiguration conf = LaunchUtil.chooseConfiguration(configs,
+						"Choose Launch Configuration",
+						"Several launch configurations are associated with '"+getName()+"' "+
+						"Choose one to open.", shell);
+				if (conf!=null) {
+					IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
+					DebugUITools.openLaunchConfigurationDialogOnGroup(shell, selection, getLaunchGroup());
+				}
 			}
 		}
 	}
