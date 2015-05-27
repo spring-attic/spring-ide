@@ -33,8 +33,8 @@ public class OpenConsoleAction extends AbstractBootDashAction {
 		super(owner);
 		this.setText("Open Console");
 		this.setToolTipText("Open Console");
-		this.setImageDescriptor(BootDashActivator
-				.getImageDescriptor("icons/an-icon.png"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console.gif"));
+		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console_disabled.gif"));
 	}
 
 	@Override
