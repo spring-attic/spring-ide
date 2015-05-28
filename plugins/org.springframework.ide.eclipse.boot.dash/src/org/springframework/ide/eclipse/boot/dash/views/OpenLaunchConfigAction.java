@@ -9,8 +9,8 @@ public class OpenLaunchConfigAction extends AbstractBootDashAction {
 
 	public OpenLaunchConfigAction(BootDashView owner) {
 		super(owner);
-		this.setText("Open Launch Config");
-		this.setToolTipText("Open launch config associated with the selected element, if one exists.");
+		this.setText("Open Config");
+		this.setToolTipText("Open the launch configuration associated with the selected element, if one exists, or create one if it doesn't.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj.gif"));
 		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj_disabled.gif"));
 	}

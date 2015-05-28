@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -21,12 +22,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.SubMenuManager;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -207,7 +211,7 @@ public class BootDashView extends ViewPart {
 		openConfigAction.updateEnablement(selecteds);
 	}
 
-	public Collection<BootDashElement> getSelectedElements() {
+	public List<BootDashElement> getSelectedElements() {
 		try {
 			IStructuredSelection selection = (IStructuredSelection)tv.getSelection();
 			Object[] array = selection.toArray();
@@ -223,7 +227,7 @@ public class BootDashView extends ViewPart {
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
-		return Collections.emptySet();
+		return Collections.emptyList();
 	}
 
 	private void hookContextMenu() {
@@ -257,11 +261,48 @@ public class BootDashView extends ViewPart {
 		}
 		manager.add(openConfigAction);
 		manager.add(openConsoleAction);
+		addPreferedConfigSelectionMenu(manager);
 		manager.add(new Separator());
 		manager.add(refreshAction);
 //		manager.add(action2);
 		// Other plug-ins can contribute there actions here
 //		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
+
+
+	private void addPreferedConfigSelectionMenu(IMenuManager parent) {
+		List<BootDashElement> selecteds = getSelectedElements();
+		if (selecteds.size()==1) {
+			BootDashElement element = selecteds.get(0);
+			ILaunchConfiguration defaultConfig = element.getConfig();
+			List<ILaunchConfiguration> allConfigs = element.getTarget().getLaunchConfigs(element);
+			if (!allConfigs.isEmpty()) {
+				MenuManager menu = new MenuManager("Default Config...");
+				parent.add(menu);
+				for (ILaunchConfiguration conf : allConfigs) {
+					menu.add(selectDefaultConfigAction(element, defaultConfig, conf));
+				}
+			}
+		}
+
+	}
+
+	private IAction selectDefaultConfigAction(
+			final BootDashElement target,
+			final ILaunchConfiguration currentDefault,
+			final ILaunchConfiguration newDefault
+	) {
+		Action action = new Action(newDefault.getName(), SWT.CHECK) {
+			@Override
+			public void run() {
+				target.setConfig(newDefault);
+				target.openConfig(getSite().getShell());
+			}
+		};
+		action.setChecked(newDefault.equals(currentDefault));
+		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
+				+ "be used the next time you (re)launch '"+target.getName());
+		return action;
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
