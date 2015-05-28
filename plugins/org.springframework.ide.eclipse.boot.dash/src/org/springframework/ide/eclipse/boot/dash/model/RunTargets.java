@@ -46,15 +46,12 @@ public class RunTargets {
 			return Collections.emptyList();
 		}
 
-		@Override
-		public ILaunchConfiguration createLaunchConfigForEditing(BootDashElement element) throws CoreException {
-			IJavaProject project = element.getJavaProject();
-			IType[] mainTypes = MainTypeFinder.guessMainTypes(project, new NullProgressMonitor());
-			if (mainTypes.length==1) {
-				return BootLaunchConfigurationDelegate.createConf(mainTypes[0]);
+
+		public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
+			if (mainType!=null) {
+				return BootLaunchConfigurationDelegate.createConf(mainType);
 			} else {
-				//Couldn't guess main type, so create a launch config based on project
-				return BootLaunchConfigurationDelegate.createConf(project);
+				return BootLaunchConfigurationDelegate.createConf(jp);
 			}
 		}
 	};

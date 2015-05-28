@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
@@ -40,6 +43,8 @@ public class BootDashModel {
 	private BootDashElementFactory elementFactory;
 	private ProjectRunStateTracker runStateTracker;
 	private LiveSet<BootDashElement> elements; //lazy created
+
+	final Map<BootDashElement, ILaunchConfiguration> preferredLaunchConfigs = new HashMap<BootDashElement, ILaunchConfiguration>();
 
 	public class WorkspaceListener implements ProjectOpenCloseListener, ClasspathListener {
 

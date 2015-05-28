@@ -21,6 +21,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -60,17 +61,45 @@ public class LaunchUtil {
 			return configs.get(0);
 		} else if (configs.size()>0) {
 			IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
-			ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, labelProvider);
-			dialog.setElements(configs.toArray());
-			dialog.setTitle(dialogTitle);
-			dialog.setMessage(message);
-			dialog.setMultipleSelection(false);
-			int result = dialog.open();
-			labelProvider.dispose();
-			if (result == Window.OK) {
-				return (ILaunchConfiguration) dialog.getFirstResult();
+			try {
+				ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, labelProvider);
+				dialog.setElements(configs.toArray());
+				dialog.setTitle(dialogTitle);
+				dialog.setMessage(message);
+				dialog.setMultipleSelection(false);
+				int result = dialog.open();
+				labelProvider.dispose();
+				if (result == Window.OK) {
+					return (ILaunchConfiguration) dialog.getFirstResult();
+				}
+				return null;
+			} finally {
+				labelProvider.dispose();
 			}
-			return null;
+		}
+		return null;
+	}
+
+	public static IType chooseMainType(IType[] mainTypes, String title, String message, Shell shell) {
+		if (mainTypes.length==1) {
+			return mainTypes[0];
+		} else if (mainTypes.length>0) {
+			IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
+			try {
+				ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, labelProvider);
+				dialog.setElements(mainTypes);
+				dialog.setTitle(title);
+				dialog.setMessage(message);
+				dialog.setMultipleSelection(false);
+				int result = dialog.open();
+				labelProvider.dispose();
+				if (result == Window.OK) {
+					return (IType) dialog.getFirstResult();
+				}
+				return null;
+			} finally {
+				labelProvider.dispose();
+			}
 		}
 		return null;
 	}

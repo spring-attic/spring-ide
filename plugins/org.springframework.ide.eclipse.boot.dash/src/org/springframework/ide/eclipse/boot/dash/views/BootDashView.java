@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -391,15 +392,15 @@ public class BootDashView extends ViewPart {
 		protected Job createJob() {
 			final Collection<BootDashElement> selecteds = getSelectedElements();
 			if (!selecteds.isEmpty()) {
-				return new Job("Restarting "+selecteds.size()+" Dash Elements") {
+				return new UIJob("Restarting "+selecteds.size()+" Dash Elements") {
 					@Override
-					protected IStatus run(IProgressMonitor monitor) {
+					public IStatus runInUIThread(IProgressMonitor monitor) {
 						monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
 						try {
 							for (BootDashElement el : selecteds) {
 								monitor.subTask("Restarting: "+el.getName());
 								try {
-									el.restart(goalState);
+									el.restart(goalState, getSite().getShell());
 								} catch (Exception e) {
 									return BootActivator.createErrorStatus(e);
 								}

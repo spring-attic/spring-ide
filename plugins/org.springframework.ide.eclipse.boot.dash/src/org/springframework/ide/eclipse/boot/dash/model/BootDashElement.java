@@ -24,8 +24,10 @@ public interface BootDashElement extends Nameable {
 	ILaunchConfiguration getConfig();
 	void setConfig(ILaunchConfiguration config);
 
-	void restart(RunState runingOrDebugging) throws Exception;
+	//TODO: the operations below don't belong here they are really 'UI' not 'model'.
+
 	void stop() throws Exception;
+	void restart(RunState runingOrDebugging, Shell shell) throws Exception;
 	void openConfig(Shell shell);
 
 }

@@ -14,6 +14,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 
 /**
  * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
@@ -36,9 +38,10 @@ public interface RunTarget extends IdAble, Nameable {
 	public abstract List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element);
 
 	/**
-	 * Create a launch config for a given dash element and initialize it with some suitable defaults. The method
-	 * should do its best to fill in good defaults, but it is not required that the launch config is already
-	 * 'launch ready' as it will be opened in an editor rather than launched immediately.
+	 * Create a launch config for a given dash element and initialize it with some suitable defaults.
+	 *
+	 * @param mainType, may be null if the main type can not be 'guessed' unambiguosly.
 	 */
-	public abstract ILaunchConfiguration createLaunchConfigForEditing(BootDashElement element) throws Exception;
+	public abstract ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception;
+
 }

@@ -13,6 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
@@ -21,11 +24,11 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -33,6 +36,8 @@ import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
@@ -42,7 +47,6 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private BootDashModel context;
-	private ILaunchConfiguration config;
 
 	public BootProjectDashElement(IProject project, BootDashModel context) {
 		super(project);
@@ -73,28 +77,53 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void restart(RunState runningOrDebugging) {
+	public void restart(RunState runningOrDebugging, Shell shell) {
 		switch (runningOrDebugging) {
 		case RUNNING:
-			restart(ILaunchManager.RUN_MODE);
+			restart(ILaunchManager.RUN_MODE, shell);
 			break;
 		case DEBUGGING:
-			restart(ILaunchManager.DEBUG_MODE);
+			restart(ILaunchManager.DEBUG_MODE, shell);
 			break;
 		default:
 			throw new IllegalArgumentException("Restart expects RUNNING or DEBUGGING as 'goal' state");
 		}
 	}
 
-	public void restart(final String runMode) {
+	public void restart(final String runMode, Shell shell) {
 		stop(true);
-		debug("starting "+this+"...");
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				BootLaunchShortcut.launch(getProject(), runMode);
-				debug("starting "+this+" DONE");
+		start(runMode, shell);
+	}
+
+	private void start(final String runMode, Shell shell) {
+		try {
+			List<ILaunchConfiguration> configs = getTarget().getLaunchConfigs(this);
+			ILaunchConfiguration conf = null;
+			if (configs.isEmpty()) {
+				IType mainType = chooseMainType(shell);
+				if (mainType!=null) {
+					conf = getTarget().createLaunchConfig(getJavaProject(), mainType);
+				}
+			} else {
+				conf = chooseConfig(shell, configs);
 			}
-		});
+			if (conf!=null) {
+				DebugUITools.launch(conf, runMode);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+	}
+
+	private IType chooseMainType(Shell shell) throws CoreException {
+		IType[] mainTypes = MainTypeFinder.guessMainTypes(getJavaProject(), new NullProgressMonitor());
+		if (mainTypes.length==0) {
+			return null;
+		} else if (mainTypes.length==1){
+			return mainTypes[0];
+		} else {
+			return LaunchUtil.chooseMainType(mainTypes, "Choose main type", "Choose main type for '"+getName()+"'", shell);
+		}
 	}
 
 	@Override
@@ -149,7 +178,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 				ILaunchConfiguration conf;
 				List<ILaunchConfiguration> configs = target.getLaunchConfigs(this);
 				if (configs.isEmpty()) {
-					conf = target.createLaunchConfigForEditing(this);
+					conf = createLaunchConfigForEditing();
 				} else {
 					conf = chooseConfig(shell, configs);
 				}
@@ -159,12 +188,19 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 				}
 			}
 		} catch (Exception e) {
+			MessageDialog.openError(shell, "Couldn't open config for "+getName(), ExceptionUtil.getMessage(e));
 			BootActivator.log(e);
 		}
 	}
 
-	protected ILaunchConfiguration chooseConfig(Shell shell,
-			List<ILaunchConfiguration> configs) {
+	protected ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
+		IJavaProject jp = getJavaProject();
+		RunTarget target = getTarget();
+		IType[] mainTypes = MainTypeFinder.guessMainTypes(jp, new NullProgressMonitor());
+		return target.createLaunchConfig(jp, mainTypes.length==1?mainTypes[0]:null);
+	}
+
+	protected ILaunchConfiguration chooseConfig(Shell shell, List<ILaunchConfiguration> configs) {
 		ILaunchConfiguration preferredConf = getConfig();
 		if (preferredConf!=null && configs.contains(preferredConf)) {
 			return preferredConf;
@@ -172,7 +208,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		ILaunchConfiguration conf = LaunchUtil.chooseConfiguration(configs,
 				"Choose Launch Configuration",
 				"Several launch configurations are associated with '"+getName()+"' "+
-				"Choose one to open.", shell);
+				"Choose one.", shell);
 		if (conf!=null) {
 			setConfig(conf);
 		}
@@ -186,20 +222,18 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		case DEBUGGING:
 			return IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP;
 		default:
-			//TODO: remember the last one used?
 			return IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP;
 		}
 	}
 
 	@Override
 	public ILaunchConfiguration getConfig() {
-		return this.config;
+		return context.preferredLaunchConfigs.get(this);
 	}
 
 	@Override
 	public void setConfig(ILaunchConfiguration config) {
-		//TODO: persist between sessions somehow
-		this.config = config;
+		context.preferredLaunchConfigs.put(this, config);
 	}
 
 
