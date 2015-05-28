@@ -13,14 +13,12 @@ package org.springframework.ide.eclipse.boot.launch;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -150,17 +148,7 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 	public ILaunchConfiguration createConfiguration(IType type) {
 		ILaunchConfiguration config = null;
 		try {
-			ILaunchConfigurationWorkingCopy wc = null;
-			ILaunchConfigurationType configType = getConfigurationType();
-			IProject project = type.getJavaProject().getProject();
-			String projectName = type.getJavaProject().getElementName();
-			String shortTypeName = type.getTypeQualifiedName('.');
-			String typeName = type.getFullyQualifiedName();
-			wc = configType.newInstance(null, getLaunchManager().generateLaunchConfigurationName(
-					projectName+" - "+shortTypeName));
-			BootLaunchConfigurationDelegate.setDefaults(wc, project, typeName);
-			wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
-			config = wc.doSave();
+			config = BootLaunchConfigurationDelegate.createConf(type);
 		} catch (CoreException exception) {
 			MessageDialog.openError(JDIDebugUIPlugin.getActiveWorkbenchShell(), LauncherMessages.JavaLaunchShortcut_3, exception.getStatus().getMessage());
 		}

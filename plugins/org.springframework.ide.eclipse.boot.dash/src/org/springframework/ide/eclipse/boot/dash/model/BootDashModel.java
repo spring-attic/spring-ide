@@ -73,7 +73,7 @@ public class BootDashModel {
 			this.openCloseListenerManager = new ProjectOpenCloseListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
 			this.runStateTracker = new ProjectRunStateTracker();
-			this.elementFactory = new DefaultBootDashElementFactory(runStateTracker);
+			this.elementFactory = new DefaultBootDashElementFactory(this);
 			runStateTracker.setListener(new ProjectRunStateListener() {
 				public void stateChanged(IProject p) {
 					BootDashElement e = elementFactory.create(p);
@@ -141,6 +141,7 @@ public class BootDashModel {
 		}
 	}
 
-
-
+	public ProjectRunStateTracker getRunStateTracker() {
+		return runStateTracker;
+	}
 }

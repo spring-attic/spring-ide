@@ -41,11 +41,12 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-	private ProjectRunStateTracker runStateTracker;
+	private BootDashModel context;
+	private ILaunchConfiguration config;
 
-	public BootProjectDashElement(IProject project, ProjectRunStateTracker runStateTracker) {
+	public BootProjectDashElement(IProject project, BootDashModel context) {
 		super(project);
-		this.runStateTracker = runStateTracker;
+		this.context = context;
 	}
 
 	public IProject getProject() {
@@ -59,7 +60,11 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public RunState getRunState() {
-		return runStateTracker.getState(getProject());
+		return runStateTracker().getState(getProject());
+	}
+
+	private ProjectRunStateTracker runStateTracker() {
+		return context.getRunStateTracker();
 	}
 
 	@Override
@@ -137,26 +142,41 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public void openConfig(Shell shell) {
-		IProject p = getProject();
-		if (p!=null) {
-			List<ILaunchConfiguration> configs = LaunchUtil.getBootLaunchConfigs(p);
-			if (configs.isEmpty()) {
-				//TODO: create a lauch configuration
-				MessageDialog.open(MessageDialog.ERROR, shell,
-						"Couldn't Open Launch Configuration",
-						"A 'Run As Boot App' launch configuration for project '"+getName()+"' "
-						+ "doesn't exist.", SWT.NONE);
-			} else {
-				ILaunchConfiguration conf = LaunchUtil.chooseConfiguration(configs,
-						"Choose Launch Configuration",
-						"Several launch configurations are associated with '"+getName()+"' "+
-						"Choose one to open.", shell);
+		try {
+			IProject p = getProject();
+			RunTarget target = getTarget();
+			if (p!=null) {
+				ILaunchConfiguration conf;
+				List<ILaunchConfiguration> configs = target.getLaunchConfigs(this);
+				if (configs.isEmpty()) {
+					conf = target.createLaunchConfigForEditing(this);
+				} else {
+					conf = chooseConfig(shell, configs);
+				}
 				if (conf!=null) {
 					IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
 					DebugUITools.openLaunchConfigurationDialogOnGroup(shell, selection, getLaunchGroup());
 				}
 			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
+	}
+
+	protected ILaunchConfiguration chooseConfig(Shell shell,
+			List<ILaunchConfiguration> configs) {
+		ILaunchConfiguration preferredConf = getConfig();
+		if (preferredConf!=null && configs.contains(preferredConf)) {
+			return preferredConf;
+		}
+		ILaunchConfiguration conf = LaunchUtil.chooseConfiguration(configs,
+				"Choose Launch Configuration",
+				"Several launch configurations are associated with '"+getName()+"' "+
+				"Choose one to open.", shell);
+		if (conf!=null) {
+			setConfig(conf);
+		}
+		return conf;
 	}
 
 	private String getLaunchGroup() {
@@ -170,4 +190,17 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			return IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP;
 		}
 	}
+
+	@Override
+	public ILaunchConfiguration getConfig() {
+		return this.config;
+	}
+
+	@Override
+	public void setConfig(ILaunchConfiguration config) {
+		//TODO: persist between sessions somehow
+		this.config = config;
+	}
+
+
 }

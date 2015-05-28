@@ -11,6 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.EnumSet;
+import java.util.List;
+
+import org.eclipse.debug.core.ILaunchConfiguration;
 
 /**
  * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
@@ -25,4 +28,17 @@ public interface RunTarget extends IdAble, Nameable {
 	 * 'debug' operations which request that the element be brought into a given run-state.
 	 */
 	public abstract EnumSet<RunState> supportedGoalStates();
+
+	/**
+	 * Retrieve all existing launch configurations that are applicable for launching a given BootDashElement on
+	 * this RunTarget.
+	 */
+	public abstract List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element);
+
+	/**
+	 * Create a launch config for a given dash element and initialize it with some suitable defaults. The method
+	 * should do its best to fill in good defaults, but it is not required that the launch config is already
+	 * 'launch ready' as it will be opened in an editor rather than launched immediately.
+	 */
+	public abstract ILaunchConfiguration createLaunchConfigForEditing(BootDashElement element) throws Exception;
 }

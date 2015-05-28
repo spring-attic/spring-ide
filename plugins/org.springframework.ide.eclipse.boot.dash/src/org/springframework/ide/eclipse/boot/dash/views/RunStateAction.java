@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;

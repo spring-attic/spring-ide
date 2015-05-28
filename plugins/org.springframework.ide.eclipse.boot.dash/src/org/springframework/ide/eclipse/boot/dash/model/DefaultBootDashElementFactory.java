@@ -12,20 +12,19 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 
 public class DefaultBootDashElementFactory implements BootDashElementFactory {
 
-	private ProjectRunStateTracker projectRunStates;
+	private BootDashModel context;
 
-	public DefaultBootDashElementFactory(ProjectRunStateTracker runStateTracker) {
-		this.projectRunStates = runStateTracker;
+	public DefaultBootDashElementFactory(BootDashModel context) {
+		this.context = context;
 	}
 
 	@Override
 	public BootDashElement create(IProject p) {
 		if (BootPropertyTester.isBootProject(p)) {
-			return new BootProjectDashElement(p, projectRunStates);
+			return new BootProjectDashElement(p, context);
 		}
 		return null;
 	}

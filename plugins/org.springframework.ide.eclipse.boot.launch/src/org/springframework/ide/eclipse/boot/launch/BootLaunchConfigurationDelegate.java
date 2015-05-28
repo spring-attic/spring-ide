@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -31,6 +32,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -175,7 +179,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	 */
 	private static ILaunchConfigurationWorkingCopy copyAs(ILaunchConfiguration conf,
 			String newType) throws CoreException {
-		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+		ILaunchManager launchManager = getLaunchMan();
 		ILaunchConfigurationType launchConfigurationType = launchManager
 				.getLaunchConfigurationType(newType);
 		ILaunchConfigurationWorkingCopy wc = launchConfigurationType.newInstance(null,
@@ -249,15 +253,43 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	}
 
 	/**
+	 * Get all ILaunchConfigurations  for "Run As >> Spring Boot App" that are
+	 * associated with a given project.
+	 */
+	public static List<ILaunchConfiguration> getLaunchConfigs(IProject p) {
+		try {
+			ILaunchManager lm = getLaunchMan();
+			ILaunchConfigurationType type = lm.getLaunchConfigurationType(LAUNCH_CONFIG_TYPE_ID);
+			if (type!=null) {
+				ILaunchConfiguration[] configs = lm.getLaunchConfigurations(type);
+				if (configs!=null && configs.length>0) {
+					ArrayList<ILaunchConfiguration> result = new ArrayList<ILaunchConfiguration>();
+					for (ILaunchConfiguration conf : configs) {
+						if (p.equals(getProject(conf))) {
+							result.add(conf);
+						}
+					}
+					return result;
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Sets minimal default values to create a runnable launch configuration.
 	 */
 	public static void setDefaults(ILaunchConfigurationWorkingCopy wc,
 			IProject project,
 			String mainType
-			) {
+	) {
 		setProcessFactory(wc, BootProcessFactory.class);
 		setProject(wc, project);
-		setMainType(wc, mainType);
+		if (mainType!=null) {
+			setMainType(wc, mainType);
+		}
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setJMXPort(wc, ""+LiveBeanSupport.randomPort());
 		if (!OsUtils.isWindows()) {
@@ -453,6 +485,43 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
+	}
+
+	public static ILaunchConfigurationWorkingCopy createWorkingCopy(String nameHint) throws CoreException {
+		String name = getLaunchMan().generateLaunchConfigurationName(nameHint);
+		return getConfType().newInstance(null, name);
+	}
+
+	private static ILaunchManager getLaunchMan() {
+		return DebugPlugin.getDefault().getLaunchManager();
+	}
+
+	public static ILaunchConfigurationType getConfType() {
+		return getLaunchMan().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE_ID);
+	}
+
+	public static ILaunchConfiguration createConf(IType type) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = null;
+		ILaunchConfigurationType configType = getConfType();
+		IProject project = type.getJavaProject().getProject();
+		String projectName = type.getJavaProject().getElementName();
+		String shortTypeName = type.getTypeQualifiedName('.');
+		String typeName = type.getFullyQualifiedName();
+		wc = configType.newInstance(null, getLaunchMan().generateLaunchConfigurationName(
+				projectName+" - "+shortTypeName));
+		BootLaunchConfigurationDelegate.setDefaults(wc, project, typeName);
+		wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
+		return wc.doSave();
+	}
+
+	public static ILaunchConfiguration createConf(IJavaProject project) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = null;
+		ILaunchConfigurationType configType = getConfType();
+		String projectName = project.getElementName();
+		wc = configType.newInstance(null, getLaunchMan().generateLaunchConfigurationName(projectName));
+		BootLaunchConfigurationDelegate.setDefaults(wc, project.getProject(), null);
+		wc.setMappedResources(new IResource[] {project.getUnderlyingResource()});
+		return wc.doSave();
 	}
 
 }
