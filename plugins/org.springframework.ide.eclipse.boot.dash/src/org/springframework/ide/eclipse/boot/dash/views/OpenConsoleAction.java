@@ -98,7 +98,7 @@ public class OpenConsoleAction extends AbstractBootDashAction {
 									owner.getSite().getShell(),
 									"Open Console",
 									"Failed to open console for: "
-											+ selectedElements
+											+ element.getName()
 											+ ". Either a process console may not exist or the application is not running.");
 				}
 			}
