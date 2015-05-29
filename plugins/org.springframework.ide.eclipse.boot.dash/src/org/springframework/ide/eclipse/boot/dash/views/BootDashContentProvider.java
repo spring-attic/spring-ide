@@ -10,14 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 
+/**
+ * @author Kris De Volder
+ */
 class BootDashContentProvider implements IStructuredContentProvider {
 
-	private BootDashModel model = new BootDashModel(ResourcesPlugin.getWorkspace());
+	private BootDashModel model;
 
 	public BootDashContentProvider(BootDashModel model) {
 		this.model = model;

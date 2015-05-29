@@ -16,10 +16,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
@@ -44,7 +47,7 @@ public class BootDashModel {
 	private ProjectRunStateTracker runStateTracker;
 	private LiveSet<BootDashElement> elements; //lazy created
 
-	final Map<BootDashElement, ILaunchConfiguration> preferredLaunchConfigs = new HashMap<BootDashElement, ILaunchConfiguration>();
+	private BootDashModelStateSaver modelState;
 
 	public class WorkspaceListener implements ProjectOpenCloseListener, ClasspathListener {
 
@@ -64,6 +67,13 @@ public class BootDashModel {
 
 	public BootDashModel(IWorkspace workspace) {
 		this.workspace = workspace;
+		this.elementFactory = new DefaultBootDashElementFactory(this);
+		try {
+			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(elementFactory));
+			modelState.restore(lastState);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 
 	public synchronized LiveSet<BootDashElement> getElements() {
@@ -78,7 +88,6 @@ public class BootDashModel {
 			this.openCloseListenerManager = new ProjectOpenCloseListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
 			this.runStateTracker = new ProjectRunStateTracker();
-			this.elementFactory = new DefaultBootDashElementFactory(this);
 			runStateTracker.setListener(new ProjectRunStateListener() {
 				public void stateChanged(IProject p) {
 					BootDashElement e = elementFactory.create(p);
@@ -148,5 +157,15 @@ public class BootDashModel {
 
 	public ProjectRunStateTracker getRunStateTracker() {
 		return runStateTracker;
+	}
+
+	public ILaunchConfiguration getPreferredConfigs(BootProjectDashElement e) {
+		return modelState.getPreferredConfigs(e);
+	}
+
+	public void setPreferredConfig(
+			BootProjectDashElement e,
+			ILaunchConfiguration c) {
+		modelState.setPreferredConfig(e, c);
 	}
 }

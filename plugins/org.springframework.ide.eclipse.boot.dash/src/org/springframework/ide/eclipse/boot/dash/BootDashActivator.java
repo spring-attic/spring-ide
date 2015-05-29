@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -26,6 +28,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static BootDashActivator plugin;
+
+	private BootDashModel model;
 
 	/**
 	 * The constructor
@@ -85,6 +89,13 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	public static void log(Throwable e) {
 		getDefault().getLog().log(createErrorStatus(e));
+	}
+
+	public synchronized BootDashModel getModel() {
+		if (model==null) {
+			model = new BootDashModel(ResourcesPlugin.getWorkspace());
+		}
+		return model;
 	}
 
 }

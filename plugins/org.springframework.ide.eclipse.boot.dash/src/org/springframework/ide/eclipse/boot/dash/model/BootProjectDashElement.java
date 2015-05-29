@@ -15,7 +15,6 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
@@ -29,19 +28,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
  * Concrete BootDashElement that wraps an IProject
+ *
+ * @author Kris De Volder
  */
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
@@ -228,12 +227,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public ILaunchConfiguration getConfig() {
-		return context.preferredLaunchConfigs.get(this);
+		return context.getPreferredConfigs(this);
 	}
 
 	@Override
 	public void setConfig(ILaunchConfiguration config) {
-		context.preferredLaunchConfigs.put(this, config);
+		context.setPreferredConfig(this, config);
 	}
 
 
