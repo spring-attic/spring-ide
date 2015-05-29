@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash.test
+Bundle-Version: 3.7.0.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.boot.dash.test.Activator
+Bundle-Vendor: Pivotal Inc
+Require-Bundle: org.eclipse.core.runtime,
+ org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
