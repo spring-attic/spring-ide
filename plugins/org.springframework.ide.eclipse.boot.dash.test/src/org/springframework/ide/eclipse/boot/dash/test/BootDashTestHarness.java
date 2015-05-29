@@ -12,6 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import junit.framework.TestCase;
 
-public class BootDashModelTestHarness extends TestCase {
+public class BootDashTestHarness extends TestCase {
 
 }

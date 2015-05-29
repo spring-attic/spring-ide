@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 /**
  * @author Kris De Volder
  */
-public class BootDashModelTest extends BootDashModelTestHarness {
+public class BootDashModelTest extends BootDashTestHarness {
 
 	public void testDummy() throws Exception {
 		fail("This test should fail!");
