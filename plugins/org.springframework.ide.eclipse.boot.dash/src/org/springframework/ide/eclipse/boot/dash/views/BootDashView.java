@@ -281,7 +281,7 @@ public class BootDashView extends ViewPart {
 			@Override
 			public void run() {
 				target.setConfig(newDefault);
-				target.openConfig(getSite().getShell());
+				//target.openConfig(getSite().getShell());
 			}
 		};
 		action.setChecked(newDefault.equals(currentDefault));
