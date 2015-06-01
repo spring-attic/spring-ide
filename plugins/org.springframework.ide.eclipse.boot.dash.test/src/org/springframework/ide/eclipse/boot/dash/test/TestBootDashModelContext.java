@@ -44,12 +44,10 @@ public class TestBootDashModelContext implements BootDashModelContext {
 		}
 	}
 
-	@Override
 	public IPath getStateLocation() {
 		return new Path(stateLoc.toString());
 	}
 
-	@Override
 	public IWorkspace getWorkspace() {
 		return workspace;
 	}
@@ -58,12 +56,10 @@ public class TestBootDashModelContext implements BootDashModelContext {
 		FileUtils.deleteQuietly(stateLoc);
 	}
 
-	@Override
 	public ILaunchManager getLaunchManager() {
 		return launchManager;
 	}
 
-	@Override
 	public void log(Exception e) {
 		//No implementation we'll use Mockito to spy on the method instead.
 	}
