@@ -11,11 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 
-public interface BootDashModelContext extends StateLocationProvider {
+public interface BootDashModelContext {
 
 	IWorkspace getWorkspace();
 	ILaunchManager getLaunchManager();
+	void log(Exception e);
+	IPath getStateLocation();
 
 }

@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
@@ -55,8 +53,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 	public void doneSaving(ISaveContext context) {
 		// delete the old saved state since it is not necessary anymore
 		int previousSaveNumber = context.getPreviousSaveNumber();
-		String oldFileName = "save-" + Integer.toString(previousSaveNumber);
-		File f = modelContext.getStateLocation().append(oldFileName).toFile();
+		File f = saveFilePath(previousSaveNumber).toFile();
 		f.delete();
 	}
 
@@ -68,7 +65,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 	public synchronized void saving(ISaveContext context) throws CoreException {
 		try {
 			int saveNum = context.getSaveNumber();
-			IPath path = modelContext.getStateLocation().append(PREFERRED_LAUNCHES+"-"+saveNum);
+			IPath path = saveFilePath(saveNum);
 			File file = path.toFile();
 			Map<String, String> storage = new HashMap<String, String>();
 			for (Entry<BootDashElement, ILaunchConfiguration> entry : preferredLaunchconfigs.entrySet()) {
@@ -85,6 +82,10 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 		} catch (Exception e) {
 			throw ExceptionUtil.coreException(e);
 		}
+	}
+
+	protected IPath saveFilePath(int saveNum) {
+		return modelContext.getStateLocation().append(PREFERRED_LAUNCHES+"-"+saveNum);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -114,6 +115,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 				}
 			}
 		} catch (Exception e) {
+			modelContext.log(e);
 		}
 	}
 
@@ -124,7 +126,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 				return conf;
 			}
 		} catch (CoreException e) {
-			BootDashActivator.log(e);
+			modelContext.log(e);
 		}
 		return null;
 	}

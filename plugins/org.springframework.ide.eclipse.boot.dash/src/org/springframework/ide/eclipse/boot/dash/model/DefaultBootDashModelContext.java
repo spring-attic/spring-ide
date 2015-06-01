@@ -34,4 +34,9 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 		return DebugPlugin.getDefault().getLaunchManager();
 	}
 
+	@Override
+	public void log(Exception e) {
+		BootDashActivator.log(e);
+	}
+
 }

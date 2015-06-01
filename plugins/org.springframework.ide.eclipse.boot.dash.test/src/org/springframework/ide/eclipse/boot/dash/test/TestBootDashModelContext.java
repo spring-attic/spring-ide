@@ -63,4 +63,9 @@ public class TestBootDashModelContext implements BootDashModelContext {
 		return launchManager;
 	}
 
+	@Override
+	public void log(Exception e) {
+		//No implementation we'll use Mockito to spy on the method instead.
+	}
+
 }
