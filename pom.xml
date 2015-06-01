@@ -534,9 +534,9 @@
 <!-- 		   <url>http://dadacoalition.org/yedit</url> -->
 <!-- 		</repository> -->
 		<repository>
-		  <id>yedit-patched</id>
+		  <id>yedit-test-release</id>
 		  <layout>p2</layout>
-		  <url>https://raw.githubusercontent.com/kdvolder/yedit/publish-update-site/org.dadacoalition.yedit.update/target/site</url>
+		  <url>http://dadacoalition.org/yedit_test_site</url>
 		</repository>
 	</repositories>
 
