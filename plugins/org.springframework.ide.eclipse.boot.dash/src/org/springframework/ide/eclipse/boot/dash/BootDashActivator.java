@@ -17,6 +17,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -93,7 +95,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	public synchronized BootDashModel getModel() {
 		if (model==null) {
-			model = new BootDashModel(ResourcesPlugin.getWorkspace());
+			BootDashModelContext context = new DefaultBootDashModelContext();
+			model = new BootDashModel(context);
 		}
 		return model;
 	}

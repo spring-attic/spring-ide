@@ -23,12 +23,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
@@ -39,9 +38,12 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 
 	private static final String PREFERRED_LAUNCHES = "preferredLaunches";
 	private Map<BootDashElement, ILaunchConfiguration> preferredLaunchconfigs = new HashMap<BootDashElement, ILaunchConfiguration>();
-	private BootDashElementFactory factory;
 
-	public BootDashModelStateSaver(BootDashElementFactory f) {
+	private BootDashElementFactory factory;
+	private BootDashModelContext modelContext;
+
+	public BootDashModelStateSaver(BootDashModelContext context, BootDashElementFactory f) {
+		this.modelContext = context;
 		this.factory = f;
 	}
 
@@ -51,21 +53,19 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 
 	@Override
 	public void doneSaving(ISaveContext context) {
-		BootDashActivator myPluginInstance = BootDashActivator.getDefault();
 		// delete the old saved state since it is not necessary anymore
 		int previousSaveNumber = context.getPreviousSaveNumber();
 		String oldFileName = "save-" + Integer.toString(previousSaveNumber);
-		File f = myPluginInstance.getStateLocation().append(oldFileName).toFile();
+		File f = modelContext.getStateLocation().append(oldFileName).toFile();
 		f.delete();
 	}
 
 	@Override
 	public void rollback(ISaveContext context) {
-		BootDashActivator myPluginInstance = BootDashActivator.getDefault();
 		// since the save operation has failed, delete the saved state we have just written
 		int saveNumber = context.getSaveNumber();
 		String saveFileName = PREFERRED_LAUNCHES+"-" +saveNumber;
-		File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
+		File f = modelContext.getStateLocation().append(saveFileName).toFile();
 		f.delete();
 	}
 
@@ -73,7 +73,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 	public synchronized void saving(ISaveContext context) throws CoreException {
 		try {
 			int saveNum = context.getSaveNumber();
-			IPath path = BootDashActivator.getDefault().getStateLocation().append(PREFERRED_LAUNCHES+"-"+saveNum);
+			IPath path = modelContext.getStateLocation().append(PREFERRED_LAUNCHES+"-"+saveNum);
 			File file = path.toFile();
 			Map<String, String> storage = new HashMap<String, String>();
 			for (Entry<BootDashElement, ILaunchConfiguration> entry : preferredLaunchconfigs.entrySet()) {
@@ -124,7 +124,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 
 	private ILaunchConfiguration getLaunchConf(String memento) {
 		try {
-			ILaunchConfiguration conf = DebugPlugin.getDefault().getLaunchManager().getLaunchConfiguration(memento);
+			ILaunchConfiguration conf = modelContext.getLaunchManager().getLaunchConfiguration(memento);
 			if (conf.exists()) {
 				return conf;
 			}
@@ -135,20 +135,24 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 	}
 
 	private BootDashElement getBootDashElement(String pname) {
-		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
+		IProject p = modelContext.getWorkspace().getRoot().getProject(pname);
 		if (p!=null && p.exists()) {
 			return factory.create(p);
 		}
 		return null;
 	}
 
-	public synchronized ILaunchConfiguration getPreferredConfigs(BootProjectDashElement e) {
+	public synchronized ILaunchConfiguration getPreferredConfig(BootDashElement e) {
 		return preferredLaunchconfigs.get(e);
 	}
 
-	public synchronized void setPreferredConfig(BootProjectDashElement e,
+	public synchronized void setPreferredConfig(BootDashElement e,
 			ILaunchConfiguration c) {
 		preferredLaunchconfigs.put(e, c);
+	}
+
+	public synchronized boolean isEmpty() {
+		return preferredLaunchconfigs.isEmpty();
 	}
 
 }

@@ -7,7 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	BootDashModelTest.class
+	BootDashModelStateSaverTest.class
 })
 public class AllBootDashTests {
 

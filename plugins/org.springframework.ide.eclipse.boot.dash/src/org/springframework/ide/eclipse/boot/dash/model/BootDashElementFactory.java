@@ -11,8 +11,25 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 
-public interface BootDashElementFactory {
-	BootDashElement create(IProject p);
-	void dispose();
+public class BootDashElementFactory {
+
+	private BootDashModel model;
+
+	public BootDashElementFactory(BootDashModel model) {
+		this.model = model;
+	}
+
+	public BootDashElement create(IProject p) {
+		if (BootPropertyTester.isBootProject(p)) {
+			return new BootProjectDashElement(p, model);
+		}
+		return null;
+	}
+
+	public void dispose() {
+		//Nothing todo
+	}
+
 }

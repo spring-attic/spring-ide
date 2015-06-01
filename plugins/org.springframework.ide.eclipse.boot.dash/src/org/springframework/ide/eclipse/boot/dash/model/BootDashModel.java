@@ -62,11 +62,11 @@ public class BootDashModel {
 		}
 	}
 
-	public BootDashModel(IWorkspace workspace) {
-		this.workspace = workspace;
-		this.elementFactory = new DefaultBootDashElementFactory(this);
+	public BootDashModel(BootDashModelContext context) {
+		this.workspace = context.getWorkspace();
+		this.elementFactory = new BootDashElementFactory(this);
 		try {
-			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(elementFactory));
+			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, elementFactory));
 			modelState.restore(lastState);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
@@ -157,7 +157,7 @@ public class BootDashModel {
 	}
 
 	public ILaunchConfiguration getPreferredConfigs(BootProjectDashElement e) {
-		return modelState.getPreferredConfigs(e);
+		return modelState.getPreferredConfig(e);
 	}
 
 	public void setPreferredConfig(

@@ -8,11 +8,10 @@
  * Contributors:
  *    Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test;
+package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.eclipse.core.runtime.IPath;
 
-public class BootDashTestHarness {
-
-
-
+public interface StateLocationProvider {
+	IPath getStateLocation();
 }

@@ -8,15 +8,14 @@
  * Contributors:
  *    Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test;
+package org.springframework.ide.eclipse.boot.dash.model;
 
-/**
- * @author Kris De Volder
- */
-public class BootDashModelTest extends BootDashTestHarness {
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.debug.core.ILaunchManager;
 
-	public void testDummy() throws Exception {
-		fail("This test should fail!");
-	}
+public interface BootDashModelContext extends StateLocationProvider {
+
+	IWorkspace getWorkspace();
+	ILaunchManager getLaunchManager();
 
 }
