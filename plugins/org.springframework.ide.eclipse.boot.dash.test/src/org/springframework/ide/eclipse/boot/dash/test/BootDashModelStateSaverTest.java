@@ -53,11 +53,6 @@ public class BootDashModelStateSaverTest extends BootDashTestHarness {
 	////////////////////////////////////////////////////////////////
 
 	@Test
-	public void testFail() throws Exception {
-		fail("This test should fail");
-	}
-
-	@Test
 	public void testRestoreFromEmptyStateLocation() throws Exception {
 		BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
 		state.restore(emptySavedState());
@@ -70,7 +65,7 @@ public class BootDashModelStateSaverTest extends BootDashTestHarness {
 		BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
 		assertTrue(state.isEmpty());
 
-		IProject project = mockProject("foo");
+		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mock(BootDashElement.class);
 		when(factory.create(project)).thenReturn(dashElement);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
@@ -127,7 +122,7 @@ public class BootDashModelStateSaverTest extends BootDashTestHarness {
 		File saveFile = saveFilePath.toFile();
 
 
-		IProject project = mockProject("foo");
+		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mockElement(project);
 		when(factory.create(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
@@ -176,6 +171,268 @@ public class BootDashModelStateSaverTest extends BootDashTestHarness {
 		}
 	}
 
+	@Test
+	public void testSaveWithDeletedProject() throws Exception {
+		int saveNumber = 13;
+		Path UNMAPPED_PATH = new Path("preferredLaunches");
+		IPath saveFilePath = context.getStateLocation().append("preferredLaunches-"+saveNumber);
+		File saveFile = saveFilePath.toFile();
+
+
+		IProject project = mockProject("foo", true);
+		BootDashElement dashElement = mockElement(project);
+		when(factory.create(project)).thenReturn(dashElement);
+		when(context.getWorkspace().getRoot().getProject("foo"))
+			.thenReturn(project);
+
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		when(conf.getMemento()).thenReturn("fooMemento");
+		when(context.getLaunchManager().getLaunchConfiguration("fooMemento"))
+			.thenReturn(conf);
+		when(conf.exists()).thenReturn(true);
+
+		{
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			assertTrue(state.isEmpty());
+
+			ISaveContext saveContext = mock(ISaveContext.class);
+			when(saveContext.getSaveNumber()).thenReturn(saveNumber);
+
+			assertFalse(saveFile.exists());
+
+			state.setPreferredConfig(dashElement, conf);
+
+			when(project.exists()).thenReturn(false); //pretend project deleted prior to save
+
+			state.prepareToSave(saveContext);
+			state.saving(saveContext);
+			state.doneSaving(saveContext);
+
+			verify(saveContext).map(UNMAPPED_PATH, saveFilePath);
+			verify(saveContext).needSaveNumber();
+
+			assertTrue(saveFile.exists());
+		}
+		///////////////////////////////////////////////////////////////
+		{
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			ISavedState savedState = mock(ISavedState.class);
+			when(savedState.getSaveNumber()).thenReturn(saveNumber);
+			when(savedState.lookup(UNMAPPED_PATH)).thenReturn(saveFilePath);
+
+			assertTrue(state.isEmpty());
+
+			state.restore(savedState); //Check this actually loaded the file somehow?
+
+			assertTrue(state.isEmpty());
+
+			assertEquals(null, state.getPreferredConfig(dashElement));
+		}
+	}
+
+	@Test
+	public void testSaveWithDeletedConf() throws Exception {
+		int saveNumber = 13;
+		Path UNMAPPED_PATH = new Path("preferredLaunches");
+		IPath saveFilePath = context.getStateLocation().append("preferredLaunches-"+saveNumber);
+		File saveFile = saveFilePath.toFile();
+
+
+		IProject project = mockProject("foo", true);
+		BootDashElement dashElement = mockElement(project);
+		when(factory.create(project)).thenReturn(dashElement);
+		when(context.getWorkspace().getRoot().getProject("foo"))
+			.thenReturn(project);
+
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		when(conf.getMemento()).thenReturn("fooMemento");
+		when(context.getLaunchManager().getLaunchConfiguration("fooMemento"))
+			.thenReturn(conf);
+		when(conf.exists()).thenReturn(true);
+
+		{
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			assertTrue(state.isEmpty());
+
+			ISaveContext saveContext = mock(ISaveContext.class);
+			when(saveContext.getSaveNumber()).thenReturn(saveNumber);
+
+			assertFalse(saveFile.exists());
+
+			state.setPreferredConfig(dashElement, conf);
+
+			when(conf.exists()).thenReturn(false); //pretend conf deleted prior to save
+
+			state.prepareToSave(saveContext);
+			state.saving(saveContext);
+			state.doneSaving(saveContext);
+
+			verify(saveContext).map(UNMAPPED_PATH, saveFilePath);
+			verify(saveContext).needSaveNumber();
+
+			assertTrue(saveFile.exists());
+		}
+		///////////////////////////////////////////////////////////////
+		{
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			ISavedState savedState = mock(ISavedState.class);
+			when(savedState.getSaveNumber()).thenReturn(saveNumber);
+			when(savedState.lookup(UNMAPPED_PATH)).thenReturn(saveFilePath);
+
+			assertTrue(state.isEmpty());
+
+			state.restore(savedState); //Check this actually loaded the file somehow?
+
+			assertTrue(state.isEmpty());
+
+			assertEquals(null, state.getPreferredConfig(dashElement));
+		}
+	}
+
+	@Test
+	public void testRestoreWithDeletedProject() throws Exception {
+		int saveNumber = 13;
+		Path UNMAPPED_PATH = new Path("preferredLaunches");
+		IPath saveFilePath = context.getStateLocation().append("preferredLaunches-"+saveNumber);
+		File saveFile = saveFilePath.toFile();
+
+
+		IProject project = mockProject("foo", true);
+		BootDashElement dashElement = mockElement(project);
+		when(factory.create(project)).thenReturn(dashElement);
+		when(context.getWorkspace().getRoot().getProject("foo"))
+			.thenReturn(project);
+
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		when(conf.getMemento()).thenReturn("fooMemento");
+		when(context.getLaunchManager().getLaunchConfiguration("fooMemento"))
+			.thenReturn(conf);
+		when(conf.exists()).thenReturn(true);
+
+		{
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			assertTrue(state.isEmpty());
+
+			ISaveContext saveContext = mock(ISaveContext.class);
+			when(saveContext.getSaveNumber()).thenReturn(saveNumber);
+
+			assertFalse(saveFile.exists());
+
+			state.setPreferredConfig(dashElement, conf);
+
+			state.prepareToSave(saveContext);
+			state.saving(saveContext);
+			state.doneSaving(saveContext);
+
+			verify(saveContext).map(UNMAPPED_PATH, saveFilePath);
+			verify(saveContext).needSaveNumber();
+
+			assertTrue(saveFile.exists());
+		}
+		///////////////////////////////////////////////////////////////
+		{
+			when(project.exists()).thenReturn(false); //pretend project deleted prior to restore
+
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			ISavedState savedState = mock(ISavedState.class);
+			when(savedState.getSaveNumber()).thenReturn(saveNumber);
+			when(savedState.lookup(UNMAPPED_PATH)).thenReturn(saveFilePath);
+
+			assertTrue(state.isEmpty());
+
+			state.restore(savedState); //Check this actually loaded the file somehow?
+
+			assertTrue(state.isEmpty());
+
+			assertEquals(null, state.getPreferredConfig(dashElement));
+		}
+	}
+
+	@Test
+	public void testRestoreWithDeletedConf() throws Exception {
+		int saveNumber = 13;
+		Path UNMAPPED_PATH = new Path("preferredLaunches");
+		IPath saveFilePath = context.getStateLocation().append("preferredLaunches-"+saveNumber);
+		File saveFile = saveFilePath.toFile();
+
+
+		IProject project = mockProject("foo", true);
+		BootDashElement dashElement = mockElement(project);
+		when(factory.create(project)).thenReturn(dashElement);
+		when(context.getWorkspace().getRoot().getProject("foo"))
+			.thenReturn(project);
+
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		when(conf.getMemento()).thenReturn("fooMemento");
+		when(context.getLaunchManager().getLaunchConfiguration("fooMemento"))
+			.thenReturn(conf);
+		when(conf.exists()).thenReturn(true);
+
+		{
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			assertTrue(state.isEmpty());
+
+			ISaveContext saveContext = mock(ISaveContext.class);
+			when(saveContext.getSaveNumber()).thenReturn(saveNumber);
+
+			assertFalse(saveFile.exists());
+
+			state.setPreferredConfig(dashElement, conf);
+
+			state.prepareToSave(saveContext);
+			state.saving(saveContext);
+			state.doneSaving(saveContext);
+
+			verify(saveContext).map(UNMAPPED_PATH, saveFilePath);
+			verify(saveContext).needSaveNumber();
+
+			assertTrue(saveFile.exists());
+		}
+		///////////////////////////////////////////////////////////////
+		{
+			when(conf.exists()).thenReturn(false); //pretend project deleted prior to restore
+
+			BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+			ISavedState savedState = mock(ISavedState.class);
+			when(savedState.getSaveNumber()).thenReturn(saveNumber);
+			when(savedState.lookup(UNMAPPED_PATH)).thenReturn(saveFilePath);
+
+			assertTrue(state.isEmpty());
+
+			state.restore(savedState); //Check this actually loaded the file somehow?
+
+			assertTrue(state.isEmpty());
+
+			assertEquals(null, state.getPreferredConfig(dashElement));
+		}
+	}
+
+
+	@Test
+	public void testRestoreNoPriorSave() throws Exception {
+		IProject project = mockProject("foo", true);
+
+		BootDashElement dashElement = mockElement(project);
+		when(factory.create(project)).thenReturn(dashElement);
+		when(context.getWorkspace().getRoot().getProject("foo"))
+			.thenReturn(project);
+
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		when(conf.getMemento()).thenReturn("fooMemento");
+		when(context.getLaunchManager().getLaunchConfiguration("fooMemento"))
+			.thenReturn(conf);
+		when(conf.exists()).thenReturn(true);
+
+		BootDashModelStateSaver state = new BootDashModelStateSaver(context, factory);
+		ISavedState savedState = null;
+		assertTrue(state.isEmpty());
+
+		state.restore(savedState);
+		assertTrue(state.isEmpty());
+
+		assertEquals(null, state.getPreferredConfig(dashElement));
+	}
+
 	////////////////////////////////////////////////////////////////
 
 	private BootDashElement mockElement(IProject project) {
@@ -184,10 +441,10 @@ public class BootDashModelStateSaverTest extends BootDashTestHarness {
 		return el;
 	}
 
-	private IProject mockProject(String name) {
+	private IProject mockProject(String name, boolean exists) {
 		IProject project = mock(IProject.class);
 		when(project.getName()).thenReturn(name);
-		when(project.exists()).thenReturn(true);
+		when(project.exists()).thenReturn(exists);
 		return project;
 	}
 

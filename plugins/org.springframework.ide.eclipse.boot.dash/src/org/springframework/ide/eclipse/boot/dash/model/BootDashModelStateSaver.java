@@ -62,11 +62,6 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 
 	@Override
 	public void rollback(ISaveContext context) {
-		// since the save operation has failed, delete the saved state we have just written
-		int saveNumber = context.getSaveNumber();
-		String saveFileName = PREFERRED_LAUNCHES+"-" +saveNumber;
-		File f = modelContext.getStateLocation().append(saveFileName).toFile();
-		f.delete();
 	}
 
 	@Override
