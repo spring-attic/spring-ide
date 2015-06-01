@@ -25,8 +25,8 @@ import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.Pro
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
-import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectOpenCloseListenerManager;
-import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectOpenCloseListenerManager.ProjectOpenCloseListener;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
@@ -38,7 +38,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 public class BootDashModel {
 
 	private IWorkspace workspace;
-	private ProjectOpenCloseListenerManager openCloseListenerManager;
+	private ProjectChangeListenerManager openCloseListenerManager;
 	private ClasspathListenerManager classpathListenerManager;
 	private BootDashElementFactory elementFactory;
 	private ProjectRunStateTracker runStateTracker;
@@ -46,16 +46,13 @@ public class BootDashModel {
 
 	private BootDashModelStateSaver modelState;
 
-	public class WorkspaceListener implements ProjectOpenCloseListener, ClasspathListener {
+	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
 		@Override
-		public void projectOpened(IProject project) {
+		public void projectChanged(IProject project) {
 			updateElementsFromWorkspace();
 		}
-		@Override
-		public void projectClosed(IProject project) {
-			updateElementsFromWorkspace();
-		}
+
 		@Override
 		public void classpathChanged(IJavaProject jp) {
 			updateElementsFromWorkspace();
@@ -82,7 +79,7 @@ public class BootDashModel {
 		if (elements==null) {
 			this.elements = new LiveSet<BootDashElement>();
 			WorkspaceListener workspaceListener = new WorkspaceListener();
-			this.openCloseListenerManager = new ProjectOpenCloseListenerManager(workspace, workspaceListener);
+			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
 			this.runStateTracker = new ProjectRunStateTracker();
 			runStateTracker.setListener(new ProjectRunStateListener() {

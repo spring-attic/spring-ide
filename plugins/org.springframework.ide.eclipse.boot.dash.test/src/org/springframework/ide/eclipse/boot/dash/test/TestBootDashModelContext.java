@@ -10,35 +10,28 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.mockito.Mockito.mock;
-
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-import static org.mockito.Mockito.*;
-
 public class TestBootDashModelContext implements BootDashModelContext {
 
 	private File stateLoc;
+	private ILaunchManager launchManager;
+	private IWorkspace workspace;
 
-	private IWorkspaceRoot root = mock(IWorkspaceRoot.class);
-	private IWorkspace workspace = mock(IWorkspace.class);
-
-	private ILaunchManager launchManager = mock(ILaunchManager.class);
-
-	public TestBootDashModelContext() {
+	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
+			this.workspace = workspace;
+			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
-			when(workspace.getRoot()).thenReturn(root);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

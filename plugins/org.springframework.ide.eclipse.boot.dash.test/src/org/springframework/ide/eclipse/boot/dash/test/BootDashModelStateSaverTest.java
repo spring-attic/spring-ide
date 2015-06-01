@@ -28,9 +28,12 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISavedState;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -70,7 +73,8 @@ public class BootDashModelStateSaverTest extends BootDashTestHarness {
 
 	@Before
 	public void setup() throws Exception {
-		this.context = spy(new TestBootDashModelContext());
+		this.context = spy(new TestBootDashModelContext(mock(IWorkspace.class), mock(ILaunchManager.class)));
+		when(context.getWorkspace().getRoot()).thenReturn(mock(IWorkspaceRoot.class));
 		this.factory = mock(BootDashElementFactory.class);
 	}
 

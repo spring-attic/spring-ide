@@ -426,4 +426,18 @@ public class NewSpringBootWizardModel {
 		return bootVersion;
 	}
 
+	public FieldModel<String> getArtifactId() {
+		String fieldName = "artifactId";
+		return getStringInput(fieldName);
+	}
+
+	public FieldModel<String> getStringInput(String fieldName) {
+		for (FieldModel<String> fieldModel : stringInputs) {
+			if (fieldName.equals(fieldModel.getName())) {
+				return fieldModel;
+			}
+		}
+		return null;
+	}
+
 }
