@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -18,6 +20,7 @@ import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSect
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -31,16 +34,18 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IProcess;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -142,10 +147,70 @@ public class BootDashModelTest {
 		verify(listener).stateChanged(element);
 	}
 
+	@Test public void testRestartRunningProcessTest() throws Exception {
+		String projectName = "testProject";
+		createBootProject(projectName);
+		waitModelElements(projectName);
+
+		final RunState[] RUN_STATES = {
+				RunState.RUNNING,
+				RunState.DEBUGGING
+		};
+
+		for (RunState fromState : RUN_STATES) {
+			for (RunState toState : RUN_STATES) {
+				doRestartTest(projectName, fromState, toState);
+			}
+		}
+	}
+
+	private void doRestartTest(String projectName, RunState fromState, RunState toState) throws Exception {
+		BootDashElement element = getElement(projectName);
+		try {
+			element.restart(fromState, ui);
+			waitForState(element, fromState);
+
+			final ILaunch launch = getActiveLaunch(element);
+
+			element.restart(toState, ui);
+
+			//Watch out for race conditions... we can't really reliably observe the
+			// 'terminated' state of the element, as we don't know how long it will
+			// last and the 'restart' operation may happen concurrently with the testing
+			// thread. Therefore we observe the terminated state of the actual launch.
+			// Restarting the project will/should terminate the old launch and then
+			// create a new launch.
+
+			new ACondition("Wait for launch termination") {
+				public boolean test() throws Exception {
+					return launch.isTerminated();
+				}
+			}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
+
+			waitForState(element, toState);
+		} finally {
+			element.stop();
+			waitForState(element, RunState.INACTIVE);
+		}
+	}
+
+	//TODO: start scenarios
+
+	// - no launch conf exists and:
+	//    - no main type found
+	//    - multiple main type found
+
+	// - multiple launch conf exist and:
+	//    - preferred conf is set
+	//    - preferred conf is not set
+
+
 	///////////////// harness code ////////////////////////
 
 	@Rule
 	public TestRule listenerLeakDetector = new ListenerLeakDetector();
+
+	private UserInteractions ui;
 
 	@Before
 	public void setup() throws Exception {
@@ -156,6 +221,7 @@ public class BootDashModelTest {
 				));
 		this.model = new BootDashModel(context);
 		StsTestUtil.setAutoBuilding(false);
+		this.ui = mock(UserInteractions.class);
 	}
 
 	@After
@@ -174,6 +240,26 @@ public class BootDashModelTest {
 		}
 
 		this.model.dispose();
+	}
+
+	/**
+	 * Returns the only active (i.e. not terminated launch for a project). If there is more
+	 * than one active launch, or no active launch this returns null.
+	 */
+	public ILaunch getActiveLaunch(BootDashElement element) {
+		List<ILaunch> ls = LaunchUtil.getLaunches(element.getProject());
+		ILaunch activeLaunch = null;
+		for (ILaunch l : ls) {
+			if (!l.isTerminated()) {
+				if (activeLaunch==null) {
+					activeLaunch = l;
+				} else {
+					//More than one active launch
+					return null;
+				}
+			}
+		}
+		return activeLaunch;
 	}
 
 	private void waitForState(final BootDashElement element, final RunState state) throws Exception {
