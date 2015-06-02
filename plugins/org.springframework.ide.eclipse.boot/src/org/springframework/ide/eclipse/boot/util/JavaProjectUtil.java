@@ -102,7 +102,7 @@ public class JavaProjectUtil {
 				try {
 					if (cpe.getEntryKind()==IClasspathEntry.CPE_SOURCE) {
 						IContainer sf = getProjectOrFolder(cpe.getPath());
-						if (sf!=null) {
+						if (sf!=null && sf.exists()) {
 							sourceFolders.add(sf);
 						}
 					}
