@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
+import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME;
+import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
 import java.util.ArrayList;
@@ -34,7 +36,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -42,10 +43,6 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
-
-import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
-import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
-
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
 /**
