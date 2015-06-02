@@ -18,6 +18,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * @author Kris De Volder
@@ -31,8 +32,10 @@ public class ProcessTracker {
 
 	private IDebugEventSetListener debugListener;
 	private ProcessListener listener;
+	private String stacktrace;
 
 	protected ProcessTracker(ProcessListener listener) {
+		this.stacktrace = ExceptionUtil.stacktrace();
 		this.listener = listener;
 		//Pick up any processes already running
 		DebugPlugin.getDefault().addDebugEventListener(debugListener = new IDebugEventSetListener() {

@@ -39,6 +39,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
@@ -48,6 +49,9 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.ui.DefaultUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.ui.DefaultUserInteractions.UIContext;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
@@ -55,7 +59,7 @@ import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 /**
  * @author Kris De Volder
  */
-public class BootDashView extends ViewPart {
+public class BootDashView extends ViewPart implements UIContext {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -73,6 +77,7 @@ public class BootDashView extends ViewPart {
 	private AbstractBootDashAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 
+	private UserInteractions ui = new DefaultUserInteractions(this);
 
 	/*
 	 * The content provider class is responsible for
@@ -423,7 +428,7 @@ public class BootDashView extends ViewPart {
 							for (BootDashElement el : selecteds) {
 								monitor.subTask("Restarting: "+el.getName());
 								try {
-									el.restart(goalState, getSite().getShell());
+									el.restart(goalState, getUserInteractions());
 								} catch (Exception e) {
 									return BootActivator.createErrorStatus(e);
 								}
@@ -438,6 +443,15 @@ public class BootDashView extends ViewPart {
 			}
 			return null;
 		}
+	}
+
+	public UserInteractions getUserInteractions() {
+		return ui;
+	}
+
+	@Override
+	public Shell getShell() {
+		return getSite().getShell();
 	}
 
 }

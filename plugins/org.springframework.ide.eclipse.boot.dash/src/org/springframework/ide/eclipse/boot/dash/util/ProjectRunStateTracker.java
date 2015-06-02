@@ -49,7 +49,7 @@ public class ProjectRunStateTracker implements ProcessListener {
 	///////////////////////// stuff below is implementation cruft ////////////////////
 
 	private Map<IProject, RunState> activeStates = null;
-	private ProcessTracker processTracker = new ProcessTracker(this);
+	private ProcessTracker processTracker = null;
 	private ProjectRunStateListener listener;
 
 	public ProjectRunStateTracker() {

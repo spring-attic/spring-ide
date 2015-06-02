@@ -47,7 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelStateSaver;
 /**
  * @author Kris De Volder
  */
-public class BootDashModelStateSaverTest extends BootDashTestHarness {
+public class BootDashModelStateSaverTest {
 
 	private TestBootDashModelContext context;
 	private BootDashElementFactory factory;

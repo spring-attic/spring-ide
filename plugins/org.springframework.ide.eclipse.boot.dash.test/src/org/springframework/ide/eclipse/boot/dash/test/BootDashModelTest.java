@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
@@ -30,19 +33,18 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import static org.junit.Assert.*;
 
 
 public class BootDashModelTest {
@@ -105,6 +107,17 @@ public class BootDashModelTest {
 	 * Test that element state listener is notified when a project is launched and terminated.
 	 */
 	@Test public void testRunStateChanges() throws Exception {
+		doTestRunStateChanges(RunState.RUNNING);
+	}
+
+	/**
+	 * Test that element state listener is notified when a project is launched in Debug mode and terminated.
+	 */
+	@Test public void testDebugStateChanges() throws Exception {
+		doTestRunStateChanges(RunState.DEBUGGING);
+	}
+
+	protected void doTestRunStateChanges(RunState runState) throws Exception {
 		String projectName = "testProject";
 		createBootProject(projectName);
 		waitModelElements(projectName);
@@ -113,8 +126,8 @@ public class BootDashModelTest {
 		model.addElementStateListener(listener);
 		System.out.println("Element state listener ADDED");
 		BootDashElement element = getElement(projectName);
-		element.restart(RunState.RUNNING, null);
-		waitForState(element, RunState.RUNNING);
+		element.restart(runState, null);
+		waitForState(element, runState);
 
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
@@ -131,13 +144,16 @@ public class BootDashModelTest {
 
 	///////////////// harness code ////////////////////////
 
+	@Rule
+	public TestRule listenerLeakDetector = new ListenerLeakDetector();
+
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
 		this.context = spy(new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
-		));
+				));
 		this.model = new BootDashModel(context);
 		StsTestUtil.setAutoBuilding(false);
 	}
@@ -249,5 +265,6 @@ public class BootDashModelTest {
 		}
 		assertElements(names, expectedProjectNames);
 	}
+
 
 }

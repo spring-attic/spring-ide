@@ -27,7 +27,7 @@ public interface BootDashElement extends Nameable {
 	//TODO: the operations below don't belong here they are really 'UI' not 'model'.
 
 	void stop() throws Exception;
-	void restart(RunState runingOrDebugging, Shell shell) throws Exception;
-	void openConfig(Shell shell);
+	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
+	void openConfig(UserInteractions ui);
 
 }

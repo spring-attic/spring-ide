@@ -25,10 +25,6 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
@@ -76,35 +72,35 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void restart(RunState runningOrDebugging, Shell shell) {
+	public void restart(RunState runningOrDebugging, UserInteractions ui) {
 		switch (runningOrDebugging) {
 		case RUNNING:
-			restart(ILaunchManager.RUN_MODE, shell);
+			restart(ILaunchManager.RUN_MODE, ui);
 			break;
 		case DEBUGGING:
-			restart(ILaunchManager.DEBUG_MODE, shell);
+			restart(ILaunchManager.DEBUG_MODE, ui);
 			break;
 		default:
 			throw new IllegalArgumentException("Restart expects RUNNING or DEBUGGING as 'goal' state");
 		}
 	}
 
-	public void restart(final String runMode, Shell shell) {
+	public void restart(final String runMode, UserInteractions ui) {
 		stop(true);
-		start(runMode, shell);
+		start(runMode, ui);
 	}
 
-	private void start(final String runMode, Shell shell) {
+	private void start(final String runMode, UserInteractions ui) {
 		try {
 			List<ILaunchConfiguration> configs = getTarget().getLaunchConfigs(this);
 			ILaunchConfiguration conf = null;
 			if (configs.isEmpty()) {
-				IType mainType = chooseMainType(shell);
+				IType mainType = chooseMainType(ui);
 				if (mainType!=null) {
 					conf = getTarget().createLaunchConfig(getJavaProject(), mainType);
 				}
 			} else {
-				conf = chooseConfig(shell, configs);
+				conf = chooseConfig(ui, configs);
 			}
 			if (conf!=null) {
 				DebugUITools.launch(conf, runMode);
@@ -114,14 +110,15 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		}
 	}
 
-	private IType chooseMainType(Shell shell) throws CoreException {
+	private IType chooseMainType(UserInteractions ui) throws CoreException {
 		IType[] mainTypes = MainTypeFinder.guessMainTypes(getJavaProject(), new NullProgressMonitor());
 		if (mainTypes.length==0) {
+			ui.errorPopup("Problem launching", "Couldn't find a main type in '"+getName()+"'");
 			return null;
 		} else if (mainTypes.length==1){
 			return mainTypes[0];
 		} else {
-			return LaunchUtil.chooseMainType(mainTypes, "Choose main type", "Choose main type for '"+getName()+"'", shell);
+			return ui.chooseMainType(mainTypes, "Choose main type", "Choose main type for '"+getName()+"'");
 		}
 	}
 
@@ -169,7 +166,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void openConfig(Shell shell) {
+	public void openConfig(UserInteractions ui) {
 		try {
 			IProject p = getProject();
 			RunTarget target = getTarget();
@@ -179,15 +176,14 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 				if (configs.isEmpty()) {
 					conf = createLaunchConfigForEditing();
 				} else {
-					conf = chooseConfig(shell, configs);
+					conf = chooseConfig(ui, configs);
 				}
 				if (conf!=null) {
-					IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
-					DebugUITools.openLaunchConfigurationDialogOnGroup(shell, selection, getLaunchGroup());
+					ui.openLaunchConfigurationDialogOnGroup(conf, getLaunchGroup());
 				}
 			}
 		} catch (Exception e) {
-			MessageDialog.openError(shell, "Couldn't open config for "+getName(), ExceptionUtil.getMessage(e));
+			ui.errorPopup("Couldn't open config for "+getName(), ExceptionUtil.getMessage(e));
 			BootActivator.log(e);
 		}
 	}
@@ -199,19 +195,28 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return target.createLaunchConfig(jp, mainTypes.length==1?mainTypes[0]:null);
 	}
 
-	protected ILaunchConfiguration chooseConfig(Shell shell, List<ILaunchConfiguration> configs) {
+	protected ILaunchConfiguration chooseConfig(UserInteractions ui, List<ILaunchConfiguration> configs) {
 		ILaunchConfiguration preferredConf = getConfig();
 		if (preferredConf!=null && configs.contains(preferredConf)) {
 			return preferredConf;
 		}
-		ILaunchConfiguration conf = LaunchUtil.chooseConfiguration(configs,
+		ILaunchConfiguration conf = chooseConfigurationDialog(configs,
 				"Choose Launch Configuration",
 				"Several launch configurations are associated with '"+getName()+"' "+
-				"Choose one.", shell);
+				"Choose one.", ui);
 		if (conf!=null) {
 			setConfig(conf);
 		}
 		return conf;
+	}
+
+	private ILaunchConfiguration chooseConfigurationDialog(List<ILaunchConfiguration> configs, String dialogTitle, String message, UserInteractions ui) {
+		if (configs.size()==1) {
+			return configs.get(0);
+		} else if (configs.size()>0) {
+			return ui.chooseConfigurationDialog(dialogTitle, message, configs);
+		}
+		return null;
 	}
 
 	private String getLaunchGroup() {

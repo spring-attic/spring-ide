@@ -19,7 +19,7 @@ public class OpenLaunchConfigAction extends AbstractBootDashAction {
 	public void run() {
 		Collection<BootDashElement> selecteds = owner.getSelectedElements();
 		for (BootDashElement bootDashElement : selecteds) {
-			bootDashElement.openConfig(owner.getSite().getShell());
+			bootDashElement.openConfig(owner.getUserInteractions());
 		}
 	}
 
