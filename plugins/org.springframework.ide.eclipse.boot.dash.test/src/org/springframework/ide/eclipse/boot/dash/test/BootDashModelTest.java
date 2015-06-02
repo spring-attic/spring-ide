@@ -141,7 +141,6 @@ public class BootDashModelTest {
 		};
 		job.setRule(context.getWorkspace().getRuleFactory().buildRule());
 		job.schedule();
-		JobUtil.join(job);
 
 		new ACondition() {
 			@Override
