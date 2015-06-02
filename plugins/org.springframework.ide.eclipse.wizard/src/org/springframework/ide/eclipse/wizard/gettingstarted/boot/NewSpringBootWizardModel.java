@@ -440,4 +440,22 @@ public class NewSpringBootWizardModel {
 		return null;
 	}
 
+	/**
+	 * Add for easier scripting of the wizard model. Not used by the UI itself.
+	 * If give dependencyId isn't found in the wizard model then an IllegalArgumentException
+	 * will be raised.
+	 */
+	public void addDependency(String dependencyId){
+		for (String catName : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
+			for (Dependency dep : cat.getChoices()) {
+				if (dependencyId.equals(dep.getId())) {
+					cat.add(dep);
+					return; //dep found and added to selection
+				}
+			}
+		}
+		throw new IllegalArgumentException("No such dependency: "+dependencyId);
+	}
+
 }

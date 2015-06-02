@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
@@ -31,6 +32,14 @@ public class ProjectRunStateTracker implements ProcessListener {
 
 	public interface ProjectRunStateListener {
 		void stateChanged(IProject project);
+	}
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
 	}
 
 	public synchronized RunState getState(final IProject project) {
@@ -49,9 +58,9 @@ public class ProjectRunStateTracker implements ProcessListener {
 		updateProjectStatesAndFireEvents();
 	}
 
-	private RunState getState(Map<IProject, RunState> states, IProject p) {
-		if (activeStates!=null) {
-			RunState state = activeStates.get(p);
+	private static RunState getState(Map<IProject, RunState> states, IProject p) {
+		if (states!=null) {
+			RunState state = states.get(p);
 			if (state!=null) {
 				return state;
 			}
@@ -107,8 +116,12 @@ public class ProjectRunStateTracker implements ProcessListener {
 		Iterator<IProject> iter = affectedProjects.iterator();
 		while (iter.hasNext()) {
 			IProject p = iter.next();
-			if (!getState(oldStates, p).equals(getState(activeStates, p))) {
+			RunState oldState = getState(oldStates, p);
+			RunState newState = getState(activeStates, p);
+			if (oldState.equals(newState)) {
 				iter.remove();
+			} else {
+				debug(p+": "+ oldState +" => " + newState);
 			}
 		}
 		return affectedProjects;

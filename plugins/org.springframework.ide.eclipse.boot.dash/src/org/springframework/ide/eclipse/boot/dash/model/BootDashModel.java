@@ -100,6 +100,7 @@ public class BootDashModel {
 	 */
 	public void dispose() {
 		if (elements!=null) {
+			elements = null;
 			openCloseListenerManager.dispose();
 			elementFactory.dispose();
 			classpathListenerManager.dispose();
@@ -143,6 +144,10 @@ public class BootDashModel {
 		elementStateListeners.add(l);
 	}
 
+	public void removeElementStateListener(ElementStateListener l) {
+		elementStateListeners.remove(l);
+	}
+
 	private void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
 			((ElementStateListener)l).stateChanged(element);
@@ -162,4 +167,5 @@ public class BootDashModel {
 			ILaunchConfiguration c) {
 		modelState.setPreferredConfig(e, c);
 	}
+
 }
