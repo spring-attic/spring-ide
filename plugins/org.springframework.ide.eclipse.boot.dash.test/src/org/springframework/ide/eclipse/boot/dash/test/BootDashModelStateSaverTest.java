@@ -47,7 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelStateSaver;
 /**
  * @author Kris De Volder
  */
-public class BootDashModelStateSaverTest {
+public class BootDashModelStateSaverTest extends Mocks {
 
 	private TestBootDashModelContext context;
 	private BootDashElementFactory factory;
@@ -535,13 +535,6 @@ public class BootDashModelStateSaverTest {
 		BootDashElement el = mock(BootDashElement.class);
 		when(el.getProject()).thenReturn(project);
 		return el;
-	}
-
-	private IProject mockProject(String name, boolean exists) {
-		IProject project = mock(IProject.class);
-		when(project.getName()).thenReturn(name);
-		when(project.exists()).thenReturn(exists);
-		return project;
 	}
 
 	@After

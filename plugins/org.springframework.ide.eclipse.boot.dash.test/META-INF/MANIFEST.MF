@@ -19,6 +19,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springsource.ide.eclipse.commons.livexp,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springsource.ide.eclipse.commons.frameworks.test.util,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.springframework.ide.eclipse.boot.launch,
+ org.eclipse.jdt.launching
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

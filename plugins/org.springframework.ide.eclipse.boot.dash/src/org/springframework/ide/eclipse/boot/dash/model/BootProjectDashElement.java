@@ -103,15 +103,19 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 				conf = chooseConfig(ui, configs);
 			}
 			if (conf!=null) {
-				DebugUITools.launch(conf, runMode);
+				launch(runMode, conf);
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
 	}
 
+	protected void launch(final String runMode, ILaunchConfiguration conf) {
+		DebugUITools.launch(conf, runMode);
+	}
+
 	private IType chooseMainType(UserInteractions ui) throws CoreException {
-		IType[] mainTypes = MainTypeFinder.guessMainTypes(getJavaProject(), new NullProgressMonitor());
+		IType[] mainTypes = guessMainTypes();
 		if (mainTypes.length==0) {
 			ui.errorPopup("Problem launching", "Couldn't find a main type in '"+getName()+"'");
 			return null;
@@ -120,6 +124,13 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		} else {
 			return ui.chooseMainType(mainTypes, "Choose main type", "Choose main type for '"+getName()+"'");
 		}
+	}
+
+	/**
+	 * Shouldn't really by public, it is only public to make easier to test this class.
+	 */
+	protected IType[] guessMainTypes() throws CoreException {
+		return MainTypeFinder.guessMainTypes(getJavaProject(), new NullProgressMonitor());
 	}
 
 	@Override

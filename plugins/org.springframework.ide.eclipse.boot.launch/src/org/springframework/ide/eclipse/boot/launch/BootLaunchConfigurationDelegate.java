@@ -371,7 +371,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	 */
 	public static IProject getProject(ILaunchConfiguration conf) {
 		try {
-			String pname = conf.getAttribute(ATTR_PROJECT_NAME, "");
+			String pname = getProjectName(conf);
 			if (hasText(pname)) {
 				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
 				//debug(conf, "getProject => "+p);
@@ -382,6 +382,11 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		}
 		//debug(conf, "getProject => NULL");
 		return null;
+	}
+
+	public static String getProjectName(ILaunchConfiguration conf)
+			throws CoreException {
+		return conf.getAttribute(ATTR_PROJECT_NAME, "");
 	}
 
 	public static void clearProperties(ILaunchConfigurationWorkingCopy conf) {
