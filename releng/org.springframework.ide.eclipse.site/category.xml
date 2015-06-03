@@ -15,6 +15,12 @@
 
 		<!-- Extensions features -->
 		<feature
+			url="features/org.springframework.ide.eclipse.boot.dash.feature_3.7.0.qualifier.jar"
+			id="org.springframework.ide.eclipse.boot.dash.feature" version="3.7.0.qualifier">
+			<category name="Extensions / Spring IDE" />
+		</feature>
+		
+		<feature
 			url="features/org.springframework.ide.eclipse.aop.feature_3.7.0.qualifier.jar"
 			id="org.springframework.ide.eclipse.aop.feature" version="3.7.0.qualifier">
 			<category name="Extensions / Spring IDE" />
@@ -91,6 +97,12 @@
 		<feature
 			url="features/org.springframework.ide.eclipse.feature.source_3.7.0.qualifier.jar"
 			id="org.springframework.ide.eclipse.feature.source" version="3.7.0.qualifier">
+			<category name="Resources / Spring IDE" />
+		</feature>
+
+		<feature
+			url="features/org.springframework.ide.eclipse.boot.dash.feature.source_3.7.0.qualifier.jar"
+			id="org.springframework.ide.eclipse.boot.dash.feature.source" version="3.7.0.qualifier">
 			<category name="Resources / Spring IDE" />
 		</feature>
 
