@@ -13,17 +13,16 @@
       </view>
    </extension>
    
-   <!-- TODO: integrate view into spring perspecitive? 
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="com.springsource.sts.ide.perspective">
          <view
                ratio="0.66"
-               relative="org.eclipse.jdt.ui.PackageExplorer"
-               relationship="bottom"
+               relative="org.eclipse.wst.server.ui.ServersView"
+               relationship="stack"
                id="org.springframework.ide.eclipse.boot.dash.views.BootDashView">
          </view>
       </perspectiveExtension>
-   </extension> -->
+   </extension>
 </plugin>

@@ -41,7 +41,7 @@ public class StsPerspective implements IPerspectiveFactory {
 		layout.addFastView("org.eclipse.contribution.xref.ui.views.XReferenceView", (float) 0.25);
 
 		IFolderLayout serverFolder = layout.createFolder("server", IPageLayout.BOTTOM, (float) 0.80, "left");
-		serverFolder.addView("org.springframework.ide.eclipse.boot.dash.views.BootDashView");
+//		serverFolder.addView("org.springframework.ide.eclipse.boot.dash.views.BootDashView");
 		serverFolder.addView("org.eclipse.wst.server.ui.ServersView");
 
 //		IFolderLayout tasklistFolder = layout.createFolder("topright", IPageLayout.RIGHT, (float) 0.75, editorArea); //$NON-NLS-1$
