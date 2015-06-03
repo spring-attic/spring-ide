@@ -97,7 +97,9 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			if (configs.isEmpty()) {
 				IType mainType = chooseMainType(ui);
 				if (mainType!=null) {
-					conf = getTarget().createLaunchConfig(getJavaProject(), mainType);
+					RunTarget target = getTarget();
+					IJavaProject jp = getJavaProject();
+					conf = target.createLaunchConfig(jp, mainType);
 				}
 			} else {
 				conf = chooseConfig(ui, configs);
@@ -122,7 +124,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		} else if (mainTypes.length==1){
 			return mainTypes[0];
 		} else {
-			return ui.chooseMainType(mainTypes, "Choose main type", "Choose main type for '"+getName()+"'");
+			return ui.chooseMainType(mainTypes, "Choose Main Type", "Choose main type for '"+getName()+"'");
 		}
 	}
 
@@ -202,7 +204,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	protected ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
 		IJavaProject jp = getJavaProject();
 		RunTarget target = getTarget();
-		IType[] mainTypes = MainTypeFinder.guessMainTypes(jp, new NullProgressMonitor());
+		IType[] mainTypes = guessMainTypes();
 		return target.createLaunchConfig(jp, mainTypes.length==1?mainTypes[0]:null);
 	}
 
@@ -225,7 +227,8 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		if (configs.size()==1) {
 			return configs.get(0);
 		} else if (configs.size()>0) {
-			return ui.chooseConfigurationDialog(dialogTitle, message, configs);
+			ILaunchConfiguration chosen = ui.chooseConfigurationDialog(dialogTitle, message, configs);
+			return chosen;
 		}
 		return null;
 	}

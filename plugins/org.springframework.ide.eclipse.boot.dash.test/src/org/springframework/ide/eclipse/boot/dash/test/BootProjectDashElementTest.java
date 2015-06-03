@@ -10,31 +10,38 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 
 /**
@@ -49,7 +56,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
  */
 public class BootProjectDashElementTest extends Mocks {
 
-	public class TestElement extends BootProjectDashElement {
+	public static class TestElement extends BootProjectDashElement {
 
 		public TestElement(IProject project, BootDashModel context) {
 			super(project, context);
@@ -60,29 +67,22 @@ public class BootProjectDashElementTest extends Mocks {
 		}
 
 		@Override
-		protected IType[] guessMainTypes() throws CoreException {
+		public IType[] guessMainTypes() throws CoreException {
 			return NO_TYPES;
 		}
 	}
 
 	private static final IType[] NO_TYPES = {};
 
-	private String projectName;
-	private IProject project;
-	private IJavaProject javaProject;
-	private IType fooType = mockType("demo", "FooApplication");
-
-	private BootDashModel model;
-	private TestElement element;
-	private UserInteractions ui;
-
-
-	public BootProjectDashElement createElement(String name) {
-		IProject project = mockProject(name, true);
-		return spy(new BootProjectDashElement(project, model));
+	public static TestElement createElement(BootDashModel model, IJavaProject javaProject, RunTarget runTarget) {
+		IProject project = javaProject.getProject();
+		TestElement element = spy(new TestElement(project, model));
+		when(element.getTarget()).thenReturn(runTarget);
+		doReturn(javaProject).when(element).getJavaProject();
+		return element;
 	}
 
-	private IType mockType(String pkg, String name) {
+	public static IType mockType(IJavaProject javaProject, String pkg, String name) {
 		IType type = mock(IType.class);
 		when(type.getElementName()).thenReturn(name);
 		when(type.getFullyQualifiedName()).thenReturn(pkg+"."+name);
@@ -90,25 +90,37 @@ public class BootProjectDashElementTest extends Mocks {
 		return type;
 	}
 
-	@Before
-	public void setup() {
-		projectName = "foo";
-		project = mockProject(projectName, true);
-		javaProject = mock(IJavaProject.class);
-		model = mock(BootDashModel.class);
-		element = spy(new TestElement(project, model));
-		when(element.getProject()).thenReturn(project);
-		doReturn(javaProject).when(element).getJavaProject();
-		ui = mock(UserInteractions.class);
-	}
-
 	@Test(expected=IllegalArgumentException.class)
 	public void restartWithBadArgument() throws Exception {
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+
 		element.restart(RunState.INACTIVE, ui);
+	}
+
+	public static IJavaProject mockJavaProject(IProject project) {
+		String projectName = project.getName();
+		IJavaProject jp = mock(IJavaProject.class);
+		when(jp.getElementName()).thenReturn(projectName);
+		when(jp.getProject()).thenReturn(project);
+		return jp;
 	}
 
 	@Test
 	public void restartNoMainTypes() throws Exception {
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+
 		when(element.guessMainTypes()).thenReturn(NO_TYPES);
 
 		element.restart(RunState.RUNNING, ui);
@@ -116,48 +128,139 @@ public class BootProjectDashElementTest extends Mocks {
 		verify(element).stop(true);
 		verify(ui).errorPopup(
 				stringContains("Problem"),
-				stringContains("Couldn't find a main type in 'foo'")
+				stringContains("Couldn't find a main type")
 		);
 		verifyNoMoreInteractions(ui);
 	}
 
 	@Test
 	public void restartOneMainType() throws Exception {
-		when(element.guessMainTypes()).thenReturn(new IType[] {fooType});
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		IType type = mockType(javaProject, "demo", "FooApplication");
+
+		when(element.guessMainTypes()).thenReturn(new IType[] {type});
+		when(runTarget.createLaunchConfig(javaProject, type)).thenReturn(conf);
 
 		element.restart(RunState.RUNNING, ui);
 
 		verify(element).stop(true);
-		verify(element).launch(
-				eq(ILaunchManager.RUN_MODE),
-				argThat(isLaunchableConfig(projectName, "demo.FooApplication")
-		));
+		verify(element).launch(ILaunchManager.RUN_MODE, conf);
+		verifyZeroInteractions(ui);
 	}
 
+	@Test
+	public void restartTwoMainTypes() throws Exception {
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+		IType fooType = mockType(javaProject, "demo", "FooApplication");
+		IType barType = mockType(javaProject, "demo", "BarApplication");
 
-	private Matcher<ILaunchConfiguration> isLaunchableConfig(final String expectedProject, final String expectedMainType) {
-		return new BaseMatcher<ILaunchConfiguration>() {
+		when(element.guessMainTypes()).thenReturn(new IType[] {fooType, barType});
+		when(ui.chooseMainType(
+				argThat(arrayContaining(fooType, barType)),
+				any(String.class),
+				any(String.class)
+		)).thenReturn(barType);
+		when(runTarget.createLaunchConfig(javaProject, barType)).thenReturn(conf);
 
-			@Override
-			public boolean matches(Object item) {
-				try {
-					if (item instanceof ILaunchConfiguration) {
-						ILaunchConfiguration conf = (ILaunchConfiguration) item;
-						String mainTypeName = conf.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "");
-						String projectName = conf.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-						return projectName.equals(expectedProject)
-							&& mainTypeName.equals(expectedMainType);
-					}
-				} catch (Exception e) {
-				}
-				return false;
-			}
+		element.restart(RunState.RUNNING, ui);
 
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("ILaunchConfig{"+expectedProject+", "+expectedMainType+"}");
-			}
-		};
+		verify(element).stop(true);
+		verify(ui).chooseMainType(any(IType[].class),
+				stringContains("Choose"),
+				stringContains("Choose", projectName)
+		);
+		verify(element).launch(ILaunchManager.RUN_MODE, conf);
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test
+	public void openConfigWithNoExistingConfs() throws Exception {
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+
+		when(runTarget.createLaunchConfig(javaProject, null)).thenReturn(conf);
+		doReturn(RunState.INACTIVE).when(element).getRunState();
+
+		element.openConfig(ui);
+
+		verify(ui).openLaunchConfigurationDialogOnGroup(conf, IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test
+	public void openConfigWithOneExistingConfs() throws Exception {
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
+
+		when(runTarget.getLaunchConfigs(element)).thenReturn(Arrays.asList(conf));
+		doReturn(RunState.INACTIVE).when(element).getRunState();
+
+		element.openConfig(ui);
+
+		verify(ui).openLaunchConfigurationDialogOnGroup(conf, IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
+		verifyNoMoreInteractions(ui);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void openConfigWithTwoExistingConfs() throws Exception {
+		String projectName = "fooProject";
+		BootDashModel model = mock(BootDashModel.class);
+		IProject project = mockProject(projectName, true);
+		IJavaProject javaProject = mockJavaProject(project);
+		RunTarget runTarget = mock(RunTarget.class);
+		TestElement element = createElement(model, javaProject, runTarget);
+		UserInteractions ui = mock(UserInteractions.class);
+		ILaunchConfiguration conf1 = mock(ILaunchConfiguration.class);
+		ILaunchConfiguration conf2 = mock(ILaunchConfiguration.class);
+
+		when(runTarget.getLaunchConfigs(element)).thenReturn(Arrays.asList(conf1, conf2));
+		doReturn(RunState.INACTIVE).when(element).getRunState();
+		when(ui.chooseConfigurationDialog(anyString(), anyString(), listThat(hasItems(conf1, conf2))))
+			.thenReturn(conf2);
+
+		element.openConfig(ui);
+
+		verify(ui).chooseConfigurationDialog(
+				stringContains("Choose", "Configuration"),
+				stringContains("Several"),
+				(List<ILaunchConfiguration>) any()
+		);
+		verify(ui).openLaunchConfigurationDialogOnGroup(conf2, IDebugUIConstants.ID_DEBUG_LAUNCH_GROUP);
+		verifyNoMoreInteractions(ui);
+	}
+
+	private <T> List<T> listThat(Matcher<Iterable<T>> iterMatcher) {
+		Object untyped = iterMatcher;
+		@SuppressWarnings("unchecked")
+		Matcher<List<T>> listMatcher = (Matcher<List<T>>) untyped;
+		return argThat(listMatcher);
 	}
 
 	public static String stringContains(String... strings) {

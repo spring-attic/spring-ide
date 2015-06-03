@@ -21,6 +21,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springsource.ide.eclipse.commons.frameworks.test.util,
  org.eclipse.swt,
  org.springframework.ide.eclipse.boot.launch,
- org.eclipse.jdt.launching
+ org.eclipse.jdt.launching,
+ org.eclipse.debug.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
