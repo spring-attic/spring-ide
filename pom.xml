@@ -101,7 +101,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.yaml</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
 		
-        <module>plugins/org.springframework.ide.eclipse.boot.dash.feature</module>
+        <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
 
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>
@@ -207,7 +207,7 @@
 		<module>features/org.springframework.ide.eclipse.maven.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
-        <module>plugins/org.springframework.ide.eclipse.boot.dash.feature.source</module>
+        <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
 
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
