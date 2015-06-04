@@ -63,10 +63,8 @@
 
 		<!-- Signing -->
 		<signing.skip>true</signing.skip>
-		<signing.alias>vmware</signing.alias>
-		<signing.keystore>~/.keytool/springsource.jks</signing.keystore>
-		<signing.store.password>${STORE_PASSWORD}</signing.store.password>
-		<signing.key.password>${KEY_PASSWORD}</signing.key.password>
+		<signing.alias>pivotal</signing.alias>
+		<signing.keystore>~/.keytool/pivotal.jks</signing.keystore>
 
 		<dist.name>Spring IDE</dist.name>
 		<dist.project>spring-ide</dist.project>
@@ -478,7 +476,7 @@
 			<id>bamboo-signing</id>
 			<properties>
 				<signing.store.password>${env.bamboo_signing_store_password}</signing.store.password>
-				<signing.key.password>${env.bamboo_signing_key_password}</signing.key.password>
+				<signing.key.password>${env.bamboo_signing_store_password}</signing.key.password>
 			</properties>
 		</profile>
 		
