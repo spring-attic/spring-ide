@@ -47,8 +47,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
 
 /**
@@ -70,10 +72,13 @@ public abstract class YamlAssistContext {
 	//	}
 	//	protected final Kind contextKind;
 
+	protected int documentSelector; // Yaml file can contain multiple document. The idx indicates which
+								// document this context is in.
 	protected final YamlPath contextPath;
 	protected final TypeUtil typeUtil;
 
-	public YamlAssistContext(YamlPath contextPath, TypeUtil typeUtil) {
+	public YamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil) {
+		this.documentSelector = documentSelector;
 		this.contextPath = contextPath;
 		this.typeUtil = typeUtil;
 	}
@@ -114,17 +119,22 @@ public abstract class YamlAssistContext {
 
 	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
 
-	public static YamlAssistContext global(FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-		return new IndexContext(YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
+	public static YamlAssistContext global(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
 	}
 
 	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-		YamlAssistContext context = YamlAssistContext.global(index, completionFactory, typeUtil);
-		for (YamlPathSegment s : contextPath.getSegments()) {
-			if (context==null) return null;
-			context = context.navigate(s);
+		YamlPathSegment documentSelector = contextPath.getSegment(0);
+		if (documentSelector!=null) {
+			contextPath = contextPath.dropFirst(1);
+			YamlAssistContext context = YamlAssistContext.global(documentSelector.toIndex(), index, completionFactory, typeUtil);
+			for (YamlPathSegment s : contextPath.getSegments()) {
+				if (context==null) return null;
+				context = context.navigate(s);
+			}
+			return context;
 		}
-		return context;
+		return null;
 	}
 
 	protected abstract YamlAssistContext navigate(YamlPathSegment s);
@@ -149,7 +159,7 @@ public abstract class YamlAssistContext {
 		private YamlAssistContext parent;
 
 		public TypeContext(YamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-			super(contextPath, typeUtil);
+			super(parent.documentSelector, contextPath, typeUtil);
 			this.parent = parent;
 			this.completionFactory = completionFactory;
 			this.type = type;
@@ -179,7 +189,7 @@ public abstract class YamlAssistContext {
 			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode);
 			if (CollectionUtil.hasElements(properties)) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
-				SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
+				SNode contextNode = getContextNode(doc);
 				Set<String> definedProps = getDefinedProperties(contextNode);
 				for (TypedProperty p : properties) {
 					String name = p.getName();
@@ -310,9 +320,9 @@ public abstract class YamlAssistContext {
 		private IndexNavigator indexNav;
 		PropertyCompletionFactory completionFactory;
 
-		public IndexContext(YamlPath contextPath, IndexNavigator indexNav,
+		public IndexContext(int documentSelector, YamlPath contextPath, IndexNavigator indexNav,
 				PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-			super(contextPath, typeUtil);
+			super(documentSelector, contextPath, typeUtil);
 			this.indexNav = indexNav;
 			this.completionFactory = completionFactory;
 		}
@@ -328,7 +338,7 @@ public abstract class YamlAssistContext {
 					ScoreableProposal completion = completionFactory.property(
 							doc.getDocument(), edits, match, typeUtil
 					);
-					if (doc.exists(YamlPath.fromProperty(match.data.getId()))) {
+					if (getContextRoot(doc).exists(YamlPath.fromProperty(match.data.getId()))) {
 						completion.deemphasize();
 					}
 					completions.add(completion);
@@ -338,7 +348,7 @@ public abstract class YamlAssistContext {
 			return Collections.emptyList();
 		}
 
-		protected ProposalApplier createEdits(final YamlDocument doc,
+		protected ProposalApplier createEdits(final YamlDocument file,
 				final int offset, final String query, final Match<PropertyInfo> match)
 				throws Exception {
 			//Edits created lazyly as they are somwehat expensive to compute and mostly
@@ -346,7 +356,7 @@ public abstract class YamlAssistContext {
 			return new LazyProposalApplier() {
 				@Override
 				protected ProposalApplier create() throws Exception {
-					YamlPathEdits edits = new YamlPathEdits(doc);
+					YamlPathEdits edits = new YamlPathEdits(file);
 
 					int queryOffset = offset-query.length();
 					edits.delete(queryOffset, query);
@@ -354,7 +364,7 @@ public abstract class YamlAssistContext {
 					YamlPath propertyPath = YamlPath.fromProperty(match.data.getId());
 					YamlPath relativePath = propertyPath.dropFirst(contextPath.size());
 					YamlPathSegment nextSegment = relativePath.getSegment(0);
-					SNode contextNode = contextPath.traverse((SNode)doc.getStructure());
+					SNode contextNode = getContextNode(file);
 					//To determine if this completion is 'in place' or needs to be inserted
 					// elsewhere in the tree, we check whether a node already exists in our
 					// context. If it doesn't we can create it as any child of the context
@@ -364,15 +374,14 @@ public abstract class YamlAssistContext {
 					if (existingNode==null) {
 						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendText);
 					} else {
-						String wholeLine = doc.getLineTextAtOffset(queryOffset);
+						String wholeLine = file.getLineTextAtOffset(queryOffset);
 						if (wholeLine.trim().equals(query.trim())) {
 							edits.deleteLineBackwardAtOffset(queryOffset);
 						}
-						edits.createPath(YamlPath.fromProperty(match.data.getId()), appendText);
+						edits.createPath(getContextRoot(file), YamlPath.fromProperty(match.data.getId()), appendText);
 					}
 					return edits;
 				}
-
 			};
 		}
 
@@ -381,9 +390,9 @@ public abstract class YamlAssistContext {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
 				if (subIndex.getExtensionCandidate()!=null) {
-					return new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);
+					return new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil);
 				} else if (subIndex.getExactMatch()!=null) {
-					IndexContext asIndexContext = new IndexContext(contextPath.append(s), subIndex, completionFactory, typeUtil);
+					IndexContext asIndexContext = new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil);
 					PropertyInfo prop = subIndex.getExactMatch();
 					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil);
 				}
@@ -417,4 +426,15 @@ public abstract class YamlAssistContext {
 	}
 
 	public abstract HoverInfo getHoverInfo();
+
+	protected SNode getContextNode(YamlDocument file) throws Exception {
+		return contextPath.traverse((SNode)getContextRoot(file));
+	}
+
+	protected SDocNode getContextRoot(YamlDocument file) throws Exception {
+		SRootNode root = file.getStructure();
+		return (SDocNode) root.getChildren().get(documentSelector);
+	}
+
+
 }

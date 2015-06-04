@@ -76,6 +76,9 @@ public abstract class NodeRef<Parent> {
 		public Kind getKind() {
 			return Kind.ROOT;
 		}
+		public int getIndex() {
+			return index;
+		}
 	}
 
 	public static class SeqRef extends NodeRef<SequenceNode> {

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.structure;
 
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 
 /**

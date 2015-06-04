@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.Y
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
 
 /**
@@ -75,11 +76,23 @@ public class YamlStructureParser {
 			"^(\\-( |$)).*");
 
 
+	public static final Pattern DOCUMENT_SEPERATOR = Pattern.compile("^(---|\\.\\.\\.)(\\s)*(\\#.*)?");
+	//This expression matches:
+	//   either "..." or "---" at the start of a line
+	//   followed by arbitrary amount of whitepsace
+	//   optionally followed by a "#" end of line comment.
+
+	//Note: "..." isn't a document separator but document terminator. Treating it as a separator is
+	// technically not correct. As the structure parser is meant to be 'robust' and do something
+	// sensible with incorrect input this makes sense here. The effect it will have is that user
+	// can type after a document terminator and get content assist as if they are in a new document.
+	// (They will also receive a syntax error message from the more formal and precise SnakeYaml parser)
+
 //	public static final Pattern SEQ_LINE = Pattern.compile(
 //			"^( *)- .*");
 
 	public static enum SNodeType {
-		ROOT, KEY, SEQ, RAW
+		ROOT, DOC, KEY, SEQ, RAW
 	}
 
 	private YamlLineReader input;
@@ -267,10 +280,19 @@ public class YamlStructureParser {
 				} else if (nodeType==SNodeType.SEQ) {
 					int index = ((SSeqNode)node).getIndex();
 					segments.add(YamlPathSegment.valueAt(index));
+				} else if (nodeType==SNodeType.DOC) {
+					int index = ((SDocNode)node).getIndex();
+					segments.add(YamlPathSegment.valueAt(index));
 				}
 			}
 		}
 
+		public SRootNode getRoot() {
+			if (parent==null) {
+				return (SRootNode) this;
+			}
+			return parent.getRoot();
+		}
 
 	}
 
@@ -283,6 +305,54 @@ public class YamlStructureParser {
 		@Override
 		public SNodeType getNodeType() {
 			return SNodeType.ROOT;
+		}
+
+		@Override
+		public void addChild(SNode c) {
+			Assert.isLegal(c.getNodeType()==SNodeType.DOC, ""+c.getNodeType());
+			super.addChild(c);
+		}
+
+		@Override
+		public SNode traverse(YamlPathSegment s) throws Exception {
+			Integer index = s.toIndex();
+			if (index!=null) {
+				List<SNode> cs = getChildren();
+				if (index>=0 && index<cs.size()) {
+					return cs.get(index);
+				}
+			}
+			return null;
+		}
+	}
+
+	public static class SDocNode extends SChildBearingNode {
+
+		private int index;
+
+		/**
+		 * If this SDocNode is started explicitly by '---' document separator
+		 * then the start and end will be set according to its position.
+		 * <p>
+		 * If a document is started implicitly (at the start of the file/editor)
+		 * then start and end are set to 0.
+		 */
+		public SDocNode(SRootNode parent, int start, int end) {
+			super(parent, parent.doc, 0, start, end);
+			this.index = parent.getChildren().size()-1;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		@Override
+		public SNodeType getNodeType() {
+			return SNodeType.DOC;
+		}
+
+		public boolean exists(YamlPath path) throws Exception {
+			return path.traverse((SNode)this) != null;
 		}
 
 	}
@@ -408,6 +478,7 @@ public class YamlStructureParser {
 			}
 			return null;
 		}
+
 	}
 
 	public abstract class SLeafNode extends SNode {
@@ -458,7 +529,8 @@ public class YamlStructureParser {
 
 	public SRootNode parse() throws Exception {
 		SRootNode root = new SRootNode(input.getDocument());
-		SChildBearingNode parent = root; //path is defined by parent, parent.getParent(), etc
+		SDocNode doc = new SDocNode(root,0,0);
+		SChildBearingNode parent = doc;
 		YamlLine line;
 		while (null!=(line=input.read())) {
 			int indent = line.getIndent();
@@ -473,9 +545,11 @@ public class YamlStructureParser {
 	}
 
 	protected SChildBearingNode parseLine(SChildBearingNode parent, YamlLine line, boolean createRawNode) throws Exception {
-		if (line.matches(SIMPLE_KEY_LINE)) {
+		if (line.matches(DOCUMENT_SEPERATOR)) {
+			parent = createDocNode(parent.getRoot(), line);
+		} else if (line.matches(SIMPLE_KEY_LINE)) {
 			int currentIndent = line.getIndent();
-			while (currentIndent==parent.getIndent() && parent.getParent()!=null) {
+			while (currentIndent==parent.getIndent() && parent.getNodeType()!=SNodeType.DOC) {
 				parent = parent.getParent();
 			}
 			parent = createKeyNode(parent, line);
@@ -490,6 +564,12 @@ public class YamlStructureParser {
 			createRawNode(parent, line);
 		}
 		return parent;
+	}
+
+	private SChildBearingNode createDocNode(SRootNode parent, YamlLine line) {
+		int start = line.getStart();
+		int end = line.getEnd();
+		return new SDocNode(parent, start, end);
 	}
 
 	private SChildBearingNode createSeqNode(SChildBearingNode parent, YamlLine line) throws Exception {

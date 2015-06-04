@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.RootRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.SeqRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
@@ -108,7 +109,10 @@ public class YamlPath {
 	}
 
 	public YamlPathSegment getSegment(int segment) {
-		return segments[segment];
+		if (segment>=0 && segment<segments.length) {
+			return segments[segment];
+		}
+		return null;
 	}
 
 	public YamlPath append(YamlPathSegment s) {
@@ -180,7 +184,8 @@ public class YamlPath {
 		for (NodeRef<?> nodeRef : path) {
 			switch (nodeRef.getKind()) {
 			case ROOT:
-				// nothing to do, just pass throught to a 'real' node.
+				RootRef rref = (RootRef) nodeRef;
+				segments.add(YamlPathSegment.valueAt(rref.getIndex()));
 				break;
 			case KEY: {
 				String key = NodeUtil.asScalar(nodeRef.get());

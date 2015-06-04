@@ -16,8 +16,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.YamlLine;
 
 /**
@@ -169,11 +170,5 @@ public class YamlDocument {
 		return doc.getLineInformationOfOffset(offset).getOffset();
 	}
 
-	public boolean exists(YamlPath path) throws Exception {
-		if (path!=null) {
-			return path.traverse((SNode)getStructure())!=null;
-		}
-		return false;
-	}
 
 }

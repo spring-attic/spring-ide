@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
@@ -20,6 +21,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 
 /**
@@ -41,19 +43,20 @@ public class YamlPathEdits extends DocumentEdits {
 
 	/**
 	 * Create the necessary edits to ensure that a given property
-	 * path exists, placing cursor right after that the right place to start typing
-	 * the property value.
-	 */
-	public void createPath(YamlPath path, String appendText) throws Exception {
-		SRootNode root = doc.getStructure();
-		createPath(root, path, appendText);
-	}
-
-	/**
-	 * Like createPath, but path is created relative to a parent node instead of
-	 * at the document root.
+	 * path exists, placing cursor in the right place also to start
+	 * start typing the property value.
+	 * <p>
+	 * This also handles cases where all or some of the path already
+	 * exists. In the former case no edits are performed only cursor
+	 * movement. In the latter case, the right place to start inserting
+	 * the 'missing' portion of the path is found and the edits
+	 * are created there.
 	 */
 	public void createPath(SChildBearingNode node, YamlPath path, String appendText) throws Exception {
+		//This code doesn't handle selection of subddocuments
+		// or creation of new subdocuments so must not call it on
+		//ROOT node but start at an appropriate SDocNode (or below)
+		Assert.isLegal(node.getNodeType()!=SNodeType.ROOT);
 		if (!path.isEmpty()) {
 			YamlPathSegment s = path.getSegment(0);
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
@@ -107,7 +110,7 @@ public class YamlPathEdits extends DocumentEdits {
 	}
 
 	private int getChildIndent(SNode parent) {
-		if (parent.getNodeType()==SNodeType.ROOT) {
+		if (parent.getNodeType()==SNodeType.DOC) {
 			return parent.getIndent();
 		} else {
 			return parent.getIndent()+IndentUtil.INDENT_BY;

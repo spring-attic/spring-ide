@@ -11,16 +11,16 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.ValAtKey;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
-
 
 public class YamlStructureParserTest extends YamlEditorTestHarness {
 
@@ -31,8 +31,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    message\n"
 		);
 
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): hello:",
 				"    KEY(2): world:",
 				"      RAW(4): message",
@@ -49,6 +49,15 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertEquals(expected.toString().trim(),  editor.parseStructure().toString().trim());
 	}
 
+	public void assertParseOneDoc(YamlEditor editor, String... expectDumpLines) throws Exception {
+		StringBuilder expected = new StringBuilder();
+		for (String line : expectDumpLines) {
+			expected.append(line);
+			expected.append("\n");
+		}
+		assertEquals(expected.toString().trim(),  getOnlyDocument(editor.parseStructure()).toString().trim());
+	}
+
 	public void testComments() throws Exception {
 		YamlEditor editor = new YamlEditor(
 				"#A comment\n" +
@@ -57,8 +66,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  world:\n" +
 				"    message\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  RAW(-1): #A comment",
 				"  KEY(0): hello:",
 				"    RAW(-1):   #Another comment",
@@ -84,8 +93,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  moonbase-alfa:\n" +
 				"    moonstone\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): world:",
 				"    KEY(2): europe:",
 				"      KEY(4): france:",
@@ -103,6 +112,49 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testMultiDocs() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"world:\n" +
+				"  europe:\n" +
+				"    france:\n" +
+				"      cheese\n" +
+				"    belgium:\n" +
+				"    beer\n" + //At same level as key, technically this is a syntax error but we tolerate it
+				"---\n"+
+				"  canada:\n" +
+				"    montreal: poutine\n" +
+				"    vancouver:\n" +
+				"      salmon\n" +
+				"---\n" +
+				"moon:\n" +
+				"  moonbase-alfa:\n" +
+				"    moonstone\n" +
+				"...\n"
+		);
+		assertParse(editor,
+				"ROOT(0): ",
+				"  DOC(0): ",
+				"    KEY(0): world:",
+				"      KEY(2): europe:",
+				"        KEY(4): france:",
+				"          RAW(6): cheese",
+				"        KEY(4): belgium:",
+				"          RAW(4): beer",
+				"  DOC(0): ---",
+				"    KEY(2): canada:",
+				"      KEY(4): montreal: poutine",
+				"      KEY(4): vancouver:",
+				"        RAW(6): salmon",
+				"  DOC(0): ---",
+				"    KEY(0): moon:",
+				"      KEY(2): moonbase-alfa:",
+				"        RAW(4): moonstone",
+				"  DOC(0): ...",
+				"    RAW(-1): "
+		);
+	}
+
+
 	public void testSequenceBasic() throws Exception {
 		YamlEditor editor;
 
@@ -112,8 +164,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"- bar\n" +
 				"- zor"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  SEQ(0): - foo",
 				"  SEQ(0): - bar",
 				"  SEQ(0): - zor"
@@ -129,8 +181,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"- a\n" +
 				"- def"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): something:" ,
 				"    SEQ(0): - foo",
 				"    SEQ(0): - bar",
@@ -151,8 +203,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  - a\n" +
 				"  - def"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): higher:",
 				"    KEY(2): something:" ,
 				"      SEQ(2): - foo",
@@ -173,8 +225,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  - a\n" +
 				"  - def"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): something:" ,
 				"    SEQ(2): - foo",
 				"    SEQ(2): - bar",
@@ -195,8 +247,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"- - c\n" +
 				"  - d\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  SEQ(0): - - a",
 				"    SEQ(2): - a",
 				"    SEQ(2): - b",
@@ -213,8 +265,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"- - c\n" +
 				"  - d"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): foo:",
 				"    SEQ(0): - - a",
 				"      SEQ(2): - a",
@@ -232,8 +284,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"- - c\n" +
 				"  - d\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): foo:",
 				"    SEQ(0): - - a",
 				"      SEQ(2): - a",
@@ -254,8 +306,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  - c\n" +
 				"  - d"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): foo:",
 				"    SEQ(0): - ",
 				"      SEQ(2): - a",
@@ -273,8 +325,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  - d\n" +
 				"- e\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): foo:",
 				"    SEQ(0): - - - - a",
 				"      SEQ(2): - - - a",
@@ -293,8 +345,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    - c\n" +
 				"- e\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): foo:",
 				"    SEQ(0): - - - - a",
 				"      SEQ(2): - - - a",
@@ -318,8 +370,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"- a: aaa\n" +
 				"  b: bbb\n"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  SEQ(0): - foo: is foo",
 				"    KEY(2): foo: is foo",
 				"    KEY(2): bar: is bar",
@@ -340,8 +392,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  a: aaa\n" +
 				"  b: bbb"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  SEQ(0): -",
 				"    KEY(2): foo: is foo",
 				"    KEY(2): bar: is bar",
@@ -361,8 +413,8 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"  a: aaa\n" +
 				"  b: bbb"
 		);
-		assertParse(editor,
-				"ROOT(0): ",
+		assertParseOneDoc(editor,
+				"DOC(0): ",
 				"  KEY(0): foo:",
 				"    SEQ(0): -",
 				"      KEY(2): foo: is foo",
@@ -384,20 +436,20 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		SRootNode root = editor.parseStructure();
 		YamlPath path;
 
-		path = pathWith("foo", 0, 0, 0, 0);
+		path = pathWith(0, "foo", 0, 0, 0, 0);
 		assertEquals(
 				"SEQ(6): - a\n",
 				path.traverse((SNode)root).toString());
 
-		path = pathWith("foo", -1);
+		path = pathWith(0, "foo", -1);
 		assertNull(path.traverse((SNode)root));
 
-		path = pathWith("foo", 1);
+		path = pathWith(0, "foo", 1);
 		assertEquals(
 				"SEQ(0): - e\n",
 				path.traverse((SNode)root).toString());
 
-		path = pathWith("foo", 2);
+		path = pathWith(0, "foo", 2);
 		assertNull(path.traverse((SNode)root));
 	}
 
@@ -453,12 +505,11 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		SRootNode root = editor.parseStructure();
 		YamlPath path;
 
-		path = pathWith("foo", 0, "bar", 1, "key");
+		path = pathWith(0, "foo", 0, "bar", 1, "key");
 		assertEquals(
 				"KEY(4): key: lol\n",
 				path.traverse((SNode)root).toString());
 	}
-
 
 	public void testTreeEnd() throws Exception {
 		YamlEditor editor = new YamlEditor(
@@ -477,7 +528,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    moonstone\n"
 		);
 		SRootNode root = editor.parseStructure();
-		SNode node = getNodeAtPath(root, 0, 1);
+		SNode node = getNodeAtPath(root, 0, 0, 1);
 		assertTreeText(editor, node,
 				"  canada:\n" +
 				"    montreal: poutine\n" +
@@ -485,7 +536,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"      salmon\n"
 		);
 
-		node = getNodeAtPath(root, 0, 0, 1, 0);
+		node = getNodeAtPath(root, 0, 0, 0, 1, 0);
 		assertTreeText(editor, node,
 				"beer"
 		);
@@ -504,7 +555,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    moonstone\n"
 		);
 		SRootNode root = editor.parseStructure();
-		SNode node = getNodeAtPath(root, 0, 0);
+		SNode node = getNodeAtPath(root, 0, 0, 0);
 		assertTreeText(editor, node,
 				"  europe:"
 		);
@@ -527,22 +578,60 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 				"    moonstone\n"
 		);
 		SRootNode root = editor.parseStructure();
-		assertFind(editor, root, "world:", 					0);
-		assertFind(editor, root,   "europe:", 				0, 0);
-		assertFind(editor, root,     "france:",				0, 0, 0);
-		assertFind(editor, root,       "cheese",			0, 0, 0, 0);
-		assertFind(editor, root,     "belgium:",			0, 0, 1);
-		assertFind(editor, root,     "beer",				0, 0, 1, 0);
-		assertFind(editor, root,   "canada:",				0, 1);
-		assertFind(editor, root,     "montreal: poutine",	0, 1, 0);
-		assertFind(editor, root,     "vancouver:",			0, 1, 1);
-		assertFind(editor, root,        "salmon",			0, 1, 1, 0);
-		assertFind(editor, root, "moon:",					1);
-		assertFind(editor, root,   "moonbase-alfa:",		1, 0);
-		assertFind(editor, root,     "moonstone",			1, 0, 0);
+		assertFind(editor, root, "world:", 					0, 0);
+		assertFind(editor, root,   "europe:", 				0, 0, 0);
+		assertFind(editor, root,     "france:",				0, 0, 0, 0);
+		assertFind(editor, root,       "cheese",			0, 0, 0, 0, 0);
+		assertFind(editor, root,     "belgium:",			0, 0, 0, 1);
+		assertFind(editor, root,     "beer",				0, 0, 0, 1, 0);
+		assertFind(editor, root,   "canada:",				0, 0, 1);
+		assertFind(editor, root,     "montreal: poutine",	0, 0, 1, 0);
+		assertFind(editor, root,     "vancouver:",			0, 0, 1, 1);
+		assertFind(editor, root,        "salmon",			0, 0, 1, 1, 0);
+		assertFind(editor, root, "moon:",					0, 1);
+		assertFind(editor, root,   "moonbase-alfa:",		0, 1, 0);
+		assertFind(editor, root,     "moonstone",			0, 1, 0, 0);
 
-		assertFindStart(editor, root, " europe:", 0);
+		assertFindStart(editor, root, " europe:", 0, 0);
 	}
+
+	public void testFindInMultiDoc() throws Exception {
+		YamlEditor editor = new YamlEditor(
+				"world:\n" +
+				"  europe:\n" +
+				"    france:\n" +
+				"      cheese\n" +
+				"    belgium:\n" +
+				"    beer\n" + //At same level as key, technically this is a syntax error but we tolerate it
+				"---\n" +
+				"  canada:\n" +
+				"    montreal: poutine\n" +
+				"    vancouver:\n" +
+				"      salmon\n" +
+				"---\n" +
+				"moon:\n" +
+				"  moonbase-alfa:\n" +
+				"    moonstone\n" +
+				"..."
+		);
+		SRootNode root = editor.parseStructure();
+		assertFind(editor, root, "world:", 					0, 0);
+		assertFind(editor, root,   "europe:", 				0, 0, 0);
+		assertFind(editor, root,     "france:",				0, 0, 0, 0);
+		assertFind(editor, root,       "cheese",			0, 0, 0, 0, 0);
+		assertFind(editor, root,     "belgium:",			0, 0, 0, 1);
+		assertFind(editor, root,     "beer",				0, 0, 0, 1, 0);
+		assertFind(editor, root,   "canada:",				1, 0);
+		assertFind(editor, root,     "montreal: poutine",	1, 0, 0);
+		assertFind(editor, root,     "vancouver:",			1, 0, 1);
+		assertFind(editor, root,        "salmon",			1, 0, 1, 0);
+		assertFind(editor, root, "moon:",					2, 0);
+		assertFind(editor, root,   "moonbase-alfa:",		2, 0, 0);
+		assertFind(editor, root,     "moonstone",			2, 0, 0, 0);
+
+		assertFindStart(editor, root, " canada:", 1);
+	}
+
 
 	public void testFindInSequence() throws Exception {
 		YamlEditor editor = new YamlEditor(
@@ -557,27 +646,27 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		);
 		SRootNode root = editor.parseStructure();
 
-		assertFind     (editor, root, "foo:",				0);
-		assertFind     (editor, root, "- alchemy",			0, 0);
-		assertFind     (editor, root, "- bistro",			0, 1);
-		assertFind     (editor, root, "bar:",				1);
-		assertFindStart(editor, root, "- - - nice: text",	1, 0);
-		assertFindStart(editor, root,  " - - nice: text",	1, 0);
-		assertFindStart(editor, root,   "- - nice: text",	1, 0, 0);
-		assertFindStart(editor, root,    " - nice: text",	1, 0, 0);
-		assertFindStart(editor, root,     "- nice: text",	1, 0, 0, 0);
-		assertFindStart(editor, root,      " nice: text",	1, 0, 0, 0);
-		assertFind     (editor, root,       "nice: text",	1, 0, 0, 0, 0);
-		assertFind     (editor, root, "zor:",				2);
-		assertFindStart(editor, root, "  - - - very: good",	2);
-		assertFindStart(editor, root,  " - - - very: good",	2);
-		assertFindStart(editor, root,   "- - - very: good",	2, 0);
-		assertFindStart(editor, root,    " - - very: good",	2, 0);
-		assertFindStart(editor, root,     "- - very: good",	2, 0, 0);
-		assertFindStart(editor, root,      " - very: good",	2, 0, 0);
-		assertFindStart(editor, root,       "- very: good",	2, 0, 0, 0);
-		assertFindStart(editor, root,        " very: good",	2, 0, 0, 0);
-		assertFind     (editor, root,         "very: good",	2, 0, 0, 0, 0);
+		assertFind     (editor, root, "foo:",				0, 0);
+		assertFind     (editor, root, "- alchemy",			0, 0, 0);
+		assertFind     (editor, root, "- bistro",			0, 0, 1);
+		assertFind     (editor, root, "bar:",				0, 1);
+		assertFindStart(editor, root, "- - - nice: text",	0, 1, 0);
+		assertFindStart(editor, root,  " - - nice: text",	0, 1, 0);
+		assertFindStart(editor, root,   "- - nice: text",	0, 1, 0, 0);
+		assertFindStart(editor, root,    " - nice: text",	0, 1, 0, 0);
+		assertFindStart(editor, root,     "- nice: text",	0, 1, 0, 0, 0);
+		assertFindStart(editor, root,      " nice: text",	0, 1, 0, 0, 0);
+		assertFind     (editor, root,       "nice: text",	0, 1, 0, 0, 0, 0);
+		assertFind     (editor, root, "zor:",				0, 2);
+		assertFindStart(editor, root, "  - - - very: good",	0, 2);
+		assertFindStart(editor, root,  " - - - very: good",	0, 2);
+		assertFindStart(editor, root,   "- - - very: good",	0, 2, 0);
+		assertFindStart(editor, root,    " - - very: good",	0, 2, 0);
+		assertFindStart(editor, root,     "- - very: good",	0, 2, 0, 0);
+		assertFindStart(editor, root,      " - very: good",	0, 2, 0, 0);
+		assertFindStart(editor, root,       "- very: good",	0, 2, 0, 0, 0);
+		assertFindStart(editor, root,        " very: good",	0, 2, 0, 0, 0);
+		assertFind     (editor, root,         "very: good",	0, 2, 0, 0, 0, 0);
 	}
 
 	public void testGetKey() throws Exception {
@@ -668,14 +757,14 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 
 		SRootNode root = editor.parseStructure();
 		YamlPath pathToFrance = pathWith(
-				"world", "europe", "france"
+				0, "world", "europe", "france"
 		);
 		assertEquals(
 				"KEY(4): france:\n"+
 				"  RAW(6): cheese\n",
 				pathToFrance.traverse((SNode)root).toString());
 
-		assertNull(pathWith("world", "europe", "bogus").traverse((SNode)root));
+		assertNull(pathWith(0, "world", "europe", "bogus").traverse((SNode)root));
 	}
 
 	public void testGetFirstRealChild() throws Exception {
@@ -697,21 +786,42 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertFirstRealChild(editor, "unreal-children", null);
 		assertFirstRealChild(editor, "real-child", "abc");
 		assertFirstRealChild(editor, "mixed-children", "def");
+	}
 
+	public void testDocumentSeparatorRegexp() throws Exception {
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "---");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "...");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "---   	");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "...			");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "---   #The next doc starts here");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "...   #The previous doc ends here");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "---#The next doc starts here");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "...#The previous doc ends here");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "---#");
+		assertMatch(YamlStructureParser.DOCUMENT_SEPERATOR, "...#");
+	}
+
+	private void assertMatch(Pattern pat, String string) {
+		assertTrue("Doesn't match: '"+string+"'", pat.matcher(string).matches());
 	}
 
 	private void assertFirstRealChild(YamlEditor editor, String testNodeName, String expectedNodeSnippet) throws Exception {
-		SRootNode root = editor.parseStructure();
-		SKeyNode testNode = root.getChildWithKey(testNodeName);
+		SDocNode doc = getOnlyDocument(editor.parseStructure());
+		SKeyNode testNode = doc.getChildWithKey(testNodeName);
 		assertNotNull(testNode);
 		SNode expected = null;
 		if (expectedNodeSnippet!=null) {
 			int offset = editor.getRawText().indexOf(expectedNodeSnippet);
-			expected = root.find(offset);
+			expected = doc.find(offset);
 			assertTrue(editor.textUnder(expected).contains(expectedNodeSnippet));
 		}
 
 		assertEquals(expected, testNode.getFirstRealChild());
+	}
+
+	private SDocNode getOnlyDocument(SRootNode root) {
+		assertEquals(1, root.getChildren().size());
+		return (SDocNode) root.getChildren().get(0);
 	}
 
 	private YamlPath pathWith(Object... keysOrIndexes) {
@@ -761,7 +871,6 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		SNode expectNode = getNodeAtPath(root, expectPath);
 		assertEquals(expectNode, root.find(start));
 	}
-
 
 	private void assertTreeText(YamlEditor editor, SNode node, String expected) throws Exception {
 		String actual = editor.textBetween(node.getStart(), node.getTreeEnd());

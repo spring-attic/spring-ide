@@ -15,7 +15,6 @@ import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,9 +28,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
@@ -42,9 +38,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.Y
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
 

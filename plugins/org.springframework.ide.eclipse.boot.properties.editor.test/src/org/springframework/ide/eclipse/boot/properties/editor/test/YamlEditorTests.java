@@ -1707,8 +1707,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 
-	public void DISABLED_testDocumentSeparator() throws Exception {
-		//Test DISABLED because it doesn't work *yet*
+	public void testDocumentSeparator() throws Exception {
 		defaultTestData();
 
 		assertCompletion(

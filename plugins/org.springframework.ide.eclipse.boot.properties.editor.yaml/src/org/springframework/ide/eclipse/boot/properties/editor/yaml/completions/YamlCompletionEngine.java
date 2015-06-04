@@ -94,11 +94,11 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			// area then the structure may not reflect correctly the context. This is because
 			// the correct context depends on text the user has not typed yet.(which will change the
 			// indentation level of the current line. So we must use the cursorIndentation
-			// than the structur-tree to determine the 'context' node.
+			// rather than the structur-tree to determine the 'context' node.
 			int cursorIndent = doc.getColumn(offset);
 			int nodeIndent = node.getIndent();
 			int currentIndent = IndentUtil.minIndent(cursorIndent, nodeIndent);
-			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getParent()!=null)) {
+			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getNodeType()!=SNodeType.DOC)) {
 				node = node.getParent();
 			}
 			return YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil);
@@ -109,7 +109,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			} else {
 				return YamlAssistContext.forPath(seqNode.getParent().getPath(), index, completionFactory, typeUtil);
 			}
-		} else if (node.getNodeType()==SNodeType.ROOT) {
+		} else if (node.getNodeType()==SNodeType.DOC) {
 			return  YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil);
 		} else {
 			throw new IllegalStateException("Missing case");
