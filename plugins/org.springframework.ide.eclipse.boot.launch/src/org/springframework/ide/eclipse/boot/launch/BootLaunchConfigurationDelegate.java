@@ -243,7 +243,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		if (getEnableLifeCycle(conf)) {
 			enabled.add(Feature.LIFE_CYCLE);
 		}
-		return null;
+		return enabled;
 	}
 
 	public static boolean getEnableLifeCycle(ILaunchConfiguration conf) {
