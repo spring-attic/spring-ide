@@ -452,7 +452,7 @@
 				<repository>
 					<id>orbit-mars</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/tools/orbit/downloads/drops/S20150316021154/repository/</url>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20150519210750/repository/</url>
 				</repository>
 				<repository>
 					<id>swtbot</id>
