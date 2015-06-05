@@ -111,7 +111,7 @@ public class EnableLiveBeanSupportModel implements ILaunchConfigurationTabModel 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy conf) {
 		setEnableLiveBeanSupport(conf, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
-		setJMXPort(conf, ""+LiveBeanSupport.randomPort());
+		setJMXPort(conf, ""+JmxBeanSupport.randomPort());
 	}
 
 	@Override

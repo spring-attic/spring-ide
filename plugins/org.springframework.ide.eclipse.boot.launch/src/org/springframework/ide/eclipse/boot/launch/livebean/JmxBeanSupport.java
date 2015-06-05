@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
+import java.util.EnumSet;
+
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 /**
@@ -17,26 +19,45 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
  *
  * @author Kris De Volder
  */
-public class LiveBeanSupport {
+public class JmxBeanSupport {
+
+	public static enum Feature {
+		LIVE_BEAN_GRAPH("-Dspring.liveBeansView.mbeanDomain=true"),
+		LIFE_CYCLE("-Dspring.context.lifecycle.enabled=true");
+
+		public final String vmArg;
+
+		Feature(String vmArg) {
+			this.vmArg = vmArg;
+		}
+	}
 
 	/**
 	 * VM args that enable 'live bean graph' and jmx.
 	 */
-	public static String liveBeanVmArgs(int jmxPort) {
-		return liveBeanVmArgs(""+jmxPort);
+	public static String jmxBeanVmArgs(int jmxPort, EnumSet<Feature> enabled) {
+		return jmxBeanVmArgs(""+jmxPort, enabled);
 	}
 
-	public static String liveBeanVmArgs(String jmxPort) {
-		StringBuilder str = new StringBuilder();
-		for (String a : liveBeanVmArgsArray(jmxPort)) {
-			str.append(a+"\n");
+	public static String jmxBeanVmArgs(String jmxPort, EnumSet<Feature> enabled) {
+		if (!enabled.isEmpty()) {
+			//At least one feature enabled
+			StringBuilder str = new StringBuilder();
+			for (String a : enableJmxArgs(jmxPort)) {
+				str.append(a+"\n");
+			}
+			for (Feature feature : enabled) {
+				str.append(feature.vmArg+"\n");
+			}
+			return str.toString();
+		} else {
+			//No features enabled
+			return "";
 		}
-		return str.toString();
 	}
 
-	public static String[] liveBeanVmArgsArray(String jmxPort) {
+	public static String[] enableJmxArgs(String jmxPort) {
 		return new String[] {
-				"-Dspring.liveBeansView.mbeanDomain", //enable live beans construction
 				"-Dcom.sun.management.jmxremote", //enable jmx to access the beans
 				"-D"+ JMX_PORT_PROP +"="+jmxPort,
 				"-Dcom.sun.management.jmxremote.authenticate=false",

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.launch.livebean;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -32,6 +33,7 @@ import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphVi
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
@@ -80,7 +82,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			if (serviceUrl==null) {
 				throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '"+project.getName()+"'\n"+
 						"To open the livebeans graph a process must be run with the following or similar VM arguments:\n\n"
-						+ LiveBeanSupport.liveBeanVmArgs("${jmxPort}")
+						+ JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(Feature.LIVE_BEAN_GRAPH))
 				);
 			}
 
@@ -130,7 +132,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			//There's a active process but looks like JMX arguments are missing
 			throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '"+project.getName()+"'\n"+
 					"To open the livebeans graph a process must be run with the following VM arguments:\n\n"
-					+ LiveBeanSupport.liveBeanVmArgs("${jmxPort}")
+					+ JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(Feature.LIVE_BEAN_GRAPH))
 			);
 		} else {
 			throw ExceptionUtil.coreException("No active process found for project '"+project.getName()+"'\n"+
@@ -148,7 +150,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			}
 		}
 		//Maybe user configured it manually himself in VM args:
-		return getVMSystemProp(c, LiveBeanSupport.JMX_PORT_PROP);
+		return getVMSystemProp(c, JmxBeanSupport.JMX_PORT_PROP);
 	}
 
 	/**
@@ -177,7 +179,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 	 * Collect the listing of {@link ILaunchConfiguration}s that apply to a given project.
 	 */
 	private static List<ILaunchConfiguration> getLaunchConfigs(IProject project) {
-		String ctypeId = LiveBeanSupport.LAUNCH_CONFIG_TYPE_ID;
+		String ctypeId = JmxBeanSupport.LAUNCH_CONFIG_TYPE_ID;
 		ILaunchConfigurationType ctype = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(ctypeId);
 		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList();
 		try {

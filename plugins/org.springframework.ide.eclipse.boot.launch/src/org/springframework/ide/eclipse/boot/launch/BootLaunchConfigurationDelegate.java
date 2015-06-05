@@ -18,6 +18,7 @@ import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,7 +41,8 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
@@ -72,10 +74,10 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	 */
 	private static final char OID_SEPERATOR = ':';
 
-	private static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
+	public static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
 	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
 
-	private static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
+	public static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
 
 	private static final String JMX_PORT = "spring.boot.livebean.port";
@@ -84,6 +86,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public static final String DEFAULT_PROFILE = "";
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
+	public static final String ENABLE_LIFE_CYCLE = "spring.boot.lifecycle.enable";
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
@@ -211,7 +214,8 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			throws CoreException {
 		try {
 			String vmArgs = super.getVMArguments(conf);
-			if (getEnableLiveBeanSupport(conf)) {
+			EnumSet<JmxBeanSupport.Feature> enabled = getEnabledJmxFeatures(conf);
+			if (!enabled.isEmpty()) {
 				int port = 0;
 				try {
 					port = Integer.parseInt(getJMXPort(conf));
@@ -219,9 +223,9 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 					//ignore: bad data in launch config.
 				}
 				if (port==0) {
-					port = LiveBeanSupport.randomPort();
+					port = JmxBeanSupport.randomPort();
 				}
-				String enableLiveBeanArgs = LiveBeanSupport.liveBeanVmArgs(getJMXPort(conf));
+				String enableLiveBeanArgs = JmxBeanSupport.jmxBeanVmArgs(port, enabled);
 				vmArgs = enableLiveBeanArgs + vmArgs;
 			}
 			return vmArgs;
@@ -229,6 +233,26 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			BootActivator.log(e);
 		}
 		return super.getVMArguments(conf);
+	}
+
+	public static EnumSet<Feature> getEnabledJmxFeatures(ILaunchConfiguration conf) {
+		EnumSet<Feature> enabled = EnumSet.noneOf(Feature.class);
+		if (getEnableLiveBeanSupport(conf)) {
+			 enabled.add(Feature.LIVE_BEAN_GRAPH);
+		}
+		if (getEnableLifeCycle(conf)) {
+			enabled.add(Feature.LIFE_CYCLE);
+		}
+		return null;
+	}
+
+	public static boolean getEnableLifeCycle(ILaunchConfiguration conf) {
+		//For now this is always enabled.
+		//TODO: Add UI etc... to allow disabling in launch conf editor.
+		// Caveat: if user disables it, then we won't be able to detect that
+		//  a boot app is fully started, so the Boot Dash should deal with
+		//  that somehow.
+		return true;
 	}
 
 	private void addPropertiesArguments(ArrayList<String> args, List<PropVal> props) {
@@ -288,7 +312,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			setMainType(wc, mainType);
 		}
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
-		setJMXPort(wc, ""+LiveBeanSupport.randomPort());
+		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
 		}

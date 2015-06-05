@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
+import java.util.EnumSet;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -21,6 +23,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -90,7 +93,7 @@ public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationT
 
 		private String computeTooltipText() {
 			return "Enables support for Live Beans Graph View by adding vm args:\n" +
-					LiveBeanSupport.liveBeanVmArgs("${jmxPort}");
+					JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(Feature.LIVE_BEAN_GRAPH));
 		}
 
 		@Override

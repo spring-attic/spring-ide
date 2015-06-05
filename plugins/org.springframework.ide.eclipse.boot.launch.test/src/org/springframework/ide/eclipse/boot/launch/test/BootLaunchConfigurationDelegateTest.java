@@ -22,7 +22,7 @@ import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
-import org.springframework.ide.eclipse.boot.launch.livebean.LiveBeanSupport;
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
 
@@ -200,7 +200,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
-		int port = LiveBeanSupport.randomPort();
+		int port = JmxBeanSupport.randomPort();
 		BootLaunchConfigurationDelegate.setJMXPort(wc, ""+port);
 
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
