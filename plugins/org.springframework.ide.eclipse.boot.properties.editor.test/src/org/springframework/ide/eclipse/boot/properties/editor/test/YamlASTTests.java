@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.PathUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 
@@ -74,50 +73,6 @@ public class YamlASTTests extends YamlEditorTestHarness {
 
 		assertPath(input, "8888",
 				"ROOT[0]@val['server']@val['port']");
-	}
-
-	public void testPathToPropertyString() {
-		YamlEditor input = new YamlEditor(
-				"spring:\n" +
-				"  application:\n" +
-				"    name: foofoo\n" +
-				"    \n" +
-				"server:\n" +
-				"  port: 8888"
-		);
-
-		assertPropertyString(input, "8888", "server.port");
-		assertPropertyString(input, "port", "server.port");
-		assertPropertyString(input, "server", "server");
-
-		assertPropertyString(input, "name", "spring.application.name");
-
-		assertPropertyString(input, "plica", "spring.application");
-	}
-
-	public void testPathToPropertyWithSequence() {
-		YamlEditor input = new YamlEditor(
-				"services:\n" +
-				"  - name: Foo Service\n"+
-				"    type: Great\n"+
-				"  - name: Bar Service\n" +
-				"    type: Best\n"
-		);
-
-		assertPropertyString(input, "Foo",  "services[0].name");
-		assertPropertyString(input, "Great", "services[0].type");
-		assertPropertyString(input, "type", "services[0].type");
-
-		assertPropertyString(input, "Bar", "services[1].name");
-	}
-
-
-	protected void assertPropertyString(YamlEditor input, String nodeText,
-			String expected) {
-		YamlFileAST ast = input.parse();
-		List<NodeRef<?>> path = ast.findPath(input.middleOf(nodeText));
-		assertEquals(expected,
-				PathUtil.toPropertyPrefixString(path));
 	}
 
 	@Test
