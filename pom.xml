@@ -462,7 +462,7 @@
 				<repository>
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
-		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -529,17 +529,11 @@
 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo</url>
 		</repository>
 		
-		<!--  TODO: we should use 'official' yedit site & release once PR is accepted and released -->
-<!-- 		<repository> -->
-<!-- 		   <id>yedit</id> -->
-<!-- 		   <layout>p2</layout> -->
-<!-- 		   <url>http://dadacoalition.org/yedit</url> -->
-<!-- 		</repository> -->
 		<repository>
-		  <id>yedit-test-release</id>
-		  <layout>p2</layout>
-		  <url>http://dadacoalition.org/yedit_test_site</url>
-		</repository>
+			<id>yedit</id>
+			<layout>p2</layout>
+			<url>http://dadacoalition.org/yedit</url>
+		</repository> 
 	</repositories>
 
 	<pluginRepositories>
