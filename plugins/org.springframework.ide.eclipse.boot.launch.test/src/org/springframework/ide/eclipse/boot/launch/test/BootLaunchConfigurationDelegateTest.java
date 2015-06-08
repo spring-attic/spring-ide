@@ -225,6 +225,10 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 				pv("zor", "zor disabled", false)
 		));
 
+		int jmxPort = JmxBeanSupport.randomPort(); // must set or it will be generated randomly
+												   // and then we can't make the 'assert' below pass easily.
+		BootLaunchConfigurationDelegate.setJMXPort(wc, ""+jmxPort);
+
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
 
 		assertContains(":: Spring Boot ::", result.out);
@@ -233,7 +237,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 				"zor='zor enabled'\n" +
 				"foo='foo is enabled'\n" +
 				"bar=null\n" +
-				"com.sun.management.jmxremote.port=null"
+				"com.sun.management.jmxremote.port='"+jmxPort+"'"
 		);
 		assertOk(result);
 	}
