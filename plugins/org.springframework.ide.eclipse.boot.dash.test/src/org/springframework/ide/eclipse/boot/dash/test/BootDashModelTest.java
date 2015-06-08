@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.mockito.verification.VerificationMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -137,14 +138,15 @@ public class BootDashModelTest {
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
 		System.out.println("Element state listener REMOVED");
+
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
 		element.stop();
 		waitForState(element, RunState.INACTIVE);
 
-		verify(oldListener).stateChanged(element);
-		verify(listener).stateChanged(element);
+		verify(oldListener, times(2)).stateChanged(element); //inactive -1-> starting -2-> running
+		verify(listener,    times(1)).stateChanged(element); //running  -1-> inactive
 	}
 
 	@Test public void testRestartRunningProcessTest() throws Exception {
@@ -193,17 +195,6 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
-
-	//TODO: start scenarios
-
-	// - no launch conf exists and:
-	//    - no main type found
-	//    - multiple main type found
-
-	// - multiple launch conf exist and:
-	//    - preferred conf is set
-	//    - preferred conf is not set
-
 
 	///////////////// harness code ////////////////////////
 

@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -18,10 +21,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
 public class BootPropertyTester extends PropertyTester {
 
+	private static final Pattern JAR_VERSION_REGEXP = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
@@ -82,11 +88,61 @@ public class BootPropertyTester extends PropertyTester {
 	}
 
 
-	private static boolean isBootJar(IClasspathEntry e) {
+	public static boolean isBootJar(IClasspathEntry e) {
 		if (e.getEntryKind()==IClasspathEntry.CPE_LIBRARY) {
 			IPath path = e.getPath();
 			String name = path.lastSegment();
 			return name.endsWith(".jar") && name.startsWith("spring-boot");
+		}
+		return false;
+	}
+
+
+	/**
+	 * Attempt to determine spring-boot version from project's classpath, in a form that
+	 * is easy to compare to version ranges. May return null if the version couldn't be
+	 * determined.
+	 */
+	public static Version getBootVersion(IProject p) {
+		try {
+			if (p.isAccessible() && p.hasNature(JavaCore.NATURE_ID)) {
+				IJavaProject jp = JavaCore.create(p);
+				IClasspathEntry[] cp = jp.getResolvedClasspath(true);
+				for (IClasspathEntry e : cp) {
+					if (isBootJar(e)) {
+						String version = getJarVersion(e);
+						if (version!=null) {
+							return new Version(version);
+						}
+					}
+				}
+			}
+		} catch (Exception error) {
+			BootActivator.log(error);
+		}
+		return null;
+	}
+
+
+	private static String getJarVersion(IClasspathEntry e) {
+		String name = e.getPath().lastSegment();
+		//Example: spring-boot-starter-web-1.2.3.RELEASE.jar
+
+		//Pattern regexp = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
+		Pattern regexp = JAR_VERSION_REGEXP;
+
+		Matcher matcher = regexp.matcher(name);
+		if (matcher.matches()) {
+			String versionStr = matcher.group(1);
+			return versionStr;
+		}
+		return null;
+	}
+
+	public static boolean supportsLifeCycleManagement(IProject project) {
+		Version version = BootPropertyTester.getBootVersion(project);
+		if (version!=null) {
+			return new VersionRange("1.3.0").includes(version);
 		}
 		return false;
 	}

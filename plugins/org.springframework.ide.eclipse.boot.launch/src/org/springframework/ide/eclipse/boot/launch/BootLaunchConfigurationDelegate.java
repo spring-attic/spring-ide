@@ -39,7 +39,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
@@ -247,11 +250,6 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	}
 
 	public static boolean getEnableLifeCycle(ILaunchConfiguration conf) {
-		//For now this is always enabled.
-		//TODO: Add UI etc... to allow disabling in launch conf editor.
-		// Caveat: if user disables it, then we won't be able to detect that
-		//  a boot app is fully started, so the Boot Dash should deal with
-		//  that somehow.
 		return true;
 	}
 
@@ -548,6 +546,14 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		BootLaunchConfigurationDelegate.setDefaults(wc, project.getProject(), null);
 		wc.setMappedResources(new IResource[] {project.getUnderlyingResource()});
 		return wc.doSave();
+	}
+
+	public static boolean supportsLifeCycleManagement(ILaunchConfiguration conf) {
+		IProject p = getProject(conf);
+		if (p!=null) {
+			return BootPropertyTester.supportsLifeCycleManagement(p);
+		}
+		return false;
 	}
 
 }

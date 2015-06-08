@@ -15,17 +15,27 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.util.ProcessTracker.ProcessListener;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+/**
+ * @author Kris De Volder
+ */
 public class ProjectRunStateTracker implements ProcessListener {
 
 	//// public API ///////////////////////////////////////////////////////////////////
@@ -33,6 +43,25 @@ public class ProjectRunStateTracker implements ProcessListener {
 	public interface ProjectRunStateListener {
 		void stateChanged(IProject project);
 	}
+
+	public ProjectRunStateTracker() {
+		activeStates = new HashMap<IProject, RunState>();
+		processTracker = new ProcessTracker(this);
+		updateProjectStatesAndFireEvents();
+	}
+
+	public synchronized RunState getState(final IProject project) {
+		return getState(activeStates, project);
+	}
+
+	public void setListener(ProjectRunStateListener listener) {
+		if (this.listener!=null) {
+			throw new IllegalStateException("Listener can only be set once");
+		}
+		this.listener = listener;
+	}
+
+	///////////////////////// stuff below is implementation cruft ////////////////////
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -42,21 +71,10 @@ public class ProjectRunStateTracker implements ProcessListener {
 		}
 	}
 
-	public synchronized RunState getState(final IProject project) {
-		return getState(activeStates, project);
-	}
-
-	///////////////////////// stuff below is implementation cruft ////////////////////
-
 	private Map<IProject, RunState> activeStates = null;
+	private Map<ILaunch, ReadyStateMonitor> readyStateTrackers = null;
 	private ProcessTracker processTracker = null;
-	private ProjectRunStateListener listener;
-
-	public ProjectRunStateTracker() {
-		activeStates = new HashMap<IProject, RunState>();
-		processTracker = new ProcessTracker(this);
-		updateProjectStatesAndFireEvents();
-	}
+	private ProjectRunStateListener listener; // listeners that are interested in us (i.e. clients)
 
 	private static RunState getState(Map<IProject, RunState> states, IProject p) {
 		if (states!=null) {
@@ -74,13 +92,88 @@ public class ProjectRunStateTracker implements ProcessListener {
 			if (!l.isTerminated()) {
 				IProject p = LaunchUtil.getProject(l);
 				RunState s1 = getState(states, p);
-				RunState s2 = LaunchUtil.isDebugging(l)
-						? RunState.DEBUGGING
-						: RunState.RUNNING;
+				RunState s2 = getActiveState(l);
 				states.put(p, s1.merge(s2));
 			}
 		}
 		return states;
+	}
+
+	/**
+	 * Assuming that l is an active launch, determine its RunState.
+	 */
+	private RunState getActiveState(ILaunch l) {
+		boolean isReady = getReadyState(l).getValue();
+		if (isReady) {
+			return LaunchUtil.isDebugging(l)
+					? RunState.DEBUGGING
+					: RunState.RUNNING;
+		}
+		return RunState.STARTING;
+	}
+
+	private synchronized LiveExpression<Boolean> getReadyState(ILaunch l) {
+		if (readyStateTrackers==null) {
+			readyStateTrackers = new HashMap<ILaunch, ReadyStateMonitor>();
+		}
+		ReadyStateMonitor tracker = readyStateTrackers.get(l);
+		if (tracker==null) {
+			readyStateTrackers.put(l, tracker = createReadyStateTracker(l));
+			tracker.getReady().addListener(readyStateListener);
+		}
+		return tracker.getReady();
+	}
+
+	private ValueListener<Boolean> readyStateListener = new ValueListener<Boolean>() {
+		public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+			if (value) {
+				//ready state tracker detected a launch just entered the 'ready' state
+				updateProjectStatesAndFireEvents();
+			}
+		}
+	};
+
+	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
+		ILaunchConfiguration conf = l.getLaunchConfiguration();
+		if (conf!=null) {
+			int jmxPort = getJMXPort(conf);
+			if (jmxPort>0) {
+				return new SpringApplicationReadyStateMonitor(jmxPort);
+			}
+		}
+		return DummyReadyStateMonitor.create();
+	}
+
+	private synchronized void cleanupReadyStateTrackers() {
+		if (readyStateTrackers!=null) {
+			Iterator<Entry<ILaunch, ReadyStateMonitor>> iter = readyStateTrackers.entrySet().iterator();
+			while(iter.hasNext()) {
+				Entry<ILaunch, ReadyStateMonitor> entry = iter.next();
+				ILaunch l = entry.getKey();
+				if (l.isTerminated()) {
+					ReadyStateMonitor tracker = entry.getValue();
+					iter.remove();
+					tracker.dispose();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Gets the JMX port for life-cycle tracking if this feature is enabled in
+	 * the configuration.
+	 */
+	protected int getJMXPort(ILaunchConfiguration conf) {
+		try {
+			if (BootLaunchConfigurationDelegate.getEnableLifeCycle(conf)
+					&& BootLaunchConfigurationDelegate.supportsLifeCycleManagement(conf)) {
+				String portStr = BootLaunchConfigurationDelegate.getJMXPort(conf);
+				return Integer.parseInt(portStr);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return 0; // 0 means feature is disabled
 	}
 
 	protected ILaunchManager launchManager() {
@@ -140,17 +233,11 @@ public class ProjectRunStateTracker implements ProcessListener {
 	@Override
 	public void processTerminated(IProcess process) {
 		updateProjectStatesAndFireEvents();
+		cleanupReadyStateTrackers();
 	}
 
 	@Override
 	public void processCreated(IProcess process) {
 		updateProjectStatesAndFireEvents();
-	}
-
-	public void setListener(ProjectRunStateListener listener) {
-		if (this.listener!=null) {
-			throw new IllegalStateException("Listener can only be set once");
-		}
-		this.listener = listener;
 	}
 }
