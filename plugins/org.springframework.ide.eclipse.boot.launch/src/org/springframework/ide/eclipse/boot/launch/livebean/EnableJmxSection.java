@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.launch.livebean;
 
 import java.util.EnumSet;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -26,6 +27,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -38,14 +40,24 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
  *
  * @author Kris De Volder
  */
-public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationTabSection {
+public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
+
+	private static final boolean DEBUG = false;//(""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+ 	}
+
 
 	static class UI extends WizardPageSection {
-		private Button checkbox;
+		private Button liveBeanCheckbox;
+		private Button lifeCycleCheckbox;
 		private Text portWidget;
-		private EnableLiveBeanSupportModel model;
+		private EnableJmxFeaturesModel model;
 
-		public UI(IPageWithSections owner, EnableLiveBeanSupportModel model) {
+		public UI(IPageWithSections owner, EnableJmxFeaturesModel model) {
 			super(owner);
 			this.model = model;
 		}
@@ -54,27 +66,34 @@ public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationT
 		public void createContents(Composite page) {
 			Composite row = new Composite(page, SWT.NONE);
 			row.setLayout(GridLayoutFactory.fillDefaults().numColumns(3).create());
-			checkbox = new Button(row, SWT.CHECK);
-			checkbox.setText("Enable Live Bean support.");
-			checkbox.setToolTipText(computeTooltipText());
+			liveBeanCheckbox = new Button(row, SWT.CHECK);
+			liveBeanCheckbox.setText("Enable Live Bean support.");
+			liveBeanCheckbox.setToolTipText(computeTooltipText(
+					"Enables support for Live Beans Graph View by adding vm args:\n",
+					Feature.LIVE_BEAN_GRAPH));
+
 			Label label = new Label(row, SWT.NONE);
 			label.setText("JMX Port:");
 			portWidget = new Text(row, SWT.BORDER);
 			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 6), SWT.DEFAULT)
 				.applyTo(portWidget);
 
-			model.enabled.addListener(new ValueListener<Boolean>() {
-				public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
-					boolean enable = value!=null && value;
-					checkbox.setSelection(enable);
+			lifeCycleCheckbox = new Button(row, SWT.CHECK);
+			lifeCycleCheckbox.setText("Enable Life Cycle Tracking.");
+			lifeCycleCheckbox.setToolTipText(computeTooltipText(
+					"Allows Boot Dashboard View to track 'STARTING' state of Boot Apps (require Boot 1.3.0). " +
+					"Adds these vm args: \n",
+					Feature.LIFE_CYCLE));
+
+			model.anyFeatureEnabled.addListener(new ValueListener<Boolean>() {
+				public void gotValue(LiveExpression<Boolean> exp, Boolean enable) {
+					debug("anyFeature : "+enable);
 					portWidget.setEnabled(enable);
 				}
 			});
-			checkbox.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					model.enabled.setValue(checkbox.getSelection());
-				}
-			});
+
+			connectCheckbox(model.liveBeanEnabled, liveBeanCheckbox);
+			connectCheckbox(model.lifeCycleEnabled, lifeCycleCheckbox);
 
 			model.port.addListener(new ValueListener<String>() {
 				public void gotValue(LiveExpression<String> exp, String value) {
@@ -91,9 +110,10 @@ public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationT
 			});
 		}
 
-		private String computeTooltipText() {
-			return "Enables support for Live Beans Graph View by adding vm args:\n" +
-					JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(Feature.LIVE_BEAN_GRAPH));
+
+		private String computeTooltipText(String baseMsg, Feature feature) {
+			return baseMsg +
+					JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(feature));
 		}
 
 		@Override
@@ -102,8 +122,27 @@ public class EnableLiveBeanSupportSection extends DelegatingLaunchConfigurationT
 		}
 	}
 
-	public EnableLiveBeanSupportSection(IPageWithSections owner, EnableLiveBeanSupportModel model) {
+	public EnableJmxSection(IPageWithSections owner, EnableJmxFeaturesModel model) {
 		super(owner, model, new UI(owner, model));
+	}
+
+	private static void connectCheckbox(final LiveVariable<Boolean> checkedState, final Button widget) {
+		final String name = widget.getText();
+		checkedState.addListener(new ValueListener<Boolean>() {
+			public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+				boolean enable = value!=null && value;
+				debug("Widget '"+name+"' <- "+enable);
+				widget.setSelection(enable);
+			}
+
+		});
+		widget.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean enable = widget.getSelection();
+				debug("Model '"+name+"' <- "+enable);
+				checkedState.setValue(enable);
+			}
+		});
 	}
 
 }

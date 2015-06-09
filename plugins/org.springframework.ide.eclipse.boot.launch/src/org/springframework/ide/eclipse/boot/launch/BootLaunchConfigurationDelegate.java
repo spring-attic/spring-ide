@@ -90,6 +90,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
 	public static final String ENABLE_LIFE_CYCLE = "spring.boot.lifecycle.enable";
+	public static final boolean DEFAULT_ENABLE_LIFE_CYCLE = true;
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
@@ -249,8 +250,32 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		return enabled;
 	}
 
+	/**
+	 * Retrieve the 'Enable Life Cycle Tracking' option from the config. Note that
+	 * this doesn't necesarily mean that this feature is effectively enabled as
+	 * it is only supported on recent enough versions of Boot.
+	 * <p>
+	 * See also the 'supportsLifeCycleManagement' method.
+	 */
 	public static boolean getEnableLifeCycle(ILaunchConfiguration conf) {
-		return true;
+		try {
+			return conf.getAttribute(ENABLE_LIFE_CYCLE, DEFAULT_ENABLE_LIFE_CYCLE);
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return DEFAULT_ENABLE_LIFE_CYCLE;
+	}
+
+	public static void setEnableLifeCycle(ILaunchConfigurationWorkingCopy wc, boolean enable) {
+		wc.setAttribute(ENABLE_LIFE_CYCLE, enable);
+	}
+
+	public static boolean supportsLifeCycleManagement(ILaunchConfiguration conf) {
+		IProject p = getProject(conf);
+		if (p!=null) {
+			return BootPropertyTester.supportsLifeCycleManagement(p);
+		}
+		return false;
 	}
 
 	private void addPropertiesArguments(ArrayList<String> args, List<PropVal> props) {
@@ -310,6 +335,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 			setMainType(wc, mainType);
 		}
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
@@ -546,14 +572,6 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		BootLaunchConfigurationDelegate.setDefaults(wc, project.getProject(), null);
 		wc.setMappedResources(new IResource[] {project.getUnderlyingResource()});
 		return wc.doSave();
-	}
-
-	public static boolean supportsLifeCycleManagement(ILaunchConfiguration conf) {
-		IProject p = getProject(conf);
-		if (p!=null) {
-			return BootPropertyTester.supportsLifeCycleManagement(p);
-		}
-		return false;
 	}
 
 }

@@ -28,7 +28,8 @@ import org.springframework.ide.eclipse.boot.launch.LaunchTabSelectionModel;
 import org.springframework.ide.eclipse.boot.launch.MainTypeNameLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
-import org.springframework.ide.eclipse.boot.launch.livebean.EnableLiveBeanSupportModel;
+import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
+import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -373,28 +374,37 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertTrue(dirty.getValue());
 	}
 
-	///// EnableLiveBeanSupportSection/////////////////////////////////////////////
+	///// EnableJmxSectiom /////////////////////////////////////////////
 
-	public void testLiveBeanValidator() throws Exception {
-		LiveVariable<Boolean> enabled = model.enableLiveBean.enabled;
-		LiveVariable<String> port = model.enableLiveBean.port;
-		LiveExpression<ValidationResult> validator = model.enableLiveBean.getValidator();
+	public void testJmxValidator() throws Exception {
+		EnableJmxFeaturesModel eJmxModel = this.model.enableJmx;
+		LiveVariable<Boolean> liveBean = eJmxModel.liveBeanEnabled;
+		LiveVariable<Boolean> lifeCycle = eJmxModel.lifeCycleEnabled;
+		LiveVariable<String> port = eJmxModel.port;
+		LiveExpression<ValidationResult> validator = eJmxModel.getValidator();
 
-		enabled.setValue(true);
+		liveBean.setValue(true);
+		lifeCycle.setValue(true);
 		port.setValue("8888");
 		assertOk(validator);
 
 		port.setValue("Unparseable");
 		assertError("can't be parsed as an Integer", validator);
 
-		enabled.setValue(false);
+		liveBean.setValue(false);
+		lifeCycle.setValue(false);
 		assertOk(validator); //if disabled we shouldn't check the port as it doesn't matter.
 
 		port.setValue("10000000");
-		enabled.setValue(true);
+		liveBean.setValue(true);
 		assertError("should be smaller than", validator);
 
+		liveBean.setValue(false);
 		port.setValue("-111");
+		assertOk(validator); //if disabled we shouldn't check the port as it doesn't matter.
+
+		lifeCycle.setValue(true); //only enable lifeCycle
+		assertFalse(liveBean.getValue());
 		assertError("should be a positive", validator);
 
 		port.setValue("  8888   ");
@@ -413,81 +423,98 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertOk(validator);
 	}
 
-	public void testLiveBeanSetDefaults() throws Exception {
-		EnableLiveBeanSupportModel elbModel = this.model.enableLiveBean;
+	public void testJmxSetDefaults() throws Exception {
+		EnableJmxFeaturesModel eJmxModel = this.model.enableJmx;
 
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		elbModel.setDefaults(wc);
+		eJmxModel.setDefaults(wc);
 		assertTrue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
+		assertTrue(BootLaunchConfigurationDelegate.getEnableLifeCycle(wc));
 		int randomPort = Integer.parseInt(BootLaunchConfigurationDelegate.getJMXPort(wc));
 		assertTrue(1000 <= randomPort && randomPort <= 65535);
 	}
 
-	public void testLiveBeanInitializeFrom() throws Exception {
-		EnableLiveBeanSupportModel elbModel = this.model.enableLiveBean;
+	public void testJmxInitializeFrom() throws Exception {
+		EnableJmxFeaturesModel eJmxModel = this.model.enableJmx;
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		LiveVariable<Boolean> enabled = model.enableLiveBean.enabled;
-		LiveVariable<String> port = model.enableLiveBean.port;
-		LiveVariable<Boolean> dirty = elbModel.getDirtyState();
+		LiveVariable<Boolean> liveBean = eJmxModel.liveBeanEnabled;
+		LiveVariable<Boolean> lifeCycle = eJmxModel.lifeCycleEnabled;
+		LiveVariable<String> port = eJmxModel.port;
+		LiveVariable<Boolean> dirty = eJmxModel.getDirtyState();
 
-		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
-		BootLaunchConfigurationDelegate.setJMXPort(wc, "3456");
-		dirty.setValue(true);
+		boolean[] bools = {true, false};
+		for (boolean b1 : bools) {
+			for (boolean b2 : bools) {
+				BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, b1);
+				BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, b2);
+				BootLaunchConfigurationDelegate.setJMXPort(wc, "3456");
+				dirty.setValue(true);
 
-		elbModel.initializeFrom(wc);
+				eJmxModel.initializeFrom(wc);
 
-		assertFalse(dirty.getValue());
-		assertEquals("3456", port.getValue());
-		assertTrue(enabled.getValue());
-
-		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
-		elbModel.initializeFrom(wc);
-		assertFalse(enabled.getValue());
+				assertFalse(dirty.getValue());
+				assertEquals("3456", port.getValue());
+				assertEquals(b1, (boolean)liveBean.getValue());
+				assertEquals(b2, (boolean)lifeCycle.getValue());
+			}
+		}
 	}
 
-	public void testLiveBeanPerformApply() throws Exception {
-		EnableLiveBeanSupportModel elbModel = this.model.enableLiveBean;
+	public void testJmxPerformApply() throws Exception {
+		EnableJmxFeaturesModel eJmxModel = this.model.enableJmx;
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		LiveVariable<Boolean> enabled = model.enableLiveBean.enabled;
-		LiveVariable<String> port = model.enableLiveBean.port;
-		LiveVariable<Boolean> dirty = elbModel.getDirtyState();
+
+		LiveVariable<Boolean> liveBean = eJmxModel.liveBeanEnabled;
+		LiveVariable<Boolean> lifeCycle = eJmxModel.lifeCycleEnabled;
+		LiveVariable<String> port = eJmxModel.port;
+		LiveVariable<Boolean> dirty = eJmxModel.getDirtyState();
 
 		port.setValue("1234");
-		enabled.setValue(true);
-		assertTrue(dirty.getValue());
 
-		elbModel.performApply(wc);
+		boolean[] bools = {true, false};
+		for (boolean b1 : bools) {
+			for (boolean b2 : bools) {
+				liveBean.setValue(b1);
+				lifeCycle.setValue(b2);
+				assertTrue(dirty.getValue());
 
-		assertFalse(dirty.getValue());
-		assertTrue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
-		assertEquals("1234", BootLaunchConfigurationDelegate.getJMXPort(wc));
+				eJmxModel.performApply(wc);
 
-		enabled.setValue(false);
-		elbModel.performApply(wc);
-		assertFalse(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
+				assertFalse(dirty.getValue());
+				assertEquals("1234", BootLaunchConfigurationDelegate.getJMXPort(wc));
+				assertEquals(b1, BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
+				assertEquals(b2, BootLaunchConfigurationDelegate.getEnableLifeCycle(wc));
+			}
+		}
 
+		//port
 		port.setValue("   8888   ");
-		elbModel.performApply(wc);
+		assertTrue(dirty.getValue());
+		eJmxModel.performApply(wc);
+		assertFalse(dirty.getValue());
 		assertEquals("8888", BootLaunchConfigurationDelegate.getJMXPort(wc));
 	}
 
 	public void testLiveBeanDirtyState() throws Exception {
-		EnableLiveBeanSupportModel elbModel = this.model.enableLiveBean;
-		LiveVariable<Boolean> enabled = model.enableLiveBean.enabled;
-		LiveVariable<String> port = model.enableLiveBean.port;
-		LiveVariable<Boolean> dirty = elbModel.getDirtyState();
+		EnableJmxFeaturesModel eJmxModel = this.model.enableJmx;
+
+		LiveVariable<Boolean> liveBean = eJmxModel.liveBeanEnabled;
+		LiveVariable<Boolean> lifeCycle = eJmxModel.lifeCycleEnabled;
+		LiveVariable<String> port = eJmxModel.port;
+		LiveVariable<Boolean> dirty = eJmxModel.getDirtyState();
 
 		dirty.setValue(false);
 		port.setValue("something");
 		assertTrue(dirty.getValue());
 
 		dirty.setValue(false);
-		enabled.setValue(!enabled.getValue());
+		liveBean.setValue(!liveBean.getValue());
+		assertTrue(dirty.getValue());
+
+		dirty.setValue(false);
+		lifeCycle.setValue(!lifeCycle.getValue());
 		assertTrue(dirty.getValue());
 	}
-
-	// TODO:
-	//   dirtyState
 
 	///// PropertiesTableSection ??? can't be tested in its current form (no separate 'model' to test)
 

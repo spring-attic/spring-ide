@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
-import org.springframework.ide.eclipse.boot.launch.livebean.EnableLiveBeanSupportModel;
+import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -53,14 +53,14 @@ public class BootLaunchUIModel {
 	public final MainTypeNameLaunchTabModel mainTypeName;
 	public final ProfileLaunchTabModel profile;
 	public final LaunchTabSelectionModel<Boolean> enableDebug;
-	public final EnableLiveBeanSupportModel enableLiveBean;
+	public final EnableJmxFeaturesModel enableJmx;
 
 	public BootLaunchUIModel(IProfileHistory profileHistory) {
 		project = SelectProjectLaunchTabModel.create();
 		mainTypeName = MainTypeNameLaunchTabModel.create();
 		profile = ProfileLaunchTabModel.create(project.selection, profileHistory);
 		enableDebug = EnableDebugLaunchTabModel.create();
-		enableLiveBean = new EnableLiveBeanSupportModel();
+		enableJmx = new EnableJmxFeaturesModel();
 	}
 
 }

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.boot.launch.livebean.EnableLiveBeanSupportSection;
+import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxSection;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
@@ -50,7 +50,7 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 				new ProfileLaunchTabSection(this, model.profile),
 				new HLineSection(this),
 				new EnableDebugSection(this, model.enableDebug),
-				new EnableLiveBeanSupportSection(this, model.enableLiveBean),
+				new EnableJmxSection(this, model.enableJmx),
 				new HLineSection(this),
 				new PropertiesTableSection(this, model.project.selection)
 		});

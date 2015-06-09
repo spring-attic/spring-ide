@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setEnableLiveBeanSupport;
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setJMXPort;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -21,6 +19,7 @@ import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabM
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.OrExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -32,33 +31,41 @@ import static org.springsource.ide.eclipse.commons.livexp.core.ValidationResult.
  *
  * @author Kris De Volder
  */
-public class EnableLiveBeanSupportModel implements ILaunchConfigurationTabModel {
+public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 	private static final int MAX_PORT = 65536;
 
 	public final String portFieldName = "JMX Port";
 
-	public final LiveVariable<Boolean> enabled;
+	public final LiveVariable<Boolean> liveBeanEnabled;
+	public final LiveVariable<Boolean> lifeCycleEnabled;
+	public final LiveExpression<Boolean> anyFeatureEnabled;
+
 	public final LiveVariable<String> port;
 	private final Validator validator;
 
 	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
 
 	@SuppressWarnings("unchecked")
-	public EnableLiveBeanSupportModel() {
-		this.enabled = new LiveVariable<Boolean>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+	public EnableJmxFeaturesModel() {
+		this.liveBeanEnabled = new LiveVariable<Boolean>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		this.lifeCycleEnabled = new LiveVariable<Boolean>(DEFAULT_ENABLE_LIFE_CYCLE);
+		this.anyFeatureEnabled = new OrExpression(liveBeanEnabled, lifeCycleEnabled);
+
 		this.port = new LiveVariable<String>("");
-		enabled.addListener(makeDirty());
+		liveBeanEnabled.addListener(makeDirty());
+		lifeCycleEnabled.addListener(makeDirty());
 		port.addListener(makeDirty());
+
 		this.validator = new Validator() {
 			{
-				dependsOn(enabled);
+				dependsOn(anyFeatureEnabled);
 				dependsOn(port);
 			}
 
 			@Override
 			protected ValidationResult compute() {
-				boolean isEnabled = enabled.getValue();
+				boolean isEnabled = anyFeatureEnabled.getValue();
 				if (isEnabled) {
 					String portStr = port.getValue();
 					if (!hasText(portStr)) {
@@ -96,14 +103,16 @@ public class EnableLiveBeanSupportModel implements ILaunchConfigurationTabModel 
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration conf) {
-		enabled.setValue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(conf));
+		liveBeanEnabled.setValue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(conf));
+		lifeCycleEnabled.setValue(BootLaunchConfigurationDelegate.getEnableLifeCycle(conf));
 		port.setValue(BootLaunchConfigurationDelegate.getJMXPort(conf));
 		getDirtyState().setValue(false);
 	}
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy conf) {
-		setEnableLiveBeanSupport(conf, enabled.getValue());
+		setEnableLiveBeanSupport(conf, liveBeanEnabled.getValue());
+		setEnableLifeCycle(conf, lifeCycleEnabled.getValue());
 		setJMXPort(conf, StringUtil.trim(port.getValue()));
 		getDirtyState().setValue(false);
 	}
@@ -111,6 +120,7 @@ public class EnableLiveBeanSupportModel implements ILaunchConfigurationTabModel 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy conf) {
 		setEnableLiveBeanSupport(conf, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		setEnableLifeCycle(conf, DEFAULT_ENABLE_LIFE_CYCLE);
 		setJMXPort(conf, ""+JmxBeanSupport.randomPort());
 	}
 
