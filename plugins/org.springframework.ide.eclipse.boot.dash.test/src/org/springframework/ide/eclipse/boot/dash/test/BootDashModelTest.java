@@ -14,17 +14,18 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,6 +42,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.mockito.verification.VerificationMode;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -48,12 +51,64 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 
 public class BootDashModelTest {
+
+	public interface WizardConfigurer {
+
+		void apply(NewSpringBootWizardModel wizard);
+
+		WizardConfigurer NULL = new WizardConfigurer(){
+			public void apply(NewSpringBootWizardModel wizard) {/*do nothing*/}
+		};
+	}
+
+
+	/**
+	 * @return A wizard configurer that ensures the selected 'boot version' is at least
+	 * a given version of boot.
+	 */
+	WizardConfigurer bootVersionAtLeast(final String wantedVersion) throws Exception {
+		final VersionRange WANTED_RANGE = new VersionRange(wantedVersion);
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				RadioInfo selected = bootVersionRadio.getValue();
+				Version selectedVersion = getVersion(selected);
+				if (WANTED_RANGE.includes(selectedVersion)) {
+					//existing selection is fine
+				} else {
+					//try to select the latest available version and verify it meets the requirement
+					bootVersionRadio.setValue(selected =  getLatestVersion(bootVersionRadio));
+					selectedVersion = getVersion(selected);
+					Assert.isTrue(WANTED_RANGE.includes(selectedVersion));
+				}
+			}
+
+			private RadioInfo getLatestVersion(RadioGroup bootVersionRadio) {
+				RadioInfo[] infos = bootVersionRadio.getRadios();
+				Arrays.sort(infos, new Comparator<RadioInfo>() {
+					public int compare(RadioInfo o1, RadioInfo o2) {
+						Version v1 = getVersion(o1);
+						Version v2 = getVersion(o2);
+						return v2.compareTo(v1);
+					}
+				});
+				return infos[0];
+			}
+
+			private Version getVersion(RadioInfo info) {
+				String versionString = info.getValue();
+				return new Version(versionString);
+			}
+		};
+	}
 
 	private static final long BOOT_PROJECT_CREATION_TIMEOUT = 3*60*1000; // long, may download maven dependencies
 	private static final long MODEL_UPDATE_TIMEOUT = 3000; // short, should be nearly instant
@@ -163,6 +218,29 @@ public class BootDashModelTest {
 			for (RunState toState : RUN_STATES) {
 				doRestartTest(projectName, fromState, toState);
 			}
+		}
+	}
+
+	@Test public void testStartingStateObservable() throws Exception {
+		//Test that, for boot project that supports it, the 'starting' state
+		// is observable in the model.
+		String projectName = "some-project";
+		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
+
+		BootDashElement element = getElement(projectName);
+		try {
+			waitForState(element, RunState.INACTIVE);
+
+			element.restart(RunState.RUNNING, ui);
+			waitForState(element, RunState.STARTING);
+			waitForState(element, RunState.RUNNING);
+
+			element.restart(RunState.DEBUGGING, ui);
+			waitForState(element, RunState.STARTING);
+			waitForState(element, RunState.DEBUGGING);
+		} finally {
+			element.stop();
+			waitForState(element, RunState.INACTIVE);
 		}
 	}
 
@@ -290,6 +368,10 @@ public class BootDashModelTest {
 	}
 
 	private IProject createBootProject(final String projectName) throws Exception {
+		return createBootProject(projectName, WizardConfigurer.NULL);
+	}
+
+	private IProject createBootProject(final String projectName, final WizardConfigurer extraConf) throws Exception {
 		final Job job = new Job("Create boot project '"+projectName+"'") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -302,6 +384,7 @@ public class BootDashModelTest {
 					//  location in the model.
 					wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
 					wizard.addDependency("web");
+					extraConf.apply(wizard);
 					wizard.performFinish(new NullProgressMonitor());
 					return Status.OK_STATUS;
 				} catch (Throwable e) {
