@@ -89,7 +89,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public static final String DEFAULT_PROFILE = "";
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
-	public static final String ENABLE_LIFE_CYCLE = "spring.application.admin.enabled";
+	public static final String ENABLE_LIFE_CYCLE = "spring.boot.lifecycle.enable";
 	public static final boolean DEFAULT_ENABLE_LIFE_CYCLE = true;
 
 	private ProfileHistory profileHistory = new ProfileHistory();
