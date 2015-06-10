@@ -124,7 +124,7 @@ public class BootProjectDashElementTest extends Mocks {
 
 		element.restart(RunState.RUNNING, ui);
 
-		verify(element).stop(true);
+		verify(element).stopSync();
 		verify(ui).errorPopup(
 				stringContains("Problem"),
 				stringContains("Couldn't find a main type")
@@ -149,7 +149,7 @@ public class BootProjectDashElementTest extends Mocks {
 
 		element.restart(RunState.RUNNING, ui);
 
-		verify(element).stop(true);
+		verify(element).stopSync();;
 		verify(element).launch(ILaunchManager.RUN_MODE, conf);
 		verifyZeroInteractions(ui);
 	}
@@ -177,7 +177,7 @@ public class BootProjectDashElementTest extends Mocks {
 
 		element.restart(RunState.RUNNING, ui);
 
-		verify(element).stop(true);
+		verify(element).stopSync();
 		verify(ui).chooseMainType(any(IType[].class),
 				stringContains("Choose"),
 				stringContains("Choose", projectName)

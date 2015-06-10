@@ -68,7 +68,7 @@ public class BootProcessFactory implements IProcessFactory {
 				}
 			};
 		} else {
-			//Not Java 8 so can't use the destroyForcibly to force faster process termination,
+			//Not Java 8 so can't use the destroyForcibly to force process termination,
 			return new RuntimeProcess(launch, process, label, attributes);
 		}
 	}

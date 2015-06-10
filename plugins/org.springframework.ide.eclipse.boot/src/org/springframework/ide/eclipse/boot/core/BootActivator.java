@@ -71,8 +71,17 @@ public class BootActivator extends AbstractUIPlugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
+	public static IStatus createInfoStatus(String msg) {
+		return new Status(IStatus.INFO, PLUGIN_ID, msg);
+	}
+	
 	public static void log(Throwable e) {
 		getDefault().getLog().log(createErrorStatus(e));
 	}
+
+	public static void info(String msg) {
+		getDefault().getLog().log(createInfoStatus(msg));
+	}
+
 
 }

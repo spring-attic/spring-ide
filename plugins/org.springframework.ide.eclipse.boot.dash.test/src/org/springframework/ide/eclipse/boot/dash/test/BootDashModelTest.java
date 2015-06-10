@@ -196,7 +196,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stop();
+		element.stopAsync();
 		waitForState(element, RunState.INACTIVE);
 
 		//The expected behavior will change when boot 1.3.0 is the default so guard against
@@ -243,7 +243,7 @@ public class BootDashModelTest {
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.DEBUGGING);
 		} finally {
-			element.stop();
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -273,7 +273,7 @@ public class BootDashModelTest {
 
 			waitForState(element, toState);
 		} finally {
-			element.stop();
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}

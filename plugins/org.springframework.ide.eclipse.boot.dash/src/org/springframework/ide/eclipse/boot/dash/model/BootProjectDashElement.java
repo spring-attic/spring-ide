@@ -12,12 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -26,6 +26,7 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
@@ -73,7 +74,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void restart(RunState runningOrDebugging, UserInteractions ui) {
+	public void restart(RunState runningOrDebugging, UserInteractions ui) throws Exception {
 		switch (runningOrDebugging) {
 		case RUNNING:
 			restart(ILaunchManager.RUN_MODE, ui);
@@ -86,8 +87,8 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		}
 	}
 
-	public void restart(final String runMode, UserInteractions ui) {
-		stop(true);
+	public void restart(final String runMode, UserInteractions ui) throws Exception {
+		stopSync();
 		start(runMode, ui);
 	}
 
@@ -113,8 +114,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		}
 	}
 
-	protected void launch(final String runMode, ILaunchConfiguration conf) {
-		DebugUITools.launch(conf, runMode);
+	protected void launch(final String runMode, final ILaunchConfiguration conf) {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				DebugUITools.launch(conf, runMode);
+			}
+		});
 	}
 
 	private IType chooseMainType(UserInteractions ui) throws CoreException {
@@ -137,14 +142,30 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void stop() {
-		stop(false);
+	public void stopAsync() {
+		try {
+			stop(false);
+		} catch (Exception e) {
+			//Asynch case shouldn't really throw exceptions.
+			BootActivator.log(e);
+		}
+	}
+	
+	public void stopSync() throws Exception {
+		try {
+			stop(true);
+		} catch (TimeoutException e) {
+			BootActivator.info("Termination of '"+this.getName()+"' timed-out. Retrying");
+			//Try it one more time. On windows this times out occasionally... and then
+			// it works the next time.
+			stop(true);
+		}
 	}
 
-	public void stop(boolean sync) {
+	private void stop(boolean sync) throws Exception {
 		debug("Stopping: "+this+" "+(sync?"...":""));
+		final ResolveableFuture<Void> done = sync?new ResolveableFuture<Void>():null;
 		try {
-			final ResolveableFuture<Void> done = sync?new ResolveableFuture<Void>():null;
 			List<ILaunch> launches = LaunchUtil.getLaunches(getProject());
 			if (sync) {
 				LaunchUtils.whenTerminated(launches, new Runnable() {
@@ -155,16 +176,19 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			}
 			try {
 				LaunchUtils.terminate(launches);
-			} catch (DebugException e) {
+			} catch (Exception e) {
 				//why does terminating process with Eclipse debug UI fail so #$%# often?
 				BootActivator.log(new Error("Termination of "+this+" failed", e));
 			}
-			if (sync) {
-				done.get(10, TimeUnit.SECONDS);
-				debug("Stopping: "+this+" "+"DONE");
-			}
 		} catch (Exception e) {
 			BootActivator.log(e);
+		}
+		if (sync) {
+			//Eclipse waits for 5 seconds before timing out. So we use a similar timeout but slightly 
+			// larger. Windows case termination seem to fail silently sometimes so its up to us
+			// to handle here.
+			done.get(6, TimeUnit.SECONDS);
+			debug("Stopping: "+this+" "+"DONE");
 		}
 	}
 
