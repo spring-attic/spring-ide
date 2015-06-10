@@ -38,7 +38,7 @@ import javax.management.remote.JMXServiceURL;
 class SpringApplicationLifecycleClient {
 
 	// Note: see SpringApplicationLifecycleAutoConfiguration
-	static final String DEFAULT_OBJECT_NAME = "org.springframework.boot:type=Lifecycle,name=springApplicationLifecycle";
+	static final String DEFAULT_OBJECT_NAME = "org.springframework.boot:type=Admin,name=SpringApplication";
 
 	private final MBeanServerConnection connection;
 

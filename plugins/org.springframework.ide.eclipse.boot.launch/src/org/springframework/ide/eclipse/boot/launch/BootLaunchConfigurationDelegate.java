@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2015 GoPivotal, Inc.
+ * Copyright (c) 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
@@ -89,7 +89,7 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 	public static final String DEFAULT_PROFILE = "";
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
-	public static final String ENABLE_LIFE_CYCLE = "spring.boot.lifecycle.enable";
+	public static final String ENABLE_LIFE_CYCLE = "spring.application.admin.enabled";
 	public static final boolean DEFAULT_ENABLE_LIFE_CYCLE = true;
 
 	private ProfileHistory profileHistory = new ProfileHistory();

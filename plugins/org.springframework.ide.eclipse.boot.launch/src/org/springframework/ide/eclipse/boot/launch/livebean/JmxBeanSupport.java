@@ -23,7 +23,7 @@ public class JmxBeanSupport {
 
 	public static enum Feature {
 		LIVE_BEAN_GRAPH("-Dspring.liveBeansView.mbeanDomain=true"),
-		LIFE_CYCLE("-Dspring.context.lifecycle.enabled=true");
+		LIFE_CYCLE("-Dspring.application.admin.enabled=true");
 
 		public final String vmArg;
 
