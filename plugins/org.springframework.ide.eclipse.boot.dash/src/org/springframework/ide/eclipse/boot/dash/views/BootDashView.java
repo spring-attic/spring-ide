@@ -419,9 +419,9 @@ public class BootDashView extends ViewPart implements UIContext {
 		protected Job createJob() {
 			final Collection<BootDashElement> selecteds = getSelectedElements();
 			if (!selecteds.isEmpty()) {
-				return new UIJob("Restarting "+selecteds.size()+" Dash Elements") {
+				return new Job("Restarting "+selecteds.size()+" Dash Elements") {
 					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
+					public IStatus run(IProgressMonitor monitor) {
 						monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
 						try {
 							for (BootDashElement el : selecteds) {

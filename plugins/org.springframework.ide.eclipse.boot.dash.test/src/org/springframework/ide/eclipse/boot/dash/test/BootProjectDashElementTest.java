@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.stringContainsInOrder;

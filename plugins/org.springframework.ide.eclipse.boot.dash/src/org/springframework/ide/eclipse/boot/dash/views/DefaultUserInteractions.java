@@ -20,9 +20,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
  * An implementation of 'UserInteractions' that uses real Dialogs, for use in 'production'.
@@ -66,40 +68,53 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public IType chooseMainType(IType[] mainTypes, String dialogTitle,
-			String message) {
+	public IType chooseMainType(final IType[] mainTypes, final String dialogTitle, final String message) {
 		if (mainTypes.length==1) {
 			return mainTypes[0];
 		} else if (mainTypes.length>0) {
-			IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
-			try {
-				ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
-				dialog.setElements(mainTypes);
-				dialog.setTitle(dialogTitle);
-				dialog.setMessage(message);
-				dialog.setMultipleSelection(false);
-				int result = dialog.open();
-				labelProvider.dispose();
-				if (result == Window.OK) {
-					return (IType) dialog.getFirstResult();
+			//Take care the UI interactions don't bork if called from non-ui thread.
+			final LiveVariable<IType> chosenType = new LiveVariable<IType>();
+			getShell().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
+					try {
+						ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
+						dialog.setElements(mainTypes);
+						dialog.setTitle(dialogTitle);
+						dialog.setMessage(message);
+						dialog.setMultipleSelection(false);
+						int result = dialog.open();
+						labelProvider.dispose();
+						if (result == Window.OK) {
+							chosenType.setValue((IType) dialog.getFirstResult());
+						} 
+					} finally {
+						labelProvider.dispose();
+					}
 				}
-				return null;
-			} finally {
-				labelProvider.dispose();
-			}
+			});
+			return chosenType.getValue();
 		}
 		return null;
 	}
 
 	@Override
-	public void errorPopup(String title, String message) {
-		MessageDialog.openError(getShell(), title, message);
+	public void errorPopup(final String title, final String message) {
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				MessageDialog.openError(getShell(), title, message);
+			}
+		});
 	}
 
 	@Override
-	public void openLaunchConfigurationDialogOnGroup(ILaunchConfiguration conf, String launchGroup) {
-		IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
-		DebugUITools.openLaunchConfigurationDialogOnGroup(getShell(), selection, launchGroup);
+	public void openLaunchConfigurationDialogOnGroup(final ILaunchConfiguration conf, final String launchGroup) {
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
+				DebugUITools.openLaunchConfigurationDialogOnGroup(getShell(), selection, launchGroup);
+			}
+		});
 	}
 
 }

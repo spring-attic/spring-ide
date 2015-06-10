@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -159,7 +160,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 				BootActivator.log(new Error("Termination of "+this+" failed", e));
 			}
 			if (sync) {
-				done.get();
+				done.get(10, TimeUnit.SECONDS);
 				debug("Stopping: "+this+" "+"DONE");
 			}
 		} catch (Exception e) {
