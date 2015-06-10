@@ -18,7 +18,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * A java.util.concurrent.Future which isn't created by some
- * executor, but rather just an object which is awating some kind
+ * executor, but rather just an object which is awaiting some kind
  * of event to resolve or reject it.
  */
 public class ResolveableFuture<T> implements Future<T> {
@@ -94,8 +94,4 @@ public class ResolveableFuture<T> implements Future<T> {
 			return value;
 		}
 	}
-
-//	public synchronized T get() throws Exception {
-//	}
-
 }
