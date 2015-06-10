@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.supportsLifeCycleManagement;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
@@ -35,13 +37,11 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.model.IProcess;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.mockito.verification.VerificationMode;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -56,7 +56,6 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
 
 public class BootDashModelTest {
 
@@ -200,8 +199,13 @@ public class BootDashModelTest {
 		element.stop();
 		waitForState(element, RunState.INACTIVE);
 
-		verify(oldListener, times(2)).stateChanged(element); //inactive -1-> starting -2-> running
-		verify(listener,    times(1)).stateChanged(element); //running  -1-> inactive
+		//The expected behavior will change when boot 1.3.0 is the default so guard against
+		// that already:
+		int expectedReadyStateChanges =supportsLifeCycleManagement(element.getProject())
+			?2  // INACTIVE -> STARTING -> RUNNING
+			:1; // INACTIVE -> RUNNING
+		verify(oldListener, times(expectedReadyStateChanges)).stateChanged(element);
+		verify(listener,    times(1)).stateChanged(element); //running  -> inactive
 	}
 
 	@Test public void testRestartRunningProcessTest() throws Exception {
