@@ -132,6 +132,7 @@ public class ProjectRunStateTracker implements ProcessListener {
 			}
 		}
 	};
+	private boolean updateInProgress;
 
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
 		ILaunchConfiguration conf = l.getLaunchConfiguration();
@@ -200,24 +201,39 @@ public class ProjectRunStateTracker implements ProcessListener {
 	}
 
 	private synchronized Set<IProject> updateProjectStates() {
-		Map<IProject, RunState> oldStates = activeStates;
-		activeStates = getCurrentActiveStates();
+		if (updateInProgress) {
+			//Avoid bug caused by reentrance from same thread.
+			//This bug causes double update events for INAVTIVE -> RUNNING for projects that
+			// don't have ready state tracking and so immediately enter the ready state upon
+			// creation.
+			return Collections.emptySet();
+		} else {
+			updateInProgress = true;
+			try {
+				Map<IProject, RunState> oldStates = activeStates;
+				debug("old: "+oldStates);
+				activeStates = getCurrentActiveStates();
+				debug("new: "+activeStates);
 
-		// Compute set of projects who's state has changed
-		Set<IProject> affectedProjects = new HashSet<IProject>(keySet(oldStates));
-		affectedProjects.addAll(keySet(activeStates));
-		Iterator<IProject> iter = affectedProjects.iterator();
-		while (iter.hasNext()) {
-			IProject p = iter.next();
-			RunState oldState = getState(oldStates, p);
-			RunState newState = getState(activeStates, p);
-			if (oldState.equals(newState)) {
-				iter.remove();
-			} else {
-				debug(p+": "+ oldState +" => " + newState);
+				// Compute set of projects who's state has changed
+				Set<IProject> affectedProjects = new HashSet<IProject>(keySet(oldStates));
+				affectedProjects.addAll(keySet(activeStates));
+				Iterator<IProject> iter = affectedProjects.iterator();
+				while (iter.hasNext()) {
+					IProject p = iter.next();
+					RunState oldState = getState(oldStates, p);
+					RunState newState = getState(activeStates, p);
+					if (oldState.equals(newState)) {
+						iter.remove();
+					} else {
+						debug(p+": "+ oldState +" => " + newState);
+					}
+				}
+				return affectedProjects;
+			} finally {
+				updateInProgress = false;
 			}
 		}
-		return affectedProjects;
 	}
 
 	/**
