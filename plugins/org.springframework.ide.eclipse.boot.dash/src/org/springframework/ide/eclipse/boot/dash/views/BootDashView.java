@@ -340,7 +340,7 @@ public class BootDashView extends ViewPart implements UIContext {
 								for (BootDashElement el : selecteds) {
 									monitor.subTask("Stopping: "+el.getName());
 									try {
-										el.stop();
+										el.stopAsync();
 									} catch (Exception e) {
 										return BootActivator.createErrorStatus(e);
 									}
