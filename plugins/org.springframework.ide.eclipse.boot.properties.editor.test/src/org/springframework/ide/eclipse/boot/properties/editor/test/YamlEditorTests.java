@@ -141,6 +141,64 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	}
 
+	public void test_STS_4140_StringArrayReconciling() throws Exception {
+		defaultTestData();
+
+		MockEditor editor;
+
+		//Case 0: very focussed test for easy debugging
+		editor = new MockEditor(
+			"flyway:\n" +
+			"  schemas: [MEMBER_VERSION, MEMBER]"
+		);
+		assertProblems(editor /*none*/);
+
+		//Case 1: String[] as a flow sequence
+		editor = new MockEditor(
+			"something-bad: wrong\n"+
+			"flyway:\n" +
+			"  url: jdbc:h2:file:~/localdb;IGNORECASE=TRUE;mv_store=false\n" +
+			"  user: admin\n" +
+			"  password: admin\n" +
+			"  schemas: [MEMBER_VERSION, MEMBER]"
+		);
+		assertProblems(editor,
+				"something-bad|Unknown property"
+				//No other problems should be reported
+		);
+
+		//Case 1: String[] as a block sequence
+		editor = new MockEditor(
+			"something-bad: wrong\n"+
+			"flyway:\n" +
+			"  url: jdbc:h2:file:~/localdb;IGNORECASE=TRUE;mv_store=false\n" +
+			"  user: admin\n" +
+			"  password: admin\n" +
+			"  schemas:\n" +
+			"    - MEMBER_VERSION\n" +
+			"    - MEMBER"
+		);
+		assertProblems(editor,
+				"something-bad|Unknown property"
+				//No other problems should be reported
+		);
+	}
+
+	public void test_STS_4140_StringArrayCompletion() throws Exception {
+		defaultTestData();
+
+		assertCompletion(
+				"#some comment\n" +
+				"flyway:\n" +
+				"  sch<*>\n"
+				, //=>
+				"#some comment\n" +
+				"flyway:\n" +
+				"  schemas:\n" +
+				"    - <*>\n"
+		);
+	}
+
 	public void testReconcileIntegerScalar() throws Exception {
 		data("server.port", "java.lang.Integer", null, "Port of server");
 		data("server.threads", "java.lang.Integer", null, "Number of threads for server threadpool");

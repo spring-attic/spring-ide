@@ -236,7 +236,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 		if (type!=null) {
 			if (typeUtil.isAssignableType(type)) {
 				postfix = "=";
-			} else if (TypeUtil.isArrayLike(type)) {
+			} else if (TypeUtil.isBracketable(type)) {
 				postfix = "[";
 			} else if (typeUtil.isDotable(type)) {
 				postfix = ".";

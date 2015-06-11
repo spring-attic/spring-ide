@@ -130,7 +130,7 @@ public class YamlASTReconciler {
 	private void reconcile(MappingNode mapping, Type type) {
 		if (typeUtil.isAtomic(type)) {
 			expectType(type, mapping);
-		} else if (TypeUtil.isMap(type) || TypeUtil.isArrayLike(type)) {
+		} else if (TypeUtil.isMap(type) || TypeUtil.isSequencable(type)) {
 			Type keyType = TypeUtil.getKeyType(type);
 			Type valueType = TypeUtil.getDomainType(type);
 			if (keyType!=null) {
@@ -168,7 +168,7 @@ public class YamlASTReconciler {
 	private void reconcile(SequenceNode seq, Type type) {
 		if (typeUtil.isAtomic(type)) {
 			expectType(type, seq);
-		} else if (TypeUtil.isArrayLike(type)) {
+		} else if (TypeUtil.isSequencable(type)) {
 			Type domainType = TypeUtil.getDomainType(type);
 			if (domainType!=null) {
 				for (Node element : seq.getValue()) {

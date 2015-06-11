@@ -85,7 +85,7 @@ public class PropertyNavigator {
 								offset, getEnd(region)-offset));
 					}
 				} else if (navOp=='[') {
-					if (isArrayLike(type)) {
+					if (isBracketable(type)) {
 						return bracketNavigate(offset, type);
 					} else {
 						problemCollector.accept(error(

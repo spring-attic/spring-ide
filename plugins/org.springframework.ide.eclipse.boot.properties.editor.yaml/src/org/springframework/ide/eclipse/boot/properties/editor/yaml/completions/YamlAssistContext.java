@@ -93,7 +93,7 @@ public abstract class YamlAssistContext {
 		if (TypeUtil.isMap(type)) {
 			//ready to enter nested map key on next line
 			return "\n";
-		} if (TypeUtil.isArrayLike(type)) {
+		} if (TypeUtil.isSequencable(type)) {
 			//ready to enter sequence element on next line
 			return "\n- ";
 		} else if (typeUtil.isAtomic(type)) {
@@ -267,7 +267,7 @@ public abstract class YamlAssistContext {
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
-				if (TypeUtil.isArrayLike(type) || TypeUtil.isMap(type)) {
+				if (TypeUtil.isSequencable(type) || TypeUtil.isMap(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
 				String key = s.toPropString();
@@ -276,7 +276,7 @@ public abstract class YamlAssistContext {
 					return contextWith(s, subproperties.get(key));
 				}
 			} else if (s.getType()==YamlPathSegmentType.VAL_AT_INDEX) {
-				if (TypeUtil.isArrayLike(type)) {
+				if (TypeUtil.isSequencable(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
 			}

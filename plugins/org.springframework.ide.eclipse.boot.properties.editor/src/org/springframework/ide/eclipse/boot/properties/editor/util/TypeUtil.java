@@ -318,12 +318,16 @@ public class TypeUtil {
 	 * use the notation <name>[<index>]=<value> in property file
 	 * for properties of this type.
 	 */
-	public static boolean isArrayLike(Type type) {
+	public static boolean isBracketable(Type type) {
 		//Note: map types are bracketable although the notation isn't really useful
 		// for them (and a bit broken see https://github.com/spring-projects/spring-boot/issues/2386).
 
 		//Note array types are no longer considered 'Bracketable'
 		//see: STS-4031
+		return isList(type);
+	}
+
+	public static boolean isList(Type type) {
 		String erasure = type.getErasure();
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
@@ -337,6 +341,17 @@ public class TypeUtil {
 			//type not resolveable assume its not 'array like'
 			return false;
 		}
+	}
+
+	/**
+	 * Check if type can be treated / represented as a sequence node in .yml file
+	 */
+	public static boolean isSequencable(Type type) {
+		return isList(type) || isArray(type);
+	}
+
+	public static boolean isArray(Type type) {
+		return type.getErasure().endsWith("[]");
 	}
 
 	public static boolean isMap(Type type) {
@@ -363,7 +378,7 @@ public class TypeUtil {
 	}
 
 	public static Type getKeyType(Type mapOrArrayType) {
-		if (isArrayLike(mapOrArrayType)) {
+		if (isBracketable(mapOrArrayType)) {
 			return INTEGER_TYPE;
 		} else {
 			//assumed to be a map
@@ -380,7 +395,7 @@ public class TypeUtil {
 	private boolean isAssignableList(Type type) {
 		//TODO: isBracketable means 'isList' right now, but this may not be
 		// the case in the future.
-		if (isArrayLike(type)) {
+		if (isBracketable(type)) {
 			Type domainType = getDomainType(type);
 			return isAtomic(domainType);
 		}

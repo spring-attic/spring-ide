@@ -63,7 +63,7 @@ public class ProjectRunStateTracker implements ProcessListener {
 
 	///////////////////////// stuff below is implementation cruft ////////////////////
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {
