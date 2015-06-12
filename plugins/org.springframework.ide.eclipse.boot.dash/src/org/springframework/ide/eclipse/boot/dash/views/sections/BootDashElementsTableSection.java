@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Layout;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -34,22 +33,27 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 
-import org.eclipse.swt.widgets.Control;
-
 /**
+ * A section that contains a table viewer widget displaying Boot Dash Elements from a model.
+ *
  * @author Kris De Volder
  */
-public class LocalSection extends PageSection {
+public class BootDashElementsTableSection extends PageSection {
 
 	private TableViewer tv;
 	private BootDashModel model;
+	private BootDashColumn[] enabledColumns = BootDashColumn.values();
 
-	protected LocalSection(TestView owner, BootDashModel model) {
+	protected BootDashElementsTableSection(TestView owner, BootDashModel model) {
 		super(owner);
 		this.model = model;
 	}
 
 	class NameSorter extends ViewerSorter {
+	}
+
+	public void setColumns(BootDashColumn... columns) {
+		this.enabledColumns = columns;
 	}
 
 	@Override
@@ -65,7 +69,7 @@ public class LocalSection extends PageSection {
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
 
-		for (BootDashColumn columnType : BootDashColumn.values()) {
+		for (BootDashColumn columnType : enabledColumns ) {
 			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
 			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
 			c1viewer.getColumn().setText(columnType.getLabel());

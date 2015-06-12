@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import static org.springframework.ide.eclipse.boot.dash.views.BootDashColumn.PROJECT;
+import static org.springframework.ide.eclipse.boot.dash.views.BootDashColumn.RUN_STATE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +37,10 @@ public class TestView extends ViewPartWithSections {
 	@Override
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
-		sections.add(new ExpandableSection(this, "Local Boot Apps", new LocalSection(this, model)));
+		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model);
+		localApsTable.setColumns(PROJECT, RUN_STATE);
+		sections.add(new ExpandableSection(this, "Local Boot Apps", localApsTable));
 		return sections;
 	}
-
-
 
 }

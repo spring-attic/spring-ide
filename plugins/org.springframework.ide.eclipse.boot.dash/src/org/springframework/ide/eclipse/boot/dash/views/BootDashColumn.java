@@ -14,7 +14,7 @@ import org.eclipse.swt.SWT;
 
 public enum BootDashColumn {
 
-	PROJECT(	"Project", 	250),
+	PROJECT(	"Project", 	200),
 	RUN_TARGET(	"Target", 	60),
 	RUN_STATE(	"State", 	100);
 
