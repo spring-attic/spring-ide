@@ -20,7 +20,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -87,7 +86,7 @@ public class DefaultUserInteractions implements UserInteractions {
 						labelProvider.dispose();
 						if (result == Window.OK) {
 							chosenType.setValue((IType) dialog.getFirstResult());
-						} 
+						}
 					} finally {
 						labelProvider.dispose();
 					}

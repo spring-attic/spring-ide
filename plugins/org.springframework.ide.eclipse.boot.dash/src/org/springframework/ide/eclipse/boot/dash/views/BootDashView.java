@@ -141,7 +141,7 @@ public class BootDashView extends ViewPart implements UIContext {
 		tv.setContentProvider(new BootDashContentProvider(model));
 		//tv.setLabelProvider(new ViewLabelProvider());
 		tv.setSorter(new NameSorter());
-		tv.setInput(getViewSite());
+		tv.setInput(model);
 		tv.getTable().setHeaderVisible(true);
 				tv.getTable().setLinesVisible(true);
 

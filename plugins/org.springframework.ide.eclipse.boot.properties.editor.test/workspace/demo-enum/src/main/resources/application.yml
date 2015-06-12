@@ -28,7 +28,7 @@ flyway:
   enabled: false
 server:
   port: 666
-  address: locahost
+  address: localhost
 
 foo:
   list:

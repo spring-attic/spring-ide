@@ -17,7 +17,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 /**
  * @author Kris De Volder
  */
-class BootDashContentProvider implements IStructuredContentProvider {
+public class BootDashContentProvider implements IStructuredContentProvider {
 
 	private BootDashModel model;
 
