@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -28,18 +33,23 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
+import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 
@@ -48,16 +58,19 @@ import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
  *
  * @author Kris De Volder
  */
-public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource<BootDashElement> {
+public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource<BootDashElement>, Disposable {
 
 	private TableViewer tv;
 	private BootDashModel model;
 	private BootDashColumn[] enabledColumns = BootDashColumn.values();
 	private MultiSelection<BootDashElement> selection;
+	private BootDashActions actions;
+	private UserInteractions ui;
 
-	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model) {
+	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
 		super(owner);
 		this.model = model;
+		this.ui = owner.getUserInteractions();
 	}
 
 	class NameSorter extends ViewerSorter {
@@ -104,19 +117,72 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						tv.update(e, null);
-//						updateActionEnablement();
 					}
 				});
 			}
 		});
 
+		actions = new BootDashActions(model, getSelection(), ui);
+		hookContextMenu();
+	}
 
-//		tv.addSelectionChangedListener(new ISelectionChangedListener() {
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				updateActionEnablement();
-//			}
-//		});
+	private void hookContextMenu() {
+		MenuManager menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				fillContextMenu(manager);
+			}
+		});
+		Menu menu = menuMgr.createContextMenu(tv.getControl());
+		tv.getControl().setMenu(menu);
+	}
 
+	private void fillContextMenu(IMenuManager manager) {
+		for (RunStateAction a : actions.getRunStateActions()) {
+			manager.add(a);
+		}
+		manager.add(actions.getOpenConfigAction());
+		manager.add(actions.getOpenConsoleAction());
+		addPreferedConfigSelectionMenu(manager);
+//		manager.add(new Separator());
+//		manager.add(refreshAction);
+//		manager.add(action2);
+		// Other plug-ins can contribute there actions here
+//		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
+
+	private void addPreferedConfigSelectionMenu(IMenuManager parent) {
+		BootDashElement element = selection.getSingle();
+		if (element!=null) {
+			ILaunchConfiguration defaultConfig = element.getConfig();
+			List<ILaunchConfiguration> allConfigs = element.getTarget().getLaunchConfigs(element);
+			if (!allConfigs.isEmpty()) {
+				MenuManager menu = new MenuManager("Default Config...");
+				parent.add(menu);
+				for (ILaunchConfiguration conf : allConfigs) {
+					menu.add(selectDefaultConfigAction(element, defaultConfig, conf));
+				}
+			}
+		}
+	}
+
+	private IAction selectDefaultConfigAction(
+			final BootDashElement target,
+			final ILaunchConfiguration currentDefault,
+			final ILaunchConfiguration newDefault
+	) {
+		Action action = new Action(newDefault.getName(), SWT.CHECK) {
+			@Override
+			public void run() {
+				target.setConfig(newDefault);
+				//target.openConfig(getSite().getShell());
+			}
+		};
+		action.setChecked(newDefault.equals(currentDefault));
+		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
+				+ "be used the next time you (re)launch '"+target.getName());
+		return action;
 	}
 
 	@Override
@@ -155,4 +221,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		return selection;
 	}
 
+	public void dispose() {
+		if (actions!=null) {
+			actions.dispose();
+			actions = null;
+		}
+	}
 }

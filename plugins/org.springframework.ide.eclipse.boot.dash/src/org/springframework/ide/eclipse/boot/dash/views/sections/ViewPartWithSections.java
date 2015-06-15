@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.U
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
@@ -98,5 +99,17 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 		});
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (sections!=null) {
+			for (IPageSection s : sections) {
+				if (s instanceof Disposable) {
+					((Disposable) s).dispose();
+				}
+			}
+			sections = null;
+		}
+	}
 
 }

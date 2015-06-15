@@ -17,20 +17,21 @@ import java.util.List;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 
 @SuppressWarnings("restriction")
 public class OpenConsoleAction extends AbstractBootDashAction {
 
-	public OpenConsoleAction(BootDashView owner) {
-		super(owner);
+	public OpenConsoleAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
+		super(selection, ui);
 		this.setText("Open Console");
 		this.setToolTipText("Open Console");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console.gif"));
@@ -39,8 +40,7 @@ public class OpenConsoleAction extends AbstractBootDashAction {
 
 	@Override
 	public void run() {
-		final Collection<BootDashElement> selecteds = owner
-				.getSelectedElements();
+		final Collection<BootDashElement> selecteds = getSelectedElements();
 
 		Display.getCurrent().asyncExec(new Runnable() {
 
@@ -93,13 +93,10 @@ public class OpenConsoleAction extends AbstractBootDashAction {
 				if (appConsole != null) {
 					manager.showConsoleView(appConsole);
 				} else {
-					MessageDialog
-							.openError(
-									owner.getSite().getShell(),
-									"Open Console",
-									"Failed to open console for: "
-											+ element.getName()
-											+ ". Either a process console may not exist or the application is not running.");
+					ui.errorPopup("Open Console",
+							"Failed to open console for: "
+									+ element.getName()
+									+ ". Either a process console may not exist or the application is not running.");
 				}
 			}
 		}

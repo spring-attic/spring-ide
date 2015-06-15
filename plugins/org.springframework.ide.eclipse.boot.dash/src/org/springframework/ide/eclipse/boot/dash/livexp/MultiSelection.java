@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.livexp;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -86,6 +87,20 @@ public final class MultiSelection<T> {
 
 	public Set<T> getValue() {
 		return getElements().getValue();
+	}
+
+	/**
+	 * @return The only element in the selection, if exactly one element is selected; or null
+	 * otherwise.
+	 */
+	public T getSingle() {
+		Set<T> es = getValue();
+		if (es.size()==1) {
+			for (T t : es) {
+				return t;
+			}
+		}
+		return null;
 	}
 
 }

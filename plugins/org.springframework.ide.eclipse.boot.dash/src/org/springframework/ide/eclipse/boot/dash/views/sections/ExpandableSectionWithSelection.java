@@ -29,6 +29,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 
@@ -51,7 +52,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
  *
  * @author Kris De Volder
  */
-public class ExpandableSectionWithSelection<T> extends PageSection implements MultiSelectionSource<T> {
+public class ExpandableSectionWithSelection<T> extends PageSection implements MultiSelectionSource<T>, Disposable {
 
 	private MultiSelectionSource<T> child;
 	private String title;
@@ -134,6 +135,16 @@ public class ExpandableSectionWithSelection<T> extends PageSection implements Mu
 			selection = createSelection();
 		}
 		return selection;
+	}
+
+	@Override
+	public void dispose() {
+		if (child!=null) {
+			if (child instanceof Disposable) {
+				((Disposable) child).dispose();
+			}
+			child = null;
+		}
 	}
 
 //	@SuppressWarnings("unchecked")

@@ -12,13 +12,18 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
+import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 
 /**
  * An action who's intended effect is to transition a BootDashElement to a
@@ -26,22 +31,50 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
  *
  * @author Kris De Volder
  */
-public abstract class RunStateAction extends Action {
+public abstract class RunStateAction extends AbstractBootDashAction {
+
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 
 	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
-
 	protected final RunState goalState;
+	private ElementStateListener stateListener = null;
+	private BootDashModel model;
 
 	protected void configureJob(Job job) {
 		job.setRule(SCEDULING_RULE);
 	}
 
-	public RunStateAction(RunState goalState) {
+	public RunStateAction(
+			BootDashModel model,
+			MultiSelection<BootDashElement> selection,
+			UserInteractions ui,
+			RunState goalState) {
+		super(selection, ui);
+		debug("Create RunStateAction "+goalState);
+		this.model = model;
 		this.goalState = goalState;
+		model.addElementStateListener(stateListener = new ElementStateListener() {
+			public void stateChanged(BootDashElement e) {
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						updateEnablement();
+					}
+				});
+			}
+		});
 	}
-
-	public void updateEnablement(Collection<BootDashElement> selection) {
-		setEnabled(appliesTo(selection));
+	@Override
+	public void updateEnablement() {
+		Collection<BootDashElement> selecteds = getSelectedElements();
+		setEnabled(appliesTo(selecteds));
 	}
 
 	private boolean appliesTo(Collection<BootDashElement> selection) {
@@ -89,6 +122,17 @@ public abstract class RunStateAction extends Action {
 		if (job!=null) {
 			configureJob(job);
 			job.schedule();
+		}
+	}
+
+	@Override
+	public void dispose() {
+		debug("DISPOSE RunStateAction "+goalState);
+		super.dispose();
+		if (stateListener!=null) {
+			//Avoid leaking model listeners
+			model.removeElementStateListener(stateListener);
+			stateListener = null;
 		}
 	}
 
