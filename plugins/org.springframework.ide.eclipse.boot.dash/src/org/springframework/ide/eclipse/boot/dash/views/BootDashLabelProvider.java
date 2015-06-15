@@ -15,6 +15,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends CellLabelProvider {

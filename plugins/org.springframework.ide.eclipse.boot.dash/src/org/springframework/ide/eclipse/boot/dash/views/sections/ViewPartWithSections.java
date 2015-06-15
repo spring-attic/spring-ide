@@ -32,7 +32,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
 public class ViewPartWithSections extends ViewPart implements UIContext, IPageWithSections {
 
 	private ViewPageScroller scroller;
-	private Composite page;
+	protected Composite page;
 
 	@Override
 	public void createPartControl(Composite parent) {

@@ -10,10 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import java.util.EnumSet;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -21,15 +28,18 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 
@@ -38,13 +48,14 @@ import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
  *
  * @author Kris De Volder
  */
-public class BootDashElementsTableSection extends PageSection {
+public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource<BootDashElement> {
 
 	private TableViewer tv;
 	private BootDashModel model;
 	private BootDashColumn[] enabledColumns = BootDashColumn.values();
+	private MultiSelection<BootDashElement> selection;
 
-	protected BootDashElementsTableSection(TestView owner, BootDashModel model) {
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model) {
 		super(owner);
 		this.model = model;
 	}
@@ -111,6 +122,37 @@ public class BootDashElementsTableSection extends PageSection {
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
 		return OK_VALIDATOR;
+	}
+
+	@Override
+	public synchronized MultiSelection<BootDashElement> getSelection() {
+		if (selection==null) {
+			selection = MultiSelection.from(BootDashElement.class, new ObservableSet<BootDashElement>() {
+				@Override
+				protected Set<BootDashElement> compute() {
+					if (tv!=null) {
+						ISelection s = tv.getSelection();
+						if (s instanceof IStructuredSelection) {
+							Object[] elements = ((IStructuredSelection) s).toArray();
+							if (elements!=null && elements.length>0) {
+								HashSet<BootDashElement> set = new HashSet<BootDashElement>();
+								for (Object o : elements) {
+									set.add((BootDashElement) o);
+								}
+								return set;
+							}
+						}
+					}
+					return Collections.emptySet();
+				}
+			});
+		}
+		tv.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				selection.getElements().refresh();
+			}
+		});
+		return selection;
 	}
 
 }

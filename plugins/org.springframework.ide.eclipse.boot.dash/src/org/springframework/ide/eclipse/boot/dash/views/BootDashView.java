@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,37 +32,29 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
-import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 /**
  * @author Kris De Volder
  */
-public class BootDashView extends ViewPart implements UIContext {
+public class BootDashView extends ViewPartWithSections {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -67,8 +63,7 @@ public class BootDashView extends ViewPart implements UIContext {
 
 	private BootDashModel model = BootDashActivator.getDefault().getModel();
 
-	private TableViewer tv;
-	private Action refreshAction;
+//	private Action refreshAction;
 //	private Action doubleClickAction;
 
 	private RunStateAction[] runStateActions;
@@ -77,6 +72,8 @@ public class BootDashView extends ViewPart implements UIContext {
 	private OpenLaunchConfigAction openConfigAction;
 
 	private UserInteractions ui = new DefaultUserInteractions(this);
+
+	private MultiSelection<BootDashElement> selection = null; //lazy init
 
 	/*
 	 * The content provider class is responsible for
@@ -87,39 +84,6 @@ public class BootDashView extends ViewPart implements UIContext {
 	 * it and always show the same content
 	 * (like Task List, for example).
 	 */
-
-//	@SuppressWarnings("restriction")
-//	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
-//
-//		private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
-//
-//		public String getColumnText(Object obj, int index) {
-//			if (obj instanceof BootDashElement) {
-//				return javaLabels.getText(((BootDashElement)obj).getJavaProject());
-//			}
-//			return super.getText(obj);
-//		}
-//		public Image getColumnImage(Object obj, int index) {
-//			if (obj instanceof BootDashElement) {
-//				return javaLabels.getImage(((BootDashElement)obj).getJavaProject());
-//			}
-//			return super.getImage(obj);
-//		}
-//
-//		public Image getImage(Object obj) {
-//			if (obj instanceof BootDashElement) {
-//				return javaLabels.getImage(((BootDashElement)obj).getJavaProject());
-//			}
-//			return super.getImage(obj);
-//		}
-//		@Override
-//		public void dispose() {
-//			super.dispose();
-//			javaLabels.dispose();
-//		}
-//	}
-	class NameSorter extends ViewerSorter {
-	}
 
 	/**
 	 * The constructor.
@@ -137,21 +101,7 @@ public class BootDashView extends ViewPart implements UIContext {
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
-		tv = new TableViewer(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL);
-		tv.setContentProvider(new BootDashContentProvider(model));
-		//tv.setLabelProvider(new ViewLabelProvider());
-		tv.setSorter(new NameSorter());
-		tv.setInput(model);
-		tv.getTable().setHeaderVisible(true);
-				tv.getTable().setLinesVisible(true);
-
-		for (BootDashColumn columnType : BootDashColumn.values()) {
-			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
-			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
-			c1viewer.getColumn().setText(columnType.getLabel());
-			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
-		}
-		new TableResizeHelper(tv).enableResizing();
+		super.createPartControl(parent);
 
 		//Create the help context id for the viewer's control
 		//PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(), "org.springframework.ide.eclipse.boot.dash.viewer");
@@ -160,32 +110,27 @@ public class BootDashView extends ViewPart implements UIContext {
 //		hookDoubleClickAction();
 		contributeToActionBars();
 
-		model.getElements().addListener(new UIValueListener<Set<BootDashElement>>() {
-			@Override
-			protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp,
-					Set<BootDashElement> value) {
-				tv.refresh();
-			}
-		});
-
-		model.addElementStateListener(new ElementStateListener() {
-			public void stateChanged(final BootDashElement e) {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						tv.update(e, null);
-						updateActionEnablement();
-					}
-				});
-			}
-		});
-
-		tv.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
+		MultiSelection<BootDashElement> selection = getSelection();
+		selection.getElements().addListener(new ValueListener<Set<BootDashElement>>() {
+			public void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
 				updateActionEnablement();
 			}
 		});
-
 		updateActionEnablement();
+	}
+
+	public synchronized MultiSelection<BootDashElement> getSelection() {
+		if (selection==null) {
+			selection = MultiSelection.empty(BootDashElement.class);
+			for (IPageSection section : getSections()) {
+				if (section instanceof MultiSelectionSource) {
+					MultiSelectionSource<?> source = (MultiSelectionSource<?>) section;
+					MultiSelection<BootDashElement> subSelection = source.getSelection().cast(BootDashElement.class);
+					selection = MultiSelection.union(selection, subSelection);
+				}
+			}
+		}
+		return selection;
 	}
 
 	protected void updateActionEnablement() {
@@ -198,22 +143,13 @@ public class BootDashView extends ViewPart implements UIContext {
 	}
 
 	public List<BootDashElement> getSelectedElements() {
-		try {
-			IStructuredSelection selection = (IStructuredSelection)tv.getSelection();
-			Object[] array = selection.toArray();
-			if (array!=null && array.length>0) {
-				ArrayList<BootDashElement> result = new ArrayList<BootDashElement>();
-				for (Object o : array) {
-					if (o instanceof BootDashElement) {
-						result.add((BootDashElement) o);
-					}
-				}
-				return result;
+		ArrayList<BootDashElement> elements = new ArrayList<BootDashElement>();
+		for (Object e : getSelection().getValue()) {
+			if (e instanceof BootDashElement) {
+				elements.add((BootDashElement) e);
 			}
-		} catch (Exception e) {
-			BootActivator.log(e);
 		}
-		return Collections.emptyList();
+		return Collections.unmodifiableList(elements);
 	}
 
 	private void hookContextMenu() {
@@ -224,9 +160,9 @@ public class BootDashView extends ViewPart implements UIContext {
 				BootDashView.this.fillContextMenu(manager);
 			}
 		});
-		Menu menu = menuMgr.createContextMenu(tv.getControl());
-		tv.getControl().setMenu(menu);
-//		getSite().registerContextMenu(menuMgr, tv);
+// TODO: how can we add context menu for all our actions to the table viewer???
+//		Menu menu = menuMgr.createContextMenu(tv.getControl());
+//		tv.getControl().setMenu(menu);
 	}
 
 	private void contributeToActionBars() {
@@ -236,7 +172,7 @@ public class BootDashView extends ViewPart implements UIContext {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(refreshAction);
+//		manager.add(refreshAction);
 //		manager.add(new Separator());
 //		manager.add(action2);
 	}
@@ -248,8 +184,8 @@ public class BootDashView extends ViewPart implements UIContext {
 		manager.add(openConfigAction);
 		manager.add(openConsoleAction);
 		addPreferedConfigSelectionMenu(manager);
-		manager.add(new Separator());
-		manager.add(refreshAction);
+//		manager.add(new Separator());
+//		manager.add(refreshAction);
 //		manager.add(action2);
 		// Other plug-ins can contribute there actions here
 //		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
@@ -297,20 +233,20 @@ public class BootDashView extends ViewPart implements UIContext {
 		}
 		manager.add(openConsoleAction);
 		manager.add(openConfigAction);
-		manager.add(refreshAction);
+//		manager.add(refreshAction);
 //		manager.add(action2);
 	}
 
 	private void makeActions() {
-		refreshAction = new Action() {
-			public void run() {
-				model.refresh();
-				tv.refresh();
-			}
-		};
-		refreshAction.setText("Refresh");
-		refreshAction.setToolTipText("Manually trigger a view refresh");
-		refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
+//		refreshAction = new Action() {
+//			public void run() {
+//				model.refresh();
+//				tv.refresh();
+//			}
+//		};
+//		refreshAction.setText("Refresh");
+//		refreshAction.setToolTipText("Manually trigger a view refresh");
+//		refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
 
 		RunStateAction restartAction = new RunOrDebugStateAction(RunState.RUNNING);
 		restartAction.setText("(Re)start");
@@ -405,7 +341,9 @@ public class BootDashView extends ViewPart implements UIContext {
 	 * Passing the focus request to the viewer's control.
 	 */
 	public void setFocus() {
-		tv.getControl().setFocus();
+		if (page!=null) {
+			page.setFocus();
+		}
 	}
 
 	class RunOrDebugStateAction extends RunStateAction {
@@ -453,4 +391,12 @@ public class BootDashView extends ViewPart implements UIContext {
 		return getSite().getShell();
 	}
 
+	@Override
+	protected List<IPageSection> createSections() throws CoreException {
+		List<IPageSection> sections = new ArrayList<IPageSection>();
+		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model);
+		localApsTable.setColumns(PROJECT, RUN_STATE);
+		sections.add(new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable));
+		return sections;
+	}
 }
