@@ -11,13 +11,6 @@
             class="org.springframework.ide.eclipse.boot.dash.views.BootDashView"
             id="org.springframework.ide.eclipse.boot.dash.views.BootDashView">
       </view>
-      <view
-            name="Test View"
-            icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-icon.png"
-            category="org.springframework.ide.eclipse.ui.views"
-            class="org.springframework.ide.eclipse.boot.dash.views.sections.TestView"
-            id="org.springframework.ide.eclipse.boot.dash.views.TestView">
-      </view>
    </extension>
    
    <extension
