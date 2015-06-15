@@ -67,10 +67,20 @@ public class YamlASTReconciler {
 				reconcile(entry, nav);
 			}
 			break;
+		case scalar:
+			if (!isIgnoreScalarAssignmentTo(nav.getPrefix())) {
+				expectMapping(node);
+			}
+			break;
 		default:
 			expectMapping(node);
 			break;
 		}
+	}
+
+	protected boolean isIgnoreScalarAssignmentTo(String propName) {
+		//See https://issuetracker.springsource.com/browse/STS-4144
+		return propName.equals("spring.profiles");
 	}
 
 	private void reconcile(NodeTuple entry, IndexNavigator nav) {

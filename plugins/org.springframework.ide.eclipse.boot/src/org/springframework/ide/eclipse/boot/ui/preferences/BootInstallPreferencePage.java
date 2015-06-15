@@ -142,7 +142,7 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 
 				IBootInstall install = getCurrentDefaultVM();
 				if (install == null) {
-					setErrorMessage("Select a default Roo installation");
+					setErrorMessage("Select a default Boot installation");
 				}
 				else {
 					setErrorMessage(null);

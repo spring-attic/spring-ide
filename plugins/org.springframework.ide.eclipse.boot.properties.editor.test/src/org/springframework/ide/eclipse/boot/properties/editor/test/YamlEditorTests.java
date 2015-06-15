@@ -1764,7 +1764,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	}
 
-
 	public void testDocumentSeparator() throws Exception {
 		defaultTestData();
 
@@ -1779,6 +1778,38 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"---\n" +
 				"flyway:\n" +
 				"  enabled: <*>"
+		);
+	}
+
+	public void testMultiProfileYamlReconcile() throws Exception {
+		MockEditor editor;
+		//See https://issuetracker.springsource.com/browse/STS-4144
+		defaultTestData();
+
+		//Narrowly focussed test-case for easier debugging
+		editor = new MockEditor(
+				"spring:\n" +
+				"  profiles: seven\n"
+		);
+		assertProblems(editor
+				/*none*/
+		);
+
+		//More complete test
+		editor = new MockEditor(
+				"spring:\n" +
+				"  profiles: seven\n" +
+				"server:\n" +
+				"  port: 7777\n" +
+				"---\n" +
+				"spring:\n" +
+				"  profiles: eight\n" +
+				"server:\n" +
+				"  port: 8888\n"+
+				"bogus: bad"
+		);
+		assertProblems(editor,
+				"bogus|Unknown property"
 		);
 	}
 
