@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.util;
+package org.springframework.ide.eclipse.boot.dash.livexp;
 
 import java.util.Collections;
 import java.util.HashSet;
