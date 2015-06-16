@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -64,8 +65,6 @@ public class TypeUtil {
 
 	}
 
-	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
-
 	private static final String STRING_TYPE_NAME = String.class.getName();
 	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
 
@@ -85,6 +84,7 @@ public class TypeUtil {
 
 
 	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
+	private static final Map<String, Type> PRIMITIVE_TO_BOX_TYPE = new HashMap<String, Type>();
 	static {
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
 
@@ -97,7 +97,13 @@ public class TypeUtil {
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Float", "float");
 
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Character", "char");
+
+		for (Entry<String, String> e : PRIMITIVE_TYPE_NAMES.entrySet()) {
+			PRIMITIVE_TO_BOX_TYPE.put(e.getValue(), new Type(e.getKey(), null));
+		}
 	}
+
+	public static final Type INTEGER_TYPE = PRIMITIVE_TO_BOX_TYPE.get("java.lang.Integer");
 
 	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
@@ -374,7 +380,37 @@ public class TypeUtil {
 	 * Get domain type for a map or list generic type.
 	 */
 	public static Type getDomainType(Type type) {
-		return lastElement(type.getParams());
+		if (isArray(type)) {
+			return getArrayDomainType(type);
+		} else {
+			return lastElement(type.getParams());
+		}
+	}
+
+	private static Type getArrayDomainType(Type type) {
+		if (type!=null) {
+			String fullName = type.getErasure();
+			Assert.isLegal(fullName.endsWith("[]"));
+			String elName = fullName.substring(0, fullName.length()-2);
+			return normalizePrimitiveType(new Type(elName, null));
+		}
+		return null;
+	}
+
+	/**
+	 * Convert a type which is a 'primitive' type like 'int', 'long' etc. to its
+	 * corresponding 'Boxed' type. If the type isn't a primitive type then
+	 * just return it unchanged.
+	 */
+	private static Type normalizePrimitiveType(Type type) {
+		if (type!=null) {
+			String name = type.getErasure();
+			Type boxType = PRIMITIVE_TO_BOX_TYPE.get(name);
+			if (boxType!=null) {
+				return boxType;
+			}
+		}
+		return null;
 	}
 
 	public static Type getKeyType(Type mapOrArrayType) {

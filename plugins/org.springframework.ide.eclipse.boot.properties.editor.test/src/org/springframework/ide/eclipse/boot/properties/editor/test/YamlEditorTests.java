@@ -1813,6 +1813,45 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testReconcileArrayOfPrimitiveType() throws Exception {
+		data("my.array", "int[]", null, "A primitive array");
+		data("my.boxarray", "int[]", null, "An array of boxed primitives");
+		data("my.list", "java.util.List<java.lang.Integer>", null, "A list of boxed types");
+
+		MockEditor editor = new MockEditor(
+				"my:\n" +
+				"  array:\n" +
+				"    - 777\n" +
+				"    - bad\n" +
+				"    - 888"
+		);
+		assertProblems(editor,
+				"bad|Expecting a 'int'"
+		);
+
+		editor = new MockEditor(
+				"my:\n" +
+				"  boxarray:\n" +
+				"    - 777\n" +
+				"    - bad\n" +
+				"    - 888"
+		);
+		assertProblems(editor,
+				"bad|Expecting a 'int'"
+		);
+
+		editor = new MockEditor(
+				"my:\n" +
+				"  list:\n" +
+				"    - 777\n" +
+				"    - bad\n" +
+				"    - 888"
+		);
+		assertProblems(editor,
+				"bad|Expecting a 'int'"
+		);
+	}
+
 	// TODO: allow relaxed property names in reconciling
 
 	///////////////// cruft ////////////////////////////////////////////////////////
