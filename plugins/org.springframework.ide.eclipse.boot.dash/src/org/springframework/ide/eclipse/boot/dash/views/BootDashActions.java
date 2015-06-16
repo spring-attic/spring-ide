@@ -112,24 +112,6 @@ public class BootDashActions {
 
 		openConfigAction = new OpenLaunchConfigAction(selection, ui);
 		openConsoleAction = new OpenConsoleAction(selection, ui);
-
-//		action2 = new Action() {
-//			public void run() {
-//				showMessage("Action 2 executed");
-//			}
-//		};
-//		action2.setText("Action 2");
-//		action2.setToolTipText("Action 2 tooltip");
-//		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-//				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-
-//		doubleClickAction = new Action() {
-//			public void run() {
-//				ISelection selection = tv.getSelection();
-//				Object obj = ((IStructuredSelection)selection).getFirstElement();
-//				showMessage("Double-click detected on "+obj.toString());
-//			}
-//		};
 	}
 
 	static class RunOrDebugStateAction extends RunStateAction {
