@@ -103,7 +103,7 @@ public class TypeUtil {
 		}
 	}
 
-	public static final Type INTEGER_TYPE = PRIMITIVE_TO_BOX_TYPE.get("java.lang.Integer");
+	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
 
 	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
 			"java.lang.Boolean",
