@@ -14,9 +14,10 @@ import org.eclipse.swt.SWT;
 
 public enum BootDashColumn {
 
-	PROJECT(	"Project", 	200),
-	RUN_TARGET(	"Target", 	60),
-	RUN_STATE(	"State", 	100);
+	PROJECT(		"Project", 	200),
+	RUN_TARGET(		"Target", 	60),
+	RUN_STATE(		"State", 	100),
+	RUN_STATE_ICN(	"",			20);
 
 	private final String label;
 	private final int defaultWidth;

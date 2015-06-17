@@ -30,6 +30,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -107,7 +109,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					Set<BootDashElement> value) {
 				if (!tv.getControl().isDisposed()) {
 					tv.refresh();
-					page.layout(new Control[]{tv.getControl()});
+					page.getParent().getParent().layout(new Control[]{tv.getControl()});
 				}
 			}
 		});
@@ -122,8 +124,30 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
+		final Composite reflowParent = findReflowParent(tv.getControl());
+		if (reflowParent!=null) {
+			tv.getControl().addControlListener(new ControlListener() {
+				public void controlResized(ControlEvent e) {
+					reflowParent.layout(new Control[]{tv.getControl()});
+				}
+				public void controlMoved(ControlEvent e) {
+				}
+			});
+
+		}
+
 		actions = new BootDashActions(model, getSelection(), ui);
 		hookContextMenu();
+	}
+
+	private Composite findReflowParent(Control control) {
+		Composite it = null;
+		while ((control = control.getParent())!=null) {
+			if (control instanceof Composite) {
+				it = (Composite) control;
+			}
+		}
+		return it;
 	}
 
 	private void hookContextMenu() {

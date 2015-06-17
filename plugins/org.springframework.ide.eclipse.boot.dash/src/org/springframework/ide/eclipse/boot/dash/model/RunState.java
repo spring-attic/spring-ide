@@ -31,4 +31,8 @@ public enum RunState {
 			return other;
 		}
 	}
+
+	public String getImageUrl() {
+		return "icons/rs_"+toString().toLowerCase()+".png";
+	}
 }

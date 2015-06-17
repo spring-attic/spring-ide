@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.livexp;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**

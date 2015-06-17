@@ -14,7 +14,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 @SuppressWarnings("restriction")
@@ -22,6 +24,7 @@ public class BootDashLabelProvider extends CellLabelProvider {
 
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	private BootDashColumn forColum;
+	private RunStateImages runStateImages;
 
 	public BootDashLabelProvider(BootDashColumn target) {
 		this.forColum = target;
@@ -44,16 +47,32 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			cell.setText(e.getTarget().getName());
 			break;
 		case RUN_STATE:
+			//cell.setImage(getRunStateImage(e.getRunState()));
 			cell.setText(e.getRunState().toString());
+			break;
+		case RUN_STATE_ICN:
+			cell.setText("");
+			cell.setImage(getRunStateImage(e.getRunState()));
 			break;
 		default:
 			cell.setText("???");
 		}
 	}
 
+	private Image getRunStateImage(RunState runState) {
+		if (runStateImages==null) {
+			runStateImages = new RunStateImages();
+		}
+		return runStateImages.getImg(runState);
+	}
+
 	@Override
 	public void dispose() {
 		super.dispose();
 		javaLabels.dispose();
+		if (runStateImages!=null) {
+			runStateImages.dispose();
+			runStateImages = null;
+		}
 	}
 }

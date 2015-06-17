@@ -11,21 +11,15 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
@@ -186,9 +180,13 @@ public class BootDashView extends ViewPartWithSections {
 	@Override
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
-		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model);
-		localApsTable.setColumns(PROJECT, RUN_STATE);
-		sections.add(new ExpandableSectionWithSelection<BootDashElement>(this, "Local Boot Apps", localApsTable));
+//		for (int i = 0; i < 2; i++) {
+			BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model);
+			localApsTable.setColumns(RUN_STATE_ICN, PROJECT);
+			sections.add(
+				new ExpandableSectionWithSelection<BootDashElement>(this, "Local Boot Apps "/*+(i+1)*/, localApsTable)
+			);
+//		}
 		return sections;
 	}
 }
