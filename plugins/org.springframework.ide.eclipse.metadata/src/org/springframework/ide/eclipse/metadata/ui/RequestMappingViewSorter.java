@@ -93,7 +93,15 @@ public class RequestMappingViewSorter extends ViewerSorter {
 		String prefix = getCommonPrefix(str1, str2);
 		str1 = str1.substring(prefix.length(), str1.length());
 		str2 = str2.substring(prefix.length(), str2.length());
-
+		
+		// workaround for a bug in AntPathMatcher, dealing with a path that starts with a "*"
+		if (str1.startsWith("*")) {
+			str1 = "/" + str1;
+		}
+		if (str2.startsWith("*")) {
+			str2 = "/" + str2;
+		}
+		
 		Comparator<String> comparator = matcher.getPatternComparator(prefix);
 		if (prefix.length() > 1
 				&& (matcher.isPattern(str1) || str1.contains("{") //$NON-NLS-1$
@@ -124,6 +132,7 @@ public class RequestMappingViewSorter extends ViewerSorter {
 				break;
 			}
 		}
+		
 		return prefix;
 	}
 
