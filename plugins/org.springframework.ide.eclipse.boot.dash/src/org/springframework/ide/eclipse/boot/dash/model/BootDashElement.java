@@ -20,6 +20,12 @@ public interface BootDashElement extends Nameable {
 	RunState getRunState();
 	RunTarget getTarget();
 
+	/**
+	 * Return the port this element is running on. If the port can not
+	 * be determined or the app is not running this returns -1.
+	 */
+	int getLivePort();
+
 	ILaunchConfiguration getConfig();
 	void setConfig(ILaunchConfiguration config);
 

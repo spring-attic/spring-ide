@@ -150,7 +150,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			BootActivator.log(e);
 		}
 	}
-	
+
 	public void stopSync() throws Exception {
 		try {
 			stop(true);
@@ -184,7 +184,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			BootActivator.log(e);
 		}
 		if (sync) {
-			//Eclipse waits for 5 seconds before timing out. So we use a similar timeout but slightly 
+			//Eclipse waits for 5 seconds before timing out. So we use a similar timeout but slightly
 			// larger. Windows case termination seem to fail silently sometimes so its up to us
 			// to handle here.
 			done.get(6, TimeUnit.SECONDS);
@@ -277,6 +277,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	@Override
 	public void setConfig(ILaunchConfiguration config) {
 		context.setPreferredConfig(this, config);
+	}
+
+	@Override
+	public int getLivePort() {
+		//TODO: provide a real implementation
+		return 1234;
 	}
 
 

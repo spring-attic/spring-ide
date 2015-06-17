@@ -17,7 +17,8 @@ public enum BootDashColumn {
 	PROJECT(		"Project", 	200),
 	RUN_TARGET(		"Target", 	60),
 	RUN_STATE(		"State", 	100),
-	RUN_STATE_ICN(	"",			20);
+	RUN_STATE_ICN(	"",			20),
+	LIVE_PORT(		"Port",		70);
 
 	private final String label;
 	private final int defaultWidth;

@@ -54,6 +54,10 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			cell.setText("");
 			cell.setImage(getRunStateImage(e.getRunState()));
 			break;
+		case LIVE_PORT:
+			int port = e.getLivePort();
+			cell.setText(port>=0?""+port:"?");
+			break;
 		default:
 			cell.setText("???");
 		}
