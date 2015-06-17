@@ -31,6 +31,9 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
+import org.springframework.ide.eclipse.boot.dash.util.SpringApplicationLifeCycleClientManager;
+import org.springframework.ide.eclipse.boot.dash.util.SpringApplicationLifecycleClient;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
@@ -135,7 +138,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	/**
-	 * Shouldn't really by public, it is only public to make easier to test this class.
+	 * Shouldn't really be public, it is only public to make easier to test this class.
 	 */
 	protected IType[] guessMainTypes() throws CoreException {
 		return MainTypeFinder.guessMainTypes(getJavaProject(), new NullProgressMonitor());
@@ -234,7 +237,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	protected ILaunchConfiguration chooseConfig(UserInteractions ui, List<ILaunchConfiguration> configs) {
-		ILaunchConfiguration preferredConf = getConfig();
+		ILaunchConfiguration preferredConf = getPreferredConfig();
 		if (preferredConf!=null && configs.contains(preferredConf)) {
 			return preferredConf;
 		}
@@ -243,7 +246,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 				"Several launch configurations are associated with '"+getName()+"' "+
 				"Choose one.", ui);
 		if (conf!=null) {
-			setConfig(conf);
+			setPreferredConfig(conf);
 		}
 		return conf;
 	}
@@ -270,19 +273,54 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public ILaunchConfiguration getConfig() {
+	public ILaunchConfiguration getPreferredConfig() {
 		return context.getPreferredConfigs(this);
 	}
 
 	@Override
-	public void setConfig(ILaunchConfiguration config) {
+	public void setPreferredConfig(ILaunchConfiguration config) {
 		context.setPreferredConfig(this, config);
 	}
 
 	@Override
 	public int getLivePort() {
-		//TODO: provide a real implementation
-		return 1234;
+		ILaunchConfiguration conf = getActiveConfig();
+		if (conf!=null) {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
+				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
+				if (jmxPort>0) {
+					SpringApplicationLifeCycleClientManager cm = null;
+					try {
+						cm = new SpringApplicationLifeCycleClientManager(jmxPort);
+
+						SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
+						if (c!=null) {
+							return c.getServerPort();
+						}
+					} catch (Exception e) {
+						//most likely this just means the app isn't running so ignore
+					} finally {
+						if (cm!=null) {
+							cm.disposeClient();
+						}
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
+	public ILaunchConfiguration getActiveConfig() {
+		List<ILaunchConfiguration> allConfigs = getTarget().getLaunchConfigs(this);
+		if (allConfigs.size()==1) {
+			return allConfigs.get(0);
+		} else if (allConfigs.size()>1) {
+			ILaunchConfiguration preferred = getPreferredConfig();
+			if (preferred!=null && allConfigs.contains(preferred)) {
+				return preferred;
+			}
+		}
+		return null;
 	}
 
 

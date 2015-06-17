@@ -26,8 +26,28 @@ public interface BootDashElement extends Nameable {
 	 */
 	int getLivePort();
 
-	ILaunchConfiguration getConfig();
-	void setConfig(ILaunchConfiguration config);
+	/**
+	 * Get the 'active' launch configuration. This may be null.
+	 * <p>
+	 * If only one existing configuration is associated with this element then
+	 * it is automatically considered as the 'active' configuration.
+	 * <p>
+	 * If there are no configurations associated with this element then the active configuration
+	 * is undefined (null).
+	 * <p>
+	 * If more than one configuration exists then the 'preferred config' is used to decide which one
+	 * of the existing elements should be considered as 'active'.
+	 *
+	 * @return active configuration or null.
+	 */
+	ILaunchConfiguration getActiveConfig();
+
+	/**
+	 * A preferred configuration may be associated with an element. This is used by various operations
+	 * as a 'tie breaker' if there is more than one existing configuration associated with an element.
+	 */
+	ILaunchConfiguration getPreferredConfig();
+	void setPreferredConfig(ILaunchConfiguration config);
 
 	//TODO: the operations below don't belong here they are really 'UI' not 'model'.
 

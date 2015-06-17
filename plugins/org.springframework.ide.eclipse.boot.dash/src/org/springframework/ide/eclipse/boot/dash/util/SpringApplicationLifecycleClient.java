@@ -29,7 +29,7 @@ import javax.management.remote.JMXServiceURL;
  *
  * @author Stephane Nicoll
  */
-class SpringApplicationLifecycleClient {
+public class SpringApplicationLifecycleClient {
 
 	// Note: see SpringApplicationLifecycleAutoConfiguration
 	static final String DEFAULT_OBJECT_NAME = "org.springframework.boot:type=Admin,name=SpringApplication";
@@ -85,6 +85,23 @@ class SpringApplicationLifecycleClient {
 		catch (IOException ex) {
 			throw new Exception(ex.getMessage(), ex);
 		}
+	}
+
+	public int getServerPort() throws Exception {
+		try {
+			Object o = this.connection.invoke(this.objectName,"getProperty",
+					new String[] {"local.server.port"},
+					new String[] {String.class.getName()});
+			if (o instanceof Integer) {
+				return (Integer)o;
+			} else if (o instanceof String) {
+				return Integer.parseInt((String) o);
+			}
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return -1; // Couldn't determine port. Maybe App not ready yet, or maybe its not server-like app and so has no server.port
 	}
 
 	/**

@@ -179,7 +179,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private void addPreferedConfigSelectionMenu(IMenuManager parent) {
 		BootDashElement element = selection.getSingle();
 		if (element!=null) {
-			ILaunchConfiguration defaultConfig = element.getConfig();
+			ILaunchConfiguration defaultConfig = element.getPreferredConfig();
 			List<ILaunchConfiguration> allConfigs = element.getTarget().getLaunchConfigs(element);
 			if (!allConfigs.isEmpty()) {
 				MenuManager menu = new MenuManager("Default Config...");
@@ -199,7 +199,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		Action action = new Action(newDefault.getName(), SWT.CHECK) {
 			@Override
 			public void run() {
-				target.setConfig(newDefault);
+				target.setPreferredConfig(newDefault);
 				//target.openConfig(getSite().getShell());
 			}
 		};

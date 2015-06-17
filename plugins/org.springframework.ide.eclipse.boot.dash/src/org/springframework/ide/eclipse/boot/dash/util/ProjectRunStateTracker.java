@@ -166,8 +166,7 @@ public class ProjectRunStateTracker implements ProcessListener {
 	 */
 	protected int getJMXPort(ILaunchConfiguration conf) {
 		try {
-			if (BootLaunchConfigurationDelegate.getEnableLifeCycle(conf)
-					&& BootLaunchConfigurationDelegate.supportsLifeCycleManagement(conf)) {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
 				String portStr = BootLaunchConfigurationDelegate.getJMXPort(conf);
 				return Integer.parseInt(portStr);
 			}

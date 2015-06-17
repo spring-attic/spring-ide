@@ -270,6 +270,11 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		wc.setAttribute(ENABLE_LIFE_CYCLE, enable);
 	}
 
+	public static boolean canUseLifeCycle(ILaunchConfiguration conf) {
+		return BootLaunchConfigurationDelegate.getEnableLifeCycle(conf)
+				&& BootLaunchConfigurationDelegate.supportsLifeCycleManagement(conf);
+	}
+
 	public static boolean supportsLifeCycleManagement(ILaunchConfiguration conf) {
 		IProject p = getProject(conf);
 		if (p!=null) {
@@ -572,6 +577,18 @@ public class BootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 		BootLaunchConfigurationDelegate.setDefaults(wc, project.getProject(), null);
 		wc.setMappedResources(new IResource[] {project.getUnderlyingResource()});
 		return wc.doSave();
+	}
+
+	public static int getJMXPortAsInt(ILaunchConfiguration conf) {
+		String jmxPortStr = getJMXPort(conf);
+		if (jmxPortStr!=null) {
+			try {
+				return Integer.parseInt(jmxPortStr);
+			} catch (Exception e) {
+				//Ignore
+			}
+		}
+		return -1;
 	}
 
 }

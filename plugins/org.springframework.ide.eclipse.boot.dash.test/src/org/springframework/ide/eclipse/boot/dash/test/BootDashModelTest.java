@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -19,7 +20,11 @@ import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.suppo
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -36,12 +41,15 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.rules.TestRule;
+import org.omg.PortableInterceptor.INACTIVE;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -50,6 +58,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
@@ -104,7 +113,12 @@ public class BootDashModelTest {
 
 			private Version getVersion(RadioInfo info) {
 				String versionString = info.getValue();
-				return new Version(versionString);
+				Version v = new Version(versionString);
+				if ("BUILD-SNAPSHOT".equals(v.getQualifier())) {
+					// Caveat "M1" will be treated as 'later' than "BUILD-SNAPSHOT" so that is wrong.
+					return new Version(v.getMajor(), v.getMinor(), v.getMicro(), "SNAPSHOT"); //Comes after "MX" but before "RELEASE"
+				}
+				return v;
 			}
 		};
 	}
@@ -277,6 +291,46 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
+
+	@Test public void livePort() throws Exception {
+		String projectName = "some-project";
+		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
+
+		BootDashElement element = getElement(projectName);
+		assertEquals(RunState.INACTIVE, element.getRunState());
+		assertEquals(-1, element.getLivePort()); // live port is 'unknown' if app is not running
+		try {
+			waitForState(element, RunState.INACTIVE);
+
+			element.restart(RunState.RUNNING, ui);
+			waitForState(element, RunState.STARTING);
+			waitForState(element, RunState.RUNNING);
+
+			assertEquals(8080, element.getLivePort());
+
+			//Change port in launch conf and restart
+			ILaunchConfiguration conf = element.getActiveConfig();
+			ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+			BootLaunchConfigurationDelegate.setProperties(wc, Collections.singletonList(
+					new PropVal("server.port", "6789", true)
+			));
+			wc.doSave();
+
+			assertEquals(8080, element.getLivePort()); // port still the same until we restart
+
+			element.restart(RunState.RUNNING, ui);
+			waitForState(element, RunState.STARTING);
+			waitForState(element, RunState.RUNNING);
+			assertEquals(6789, element.getLivePort());
+
+		} finally {
+			element.stopAsync();
+			waitForState(element, RunState.INACTIVE);
+		}
+
+
+	}
+
 
 	///////////////// harness code ////////////////////////
 

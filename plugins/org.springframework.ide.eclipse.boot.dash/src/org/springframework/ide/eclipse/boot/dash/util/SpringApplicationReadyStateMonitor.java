@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
-import javax.management.remote.JMXConnector;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -36,9 +34,10 @@ public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
 	// public API
 
 	public static final long POLLING_INTERVAL = 500/*ms*/;
+	private SpringApplicationLifeCycleClientManager clientManager;
 
 	public SpringApplicationReadyStateMonitor(int jmxPort) {
-		this.jmxPort = jmxPort;
+		this.clientManager = new SpringApplicationLifeCycleClientManager(jmxPort);
 		this.job = new Job("Ready state poller") {
 			protected IStatus run(IProgressMonitor monitor) {
 				LiveVariable<Boolean> r = ready;
@@ -62,7 +61,7 @@ public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
 	}
 
 	public void dispose() {
-		disposeClient();
+		clientManager.disposeClient();
 		if (job!=null) {
 			job.cancel();
 			job = null;
@@ -73,55 +72,22 @@ public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
 	/////////////////////////////////////////////////////////////////////////
 	// implementation
 
-	private int jmxPort;
-	private JMXConnector connector;
-	private SpringApplicationLifecycleClient client;
 
 	private Job job;
 	private LiveVariable<Boolean> ready = new LiveVariable<Boolean>(false);
 
-
 	private boolean checkReady() {
 		try {
-			SpringApplicationLifecycleClient client = getLifeCycleClient();
+			SpringApplicationLifecycleClient client = clientManager.getLifeCycleClient();
 			if (client!=null) {
 				return client.isReady();
 			}
 		} catch (Exception e) {
-			//Something went wrong asking clinet for ready state.
+			//Something went wrong asking client for ready state.
 			// most likely process died.
-			disposeClient();
+			clientManager.disposeClient();
 		}
 		return false;
 	}
 
-	private synchronized void disposeClient() {
-		try {
-			if (connector!=null) {
-				connector.close();
-			}
-		} catch (Exception e) {
-			//ignore
-		}
-		client = null;
-		connector = null;
-	}
-
-	private synchronized SpringApplicationLifecycleClient getLifeCycleClient() {
-		try {
-			if (client==null) {
-				connector = SpringApplicationLifecycleClient.createLocalJmxConnector(jmxPort);
-				client = new SpringApplicationLifecycleClient(
-						connector.getMBeanServerConnection(),
-						SpringApplicationLifecycleClient.DEFAULT_OBJECT_NAME
-				);
-			}
-			return client;
-		} catch (Exception e) {
-			//Someting went wrong creating client (most likely process we are trying to connect
-			// doesn't exist yet or has been terminated.
-			disposeClient();
-		}
-		return null;
-	}
 }
