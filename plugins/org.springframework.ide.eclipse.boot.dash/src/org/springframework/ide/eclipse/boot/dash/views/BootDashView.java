@@ -214,18 +214,24 @@ public class BootDashView extends ViewPartWithSections {
 			}
 		);
 		sections.add(wrapper);
-		for (int i = 0; i < 3; i++) {
-			long delay = 5000 * i;
-			UIJob j = new UIJob("Test") {
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					int i = models.getValue().size()+1;
-					System.out.println("Adding model: "+i);
-					models.add(i);
-					return Status.OK_STATUS;
-				}
-			};
-			j.schedule(delay);
+		for (int _i = 0; _i < 5; _i++) {
+			{   final int i = _i+1;
+				long delay = 5000 * i;
+				UIJob j = new UIJob("Test") {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (i<=3) {
+							System.out.println("Adding model: "+i);
+							models.add(i);
+						} else {
+							System.out.println("Removing model: "+(i%3));
+							models.remove(i%3);
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				j.schedule(delay);
+			}
 		}
 
 		//TODO: test dynamic section removal
