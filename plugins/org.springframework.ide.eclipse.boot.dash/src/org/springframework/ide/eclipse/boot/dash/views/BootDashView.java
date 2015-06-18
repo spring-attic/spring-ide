@@ -11,18 +11,22 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -30,8 +34,14 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicCompositeSection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicCompositeSection.SectionFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 /**
@@ -44,6 +54,7 @@ public class BootDashView extends ViewPartWithSections {
 	 */
 	public static final String ID = "org.springframework.ide.eclipse.boot.dash.views.BootDashView";
 
+	private LiveVariable<Integer> numSections = new LiveVariable<Integer>(1);
 	private BootDashModel model = BootDashActivator.getDefault().getModel();
 
 //	private Action refreshAction;
@@ -54,6 +65,7 @@ public class BootDashView extends ViewPartWithSections {
 	private UserInteractions ui = new DefaultUserInteractions(this);
 
 	private MultiSelection<BootDashElement> selection = null; //lazy init
+
 
 	/*
 	 * The content provider class is responsible for
@@ -180,13 +192,44 @@ public class BootDashView extends ViewPartWithSections {
 	@Override
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
+
 //		for (int i = 0; i < 2; i++) {
-			BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model);
-			localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
-			sections.add(
-				new ExpandableSectionWithSelection<BootDashElement>(this, "Local Boot Apps "/*+(i+1)*/, localApsTable)
-			);
+//			BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
+//			localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
+//			sections.add(new ExpandableSectionWithSelection<BootDashElement>(BootDashView.this, "Local Boot Apps "+i, localApsTable));
 //		}
+
+
+		final LiveSet<Integer> models = new LiveSet<Integer>();
+		DynamicCompositeSection<Integer, BootDashElement> wrapper = new DynamicCompositeSection<Integer, BootDashElement>(
+			BootDashElement.class,
+			this,
+			models,
+			new SectionFactory<Integer, BootDashElement>() {
+				public MultiSelectionSource<BootDashElement> create(Integer i) {
+					BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
+					localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
+					return new ExpandableSectionWithSelection<BootDashElement>(BootDashView.this, "Local Boot Apps "+i, localApsTable);
+				}
+			}
+		);
+		sections.add(wrapper);
+		for (int i = 0; i < 3; i++) {
+			long delay = 5000 * i;
+			UIJob j = new UIJob("Test") {
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					int i = models.getValue().size()+1;
+					System.out.println("Adding model: "+i);
+					models.add(i);
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule(delay);
+		}
+
+		//TODO: test dynamic section removal
+
 		return sections;
 	}
 }
