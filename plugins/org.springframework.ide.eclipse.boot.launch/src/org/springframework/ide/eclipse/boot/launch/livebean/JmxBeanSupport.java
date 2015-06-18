@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 public class JmxBeanSupport {
 
 	public static enum Feature {
-		LIVE_BEAN_GRAPH("-Dspring.liveBeansView.mbeanDomain=true"),
+		LIVE_BEAN_GRAPH("-Dspring.liveBeansView.mbeanDomain"),
 		LIFE_CYCLE("-Dspring.application.admin.enabled=true");
 
 		public final String vmArg;
