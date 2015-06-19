@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Arrays;
@@ -7,14 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Layout;
-import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -97,27 +101,21 @@ public class DynamicCompositeSection<M, T> extends PageSection implements MultiS
 	 */
 	private synchronized void updateSections() {
 		Set<M> currentModels = models.getValue();
-		System.out.println("Update sections: "+currentModels);
-		System.out.println("Already have: "+sectionsMap.keySet());
 
 		//Missing: current models for which we have no section
 		Set<M> missing = new HashSet<M>(currentModels);
 		missing.removeAll(sectionsMap.keySet());
-		System.out.println("Missing: "+missing);
 
 		//Extra: current sections for which there is no more model
 		Set<M> extra = new HashSet<M>();
 		extra.addAll(sectionsMap.keySet());
 		extra.removeAll(currentModels);
-		System.out.println("Extra: "+extra);
 
 		for (M m : extra) {
-			System.out.println("Delete: "+m);
 			deleteSectionFor(m);
 		}
 
 		for (M m : missing) {
-			System.out.println("Create: "+m);
 			createSectionFor(m);
 		}
 
