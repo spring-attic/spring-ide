@@ -9,10 +9,12 @@ import java.util.Set;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -145,8 +147,8 @@ public class DynamicCompositeSection<M, T> extends PageSection implements MultiS
 	}
 
 	private void reflow() {
-		if (composite!=null) {
-			composite.layout(true, true);
+		if (owner instanceof Reflowable) {
+			((Reflowable) owner).reflow();
 		}
 	}
 

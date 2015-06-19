@@ -124,31 +124,20 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		final Composite reflowParent = findReflowParent(tv.getControl());
-		if (reflowParent!=null) {
+		if (owner instanceof Reflowable) {
 			tv.getControl().addControlListener(new ControlListener() {
 				public void controlResized(ControlEvent e) {
-					reflowParent.layout(new Control[]{tv.getControl()});
+					((Reflowable) owner).reflow();
 				}
 				public void controlMoved(ControlEvent e) {
 				}
 			});
-
 		}
 
 		actions = new BootDashActions(model, getSelection(), ui);
 		hookContextMenu();
 	}
 
-	private Composite findReflowParent(Control control) {
-		Composite it = null;
-		while ((control = control.getParent())!=null) {
-			if (control instanceof Composite) {
-				it = (Composite) control;
-			}
-		}
-		return it;
-	}
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
