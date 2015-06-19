@@ -30,7 +30,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
 
-public class ViewPartWithSections extends ViewPart implements UIContext, IPageWithSections {
+public class ViewPartWithSections extends ViewPart implements UIContext, IPageWithSections, Reflowable {
 
 	private ViewPageScroller scroller;
 	protected Composite page;
@@ -109,6 +109,13 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 				}
 			}
 			sections = null;
+		}
+	}
+
+	@Override
+	public void reflow() {
+		if (scroller!=null && !scroller.isDisposed()) {
+			scroller.reflow(true);
 		}
 	}
 

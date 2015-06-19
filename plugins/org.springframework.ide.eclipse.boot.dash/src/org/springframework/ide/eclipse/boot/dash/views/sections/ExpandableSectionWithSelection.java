@@ -104,7 +104,12 @@ public class ExpandableSectionWithSelection<T> extends PageSection implements Mu
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				expansionState.setValue(comp.isExpanded());
-				page.layout(new Control[]{comp});
+				if (owner instanceof Reflowable) {
+					((Reflowable) owner).reflow();
+				} else {
+					//better than nothing:
+					page.layout(new Control[]{comp});
+				}
 			}
 		});
 		expansionState.addListener(new ValueListener<Boolean>() {
