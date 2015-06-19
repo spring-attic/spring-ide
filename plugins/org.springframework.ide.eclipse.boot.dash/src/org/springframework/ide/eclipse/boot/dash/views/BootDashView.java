@@ -193,13 +193,15 @@ public class BootDashView extends ViewPartWithSections {
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
-//		for (int i = 0; i < 2; i++) {
-//			BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
-//			localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
-//			sections.add(new ExpandableSectionWithSelection<BootDashElement>(BootDashView.this, "Local Boot Apps "+i, localApsTable));
-//		}
+		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
+		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
+		sections.add(new ExpandableSectionWithSelection<BootDashElement>(BootDashView.this, "Local Boot Apps", localApsTable));
+		return sections;
+	}
 
-
+	/* Alternate 'createSections' for quick-and-dirty testing of the 'DynamicComposite'.
+	@Override
+	protected List<IPageSection> createSections() throws CoreException {
 		final LiveSet<Integer> models = new LiveSet<Integer>();
 		DynamicCompositeSection<Integer, BootDashElement> wrapper = new DynamicCompositeSection<Integer, BootDashElement>(
 			BootDashElement.class,
@@ -233,9 +235,7 @@ public class BootDashView extends ViewPartWithSections {
 				j.schedule(delay);
 			}
 		}
-
-		//TODO: test dynamic section removal
-
 		return sections;
 	}
+	*/
 }
