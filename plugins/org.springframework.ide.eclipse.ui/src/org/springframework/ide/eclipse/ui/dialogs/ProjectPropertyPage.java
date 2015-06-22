@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.ui.dialogs;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -21,11 +23,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.osgi.service.prefs.BackingStoreException;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
+import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
 
 /**
  * Provides an {@link PropertyPage} that allows to manage the enablement of {@link IProjectBuilder}s and
@@ -69,6 +72,7 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 
 		if (!isProjectPreferencePage()) {
 
+			IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID); // does all the above behind the scenes
 			Label options = new Label(composite, SWT.WRAP);
 			options.setText("Options:");
 			options.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -76,8 +80,8 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 			useChangeDetectionForJavaFiles = new Button(composite, SWT.CHECK);
 			useChangeDetectionForJavaFiles
 					.setText(SpringUIMessages.ProjectBuilderPropertyPage_IncrementalCompileMessage);
-			useChangeDetectionForJavaFiles.setSelection(SpringCore.getDefault().getPluginPreferences().getBoolean(
-					SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES));
+			useChangeDetectionForJavaFiles.setSelection(prefs.getBoolean(
+					SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES, true));
 
 			Label note = new Label(composite, SWT.WRAP);
 			note.setText(SpringUIMessages.ProjectBuilderPropertyPage_IncrementalCompileNote);
@@ -85,8 +89,8 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 
 			useNonLockingClassLoader = new Button(composite, SWT.CHECK);
 			useNonLockingClassLoader.setText(SpringUIMessages.ProjectBuilderPropertyPage_NonLockingClassLoaderMessage);
-			useNonLockingClassLoader.setSelection(SpringCore.getDefault().getPluginPreferences().getBoolean(
-					SpringCore.USE_NON_LOCKING_CLASSLOADER));
+			useNonLockingClassLoader.setSelection(prefs.getBoolean(
+					SpringCore.USE_NON_LOCKING_CLASSLOADER, false));
 			
 			note = new Label(composite, SWT.WRAP);
 			note.setText(SpringUIMessages.ProjectBuilderPropertyPage_NonLockingClassLoaderNote);
@@ -107,32 +111,44 @@ public class ProjectPropertyPage extends ProjectAndPreferencePage {
 	}
 
 	protected boolean hasProjectSpecificOptions(IProject project) {
-		return SpringCorePreferences.getProjectPreferences(project).getBoolean(SpringCore.PROJECT_PROPERTY_ID, false);
+		return SpringCorePreferences.getProjectPreferences(project, SpringCore.PLUGIN_ID).getBoolean(SpringCore.PROJECT_PROPERTY_ID, false);
 	}
 
 	public boolean performOk() {
 
+		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID); // does all the above behind the scenes
+		
 		if (isProjectPreferencePage()) {
 			if (useProjectSettings()) {
-				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(SpringCore.PROJECT_PROPERTY_ID,
+				SpringCorePreferences.getProjectPreferences(getProject(), SpringCore.PLUGIN_ID).putBoolean(SpringCore.PROJECT_PROPERTY_ID,
 						true);
 			}
 			else {
-				SpringCorePreferences.getProjectPreferences(getProject()).putBoolean(SpringCore.PROJECT_PROPERTY_ID,
+				SpringCorePreferences.getProjectPreferences(getProject(), SpringCore.PLUGIN_ID).putBoolean(SpringCore.PROJECT_PROPERTY_ID,
 						false);
 			}
-		}
-		else {
-			SpringCore.getDefault().getPluginPreferences().setValue(SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES,
-					useChangeDetectionForJavaFiles.getSelection());
-			SpringCore.getDefault().getPluginPreferences().setValue(SpringCore.USE_NON_LOCKING_CLASSLOADER,
-					useNonLockingClassLoader.getSelection());
+		} else {
+			prefs.putBoolean(SpringCore.USE_CHANGE_DETECTION_IN_JAVA_FILES, useChangeDetectionForJavaFiles.getSelection());
+			prefs.putBoolean(SpringCore.USE_NON_LOCKING_CLASSLOADER, useNonLockingClassLoader.getSelection());
 		}
 
 		this.builderTab.performOk();
 		this.validatorTab.performOk();
-		SpringCore.getDefault().savePluginPreferences();
+		try {
+			prefs.flush();
+		} catch (BackingStoreException e) {
+			SpringCore.log(e);
+			return false;
+		}
 		// always say it is ok
 		return super.performOk();
 	}
+
+	@Override
+	protected void performDefaults() {
+		super.performDefaults();
+		this.validatorTab.performDefaults();
+	}
+	
+	
 }

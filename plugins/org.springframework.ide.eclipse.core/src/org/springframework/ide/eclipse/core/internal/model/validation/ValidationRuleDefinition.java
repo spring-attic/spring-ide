@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,15 +16,17 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
 
 /**
  * Wraps a {@link IValidationRule} and all the information from it's definition via the corresponding extension point.
@@ -190,6 +192,14 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 		originalMessageSeverities = new HashMap<String, Integer>(messageSeverities);
 
 	}
+	
+	public Map<String, String> getDefaultPropertyValues() {
+		return new HashMap<String, String>(originalPropertyValues);
+	}
+	
+	public Map<String, Integer> getDefaultMessageSeverities() {
+		return new HashMap<String, Integer>(originalMessageSeverities);
+	}
 
 	public Map<String, String> getPropertyValues() {
 		return new HashMap<String, String>(propertyValues);
@@ -213,27 +223,26 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 	protected void readSpecificConfiguration(IProject project) {
 		if (project != null && hasProjectSpecificOptions(project)) {
 			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
-				String value = SpringCorePreferences.getProjectPreferences(project).getString(
+				String value = SpringCorePreferences.getProjectPreferences(project, SpringCore.PLUGIN_ID).getString(
 						PROPERTY_PREFIX + entry.getKey(), entry.getValue());
 				propertyValues.put(entry.getKey(), value);
 			}
 			for (Map.Entry<String, Integer> entry : originalMessageSeverities.entrySet()) {
-				String value = SpringCorePreferences.getProjectPreferences(project).getString(
+				String value = SpringCorePreferences.getProjectPreferences(project, SpringCore.PLUGIN_ID).getString(
 						MESSAGE_PREFIX + entry.getKey(), Integer.toString(entry.getValue()));
 				messageSeverities.put(entry.getKey(), Integer.valueOf(value));
 			}
 		}
 		else {
+			IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID);
 			for (Map.Entry<String, String> entry : originalPropertyValues.entrySet()) {
-				String value = SpringCore.getDefault().getPluginPreferences().getString(
-						PROPERTY_PREFIX + entry.getKey());
+				String value = prefs.get(PROPERTY_PREFIX + entry.getKey(), "");
 				if (StringUtils.hasText(value)) {
 					propertyValues.put(entry.getKey(), value);
 				}
 			}
 			for (Map.Entry<String, Integer> entry : originalMessageSeverities.entrySet()) {
-				String value = SpringCore.getDefault().getPluginPreferences()
-						.getString(MESSAGE_PREFIX + entry.getKey());
+				String value = prefs.get(MESSAGE_PREFIX + entry.getKey(), "");
 				if (StringUtils.hasText(value)) {
 					messageSeverities.put(entry.getKey(), Integer.valueOf(value));
 				}
@@ -246,22 +255,21 @@ public class ValidationRuleDefinition extends PersistablePreferenceObjectSupport
 			Map<String, Integer> newMessageSeverities, IProject project) {
 		if (project != null && hasProjectSpecificOptions(project)) {
 			for (Map.Entry<String, String> entry : newPropertyValues.entrySet()) {
-				SpringCorePreferences.getProjectPreferences(project).putString(PROPERTY_PREFIX + entry.getKey(),
+				SpringCorePreferences.getProjectPreferences(project, SpringCore.PLUGIN_ID).putString(PROPERTY_PREFIX + entry.getKey(),
 						entry.getValue());
 			}
 			for (Map.Entry<String, Integer> entry : newMessageSeverities.entrySet()) {
-				SpringCorePreferences.getProjectPreferences(project).putString(MESSAGE_PREFIX + entry.getKey(),
+				SpringCorePreferences.getProjectPreferences(project, SpringCore.PLUGIN_ID).putString(MESSAGE_PREFIX + entry.getKey(),
 						Integer.toString(entry.getValue()));
 			}
 		}
 		else {
+			IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(SpringCore.PLUGIN_ID);
 			for (Map.Entry<String, String> entry : newPropertyValues.entrySet()) {
-				SpringCore.getDefault().getPluginPreferences().setValue(PROPERTY_PREFIX + entry.getKey(),
-						entry.getValue());
+				prefs.put(PROPERTY_PREFIX + entry.getKey(), entry.getValue());
 			}
 			for (Map.Entry<String, Integer> entry : newMessageSeverities.entrySet()) {
-				SpringCore.getDefault().getPluginPreferences().setValue(MESSAGE_PREFIX + entry.getKey(),
-						Integer.toString(entry.getValue()));
+				prefs.put(MESSAGE_PREFIX + entry.getKey(), Integer.toString(entry.getValue()));
 			}
 		}
 	}
