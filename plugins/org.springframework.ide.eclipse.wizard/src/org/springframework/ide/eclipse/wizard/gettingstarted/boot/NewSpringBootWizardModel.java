@@ -441,8 +441,8 @@ public class NewSpringBootWizardModel {
 	}
 
 	/**
-	 * Add for easier scripting of the wizard model. Not used by the UI itself.
-	 * If give dependencyId isn't found in the wizard model then an IllegalArgumentException
+	 * Convenience method for easier scripting of the wizard model (used in testing). Not used
+	 * by the UI itself. If the dependencyId isn't found in the wizard model then an IllegalArgumentException
 	 * will be raised.
 	 */
 	public void addDependency(String dependencyId){

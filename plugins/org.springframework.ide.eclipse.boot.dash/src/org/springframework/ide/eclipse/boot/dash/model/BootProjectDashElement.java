@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -28,6 +30,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
@@ -284,6 +289,14 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public int getLivePort() {
+		return getLivePort("local.server.port");
+	}
+
+	public int getActuatorPort() {
+		return getLivePort("local.management.port");
+	}
+
+	public int getLivePort(String propName) {
 		ILaunchConfiguration conf = getActiveConfig();
 		if (conf!=null) {
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
@@ -295,7 +308,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 						SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
 						if (c!=null) {
-							return c.getServerPort();
+							return c.getProperty(propName, -1);
 						}
 					} catch (Exception e) {
 						//most likely this just means the app isn't running so ignore
@@ -308,6 +321,32 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			}
 		}
 		return -1;
+	}
+
+	@Override
+	public List<RequestMapping> getLiveRequestMappings() {
+		try {
+			URI target = getActuatorUrl();
+			if (target!=null) {
+				ActuatorClient client = new ActuatorClient(target);
+				return client.getRequestMappings();
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	protected URI getActuatorUrl() {
+		try {
+			int actuatorPort = getActuatorPort();
+			if (actuatorPort>0) {
+					return new URI("http://localhost:"+actuatorPort);
+			}
+		} catch (URISyntaxException e) {
+			BootDashActivator.log(e);
+		}
+		return null;
 	}
 
 	public ILaunchConfiguration getActiveConfig() {

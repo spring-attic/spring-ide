@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 
 public interface BootDashElement extends Nameable {
 	IJavaProject getJavaProject();
@@ -25,6 +28,14 @@ public interface BootDashElement extends Nameable {
 	 * be determined or the app is not running this returns -1.
 	 */
 	int getLivePort();
+
+
+	/**
+	 * Get the request mappings from a running process. May return null if
+	 * request mappings can not be determined. (Son 'null' means 'unknown', whereas
+	 * an empty list means 'no request mappings').
+	 */
+	List<RequestMapping> getLiveRequestMappings();
 
 	/**
 	 * Get the 'active' launch configuration. This may be null.

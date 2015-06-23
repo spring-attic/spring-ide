@@ -11,6 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -20,9 +23,6 @@ import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.suppo
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,18 +47,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.rules.TestRule;
-import org.omg.PortableInterceptor.INACTIVE;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
@@ -77,6 +77,18 @@ public class BootDashModelTest {
 		};
 	}
 
+	WizardConfigurer withStarters(final String... ids) {
+		if (ids.length>0) {
+			return new WizardConfigurer() {
+				public void apply(NewSpringBootWizardModel wizard) {
+					for (String id : ids) {
+						wizard.addDependency(id);
+					}
+				}
+			};
+		}
+		return WizardConfigurer.NULL;
+	}
 
 	/**
 	 * @return A wizard configurer that ensures the selected 'boot version' is at least
@@ -327,12 +339,61 @@ public class BootDashModelTest {
 			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
-
-
 	}
 
+	@Test public void testRequestMappings() throws Exception {
+		String projectName = "actuated-project";
+		createBootProject(projectName,
+				bootVersionAtLeast("1.3.0"), //required for us to be able to determine the actuator port
+				withStarters("actuator")     //required to actually *have* an actuator
+		);
+		BootDashElement element = getElement(projectName);
+		try {
+			waitForState(element, RunState.INACTIVE);
+			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
+
+			element.restart(RunState.RUNNING, ui);
+			waitForState(element, RunState.RUNNING);
+			List<RequestMapping> mappings = element.getLiveRequestMappings();
+			assertNotNull(mappings);
+			assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
+			                                 // for example an 'error' page.
+			System.out.println(">>> Found RequestMappings");
+			for (RequestMapping m : mappings) {
+				System.out.println(m.getPath());
+				assertNotNull(m.getPath());
+			}
+			System.out.println("<<< Found RequestMappings");
+
+			//Case 2 examples (path extracted from 'pseudo' json in the key)
+			assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
+			assertRequestMappingWithPath(mappings, "/mappings"); //Since we are using this, it should be there.
+
+			//Case 1 example (path represented directly in the json key).
+			assertRequestMappingWithPath(mappings, "/**/favicon.ico");
+
+		} finally {
+			element.stopAsync();
+			waitForState(element, RunState.INACTIVE);
+		}
+	}
 
 	///////////////// harness code ////////////////////////
+
+	private void assertRequestMappingWithPath(List<RequestMapping> mappings, String string) {
+		StringBuilder builder = new StringBuilder();
+		for (RequestMapping m : mappings) {
+			builder.append(m.getPath()+"\n");
+			if (m.getPath().equals(string)) {
+				return;
+			}
+		}
+		fail(
+				"Expected path not found: "+string+"\n" +
+				"Found:\n" +
+				builder
+		);
+	}
 
 	@Rule
 	public TestRule listenerLeakDetector = new ListenerLeakDetector();
@@ -425,11 +486,7 @@ public class BootDashModelTest {
 		}.waitFor(MODEL_UPDATE_TIMEOUT);
 	}
 
-	private IProject createBootProject(final String projectName) throws Exception {
-		return createBootProject(projectName, WizardConfigurer.NULL);
-	}
-
-	private IProject createBootProject(final String projectName, final WizardConfigurer extraConf) throws Exception {
+	private IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
 		final Job job = new Job("Create boot project '"+projectName+"'") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -442,7 +499,9 @@ public class BootDashModelTest {
 					//  location in the model.
 					wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
 					wizard.addDependency("web");
-					extraConf.apply(wizard);
+					for (WizardConfigurer extraConf : extraConfs) {
+						extraConf.apply(wizard);
+					}
 					wizard.performFinish(new NullProgressMonitor());
 					return Status.OK_STATUS;
 				} catch (Throwable e) {
