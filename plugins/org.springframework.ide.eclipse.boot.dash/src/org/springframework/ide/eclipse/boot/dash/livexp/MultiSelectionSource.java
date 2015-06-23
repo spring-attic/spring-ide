@@ -19,6 +19,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
  *
  * @author Kris De Volder
  */
-public interface MultiSelectionSource<T> extends IPageSection {
-	MultiSelection<T> getSelection();
+public interface MultiSelectionSource extends IPageSection {
+	MultiSelection<?> getSelection();
 }

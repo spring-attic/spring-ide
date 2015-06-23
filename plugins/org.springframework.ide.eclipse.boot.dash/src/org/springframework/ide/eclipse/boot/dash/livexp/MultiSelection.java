@@ -44,6 +44,21 @@ public final class MultiSelection<T> {
 	}
 
 	/**
+	 * Filter a selection to retain only elements of a given type.
+	 */
+	public <U> MultiSelection<U> filter(Class<U> retainType) {
+		MultiSelection<U> converted = this.as(retainType);
+		if (converted!=null) {
+			//Don't need to filter element-by-element since the selection only
+			// can contain elements of 'retainType'.
+			return converted;
+		} else {
+			//Selection may contain objects that are not instances of retainType.
+			return from(retainType, LiveSets.filter(getElements(), retainType));
+		}
+	}
+
+	/**
 	 * Convert a selection of one type into a selection of a different
 	 * type. The conversion only succeeds if the target-type is assignment
 	 * compatible with the source type.

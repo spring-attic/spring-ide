@@ -60,7 +60,7 @@ import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
  *
  * @author Kris De Volder
  */
-public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource<BootDashElement>, Disposable {
+public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
 
 	private TableViewer tv;
 	private BootDashModel model;

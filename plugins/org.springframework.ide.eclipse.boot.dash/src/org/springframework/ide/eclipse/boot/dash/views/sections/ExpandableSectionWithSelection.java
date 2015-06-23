@@ -23,8 +23,8 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -52,39 +52,48 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
  *
  * @author Kris De Volder
  */
-public class ExpandableSectionWithSelection<T> extends PageSection implements MultiSelectionSource<T>, Disposable {
+public class ExpandableSectionWithSelection extends PageSection implements MultiSelectionSource, Disposable {
 
-	private MultiSelectionSource<T> child;
+	private MultiSelectionSource child;
 	private String title;
 	private LiveVariable<Boolean> expansionState = new LiveVariable<Boolean>(true);
-	private MultiSelection<T> selection;
+	private MultiSelection<?> selection;
 
-	public ExpandableSectionWithSelection(IPageWithSections owner, String title, MultiSelectionSource<T> expandableContent) {
+	public ExpandableSectionWithSelection(IPageWithSections owner, String title, MultiSelectionSource expandableContent) {
 		super(owner);
 		this.title = title;
 		this.child = expandableContent;
 		this.selection = null;
 	}
 
-	protected MultiSelection<T> createSelection() {
-		final MultiSelection<T> childSelection = child.getSelection();
-		MultiSelection<T> sel = MultiSelection.from(childSelection.getElementType(),
-			new ObservableSet<T>() {
-				{
-					this.dependsOn(expansionState);
-					this.dependsOn(childSelection.getElements());
-				}
-				@Override
-				protected Set<T> compute() {
-					boolean isExpanded = expansionState.getValue();
-					if (isExpanded) {
-						return childSelection.getValue();
+	protected <T> MultiSelection<?> createSelection() {
+		if (child instanceof MultiSelectionSource) {
+			@SuppressWarnings("unchecked")
+			final MultiSelection<T> childSelection = (MultiSelection<T>) child.getSelection();
+			Class<T> selectionType = childSelection.getElementType();
+			MultiSelection<T> sel = MultiSelection.from(selectionType,
+				new ObservableSet<T>() {
+					{
+						this.dependsOn(expansionState);
+						this.dependsOn(childSelection.getElements());
 					}
-					return Collections.emptySet();
+					@Override
+					protected Set<T> compute() {
+						boolean isExpanded = expansionState.getValue();
+						if (isExpanded) {
+							return childSelection.getValue();
+						}
+						return Collections.emptySet();
+					}
 				}
-			}
-		);
-		return sel;
+			);
+			return sel;
+		} else {
+			//child is not a selection source
+			return MultiSelection.empty(Object.class);
+			//                         ^^^^^ Object is wrong, the type we'd want here is the type of 'null'. I.e. a type that can
+			// be assigned to any reference. But I don't beleave there is a java.lang.Class representing that.
+		}
 	}
 
 	@Override
@@ -135,7 +144,7 @@ public class ExpandableSectionWithSelection<T> extends PageSection implements Mu
 	}
 
 	@Override
-	public synchronized MultiSelection<T> getSelection() {
+	public synchronized MultiSelection<?> getSelection() {
 		if (selection==null) {
 			selection = createSelection();
 		}
