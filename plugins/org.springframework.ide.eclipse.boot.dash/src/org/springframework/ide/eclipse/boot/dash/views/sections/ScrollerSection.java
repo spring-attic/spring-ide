@@ -12,8 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -26,7 +27,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
  *
  * @author Kris De Volder
  */
-public class ScrollerSection extends PageSection implements Disposable {
+public class ScrollerSection extends PageSection implements Disposable, MultiSelectionSource {
 
 	public ScrollerSection(IPageWithSections owner, IPageSection scolledContent) {
 		super(owner);
@@ -35,6 +36,7 @@ public class ScrollerSection extends PageSection implements Disposable {
 
 	private Scroller scroller;
 	private IPageSection scolledContent;
+	private MultiSelection<?> selection;
 
 	@Override
 	public void dispose() {
@@ -56,9 +58,20 @@ public class ScrollerSection extends PageSection implements Disposable {
 		scroller = new Scroller(page);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(scroller);
 		Composite body = scroller.getBody();
-		GridLayout layout;
 		body.setLayout(GridLayoutFactory.swtDefaults().create());
 		scolledContent.createContents(body);
+	}
+
+	@Override
+	public synchronized MultiSelection<?> getSelection() {
+		if (selection==null) {
+			if (scolledContent instanceof MultiSelectionSource) {
+				selection = ((MultiSelectionSource) scolledContent).getSelection();
+			} else {
+				selection = MultiSelection.empty(Object.class);
+			}
+		}
+		return selection;
 	}
 
 }

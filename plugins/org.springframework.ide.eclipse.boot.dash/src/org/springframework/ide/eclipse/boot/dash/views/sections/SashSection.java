@@ -16,6 +16,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -30,7 +32,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
  *
  * @author Kris De Volder
  */
-public class SashSection extends PageSection implements Disposable {
+public class SashSection extends PageSection implements Disposable, MultiSelectionSource {
 
 	//TODO: The sash is always aligning view in a column. Generalize this to
 	// support both horizontal and vertical orientations.
@@ -52,6 +54,7 @@ public class SashSection extends PageSection implements Disposable {
 	private Composite topComposite;
 	private Composite bottomComposite;
 	private int sashWidth = 8;
+	private MultiSelection<?> selection;
 
 	@Override
 	public synchronized LiveExpression<ValidationResult> getValidator() {
@@ -128,6 +131,19 @@ public class SashSection extends PageSection implements Disposable {
 
 	public void setSashWidth(int sashWidth) {
 		this.sashWidth = sashWidth;
+	}
+
+	@Override
+	public synchronized MultiSelection<?> getSelection() {
+		//for now we keep it simple and only propagate selection from the 'dominant' child (i.e. the one at the top).
+		if (selection==null) {
+			if (top instanceof MultiSelectionSource) {
+				selection = ((MultiSelectionSource) top).getSelection();
+			} else {
+				selection = MultiSelection.empty(Object.class);
+			}
+		}
+		return selection;
 	}
 
 }
