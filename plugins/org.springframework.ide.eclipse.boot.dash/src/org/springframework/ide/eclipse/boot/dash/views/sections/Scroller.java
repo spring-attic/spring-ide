@@ -14,13 +14,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
 
-public class ViewPageScroller extends SharedScrolledComposite {
+public class Scroller extends SharedScrolledComposite {
 
-	public ViewPageScroller(Composite parent) {
+	public Scroller(Composite parent) {
 		this(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 	}
 
-	public ViewPageScroller(Composite parent, int style) {
+	public Scroller(Composite parent, int style) {
 		super(parent, style);
 
 		setFont(parent.getFont());
