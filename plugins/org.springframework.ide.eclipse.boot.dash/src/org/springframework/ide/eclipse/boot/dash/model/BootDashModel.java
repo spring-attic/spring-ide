@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.TaggableBootDashElement.TagsChangedListener;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
@@ -43,9 +44,16 @@ public class BootDashModel {
 	private BootDashElementFactory elementFactory;
 	private ProjectRunStateTracker runStateTracker;
 	private LiveSet<BootDashElement> elements; //lazy created
-
+	
 	private BootDashModelStateSaver modelState;
 
+	final private TagsChangedListener TAGS_LISTENER = new TagsChangedListener() {
+		@Override
+		public void tagsChanged(TaggableBootDashElement taggable, String[] added, String[] removed) {
+			notifyElementChanged(taggable);
+		}
+	};
+	
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
 		@Override
@@ -114,6 +122,20 @@ public class BootDashModel {
 			BootDashElement element = elementFactory.create(p);
 			if (element!=null) {
 				newElements.add(element);
+				/*
+				 * Add tag listener to boot dash element
+				 */
+				if (element instanceof TaggableBootDashElement) {
+					((TaggableBootDashElement)element).addListener(TAGS_LISTENER);
+				}
+			}
+		}
+		/*
+		 * Remove tag listeners from the old boot dash elements
+		 */
+		for (BootDashElement element : elements.getValue()) {
+			if (elements instanceof TaggableBootDashElement) {
+				((TaggableBootDashElement)element).removeListener(TAGS_LISTENER);
 			}
 		}
 		elements.replaceAll(newElements);
@@ -148,7 +170,7 @@ public class BootDashModel {
 		elementStateListeners.remove(l);
 	}
 
-	void notifyElementChanged(BootDashElement element) {
+	private void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
 			((ElementStateListener)l).stateChanged(element);
 		}

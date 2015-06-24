@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +56,7 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements Taggable {
+public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private BootDashModel context;
@@ -376,28 +377,32 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		return null;
 	}
 
-	public void setTags(final String[] newTags) {
-		if (!new HashSet<String>(Arrays.asList(tags)).equals(new HashSet<String>(Arrays.asList(newTags)))) {
-			Job job = new Job("Saving Tags for project " + delegate.getName()) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						LocalProjectTagUtils.saveTags(delegate, newTags);
-						// Update the value of tags on successful save
-						tags = newTags;
-						// Fire the events to get the UI updated
-						context.notifyElementChanged(BootProjectDashElement.this);
-						return Status.OK_STATUS;
-					} catch (CoreException e) {
-						// Show the old value of tags in the UI is failed saving
-						context.notifyElementChanged(BootProjectDashElement.this);
-						return e.getStatus();
-					}
-				}
-			};
-			job.setRule(delegate);
-			job.schedule();
+	public void setTags(String[] tagsArray) {
+		List<String> newTagsList = new ArrayList<String>();
+		for (String tag : tagsArray) {
+			if (!newTagsList.contains(tag)) {
+				newTagsList.add(tag);
+			}
 		}
+		final String[] newTags = newTagsList.toArray(new String[newTagsList.size()]);
+		final String[] oldTags = tags;
+		tags = newTags;
+		notifyTagsChanged(newTags, oldTags);
+		Job job = new Job("Saving Tags for project " + delegate.getName()) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					LocalProjectTagUtils.saveTags(delegate, tags);
+					return Status.OK_STATUS;
+				} catch (CoreException e) {
+					tags = oldTags;
+					notifyTagsChanged(oldTags, newTags);
+					return e.getStatus();
+				}
+			}
+		};
+		job.setRule(delegate);
+		job.schedule();
 	}
 
 	private void loadTags() {
@@ -408,7 +413,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 				// Sanitize tags to remove duplicates if there are any
 				tags = tagsSet.toArray(new String[tagsSet.size()]);
 				// Fire the events to get the UI updated
-				context.notifyElementChanged(BootProjectDashElement.this);
+				notifyTagsChanged(tags, new String[0]);
 				return Status.OK_STATUS;
 			}
 		};

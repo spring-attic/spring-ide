@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
-import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.model.TaggableBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 
 /**
@@ -40,13 +40,13 @@ public class TagEditingSupport extends EditingSupport {
 
 	@Override
 	protected boolean canEdit(Object element) {
-		return element instanceof Taggable;
+		return element instanceof TaggableBootDashElement;
 	}
 
 	@Override
 	protected Object getValue(Object element) {
-		if (element instanceof Taggable) {
-			return StringUtils.join(((Taggable)element).getTags(), LocalProjectTagUtils.SEPARATOR);
+		if (element instanceof TaggableBootDashElement) {
+			return StringUtils.join(((TaggableBootDashElement)element).getTags(), LocalProjectTagUtils.SEPARATOR);
 		} else {
 			return null;
 		}
@@ -54,9 +54,8 @@ public class TagEditingSupport extends EditingSupport {
 
 	@Override
 	protected void setValue(Object element, Object value) {
-		if (element instanceof Taggable && value instanceof String) {
-			String[] newTags = ((String)value).split("\\s+");
-			((Taggable)element).setTags(newTags);
+		if (element instanceof TaggableBootDashElement && value instanceof String) {
+			((TaggableBootDashElement)element).setTags(((String)value).split("\\s+"));
 		}
 	}
 

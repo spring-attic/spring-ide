@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.model.TaggableBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
@@ -58,8 +58,8 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			cell.setImage(getRunStateImage(e.getRunState()));
 			break;
 		case TAGS:
-			if (e instanceof Taggable) {
-				cell.setText(StringUtils.join(((Taggable)e).getTags(), LocalProjectTagUtils.SEPARATOR));
+			if (e instanceof TaggableBootDashElement) {
+				cell.setText(StringUtils.join(((TaggableBootDashElement)e).getTags(), LocalProjectTagUtils.SEPARATOR));
 			} else {
 				cell.setText("");
 			}
