@@ -16,7 +16,11 @@ package org.springframework.ide.eclipse.boot.dash.model;
  * @author Alex Boyko
  *
  */
-public interface Taggable {
+public interface TaggableBootDashElement extends BootDashElement {
+	
+	public interface TagsChangedListener {		
+		void tagsChanged(TaggableBootDashElement taggable, String[] newTags, String[] oldTags);		
+	}
 	
 	/**
 	 * Returns array of string tags
@@ -30,4 +34,9 @@ public interface Taggable {
 	 * @param newTags new tags
 	 */
 	void setTags(String[] newTags);
+	
+	void addListener(TagsChangedListener listener);
+	
+	void removeListener(TagsChangedListener listener);
+	
 }

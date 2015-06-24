@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-public abstract class WrappingBootDashElement<T> implements BootDashElement {
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class WrappingBootDashElement<T> implements TaggableBootDashElement {
 
 	protected final T delegate;
+	
+	private List<TagsChangedListener> tagsListeners;
 
 	public WrappingBootDashElement(T delegate) {
 		this.delegate = delegate;
+		this.tagsListeners = new ArrayList<TagsChangedListener>();
 	}
 
 	@Override
@@ -49,6 +55,22 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 	@Override
 	public String toString() {
 		return delegate.toString();
+	}
+
+	@Override
+	public void addListener(TagsChangedListener listener) {
+		tagsListeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(TagsChangedListener listener) {
+		tagsListeners.remove(listener);
+	}
+	
+	protected void notifyTagsChanged(String[] newTags, String[] oldTags) {
+		for (TagsChangedListener listener : tagsListeners) {
+			listener.tagsChanged(this, newTags, oldTags);
+		}
 	}
 
 }
