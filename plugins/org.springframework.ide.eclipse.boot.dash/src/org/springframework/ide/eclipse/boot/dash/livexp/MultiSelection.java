@@ -81,7 +81,6 @@ public final class MultiSelection<T> {
 	 *
 	 * @return Converted selection
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <U> MultiSelection<U> cast(Class<U> toElementType) throws ClassCastException {
 		MultiSelection<U> converted = as(toElementType);
 		if (converted==null) {
@@ -115,6 +114,21 @@ public final class MultiSelection<T> {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Converts a 'multi' selection to a selection of a single element. The single selection
+	 * will be the selected element of the multi-selection if exactly one element is
+	 * currently selected, and 'null' otherwise.
+	 */
+	public LiveExpression<T> toSingleSelection() {
+		LiveExpression<T> singleSelect = new LiveExpression<T>() {
+			protected T compute() {
+				return MultiSelection.this.getSingle();
+			}
+		};
+		singleSelect.dependsOn(getElements());
+		return singleSelect;
 	}
 
 }

@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -84,14 +85,14 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	@Override
 	public void createContents(final Composite page) {
-		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION); // Note: No SWT.SCROLL options.
+		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI /*| SWT.FULL_SELECTION*/ | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
 																	// Assumes its up to the page to be scrollable.
 		tv.setContentProvider(new BootDashContentProvider(model));
 		//tv.setLabelProvider(new ViewLabelProvider());
 		tv.setSorter(new NameSorter());
 		tv.setInput(model);
 		tv.getTable().setHeaderVisible(true);
-				tv.getTable().setLinesVisible(true);
+		//tv.getTable().setLinesVisible(true);
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
 
@@ -109,7 +110,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					Set<BootDashElement> value) {
 				if (!tv.getControl().isDisposed()) {
 					tv.refresh();
-					page.getParent().getParent().layout(new Control[]{tv.getControl()});
+					page.getParent().layout(new Control[]{tv.getControl()});
 				}
 			}
 		});
@@ -124,18 +125,23 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		if (owner instanceof Reflowable) {
-			tv.getControl().addControlListener(new ControlListener() {
-				public void controlResized(ControlEvent e) {
-					((Reflowable) owner).reflow();
-				}
-				public void controlMoved(ControlEvent e) {
-				}
-			});
-		}
+		tv.getControl().addControlListener(new ControlListener() {
+			public void controlResized(ControlEvent e) {
+				ReflowUtil.reflow(owner, tv.getControl());
+			}
+			public void controlMoved(ControlEvent e) {
+			}
+		});
 
 		actions = new BootDashActions(model, getSelection(), ui);
 		hookContextMenu();
+
+		//Careful, either selection or tableviewer might be created first.
+		// in either case we must make sure the listener is added when *both*
+		// have been created.
+		if (selection!=null) {
+			addTableSelectionListener();
+		}
 	}
 
 
@@ -226,12 +232,18 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			});
 		}
+		if (tv!=null) {
+			addTableSelectionListener();
+		}
+		return selection;
+	}
+
+	private void addTableSelectionListener() {
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				selection.getElements().refresh();
 			}
 		});
-		return selection;
 	}
 
 	public void dispose() {

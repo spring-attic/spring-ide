@@ -25,6 +25,8 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -113,12 +115,7 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				expansionState.setValue(comp.isExpanded());
-				if (owner instanceof Reflowable) {
-					((Reflowable) owner).reflow();
-				} else {
-					//better than nothing:
-					page.layout(new Control[]{comp});
-				}
+				ReflowUtil.reflow(owner, comp);
 			}
 		});
 		expansionState.addListener(new ValueListener<Boolean>() {

@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
@@ -123,7 +124,7 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 	}
 
 	@Override
-	public void reflow() {
+	public boolean reflow() {
 		if (enableScrolling) {
 			if (scroller!=null && !scroller.isDisposed()) {
 				scroller.reflow(true);
@@ -133,6 +134,7 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 				page.layout();
 			}
 		}
+		return true;
 	}
 
 }

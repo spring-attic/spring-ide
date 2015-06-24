@@ -23,6 +23,8 @@ import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -127,7 +129,7 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 
 		boolean dirty = !missing.isEmpty() || !extra.isEmpty();
 		if (dirty) {
-			reflow();
+			ReflowUtil.reflow(owner, composite);
 			updateSelectionDelegate();
 		}
 	}
@@ -157,12 +159,6 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 		s.ui = new HashSet<Control>(Arrays.asList(composite.getChildren()));
 		s.ui.removeAll(oldWidgets);
 		sectionsMap.put(m, s);
-	}
-
-	private void reflow() {
-		if (owner instanceof Reflowable) {
-			((Reflowable) owner).reflow();
-		}
 	}
 
 	private void deleteSectionFor(M m) {

@@ -197,15 +197,8 @@ public class BootDashView extends ViewPartWithSections {
 		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
 		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
 
-		CommentSection detailsSection = new CommentSection(this,
-						"Many details will go in here. " +
-						"Many details will go in here. " +
-						"Many details will go in here. " +
-						"Many details will go in here. " +
-						"Many details will go in here. " +
-						"Many details will go in here. " +
-						"Many details will go in here. "
-		);
+		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,
+				localApsTable.getSelection().toSingleSelection());
 
 		sections.add(new SashSection(this,
 				new ScrollerSection(this, localApsSection),

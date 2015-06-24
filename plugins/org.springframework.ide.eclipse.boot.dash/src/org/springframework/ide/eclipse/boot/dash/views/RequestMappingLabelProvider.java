@@ -8,13 +8,26 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views.sections;
+package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 
 /**
  * @author Kris De Volder
  */
-public interface Reflowable extends IPageWithSections {
-	void reflow();
+public class RequestMappingLabelProvider extends CellLabelProvider {
+
+	@Override
+	public void update(ViewerCell cell) {
+		Object el = cell.getElement();
+		if (el instanceof RequestMapping) {
+			cell.setText(((RequestMapping) el).getPath());
+		} else {
+			cell.setText(""+el);
+		}
+	}
+
+
 }

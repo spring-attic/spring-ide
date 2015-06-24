@@ -13,8 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 
-public class Scroller extends SharedScrolledComposite {
+public class Scroller extends SharedScrolledComposite implements Reflowable {
 
 	public Scroller(Composite parent) {
 		this(parent, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -37,6 +38,12 @@ public class Scroller extends SharedScrolledComposite {
 
 	public Composite getBody() {
 		return (Composite) getContent();
+	}
+
+	@Override
+	public boolean reflow() {
+		reflow(true);
+		return true;
 	}
 
 }
