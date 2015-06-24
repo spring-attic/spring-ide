@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -36,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
@@ -100,6 +103,13 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
 			c1viewer.getColumn().setText(columnType.getLabel());
 			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
+			if (columnType.getEditingSupportClass() != null) {
+				try {
+					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class).newInstance(tv));					
+				} catch (Throwable t) {
+					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnType.getLabel(), t));
+				}
+			}
 		}
 		new TableResizeHelper(tv).enableResizing();
 

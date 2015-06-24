@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -17,6 +18,8 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 @SuppressWarnings("restriction")
@@ -53,6 +56,13 @@ public class BootDashLabelProvider extends CellLabelProvider {
 		case RUN_STATE_ICN:
 			cell.setText("");
 			cell.setImage(getRunStateImage(e.getRunState()));
+			break;
+		case TAGS:
+			if (e instanceof Taggable) {
+				cell.setText(StringUtils.join(((Taggable)e).getTags(), LocalProjectTagUtils.SEPARATOR));
+			} else {
+				cell.setText("");
+			}
 			break;
 		case LIVE_PORT:
 			int port = e.getLivePort();

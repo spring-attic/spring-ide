@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.swt.SWT;
 
 public enum BootDashColumn {
@@ -18,20 +19,27 @@ public enum BootDashColumn {
 	RUN_TARGET(		"Target", 	60),
 	RUN_STATE(		"State", 	100),
 	RUN_STATE_ICN(	"",			20),
+	TAGS(			"Tags",		100,	TagEditingSupport.class),
 	LIVE_PORT(		"Port",		70);
 
 	private final String label;
 	private final int defaultWidth;
 	private final int allignment;
+	private final Class<? extends EditingSupport> editingSupportClass;
 
 	private BootDashColumn(String label, int defaultWidth) {
-		this(label, defaultWidth, SWT.LEFT);
+		this(label, defaultWidth, SWT.LEFT, null);
+	}
+	
+	private BootDashColumn(String label, int defaultWidth, Class<? extends EditingSupport> editingSupportClass) {
+		this(label, defaultWidth, SWT.LEFT, editingSupportClass);
 	}
 
-	private BootDashColumn(String label, int defaultWidth, int allignment) {
+	private BootDashColumn(String label, int defaultWidth, int allignment, Class<? extends EditingSupport> editingSupportClass) {
 		this.label = label;
 		this.defaultWidth = defaultWidth;
 		this.allignment = allignment;
+		this.editingSupportClass = editingSupportClass;
 	}
 	public String getLabel() {
 		return label;
@@ -45,5 +53,9 @@ public enum BootDashColumn {
 	 */
 	public int getAllignment() {
 		return allignment;
+	}
+	
+	public Class<? extends EditingSupport> getEditingSupportClass() {
+		return editingSupportClass;
 	}
 }

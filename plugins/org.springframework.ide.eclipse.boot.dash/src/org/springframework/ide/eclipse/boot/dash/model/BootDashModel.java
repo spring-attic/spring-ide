@@ -148,7 +148,7 @@ public class BootDashModel {
 		elementStateListeners.remove(l);
 	}
 
-	private void notifyElementChanged(BootDashElement element) {
+	void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
 			((ElementStateListener)l).stateChanged(element);
 		}

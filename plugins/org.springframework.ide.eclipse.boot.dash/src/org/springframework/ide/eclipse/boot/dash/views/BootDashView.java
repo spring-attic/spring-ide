@@ -194,7 +194,7 @@ public class BootDashView extends ViewPartWithSections {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
 		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
-		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
+		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, TAGS, LIVE_PORT);
 		sections.add(new ExpandableSectionWithSelection<BootDashElement>(BootDashView.this, "Local Boot Apps", localApsTable));
 		return sections;
 	}

@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -29,6 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
 import org.springframework.ide.eclipse.boot.dash.util.SpringApplicationLifeCycleClientManager;
@@ -43,14 +50,17 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
+public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements Taggable {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private BootDashModel context;
+	private String[] tags = new String[0];
 
 	public BootProjectDashElement(IProject project, BootDashModel context) {
 		super(project);
 		this.context = context;
+//		setTags(new String[] {"misha", "nossov"});
+		loadTags();
 	}
 
 	public IProject getProject() {
@@ -322,6 +332,50 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		}
 		return null;
 	}
+	
+	public void setTags(final String[] newTags) {
+		if (!new HashSet<String>(Arrays.asList(tags)).equals(new HashSet<String>(Arrays.asList(newTags)))) {
+			Job job = new Job("Saving Tags for project " + delegate.getName()) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						LocalProjectTagUtils.saveTags(delegate, newTags);
+						// Update the value of tags on successful save
+						tags = newTags;
+						// Fire the events to get the UI updated
+						context.notifyElementChanged(BootProjectDashElement.this);
+						return Status.OK_STATUS;
+					} catch (CoreException e) {
+						// Show the old value of tags in the UI is failed saving
+						context.notifyElementChanged(BootProjectDashElement.this);
+						return e.getStatus();
+					}
+				}
+			};
+			job.setRule(delegate);
+			job.schedule();
+		}
+	}
+	
+	private void loadTags() {
+		Job job = new Job("Load Tags for project " + delegate.getName()) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				HashSet<String> tagsSet = new HashSet<String>(Arrays.asList(LocalProjectTagUtils.loadTags(delegate)));
+				// Sanitize tags to remove duplicates if there are any
+				tags = tagsSet.toArray(new String[tagsSet.size()]);
+				// Fire the events to get the UI updated
+				context.notifyElementChanged(BootProjectDashElement.this);
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(delegate);
+		job.schedule();
+	}
 
+	@Override
+	public String[] getTags() {
+		return tags;
+	}
 
 }
