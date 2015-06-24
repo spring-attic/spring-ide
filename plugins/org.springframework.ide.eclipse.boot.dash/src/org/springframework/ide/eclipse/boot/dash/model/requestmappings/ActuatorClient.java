@@ -77,6 +77,11 @@ public class ActuatorClient {
 			// and  probably more useful than null for 'unanticipated stuff'.
 			return key;
 		}
+
+		@Override
+		public String toString() {
+			return "RequestMapping("+key+")";
+		}
 	}
 
 	private RestTemplate rest = new RestTemplate();

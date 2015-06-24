@@ -34,7 +34,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 public abstract class RunStateAction extends AbstractBootDashAction {
 
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {

@@ -29,6 +29,12 @@ public interface BootDashElement extends Nameable {
 	 */
 	int getLivePort();
 
+	/**
+	 * @return The host the app is running on. May return null if
+	 *    app is not running or host is not known.
+	 */
+	String getLiveHost();
+
 
 	/**
 	 * Get the request mappings from a running process. May return null if

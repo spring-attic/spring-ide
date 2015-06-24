@@ -88,7 +88,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	@Override
 	public void createContents(final Composite page) {
-		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI /*| SWT.FULL_SELECTION*/ | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
+		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
 																	// Assumes its up to the page to be scrollable.
 		tv.setContentProvider(new BootDashContentProvider(model));
 		//tv.setLabelProvider(new ViewLabelProvider());
@@ -106,7 +106,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
 			if (columnType.getEditingSupportClass() != null) {
 				try {
-					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class).newInstance(tv));					
+					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class).newInstance(tv));
 				} catch (Throwable t) {
 					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnType.getLabel(), t));
 				}

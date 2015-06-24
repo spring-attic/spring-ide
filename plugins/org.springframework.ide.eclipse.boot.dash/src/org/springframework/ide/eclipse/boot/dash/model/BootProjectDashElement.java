@@ -297,6 +297,11 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	}
 
 	@Override
+	public String getLiveHost() {
+		return "localhost";
+	}
+
+	@Override
 	public int getLivePort() {
 		return getLivePort("local.server.port");
 	}
@@ -370,7 +375,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		}
 		return null;
 	}
-	
+
 	public void setTags(final String[] newTags) {
 		if (!new HashSet<String>(Arrays.asList(tags)).equals(new HashSet<String>(Arrays.asList(newTags)))) {
 			Job job = new Job("Saving Tags for project " + delegate.getName()) {
@@ -394,7 +399,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			job.schedule();
 		}
 	}
-	
+
 	private void loadTags() {
 		Job job = new Job("Load Tags for project " + delegate.getName()) {
 			@Override

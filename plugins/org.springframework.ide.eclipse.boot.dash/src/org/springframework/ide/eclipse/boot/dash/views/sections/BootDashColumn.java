@@ -15,7 +15,7 @@ import org.eclipse.swt.SWT;
 
 public enum BootDashColumn {
 
-	PROJECT(		"Project", 	200),
+	PROJECT(		"Project", 	150),
 	RUN_TARGET(		"Target", 	60),
 	RUN_STATE(		"State", 	100),
 	RUN_STATE_ICN(	"",			20),
@@ -30,7 +30,7 @@ public enum BootDashColumn {
 	private BootDashColumn(String label, int defaultWidth) {
 		this(label, defaultWidth, SWT.LEFT, null);
 	}
-	
+
 	private BootDashColumn(String label, int defaultWidth, Class<? extends EditingSupport> editingSupportClass) {
 		this(label, defaultWidth, SWT.LEFT, editingSupportClass);
 	}
@@ -54,7 +54,7 @@ public enum BootDashColumn {
 	public int getAllignment() {
 		return allignment;
 	}
-	
+
 	public Class<? extends EditingSupport> getEditingSupportClass() {
 		return editingSupportClass;
 	}

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+
 public interface RequestMapping {
 	public String getPath();
 }
