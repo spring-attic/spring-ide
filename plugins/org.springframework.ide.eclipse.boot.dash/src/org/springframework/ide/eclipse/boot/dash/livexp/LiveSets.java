@@ -68,6 +68,25 @@ public class LiveSets {
 
 	}
 
+	public static <S,T> LiveExpression<Set<T>> filter(final LiveExpression<Set<S>> source, final Class<T> retainType) {
+		ObservableSet<T> filtered = new ObservableSet<T>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			protected Set<T> compute() {
+				Set<S> sourceElements = source.getValue();
+				Set<T> targetElements = new HashSet<T>();
+				for (S s : sourceElements) {
+					if (retainType.isAssignableFrom(s.getClass())) {
+						targetElements.add((T) s);
+					}
+				}
+				return targetElements;
+			}
+		};
+		filtered.dependsOn(source);
+		return filtered;
+	}
+
 
 
 }

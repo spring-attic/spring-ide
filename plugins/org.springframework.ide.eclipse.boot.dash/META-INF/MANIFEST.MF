@@ -22,9 +22,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.debug.ui,
  org.eclipse.ui.forms,
- org.apache.commons.lang
+ org.apache.commons.lang,
+ org.springframework.web,
+ org.springframework.core,
+ org.json
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.model,
+ org.springframework.ide.eclipse.boot.dash.model.requestmappings,
  org.springframework.ide.eclipse.boot.dash.util

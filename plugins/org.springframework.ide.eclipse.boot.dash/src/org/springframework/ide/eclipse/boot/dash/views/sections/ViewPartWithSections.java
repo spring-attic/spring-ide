@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
@@ -32,13 +33,23 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
 
 public class ViewPartWithSections extends ViewPart implements UIContext, IPageWithSections, Reflowable {
 
-	private ViewPageScroller scroller;
+	private final boolean enableScrolling;
+	private Scroller scroller;
 	protected Composite page;
+
+	public ViewPartWithSections(boolean enableScrolling) {
+		super();
+		this.enableScrolling = enableScrolling;
+	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		scroller = new ViewPageScroller(parent, SWT.V_SCROLL | SWT.H_SCROLL);
-		page = scroller.getBody();
+		if (enableScrolling) {
+			scroller = new Scroller(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+			page = scroller.getBody();
+		} else {
+			page = new Composite(parent, SWT.NONE);
+		}
 		page.setLayout(new GridLayout());
 
 		for (IPageSection s : getSections()) {
@@ -113,10 +124,17 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 	}
 
 	@Override
-	public void reflow() {
-		if (scroller!=null && !scroller.isDisposed()) {
-			scroller.reflow(true);
+	public boolean reflow() {
+		if (enableScrolling) {
+			if (scroller!=null && !scroller.isDisposed()) {
+				scroller.reflow(true);
+			}
+		} else {
+			if (page!=null && !page.isDisposed()) {
+				page.layout();
+			}
 		}
+		return true;
 	}
 
 }

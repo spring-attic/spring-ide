@@ -44,6 +44,21 @@ public final class MultiSelection<T> {
 	}
 
 	/**
+	 * Filter a selection to retain only elements of a given type.
+	 */
+	public <U> MultiSelection<U> filter(Class<U> retainType) {
+		MultiSelection<U> converted = this.as(retainType);
+		if (converted!=null) {
+			//Don't need to filter element-by-element since the selection only
+			// can contain elements of 'retainType'.
+			return converted;
+		} else {
+			//Selection may contain objects that are not instances of retainType.
+			return from(retainType, LiveSets.filter(getElements(), retainType));
+		}
+	}
+
+	/**
 	 * Convert a selection of one type into a selection of a different
 	 * type. The conversion only succeeds if the target-type is assignment
 	 * compatible with the source type.
@@ -66,7 +81,6 @@ public final class MultiSelection<T> {
 	 *
 	 * @return Converted selection
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <U> MultiSelection<U> cast(Class<U> toElementType) throws ClassCastException {
 		MultiSelection<U> converted = as(toElementType);
 		if (converted==null) {
@@ -100,6 +114,21 @@ public final class MultiSelection<T> {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Converts a 'multi' selection to a selection of a single element. The single selection
+	 * will be the selected element of the multi-selection if exactly one element is
+	 * currently selected, and 'null' otherwise.
+	 */
+	public LiveExpression<T> toSingleSelection() {
+		LiveExpression<T> singleSelect = new LiveExpression<T>() {
+			protected T compute() {
+				return MultiSelection.this.getSingle();
+			}
+		};
+		singleSelect.dependsOn(getElements());
+		return singleSelect;
 	}
 
 }

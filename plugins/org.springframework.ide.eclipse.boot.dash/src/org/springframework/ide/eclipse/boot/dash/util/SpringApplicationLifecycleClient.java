@@ -23,6 +23,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+
 /**
  * A JMX client for the {@code SpringApplicationLifecycle} mbean. Permits to obtain
  * information about the lifecycle of a given Spring application.
@@ -87,10 +89,10 @@ public class SpringApplicationLifecycleClient {
 		}
 	}
 
-	public int getServerPort() throws Exception {
+	public int getProperty(String prop, int defaultValue) {
 		try {
 			Object o = this.connection.invoke(this.objectName,"getProperty",
-					new String[] {"local.server.port"},
+					new String[] {prop},
 					new String[] {String.class.getName()});
 			if (o instanceof Integer) {
 				return (Integer)o;
@@ -99,9 +101,9 @@ public class SpringApplicationLifecycleClient {
 			}
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
+			BootDashActivator.log(ex);
 		}
-		return -1; // Couldn't determine port. Maybe App not ready yet, or maybe its not server-like app and so has no server.port
+		return defaultValue;
 	}
 
 	/**

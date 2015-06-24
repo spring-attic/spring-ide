@@ -20,20 +20,23 @@ import java.util.Set;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 
-public class DynamicCompositeSection<M, T> extends PageSection implements MultiSelectionSource<T>, Disposable {
+public class DynamicCompositeSection<M> extends PageSection implements MultiSelectionSource, Disposable {
 
-	public static interface SectionFactory<M, T> {
-		MultiSelectionSource<T> create(M model);
+	public static interface SectionFactory<M> {
+		IPageSection create(M model);
 	}
 
 	/**
@@ -50,11 +53,12 @@ public class DynamicCompositeSection<M, T> extends PageSection implements MultiS
 	/**
 	 * Keeps track of the selected elements
 	 */
-	private DelegatingLiveSet<T> elements;
-	private MultiSelection<T> selection;
+	private DelegatingLiveSet<?> elements;
+	private MultiSelection<?> selection; //Because of the dynamic nature, we can't really know what kinds of selections will get added
+											// So we must assume any kinds of object may appear.
 	private Composite composite = null; //Set once UI is created
 
-	private SectionFactory<M, T> sectionFactory;
+	private SectionFactory<M> sectionFactory;
 
 	private ValueListener<Set<M>> modelListener = new ValueListener<Set<M>>() {
 		public void gotValue(LiveExpression<Set<M>> exp, Set<M> value) {
@@ -62,21 +66,25 @@ public class DynamicCompositeSection<M, T> extends PageSection implements MultiS
 		}
 	};
 
+	private Class<?> selectionType = Object.class;
+
 	private class SubSection {
 		Collection<Control> ui;
-		MultiSelectionSource<T> section;
+		IPageSection section;
 	}
 
-	public DynamicCompositeSection(Class<T> selectionType, IPageWithSections owner, LiveExpression<Set<M>> models, SectionFactory<M,T> sectionFactory) {
+	public <T> DynamicCompositeSection(IPageWithSections owner, LiveExpression<Set<M>> models, SectionFactory<M> sectionFactory, Class<T> selectionType) {
 		super(owner);
 		this.models = models;
-		this.elements = new DelegatingLiveSet<T>();
-		this.selection = new MultiSelection<T>(selectionType, elements);
+		DelegatingLiveSet<T> _elements = new DelegatingLiveSet<T>();
+		this.elements = _elements;
 		this.sectionFactory = sectionFactory;
+		this.selectionType = selectionType;
+		this.selection = MultiSelection.from(selectionType, _elements);
 	}
 
 	@Override
-	public MultiSelection<T> getSelection() {
+	public MultiSelection<?> getSelection() {
 		return selection;
 	}
 
@@ -121,17 +129,26 @@ public class DynamicCompositeSection<M, T> extends PageSection implements MultiS
 
 		boolean dirty = !missing.isEmpty() || !extra.isEmpty();
 		if (dirty) {
-			reflow();
+			ReflowUtil.reflow(owner, composite);
 			updateSelectionDelegate();
 		}
 	}
 
-	private void updateSelectionDelegate() {
-		LiveExpression<Set<T>> newSelection = LiveSets.emptySet(selection.getElementType());
+	@SuppressWarnings("unchecked")
+	private <T> void updateSelectionDelegate() {
+		Class<T> selectionType = (Class<T>) this.selectionType;
+		MultiSelection<T> newSelection = MultiSelection.empty(selectionType);
 		for (SubSection s : sectionsMap.values()) {
-			newSelection = LiveSets.union(newSelection, s.section.getSelection().getElements());
+			if (s.section instanceof MultiSelectionSource) {
+				newSelection = MultiSelection.union(
+						newSelection,
+						((MultiSelectionSource)s.section).getSelection().filter(selectionType)
+				);
+			}
 		}
-		elements.setDelegate(newSelection);
+		@SuppressWarnings("rawtypes")
+		LiveExpression newElements = newSelection.getElements();
+		elements.setDelegate(newElements);
 	}
 
 	private void createSectionFor(M m) {
@@ -142,12 +159,6 @@ public class DynamicCompositeSection<M, T> extends PageSection implements MultiS
 		s.ui = new HashSet<Control>(Arrays.asList(composite.getChildren()));
 		s.ui.removeAll(oldWidgets);
 		sectionsMap.put(m, s);
-	}
-
-	private void reflow() {
-		if (owner instanceof Reflowable) {
-			((Reflowable) owner).reflow();
-		}
 	}
 
 	private void deleteSectionFor(M m) {
