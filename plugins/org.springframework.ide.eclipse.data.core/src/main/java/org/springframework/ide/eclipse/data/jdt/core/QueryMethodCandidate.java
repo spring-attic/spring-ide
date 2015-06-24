@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,10 @@ class QueryMethodCandidate {
 		Matcher matcher = CONCATENATOR_PATERN.matcher(name);
 		int startIndex = matcher.find() ? matcher.end() : 0;
 		int endIndex = i - prefixLength > name.length() ? name.length() : i - prefixLength;
+		
+		if (startIndex < 0 || endIndex < 0 || startIndex > endIndex) {
+			return null;
+		}
 
 		String subName = startIndex >= name.length() ? "" : name.substring(startIndex, endIndex);
 		return new QueryMethodPart(subName, entityClass);

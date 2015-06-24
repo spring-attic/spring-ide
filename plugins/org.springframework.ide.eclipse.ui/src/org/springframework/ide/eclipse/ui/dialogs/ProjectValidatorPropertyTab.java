@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -187,7 +187,7 @@ public class ProjectValidatorPropertyTab {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
 			if ((Button) e.widget == resetButton) {
-				initializeCheckedState(null, true);
+				performDefaults();
 			}
 		}
 	};
@@ -462,6 +462,20 @@ public class ProjectValidatorPropertyTab {
 		}
 		else {
 			configureButton.setEnabled(false);
+		}
+	}
+	
+	public void performDefaults() {
+		// Reset checked state of validation definition rules in the tree
+		initializeCheckedState(null, true);
+		// Reset the validation rule definition settings
+		for (List<ValidationRuleDefinition> defList : validationRuleDefinitions.values()) {
+			for (ValidationRuleDefinition ruleDef : defList) {
+				// Process property values
+				changedPropertyValues.put(ruleDef, ruleDef.getDefaultPropertyValues());
+				// Process Message severities
+				changedMessageSeverities.put(ruleDef, ruleDef.getDefaultMessageSeverities());				
+			}
 		}
 	}
 

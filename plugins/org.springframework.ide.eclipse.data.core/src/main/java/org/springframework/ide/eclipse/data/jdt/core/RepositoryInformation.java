@@ -245,7 +245,7 @@ public class RepositoryInformation {
 
 		try {
 			for (IMethod method : type.getMethods()) {
-				if (!isCrudMethod(method) && !hasQueryAnnotation(method) && !Flags.isDefaultMethod(method.getFlags())) {
+				if (isMethodToValidate(method)) {
 					result.add(method);
 				}
 			}
@@ -256,10 +256,26 @@ public class RepositoryInformation {
 		return result;
 	}
 
+	public boolean isMethodToValidate(IMethod method) throws JavaModelException {
+		if (isCrudMethod(method)) return false;
+		if (hasQueryAnnotation(method)) return false;
+		if (Flags.isDefaultMethod(method.getFlags())) return false;
+
+		String[] prefixes = new String[] {"find", "read", "get", "query", "count", "delete", "remove"};
+		String methodName = method.getElementName();
+		for (int i = 0; i < prefixes.length; i++) {
+			if (methodName.startsWith(prefixes[i])) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	private boolean isCrudMethod(IMethod method) {
 		return METHOD_NAMES.contains(method.getElementName());
 	}
-
+	
 	private boolean hasQueryAnnotation(IMethod method) throws JavaModelException {
 
 		for (IAnnotation annotation : method.getAnnotations()) {
