@@ -434,12 +434,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public String getDefaultUrlPath() {
+	public String getDefaultRequestMappingPath() {
 		return projectProperties.get(delegate, DEFAULT_URL_PATH_PROP);
 	}
 
 	@Override
-	public void setDefaultPath(String defaultPath) {
+	public void setDefaultRequestMapingPath(String defaultPath) {
 		try {
 			projectProperties.put(delegate, DEFAULT_URL_PATH_PROP, defaultPath);
 		} catch (Exception e) {

@@ -74,8 +74,8 @@ public interface BootDashElement extends Nameable {
 	 * Usually, it should be, but if the request mappings have changed since the
 	 * value was stored then it may no longer exist.
 	 */
-	String getDefaultUrlPath();
-	void setDefaultPath(String defaultPath);
+	String getDefaultRequestMappingPath();
+	void setDefaultRequestMapingPath(String defaultPath);
 
 
 	//TODO: the operations below don't belong here they are really 'UI' not 'model'.

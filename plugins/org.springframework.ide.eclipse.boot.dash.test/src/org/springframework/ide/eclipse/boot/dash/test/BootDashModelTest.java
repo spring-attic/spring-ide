@@ -382,11 +382,11 @@ public class BootDashModelTest {
 		createBootProject(projectName);
 		BootDashElement element = getElement(projectName);
 
-		assertNull(element.getDefaultUrlPath());
-		element.setDefaultPath("something");
+		assertNull(element.getDefaultRequestMappingPath());
+		element.setDefaultRequestMapingPath("something");
 		assertProjectProperty(element.getProject(), "default.request-mapping.path", "something");
 
-		assertEquals("something", element.getDefaultUrlPath());
+		assertEquals("something", element.getDefaultRequestMappingPath());
 
 	}
 
