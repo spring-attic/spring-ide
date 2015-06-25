@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,6 +55,7 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -542,6 +545,47 @@ public class BootDashModelTest {
 		}
 		assertElements(names, expectedProjectNames);
 	}
+	
+	private void waitForJobsToComplete() throws Exception {
+		new ACondition("Wait for Jobs") {
+			@Override
+			public boolean test() throws Exception {
+				assertJobManagerIdle();
+				return true;
+			}
+		}.waitFor(3 * 60 * 1000);
+	}
 
+	private void testSettingTags(String[] tagsToSet, String[] expectedTags) throws Exception {		
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IProject project = root.getProject("fooProject");
+		project.create(null);
+		project.open(null);
+		
+		BootProjectDashElement element = new BootProjectDashElement(project, model);
+		element.setTags(tagsToSet);
+		waitForJobsToComplete();
+		assertArrayEquals(expectedTags, element.getTags());
+		
+		// Reopne the project to load tags from the resource
+		project.close(null);
+		project.open(null);
+		element = new BootProjectDashElement(project, model);
+		assertArrayEquals(expectedTags, element.getTags());
+	}
 
+	@Test
+	public void setUniqueTagsForProject() throws Exception {
+		testSettingTags(new String[] {"xd", "spring"}, new String[] {"xd", "spring"});
+	}
+	
+	@Test
+	public void setDuplicateTagsForProject() throws Exception {
+		testSettingTags(new String[] {"xd", "spring", "xd", "spring", "spring"}, new String[] {"xd", "spring"});		
+	}
+
+	@Test
+	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
+		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "spring", "xd", "ko", "spring!!-@", "@@@", "-"});		
+	}
 }

@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -60,12 +58,10 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private BootDashModel context;
-	private String[] tags = new String[0];
 
 	public BootProjectDashElement(IProject project, BootDashModel context) {
 		super(project);
 		this.context = context;
-		loadTags();
 	}
 
 	public IProject getProject() {
@@ -377,27 +373,23 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return null;
 	}
 
-	public void setTags(String[] tagsArray) {
-		List<String> newTagsList = new ArrayList<String>();
-		for (String tag : tagsArray) {
-			if (!newTagsList.contains(tag)) {
-				newTagsList.add(tag);
-			}
-		}
-		final String[] newTags = newTagsList.toArray(new String[newTagsList.size()]);
-		final String[] oldTags = tags;
-		tags = newTags;
-		notifyTagsChanged(newTags, oldTags);
+	public void setTags(final String[] tagsArray) {
 		Job job = new Job("Saving Tags for project " + delegate.getName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					LocalProjectTagUtils.saveTags(delegate, tags);
+					List<String> newTagsList = new ArrayList<String>();
+					for (String tag : tagsArray) {
+						if (!newTagsList.contains(tag)) {
+							newTagsList.add(tag);
+						}
+					}
+					LocalProjectTagUtils.saveTags(delegate, newTagsList.toArray(new String[newTagsList.size()]));
 					return Status.OK_STATUS;
 				} catch (CoreException e) {
-					tags = oldTags;
-					notifyTagsChanged(oldTags, newTags);
 					return e.getStatus();
+				} finally {
+					context.notifyElementChanged(BootProjectDashElement.this);					
 				}
 			}
 		};
@@ -405,25 +397,15 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		job.schedule();
 	}
 
-	private void loadTags() {
-//		Job job = new Job("Load Tags for project " + delegate.getName()) {
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-				HashSet<String> tagsSet = new HashSet<String>(Arrays.asList(LocalProjectTagUtils.loadTags(delegate)));
-				// Sanitize tags to remove duplicates if there are any
-				tags = tagsSet.toArray(new String[tagsSet.size()]);
-//				// Fire the events to get the UI updated
-//				notifyTagsChanged(tags, new String[0]);
-//				return Status.OK_STATUS;
-//			}
-//		};
-//		job.setRule(delegate);
-//		job.schedule();
-	}
-
 	@Override
 	public String[] getTags() {
-		return tags;
+		List<String> sanitizedTags = new ArrayList<String>();
+		for (String tag : LocalProjectTagUtils.loadTags(delegate)) {
+			if (!sanitizedTags.contains(tag)) {
+				sanitizedTags.add(tag);
+			}
+		}
+		return sanitizedTags.toArray(new String[sanitizedTags.size()]);
 	}
 
 }
