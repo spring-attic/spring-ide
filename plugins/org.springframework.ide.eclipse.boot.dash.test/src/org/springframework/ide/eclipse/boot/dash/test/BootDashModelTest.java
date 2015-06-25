@@ -16,7 +16,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.supportsLifeCycleManagement;
@@ -53,9 +52,9 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
@@ -378,7 +377,24 @@ public class BootDashModelTest {
 		}
 	}
 
+	@Test public void testDefaultRequestMapping() throws Exception {
+		String projectName = "sdfsd-project";
+		createBootProject(projectName);
+		BootDashElement element = getElement(projectName);
+
+		assertNull(element.getDefaultUrlPath());
+		element.setDefaultPath("something");
+		assertProjectProperty(element.getProject(), "default.request-mapping.path", "something");
+
+		assertEquals("something", element.getDefaultUrlPath());
+
+	}
+
 	///////////////// harness code ////////////////////////
+
+	private void assertProjectProperty(IProject project, String prop, String value) {
+		assertEquals(value, context.getProjectProperties().get(project, prop));
+	}
 
 	private void assertRequestMappingWithPath(List<RequestMapping> mappings, String string) {
 		StringBuilder builder = new StringBuilder();
@@ -542,6 +558,5 @@ public class BootDashModelTest {
 		}
 		assertElements(names, expectedProjectNames);
 	}
-
 
 }
