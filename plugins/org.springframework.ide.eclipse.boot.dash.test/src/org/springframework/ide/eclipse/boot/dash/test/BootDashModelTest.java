@@ -403,10 +403,10 @@ public class BootDashModelTest {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
-		this.context = spy(new TestBootDashModelContext(
+		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
-				));
+		);
 		this.model = new BootDashModel(context);
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);

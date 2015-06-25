@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
@@ -59,12 +60,18 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static final String DEFAULT_URL_PATH_PROP = "default.request-mapping.path";
+
 	private BootDashModel context;
 	private String[] tags = new String[0];
 
-	public BootProjectDashElement(IProject project, BootDashModel context) {
+	private IPropertyStore<IProject> projectProperties;
+
+	public BootProjectDashElement(IProject project, BootDashModel context, IPropertyStore<IProject> projectProperties) {
 		super(project);
 		this.context = context;
+		this.projectProperties = projectProperties;
 		loadTags();
 	}
 
@@ -424,6 +431,20 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	@Override
 	public String[] getTags() {
 		return tags;
+	}
+
+	@Override
+	public String getDefaultUrlPath() {
+		return projectProperties.get(delegate, DEFAULT_URL_PATH_PROP);
+	}
+
+	@Override
+	public void setDefaultPath(String defaultPath) {
+		try {
+			projectProperties.put(delegate, DEFAULT_URL_PATH_PROP, defaultPath);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 
 }

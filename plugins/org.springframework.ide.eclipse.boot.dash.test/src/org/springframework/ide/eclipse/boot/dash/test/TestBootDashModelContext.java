@@ -14,10 +14,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -26,12 +28,14 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private File stateLoc;
 	private ILaunchManager launchManager;
 	private IWorkspace workspace;
+	private IPropertyStore<IProject> projectProperties;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
 			this.workspace = workspace;
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
+			this.projectProperties = new MockPropertyStore<IProject>();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -55,6 +59,11 @@ public class TestBootDashModelContext implements BootDashModelContext {
 
 	public void log(Exception e) {
 		//No implementation we'll use Mockito to spy on the method instead.
+	}
+
+	@Override
+	public IPropertyStore<IProject> getProjectProperties() {
+		return projectProperties;
 	}
 
 }

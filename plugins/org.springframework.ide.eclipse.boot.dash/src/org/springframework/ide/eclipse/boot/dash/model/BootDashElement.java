@@ -66,6 +66,18 @@ public interface BootDashElement extends Nameable {
 	ILaunchConfiguration getPreferredConfig();
 	void setPreferredConfig(ILaunchConfiguration config);
 
+	/**
+	 * The 'default' path is used by some actions to quickly open
+	 * the app in a browser view. This is just a stored value. There is no guarantee
+	 * that it actually exists on the given element when it is running (i.e. it may
+	 * or may not be the path of a RequestMapping returned from get getLiveRequestMappings.
+	 * Usually, it should be, but if the request mappings have changed since the
+	 * value was stored then it may no longer exist.
+	 */
+	String getDefaultUrlPath();
+	void setDefaultPath(String defaultPath);
+
+
 	//TODO: the operations below don't belong here they are really 'UI' not 'model'.
 
 	void stopAsync() throws Exception;

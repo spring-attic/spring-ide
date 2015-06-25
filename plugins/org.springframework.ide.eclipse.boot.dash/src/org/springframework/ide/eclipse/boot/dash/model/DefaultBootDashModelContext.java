@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 
 public class DefaultBootDashModelContext implements BootDashModelContext {
+
+	private IPropertyStore<IProject> projectProperties = PropertyStoreFactory.createForProjects();
 
 	@Override
 	public IWorkspace getWorkspace() {
@@ -37,6 +43,11 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public void log(Exception e) {
 		BootDashActivator.log(e);
+	}
+
+	@Override
+	public IPropertyStore<IProject> getProjectProperties() {
+		return projectProperties;
 	}
 
 }

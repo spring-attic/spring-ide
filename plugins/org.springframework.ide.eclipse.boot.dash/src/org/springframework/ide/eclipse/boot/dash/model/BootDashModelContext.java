@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 
 public interface BootDashModelContext {
 
@@ -20,5 +22,6 @@ public interface BootDashModelContext {
 	ILaunchManager getLaunchManager();
 	void log(Exception e);
 	IPath getStateLocation();
+	IPropertyStore<IProject> getProjectProperties();
 
 }

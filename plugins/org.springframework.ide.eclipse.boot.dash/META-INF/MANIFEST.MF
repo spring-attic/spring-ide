@@ -29,6 +29,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash,
+ org.springframework.ide.eclipse.boot.dash.metadata,
  org.springframework.ide.eclipse.boot.dash.model,
  org.springframework.ide.eclipse.boot.dash.model.requestmappings,
  org.springframework.ide.eclipse.boot.dash.util

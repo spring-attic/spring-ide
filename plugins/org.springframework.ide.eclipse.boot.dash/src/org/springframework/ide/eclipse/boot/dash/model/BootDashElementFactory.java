@@ -12,18 +12,21 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 
 public class BootDashElementFactory {
 
 	private BootDashModel model;
+	private IPropertyStore<IProject> projectProperties;
 
-	public BootDashElementFactory(BootDashModel model) {
+	public BootDashElementFactory(BootDashModel model, IPropertyStore<IProject> projectProperties) {
 		this.model = model;
+		this.projectProperties = projectProperties;
 	}
 
 	public BootDashElement create(IProject p) {
 		if (BootPropertyTester.isBootProject(p)) {
-			return new BootProjectDashElement(p, model);
+			return new BootProjectDashElement(p, model, projectProperties);
 		}
 		return null;
 	}
