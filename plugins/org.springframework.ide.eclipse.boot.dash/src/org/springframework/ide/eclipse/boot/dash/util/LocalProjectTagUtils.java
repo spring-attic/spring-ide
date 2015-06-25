@@ -49,7 +49,7 @@ public class LocalProjectTagUtils {
 	 * @return array of tags
 	 */
 	public static String[] loadTags(IProject project) {
-		return new ProjectScope(project).getNode(QUALIFIER).get(TAGS_PROPERTY_KEY, "").split(SEPARATOR);
+		return new ProjectScope(project).getNode(QUALIFIER).get(TAGS_PROPERTY_KEY, "").split("\\s+");
 	}
 	
 	/**

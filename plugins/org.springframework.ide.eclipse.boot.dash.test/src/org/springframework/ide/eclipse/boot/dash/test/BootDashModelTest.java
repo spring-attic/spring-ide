@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,6 +54,7 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -390,6 +393,45 @@ public class BootDashModelTest {
 
 	}
 
+
+	private void testSettingTags(String[] tagsToSet, String[] expectedTags) throws Exception {
+		String projectName = "alex-project";
+		createBootProject(projectName);
+		BootDashElement element = getElement(projectName);
+		IProject project = element.getProject();
+
+		assertArrayEquals(new String[]{}, element.getTags());
+
+		element.setTags(tagsToSet);
+		waitForJobsToComplete();
+		assertArrayEquals(expectedTags, element.getTags());
+
+		//TODO: instead of the stuffs below, use IPropertyStore<IProject> and then
+		// the test here can check if the expected stuffs have been set into the
+		// store.
+
+		// Reopen the project to load tags from the resource
+		project.close(null);
+		project.open(null);
+		element = getElement(projectName);
+		assertArrayEquals(expectedTags, element.getTags());
+	}
+
+	@Test
+	public void setUniqueTagsForProject() throws Exception {
+		testSettingTags(new String[] {"xd", "spring"}, new String[] {"xd", "spring"});
+	}
+
+	@Test
+	public void setDuplicateTagsForProject() throws Exception {
+		testSettingTags(new String[] {"xd", "spring", "xd", "spring", "spring"}, new String[] {"xd", "spring"});
+	}
+
+	@Test
+	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
+		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "spring", "xd", "ko", "spring!!-@", "@@@", "-"});
+	}
+
 	///////////////// harness code ////////////////////////
 
 	private void assertProjectProperty(IProject project, String prop, String value) {
@@ -557,6 +599,16 @@ public class BootDashModelTest {
 			names[i] = projects[i].getName();
 		}
 		assertElements(names, expectedProjectNames);
+	}
+
+	private void waitForJobsToComplete() throws Exception {
+		new ACondition("Wait for Jobs") {
+			@Override
+			public boolean test() throws Exception {
+				assertJobManagerIdle();
+				return true;
+			}
+		}.waitFor(3 * 60 * 1000);
 	}
 
 }

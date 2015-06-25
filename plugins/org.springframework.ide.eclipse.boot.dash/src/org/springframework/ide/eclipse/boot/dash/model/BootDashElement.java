@@ -17,7 +17,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 
-public interface BootDashElement extends Nameable {
+public interface BootDashElement extends Nameable, Taggable {
 	IJavaProject getJavaProject();
 	IProject getProject();
 	RunState getRunState();
