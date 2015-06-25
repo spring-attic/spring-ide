@@ -406,19 +406,19 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	private void loadTags() {
-		Job job = new Job("Load Tags for project " + delegate.getName()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
+//		Job job = new Job("Load Tags for project " + delegate.getName()) {
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
 				HashSet<String> tagsSet = new HashSet<String>(Arrays.asList(LocalProjectTagUtils.loadTags(delegate)));
 				// Sanitize tags to remove duplicates if there are any
 				tags = tagsSet.toArray(new String[tagsSet.size()]);
-				// Fire the events to get the UI updated
-				notifyTagsChanged(tags, new String[0]);
-				return Status.OK_STATUS;
-			}
-		};
-		job.setRule(delegate);
-		job.schedule();
+//				// Fire the events to get the UI updated
+//				notifyTagsChanged(tags, new String[0]);
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		job.setRule(delegate);
+//		job.schedule();
 	}
 
 	@Override
