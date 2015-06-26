@@ -133,7 +133,9 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 			tv.refresh();
 			tv.getControl().getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					page.layout(new Control[] {tv.getControl()});
+					if (!page.isDisposed()) {
+						page.layout(new Control[] {tv.getControl()});
+					}
 				}
 			});
 		}
