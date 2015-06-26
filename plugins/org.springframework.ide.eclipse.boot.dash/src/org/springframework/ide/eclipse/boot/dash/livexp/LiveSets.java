@@ -87,6 +87,22 @@ public class LiveSets {
 		return filtered;
 	}
 
+	public static <T> LiveExpression<Set<T>> singletonOrEmpty(final LiveExpression<T> exp) {
+		return new ObservableSet<T>() {
+			{
+				dependsOn(exp);
+			}
+			protected Set<T> compute() {
+				T val = exp.getValue();
+				if (val==null) {
+					return Collections.emptySet();
+				} else {
+					return Collections.singleton(val);
+				}
+			}
+		};
+	}
+
 
 
 }

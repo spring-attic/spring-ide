@@ -32,14 +32,21 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -50,15 +57,17 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
-import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsSection;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
@@ -77,6 +86,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private MultiSelection<BootDashElement> selection;
 	private BootDashActions actions;
 	private UserInteractions ui;
+	private LiveVariable<ViewerCell> hoverCell;
+	private LiveExpression<BootDashElement> hoverElement;
 
 	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
 		super(owner);
@@ -100,6 +111,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv.setSorter(new NameSorter());
 		tv.setInput(model);
 		tv.getTable().setHeaderVisible(true);
+
 		//tv.getTable().setLinesVisible(true);
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
@@ -118,6 +130,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			}
 		}
+		addSingleClickHandling();
+
 		new TableResizeHelper(tv).enableResizing();
 
 		model.getElements().addListener(new UIValueListener<Set<BootDashElement>>() {
@@ -172,6 +186,97 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 	}
+
+	public void addSingleClickHandling() {
+		final AbstractBootDashAction[] singleClickActions = new AbstractBootDashAction[enabledColumns.length];
+		boolean hasSingleClickActions = false;
+		for (int i = 0; i < enabledColumns.length; i++) {
+			BootDashColumn columnType = enabledColumns[i];
+			BootDashActionFactory factory = columnType.getSingleClickAction();
+			if (factory!=null) {
+				hasSingleClickActions = true;
+				singleClickActions[i] = factory.create(model, getHoverElement(), ui);
+			}
+		}
+
+		if (hasSingleClickActions) {
+			final Cursor defaultCursor = tv.getTable().getCursor();
+			getHoverCell().addListener(new ValueListener<ViewerCell>() {
+				public void gotValue(LiveExpression<ViewerCell> exp, ViewerCell cell) {
+					Table table = tv.getTable();
+					if (cell!=null) {
+						int colIdx = cell.getColumnIndex();
+						AbstractBootDashAction action = singleClickActions[colIdx];
+						if (action!=null && action.isEnabled()) {
+							table.setCursor(CursorProviders.HAND_CURSOR.getCursor(cell));
+							return;
+						}
+					}
+					table.setCursor(defaultCursor);
+				}
+			});
+
+			tv.getTable().addMouseListener(new MouseAdapter() {
+				public void mouseDown(MouseEvent e) {
+					ViewerCell cell = tv.getCell(new Point(e.x,e.y));
+					if (cell!=null) {
+						Object el = cell.getElement();
+						if (el instanceof BootDashElement) {
+							int idx = cell.getColumnIndex();
+							AbstractBootDashAction action = singleClickActions[idx];
+							if (action!=null) {
+								action.run();
+							}
+						}
+					}
+				}
+			});
+		}
+	}
+
+	/**
+	 * Selection used for 'single click' actions. This represents the
+	 * element the mouse is hovering over.
+	 */
+	private synchronized LiveExpression<ViewerCell> getHoverCell() {
+		if (hoverCell==null) {
+			hoverCell = new LiveVariable<ViewerCell>();
+			tv.getTable().addMouseMoveListener(new MouseMoveListener() {
+				public void mouseMove(MouseEvent e) {
+					Point pos = new Point(e.x, e.y);
+					hoverCell.setValue(tv.getCell(pos));
+				}
+			});
+		}
+		return hoverCell;
+	}
+
+	/**
+	 * Selection used for 'single click' actions. This represents the
+	 * element the mouse is hovering over.
+	 */
+	private synchronized LiveExpression<BootDashElement> getHoverElement() {
+		if (hoverElement==null) {
+			final LiveExpression<ViewerCell> hoverCell = getHoverCell();
+			hoverElement = new LiveExpression<BootDashElement>() {
+				{
+					dependsOn(hoverCell);
+				}
+				protected BootDashElement compute() {
+					ViewerCell cell = hoverCell.getValue();
+					if (cell!=null) {
+						Object e = cell.getElement();
+						if (e instanceof BootDashElement) {
+							return (BootDashElement) e;
+						}
+					}
+					return null;
+				}
+			};
+		}
+		return hoverElement;
+	}
+
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");

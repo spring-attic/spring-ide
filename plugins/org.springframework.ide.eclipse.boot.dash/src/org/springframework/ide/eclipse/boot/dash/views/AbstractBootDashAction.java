@@ -49,6 +49,10 @@ public class AbstractBootDashAction extends Action {
 		return selection.getValue();
 	}
 
+	protected BootDashElement getSingleSelectedElement() {
+		return selection.getSingle();
+	}
+
 	public void dispose() {
 	}
 }

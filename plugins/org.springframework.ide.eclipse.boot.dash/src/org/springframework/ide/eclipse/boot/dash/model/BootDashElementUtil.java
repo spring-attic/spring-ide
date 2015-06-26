@@ -39,5 +39,10 @@ public class BootDashElementUtil {
 		return null;
 	}
 
-
+	public static String getUrl(BootDashElement el) {
+		if (el!=null) {
+			return getUrl(el, el.getDefaultRequestMappingPath());
+		}
+		return null;
+	}
 }

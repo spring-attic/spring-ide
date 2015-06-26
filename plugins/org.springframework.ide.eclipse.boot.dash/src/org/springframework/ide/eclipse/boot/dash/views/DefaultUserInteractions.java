@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * An implementation of 'UserInteractions' that uses real Dialogs, for use in 'production'.
@@ -114,6 +115,13 @@ public class DefaultUserInteractions implements UserInteractions {
 				DebugUITools.openLaunchConfigurationDialogOnGroup(getShell(), selection, launchGroup);
 			}
 		});
+	}
+
+	@Override
+	public void openUrl(String url) {
+		if (url!=null) {
+			UiUtil.openUrl(url);
+		}
 	}
 
 }
