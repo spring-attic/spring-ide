@@ -400,8 +400,7 @@ public class BootDashModelTest {
 		BootDashElement element = getElement(projectName);
 		IProject project = element.getProject();
 
-// TODO: fails:
-//		assertArrayEquals(new String[]{}, element.getTags());
+		assertArrayEquals(new String[]{}, element.getTags());
 
 		element.setTags(tagsToSet);
 		waitForJobsToComplete();
@@ -430,7 +429,7 @@ public class BootDashModelTest {
 
 	@Test
 	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
-		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "spring", "xd", "ko", "spring!!-@", "@@@", "-"});
+		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"});
 	}
 
 	///////////////// harness code ////////////////////////

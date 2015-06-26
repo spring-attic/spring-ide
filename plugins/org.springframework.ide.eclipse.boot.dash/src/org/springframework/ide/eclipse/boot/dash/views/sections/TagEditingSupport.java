@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
-import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 
 /**
  * Support for editing tags with the text cell editor
@@ -46,7 +46,7 @@ public class TagEditingSupport extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof Taggable) {
-			return StringUtils.join(((Taggable)element).getTags(), LocalProjectTagUtils.SEPARATOR);
+			return StringUtils.join(((Taggable)element).getTags(), BootDashLabelProvider.TAGS_SEPARATOR);
 		} else {
 			return null;
 		}
@@ -55,8 +55,14 @@ public class TagEditingSupport extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		if (element instanceof Taggable && value instanceof String) {
-			((Taggable)element).setTags(((String)value).split("\\s+"));
+			String str = (String) value;
+			Taggable taggable = (Taggable) element;
+			if (str.isEmpty()) {
+				taggable.setTags(new String[0]);
+			} else {
+				taggable.setTags(str.split("\\s+"));
+			}
 		}
 	}
-
+	
 }
