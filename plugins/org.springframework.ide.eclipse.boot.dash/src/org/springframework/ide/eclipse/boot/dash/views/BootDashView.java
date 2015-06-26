@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -194,7 +191,7 @@ public class BootDashView extends ViewPartWithSections {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
 		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
-		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, TAGS);
+		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
 		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
 
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,

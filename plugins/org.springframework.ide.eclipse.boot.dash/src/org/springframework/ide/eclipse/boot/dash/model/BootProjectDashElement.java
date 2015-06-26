@@ -434,6 +434,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	public void setDefaultRequestMapingPath(String defaultPath) {
 		try {
 			projectProperties.put(delegate, DEFAULT_URL_PATH_PROP, defaultPath);
+			context.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}

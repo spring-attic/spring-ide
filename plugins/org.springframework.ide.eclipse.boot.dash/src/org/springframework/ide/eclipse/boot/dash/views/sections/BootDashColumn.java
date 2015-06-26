@@ -20,7 +20,8 @@ public enum BootDashColumn {
 	RUN_STATE(		"State", 	100),
 	RUN_STATE_ICN(	"",			20),
 	TAGS(			"Tags",		100,	TagEditingSupport.class),
-	LIVE_PORT(		"Port",		70);
+	LIVE_PORT(		"Port",		70),
+	DEFAULT_PATH(	"Path",		70,		DefaultPathEditorSupport.class);
 
 	private final String label;
 	private final int defaultWidth;

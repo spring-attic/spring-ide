@@ -15,20 +15,22 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
  * Support for editing tags with the text cell editor
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class TagEditingSupport extends EditingSupport {
-	
+
 	private TextCellEditor editor;
 
-	public TagEditingSupport(TableViewer viewer) {
+	public TagEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection) {
 		super(viewer);
 		this.editor = new TextCellEditor(viewer.getTable());
 	}
