@@ -24,6 +24,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -44,6 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -51,6 +54,7 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
+import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsSection;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
@@ -58,6 +62,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * A section that contains a table viewer widget displaying Boot Dash Elements from a model.
@@ -106,7 +111,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
 			if (columnType.getEditingSupportClass() != null) {
 				try {
-					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class).newInstance(tv));
+					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class)
+							.newInstance(tv, getSelection().toSingleSelection()));
 				} catch (Throwable t) {
 					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnType.getLabel(), t));
 				}
@@ -152,8 +158,20 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		if (selection!=null) {
 			addTableSelectionListener();
 		}
+		tv.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				if (selection!=null) {
+					BootDashElement selected = selection.getSingle();
+					if (selected!=null) {
+						String url = BootDashElementUtil.getUrl(selected, selected.getDefaultRequestMappingPath());
+						if (url!=null) {
+							UiUtil.openUrl(url);
+						}
+					}
+				}
+			}
+		});
 	}
-
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");

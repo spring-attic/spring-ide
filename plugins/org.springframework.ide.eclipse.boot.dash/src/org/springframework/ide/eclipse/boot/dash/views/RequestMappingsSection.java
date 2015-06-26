@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import static org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil.getUrl;
+import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
+
 import java.util.List;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -38,8 +40,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
-
-import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 
 /**
  * @author Kris De Volder
@@ -119,21 +119,6 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 				}
 			}
 		});
-	}
-
-	private static String getUrl(BootDashElement el, RequestMapping rm) {
-		String host = el.getLiveHost();
-		if (host!=null) {
-			int port = el.getLivePort();
-			if (port>0) {
-				String path = rm.getPath();
-				if (!path.startsWith("/")) {
-					path = "/" +path;
-				}
-				return "http://"+host+":"+port+path;
-			}
-		}
-		return null;
 	}
 
 	public class ContentProvider implements IStructuredContentProvider {

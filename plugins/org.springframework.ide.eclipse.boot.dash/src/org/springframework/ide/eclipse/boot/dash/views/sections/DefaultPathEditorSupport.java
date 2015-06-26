@@ -10,30 +10,36 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class DefaultPathEditorSupport extends EditingSupport {
 
 	private CellEditor editor;
-	private int col;
 
-	public DefaultPathEditorSupport(TableViewer tableViewer) {
+	public static final char[] AUTO_ACTIVATION_CHARS = "/.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
+	private static final KeyStroke CTRL_SPACE = KeyStroke.getInstance(SWT.CTRL, SWT.SPACE);
+
+	public DefaultPathEditorSupport(TableViewer tableViewer, LiveExpression<BootDashElement> input) {
 		super(tableViewer);
-//		if (col==PROPERTY_NAME_COLUMN) {
-//			IContentProposalProvider proposalProvider =
-//				//	new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
-//				 new PropertyNameContentProposalProvider(project);
-//			this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(),
-//					proposalProvider, CTRL_SPACE,
-//					SpringPropertiesProposalProcessor.AUTO_ACTIVATION_CHARS
-//			).setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
-//		} else {
-			this.editor = new TextCellEditor(tableViewer.getTable());
-//		}
+			IContentProposalProvider proposalProvider =
+				//	new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
+				 new RequestMappingContentProposalProvider(input);
+			this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(),
+					proposalProvider, CTRL_SPACE, AUTO_ACTIVATION_CHARS
+			).setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+
+
+//			this.editor = new TextCellEditor(tableViewer.getTable());
 	}
 
 	@Override
