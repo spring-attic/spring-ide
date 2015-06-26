@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.IContentProposal;
@@ -37,13 +38,19 @@ public class RequestMappingContentProposalProvider implements IContentProposalPr
 		if (bde!=null) {
 			List<RequestMapping> rms = bde.getLiveRequestMappings();
 			if (rms!=null && !rms.isEmpty()) {
-				ArrayList<IContentProposal> proposals = new ArrayList<IContentProposal>(rms.size());
+				LinkedHashSet<String> matches = new LinkedHashSet<String>(rms.size());
 				for (RequestMapping rm : rms) {
 					String path = rm.getPath();
 					if (FuzzyMatcher.matchScore(contents, path)!=0) {
-						proposals.add(simpleProposal(path));
+						matches.add(path);
 					}
 				}
+				IContentProposal[] proposals = new IContentProposal[matches.size()];
+				int i = 0;
+				for (String m : matches) {
+					proposals[i++] = simpleProposal(m);
+				}
+				return proposals;
 			}
 		}
 		return NO_PROPOSALS;
@@ -59,7 +66,7 @@ public class RequestMappingContentProposalProvider implements IContentProposalPr
 
 			@Override
 			public String getDescription() {
-				return path;
+				return null;
 			}
 
 			@Override
