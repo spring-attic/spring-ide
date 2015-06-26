@@ -52,6 +52,7 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 	private TableViewer tv;
 	private BootDashModel model;
 	private ElementStateListener modelListener;
+	private RequestMappingLabelProvider labelProvider;
 
 	public RequestMappingsSection(IPageWithSections owner, BootDashModel model, LiveExpression<BootDashElement> selection) {
 		super(owner);
@@ -70,7 +71,7 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 		this.tv = new TableViewer(page, SWT.BORDER|SWT.FULL_SELECTION|SWT.NO_SCROLL);
 		tv.setContentProvider(new ContentProvider());
 		tv.setSorter(new NameSorter());
-		tv.setLabelProvider(new RequestMappingLabelProvider());
+		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
 		tv.setInput(BootDashActivator.getDefault().getModel());
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getTable());
 		this.input.addListener(new UIValueListener<BootDashElement>() {
@@ -181,6 +182,11 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 	public void dispose() {
 		if (modelListener!=null) {
 			model.removeElementStateListener(modelListener);
+			modelListener = null;
+		}
+		if (labelProvider!=null) {
+			labelProvider.dispose();
+			labelProvider = null;
 		}
 	}
 

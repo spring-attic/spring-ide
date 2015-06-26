@@ -68,6 +68,10 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			int port = e.getLivePort();
 			cell.setText(port>=0?""+port:"?");
 			break;
+		case DEFAULT_PATH:
+			String path = e.getDefaultRequestMappingPath();
+			cell.setText(path==null?"":path);
+			break;
 		default:
 			cell.setText("???");
 		}
