@@ -43,7 +43,7 @@ public class BootDashModel {
 	private BootDashElementFactory elementFactory;
 	private ProjectRunStateTracker runStateTracker;
 	private LiveSet<BootDashElement> elements; //lazy created
-	
+
 	private BootDashModelStateSaver modelState;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
@@ -61,7 +61,7 @@ public class BootDashModel {
 
 	public BootDashModel(BootDashModelContext context) {
 		this.workspace = context.getWorkspace();
-		this.elementFactory = new BootDashElementFactory(this);
+		this.elementFactory = new BootDashElementFactory(this, context.getProjectProperties());
 		try {
 			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, elementFactory));
 			modelState.restore(lastState);

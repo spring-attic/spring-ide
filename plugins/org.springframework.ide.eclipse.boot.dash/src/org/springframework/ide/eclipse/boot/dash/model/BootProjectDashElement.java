@@ -36,10 +36,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
-import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
 import org.springframework.ide.eclipse.boot.dash.util.SpringApplicationLifeCycleClientManager;
@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.util.SpringApplicationLifecycle
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
@@ -57,11 +58,22 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static final String DEFAULT_URL_PATH_PROP = "default.request-mapping.path";
+	
+	/**
+	 * Preference key for tags string
+	 */
+	private static final String TAGS_PROPERTY_KEY = "tags";
+
 	private BootDashModel context;
 
-	public BootProjectDashElement(IProject project, BootDashModel context) {
+	private IPropertyStore<IProject> projectProperties;
+
+	public BootProjectDashElement(IProject project, BootDashModel context, IPropertyStore<IProject> projectProperties) {
 		super(project);
 		this.context = context;
+		this.projectProperties = projectProperties;
 	}
 
 	public IProject getProject() {
@@ -373,7 +385,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return null;
 	}
 
-	public void setTags(final String[] tagsArray) {
+	public void setTags(final String[] tagsArray) {		
 		Job job = new Job("Saving Tags for project " + delegate.getName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -384,12 +396,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 							newTagsList.add(tag);
 						}
 					}
-					LocalProjectTagUtils.saveTags(delegate, newTagsList.toArray(new String[newTagsList.size()]));
+					projectProperties.put(delegate, TAGS_PROPERTY_KEY, newTagsList.size() == 0 ? null : ArrayEncoder.encode(newTagsList.toArray(new String[newTagsList.size()])));
 					return Status.OK_STATUS;
-				} catch (CoreException e) {
-					return e.getStatus();
+				} catch (Exception e) {
+					return new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to persist tags", e);
 				} finally {
-					context.notifyElementChanged(BootProjectDashElement.this);					
+					context.notifyElementChanged(BootProjectDashElement.this);
 				}
 			}
 		};
@@ -399,13 +411,33 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public String[] getTags() {
-		List<String> sanitizedTags = new ArrayList<String>();
-		for (String tag : LocalProjectTagUtils.loadTags(delegate)) {
-			if (!sanitizedTags.contains(tag)) {
-				sanitizedTags.add(tag);
+		String str = projectProperties.get(delegate, TAGS_PROPERTY_KEY);
+		if (str == null || str.isEmpty()) {
+			return new String[0];
+		} else {
+			List<String> sanitizedTags = new ArrayList<String>();
+			for (String tag : ArrayEncoder.decode(str)) {
+				if (!sanitizedTags.contains(tag)) {
+					sanitizedTags.add(tag);
+				}
 			}
+			return sanitizedTags.toArray(new String[sanitizedTags.size()]);
 		}
-		return sanitizedTags.toArray(new String[sanitizedTags.size()]);
+	}
+
+	@Override
+	public String getDefaultRequestMappingPath() {
+		return projectProperties.get(delegate, DEFAULT_URL_PATH_PROP);
+	}
+
+	@Override
+	public void setDefaultRequestMapingPath(String defaultPath) {
+		try {
+			projectProperties.put(delegate, DEFAULT_URL_PATH_PROP, defaultPath);
+			context.notifyElementChanged(this);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 
 }

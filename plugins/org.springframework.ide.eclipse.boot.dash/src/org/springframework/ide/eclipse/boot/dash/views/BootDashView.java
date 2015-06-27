@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
@@ -37,7 +38,6 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
@@ -108,7 +108,7 @@ public class BootDashView extends ViewPartWithSections {
 	protected void createControls(Composite page) {
 		tagsSearchBox = new Text(page, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 		tagsSearchBox.setMessage("Type tags to match");
-		tagsSearchBox.setText(StringUtils.join(searchTags, LocalProjectTagUtils.SEPARATOR));
+		tagsSearchBox.setText(StringUtils.join(searchTags, BootDashLabelProvider.TAGS_SEPARATOR));
 		tagsSearchBox.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		tagsSearchBox.addModifyListener(new ModifyListener() {
 			@Override
@@ -126,7 +126,7 @@ public class BootDashView extends ViewPartWithSections {
 	public void setSearchTags(String[] s) {
 		internalSetSearchTags(s);
 		if (tagsSearchBox != null && !tagsSearchBox.isDisposed()) {
-			tagsSearchBox.setText(StringUtils.join(searchTags, LocalProjectTagUtils.SEPARATOR));			
+			tagsSearchBox.setText(StringUtils.join(searchTags, BootDashLabelProvider.TAGS_SEPARATOR));			
 		}
 	}
 	
@@ -193,6 +193,7 @@ public class BootDashView extends ViewPartWithSections {
 		for (RunStateAction a : actions.getRunStateActions()) {
 			manager.add(a);
 		}
+		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 //		manager.add(refreshAction);
@@ -237,7 +238,7 @@ public class BootDashView extends ViewPartWithSections {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
 		localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
-		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, TAGS);
+		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
 		localApsTable.setFilterTags(searchTags);
 		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
 

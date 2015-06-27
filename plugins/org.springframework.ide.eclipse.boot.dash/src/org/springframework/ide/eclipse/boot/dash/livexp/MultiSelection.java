@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.livexp;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -25,6 +26,16 @@ public final class MultiSelection<T> {
 	public static <T> MultiSelection<T> empty(Class<T> type) {
 		return new MultiSelection<T>(type, LiveSets.emptySet(type));
 	}
+
+	/**
+	 * Converts a 'single' selection to a multi selection.
+	 */
+	public static <T> MultiSelection<T> singletonOrEmpty(Class<T> type,
+			LiveExpression<T> singleSelection) {
+		return new MultiSelection<T>(type, LiveSets.singletonOrEmpty(singleSelection));
+	}
+
+
 
 	public static <T> MultiSelection<T> union(MultiSelection<T> a, MultiSelection<T> b) {
 		Assert.isLegal(a.getElementType().equals(b.getElementType()));

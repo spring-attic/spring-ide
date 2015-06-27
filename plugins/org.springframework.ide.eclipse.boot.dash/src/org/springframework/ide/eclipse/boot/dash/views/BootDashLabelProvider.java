@@ -19,11 +19,15 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
-import org.springframework.ide.eclipse.boot.dash.util.LocalProjectTagUtils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends CellLabelProvider {
+	
+	/**
+	 * String separator between tags string representation
+	 */
+	public static String TAGS_SEPARATOR = " ";
 
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	private BootDashColumn forColum;
@@ -59,7 +63,7 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			break;
 		case TAGS:
 			if (e instanceof Taggable) {
-				cell.setText(StringUtils.join(((Taggable)e).getTags(), LocalProjectTagUtils.SEPARATOR));
+				cell.setText(StringUtils.join(((Taggable)e).getTags(), TAGS_SEPARATOR));
 			} else {
 				cell.setText("");
 			}
@@ -67,6 +71,10 @@ public class BootDashLabelProvider extends CellLabelProvider {
 		case LIVE_PORT:
 			int port = e.getLivePort();
 			cell.setText(port>=0?""+port:"?");
+			break;
+		case DEFAULT_PATH:
+			String path = e.getDefaultRequestMappingPath();
+			cell.setText(path==null?"":path);
 			break;
 		default:
 			cell.setText("???");

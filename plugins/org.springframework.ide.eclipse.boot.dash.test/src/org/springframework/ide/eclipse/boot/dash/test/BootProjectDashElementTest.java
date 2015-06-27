@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -57,8 +58,8 @@ public class BootProjectDashElementTest extends Mocks {
 
 	public static class TestElement extends BootProjectDashElement {
 
-		public TestElement(IProject project, BootDashModel context) {
-			super(project, context);
+		public TestElement(IProject project, BootDashModel context, IPropertyStore<IProject> projectProperties) {
+			super(project, context, projectProperties);
 		}
 
 		@Override
@@ -73,9 +74,9 @@ public class BootProjectDashElementTest extends Mocks {
 
 	private static final IType[] NO_TYPES = {};
 
-	public static TestElement createElement(BootDashModel model, IJavaProject javaProject, RunTarget runTarget) {
+	public static TestElement createElement(BootDashModel model, IJavaProject javaProject, RunTarget runTarget, IPropertyStore<IProject> projectProperties) {
 		IProject project = javaProject.getProject();
-		TestElement element = spy(new TestElement(project, model));
+		TestElement element = spy(new TestElement(project, model, projectProperties));
 		when(element.getTarget()).thenReturn(runTarget);
 		doReturn(javaProject).when(element).getJavaProject();
 		return element;
@@ -92,11 +93,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test(expected=IllegalArgumentException.class)
 	public void restartWithBadArgument() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 
 		element.restart(RunState.INACTIVE, ui);
@@ -113,11 +115,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartNoMainTypes() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 
 		when(element.guessMainTypes()).thenReturn(NO_TYPES);
@@ -135,11 +138,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartOneMainType() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 		IType type = mockType(javaProject, "demo", "FooApplication");
@@ -157,11 +161,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartTwoMainTypes() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 		IType fooType = mockType(javaProject, "demo", "FooApplication");
@@ -189,11 +194,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithNoExistingConfs() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 
@@ -209,11 +215,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithOneExistingConfs() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 
@@ -230,11 +237,12 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithTwoExistingConfs() throws Exception {
 		String projectName = "fooProject";
+		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		BootDashModel model = mock(BootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget);
+		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf1 = mock(ILaunchConfiguration.class);
 		ILaunchConfiguration conf2 = mock(ILaunchConfiguration.class);

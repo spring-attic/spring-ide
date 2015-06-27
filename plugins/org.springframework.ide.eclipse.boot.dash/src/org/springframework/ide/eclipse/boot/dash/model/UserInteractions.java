@@ -27,4 +27,5 @@ public interface UserInteractions {
 	IType chooseMainType(IType[] mainTypes, String dialogTitle, String message);
 	void errorPopup(String title, String message);
 	void openLaunchConfigurationDialogOnGroup(ILaunchConfiguration selection, String launchGroup);
+	void openUrl(String url);
 }

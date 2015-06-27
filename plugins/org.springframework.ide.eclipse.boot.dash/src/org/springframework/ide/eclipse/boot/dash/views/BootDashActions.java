@@ -37,6 +37,7 @@ public class BootDashActions {
 	private RunStateAction[] runStateActions;
 	private AbstractBootDashAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
+	private OpenInBrowserAction openBrowserAction;
 
 	public BootDashActions(BootDashModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -112,6 +113,7 @@ public class BootDashActions {
 
 		openConfigAction = new OpenLaunchConfigAction(selection, ui);
 		openConsoleAction = new OpenConsoleAction(selection, ui);
+		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
 	}
 
 	static class RunOrDebugStateAction extends RunStateAction {
@@ -159,6 +161,10 @@ public class BootDashActions {
 		return runStateActions;
 	}
 
+	public AbstractBootDashAction getOpenBrowserAction() {
+		return openBrowserAction;
+	}
+
 	public AbstractBootDashAction getOpenConsoleAction() {
 		return openConsoleAction;
 	}
@@ -179,6 +185,9 @@ public class BootDashActions {
 		}
 		if (openConfigAction!=null) {
 			openConfigAction.dispose();
+		}
+		if (openBrowserAction!=null) {
+			openBrowserAction.dispose();
 		}
 	}
 

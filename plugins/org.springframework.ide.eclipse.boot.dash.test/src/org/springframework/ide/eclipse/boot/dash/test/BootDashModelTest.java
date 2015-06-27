@@ -17,7 +17,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.supportsLifeCycleManagement;
@@ -56,9 +55,9 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
@@ -381,7 +380,63 @@ public class BootDashModelTest {
 		}
 	}
 
+	@Test public void testDefaultRequestMapping() throws Exception {
+		String projectName = "sdfsd-project";
+		createBootProject(projectName);
+		BootDashElement element = getElement(projectName);
+
+		assertNull(element.getDefaultRequestMappingPath());
+		element.setDefaultRequestMapingPath("something");
+		assertProjectProperty(element.getProject(), "default.request-mapping.path", "something");
+
+		assertEquals("something", element.getDefaultRequestMappingPath());
+
+	}
+
+
+	private void testSettingTags(String[] tagsToSet, String[] expectedTags) throws Exception {
+		String projectName = "alex-project";
+		createBootProject(projectName);
+		BootDashElement element = getElement(projectName);
+		IProject project = element.getProject();
+
+		assertArrayEquals(new String[]{}, element.getTags());
+
+		element.setTags(tagsToSet);
+		waitForJobsToComplete();
+		assertArrayEquals(expectedTags, element.getTags());
+
+		//TODO: instead of the stuffs below, use IPropertyStore<IProject> and then
+		// the test here can check if the expected stuffs have been set into the
+		// store.
+
+		// Reopen the project to load tags from the resource
+		project.close(null);
+		project.open(null);
+		element = getElement(projectName);
+		assertArrayEquals(expectedTags, element.getTags());
+	}
+
+	@Test
+	public void setUniqueTagsForProject() throws Exception {
+		testSettingTags(new String[] {"xd", "spring"}, new String[] {"xd", "spring"});
+	}
+
+	@Test
+	public void setDuplicateTagsForProject() throws Exception {
+		testSettingTags(new String[] {"xd", "spring", "xd", "spring", "spring"}, new String[] {"xd", "spring"});
+	}
+
+	@Test
+	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
+		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"});
+	}
+
 	///////////////// harness code ////////////////////////
+
+	private void assertProjectProperty(IProject project, String prop, String value) {
+		assertEquals(value, context.getProjectProperties().get(project, prop));
+	}
 
 	private void assertRequestMappingWithPath(List<RequestMapping> mappings, String string) {
 		StringBuilder builder = new StringBuilder();
@@ -406,10 +461,10 @@ public class BootDashModelTest {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
-		this.context = spy(new TestBootDashModelContext(
+		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
-				));
+		);
 		this.model = new BootDashModel(context);
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);
@@ -545,7 +600,7 @@ public class BootDashModelTest {
 		}
 		assertElements(names, expectedProjectNames);
 	}
-	
+
 	private void waitForJobsToComplete() throws Exception {
 		new ACondition("Wait for Jobs") {
 			@Override
@@ -556,36 +611,4 @@ public class BootDashModelTest {
 		}.waitFor(3 * 60 * 1000);
 	}
 
-	private void testSettingTags(String[] tagsToSet, String[] expectedTags) throws Exception {		
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject("fooProject");
-		project.create(null);
-		project.open(null);
-		
-		BootProjectDashElement element = new BootProjectDashElement(project, model);
-		element.setTags(tagsToSet);
-		waitForJobsToComplete();
-		assertArrayEquals(expectedTags, element.getTags());
-		
-		// Reopne the project to load tags from the resource
-		project.close(null);
-		project.open(null);
-		element = new BootProjectDashElement(project, model);
-		assertArrayEquals(expectedTags, element.getTags());
-	}
-
-	@Test
-	public void setUniqueTagsForProject() throws Exception {
-		testSettingTags(new String[] {"xd", "spring"}, new String[] {"xd", "spring"});
-	}
-	
-	@Test
-	public void setDuplicateTagsForProject() throws Exception {
-		testSettingTags(new String[] {"xd", "spring", "xd", "spring", "spring"}, new String[] {"xd", "spring"});		
-	}
-
-	@Test
-	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
-		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "spring", "xd", "ko", "spring!!-@", "@@@", "-"});		
-	}
 }
