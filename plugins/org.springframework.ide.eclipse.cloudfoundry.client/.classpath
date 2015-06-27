@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/cloudfoundry-client-lib-1.1.2.jar" sourcepath="/cloudfoundry-client-lib"/>
+	<classpathentry exported="false" kind="lib" path="lib/aopalliance-1.0.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/commons-codec-1.6.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/commons-logging-1.1.3.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/commons-io-2.1.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/httpclient-4.3.6.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/httpcore-4.3.3.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/jackson-core-asl-1.9.13.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/jackson-mapper-asl-1.9.13.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/jackson-annotations-2.3.0.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/jackson-core-2.3.3.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/jackson-databind-2.3.3.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/protobuf-java-2.6.1.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/snakeyaml-1.13.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-aop-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-beans-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-context-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-core-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-expression-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-security-config-3.2.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-security-core-3.2.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-security-oauth2-2.0.4.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-security-web-3.2.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-web-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/spring-webmvc-4.0.5.RELEASE.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/tomcat-embed-core-8.0.15.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/tomcat-embed-websocket-8.0.15.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/tomcat-juli-8.0.15.jar"/>
+	<classpathentry exported="false" kind="lib" path="lib/yamlbeans-1.06.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
