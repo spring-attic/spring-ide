@@ -30,6 +30,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
@@ -46,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
@@ -72,6 +75,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private MultiSelection<BootDashElement> selection;
 	private BootDashActions actions;
 	private UserInteractions ui;
+	private TagsTableSectionFilter tagsFilter = new TagsTableSectionFilter();
 
 	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
 		super(owner);
@@ -85,7 +89,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	public void setColumns(BootDashColumn... columns) {
 		this.enabledColumns = columns;
 	}
-
+	
+	public void setFilterTags(String[] searchTags) {
+		tagsFilter.setSearchTerms(searchTags);
+	}
+	
 	@Override
 	public void createContents(final Composite page) {
 		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
@@ -98,7 +106,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		//tv.getTable().setLinesVisible(true);
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
-
+		
 		for (BootDashColumn columnType : enabledColumns ) {
 			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
 			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
@@ -111,7 +119,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnType.getLabel(), t));
 				}
 			}
+			if (columnType == BootDashColumn.TAGS) {
+				tv.addFilter(tagsFilter);
+			}
 		}
+		
 		new TableResizeHelper(tv).enableResizing();
 
 		model.getElements().addListener(new UIValueListener<Set<BootDashElement>>() {
@@ -262,4 +274,35 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			actions = null;
 		}
 	}
+	
+	private class TagsTableSectionFilter extends ViewerFilter {
+		
+		private String[] terms = new String[0];
+		
+		void setSearchTerms(String[] tags) {
+			terms = tags;
+			if (tv != null) {
+				tv.refresh();
+			}
+		}
+
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (terms.length == 0) {
+				return true;
+			}
+			if (element instanceof Taggable) {
+				for (String elementTag : ((Taggable)element).getTags()) {
+					for (String term : terms) {
+						if (elementTag.startsWith(term)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+	}
+
 }
