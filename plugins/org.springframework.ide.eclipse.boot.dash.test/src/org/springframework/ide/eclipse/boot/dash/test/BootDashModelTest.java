@@ -27,11 +27,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,7 +54,6 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -400,11 +399,11 @@ public class BootDashModelTest {
 		BootDashElement element = getElement(projectName);
 		IProject project = element.getProject();
 
-		assertArrayEquals(new String[]{}, element.getTags());
+		assertArrayEquals(new String[]{}, element.getTags().toArray(new String[0]));
 
-		element.setTags(tagsToSet);
+		element.setTags(new LinkedHashSet<String>(Arrays.asList(tagsToSet)));
 		waitForJobsToComplete();
-		assertArrayEquals(expectedTags, element.getTags());
+		assertArrayEquals(expectedTags, element.getTags().toArray(new String[0]));
 
 		//TODO: instead of the stuffs below, use IPropertyStore<IProject> and then
 		// the test here can check if the expected stuffs have been set into the
@@ -414,7 +413,7 @@ public class BootDashModelTest {
 		project.close(null);
 		project.open(null);
 		element = getElement(projectName);
-		assertArrayEquals(expectedTags, element.getTags());
+		assertArrayEquals(expectedTags, element.getTags().toArray(new String[0]));
 	}
 
 	@Test

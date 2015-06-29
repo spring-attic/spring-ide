@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -60,9 +63,9 @@ public class TagEditingSupport extends EditingSupport {
 			String str = (String) value;
 			Taggable taggable = (Taggable) element;
 			if (str.isEmpty()) {
-				taggable.setTags(new String[0]);
+				taggable.setTags(null);
 			} else {
-				taggable.setTags(str.split("\\s+"));
+				taggable.setTags(new LinkedHashSet<String>(Arrays.asList(str.split("\\s+"))));
 			}
 		}
 	}

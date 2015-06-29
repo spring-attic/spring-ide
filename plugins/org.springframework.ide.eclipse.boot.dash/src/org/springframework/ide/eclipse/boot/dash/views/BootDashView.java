@@ -17,8 +17,10 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -76,6 +78,8 @@ public class BootDashView extends ViewPartWithSections {
 	
 	private String[] searchTags = new String[0];
 	
+	private String tagSearchTerm = "";
+	
 	private BootDashElementsTableSection localApsTable;
 	
 	/*
@@ -113,25 +117,30 @@ public class BootDashView extends ViewPartWithSections {
 		tagsSearchBox.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				internalSetSearchTags(tagsSearchBox.getText().split("\\s+"));
+				internalSetSearchTags(tagsSearchBox.getText());
 			}
 		});
 	}
 	
-	private void internalSetSearchTags(String[] s) {
-		searchTags = s;
+	private void internalSetSearchTags(String s) {
+		if (s.isEmpty()) {
+			searchTags = new String[0];
+			tagSearchTerm = "";
+		} else {
+			String[] splitSearchStr = s.split("\\s+");
+			if (Pattern.matches("(.+)\\s+", s)) {
+				searchTags = splitSearchStr;
+				tagSearchTerm = "";
+			} else {
+				searchTags = Arrays.copyOfRange(splitSearchStr, 0, splitSearchStr.length - 1);
+				tagSearchTerm = splitSearchStr[splitSearchStr.length - 1];
+			}
+		}
 		notifySearchTagsChanged();
 	}
 	
-	public void setSearchTags(String[] s) {
-		internalSetSearchTags(s);
-		if (tagsSearchBox != null && !tagsSearchBox.isDisposed()) {
-			tagsSearchBox.setText(StringUtils.join(searchTags, BootDashLabelProvider.TAGS_SEPARATOR));			
-		}
-	}
-	
 	private void notifySearchTagsChanged() {
-		localApsTable.setFilterTags(searchTags);
+		localApsTable.setFilterTags(searchTags, tagSearchTerm);
 	}	
 
 	/**
@@ -239,7 +248,7 @@ public class BootDashView extends ViewPartWithSections {
 
 		localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
 		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
-		localApsTable.setFilterTags(searchTags);
+		localApsTable.setFilterTags(searchTags, tagSearchTerm);
 		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
 
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,

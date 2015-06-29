@@ -12,7 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -385,18 +386,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return null;
 	}
 
-	public void setTags(final String[] tagsArray) {		
+	public void setTags(final LinkedHashSet<String> tags) {		
 		Job job = new Job("Saving Tags for project " + delegate.getName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					List<String> newTagsList = new ArrayList<String>();
-					for (String tag : tagsArray) {
-						if (!newTagsList.contains(tag)) {
-							newTagsList.add(tag);
-						}
-					}
-					projectProperties.put(delegate, TAGS_PROPERTY_KEY, newTagsList.size() == 0 ? null : ArrayEncoder.encode(newTagsList.toArray(new String[newTagsList.size()])));
+					projectProperties.put(delegate, TAGS_PROPERTY_KEY, tags == null || tags.size() == 0 ? null : ArrayEncoder.encode(tags.toArray(new String[tags.size()])));
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					return new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to persist tags", e);
@@ -410,18 +405,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public String[] getTags() {
+	public LinkedHashSet<String> getTags() {
 		String str = projectProperties.get(delegate, TAGS_PROPERTY_KEY);
 		if (str == null || str.isEmpty()) {
-			return new String[0];
+			return new LinkedHashSet<String>();
 		} else {
-			List<String> sanitizedTags = new ArrayList<String>();
-			for (String tag : ArrayEncoder.decode(str)) {
-				if (!sanitizedTags.contains(tag)) {
-					sanitizedTags.add(tag);
-				}
-			}
-			return sanitizedTags.toArray(new String[sanitizedTags.size()]);
+			return new LinkedHashSet<String>(Arrays.asList(ArrayEncoder.decode(str)));
 		}
 	}
 

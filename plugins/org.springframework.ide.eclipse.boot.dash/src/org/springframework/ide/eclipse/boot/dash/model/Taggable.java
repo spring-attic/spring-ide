@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.LinkedHashSet;
+
 /**
  * Interface for taggable items
  * 
@@ -19,16 +21,16 @@ package org.springframework.ide.eclipse.boot.dash.model;
 public interface Taggable {
 	
 	/**
-	 * Returns array of string tags
+	 * Returns an ordered set of string tags
 	 * @return array of tags
 	 */
-	String[] getTags();
+	LinkedHashSet<String> getTags();
 	
 	
 	/**
-	 * Sets the new tags
+	 * Sets an ordered set of new tags
 	 * @param newTags new tags
 	 */
-	void setTags(String[] newTags);
+	void setTags(LinkedHashSet<String> newTags);
 	
 }

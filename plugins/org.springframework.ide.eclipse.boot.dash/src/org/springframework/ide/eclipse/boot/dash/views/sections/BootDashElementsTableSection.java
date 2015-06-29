@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,8 +35,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
@@ -106,8 +108,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		this.enabledColumns = columns;
 	}
 	
-	public void setFilterTags(String[] searchTags) {
-		tagsFilter.setSearchTerms(searchTags);
+	public void setFilterTags(String[] tags, String term) {
+		tagsFilter.setSearchTerms(tags, term);
 	}
 	
 	@Override
@@ -400,10 +402,12 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	
 	private class TagsTableSectionFilter extends ViewerFilter {
 		
-		private String[] terms = new String[0];
+		private String[] tags = new String[0];
+		private String term = null;
 		
-		void setSearchTerms(String[] tags) {
-			terms = tags;
+		void setSearchTerms(String[] tags, String term) {
+			this.tags = tags;
+			this.term = term;
 			if (tv != null) {
 				tv.refresh();
 			}
@@ -411,14 +415,22 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			if (terms.length == 0) {
+			if (tags.length == 0 && term == null) {
 				return true;
 			}
 			if (element instanceof Taggable) {
-				for (String elementTag : ((Taggable)element).getTags()) {
-					for (String term : terms) {
-						if (elementTag.startsWith(term)) {
-							return true;
+				LinkedHashSet<String> elementTags = ((Taggable)element).getTags();
+				int initSize = elementTags.size();
+				elementTags.removeAll(Arrays.asList(tags));
+				// Check if all search tags are present in the element tags set
+				if (elementTags.size() == initSize - tags.length) {
+					if (term == null || term.isEmpty()) {
+						return true;
+					} else {
+						for (String elementTag : elementTags) {
+							if (elementTag.startsWith(term)) {
+								return true;
+							}
 						}
 					}
 				}
