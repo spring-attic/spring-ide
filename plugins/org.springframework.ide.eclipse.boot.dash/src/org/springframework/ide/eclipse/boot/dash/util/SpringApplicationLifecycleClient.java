@@ -23,8 +23,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-
 /**
  * A JMX client for the {@code SpringApplicationLifecycle} mbean. Permits to obtain
  * information about the lifecycle of a given Spring application.
