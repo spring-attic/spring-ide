@@ -52,17 +52,11 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 		}
 		page.setLayout(new GridLayout());
 		
-		createControls(page);
-		
 		for (IPageSection s : getSections()) {
 			s.createContents(page);
 		}
 	}
 	
-	protected void createControls(Composite page) {
-		
-	}
-
 	@Override
 	public void setFocus() {
 		page.setFocus();

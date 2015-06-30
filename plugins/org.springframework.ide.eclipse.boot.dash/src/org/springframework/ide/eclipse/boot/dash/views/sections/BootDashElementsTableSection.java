@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
+import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection.TagSearchListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
@@ -83,7 +84,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  *
  * @author Kris De Volder
  */
-public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
+public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable, TagSearchListener {
 
 	private TableViewer tv;
 	private BootDashModel model;
@@ -106,10 +107,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	public void setColumns(BootDashColumn... columns) {
 		this.enabledColumns = columns;
-	}
-	
-	public void setFilterTags(String[] tags, String term) {
-		tagsFilter.setSearchTerms(tags, term);
 	}
 	
 	@Override
@@ -400,6 +397,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 	}
 	
+	@Override
+	public void searchTermsChanged(String[] tags, String term) {
+		tagsFilter.setSearchTerms(tags, term);
+	}
+
 	private class TagsTableSectionFilter extends ViewerFilter {
 		
 		private String[] tags = new String[0];
