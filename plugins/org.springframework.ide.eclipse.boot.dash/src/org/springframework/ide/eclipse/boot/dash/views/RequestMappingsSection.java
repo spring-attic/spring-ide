@@ -68,12 +68,12 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 	@Override
 	public void createContents(final Composite page) {
 		this.page = page;
-		this.tv = new TableViewer(page, SWT.BORDER|SWT.FULL_SELECTION|SWT.NO_SCROLL);
+		this.tv = new TableViewer(page, SWT.BORDER|SWT.FULL_SELECTION|SWT.V_SCROLL);
 		tv.setContentProvider(new ContentProvider());
 		tv.setSorter(new NameSorter());
 		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
 		tv.setInput(BootDashActivator.getDefault().getModel());
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getTable());
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getTable());
 		this.input.addListener(new UIValueListener<BootDashElement>() {
 			public void uiGotValue(LiveExpression<BootDashElement> exp, BootDashElement value) {
 				if (!tv.getControl().isDisposed()) {

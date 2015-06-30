@@ -256,7 +256,7 @@ public class BootDashView extends ViewPartWithSections {
 
 		sections.add(new SashSection(this,
 				new ScrollerSection(this, localApsSection),
-				new ScrollerSection(this, detailsSection)));
+				detailsSection));
 		return sections;
 	}
 
