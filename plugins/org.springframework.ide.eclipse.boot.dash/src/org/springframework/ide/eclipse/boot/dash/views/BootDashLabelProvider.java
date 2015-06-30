@@ -18,17 +18,13 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.TagSearchFilter;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends CellLabelProvider {
 	
-	/**
-	 * String separator between tags string representation
-	 */
-	public static String TAGS_SEPARATOR = " ";
-
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	private BootDashColumn forColum;
 	private RunStateImages runStateImages;
@@ -63,7 +59,7 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			break;
 		case TAGS:
 			if (e instanceof Taggable) {
-				cell.setText(StringUtils.join(((Taggable)e).getTags(), TAGS_SEPARATOR));
+				cell.setText(StringUtils.join(((Taggable)e).getTags(), TagSearchFilter.TAGS_SEPARATOR));
 			} else {
 				cell.setText("");
 			}

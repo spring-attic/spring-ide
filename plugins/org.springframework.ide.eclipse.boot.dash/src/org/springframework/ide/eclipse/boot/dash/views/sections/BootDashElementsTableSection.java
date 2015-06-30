@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +58,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
@@ -68,7 +66,6 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
-import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection.TagSearchListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
@@ -84,7 +81,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  *
  * @author Kris De Volder
  */
-public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable, TagSearchListener {
+public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
 
 	private TableViewer tv;
 	private BootDashModel model;
@@ -92,16 +89,33 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private MultiSelection<BootDashElement> selection;
 	private BootDashActions actions;
 	private UserInteractions ui;
-	private TagsTableSectionFilter tagsFilter = new TagsTableSectionFilter();
 	private LiveVariable<ViewerCell> hoverCell;
 	private LiveExpression<BootDashElement> hoverElement;
+	private LiveVariable<Filter<BootDashElement>> searchFilterModel;
+	
+	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new ValueListener<Filter<BootDashElement>>() {
+		@Override
+		public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
+			if (tv != null) {
+				tv.refresh();
+			}
+		}
+	};
 
 	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
+		this(owner, model, null);
+	}
+
+	public BootDashElementsTableSection(BootDashView owner, BootDashModel model, LiveVariable<Filter<BootDashElement>> searchFilterModel) {
 		super(owner);
 		this.model = model;
 		this.ui = owner.getUserInteractions();
+		this.searchFilterModel = searchFilterModel;
+		if (searchFilterModel != null) {
+			searchFilterModel.addListener(FILTER_LISTENER);
+		}
 	}
-
+	
 	class NameSorter extends ViewerSorter {
 	}
 
@@ -136,10 +150,17 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnType.getLabel(), t));
 				}
 			}
-			if (columnType == BootDashColumn.TAGS) {
-				tv.addFilter(tagsFilter);
-			}
 		}
+		
+		tv.addFilter(new ViewerFilter() {
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (searchFilterModel.getValue() != null && element instanceof BootDashElement) {
+					return searchFilterModel.getValue().accept((BootDashElement) element);
+				}
+				return true;
+			}
+		});
 		
 		addSingleClickHandling();
 
@@ -391,55 +412,13 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	public void dispose() {
+		if (searchFilterModel != null) {
+			searchFilterModel.removeListener(FILTER_LISTENER);
+		}
 		if (actions!=null) {
 			actions.dispose();
 			actions = null;
 		}
 	}
 	
-	@Override
-	public void searchTermsChanged(String[] tags, String term) {
-		tagsFilter.setSearchTerms(tags, term);
-	}
-
-	private class TagsTableSectionFilter extends ViewerFilter {
-		
-		private String[] tags = new String[0];
-		private String term = null;
-		
-		void setSearchTerms(String[] tags, String term) {
-			this.tags = tags;
-			this.term = term;
-			if (tv != null) {
-				tv.refresh();
-			}
-		}
-
-		@Override
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			if (tags.length == 0 && term == null) {
-				return true;
-			}
-			if (element instanceof Taggable) {
-				LinkedHashSet<String> elementTags = ((Taggable)element).getTags();
-				int initSize = elementTags.size();
-				elementTags.removeAll(Arrays.asList(tags));
-				// Check if all search tags are present in the element tags set
-				if (elementTags.size() == initSize - tags.length) {
-					if (term == null || term.isEmpty()) {
-						return true;
-					} else {
-						for (String elementTag : elementTags) {
-							if (elementTag.startsWith(term)) {
-								return true;
-							}
-						}
-					}
-				}
-			}
-			return false;
-		}
-
-	}
-
 }

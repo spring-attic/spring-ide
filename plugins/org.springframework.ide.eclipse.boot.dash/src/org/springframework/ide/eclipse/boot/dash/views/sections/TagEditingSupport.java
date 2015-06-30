@@ -19,8 +19,8 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.TagSearchFilter;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -51,7 +51,7 @@ public class TagEditingSupport extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof Taggable) {
-			return StringUtils.join(((Taggable)element).getTags(), BootDashLabelProvider.TAGS_SEPARATOR);
+			return StringUtils.join(((Taggable)element).getTags(), TagSearchFilter.TAGS_SEPARATOR);
 		} else {
 			return null;
 		}
