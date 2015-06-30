@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
@@ -66,7 +67,7 @@ public class BootDashView extends ViewPartWithSections {
 	private UserInteractions ui = new DefaultUserInteractions(this);
 
 	private MultiSelection<BootDashElement> selection = null; //lazy init
-	
+
 	/*
 	 * The content provider class is responsible for
 	 * providing objects to the view. It can wrap
@@ -91,7 +92,7 @@ public class BootDashView extends ViewPartWithSections {
 			actions.dispose();
 		}
 	}
-	
+
 	/**
 	 * This is a callback that will allow us
 	 * to create the viewer and initialize it.
@@ -194,10 +195,10 @@ public class BootDashView extends ViewPartWithSections {
 	@Override
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
-		
+
 		TagSearchSection tagSearchSection = new TagSearchSection(BootDashView.this);
 		sections.add(tagSearchSection);
-		
+
 		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
 		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
 		tagSearchSection.addListener(localApsTable);
@@ -205,7 +206,7 @@ public class BootDashView extends ViewPartWithSections {
 
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,
 				localApsTable.getSelection().toSingleSelection());
-		
+
 		sections.add(new SashSection(this,
 				new ScrollerSection(this, localApsSection),
 				detailsSection));
