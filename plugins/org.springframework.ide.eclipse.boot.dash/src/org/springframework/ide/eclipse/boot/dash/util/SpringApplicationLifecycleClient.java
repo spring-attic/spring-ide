@@ -89,19 +89,14 @@ public class SpringApplicationLifecycleClient {
 		}
 	}
 
-	public int getProperty(String prop, int defaultValue) {
-		try {
-			Object o = this.connection.invoke(this.objectName,"getProperty",
-					new String[] {prop},
-					new String[] {String.class.getName()});
-			if (o instanceof Integer) {
-				return (Integer)o;
-			} else if (o instanceof String) {
-				return Integer.parseInt((String) o);
-			}
-		}
-		catch (Exception ex) {
-			BootDashActivator.log(ex);
+	public int getProperty(String prop, int defaultValue) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+		Object o = this.connection.invoke(this.objectName,"getProperty",
+				new String[] {prop},
+				new String[] {String.class.getName()});
+		if (o instanceof Integer) {
+			return (Integer)o;
+		} else if (o instanceof String) {
+			return Integer.parseInt((String) o);
 		}
 		return defaultValue;
 	}
