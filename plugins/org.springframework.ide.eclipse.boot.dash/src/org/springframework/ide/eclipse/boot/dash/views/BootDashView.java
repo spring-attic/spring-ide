@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
@@ -38,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 /**
@@ -66,6 +68,8 @@ public class BootDashView extends ViewPartWithSections {
 	private UserInteractions ui = new DefaultUserInteractions(this);
 
 	private MultiSelection<BootDashElement> selection = null; //lazy init
+	
+	private LiveVariable<Filter<BootDashElement>> searchFilterModel = new LiveVariable<Filter<BootDashElement>>(null);
 	
 	/*
 	 * The content provider class is responsible for
@@ -195,12 +199,10 @@ public class BootDashView extends ViewPartWithSections {
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 		
-		TagSearchSection tagSearchSection = new TagSearchSection(BootDashView.this);
-		sections.add(tagSearchSection);
+		sections.add(new TagSearchSection(BootDashView.this, searchFilterModel));
 		
-		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
+		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model, searchFilterModel);
 		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
-		tagSearchSection.addListener(localApsTable);
 		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
 
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,
@@ -211,7 +213,7 @@ public class BootDashView extends ViewPartWithSections {
 				detailsSection));
 		return sections;
 	}
-
+	
 //	/* Alternate 'createSections' for quick-and-dirty testing of the 'DynamicComposite'. */
 //	@Override
 //	protected List<IPageSection> createSections() throws CoreException {
