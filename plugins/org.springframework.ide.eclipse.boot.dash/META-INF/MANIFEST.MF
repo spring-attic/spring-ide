@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.web,
  org.springframework.core,
  org.json,
- org.springframework.ide.eclipse.boot.properties.editor
+ org.springframework.ide.eclipse.boot.properties.editor,
+ org.springframework.ide.eclipse.cloudfoundry.client
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash,
