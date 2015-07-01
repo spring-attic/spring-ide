@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
@@ -59,6 +60,7 @@ public class BootDashView extends ViewPartWithSections {
 	private static final boolean ENABLE_SCROLLING = false;
 
 	private BootDashModel model = BootDashActivator.getDefault().getModel();
+	private TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 
 //	private Action refreshAction;
 //	private Action doubleClickAction;
@@ -68,8 +70,6 @@ public class BootDashView extends ViewPartWithSections {
 	private UserInteractions ui = new DefaultUserInteractions(this);
 
 	private MultiSelection<BootDashElement> selection = null; //lazy init
-
-	private LiveVariable<Filter<BootDashElement>> searchFilterModel = new LiveVariable<Filter<BootDashElement>>(null);
 
 	/*
 	 * The content provider class is responsible for
@@ -199,9 +199,9 @@ public class BootDashView extends ViewPartWithSections {
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
-		sections.add(new TagSearchSection(BootDashView.this, searchFilterModel));
+		sections.add(new TagSearchSection(BootDashView.this, filterBoxModel.getText()));
 
-		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model, searchFilterModel);
+		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model, filterBoxModel.getFilter());
 		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
 		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
 

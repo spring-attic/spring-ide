@@ -91,8 +91,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private UserInteractions ui;
 	private LiveVariable<ViewerCell> hoverCell;
 	private LiveExpression<BootDashElement> hoverElement;
-	private LiveVariable<Filter<BootDashElement>> searchFilterModel;
-	
+	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
+
 	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new ValueListener<Filter<BootDashElement>>() {
 		@Override
 		public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
@@ -106,7 +106,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		this(owner, model, null);
 	}
 
-	public BootDashElementsTableSection(BootDashView owner, BootDashModel model, LiveVariable<Filter<BootDashElement>> searchFilterModel) {
+	public BootDashElementsTableSection(BootDashView owner, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
 		super(owner);
 		this.model = model;
 		this.ui = owner.getUserInteractions();
@@ -115,14 +115,14 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			searchFilterModel.addListener(FILTER_LISTENER);
 		}
 	}
-	
+
 	class NameSorter extends ViewerSorter {
 	}
 
 	public void setColumns(BootDashColumn... columns) {
 		this.enabledColumns = columns;
 	}
-	
+
 	@Override
 	public void createContents(final Composite page) {
 		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
@@ -136,7 +136,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		//tv.getTable().setLinesVisible(true);
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
-		
+
 		for (BootDashColumn columnType : enabledColumns ) {
 			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
 			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
@@ -151,7 +151,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			}
 		}
-		
+
 		tv.addFilter(new ViewerFilter() {
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -161,7 +161,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				return true;
 			}
 		});
-		
+
 		addSingleClickHandling();
 
 		new TableResizeHelper(tv).enableResizing();
@@ -420,5 +420,5 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			actions = null;
 		}
 	}
-	
+
 }

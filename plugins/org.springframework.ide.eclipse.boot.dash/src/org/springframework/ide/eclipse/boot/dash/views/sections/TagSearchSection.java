@@ -16,32 +16,30 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.Filter;
-import org.springframework.ide.eclipse.boot.dash.model.TagSearchFilter;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 
 /**
- * Tags searching section. Creates a search text box UI wise and allows to
- * register listeners to tags and search term changes.
- * 
- * @author Alex Boyko
+ * A text box with the look and feel of a search box. The contents
+ * of the searchbox text is mirrored into a LiveVariable 'model'.
  *
+ * @author Alex Boyko
+ * @author Kris De Volder
  */
 public class TagSearchSection extends PageSection implements Disposable {
-	
-	private Text tagsSearchBox;
 
-	private LiveVariable<Filter<BootDashElement>> searchFilterModel;
-	
-	public TagSearchSection(IPageWithSections owner, LiveVariable<Filter<BootDashElement>> searchFilterModel) {
+	private Text tagsSearchBox;
+	private LiveVariable<String> model;
+
+
+	public TagSearchSection(IPageWithSections owner, LiveVariable<String> model) {
 		super(owner);
-		this.searchFilterModel = searchFilterModel;
+		this.model = model;
 	}
 
 	@Override
@@ -53,17 +51,18 @@ public class TagSearchSection extends PageSection implements Disposable {
 	public void createContents(Composite page) {
 		tagsSearchBox = new Text(page, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 		tagsSearchBox.setMessage("Type tags to match");
-		if (searchFilterModel.getValue() instanceof TagSearchFilter) {
-			tagsSearchBox.setText(searchFilterModel.toString());			
-		}
 		tagsSearchBox.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		tagsSearchBox.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (tagsSearchBox.getText().isEmpty()) {
-					searchFilterModel.setValue(null);
-				} else {
-					searchFilterModel.setValue(new TagSearchFilter(tagsSearchBox.getText()));					
+				model.setValue(tagsSearchBox.getText());
+			}
+		});
+		this.model.addListener(new ValueListener<String>() {
+			public void gotValue(LiveExpression<String> exp, String newText) {
+				String oldText = tagsSearchBox.getText();
+				if (!oldText.equals(newText)) { //Avoid cursor bug on macs.
+					tagsSearchBox.setText(newText);
 				}
 			}
 		});
