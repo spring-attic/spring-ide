@@ -185,6 +185,10 @@
 		
 		<bundle id="com.google.protobuf" version="0.0.0"/>
 
+		<bundle id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
+		<bundle id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
+		<bundle id="com.fasterxml.jackson.core.jackson-databind" version="0.0.0"/>
+
 		<bundle id="org.aspectj.runtime" version="0.0.0"/>
 		<bundle id="org.aspectj.runtime.source" version="0.0.0"/>
 		<bundle id="org.aspectj.weaver" version="0.0.0"/>
@@ -228,8 +232,6 @@
 		<bundle id="org.objectweb.asm.source" version="0.0.0"/>
 
 		<bundle id="org.yaml.snakeyaml" version="0.0.0"/>
-		<!-- orbit doesn't seem to have a source bundle for snakeyaml. -->
-		<!-- <bundle id="org.yaml.snakeyaml.source" version="0.0.0"/> -->		
 		<bundle id="org.dadacoalition.yedit" version="0.0.0"/>
 
 		<bundle id="org.springframework.aop" version="0.0.0"/>
