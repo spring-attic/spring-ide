@@ -92,15 +92,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveVariable<ViewerCell> hoverCell;
 	private LiveExpression<BootDashElement> hoverElement;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
-
-	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new ValueListener<Filter<BootDashElement>>() {
-		@Override
-		public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
-			if (tv != null) {
-				tv.refresh();
-			}
-		}
-	};
+	private ValueListener<Filter<BootDashElement>> filterListener;
 
 	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
 		this(owner, model, null);
@@ -111,9 +103,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		this.model = model;
 		this.ui = owner.getUserInteractions();
 		this.searchFilterModel = searchFilterModel;
-		if (searchFilterModel != null) {
-			searchFilterModel.addListener(FILTER_LISTENER);
-		}
 	}
 
 	class NameSorter extends ViewerSorter {
@@ -151,16 +140,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			}
 		}
-
-		tv.addFilter(new ViewerFilter() {
-			@Override
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				if (searchFilterModel.getValue() != null && element instanceof BootDashElement) {
-					return searchFilterModel.getValue().accept((BootDashElement) element);
-				}
-				return true;
-			}
-		});
 
 		addSingleClickHandling();
 
@@ -217,6 +196,27 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			}
 		});
+
+		if (searchFilterModel!=null) {
+			tv.addFilter(new ViewerFilter() {
+				@Override
+				public boolean select(Viewer viewer, Object parentElement, Object element) {
+					if (searchFilterModel.getValue() != null && element instanceof BootDashElement) {
+						return searchFilterModel.getValue().accept((BootDashElement) element);
+					}
+					return true;
+				}
+			});
+			searchFilterModel.addListener(this.filterListener = new ValueListener<Filter<BootDashElement>>() {
+				public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
+					tv.refresh();
+					Table t = tv.getTable();
+					Composite parent = t.getParent();
+					parent.layout(new Control[]{t});
+				}
+			});
+		}
+
 	}
 
 	public void addSingleClickHandling() {
@@ -412,8 +412,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	public void dispose() {
-		if (searchFilterModel != null) {
-			searchFilterModel.removeListener(FILTER_LISTENER);
+		if (filterListener!= null) {
+			searchFilterModel.removeListener(filterListener);
+			filterListener = null;
 		}
 		if (actions!=null) {
 			actions.dispose();
