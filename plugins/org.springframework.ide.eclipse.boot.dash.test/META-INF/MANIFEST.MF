@@ -25,6 +25,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.hamcrest.library,
  org.springframework.ide.eclipse.boot,
  org.eclipse.core.expressions,
- org.springsource.ide.eclipse.commons.receptor.client;bundle-version="3.7.1"
+ org.springsource.ide.eclipse.commons.receptor.client
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
