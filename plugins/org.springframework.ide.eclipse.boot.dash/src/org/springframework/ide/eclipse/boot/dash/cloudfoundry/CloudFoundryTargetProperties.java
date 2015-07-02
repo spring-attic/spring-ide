@@ -156,27 +156,8 @@ public class CloudFoundryTargetProperties {
 		protected ValidationResult compute() {
 			if (getSpace() == null) {
 				return ValidationResult.info("Select a Cloud space");
-			} else {
-				RunTarget existing = getExistingRunTarget();
-				if (existing != null) {
-					return ValidationResult.error("A run target for that space already exists: '" + existing.getName()
-							+ "'. Please select another space.");
-				}
-			}
+			} 
 			return ValidationResult.OK;
-		}
-
-		protected RunTarget getExistingRunTarget() {
-			if (getSpace() != null) {
-				String targetId = CloudFoundryRunTarget.getId(getUserName(), getUrl(),
-						getSpace().getOrganization().getName(), getSpace().getName());
-				for (RunTarget target : RunTargets.getTargets().getValues()) {
-					if (targetId.equals(target.getId())) {
-						return target;
-					}
-				}
-			}
-			return null;
 		}
 	}
 }

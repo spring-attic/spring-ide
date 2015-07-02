@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 
 /**
  * Wizard page to allow users to select a target cloud space when cloning an
@@ -39,7 +41,6 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected TreeViewer orgsSpacesViewer;
-
 
 	private final CloudFoundryTargetProperties targetProperties;
 
@@ -165,7 +166,31 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 	}
 
 	protected void setSpaceInProperties(CloudSpace space) {
+		// TODO: Move this to a validator
+		setErrorMessage(null);
+		if (space != null) {
+			RunTarget existing = getExistingRunTarget(space);
+			if (existing != null) {
+				setErrorMessage("A run target for that space already exists: '" + existing.getName()
+						+ "'. Please select another space.");
+				targetProperties.setSpace(null);
+				return;
+			}
+		}
 		targetProperties.setSpace(space);
+	}
+
+	protected RunTarget getExistingRunTarget(CloudSpace space) {
+		if (space != null) {
+			String targetId = CloudFoundryRunTarget.getId(targetProperties.getUserName(), targetProperties.getUrl(),
+					space.getOrganization().getName(), space.getName());
+			for (RunTarget target : RunTargets.getTargets().getValues()) {
+				if (targetId.equals(target.getId())) {
+					return target;
+				}
+			}
+		}
+		return null;
 	}
 
 	private void refreshWizardUI() {
