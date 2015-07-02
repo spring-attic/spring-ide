@@ -13,13 +13,12 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.TagSearchFilter;
+import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -51,7 +50,7 @@ public class TagEditingSupport extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof Taggable) {
-			return StringUtils.join(((Taggable)element).getTags(), TagSearchFilter.TAGS_SEPARATOR);
+			return TagUtils.toString(((Taggable)element).getTags());
 		} else {
 			return null;
 		}
@@ -65,7 +64,7 @@ public class TagEditingSupport extends EditingSupport {
 			if (str.isEmpty()) {
 				taggable.setTags(null);
 			} else {
-				taggable.setTags(new LinkedHashSet<String>(Arrays.asList(str.split("\\s+"))));
+				taggable.setTags(new LinkedHashSet<String>(Arrays.asList(TagUtils.parseTags(str))));
 			}
 		}
 	}
