@@ -9,7 +9,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	BootDashModelStateSaverTest.class,
 	BootDashModelTest.class,
-	BootProjectDashElementTest.class
+	BootProjectDashElementTest.class,
+	BootDashElementTagsTests.class
 })
 public class AllBootDashTests {
 

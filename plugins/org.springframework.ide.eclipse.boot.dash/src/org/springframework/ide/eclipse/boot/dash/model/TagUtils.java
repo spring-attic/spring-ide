@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,9 +42,19 @@ public class TagUtils {
 	public static String[] parseTags(String text) {
 		String s = text.trim();
 		if (s.isEmpty()) {
-			return null;
+			return new String[0];
 		} else {
-			return s.split(SEPARATOR_REGEX);
+			String[] split = s.split(SEPARATOR_REGEX);
+			if (split.length > 0) {
+				ArrayList<String> sanitized = new ArrayList<String>(split.length);
+				for (String tag : split) {
+					if (!tag.isEmpty()) {
+						sanitized.add(tag);
+					}
+				}
+				split = sanitized.toArray(new String[sanitized.size()]);
+			}
+			return split;
 		}
 
 	}

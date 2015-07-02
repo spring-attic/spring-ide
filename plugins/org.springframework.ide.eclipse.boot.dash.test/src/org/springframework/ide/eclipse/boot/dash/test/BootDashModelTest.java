@@ -392,7 +392,10 @@ public class BootDashModelTest {
 		assertEquals("something", element.getDefaultRequestMappingPath());
 
 	}
-
+	
+	/**************************************************************************************
+	 * TAGS Tests START
+	 *************************************************************************************/
 
 	private void testSettingTags(String[] tagsToSet, String[] expectedTags) throws Exception {
 		String projectName = "alex-project";
@@ -405,10 +408,6 @@ public class BootDashModelTest {
 		element.setTags(new LinkedHashSet<String>(Arrays.asList(tagsToSet)));
 		waitForJobsToComplete();
 		assertArrayEquals(expectedTags, element.getTags().toArray(new String[0]));
-
-		//TODO: instead of the stuffs below, use IPropertyStore<IProject> and then
-		// the test here can check if the expected stuffs have been set into the
-		// store.
 
 		// Reopen the project to load tags from the resource
 		project.close(null);
@@ -431,6 +430,10 @@ public class BootDashModelTest {
 	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
 		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"});
 	}
+	
+	/**************************************************************************************
+	 * TAGS Tests END
+	 *************************************************************************************/
 
 	///////////////// harness code ////////////////////////
 
