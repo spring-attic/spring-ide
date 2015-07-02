@@ -63,8 +63,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		super("Add a Cloud Foundry Target");
 
 		setTitle("Add a Cloud Foundry Target");
-		setDescription(
-				"Enter credentials and a Cloud Foundry target URL.");
+		setDescription("Enter credentials and a Cloud Foundry target URL.");
 
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 
@@ -187,9 +186,27 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		});
 
+		targetProperties.addListeners(this, new EnableSpaceControlListener(), new SetSpaceValListener());
+
+		setValuesFromTargetProperties();
 		refreshWizardUI();
 
-		targetProperties.addListeners(this, new EnableSpaceControlListener(), new SetSpaceValListener());
+	}
+
+	private void setValuesFromTargetProperties() {
+
+		String userName = targetProperties.getUserName();
+		if (emailText != null && !emailText.isDisposed() && userName != null) {
+			emailText.setText(userName);
+		}
+		String password = targetProperties.getPassword();
+		if (passwordText != null && !passwordText.isDisposed() && password != null) {
+			passwordText.setText(password);
+		}
+		String url = targetProperties.getUrl();
+		if (urlText != null && !urlText.isDisposed() && url != null) {
+			urlText.setText(url);
+		}
 
 	}
 
