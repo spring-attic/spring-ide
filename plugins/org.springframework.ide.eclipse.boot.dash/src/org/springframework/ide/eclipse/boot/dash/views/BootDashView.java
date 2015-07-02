@@ -203,7 +203,7 @@ public class BootDashView extends ViewPartWithSections {
 		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH, TAGS);
 
 		IPageSection dynamicSection = new DynamicRunTargetSection(this,
-				BootDashActivator.getDefault().getRunTargetModel().getModels(), new RunTargetSectionFactory(this) {
+				BootDashActivator.getDefault().getRunTargetModel().getModels(), new RunTargetSectionFactory(this, filterBoxModel.getFilter()) {
 
 					@Override
 					public IPageSection create(BootDashModel model) {
