@@ -210,7 +210,10 @@ public class BootDashView extends ViewPartWithSections {
 				this, model, runTargetSections.getSelection().cast(BootDashElement.class).toSingleSelection()
 		);
 
-		sections.add(new SashSection(this, new ScrollerSection(this, runTargetSections), detailsSection));
+		sections.add(new SashSection(this,
+				new ScrollerSection(this, runTargetSections),
+				detailsSection)
+		);
 		return sections;
 	}
 
