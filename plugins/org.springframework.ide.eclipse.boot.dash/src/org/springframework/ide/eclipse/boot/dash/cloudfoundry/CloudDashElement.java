@@ -83,6 +83,17 @@ public class CloudDashElement implements BootDashElement {
 
 	@Override
 	public RunState getRunState() {
+		if (app != null && app.getState() != null) {
+			switch (this.app.getState()) {
+			case STARTED:
+				return RunState.RUNNING;
+			case STOPPED:
+				return RunState.INACTIVE;
+			case UPDATING:
+				return RunState.STARTING;
+			}
+		}
+
 		return RunState.INACTIVE;
 	}
 
