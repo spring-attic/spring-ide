@@ -54,10 +54,10 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
@@ -72,6 +72,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
@@ -94,14 +95,14 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private ValueListener<Filter<BootDashElement>> filterListener;
 
-	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model) {
 		this(owner, model, null);
 	}
 
-	public BootDashElementsTableSection(BootDashView owner, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
 		super(owner);
 		this.model = model;
-		this.ui = owner.getUserInteractions();
+		this.ui = owner instanceof BootDashView ? ((BootDashView)owner).getUserInteractions() : null;
 		this.searchFilterModel = searchFilterModel;
 	}
 
@@ -328,6 +329,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getAddRunTargetAction());
+		
 		addPreferedConfigSelectionMenu(manager);
 //		manager.add(new Separator());
 //		manager.add(refreshAction);

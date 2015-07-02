@@ -18,6 +18,8 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargetBootDashModel;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -32,6 +34,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	private BootDashModel model;
 
+	private RunTargetBootDashModel runTargetBootModel;
+
 	/**
 	 * The constructor
 	 */
@@ -40,7 +44,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
+	 * BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
@@ -49,7 +55,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
+	 * BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
@@ -66,10 +74,11 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns an image descriptor for the image file at the given
-	 * plug-in relative path
+	 * Returns an image descriptor for the image file at the given plug-in
+	 * relative path
 	 *
-	 * @param path the path
+	 * @param path
+	 *            the path
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
@@ -86,7 +95,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
-	
+
 	public static IStatus createErrorStatus(Throwable exception, String message) {
 		if (message == null) {
 			message = "";
@@ -94,17 +103,28 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
-
 	public static void log(Throwable e) {
 		getDefault().getLog().log(createErrorStatus(e));
 	}
 
+	// TODO: Consider removing was the local model is handled the same way as
+	// other run target models
 	public synchronized BootDashModel getModel() {
-		if (model==null) {
+		if (model == null) {
 			BootDashModelContext context = new DefaultBootDashModelContext();
-			model = new BootDashModel(context);
+			model = new LocalBootDashModel(context);
 		}
 		return model;
+	}
+
+	public synchronized RunTargetBootDashModel getRunTargetModel() {
+		if (runTargetBootModel == null) {
+			BootDashModelContext context = new DefaultBootDashModelContext();
+
+			runTargetBootModel = new RunTargetBootDashModel(context);
+			runTargetBootModel.getModels().add(getModel());
+		}
+		return runTargetBootModel;
 	}
 
 }

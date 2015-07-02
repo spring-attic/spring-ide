@@ -40,24 +40,25 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected TreeViewer orgsSpacesViewer;
 
-	protected CloudSpace selectedSpace;
+
+	private final CloudFoundryTargetProperties targetProperties;
 
 	private final OrgsAndSpaces spaces;
 
-	OrgsAndSpacesWizardPage(OrgsAndSpaces spaces, String url) {
+	OrgsAndSpacesWizardPage(OrgsAndSpaces spaces, CloudFoundryTargetProperties targetProperties) {
 		super("Select an Org and Space");
 
 		setTitle("Select an Org and Space");
-		setDescription("Select a space in " + url);
+		setDescription("Select a space in " + targetProperties.getUrl());
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
-
+		this.targetProperties = targetProperties;
 		this.spaces = spaces;
 
 	}
 
 	@Override
 	public boolean isPageComplete() {
-		return getSpaceSelection() != null;
+		return targetProperties.getSpace() != null;
 	}
 
 	@Override
@@ -106,9 +107,10 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected void setInitialSelectionInViewer() {
 
-		selectedSpace = spaces.getAllSpaces().get(0);
+		CloudSpace selectedSpace = spaces.getAllSpaces().get(0);
 
 		if (selectedSpace != null) {
+			setSpaceInProperties(selectedSpace);
 			setSelectionInViewer(selectedSpace);
 		}
 	}
@@ -148,10 +150,6 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		}
 	}
 
-	protected CloudSpace getSpaceSelection() {
-		return selectedSpace;
-	}
-
 	protected void refresh() {
 		if (orgsSpacesViewer != null) {
 
@@ -160,15 +158,19 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 			if (selectedItems != null && selectedItems.length > 0) {
 				// It's a single selection tree, so only get the first selection
 				Object selectedObj = selectedItems[0].getData();
-				selectedSpace = selectedObj instanceof CloudSpace ? (CloudSpace) selectedObj : null;
+				setSpaceInProperties(selectedObj instanceof CloudSpace ? (CloudSpace) selectedObj : null);
 			}
 		}
 		refreshWizardUI();
 	}
 
+	protected void setSpaceInProperties(CloudSpace space) {
+		targetProperties.setSpace(space);
+	}
+
 	private void refreshWizardUI() {
 		if (getWizard() != null && getWizard().getContainer() != null) {
-			setPageComplete(getSpaceSelection() != null);
+			setPageComplete(targetProperties.getSpace() != null);
 
 			getWizard().getContainer().updateButtons();
 		}

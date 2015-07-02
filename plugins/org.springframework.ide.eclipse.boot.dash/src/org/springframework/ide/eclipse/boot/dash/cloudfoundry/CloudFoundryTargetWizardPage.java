@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -58,7 +59,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private CloudFoundryTargetProperties targetProperties = new CloudFoundryTargetProperties();
 
-	protected CloudFoundryTargetWizardPage() {
+	public CloudFoundryTargetWizardPage() {
 		super("Add a Cloud Foundry Target");
 
 		setTitle("Add a Cloud Foundry Target");
@@ -205,8 +206,8 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		return canFinish;
 	}
 
-	public CloudFoundryTargetProperties getTargetProperties() {
-		return targetProperties;
+	public RunTarget getRunTarget() {
+		return new CloudFoundryRunTarget(targetProperties);
 	}
 
 	/*
