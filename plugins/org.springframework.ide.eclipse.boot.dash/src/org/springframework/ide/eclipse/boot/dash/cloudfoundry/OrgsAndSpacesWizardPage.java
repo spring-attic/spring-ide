@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 
 /**
  * Wizard page to allow users to select a target cloud space when cloning an
@@ -40,24 +42,24 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected TreeViewer orgsSpacesViewer;
 
-	protected CloudSpace selectedSpace;
+	private final CloudFoundryTargetProperties targetProperties;
 
 	private final OrgsAndSpaces spaces;
 
-	OrgsAndSpacesWizardPage(OrgsAndSpaces spaces, String url) {
+	OrgsAndSpacesWizardPage(OrgsAndSpaces spaces, CloudFoundryTargetProperties targetProperties) {
 		super("Select an Org and Space");
 
 		setTitle("Select an Org and Space");
-		setDescription("Select a space in " + url);
+		setDescription("Select a space in " + targetProperties.getUrl());
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
-
+		this.targetProperties = targetProperties;
 		this.spaces = spaces;
 
 	}
 
 	@Override
 	public boolean isPageComplete() {
-		return getSpaceSelection() != null;
+		return targetProperties.getSpace() != null;
 	}
 
 	@Override
@@ -106,9 +108,10 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected void setInitialSelectionInViewer() {
 
-		selectedSpace = spaces.getAllSpaces().get(0);
+		CloudSpace selectedSpace = spaces.getAllSpaces().get(0);
 
 		if (selectedSpace != null) {
+			setSpaceInProperties(selectedSpace);
 			setSelectionInViewer(selectedSpace);
 		}
 	}
@@ -148,10 +151,6 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		}
 	}
 
-	protected CloudSpace getSpaceSelection() {
-		return selectedSpace;
-	}
-
 	protected void refresh() {
 		if (orgsSpacesViewer != null) {
 
@@ -160,15 +159,43 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 			if (selectedItems != null && selectedItems.length > 0) {
 				// It's a single selection tree, so only get the first selection
 				Object selectedObj = selectedItems[0].getData();
-				selectedSpace = selectedObj instanceof CloudSpace ? (CloudSpace) selectedObj : null;
+				setSpaceInProperties(selectedObj instanceof CloudSpace ? (CloudSpace) selectedObj : null);
 			}
 		}
 		refreshWizardUI();
 	}
 
+	protected void setSpaceInProperties(CloudSpace space) {
+		// TODO: Move this to a validator
+		setErrorMessage(null);
+		if (space != null) {
+			RunTarget existing = getExistingRunTarget(space);
+			if (existing != null) {
+				setErrorMessage("A run target for that space already exists: '" + existing.getName()
+						+ "'. Please select another space.");
+				targetProperties.setSpace(null);
+				return;
+			}
+		}
+		targetProperties.setSpace(space);
+	}
+
+	protected RunTarget getExistingRunTarget(CloudSpace space) {
+		if (space != null) {
+			String targetId = CloudFoundryRunTarget.getId(targetProperties.getUserName(), targetProperties.getUrl(),
+					space.getOrganization().getName(), space.getName());
+			for (RunTarget target : RunTargets.getTargets().getValues()) {
+				if (targetId.equals(target.getId())) {
+					return target;
+				}
+			}
+		}
+		return null;
+	}
+
 	private void refreshWizardUI() {
 		if (getWizard() != null && getWizard().getContainer() != null) {
-			setPageComplete(getSpaceSelection() != null);
+			setPageComplete(targetProperties.getSpace() != null);
 
 			getWizard().getContainer().updateButtons();
 		}

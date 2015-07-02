@@ -23,10 +23,13 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class RunTargets {
 
 	private static final EnumSet<RunState> LOCAL_RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING, DEBUGGING);
+
+	private static final LiveSet<RunTarget> nonLocalTargets = new LiveSet<RunTarget>();
 
 	public static final RunTarget LOCAL = new AbstractRunTarget("local") {
 		@Override
@@ -37,15 +40,14 @@ public class RunTargets {
 		@Override
 		public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
 			IProject p = element.getProject();
-			if (p!=null) {
+			if (p != null) {
 				return BootLaunchConfigurationDelegate.getLaunchConfigs(p);
 			}
 			return Collections.emptyList();
 		}
 
-
 		public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
-			if (mainType!=null) {
+			if (mainType != null) {
 				return BootLaunchConfigurationDelegate.createConf(mainType);
 			} else {
 				return BootLaunchConfigurationDelegate.createConf(jp);
@@ -53,4 +55,11 @@ public class RunTargets {
 		}
 	};
 
+	/**
+	 * 
+	 * @return non-null list of Targets.
+	 */
+	public static synchronized LiveSet<RunTarget> getTargets() {
+		return nonLocalTargets;
+	}
 }

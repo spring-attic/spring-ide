@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
+import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,6 +26,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springsource.ide.eclipse.commons.ui.ICoreRunnable;
 
@@ -69,18 +72,23 @@ public class CloudFoundryUiUtil {
 
 					try {
 
-						List<CloudSpace> actualSpaces = new CloudFoundryClient(
-								new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
-								new URL(targetProperties.getUrl()), targetProperties.isSelfsigned()).getSpaces();
+						SubMonitor sub = SubMonitor.convert(monitor, 100);
+
+						sub.setTaskName(
+								"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...");
+						sub.worked(50);
+						List<CloudSpace> actualSpaces = getClient(targetProperties).getSpaces();
 						if (actualSpaces != null && !actualSpaces.isEmpty()) {
 							spaces[0] = new OrgsAndSpaces(actualSpaces);
 						}
-					} catch (MalformedURLException e) {
-						throw new CoreException(BootDashActivator.createErrorStatus(e));
-
+						sub.worked(50);
 					} catch (Throwable e) {
-						throw new CoreException(BootDashActivator.createErrorStatus(e,
-								"Cloud Foundry client error: " + e.getMessage()));
+						if (!(e instanceof CoreException)) {
+							throw new CoreException(BootDashActivator.createErrorStatus(e,
+									"Cloud Foundry client error: " + e.getMessage()));
+						} else {
+							throw (CoreException) e;
+						}
 					}
 				}
 			};
@@ -92,5 +100,22 @@ public class CloudFoundryUiUtil {
 		}
 		return null;
 
+	}
+
+	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws CoreException {
+		try {
+			return targetProperties.getSpace() != null ? new CloudFoundryClient(
+					new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
+					new URL(targetProperties.getUrl()), targetProperties.getSpace(), targetProperties.isSelfsigned())
+					: new CloudFoundryClient(
+							new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
+							new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
+		} catch (MalformedURLException e) {
+			throw new CoreException(BootDashActivator.createErrorStatus(e));
+		}
+	}
+
+	public static Shell getShell() {
+		return PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
 	}
 }

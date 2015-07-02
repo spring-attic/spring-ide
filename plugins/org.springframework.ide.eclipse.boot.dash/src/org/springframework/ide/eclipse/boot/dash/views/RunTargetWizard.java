@@ -8,37 +8,42 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardPage;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
 /**
- * Creates a Cloud Foundry target
+ * Creates a run target
  *
  */
-public class CloudFoundryTargetWizard extends Wizard {
+public class RunTargetWizard extends Wizard {
 
 	private CloudFoundryTargetWizardPage page;
 
-	public CloudFoundryTargetWizard() {
+	public RunTargetWizard() {
 
-		setWindowTitle("Add a Cloud Foundry Target");
+		setWindowTitle("Add a Run Target");
 
 		setNeedsProgressMonitor(true);
 	}
 
 	@Override
 	public void addPages() {
+		// TODO: Turn into framework and load pages based on an initial page
+		// that shows different target types.
+		// Right it is hardcoded to load the Cloud Foundry target page.
 		page = new CloudFoundryTargetWizardPage();
 		addPage(page);
 	}
 
 	@Override
 	public boolean performFinish() {
-		return getTargetProperties() != null;
+		return getRunTarget() != null;
 	}
 
-	public CloudFoundryTargetProperties getTargetProperties() {
-		return page != null ? page.getTargetProperties() : null;
+	public RunTarget getRunTarget() {
+		return page != null ? page.getRunTarget() : null;
 	}
 }

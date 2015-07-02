@@ -20,14 +20,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class BootDashActions {
 
-	/////  context info //////////////
+	///// context info //////////////
 	private BootDashModel model;
 	private MultiSelection<BootDashElement> selection;
 	private UserInteractions ui;
@@ -38,6 +38,7 @@ public class BootDashActions {
 	private AbstractBootDashAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
+	private AddRunTargetAction addTargetAction;
 
 	public BootDashActions(BootDashModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -48,15 +49,15 @@ public class BootDashActions {
 	}
 
 	protected void makeActions() {
-//		refreshAction = new Action() {
-//			public void run() {
-//				model.refresh();
-//				tv.refresh();
-//			}
-//		};
-//		refreshAction.setText("Refresh");
-//		refreshAction.setToolTipText("Manually trigger a view refresh");
-//		refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
+		// refreshAction = new Action() {
+		// public void run() {
+		// model.refresh();
+		// tv.refresh();
+		// }
+		// };
+		// refreshAction.setText("Refresh");
+		// refreshAction.setToolTipText("Manually trigger a view refresh");
+		// refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
 
 		RunStateAction restartAction = new RunOrDebugStateAction(model, selection, ui, RunState.RUNNING);
 		restartAction.setText("(Re)start");
@@ -73,18 +74,19 @@ public class BootDashActions {
 		RunStateAction stopAction = new RunStateAction(model, selection, ui, RunState.INACTIVE) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
-				return s==RunState.DEBUGGING || s==RunState.RUNNING;
+				return s == RunState.DEBUGGING || s == RunState.RUNNING;
 			}
+
 			@Override
 			protected Job createJob() {
 				final Collection<BootDashElement> selecteds = selection.getValue();
 				if (!selecteds.isEmpty()) {
-					return new Job("Stopping "+selecteds.size()+" Boot Dash Elements") {
+					return new Job("Stopping " + selecteds.size() + " Boot Dash Elements") {
 						protected IStatus run(IProgressMonitor monitor) {
-							monitor.beginTask("Stopping "+selecteds.size()+" Elements", selecteds.size());
+							monitor.beginTask("Stopping " + selecteds.size() + " Elements", selecteds.size());
 							try {
 								for (BootDashElement el : selecteds) {
-									monitor.subTask("Stopping: "+el.getName());
+									monitor.subTask("Stopping: " + el.getName());
 									try {
 										el.stopAsync();
 									} catch (Exception e) {
@@ -107,37 +109,33 @@ public class BootDashActions {
 		stopAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop.gif"));
 		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.gif"));
 
-		runStateActions = new RunStateAction[] {
-			restartAction, rebugAction, stopAction
-		};
+		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction };
 
 		openConfigAction = new OpenLaunchConfigAction(selection, ui);
 		openConsoleAction = new OpenConsoleAction(selection, ui);
 		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
+		addTargetAction = new AddRunTargetAction(selection, ui);
 	}
 
 	static class RunOrDebugStateAction extends RunStateAction {
 
-		public RunOrDebugStateAction(
-				BootDashModel model,
-				MultiSelection<BootDashElement> selection,
-				UserInteractions ui,
-				RunState goalState) {
+		public RunOrDebugStateAction(BootDashModel model, MultiSelection<BootDashElement> selection,
+				UserInteractions ui, RunState goalState) {
 			super(model, selection, ui, goalState);
-			Assert.isLegal(goalState==RunState.RUNNING || goalState==RunState.DEBUGGING);
+			Assert.isLegal(goalState == RunState.RUNNING || goalState == RunState.DEBUGGING);
 		}
 
 		@Override
 		protected Job createJob() {
 			final Collection<BootDashElement> selecteds = getSelectedElements();
 			if (!selecteds.isEmpty()) {
-				return new Job("Restarting "+selecteds.size()+" Dash Elements") {
+				return new Job("Restarting " + selecteds.size() + " Dash Elements") {
 					@Override
 					public IStatus run(IProgressMonitor monitor) {
 						monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
 						try {
 							for (BootDashElement el : selecteds) {
-								monitor.subTask("Restarting: "+el.getName());
+								monitor.subTask("Restarting: " + el.getName());
 								try {
 									el.restart(goalState, ui);
 								} catch (Exception e) {
@@ -172,21 +170,25 @@ public class BootDashActions {
 	public OpenLaunchConfigAction getOpenConfigAction() {
 		return openConfigAction;
 	}
+	
+	public AddRunTargetAction getAddRunTargetAction() {
+		return addTargetAction;
+	}
 
 	public void dispose() {
-		if (runStateActions!=null) {
+		if (runStateActions != null) {
 			for (RunStateAction a : runStateActions) {
 				a.dispose();
 			}
 			runStateActions = null;
 		}
-		if (openConsoleAction!=null) {
+		if (openConsoleAction != null) {
 			openConsoleAction.dispose();
 		}
-		if (openConfigAction!=null) {
+		if (openConfigAction != null) {
 			openConfigAction.dispose();
 		}
-		if (openBrowserAction!=null) {
+		if (openBrowserAction != null) {
 			openBrowserAction.dispose();
 		}
 	}

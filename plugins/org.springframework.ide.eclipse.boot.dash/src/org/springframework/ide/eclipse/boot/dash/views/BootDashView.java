@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
@@ -40,7 +40,6 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 /**
@@ -54,31 +53,29 @@ public class BootDashView extends ViewPartWithSections {
 	public static final String ID = "org.springframework.ide.eclipse.boot.dash.views.BootDashView";
 
 	/**
-	 * Adds scroll support to the whole view. You probably want to disable this if view is broken
-	 * into pieces that have their own scrollbars
+	 * Adds scroll support to the whole view. You probably want to disable this
+	 * if view is broken into pieces that have their own scrollbars
 	 */
 	private static final boolean ENABLE_SCROLLING = false;
 
 	private BootDashModel model = BootDashActivator.getDefault().getModel();
 	private TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 
-//	private Action refreshAction;
-//	private Action doubleClickAction;
+	// private Action refreshAction;
+	// private Action doubleClickAction;
 
 	private BootDashActions actions;
 
 	private UserInteractions ui = new DefaultUserInteractions(this);
 
-	private MultiSelection<BootDashElement> selection = null; //lazy init
+	private MultiSelection<BootDashElement> selection = null; // lazy init
 
 	/*
-	 * The content provider class is responsible for
-	 * providing objects to the view. It can wrap
-	 * existing objects in adapters or simply return
-	 * objects as-is. These objects may be sensitive
-	 * to the current input of the view, or ignore
-	 * it and always show the same content
-	 * (like Task List, for example).
+	 * The content provider class is responsible for providing objects to the
+	 * view. It can wrap existing objects in adapters or simply return objects
+	 * as-is. These objects may be sensitive to the current input of the view,
+	 * or ignore it and always show the same content (like Task List, for
+	 * example).
 	 */
 
 	/**
@@ -91,28 +88,29 @@ public class BootDashView extends ViewPartWithSections {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (actions!=null) {
+		if (actions != null) {
 			actions.dispose();
 		}
 	}
 
 	/**
-	 * This is a callback that will allow us
-	 * to create the viewer and initialize it.
+	 * This is a callback that will allow us to create the viewer and initialize
+	 * it.
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		//Create the help context id for the viewer's control
-		//PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(), "org.springframework.ide.eclipse.boot.dash.viewer");
+		// Create the help context id for the viewer's control
+		// PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(),
+		// "org.springframework.ide.eclipse.boot.dash.viewer");
 		actions = new BootDashActions(model, getSelection(), ui);
-//		hookContextMenu();
-//		hookDoubleClickAction();
+		// hookContextMenu();
+		// hookDoubleClickAction();
 		contributeToActionBars();
 	}
 
 	public synchronized MultiSelection<BootDashElement> getSelection() {
-		if (selection==null) {
+		if (selection == null) {
 			selection = MultiSelection.empty(BootDashElement.class);
 			for (IPageSection section : getSections()) {
 				if (section instanceof MultiSelectionSource) {
@@ -145,11 +143,10 @@ public class BootDashView extends ViewPartWithSections {
 	 * Fills the pull-down menu for this view (accessible from the toolbar)
 	 */
 	private void fillLocalPullDown(IMenuManager manager) {
-//		manager.add(refreshAction);
-//		manager.add(new Separator());
-//		manager.add(action2);
+		// manager.add(refreshAction);
+		// manager.add(new Separator());
+		// manager.add(action2);
 	}
-
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		for (RunStateAction a : actions.getRunStateActions()) {
@@ -158,30 +155,30 @@ public class BootDashView extends ViewPartWithSections {
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
-//		manager.add(refreshAction);
-//		manager.add(action2);
+		manager.add(actions.getAddRunTargetAction());
+		// manager.add(refreshAction);
+		// manager.add(action2);
 	}
 
-
-//	private void hookDoubleClickAction() {
-//		tv.addDoubleClickListener(new IDoubleClickListener() {
-//			public void doubleClick(DoubleClickEvent event) {
-//				doubleClickAction.run();
-//			}
-//		});
-//	}
-//	private void showMessage(String message) {
-//		MessageDialog.openInformation(
-//			tv.getControl().getShell(),
-//			"Boot Dashboard",
-//			message);
-//	}
+	// private void hookDoubleClickAction() {
+	// tv.addDoubleClickListener(new IDoubleClickListener() {
+	// public void doubleClick(DoubleClickEvent event) {
+	// doubleClickAction.run();
+	// }
+	// });
+	// }
+	// private void showMessage(String message) {
+	// MessageDialog.openInformation(
+	// tv.getControl().getShell(),
+	// "Boot Dashboard",
+	// message);
+	// }
 
 	/**
 	 * Passing the focus request to the viewer's control.
 	 */
 	public void setFocus() {
-		if (page!=null) {
+		if (page != null) {
 			page.setFocus();
 		}
 	}
@@ -201,56 +198,72 @@ public class BootDashView extends ViewPartWithSections {
 
 		sections.add(new TagSearchSection(BootDashView.this, filterBoxModel.getText()));
 
-		BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(this, model, filterBoxModel.getFilter());
-		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH ,TAGS);
-		ExpandableSectionWithSelection localApsSection = new ExpandableSectionWithSelection(this, "Local Boot Apps", localApsTable);
+		final BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model,
+				filterBoxModel.getFilter());
+		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH, TAGS);
+
+		IPageSection dynamicSection = new DynamicRunTargetSection(this,
+				BootDashActivator.getDefault().getRunTargetModel().getModels(), new RunTargetSectionFactory(this, filterBoxModel.getFilter()) {
+
+					@Override
+					public IPageSection create(BootDashModel model) {
+						if (model instanceof LocalBootDashModel) {
+							return new ExpandableSectionWithSelection(BootDashView.this, "Local Boot Apps",
+									localApsTable);
+						}
+						return super.create(model);
+					}
+
+				});
 
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,
 				localApsTable.getSelection().toSingleSelection());
 
-		sections.add(new SashSection(this,
-				new ScrollerSection(this, localApsSection),
-				detailsSection));
+		sections.add(new SashSection(this, new ScrollerSection(this, dynamicSection), detailsSection));
 		return sections;
 	}
 
-//	/* Alternate 'createSections' for quick-and-dirty testing of the 'DynamicComposite'. */
-//	@Override
-//	protected List<IPageSection> createSections() throws CoreException {
-//		final LiveSet<Integer> models = new LiveSet<Integer>();
-//		DynamicCompositeSection<Integer> wrapper = new DynamicCompositeSection<Integer>(
-//			this,
-//			models,
-//			new SectionFactory<Integer>() {
-//				public IPageSection create(Integer i) {
-//					BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model);
-//					localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
-//					return new ExpandableSectionWithSelection(BootDashView.this, "Local Boot Apps "+i, localApsTable);
-//				}
-//			},
-//			BootDashElement.class
-//		);
-//		List<IPageSection> sections = new ArrayList<IPageSection>();
-//		sections.add(wrapper);
-//		for (int _i = 0; _i < 4; _i++) {
-//			{   final int i = _i+1;
-//				long delay = 5000 * i;
-//				UIJob j = new UIJob("Test") {
-//					@Override
-//					public IStatus runInUIThread(IProgressMonitor monitor) {
-//						if (i<=3) {
-//							System.out.println("Adding model: "+i);
-//							models.add(i);
-//						} else {
-//							System.out.println("Removing model: "+(i%3));
-//							models.remove(i%3);
-//						}
-//						return Status.OK_STATUS;
-//					}
-//				};
-//				j.schedule(delay);
-//			}
-//		}
-//		return sections;
-//	}
+	// /* Alternate 'createSections' for quick-and-dirty testing of the
+	// 'DynamicComposite'. */
+	// @Override
+	// protected List<IPageSection> createSections() throws CoreException {
+	// final LiveSet<Integer> models = new LiveSet<Integer>();
+	// DynamicCompositeSection<Integer> wrapper = new
+	// DynamicCompositeSection<Integer>(
+	// this,
+	// models,
+	// new SectionFactory<Integer>() {
+	// public IPageSection create(Integer i) {
+	// BootDashElementsTableSection localApsTable = new
+	// BootDashElementsTableSection(BootDashView.this, model);
+	// localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
+	// return new ExpandableSectionWithSelection(BootDashView.this, "Local Boot
+	// Apps "+i, localApsTable);
+	// }
+	// },
+	// BootDashElement.class
+	// );
+	// List<IPageSection> sections = new ArrayList<IPageSection>();
+	// sections.add(wrapper);
+	// for (int _i = 0; _i < 4; _i++) {
+	// { final int i = _i+1;
+	// long delay = 5000 * i;
+	// UIJob j = new UIJob("Test") {
+	// @Override
+	// public IStatus runInUIThread(IProgressMonitor monitor) {
+	// if (i<=3) {
+	// System.out.println("Adding model: "+i);
+	// models.add(i);
+	// } else {
+	// System.out.println("Removing model: "+(i%3));
+	// models.remove(i%3);
+	// }
+	// return Status.OK_STATUS;
+	// }
+	// };
+	// j.schedule(delay);
+	// }
+	// }
+	// return sections;
+	// }
 }

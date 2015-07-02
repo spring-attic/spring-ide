@@ -24,6 +24,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -72,6 +73,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
@@ -94,14 +96,14 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private ValueListener<Filter<BootDashElement>> filterListener;
 
-	public BootDashElementsTableSection(BootDashView owner, BootDashModel model) {
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model) {
 		this(owner, model, null);
 	}
 
-	public BootDashElementsTableSection(BootDashView owner, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
 		super(owner);
 		this.model = model;
-		this.ui = owner.getUserInteractions();
+		this.ui = owner instanceof BootDashView ? ((BootDashView)owner).getUserInteractions() : null;
 		this.searchFilterModel = searchFilterModel;
 	}
 
@@ -110,6 +112,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	public void setColumns(BootDashColumn... columns) {
 		this.enabledColumns = columns;
+	}
+	
+	protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
+		return new BootDashLabelProvider(columnType);
 	}
 
 	@Override
@@ -130,7 +136,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
 			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
 			c1viewer.getColumn().setText(columnType.getLabel());
-			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
+			c1viewer.setLabelProvider(getLabelProvider(columnType));
 			if (columnType.getEditingSupportClass() != null) {
 				try {
 					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class)
@@ -328,6 +334,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getAddRunTargetAction());
+		
 		addPreferedConfigSelectionMenu(manager);
 //		manager.add(new Separator());
 //		manager.add(refreshAction);

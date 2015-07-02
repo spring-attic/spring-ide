@@ -67,11 +67,11 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	 */
 	private static final String TAGS_PROPERTY_KEY = "tags";
 
-	private BootDashModel context;
+	private LocalBootDashModel context;
 
 	private IPropertyStore<IProject> projectProperties;
 
-	public BootProjectDashElement(IProject project, BootDashModel context, IPropertyStore<IProject> projectProperties) {
+	public BootProjectDashElement(IProject project, LocalBootDashModel context, IPropertyStore<IProject> projectProperties) {
 		super(project);
 		this.context = context;
 		this.projectProperties = projectProperties;

@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 public class BootDashLabelProvider extends CellLabelProvider {
 	
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
-	private BootDashColumn forColum;
+	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
 
 	public BootDashLabelProvider(BootDashColumn target) {
@@ -43,6 +43,14 @@ public class BootDashLabelProvider extends CellLabelProvider {
 				cell.setImage(javaLabels.getImage(jp));
 			} else {
 				cell.setText(""+e);
+			}
+			break;
+		case APP:
+			String name = e.getName();
+			if (name != null) {
+				cell.setText(name);
+			} else {
+				cell.setText("???");
 			}
 			break;
 		case RUN_TARGET:

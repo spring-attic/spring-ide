@@ -54,6 +54,7 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -464,7 +465,7 @@ public class BootDashModelTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.model = new BootDashModel(context);
+		this.model = new LocalBootDashModel(context);
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);
 	}

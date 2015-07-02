@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -58,12 +59,11 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private CloudFoundryTargetProperties targetProperties = new CloudFoundryTargetProperties();
 
-	protected CloudFoundryTargetWizardPage() {
+	public CloudFoundryTargetWizardPage() {
 		super("Add a Cloud Foundry Target");
 
 		setTitle("Add a Cloud Foundry Target");
-		setDescription(
-				"Enter credentials and a Cloud Foundry target URL.");
+		setDescription("Enter credentials and a Cloud Foundry target URL.");
 
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 
@@ -186,9 +186,27 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		});
 
+		targetProperties.addListeners(this, new EnableSpaceControlListener(), new SetSpaceValListener());
+
+		setValuesFromTargetProperties();
 		refreshWizardUI();
 
-		targetProperties.addListeners(this, new EnableSpaceControlListener(), new SetSpaceValListener());
+	}
+
+	private void setValuesFromTargetProperties() {
+
+		String userName = targetProperties.getUserName();
+		if (emailText != null && !emailText.isDisposed() && userName != null) {
+			emailText.setText(userName);
+		}
+		String password = targetProperties.getPassword();
+		if (passwordText != null && !passwordText.isDisposed() && password != null) {
+			passwordText.setText(password);
+		}
+		String url = targetProperties.getUrl();
+		if (urlText != null && !urlText.isDisposed() && url != null) {
+			urlText.setText(url);
+		}
 
 	}
 
@@ -205,8 +223,8 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		return canFinish;
 	}
 
-	public CloudFoundryTargetProperties getTargetProperties() {
-		return targetProperties;
+	public RunTarget getRunTarget() {
+		return new CloudFoundryRunTarget(targetProperties);
 	}
 
 	/*

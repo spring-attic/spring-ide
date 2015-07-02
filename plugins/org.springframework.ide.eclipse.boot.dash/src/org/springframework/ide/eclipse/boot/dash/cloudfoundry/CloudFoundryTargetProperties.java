@@ -14,6 +14,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -58,6 +60,8 @@ public class CloudFoundryTargetProperties {
 		// Aggregate of the credentials and space validator.
 		allPropertiesValidator.addChild(credentialsValidator);
 		allPropertiesValidator.addChild(spacesValidator);
+		
+		setUrl(getDefaultTargetUrl());
 	}
 
 	/**
@@ -147,6 +151,10 @@ public class CloudFoundryTargetProperties {
 			return value == null || value.trim().length() == 0;
 		}
 	}
+	
+	protected String getDefaultTargetUrl() {
+		return "https://api.run.pivotal.io";
+	}
 
 	class SpacesValidator extends Validator {
 
@@ -154,7 +162,7 @@ public class CloudFoundryTargetProperties {
 		protected ValidationResult compute() {
 			if (getSpace() == null) {
 				return ValidationResult.info("Select a Cloud space");
-			}
+			} 
 			return ValidationResult.OK;
 		}
 	}

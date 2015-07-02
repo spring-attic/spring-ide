@@ -16,10 +16,10 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 
 public class BootDashElementFactory {
 
-	private BootDashModel model;
+	private LocalBootDashModel model;
 	private IPropertyStore<IProject> projectProperties;
 
-	public BootDashElementFactory(BootDashModel model, IPropertyStore<IProject> projectProperties) {
+	public BootDashElementFactory(LocalBootDashModel model, IPropertyStore<IProject> projectProperties) {
 		this.model = model;
 		this.projectProperties = projectProperties;
 	}

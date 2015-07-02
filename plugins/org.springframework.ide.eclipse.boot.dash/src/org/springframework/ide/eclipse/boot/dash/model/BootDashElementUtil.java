@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 
 /**
+ * TODO: push these functions into BootDashElements so CF implements differently.
+ *
  * @author Kris De Volder
  */
 public class BootDashElementUtil {

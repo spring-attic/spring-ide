@@ -8,29 +8,27 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 
-public class AddCloudFoundryTargetAction extends AbstractBootDashAction {
+public class AddRunTargetAction extends AbstractBootDashAction {
 
-	
-	private final Shell shell;
-	
-	public AddCloudFoundryTargetAction(MultiSelection<BootDashElement> selection, UserInteractions ui, Shell shell) {
+	public AddRunTargetAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
-		this.shell = shell;
-		this.setText("Add Cloud Foundry Target");
-		this.setToolTipText("Add Cloud Foundry Target");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/cloud_obj.png"));
+		this.setText("Add a Run Target");
+		this.setToolTipText("Add a Run Target");
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target.png"));
 	}
 
 	@Override
@@ -40,12 +38,25 @@ public class AddCloudFoundryTargetAction extends AbstractBootDashAction {
 
 			@Override
 			public void run() {
-				CloudFoundryTargetWizard wizard = new CloudFoundryTargetWizard();
-				WizardDialog dialog = new WizardDialog(shell, wizard);
-				if (dialog.open() == Dialog.OK) {
-					CloudFoundryTargetProperties targetProperties = wizard.getTargetProperties();
+				RunTargetWizard wizard = new RunTargetWizard();
+				Shell shell = CloudFoundryUiUtil.getShell();
+				if (shell != null) {
+					WizardDialog dialog = new WizardDialog(shell, wizard);
+					if (dialog.open() == Dialog.OK) {
+						RunTarget target = wizard.getRunTarget();
+						if (target != null) {
+							RunTargets.getTargets().add(target);
+						}
+					}
 				}
 			}
 		});
 	}
+
+	@Override
+	public void updateEnablement() {
+		// Always enable
+		this.setEnabled(true);
+	}
+
 }
