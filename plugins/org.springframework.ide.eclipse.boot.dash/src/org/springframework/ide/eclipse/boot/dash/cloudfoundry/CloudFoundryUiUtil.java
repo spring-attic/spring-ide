@@ -72,10 +72,16 @@ public class CloudFoundryUiUtil {
 
 					try {
 
+						SubMonitor sub = SubMonitor.convert(monitor, 100);
+
+						sub.setTaskName(
+								"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...");
+						sub.worked(50);
 						List<CloudSpace> actualSpaces = getClient(targetProperties).getSpaces();
 						if (actualSpaces != null && !actualSpaces.isEmpty()) {
 							spaces[0] = new OrgsAndSpaces(actualSpaces);
 						}
+						sub.worked(50);
 					} catch (Throwable e) {
 						if (!(e instanceof CoreException)) {
 							throw new CoreException(BootDashActivator.createErrorStatus(e,
