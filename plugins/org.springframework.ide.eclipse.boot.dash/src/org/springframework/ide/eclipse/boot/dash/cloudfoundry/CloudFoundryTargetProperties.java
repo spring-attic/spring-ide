@@ -60,6 +60,8 @@ public class CloudFoundryTargetProperties {
 		// Aggregate of the credentials and space validator.
 		allPropertiesValidator.addChild(credentialsValidator);
 		allPropertiesValidator.addChild(spacesValidator);
+		
+		setUrl(getDefaultTargetUrl());
 	}
 
 	/**
@@ -148,6 +150,10 @@ public class CloudFoundryTargetProperties {
 		protected boolean isEmpty(String value) {
 			return value == null || value.trim().length() == 0;
 		}
+	}
+	
+	protected String getDefaultTargetUrl() {
+		return "https://api.run.pivotal.io";
 	}
 
 	class SpacesValidator extends Validator {
