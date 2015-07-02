@@ -18,14 +18,14 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-public class RunTargetBootDashModel {
+public class BootDashModelManager {
 
 	private LiveSet<BootDashModel> models;
 	private Map<RunTarget, BootDashModel> asMap;
 	private BootDashModelFactory factory;
 	private LiveExpression<Set<RunTarget>> targets;
 
-	public RunTargetBootDashModel(BootDashModelContext context, LiveExpression<Set<RunTarget>> targets) {
+	public BootDashModelManager(BootDashModelContext context, LiveExpression<Set<RunTarget>> targets) {
 		this.targets = targets;
 	}
 

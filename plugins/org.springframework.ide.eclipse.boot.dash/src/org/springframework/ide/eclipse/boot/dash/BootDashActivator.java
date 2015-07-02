@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargetBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelManager;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 
 /**
@@ -35,7 +35,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	private BootDashModel model;
 
-	private RunTargetBootDashModel runTargetBootModel;
+	private BootDashModelManager runTargetBootModel;
 
 	/**
 	 * The constructor
@@ -118,10 +118,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return model;
 	}
 
-	public synchronized RunTargetBootDashModel getRunTargetModel() {
+	public synchronized BootDashModelManager getRunTargetModel() {
 		if (runTargetBootModel == null) {
 			BootDashModelContext context = new DefaultBootDashModelContext();
-			runTargetBootModel = new RunTargetBootDashModel(context, RunTargets.getTargets());
+			runTargetBootModel = new BootDashModelManager(context, RunTargets.getTargets());
 			runTargetBootModel.getModels().add(getModel());
 		}
 		return runTargetBootModel;
