@@ -46,8 +46,10 @@ public class DelegatingLiveSet<T> extends LiveExpression<Set<T>> {
 		this.delegate = newDelegate;
 		if (oldDelegate==newDelegate) {
 			return;
-		} else if (oldDelegate!=null) {
-			oldDelegate.removeListener(delegateListener);
+		} else {
+			if (oldDelegate!=null) {
+				oldDelegate.removeListener(delegateListener);
+			}
 			if (newDelegate==null) {
 				//trigger a refresh because the delegate changed and the newDelegate won't trigger one
 				refresh();
