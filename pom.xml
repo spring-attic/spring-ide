@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-	<version>3.7.0-SNAPSHOT</version>
+	<version>3.7.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<organization>
@@ -100,6 +100,9 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
 		
         <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
+        
+        <!-- cloud foundry -->
+        <module>plugins/org.springframework.ide.eclipse.cloudfoundry.client</module>
 
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring Boot Dashboard View
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash;singleton:=true
-Bundle-Version: 3.7.0.qualifier
+Bundle-Version: 3.7.1.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.BootDashActivator
 Bundle-Vendor: Pivotal Inc
 Require-Bundle: org.eclipse.ui,
@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.web,
  org.springframework.core,
  org.json,
- org.springframework.ide.eclipse.boot.properties.editor
+ org.springframework.ide.eclipse.boot.properties.editor,
+ org.springframework.ide.eclipse.cloudfoundry.client
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash,

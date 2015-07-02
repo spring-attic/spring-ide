@@ -86,6 +86,13 @@ public class BootDashActivator extends AbstractUIPlugin {
 		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
+	
+	public static IStatus createErrorStatus(Throwable exception, String message) {
+		if (message == null) {
+			message = "";
+		}
+		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+	}
 
 
 	public static void log(Throwable e) {
