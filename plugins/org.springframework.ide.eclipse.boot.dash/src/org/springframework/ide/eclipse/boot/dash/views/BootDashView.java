@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
@@ -218,7 +219,7 @@ public class BootDashView extends ViewPartWithSections {
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,
 				localApsTable.getSelection().toSingleSelection());
 
-		sections.add(new SashSection(this, dynamicSection, detailsSection));
+		sections.add(new SashSection(this, new ScrollerSection(this, dynamicSection), detailsSection));
 		return sections;
 	}
 
