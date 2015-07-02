@@ -98,9 +98,12 @@ public class CloudFoundryUiUtil {
 
 	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws CoreException {
 		try {
-			return new CloudFoundryClient(
+			return targetProperties.getSpace() != null ? new CloudFoundryClient(
 					new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
-					new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
+					new URL(targetProperties.getUrl()), targetProperties.getSpace(), targetProperties.isSelfsigned())
+					: new CloudFoundryClient(
+							new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
+							new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
 		} catch (MalformedURLException e) {
 			throw new CoreException(BootDashActivator.createErrorStatus(e));
 		}
