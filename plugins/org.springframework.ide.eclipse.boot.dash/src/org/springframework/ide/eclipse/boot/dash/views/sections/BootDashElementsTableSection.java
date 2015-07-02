@@ -24,6 +24,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -54,10 +55,10 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
@@ -112,6 +113,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	public void setColumns(BootDashColumn... columns) {
 		this.enabledColumns = columns;
 	}
+	
+	protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
+		return new BootDashLabelProvider(columnType);
+	}
 
 	@Override
 	public void createContents(final Composite page) {
@@ -131,7 +136,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			TableViewerColumn c1viewer = new TableViewerColumn(tv, columnType.getAllignment());
 			c1viewer.getColumn().setWidth(columnType.getDefaultWidth());
 			c1viewer.getColumn().setText(columnType.getLabel());
-			c1viewer.setLabelProvider(new BootDashLabelProvider(columnType));
+			c1viewer.setLabelProvider(getLabelProvider(columnType));
 			if (columnType.getEditingSupportClass() != null) {
 				try {
 					c1viewer.setEditingSupport(columnType.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class)

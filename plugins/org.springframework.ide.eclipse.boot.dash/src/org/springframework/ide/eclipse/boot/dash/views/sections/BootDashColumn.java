@@ -23,6 +23,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 public enum BootDashColumn {
 
 	PROJECT(		"Project", 	150),
+	APP(    		"Application", 150),
 	RUN_TARGET(		"Target", 	60),
 	RUN_STATE(		"State", 	100),
 	RUN_STATE_ICN(	"",			20),
