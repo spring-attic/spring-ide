@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -44,7 +45,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
 	 * BundleContext)
 	 */
@@ -55,7 +56,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
 	 * BundleContext)
 	 */
@@ -120,8 +121,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public synchronized RunTargetBootDashModel getRunTargetModel() {
 		if (runTargetBootModel == null) {
 			BootDashModelContext context = new DefaultBootDashModelContext();
-
-			runTargetBootModel = new RunTargetBootDashModel(context);
+			runTargetBootModel = new RunTargetBootDashModel(context, RunTargets.getTargets());
 			runTargetBootModel.getModels().add(getModel());
 		}
 		return runTargetBootModel;

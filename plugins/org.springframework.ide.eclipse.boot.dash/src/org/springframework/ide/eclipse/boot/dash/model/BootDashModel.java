@@ -15,8 +15,15 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public abstract class BootDashModel {
 
-	public BootDashModel() {
+	private RunTarget target;
+
+	public BootDashModel(RunTarget target) {
 		super();
+		this.target = target;
+	}
+
+	public RunTarget getRunTarget() {
+		return this.target;
 	}
 
 	ListenerList elementStateListeners = new ListenerList();

@@ -23,9 +23,10 @@ public class RunTargetBootDashModel {
 	private LiveSet<BootDashModel> models;
 	private Map<RunTarget, BootDashModel> asMap;
 	private BootDashModelFactory factory;
+	private LiveExpression<Set<RunTarget>> targets;
 
-	public RunTargetBootDashModel(BootDashModelContext context) {
-
+	public RunTargetBootDashModel(BootDashModelContext context, LiveExpression<Set<RunTarget>> targets) {
+		this.targets = targets;
 	}
 
 	public LiveSet<BootDashModel> getModels() {
@@ -34,7 +35,7 @@ public class RunTargetBootDashModel {
 			factory = new BootDashModelFactory();
 			asMap = new HashMap<RunTarget, BootDashModel>();
 			models.dependsOn(RunTargets.getTargets());
-			RunTargets.getTargets().addListener(new RunTargetChangeListener());
+			targets.addListener(new RunTargetChangeListener());
 		}
 		return models;
 	}

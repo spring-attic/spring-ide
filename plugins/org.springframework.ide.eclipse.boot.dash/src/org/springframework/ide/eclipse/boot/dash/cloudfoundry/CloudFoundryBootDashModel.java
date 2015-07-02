@@ -20,10 +20,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.TargetBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
-public class CloudFoundryBootDashModel extends TargetBootDashModel {
+public class CloudFoundryBootDashModel extends BootDashModel {
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target) {
 		super(target);

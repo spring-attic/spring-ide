@@ -12,12 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
-import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicCompositeSection.SectionFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
@@ -36,14 +35,9 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 	public IPageSection create(BootDashModel model) {
 		if (model instanceof CloudFoundryBootDashModel) {
 			String sectionName = ((CloudFoundryBootDashModel) model).getRunTarget().getName();
-			BootDashElementsTableSection section = new BootDashElementsTableSection(owner, model,
-					new TagFilterBoxModel().getFilter()) {
-				protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
-					return new BootDashLabelProvider(columnType);
-				}
-			};
-			section.setColumns(RUN_STATE_ICN, APP);
-	
+			BootDashElementsTableSection section = new BootDashElementsTableSection(owner, model, new TagFilterBoxModel().getFilter());
+			section.setColumns(RUN_STATE_ICN, APP, TAGS);
+
 			return new ExpandableSectionWithSelection(owner, sectionName, section);
 		}
 		return null;

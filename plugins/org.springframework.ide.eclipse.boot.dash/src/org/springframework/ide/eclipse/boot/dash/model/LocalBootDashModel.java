@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
@@ -60,6 +61,7 @@ public class LocalBootDashModel extends BootDashModel {
 	}
 
 	public LocalBootDashModel(BootDashModelContext context) {
+		super(RunTargets.LOCAL);
 		this.workspace = context.getWorkspace();
 		this.elementFactory = new BootDashElementFactory(this, context.getProjectProperties());
 		try {
@@ -99,7 +101,7 @@ public class LocalBootDashModel extends BootDashModel {
 		}
 		elements.replaceAll(newElements);
 	}
-	
+
 	public synchronized LiveSet<BootDashElement> getElements() {
 		init();
 		return elements;
@@ -126,7 +128,7 @@ public class LocalBootDashModel extends BootDashModel {
 		updateElementsFromWorkspace();
 	}
 
-	
+
 
 	////////////// listener cruft ///////////////////////////
 
@@ -145,5 +147,4 @@ public class LocalBootDashModel extends BootDashModel {
 			ILaunchConfiguration c) {
 		modelState.setPreferredConfig(e, c);
 	}
-
 }
