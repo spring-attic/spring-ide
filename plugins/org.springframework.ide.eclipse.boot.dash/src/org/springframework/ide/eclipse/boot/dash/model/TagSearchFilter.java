@@ -46,11 +46,13 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 		this();
 		if (!s.isEmpty()) {
 			String[] splitSearchStr = s.trim().split("\\s+");
-			if (Pattern.matches("(.+)\\s+", s)) {
-				this.searchTags = splitSearchStr;
-			} else {
-				this.searchTags = Arrays.copyOfRange(splitSearchStr, 0, splitSearchStr.length - 1);
-				this.searchTerm = splitSearchStr[splitSearchStr.length - 1]; 
+			if (splitSearchStr.length > 0) {
+				if (Pattern.matches("(.+)\\s+", s)) {
+					this.searchTags = splitSearchStr;
+				} else {
+					this.searchTags = Arrays.copyOfRange(splitSearchStr, 0, splitSearchStr.length - 1);
+					this.searchTerm = splitSearchStr[splitSearchStr.length - 1]; 
+				}
 			}
 		}
 	}
