@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -18,7 +17,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.TagSearchFilter;
+import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
@@ -67,7 +66,7 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			break;
 		case TAGS:
 			if (e instanceof Taggable) {
-				cell.setText(StringUtils.join(((Taggable)e).getTags(), TagSearchFilter.TAGS_SEPARATOR));
+				cell.setText(TagUtils.toString(((Taggable)e).getTags()));
 			} else {
 				cell.setText("");
 			}

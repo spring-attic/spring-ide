@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * The filter for searching for tags.
  * 
@@ -24,11 +22,6 @@ import org.apache.commons.lang.StringUtils;
  */
 public class TagSearchFilter implements Filter<BootDashElement> {
 	
-	/**
-	 * String separator between tags string representation
-	 */
-	public static final String TAGS_SEPARATOR = " ";
-
 	private String searchTerm;
 	
 	private String[] searchTags;
@@ -45,9 +38,9 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 	public TagSearchFilter(String s) {
 		this();
 		if (!s.isEmpty()) {
-			String[] splitSearchStr = s.trim().split("\\s+");
+			String[] splitSearchStr = TagUtils.parseTags(s);
 			if (splitSearchStr.length > 0) {
-				if (Pattern.matches("(.+)\\s+", s)) {
+				if (Pattern.matches("(.+)" + TagUtils.SEPARATOR_REGEX, s)) {
 					this.searchTags = splitSearchStr;
 				} else {
 					this.searchTags = Arrays.copyOfRange(splitSearchStr, 0, splitSearchStr.length - 1);
@@ -82,9 +75,9 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 
 	@Override
 	public String toString() {
-		String initSearchText = StringUtils.join(searchTags, TAGS_SEPARATOR);
+		String initSearchText = TagUtils.toString(searchTags);
 		if (!searchTerm.isEmpty()) {
-			initSearchText += TAGS_SEPARATOR + searchTerm;
+			initSearchText += TagUtils.SEPARATOR + searchTerm;
 		}
 		return initSearchText;
 	}
