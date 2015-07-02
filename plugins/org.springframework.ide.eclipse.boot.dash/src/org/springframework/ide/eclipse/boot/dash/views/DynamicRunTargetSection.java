@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.Set;
+
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicCompositeSection;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
 public class DynamicRunTargetSection extends DynamicCompositeSection<BootDashModel> {
 
-	public DynamicRunTargetSection(IPageWithSections owner, LiveSet<BootDashModel> models,
+	public DynamicRunTargetSection(IPageWithSections owner, LiveExpression<Set<BootDashModel>> models,
 			SectionFactory<BootDashModel> factory) {
 		super(owner, models, factory, BootDashElement.class);
 	}

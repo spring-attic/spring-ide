@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -45,14 +46,14 @@ public abstract class RunStateAction extends AbstractBootDashAction {
 	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
 	protected final RunState goalState;
 	private ElementStateListener stateListener = null;
-	private BootDashModel model;
+	private BootDashViewModel model;
 
 	protected void configureJob(Job job) {
 		job.setRule(SCEDULING_RULE);
 	}
 
 	public RunStateAction(
-			BootDashModel model,
+			BootDashViewModel model,
 			MultiSelection<BootDashElement> selection,
 			UserInteractions ui,
 			RunState goalState) {

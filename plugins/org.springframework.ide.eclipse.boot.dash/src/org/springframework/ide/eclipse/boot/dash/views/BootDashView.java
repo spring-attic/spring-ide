@@ -31,6 +31,8 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -58,7 +60,7 @@ public class BootDashView extends ViewPartWithSections {
 	 */
 	private static final boolean ENABLE_SCROLLING = false;
 
-	private BootDashModel model = BootDashActivator.getDefault().getModel();
+	private BootDashViewModel model = BootDashActivator.getDefault().getModel();
 	private TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 
 	// private Action refreshAction;
@@ -110,8 +112,8 @@ public class BootDashView extends ViewPartWithSections {
 	}
 
 	public synchronized MultiSelection<BootDashElement> getSelection() {
-		if (selection == null) {
-			selection = MultiSelection.empty(BootDashElement.class);
+		if (this.selection == null) {
+			MultiSelection<BootDashElement> selection = MultiSelection.empty(BootDashElement.class);
 			for (IPageSection section : getSections()) {
 				if (section instanceof MultiSelectionSource) {
 					MultiSelectionSource source = (MultiSelectionSource) section;
@@ -119,8 +121,9 @@ public class BootDashView extends ViewPartWithSections {
 					selection = MultiSelection.union(selection, subSelection);
 				}
 			}
+			this.selection = selection;
 		}
-		return selection;
+		return this.selection;
 	}
 
 	public List<BootDashElement> getSelectedElements() {
@@ -198,28 +201,16 @@ public class BootDashView extends ViewPartWithSections {
 
 		sections.add(new TagSearchSection(BootDashView.this, filterBoxModel.getText()));
 
-		final BootDashElementsTableSection localApsTable = new BootDashElementsTableSection(BootDashView.this, model,
-				filterBoxModel.getFilter());
-		localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH, TAGS);
+		DynamicRunTargetSection runTargetSections = new DynamicRunTargetSection(this,
+				model.getSectionModels(),
+				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter())
+		);
 
-		IPageSection dynamicSection = new DynamicRunTargetSection(this,
-				BootDashActivator.getDefault().getRunTargetModel().getModels(), new RunTargetSectionFactory(this, filterBoxModel.getFilter()) {
+		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
+				this, model, runTargetSections.getSelection().cast(BootDashElement.class).toSingleSelection()
+		);
 
-					@Override
-					public IPageSection create(BootDashModel model) {
-						if (model instanceof LocalBootDashModel) {
-							return new ExpandableSectionWithSelection(BootDashView.this, "Local Boot Apps",
-									localApsTable);
-						}
-						return super.create(model);
-					}
-
-				});
-
-		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(this, model,
-				localApsTable.getSelection().toSingleSelection());
-
-		sections.add(new SashSection(this, new ScrollerSection(this, dynamicSection), detailsSection));
+		sections.add(new SashSection(this, new ScrollerSection(this, runTargetSections), detailsSection));
 		return sections;
 	}
 

@@ -15,9 +15,17 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 
 public class BootDashModelFactory {
 
+	private BootDashModelContext context;
+
+	public BootDashModelFactory(BootDashModelContext context) {
+		this.context = context;
+	}
+
 	public BootDashModel getModel(RunTarget target) {
 		if (target instanceof CloudFoundryRunTarget) {
 			return new CloudFoundryBootDashModel((CloudFoundryRunTarget) target);
+		} else if (target instanceof LocalRunTarget) {
+			return new LocalBootDashModel(context);
 		}
 		return null;
 	}

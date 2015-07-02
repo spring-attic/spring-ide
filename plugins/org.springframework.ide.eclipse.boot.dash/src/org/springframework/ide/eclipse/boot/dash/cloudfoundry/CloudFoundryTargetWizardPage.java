@@ -32,13 +32,15 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  * Creates a Cloud Foundry target by prompting user for credentials and Cloud
  * Foundry target URL.
- * 
+ *
  *
  */
 public class CloudFoundryTargetWizardPage extends WizardPage implements ValueListener<ValidationResult> {
@@ -59,9 +61,11 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private CloudFoundryTargetProperties targetProperties = new CloudFoundryTargetProperties();
 
-	public CloudFoundryTargetWizardPage() {
-		super("Add a Cloud Foundry Target");
+	private LiveSet<RunTarget> targets;
 
+	public CloudFoundryTargetWizardPage(LiveSet<RunTarget> targets) {
+		super("Add a Cloud Foundry Target");
+		this.targets = targets;
 		setTitle("Add a Cloud Foundry Target");
 		setDescription("Enter credentials and a Cloud Foundry target URL.");
 
@@ -162,7 +166,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 					return;
 				}
 				if (spaces != null) {
-					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(spaces, targetProperties);
+					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(targets, spaces, targetProperties);
 					WizardDialog dialog = new WizardDialog(getShell(), spacesWizard);
 					dialog.open();
 				} else {
@@ -228,16 +232,16 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 	}
 
 	/*
-	 * 
+	 *
 	 * Properties change and validation handlers
-	 * 
+	 *
 	 */
 
 	/*
 	 * General validation handler that notifies the wizard if there is an error
 	 * in ANY properties validation, whether credentials, URL or org/space.
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.springsource.ide.eclipse.commons.livexp.core.ValueListener#gotValue(
 	 * org.springsource.ide.eclipse.commons.livexp.core.LiveExpression,
@@ -274,7 +278,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 	}
 
 	/**
-	 * 
+	 *
 	 * This is a separate listener from the general validation handler that only
 	 * enables the org/space UI, and it is only notified when credential
 	 * properties are validated, but not org/spaces validation.

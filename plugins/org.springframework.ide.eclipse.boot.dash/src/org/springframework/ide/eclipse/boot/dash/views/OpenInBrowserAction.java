@@ -17,14 +17,15 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OpenInBrowserAction extends AbstractBootDashAction {
 
 	private ElementStateListener listener;
-	private BootDashModel model;
+	private BootDashViewModel model;
 
-	public OpenInBrowserAction(BootDashModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public OpenInBrowserAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
 		this.model = model;
 		this.setText("Open Web Browser");

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.List;
+import java.util.Set;
 
 import org.cloudfoundry.client.lib.domain.CloudEntity;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
@@ -32,7 +33,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
  * Wizard page to allow users to select a target cloud space when cloning an
@@ -46,9 +48,11 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	private final OrgsAndSpaces spaces;
 
-	OrgsAndSpacesWizardPage(OrgsAndSpaces spaces, CloudFoundryTargetProperties targetProperties) {
-		super("Select an Org and Space");
+	private LiveSet<RunTarget> targets;
 
+	OrgsAndSpacesWizardPage(LiveSet<RunTarget> targets, OrgsAndSpaces spaces, CloudFoundryTargetProperties targetProperties) {
+		super("Select an Org and Space");
+		this.targets = targets;
 		setTitle("Select an Org and Space");
 		setDescription("Select a space in " + targetProperties.getUrl());
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
@@ -184,7 +188,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		if (space != null) {
 			String targetId = CloudFoundryRunTarget.getId(targetProperties.getUserName(), targetProperties.getUrl(),
 					space.getOrganization().getName(), space.getName());
-			for (RunTarget target : RunTargets.getTargets().getValues()) {
+			for (RunTarget target : targets.getValues()) {
 				if (targetId.equals(target.getId())) {
 					return target;
 				}

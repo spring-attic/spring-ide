@@ -59,6 +59,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
@@ -86,6 +87,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
 public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
 
 	private TableViewer tv;
+	private BootDashViewModel viewModel;
 	private BootDashModel model;
 	private BootDashColumn[] enabledColumns = BootDashColumn.values();
 	private MultiSelection<BootDashElement> selection;
@@ -96,12 +98,13 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private ValueListener<Filter<BootDashElement>> filterListener;
 
-	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model) {
-		this(owner, model, null);
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model) {
+		this(owner, viewModel, model, null);
 	}
 
-	public BootDashElementsTableSection(IPageWithSections owner, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
 		super(owner);
+		this.viewModel = viewModel;
 		this.model = model;
 		this.ui = owner instanceof BootDashView ? ((BootDashView)owner).getUserInteractions() : null;
 		this.searchFilterModel = searchFilterModel;
@@ -113,7 +116,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	public void setColumns(BootDashColumn... columns) {
 		this.enabledColumns = columns;
 	}
-	
+
 	protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
 		return new BootDashLabelProvider(columnType);
 	}
@@ -180,7 +183,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		actions = new BootDashActions(model, getSelection(), ui);
+		actions = new BootDashActions(viewModel, getSelection(), ui);
 		hookContextMenu();
 
 		//Careful, either selection or tableviewer might be created first.
@@ -233,7 +236,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			BootDashActionFactory factory = columnType.getSingleClickAction();
 			if (factory!=null) {
 				hasSingleClickActions = true;
-				singleClickActions[i] = factory.create(model, getHoverElement(), ui);
+				singleClickActions[i] = factory.create(viewModel, getHoverElement(), ui);
 			}
 		}
 
@@ -335,7 +338,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getAddRunTargetAction());
-		
+
 		addPreferedConfigSelectionMenu(manager);
 //		manager.add(new Separator());
 //		manager.add(refreshAction);

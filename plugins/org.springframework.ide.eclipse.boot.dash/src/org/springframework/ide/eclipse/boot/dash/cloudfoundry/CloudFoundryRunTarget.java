@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget {
 
@@ -36,6 +39,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget {
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
+	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, APP};
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -64,6 +68,11 @@ public class CloudFoundryRunTarget extends AbstractRunTarget {
 
 	public CloudFoundryOperations getClient() throws CoreException {
 		return CloudFoundryUiUtil.getClient(targetProperties);
+	}
+
+	@Override
+	public BootDashColumn[] getDefaultColumns() {
+		return DEFAULT_COLUMNS;
 	}
 
 }

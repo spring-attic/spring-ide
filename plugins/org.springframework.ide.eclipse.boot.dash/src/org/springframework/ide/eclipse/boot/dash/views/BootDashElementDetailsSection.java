@@ -14,7 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -29,7 +29,7 @@ public class BootDashElementDetailsSection extends PageSection {
 	private LiveExpression<BootDashElement> input;
 	private RequestMappingsSection requestMappings;
 
-	protected BootDashElementDetailsSection(IPageWithSections owner, BootDashModel model, LiveExpression<BootDashElement> input) {
+	protected BootDashElementDetailsSection(IPageWithSections owner, BootDashViewModel model, LiveExpression<BootDashElement> input) {
 		super(owner);
 		this.input = input;
 		this.requestMappings = new RequestMappingsSection(owner, model, input);

@@ -15,11 +15,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModelManager;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 
 /**
@@ -33,9 +30,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	// The shared instance
 	private static BootDashActivator plugin;
 
-	private BootDashModel model;
-
-	private BootDashModelManager runTargetBootModel;
+	private BootDashViewModel model;
 
 	/**
 	 * The constructor
@@ -108,23 +103,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 		getDefault().getLog().log(createErrorStatus(e));
 	}
 
-	// TODO: Consider removing was the local model is handled the same way as
-	// other run target models
-	public synchronized BootDashModel getModel() {
-		if (model == null) {
-			BootDashModelContext context = new DefaultBootDashModelContext();
-			model = new LocalBootDashModel(context);
+	public BootDashViewModel getModel() {
+		if (model==null) {
+			model = new BootDashViewModel(new DefaultBootDashModelContext());
+			model.getRunTargets().add(RunTargets.LOCAL);
 		}
 		return model;
-	}
-
-	public synchronized BootDashModelManager getRunTargetModel() {
-		if (runTargetBootModel == null) {
-			BootDashModelContext context = new DefaultBootDashModelContext();
-			runTargetBootModel = new BootDashModelManager(context, RunTargets.getTargets());
-			runTargetBootModel.getModels().add(getModel());
-		}
-		return runTargetBootModel;
 	}
 
 }

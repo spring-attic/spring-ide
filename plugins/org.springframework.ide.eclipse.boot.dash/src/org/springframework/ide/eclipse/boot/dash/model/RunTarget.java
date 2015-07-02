@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 /**
  * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
@@ -43,5 +44,7 @@ public interface RunTarget extends IdAble, Nameable {
 	 * @param mainType, may be null if the main type can not be 'guessed' unambiguosly.
 	 */
 	public abstract ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception;
+
+	public abstract BootDashColumn[] getDefaultColumns();
 
 }

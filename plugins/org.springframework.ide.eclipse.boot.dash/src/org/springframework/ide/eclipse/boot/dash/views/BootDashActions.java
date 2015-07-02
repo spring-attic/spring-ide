@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -28,7 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 public class BootDashActions {
 
 	///// context info //////////////
-	private BootDashModel model;
+	private BootDashViewModel model;
 	private MultiSelection<BootDashElement> selection;
 	private UserInteractions ui;
 
@@ -40,7 +41,7 @@ public class BootDashActions {
 	private OpenInBrowserAction openBrowserAction;
 	private AddRunTargetAction addTargetAction;
 
-	public BootDashActions(BootDashModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
 		this.selection = selection;
 		this.ui = ui;
@@ -114,12 +115,12 @@ public class BootDashActions {
 		openConfigAction = new OpenLaunchConfigAction(selection, ui);
 		openConsoleAction = new OpenConsoleAction(selection, ui);
 		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
-		addTargetAction = new AddRunTargetAction(selection, ui);
+		addTargetAction = new AddRunTargetAction(model.getRunTargets(), selection, ui);
 	}
 
 	static class RunOrDebugStateAction extends RunStateAction {
 
-		public RunOrDebugStateAction(BootDashModel model, MultiSelection<BootDashElement> selection,
+		public RunOrDebugStateAction(BootDashViewModel model, MultiSelection<BootDashElement> selection,
 				UserInteractions ui, RunState goalState) {
 			super(model, selection, ui, goalState);
 			Assert.isLegal(goalState == RunState.RUNNING || goalState == RunState.DEBUGGING);
@@ -170,7 +171,7 @@ public class BootDashActions {
 	public OpenLaunchConfigAction getOpenConfigAction() {
 		return openConfigAction;
 	}
-	
+
 	public AddRunTargetAction getAddRunTargetAction() {
 		return addTargetAction;
 	}

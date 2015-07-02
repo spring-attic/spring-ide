@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
@@ -50,11 +51,11 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 	private LiveExpression<BootDashElement> input;
 	private Composite page;
 	private TableViewer tv;
-	private BootDashModel model;
+	private BootDashViewModel model;
 	private ElementStateListener modelListener;
 	private RequestMappingLabelProvider labelProvider;
 
-	public RequestMappingsSection(IPageWithSections owner, BootDashModel model, LiveExpression<BootDashElement> selection) {
+	public RequestMappingsSection(IPageWithSections owner, BootDashViewModel model, LiveExpression<BootDashElement> selection) {
 		super(owner);
 		this.model = model;
 		this.input = selection;
@@ -72,7 +73,7 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 		tv.setContentProvider(new ContentProvider());
 		tv.setSorter(new NameSorter());
 		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
-		tv.setInput(BootDashActivator.getDefault().getModel());
+		tv.setInput(model);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getTable());
 		this.input.addListener(new UIValueListener<BootDashElement>() {
 			public void uiGotValue(LiveExpression<BootDashElement> exp, BootDashElement value) {

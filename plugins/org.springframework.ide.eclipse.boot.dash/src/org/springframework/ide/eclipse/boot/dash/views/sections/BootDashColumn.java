@@ -15,6 +15,7 @@ import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenInBrowserAction;
@@ -37,7 +38,7 @@ public enum BootDashColumn {
 		DEFAULT_PATH.editingSupportClass = DefaultPathEditorSupport.class;
 
 		RUN_STATE_ICN.singleClickAction = new BootDashActionFactory() {
-			public AbstractBootDashAction create(BootDashModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui) {
+			public AbstractBootDashAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui) {
 				return new OpenInBrowserAction(model, MultiSelection.singletonOrEmpty(BootDashElement.class, hoverElement), ui);
 			}
 		};

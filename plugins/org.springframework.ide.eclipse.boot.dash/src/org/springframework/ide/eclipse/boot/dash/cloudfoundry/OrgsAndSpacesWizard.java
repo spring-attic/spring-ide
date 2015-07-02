@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
  * Creates a new server instance from a selected space in an organization and
@@ -23,8 +25,8 @@ public class OrgsAndSpacesWizard extends Wizard {
 
 	private CloudFoundryTargetProperties properties;
 
-	public OrgsAndSpacesWizard(OrgsAndSpaces spaces, CloudFoundryTargetProperties targetProperties) {
-		cloudSpacePage = new OrgsAndSpacesWizardPage(spaces, targetProperties);
+	public OrgsAndSpacesWizard(LiveSet<RunTarget> targets, OrgsAndSpaces spaces, CloudFoundryTargetProperties targetProperties) {
+		cloudSpacePage = new OrgsAndSpacesWizardPage(targets, spaces, targetProperties);
 		this.properties = targetProperties;
 		setWindowTitle("Select space for: " + targetProperties.getUrl());
 		setNeedsProgressMonitor(true);

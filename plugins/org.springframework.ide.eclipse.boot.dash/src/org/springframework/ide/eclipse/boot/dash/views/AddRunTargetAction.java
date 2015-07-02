@@ -19,13 +19,16 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class AddRunTargetAction extends AbstractBootDashAction {
 
-	public AddRunTargetAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	private LiveSet<RunTarget> targets;
+
+	public AddRunTargetAction(LiveSet<RunTarget> targets, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
+		this.targets = targets;
 		this.setText("Add a Run Target");
 		this.setToolTipText("Add a Run Target");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target.png"));
@@ -38,14 +41,14 @@ public class AddRunTargetAction extends AbstractBootDashAction {
 
 			@Override
 			public void run() {
-				RunTargetWizard wizard = new RunTargetWizard();
+				RunTargetWizard wizard = new RunTargetWizard(targets);
 				Shell shell = CloudFoundryUiUtil.getShell();
 				if (shell != null) {
 					WizardDialog dialog = new WizardDialog(shell, wizard);
 					if (dialog.open() == Dialog.OK) {
 						RunTarget target = wizard.getRunTarget();
 						if (target != null) {
-							RunTargets.getTargets().add(target);
+							targets.add(target);
 						}
 					}
 				}
