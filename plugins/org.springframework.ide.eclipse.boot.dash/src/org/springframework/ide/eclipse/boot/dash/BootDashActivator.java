@@ -18,6 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -105,7 +106,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	public BootDashViewModel getModel() {
 		if (model==null) {
-			model = new BootDashViewModel(new DefaultBootDashModelContext());
+			model = new BootDashViewModel(new DefaultBootDashModelContext(),
+					RunTargetTypes.LOCAL,
+					RunTargetTypes.CLOUDFOUNDRY
+			);
 			model.getRunTargets().add(RunTargets.LOCAL);
 		}
 		return model;

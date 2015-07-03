@@ -63,6 +63,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
+import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
@@ -337,7 +338,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getOpenConsoleAction());
-		manager.add(actions.getAddRunTargetAction());
+		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
+			manager.add(a);
+		}
 
 		addPreferedConfigSelectionMenu(manager);
 //		manager.add(new Separator());

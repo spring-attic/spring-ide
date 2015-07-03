@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,11 +22,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 public class BootDashActions {
 
@@ -39,7 +41,7 @@ public class BootDashActions {
 	private AbstractBootDashAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
-	private AddRunTargetAction addTargetAction;
+	private AddRunTargetAction[] addTargetActions;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -115,7 +117,18 @@ public class BootDashActions {
 		openConfigAction = new OpenLaunchConfigAction(selection, ui);
 		openConsoleAction = new OpenConsoleAction(selection, ui);
 		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
-		addTargetAction = new AddRunTargetAction(model.getRunTargets(), selection, ui);
+		addTargetActions = createAddTargetActions();
+	}
+
+	private AddRunTargetAction[] createAddTargetActions() {
+		Set<RunTargetType> targetTypes = model.getRunTargetTypes();
+		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
+		for (RunTargetType tt : targetTypes) {
+			if (tt.canCreate()) {
+				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), selection, ui));
+			}
+		}
+		return actions.toArray(new AddRunTargetAction[actions.size()]);
 	}
 
 	static class RunOrDebugStateAction extends RunStateAction {
@@ -172,8 +185,8 @@ public class BootDashActions {
 		return openConfigAction;
 	}
 
-	public AddRunTargetAction getAddRunTargetAction() {
-		return addTargetAction;
+	public AddRunTargetAction[] getAddRunTargetActions() {
+		return addTargetActions;
 	}
 
 	public void dispose() {
@@ -191,6 +204,12 @@ public class BootDashActions {
 		}
 		if (openBrowserAction != null) {
 			openBrowserAction.dispose();
+		}
+		if (addTargetActions!=null) {
+			for (AddRunTargetAction a : addTargetActions) {
+				a.dispose();
+			}
+			addTargetActions = null;
 		}
 	}
 

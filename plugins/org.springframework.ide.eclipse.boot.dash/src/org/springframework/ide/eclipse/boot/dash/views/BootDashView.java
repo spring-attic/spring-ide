@@ -147,7 +147,9 @@ public class BootDashView extends ViewPartWithSections {
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
-		manager.add(actions.getAddRunTargetAction());
+		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
+			manager.add(a);
+		}
 		// manager.add(refreshAction);
 		// manager.add(action2);
 	}

@@ -20,40 +20,26 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class AddRunTargetAction extends AbstractBootDashAction {
 
 	private LiveSet<RunTarget> targets;
+	private RunTargetType runTargetType;
 
-	public AddRunTargetAction(LiveSet<RunTarget> targets, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public AddRunTargetAction(RunTargetType runTargetType, LiveSet<RunTarget> targets, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
+		this.runTargetType = runTargetType;
 		this.targets = targets;
-		this.setText("Add a Run Target");
-		this.setToolTipText("Add a Run Target");
+		this.setText("Add a "+runTargetType.getName()+" Target");
+		this.setToolTipText("Configure a connection to "+runTargetType.getName()+" and add it as a new section to the Boot Dashboard");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target.png"));
 	}
 
 	@Override
 	public void run() {
-
-		Display.getCurrent().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				RunTargetWizard wizard = new RunTargetWizard(targets);
-				Shell shell = CloudFoundryUiUtil.getShell();
-				if (shell != null) {
-					WizardDialog dialog = new WizardDialog(shell, wizard);
-					if (dialog.open() == Dialog.OK) {
-						RunTarget target = wizard.getRunTarget();
-						if (target != null) {
-							targets.add(target);
-						}
-					}
-				}
-			}
-		});
+		runTargetType.openTargetCreationUi(targets);
 	}
 
 	@Override
