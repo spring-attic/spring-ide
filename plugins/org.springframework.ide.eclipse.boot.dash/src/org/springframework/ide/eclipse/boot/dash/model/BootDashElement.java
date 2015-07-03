@@ -80,7 +80,7 @@ public interface BootDashElement extends Nameable, Taggable {
 
 	//TODO: the operations below don't belong here they are really 'UI' not 'model'.
 
-	void stopAsync() throws Exception;
+	void stopAsync(UserInteractions ui) throws Exception;
 	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
 	void openConfig(UserInteractions ui);
 

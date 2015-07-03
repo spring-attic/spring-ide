@@ -12,15 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
-
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -68,7 +67,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget {
 		return userName + " : " + url + " : " + orgName + " : " + spaceName;
 	}
 
-	public CloudFoundryOperations getClient() throws CoreException {
+	public CloudFoundryOperations getClient() throws Exception {
 		return CloudFoundryUiUtil.getClient(targetProperties);
 	}
 

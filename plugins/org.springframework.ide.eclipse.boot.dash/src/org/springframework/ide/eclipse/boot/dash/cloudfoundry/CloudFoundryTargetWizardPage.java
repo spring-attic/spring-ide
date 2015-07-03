@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -33,7 +32,6 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -160,7 +158,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				OrgsAndSpaces spaces = null;
 				try {
 					spaces = CloudFoundryUiUtil.getCloudSpaces(targetProperties, getWizard().getContainer());
-				} catch (CoreException e) {
+				} catch (Exception e) {
 					setErrorMessage(e.getMessage());
 					refreshWizardUI();
 					return;

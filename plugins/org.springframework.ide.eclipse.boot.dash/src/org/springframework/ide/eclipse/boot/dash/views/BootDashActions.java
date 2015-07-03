@@ -91,7 +91,7 @@ public class BootDashActions {
 								for (BootDashElement el : selecteds) {
 									monitor.subTask("Stopping: " + el.getName());
 									try {
-										el.stopAsync();
+										el.stopAsync(ui);
 									} catch (Exception e) {
 										return BootActivator.createErrorStatus(e);
 									}

@@ -169,7 +169,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	@Override
-	public void stopAsync() {
+	public void stopAsync(UserInteractions ui) {
 		try {
 			stop(false);
 		} catch (Exception e) {

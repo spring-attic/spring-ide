@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -19,100 +17,47 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springsource.ide.eclipse.commons.ui.ICoreRunnable;
+import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
 public class CloudFoundryUiUtil {
 
-	public static void runForked(final ICoreRunnable coreRunner, IRunnableContext context) throws CoreException {
-		try {
-			IRunnableWithProgress runner = new IRunnableWithProgress() {
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						coreRunner.run(SubMonitor.convert(monitor));
-					} catch (Exception e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						monitor.done();
-					}
-				}
-			};
-			context.run(true, false, runner);
-		} catch (InvocationTargetException e) {
-			IStatus status;
-			if (e.getCause() instanceof CoreException) {
-				status = ((CoreException) e.getCause()).getStatus();
-			} else {
-				status = BootDashActivator.createErrorStatus(e, "Failed to connect to Cloud Foundry target: ");
-			}
-
-			throw new CoreException(status);
-
-		} catch (InterruptedException e) {
-			BootDashActivator.log(e);
-		}
-	}
-
 	public static OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties,
-			IRunnableContext context) throws CoreException {
+			IRunnableContext context) throws Exception {
 
-		try {
-			final OrgsAndSpaces[] spaces = new OrgsAndSpaces[1];
-			ICoreRunnable coreRunner = new ICoreRunnable() {
-				public void run(IProgressMonitor monitor) throws CoreException {
+		final OrgsAndSpaces[] spaces = new OrgsAndSpaces[1];
 
-					try {
+		Operation op = new Operation(
+				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
+			protected void runOp(IProgressMonitor monitor) throws Exception {
 
-						SubMonitor sub = SubMonitor.convert(monitor, 100);
+				SubMonitor sub = SubMonitor.convert(monitor, 100);
 
-						sub.setTaskName(
-								"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...");
-						sub.worked(50);
-						List<CloudSpace> actualSpaces = getClient(targetProperties).getSpaces();
-						if (actualSpaces != null && !actualSpaces.isEmpty()) {
-							spaces[0] = new OrgsAndSpaces(actualSpaces);
-						}
-						sub.worked(50);
-					} catch (Throwable e) {
-						if (!(e instanceof CoreException)) {
-							throw new CoreException(BootDashActivator.createErrorStatus(e,
-									"Cloud Foundry client error: " + e.getMessage()));
-						} else {
-							throw (CoreException) e;
-						}
-					}
+				sub.worked(50);
+				List<CloudSpace> actualSpaces = getClient(targetProperties).getSpaces();
+				if (actualSpaces != null && !actualSpaces.isEmpty()) {
+					spaces[0] = new OrgsAndSpaces(actualSpaces);
 				}
-			};
-			runForked(coreRunner, context);
+				sub.worked(50);
+			}
+		};
+		Operation.runForked(op, context);
 
-			return spaces[0];
-		} catch (OperationCanceledException e) {
-			// Ignore if cancelled
-		}
-		return null;
-
+		return spaces[0];
 	}
 
-	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws CoreException {
-		try {
-			return targetProperties.getSpace() != null ? new CloudFoundryClient(
-					new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
-					new URL(targetProperties.getUrl()), targetProperties.getSpace(), targetProperties.isSelfsigned())
-					: new CloudFoundryClient(
-							new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
-							new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
-		} catch (MalformedURLException e) {
-			throw new CoreException(BootDashActivator.createErrorStatus(e));
-		}
+	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
+		return targetProperties.getSpace() != null ? new CloudFoundryClient(
+				new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
+				new URL(targetProperties.getUrl()), targetProperties.getSpace(), targetProperties.isSelfsigned())
+				: new CloudFoundryClient(
+						new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
+						new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
+
 	}
 
 	public static Shell getShell() {
