@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,14 +24,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
-import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
