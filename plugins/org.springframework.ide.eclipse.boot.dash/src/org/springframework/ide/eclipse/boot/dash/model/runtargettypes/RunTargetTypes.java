@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.lattice.LatticeRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
@@ -35,5 +36,7 @@ public class RunTargetTypes {
 	};
 
 	public static final RunTargetType CLOUDFOUNDRY = new CloudFoundryRunTargetType();
+
+	public static final RunTargetType LATTICE = new LatticeRunTargetType();
 
 }
