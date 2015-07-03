@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends CellLabelProvider {
-	
+
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
@@ -45,12 +45,24 @@ public class BootDashLabelProvider extends CellLabelProvider {
 				cell.setText(""+e);
 			}
 			break;
+		case HOST:
+			{
+				String name = e.getLiveHost();
+				if (name != null) {
+					cell.setText(name);
+				} else {
+					cell.setText("???");
+				}
+			}
+			break;
 		case APP:
-			String name = e.getName();
-			if (name != null) {
-				cell.setText(name);
-			} else {
-				cell.setText("???");
+			{
+				String name = e.getName();
+				if (name != null) {
+					cell.setText(name);
+				} else {
+					cell.setText("???");
+				}
 			}
 			break;
 		case RUN_TARGET:
