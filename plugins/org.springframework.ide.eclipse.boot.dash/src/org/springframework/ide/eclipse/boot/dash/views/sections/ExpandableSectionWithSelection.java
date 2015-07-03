@@ -156,13 +156,4 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 		}
 	}
 
-//	@SuppressWarnings("unchecked")
-//	@Override
-//	public  getSelection() {
-//		if (child instanceof SelectionSource) {
-//			return ((SelectionSource) child).getSelection();
-//		}
-//		return LiveSets.emptySet(Object.class);
-//	}
-
 }
