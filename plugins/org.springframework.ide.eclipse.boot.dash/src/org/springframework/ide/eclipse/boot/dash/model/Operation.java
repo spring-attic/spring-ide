@@ -57,6 +57,6 @@ public abstract class Operation {
 	}
 
 	public static void runForked(Operation runnable) throws Exception {
-		runForked(runnable, PlatformUI.getWorkbench().getService(IProgressService.class));
+//		runForked(runnable, PlatformUI.getWorkbench().getService(IProgressService.class));
 	}
 }
