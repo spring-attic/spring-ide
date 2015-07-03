@@ -124,7 +124,7 @@ public class BootDashActions {
 		Set<RunTargetType> targetTypes = model.getRunTargetTypes();
 		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
 		for (RunTargetType tt : targetTypes) {
-			if (tt.canCreate()) {
+			if (tt.canInstantiate()) {
 				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), selection, ui));
 			}
 		}

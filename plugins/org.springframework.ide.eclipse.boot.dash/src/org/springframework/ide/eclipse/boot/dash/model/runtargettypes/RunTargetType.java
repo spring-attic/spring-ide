@@ -28,7 +28,7 @@ public interface RunTargetType extends Nameable {
 	 * runtargets provide this ability. For example the 'local' run target
 	 * is a singleton and doesn't allow creating instances.
 	 */
-	boolean canCreate();
+	boolean canInstantiate();
 
 	/**
 	 * RunTargetTypes that return 'true' from 'canCreate' must provide an implementation

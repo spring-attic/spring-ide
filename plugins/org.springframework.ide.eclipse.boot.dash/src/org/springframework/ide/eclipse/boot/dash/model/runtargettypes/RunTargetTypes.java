@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.views.RunTargetWizard;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class RunTargetTypes {
@@ -23,7 +19,7 @@ public class RunTargetTypes {
 	public static final RunTargetType LOCAL = new AbstractRunTargetType("Local") {
 
 		@Override
-		public boolean canCreate() {
+		public boolean canInstantiate() {
 			return false;
 		}
 
@@ -38,27 +34,6 @@ public class RunTargetTypes {
 		};
 	};
 
-	public static final RunTargetType CLOUDFOUNDRY = new AbstractRunTargetType("Cloudfoundry") {
-
-		@Override
-		public void openTargetCreationUi(LiveSet<RunTarget> targets) {
-			RunTargetWizard wizard = new RunTargetWizard(targets);
-			Shell shell = CloudFoundryUiUtil.getShell();
-			if (shell != null) {
-				WizardDialog dialog = new WizardDialog(shell, wizard);
-				if (dialog.open() == Dialog.OK) {
-					RunTarget target = wizard.getRunTarget();
-					if (target != null) {
-						targets.add(target);
-					}
-				}
-			}
-		}
-
-		@Override
-		public boolean canCreate() {
-			return true;
-		}
-	};
+	public static final RunTargetType CLOUDFOUNDRY = new CloudFoundryRunTargetType();
 
 }
