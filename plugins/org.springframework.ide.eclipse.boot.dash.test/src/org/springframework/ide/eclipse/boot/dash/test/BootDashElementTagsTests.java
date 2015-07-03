@@ -76,6 +76,19 @@ public class BootDashElementTagsTests extends Mocks {
 	}
 
 	@Test
+	public void defaultValues_FilterTest() throws Exception {
+		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
+		
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring", "xd"})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring source", "xd"})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring, source"})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
+	}
+
+	@Test
 	public void empty_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("");
