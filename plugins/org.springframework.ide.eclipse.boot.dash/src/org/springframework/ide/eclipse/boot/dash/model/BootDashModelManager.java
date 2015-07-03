@@ -32,7 +32,6 @@ public class BootDashModelManager implements Disposable {
 
 	private LiveSet<BootDashModel> models;
 	private Map<RunTarget, BootDashModel> asMap;
-	private BootDashModelFactory factory;
 	private LiveExpression<Set<RunTarget>> targets;
 	private RunTargetChangeListener targetListener;
 	private ListenerList elementStateListeners = new ListenerList();
@@ -47,7 +46,6 @@ public class BootDashModelManager implements Disposable {
 	public LiveExpression<Set<BootDashModel>> getModels() {
 		if (models == null) {
 			models = new LiveSet<BootDashModel>();
-			factory = new BootDashModelFactory(context);
 			asMap = new HashMap<RunTarget, BootDashModel>();
 			models.dependsOn(targets);
 			targets.addListener(targetListener = new RunTargetChangeListener());
@@ -63,7 +61,7 @@ public class BootDashModelManager implements Disposable {
 			if (value != null && !value.isEmpty()) {
 				for (RunTarget target : value) {
 					if (!asMap.containsKey(target)) {
-						BootDashModel model = factory.getModel(target);
+						BootDashModel model = target.createElementsTabelModel(context);
 						if (model != null) {
 							asMap.put(target, model);
 							models.add(model);

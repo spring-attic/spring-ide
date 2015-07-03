@@ -47,4 +47,9 @@ public interface RunTarget extends IdAble, Nameable {
 
 	public abstract BootDashColumn[] getDefaultColumns();
 
+	/**
+	 * Factory method to create the model for the 'elements tabel' of this run target.
+	 */
+	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context);
+
 }

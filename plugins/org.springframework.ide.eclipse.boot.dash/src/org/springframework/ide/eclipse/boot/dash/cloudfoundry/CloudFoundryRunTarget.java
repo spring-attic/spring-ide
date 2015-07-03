@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
@@ -73,6 +75,11 @@ public class CloudFoundryRunTarget extends AbstractRunTarget {
 	@Override
 	public BootDashColumn[] getDefaultColumns() {
 		return DEFAULT_COLUMNS;
+	}
+
+	@Override
+	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
+		return new CloudFoundryBootDashModel(this);
 	}
 
 }

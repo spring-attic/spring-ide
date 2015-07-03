@@ -48,4 +48,9 @@ public class LocalRunTarget extends AbstractRunTarget {
 	public BootDashColumn[] getDefaultColumns() {
 		return DEFAULT_COLUMNS;
 	}
+
+	@Override
+	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
+		return new LocalBootDashModel(context);
+	}
 }
