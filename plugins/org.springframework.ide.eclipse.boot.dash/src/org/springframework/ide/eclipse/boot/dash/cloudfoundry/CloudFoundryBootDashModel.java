@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -50,11 +49,10 @@ public class CloudFoundryBootDashModel extends BootDashModel {
 					List<CloudApplication> apps = getCloudTarget().getClient().getApplications();
 					if (apps != null) {
 						for (CloudApplication app : apps) {
-							elements.add(new CloudDashElement(getCloudTarget(), app));
+							elements.add(new CloudDashElement(getCloudTarget(), app, CloudFoundryBootDashModel.this));
 						}
 					}
-
-				} catch (CoreException e) {
+				} catch (Exception e) {
 					BootDashActivator.log(e);
 				}
 				return Status.OK_STATUS;

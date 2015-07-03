@@ -15,9 +15,12 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -29,21 +32,22 @@ public class CloudDashElement implements BootDashElement {
 
 	private final CloudApplication app;
 
-	public CloudDashElement(CloudFoundryRunTarget cloudTarget, CloudApplication app) {
+	private final BootDashModel context;
+
+	public CloudDashElement(CloudFoundryRunTarget cloudTarget, CloudApplication app, BootDashModel context) {
 		this.cloudTarget = cloudTarget;
 		this.app = app;
+		this.context = context;
 	}
 
 	@Override
-	public void stopAsync() throws Exception {
-		// TODO Auto-generated method stub
-
+	public void stopAsync(UserInteractions ui) throws Exception {
+		runOp(getStop(), ui);
 	}
 
 	@Override
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		// TODO Auto-generated method stub
-
+		runOp(getRestart(), ui);
 	}
 
 	@Override
@@ -148,6 +152,41 @@ public class CloudDashElement implements BootDashElement {
 	public void setDefaultRequestMapingPath(String defaultPath) {
 		// TODO Auto-generated method stub
 
+	}
+
+	/*
+	 * Runnable Ops
+	 */
+	protected Operation getRestart() {
+		return new Operation("Starting application: " + app.getName()) {
+
+			@Override
+			protected void runOp(IProgressMonitor monitor) throws Exception {
+				cloudTarget.getClient().startApplication(app.getName());
+			}
+		};
+	}
+
+	protected Operation getStop() {
+		return new Operation("Stopping application: " + app.getName()) {
+
+			@Override
+			protected void runOp(IProgressMonitor monitor) throws Exception {
+				cloudTarget.getClient().stopApplication(app.getName());
+			}
+		};
+	}
+
+	protected void runOp(Operation runnable, UserInteractions ui) throws Exception {
+		try {
+			Operation.runForked(runnable);
+			context.notifyElementChanged(this);
+		} catch (Exception e) {
+			if (ui != null) {
+				ui.errorPopup("Error performing Cloud operation: ", e.getMessage());
+			}
+			throw e;
+		}
 	}
 
 }

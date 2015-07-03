@@ -14,8 +14,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;

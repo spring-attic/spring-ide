@@ -28,7 +28,7 @@ public abstract class BootDashModel {
 
 	ListenerList elementStateListeners = new ListenerList();
 
-	void notifyElementChanged(BootDashElement element) {
+	public void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
 			((ElementStateListener) l).stateChanged(element);
 		}
