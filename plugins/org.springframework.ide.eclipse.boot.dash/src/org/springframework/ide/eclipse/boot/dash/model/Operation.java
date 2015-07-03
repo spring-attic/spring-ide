@@ -11,15 +11,15 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IProgressService;
 
-public abstract class Operation {
+public abstract class Operation<T> {
 
 	private final String opName;
 
@@ -27,36 +27,39 @@ public abstract class Operation {
 		this.opName = opName;
 	}
 
-	public void run(IProgressMonitor monitor) throws Exception {
-		SubMonitor sub = SubMonitor.convert(monitor);
-		sub.subTask(opName);
-		runOp(sub.newChild(100));
+	public String getName() {
+		return this.opName;
 	}
 
-	protected abstract void runOp(IProgressMonitor monitor) throws Exception;
+	public T run(IProgressMonitor monitor) throws Exception {
+		SubMonitor sub = SubMonitor.convert(monitor);
+		sub.subTask(opName);
+		return runOp(sub.newChild(100));
+	}
 
-	public static void runForked(final Operation op, IRunnableContext context) throws Exception {
+	protected abstract T runOp(IProgressMonitor monitor) throws Exception;
 
+	public T run(IRunnableContext context, boolean fork) throws Exception {
+
+		final List<T> val = new ArrayList<T>();
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
 
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
-					op.run(monitor);
+					val.add(Operation.this.run(monitor));
 				} catch (Exception e) {
 					throw new InvocationTargetException(e);
 				}
 			}
 		};
 		try {
-			context.run(true, true, runnable);
+			context.run(fork, true, runnable);
+
 		} catch (InvocationTargetException ite) {
 			// Don't throw the wrapper
 			throw ite.getTargetException() instanceof Exception ? (Exception) ite.getTargetException() : ite;
 		}
-	}
-
-	public static void runForked(Operation runnable) throws Exception {
-//		runForked(runnable, PlatformUI.getWorkbench().getService(IProgressService.class));
+		return val.get(0);
 	}
 }

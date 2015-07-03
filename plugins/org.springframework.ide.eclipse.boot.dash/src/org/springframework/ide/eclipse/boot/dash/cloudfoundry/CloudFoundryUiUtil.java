@@ -18,7 +18,6 @@ import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -29,25 +28,21 @@ public class CloudFoundryUiUtil {
 	public static OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties,
 			IRunnableContext context) throws Exception {
 
-		final OrgsAndSpaces[] spaces = new OrgsAndSpaces[1];
+		OrgsAndSpaces spaces = null;
 
-		Operation op = new Operation(
+		Operation<List<CloudSpace>> op = new Operation<List<CloudSpace>>(
 				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
-			protected void runOp(IProgressMonitor monitor) throws Exception {
-
-				SubMonitor sub = SubMonitor.convert(monitor, 100);
-
-				sub.worked(50);
-				List<CloudSpace> actualSpaces = getClient(targetProperties).getSpaces();
-				if (actualSpaces != null && !actualSpaces.isEmpty()) {
-					spaces[0] = new OrgsAndSpaces(actualSpaces);
-				}
-				sub.worked(50);
+			protected List<CloudSpace> runOp(IProgressMonitor monitor) throws Exception {
+				return getClient(targetProperties).getSpaces();
 			}
 		};
-		Operation.runForked(op, context);
 
-		return spaces[0];
+		List<CloudSpace> actualSpaces = op.run(context, true);
+		if (actualSpaces != null && !actualSpaces.isEmpty()) {
+			spaces = new OrgsAndSpaces(actualSpaces);
+		}
+
+		return spaces;
 	}
 
 	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
