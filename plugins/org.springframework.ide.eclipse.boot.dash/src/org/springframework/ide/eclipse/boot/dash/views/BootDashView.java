@@ -15,9 +15,15 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -147,11 +153,40 @@ public class BootDashView extends ViewPartWithSections {
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
-		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
-			manager.add(a);
-		}
+		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
+	}
+
+	public void createAddRunTargetPulldown(IToolBarManager toolbar) {
+		Action dropdownAction=new Action("Create Target",SWT.DROP_DOWN){};
+		dropdownAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target.png"));
+		dropdownAction.setMenuCreator(new IMenuCreator() {
+			Menu theMenu;
+
+			@Override
+			public Menu getMenu(Menu parent) {
+				return null;
+			}
+
+			@Override
+			public Menu getMenu(Control parent) {
+				if (theMenu==null) {
+					MenuManager menu = new MenuManager();
+					for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
+						menu.add(a);
+					}
+					theMenu = menu.createContextMenu(parent);
+				}
+				return theMenu;
+			}
+
+			@Override
+			public void dispose() {
+			}
+		});
+
+		toolbar.add(dropdownAction);
 	}
 
 	// private void hookDoubleClickAction() {
