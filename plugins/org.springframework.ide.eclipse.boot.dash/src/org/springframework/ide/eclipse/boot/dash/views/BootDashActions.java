@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -34,6 +35,7 @@ public class BootDashActions {
 	private BootDashViewModel model;
 	private MultiSelection<BootDashElement> selection;
 	private UserInteractions ui;
+	private BootDashModel sectionModel;
 
 	///// actions ///////////////////
 
@@ -42,6 +44,8 @@ public class BootDashActions {
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
 	private AddRunTargetAction[] addTargetActions;
+	private RefreshRunTargetAction refreshAction;
+	
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -50,18 +54,17 @@ public class BootDashActions {
 
 		makeActions();
 	}
+	
+	public BootDashActions(BootDashViewModel model, BootDashModel sectionModel, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+		this.model = model;
+		this.selection = selection;
+		this.ui = ui;
+        this.sectionModel = sectionModel;
+		makeActions();
+	}
 
 	protected void makeActions() {
-		// refreshAction = new Action() {
-		// public void run() {
-		// model.refresh();
-		// tv.refresh();
-		// }
-		// };
-		// refreshAction.setText("Refresh");
-		// refreshAction.setToolTipText("Manually trigger a view refresh");
-		// refreshAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
-
+		
 		RunStateAction restartAction = new RunOrDebugStateAction(model, selection, ui, RunState.RUNNING);
 		restartAction.setText("(Re)start");
 		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
@@ -118,6 +121,10 @@ public class BootDashActions {
 		openConsoleAction = new OpenConsoleAction(selection, ui);
 		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
 		addTargetActions = createAddTargetActions();
+
+		if (sectionModel != null) {
+			refreshAction = new RefreshRunTargetAction(sectionModel, selection, ui);
+		}
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -187,6 +194,14 @@ public class BootDashActions {
 
 	public AddRunTargetAction[] getAddRunTargetActions() {
 		return addTargetActions;
+	}
+	
+	/**
+	 * 
+	 * @return May be null as it may not be supported on all models.
+	 */
+	public RefreshRunTargetAction getRefreshRunTargetAction() {
+		return refreshAction;
 	}
 
 	public void dispose() {
