@@ -184,7 +184,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		actions = new BootDashActions(viewModel, getSelection(), ui);
+		actions = new BootDashActions(viewModel, model, getSelection(), ui);
 		hookContextMenu();
 
 		//Careful, either selection or tableviewer might be created first.
@@ -348,6 +348,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		manager.add(actions.getOpenConsoleAction());
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
 			manager.add(a);
+		}
+		
+		IAction refreshAction = actions.getRefreshRunTargetAction();
+		if (refreshAction != null) {
+			manager.add(refreshAction);
 		}
 
 		addPreferedConfigSelectionMenu(manager);
