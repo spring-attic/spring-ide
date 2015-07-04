@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -46,12 +47,17 @@ public class CloudFoundryBootDashModel extends BootDashModel {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
+
 					List<CloudApplication> apps = getCloudTarget().getClient().getApplications();
+					List<BootDashElement> updatedElements = new ArrayList<BootDashElement>();
 					if (apps != null) {
 						for (CloudApplication app : apps) {
-							elements.add(new CloudDashElement(getCloudTarget(), app, CloudFoundryBootDashModel.this));
+							updatedElements
+									.add(new CloudDashElement(getCloudTarget(), app, CloudFoundryBootDashModel.this));
 						}
 					}
+					elements.replaceAll(updatedElements);
+
 				} catch (Exception e) {
 					BootDashActivator.log(e);
 				}
