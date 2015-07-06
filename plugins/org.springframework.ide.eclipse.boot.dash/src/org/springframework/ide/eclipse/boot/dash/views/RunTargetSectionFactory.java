@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
-
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -44,7 +39,6 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 		RunTarget runTarget = model.getRunTarget();
 		String sectionName = runTarget.getName();
 		BootDashElementsTableSection section = new BootDashElementsTableSection(owner, viewModel, model, elementFilter);
-		section.setColumns(runTarget.getDefaultColumns());
 		return new ExpandableSectionWithSelection(owner, sectionName, section);
 	}
 }
