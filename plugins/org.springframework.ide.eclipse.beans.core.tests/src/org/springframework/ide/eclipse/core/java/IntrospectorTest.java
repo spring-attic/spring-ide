@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.core.java;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,6 +42,8 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  */
 public class IntrospectorTest {
 	
+	private IProject project;
+	
 	@BeforeClass
 	public static void setUp() {
 		if (Platform.OS_WIN32.equals(Platform.getOS())) {
@@ -50,13 +55,21 @@ public class IntrospectorTest {
 		}
 	}
 	
+	@After
+	public void deleteProject() throws Exception {
+		if (project != null) {
+			project.delete(true, null);
+			project = null;
+		}	
+	}
+	
 	/**
 	 * Several tests dealing with intertype declared methods on the bean class
 	 */
 	@Test
 	public void testDeclaredMethods() throws CoreException, IOException {
 		Assume.assumeTrue(AjdtUtils.isJdtWeavingPresent());
-		IProject project = StsTestUtil.createPredefinedProject("aspectj", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("aspectj", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.Foo");
 		Set<IMethod> methods = Introspector.findAllWritableProperties(foo);
 		assertTrue(methods.size() > 1);
@@ -81,47 +94,39 @@ public class IntrospectorTest {
 		
 		assertTrue(containsSetBar);
 		assertTrue(containsSetFoochen);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testDoesExtend() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		assertTrue(Introspector.doesExtend(foo, "org.springframework.Base"));
 		assertTrue(!Introspector.doesExtend(foo, "org.springframework.beans.factory.BeanFactory"));
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testDoesImplement() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		assertTrue(Introspector.doesImplement(foo, "org.springframework.FooInterface"));
 		assertTrue(!Introspector
 				.doesImplement(foo, "org.springframework.beans.factory.BeanFactory"));
 		IType base = JdtUtils.getJavaType(project, "org.springframework.Base");
 		assertTrue(Introspector.doesImplement(base, "org.springframework.FooInterface"));
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testfindAllConstructor() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IMethod> cons = Introspector.findAllConstructors(foo);
 		assertTrue(!cons.isEmpty());
 		assertTrue(cons.toArray().length == 5);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testFindAllMethodsWithFilter() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IMethod> methods = Introspector.findAllMethods(foo, new IMethodFilter() {
 
@@ -140,13 +145,11 @@ public class IntrospectorTest {
 		});
 		assertTrue(!methods.isEmpty());
 		checkResult(methods, 3);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testFindAllMethods() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		// only methods; no constructors
 		Set<IMethod> methods = Introspector.findAllMethods(foo, "", -1, Public.DONT_CARE,
@@ -164,49 +167,41 @@ public class IntrospectorTest {
 		// only protected methods setters (static)
 		methods = Introspector.findAllMethods(foo, "", -1, Public.NO, Static.YES);
 		checkResult(methods, 4);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testGetAllImplementedInterfaces() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IType> interfaces = Introspector.getAllImplementedInterfaces(foo);
 		assertTrue(interfaces.toArray().length == 2);
 		IType base = JdtUtils.getJavaType(project, "org.springframework.Base");
 		interfaces = Introspector.getAllImplementedInterfaces(base);
 		assertTrue(interfaces.toArray().length == 1);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testGetAllMethods() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		Set<IMethod> methods = Introspector.getAllMethods(foo);
 		checkResult(methods, 24);
 		IType base = JdtUtils.getJavaType(project, "org.springframework.Base");
 		methods = Introspector.getAllMethods(base);
 		checkResult(methods, 20);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testFindSpecificMethod() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.SubClass");
 		IMethod method = Introspector.findMethod(foo, "getDao", 0, Public.YES, Static.NO);
 		assertNotNull(method);
-		
-		project.delete(true, null);
 	}
 
 	@Test
 	public void testFindSpecificMethodFromInterfaces() throws CoreException, IOException {
-		IProject project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
 		IType foo = JdtUtils.getJavaType(project, "org.springframework.AbstractClass");
 
 		IMethod method1 = Introspector.findMethod(foo, "method1", 0, Public.YES, Static.NO);
@@ -217,8 +212,33 @@ public class IntrospectorTest {
 
 		IMethod method3 = Introspector.findMethod(foo, "method3", 0, Public.YES, Static.NO);
 		assertNotNull(method3);
+	}
+	
+	@Test
+	public void testPropertyChecks() throws Exception {
+		project = StsTestUtil.createPredefinedProject("validation", "org.springframework.ide.eclipse.beans.core.tests");
+		IType propTestClass = JdtUtils.getJavaType(project, "org.springframework.PropertyTestClass");
+		
+		assertTrue(Introspector.hasWritableProperty(propTestClass, "foo"));
+		assertTrue(Introspector.hasWritableProperty(propTestClass, "Foo"));
+		assertTrue(Introspector.hasWritableProperty(propTestClass, "writeOnlyProp"));
+		assertTrue(Introspector.hasWritableProperty(propTestClass, "WriteOnlyProp"));
+		
+		assertFalse(Introspector.hasWritableProperty(propTestClass, "readOnlyProp"));
+		assertFalse(Introspector.hasWritableProperty(propTestClass, "ReadOnlyProp"));
+		
+		assertNotNull(Introspector.getReadableProperty(propTestClass, "foo"));
+		assertNotNull(Introspector.getReadableProperty(propTestClass, "Foo"));
+		assertNotNull(Introspector.getReadableProperty(propTestClass, "readOnlyProp"));
+		assertNotNull(Introspector.getReadableProperty(propTestClass, "ReadOnlyProp"));
 
-		project.delete(true, null);
+		assertNull(Introspector.getReadableProperty(propTestClass, "writeOnlyProp"));
+		assertNull(Introspector.getReadableProperty(propTestClass, "WriteOnlyProp"));
+		
+		assertNotNull(Introspector.getReadableProperty(propTestClass, "UPPERCaseProp"));
+		assertNotNull(Introspector.getReadableProperty(propTestClass, "uPPERCaseProp"));
+		assertTrue(Introspector.hasWritableProperty(propTestClass, "UPPERCaseProp"));
+		assertTrue(Introspector.hasWritableProperty(propTestClass, "uPPERCaseProp"));
 	}
 
 	private void checkResult(Set<IMethod> methods, int expectedSize) {

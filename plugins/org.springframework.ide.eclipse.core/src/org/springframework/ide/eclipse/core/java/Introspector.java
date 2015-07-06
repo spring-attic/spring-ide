@@ -53,7 +53,7 @@ public final class Introspector {
 		if (name == null || name.length() == 0) {
 			return name;
 		}
-		if (name.length() > 1 && Character.isUpperCase(name.charAt(1)) && Character.isLowerCase(name.charAt(0))) {
+		if (name.length() > 1 && Character.isUpperCase(name.charAt(0))) {
 			return name;
 		}
 		char chars[] = name.toCharArray();
