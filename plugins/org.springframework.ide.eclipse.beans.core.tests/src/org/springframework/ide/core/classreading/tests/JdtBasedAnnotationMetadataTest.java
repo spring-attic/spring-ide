@@ -332,13 +332,13 @@ public class JdtBasedAnnotationMetadataTest {
 		
 		AnnotationMemberValuePair values = members.iterator().next();
 		assertEquals("excludeFilters", values.getName());
-		assertTrue(values.getValueAsObject() instanceof Type[]);
-		Type[] filterTypes = (Type[]) values.getValueAsObject();
+		assertTrue(values.getValueAsObject() instanceof Object[]);
+		Object[] filterTypes = (Object[]) values.getValueAsObject();
 		
 		assertEquals(3, filterTypes.length);
-		assertEquals(Service.class.getName(), filterTypes[0].getClassName());
-		assertEquals(Configuration.class.getName(), filterTypes[1].getClassName());
-		assertEquals("org.test.spring.SimpleBeanClass", filterTypes[2].getClassName());
+		assertEquals(Service.class.getName(), ((Type)filterTypes[0]).getClassName());
+		assertEquals(Configuration.class.getName(), ((Type)filterTypes[1]).getClassName());
+		assertEquals("org.test.spring.SimpleBeanClass", ((Type)filterTypes[2]).getClassName());
 	}
 
 	@Test

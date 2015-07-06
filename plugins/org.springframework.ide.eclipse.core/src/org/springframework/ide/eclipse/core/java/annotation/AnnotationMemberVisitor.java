@@ -159,11 +159,9 @@ public class AnnotationMemberVisitor extends AnnotationVisitor {
 				}
 
 				if (typeOfArray != null && name.equals("value") && !advancedValueProcessing) {
-					annotation.addMember(new AnnotationMemberValuePair(null, value, (Object[]) values.toArray((Object[]) Array.newInstance(
-							typeOfArray, values.size()))));
+					annotation.addMember(new AnnotationMemberValuePair(null, value, values.toArray(new Object[values.size()])));
 				} else if (typeOfArray != null && !annotation.hasMember(name)) {
-					annotation.addMember(new AnnotationMemberValuePair(name, value, (Object[]) values.toArray((Object[]) Array.newInstance(
-							typeOfArray, values.size()))));
+					annotation.addMember(new AnnotationMemberValuePair(name, value, values.toArray(new Object[values.size()])));
 				}
 			}
 
