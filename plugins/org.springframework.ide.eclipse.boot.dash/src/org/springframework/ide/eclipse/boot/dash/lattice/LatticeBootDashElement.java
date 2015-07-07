@@ -19,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -31,6 +30,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import io.pivotal.receptor.commands.ActualLRPResponse;
@@ -40,26 +41,19 @@ import io.pivotal.receptor.support.Route;
 public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 
 	private String processGuid;
-	private DesiredLRPResponse desiredLrp;
-	private Map<Integer, ActualLRPResponse> actualLrps = new TreeMap<Integer, ActualLRPResponse>();
-
 	private RunTarget target;
 	private BootDashModel parent;
 
-	private LiveExpression<RunState> runState = new LiveExpression<RunState>(INACTIVE) {
-		protected RunState compute() {
-			RunState stateSummary = getDesiredInstances()>0?RunState.STARTING:RunState.INACTIVE;
-			for (ActualLRPResponse alrp : getActualLrps()) {
-				stateSummary = stateSummary.merge(getRunState(alrp));
-			}
-			return stateSummary;
-		}
-	};
+	private LiveVariable<DesiredLRPResponse> desiredLrp = new LiveVariable<DesiredLRPResponse>();
+	private LiveSet<ActualLRPResponse> actualLrps = new LiveSet<ActualLRPResponse>();
 
 	private LiveExpression<Integer> runningInstances = new LiveExpression<Integer>(0) {
+		{
+			dependsOn(actualLrps);
+		}
 		protected Integer compute() {
 			int count = 0;
-			for (ActualLRPResponse alrp : getActualLrps()) {
+			for (ActualLRPResponse alrp : actualLrps.getValues()) {
 				if (getRunState(alrp)==RunState.RUNNING) {
 					count++;
 				}
@@ -69,8 +63,11 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 	};
 
 	private LiveExpression<Integer> desiredInstances = new LiveExpression<Integer>(0) {
+		{
+			dependsOn(desiredLrp);
+		}
 		protected Integer compute() {
-			DesiredLRPResponse lrp = desiredLrp;
+			DesiredLRPResponse lrp = desiredLrp.getValue();
 			if (lrp!=null) {
 				return lrp.getInstances();
 			}
@@ -78,16 +75,32 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 		}
 	};
 
+	private LiveExpression<RunState> runState = new LiveExpression<RunState>(INACTIVE) {
+		{
+			dependsOn(desiredInstances);
+			dependsOn(actualLrps);
+		}
+		protected RunState compute() {
+			RunState stateSummary = getDesiredInstances()>0?RunState.STARTING:RunState.INACTIVE;
+			for (ActualLRPResponse alrp : actualLrps.getValues()) {
+				stateSummary = stateSummary.merge(getRunState(alrp));
+			}
+			return stateSummary;
+		}
+	};
+
+
+
 	public LatticeBootDashElement(final BootDashModel parent, RunTarget target, String processGuid) {
 		super(processGuid);
 		this.processGuid = processGuid;
 		this.parent = parent;
 		this.target = target;
-		registerLiveExpListener(parent);
+		registerLiveExpListener();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void registerLiveExpListener(final BootDashModel parent) {
+	public void registerLiveExpListener() {
 		ValueListener modelChangeNotfiier = new ValueListener() {
 			public void gotValue(LiveExpression exp, Object value) {
 				parent.notifyElementChanged(LatticeBootDashElement.this);
@@ -115,30 +128,6 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 		}
 	}
 
-	public void putActualLrp(ActualLRPResponse alrp) {
-		synchronized (this) {
-			int id = alrp.getIndex();
-			actualLrps.put(id, alrp);
-		}
-		refreshLivexps();
-	}
-
-	private void refreshLivexps() {
-		runState.refresh();
-		runningInstances.refresh();
-		desiredInstances.refresh();
-	}
-
-	public synchronized ActualLRPResponse[] getActualLrps() {
-		Collection<ActualLRPResponse> collection = actualLrps.values();
-		return collection.toArray(new ActualLRPResponse[collection.size()]);
-	}
-
-	public synchronized void removeActualLrp(ActualLRPResponse removedLrp) {
-		actualLrps.remove(removedLrp.getIndex());
-		refreshLivexps();
-	}
-
 	@Override
 	public IJavaProject getJavaProject() {
 		return null;
@@ -161,7 +150,7 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public int getLivePort() {
-		DesiredLRPResponse lrp = desiredLrp;
+		DesiredLRPResponse lrp = desiredLrp.getValue();
 		if (lrp!=null) {
 			Map<String, Route[]> routes = lrp.getRoutes();
 	//		System.out.println(">>>> routes");
@@ -185,7 +174,7 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public String getLiveHost() {
-		DesiredLRPResponse lrp = desiredLrp;
+		DesiredLRPResponse lrp = desiredLrp.getValue();
 		if (lrp!=null) {
 			Map<String, Route[]> routes = lrp.getRoutes();
 	//		System.out.println(">>>> routes");
@@ -287,8 +276,7 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 	}
 
 	public void setDesiredLrp(DesiredLRPResponse lrp) {
-		this.desiredLrp = lrp;
-		refreshLivexps();
+		this.desiredLrp.setValue(lrp);
 	}
 
 	@Override
@@ -301,6 +289,7 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 		return desiredInstances.getValue();
 	}
 
-
-
+	public void setActualLrps(Collection<ActualLRPResponse> alrps) {
+		actualLrps.replaceAll(alrps);
+	}
 }
