@@ -57,11 +57,6 @@ public class LatticeBootDashModel extends BootDashModel {
 	public synchronized LiveSet<BootDashElement> getElements() {
 		if (elements==null) {
 			elements = new LiveSet<BootDashElement>();
-			elements.addListener(new ValueListener<Set<BootDashElement>>() {
-				public void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
-					System.out.println("lattice BDEs: "+value);
-				}
-			});
 			startRefreshJob();
 		}
 		return elements;
