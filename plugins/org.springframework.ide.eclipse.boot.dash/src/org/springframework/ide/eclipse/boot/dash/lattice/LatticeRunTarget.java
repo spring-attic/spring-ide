@@ -14,7 +14,7 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ public class LatticeRunTarget extends AbstractRunTarget {
 
 	private static final EnumSet<RunState> SUPPORTED_RUN_GOAL_STATES = EnumSet.of(RUNNING, INACTIVE);
 
-	private static final BootDashColumn[] DEFAULT_COLUMS = {RUN_STATE_ICN, APP, HOST, LIVE_PORT};
+	private static final BootDashColumn[] DEFAULT_COLUMS = {RUN_STATE_ICN, APP, HOST, INSTANCES};
 
 	private String targetHost;
 

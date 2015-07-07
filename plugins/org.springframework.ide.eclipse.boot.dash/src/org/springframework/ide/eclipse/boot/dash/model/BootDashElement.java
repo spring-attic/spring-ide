@@ -83,5 +83,7 @@ public interface BootDashElement extends Nameable, Taggable {
 	void stopAsync(UserInteractions ui) throws Exception;
 	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
 	void openConfig(UserInteractions ui);
+	int getActualInstances();
+	int getDesiredInstances();
 
 }

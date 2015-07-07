@@ -220,4 +220,16 @@ public class CloudDashElement implements BootDashElement {
 		job.schedule();
 
 	}
+
+	@Override
+	public int getActualInstances() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getDesiredInstances() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

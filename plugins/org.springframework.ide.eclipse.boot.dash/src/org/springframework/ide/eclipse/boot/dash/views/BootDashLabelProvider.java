@@ -91,6 +91,11 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			String path = e.getDefaultRequestMappingPath();
 			cell.setText(path==null?"":path);
 			break;
+		case INSTANCES:
+			int actual = e.getActualInstances();
+			int desired = e.getDesiredInstances();
+			cell.setText(actual+"/"+desired);
+			break;
 		default:
 			cell.setText("???");
 		}
