@@ -101,9 +101,6 @@
 		
         <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
         
-        <!-- cloud foundry -->
-        <module>plugins/org.springframework.ide.eclipse.cloudfoundry.client</module>
-
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>
 		<module>plugins/org.springframework.ide.eclipse.doc</module>
