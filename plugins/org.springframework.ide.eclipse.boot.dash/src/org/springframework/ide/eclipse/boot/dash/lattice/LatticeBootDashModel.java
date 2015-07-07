@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.lattice;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +29,12 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import io.pivotal.receptor.client.ReceptorClient;
 import io.pivotal.receptor.commands.ActualLRPResponse;
 import io.pivotal.receptor.commands.DesiredLRPResponse;
-
-import com.google.common.collect.ArrayListMultimap;
 
 public class LatticeBootDashModel extends BootDashModel {
 
