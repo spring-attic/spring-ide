@@ -14,7 +14,6 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
@@ -27,7 +26,7 @@ public enum BootDashColumn {
 	APP(    		"Application", 150),
 	RUN_TARGET(		"Target", 	60),
 	RUN_STATE(		"State", 	100),
-	RUN_STATE_ICN(	"",			20),
+	RUN_STATE_ICN(	"",		"State",	20),
 	TAGS(			"Tags",		100),
 	LIVE_PORT(		"Port",		70),
 	DEFAULT_PATH(	"Path",		70),
@@ -47,6 +46,7 @@ public enum BootDashColumn {
 	}
 
 	private final String label;
+	private final String longLabel;
 	private final int defaultWidth;
 	private final int allignment;
 	private Class<? extends EditingSupport> editingSupportClass;
@@ -56,8 +56,17 @@ public enum BootDashColumn {
 		this(label, defaultWidth, SWT.LEFT);
 	}
 
+	private BootDashColumn(String label, String longLabel, int defaultWidth) {
+		this(label, longLabel, defaultWidth, SWT.LEFT);
+	}
+
 	private BootDashColumn(String label, int defaultWidth, int allignment) {
+		this(label, label, defaultWidth, allignment);
+	}
+
+	private BootDashColumn(String label, String longLabel, int defaultWidth, int allignment) {
 		this.label = label;
+		this.longLabel = longLabel;
 		this.defaultWidth = defaultWidth;
 		this.allignment = allignment;
 	}
@@ -65,6 +74,11 @@ public enum BootDashColumn {
 	public String getLabel() {
 		return label;
 	}
+	
+	public String getLongLabel() {
+		return longLabel;
+	}
+	
 	public int getDefaultWidth() {
 		return defaultWidth;
 	}
