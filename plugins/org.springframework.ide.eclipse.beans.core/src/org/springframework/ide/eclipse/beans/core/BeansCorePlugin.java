@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -186,18 +187,14 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		getPreferenceStore().setDefault(LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
 
 		Job modelJob = new Job("Initializing Spring Tooling") {
-
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-
 				initNamespaceHandlers(context);
-
 				model.start();
-
 				return Status.OK_STATUS;
 			}
 		};
-		modelJob.setRule(BeansCoreUtils.BEANS_MODEL_INIT_RULE);
+		modelJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), BeansCoreUtils.BEANS_MODEL_INIT_RULE));
 		// modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		// modelJob.setSystem(true);
 		modelJob.setPriority(Job.INTERACTIVE);
