@@ -455,6 +455,9 @@ public abstract class StyledTextCellEditor extends CellEditor {
                     super.keyReleaseOccured(keyEvent);
                 }
             }
+            if (popupOpen) {
+            	return;
+            }
         }
         super.keyReleaseOccured(keyEvent);
     }
