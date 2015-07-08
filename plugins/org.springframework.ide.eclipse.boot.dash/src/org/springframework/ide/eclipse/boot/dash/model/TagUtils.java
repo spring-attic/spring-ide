@@ -23,15 +23,17 @@ import org.apache.commons.lang.StringUtils;
  */
 public class TagUtils {
 	
+	public static final char SEPARATOR_SYMBOL = ',';
+	
 	/**
 	 * String separator between tags string representation
 	 */
-	public static final String SEPARATOR = ", ";
+	public static final String SEPARATOR = SEPARATOR_SYMBOL + " ";
 	
 	/**
 	 * Regular Expression pattern for separation string between tags in their textual representation
 	 */
-	public static final String SEPARATOR_REGEX = "\\s*,\\s*";
+	public static final String SEPARATOR_REGEX = "\\s*" + SEPARATOR_SYMBOL + "\\s*";
 	
 	/**
 	 * Parses text into tags

@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -20,10 +20,11 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 
 @SuppressWarnings("restriction")
-public class BootDashLabelProvider extends CellLabelProvider {
-
+public class BootDashLabelProvider extends StyledCellLabelProvider {
+	
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
@@ -82,6 +83,7 @@ public class BootDashLabelProvider extends CellLabelProvider {
 			} else {
 				cell.setText("");
 			}
+			cell.setStyleRanges(UIUtils.getStyleRangesForTags(cell.getText()));
 			break;
 		case LIVE_PORT:
 			int port = e.getLivePort();

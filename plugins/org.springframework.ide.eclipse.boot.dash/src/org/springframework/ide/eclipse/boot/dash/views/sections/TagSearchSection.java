@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -34,12 +38,13 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 public class TagSearchSection extends PageSection implements Disposable {
 
 	private Text tagsSearchBox;
+	private BootDashViewModel viewModel;
 	private LiveVariable<String> model;
 
-
-	public TagSearchSection(IPageWithSections owner, LiveVariable<String> model) {
+	public TagSearchSection(IPageWithSections owner, LiveVariable<String> model, BootDashViewModel viewModel) {
 		super(owner);
 		this.model = model;
+		this.viewModel = viewModel;
 	}
 
 	@Override
@@ -66,6 +71,11 @@ public class TagSearchSection extends PageSection implements Disposable {
 				}
 			}
 		});
+		
+		IContentProposalProvider proposalProvider = new TagContentProposalProvider(viewModel);
+		ContentProposalAdapter caAdapter = new ContentProposalAdapter(tagsSearchBox, new TextContentAdapter(), proposalProvider, UIUtils.CTRL_SPACE, UIUtils.TAG_CA_AUTO_ACTIVATION_CHARS);
+		caAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+
 	}
 
 	@Override
