@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -66,7 +67,11 @@ public class LatticeBootDashModel extends BootDashModel {
 		this.refreshJob = new Job("Refresh Lattice State") {
 			protected IStatus run(IProgressMonitor monitor) {
 				if (!isDisposed()) {
-					refresh();
+					try {
+						refresh();
+					} catch (Throwable e) {
+						BootDashActivator.log(e);
+					}
 					this.schedule(REFRESH_INTERVAL);
 				}
 				return Status.OK_STATUS;
