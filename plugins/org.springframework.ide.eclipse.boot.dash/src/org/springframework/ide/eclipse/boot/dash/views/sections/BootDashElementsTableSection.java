@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -547,10 +548,25 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		viewer.setLabelProvider(getLabelProvider(column));
 		if (column.getEditingSupportClass() != null) {
 			try {
-				viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class)
-						.newInstance(tv, getSelection().toSingleSelection()));
-			} catch (Throwable t) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), t));
+				viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, BootDashViewModel.class)
+						.newInstance(tv, getSelection().toSingleSelection(), viewModel));
+			} catch (NoSuchMethodException e) {
+				try {
+					viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class)
+							.newInstance(tv, getSelection().toSingleSelection()));
+				} catch (Throwable t) {
+					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), t));
+				}
+			} catch (InstantiationException e) {
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+			} catch (IllegalAccessException e) {
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+			} catch (IllegalArgumentException e) {
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+			} catch (InvocationTargetException e) {
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+			} catch (SecurityException e) {
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
 			}
 		}
 

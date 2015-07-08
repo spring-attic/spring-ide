@@ -13,11 +13,16 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -30,12 +35,19 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  */
 public class TagEditingSupport extends EditingSupport {
 
-	private TextCellEditor editor;
+	private StyledTextCellEditor editor;
 
 	public TagEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection) {
 		super(viewer);
-		this.editor = new TextCellEditor(viewer.getTable());
+		this.editor = new TagsCellEditor(viewer.getTable());
 	}
+	
+	public TagEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection, BootDashViewModel model) {
+		super(viewer);
+		IContentProposalProvider proposalProvider = new TagContentProposalProvider(model);
+		this.editor = new TagsCellEditor(viewer.getTable(), proposalProvider, UIUtils.CTRL_SPACE,
+				UIUtils.TAG_CA_AUTO_ACTIVATION_CHARS).setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+	}	
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
@@ -67,6 +79,24 @@ public class TagEditingSupport extends EditingSupport {
 				taggable.setTags(new LinkedHashSet<String>(Arrays.asList(TagUtils.parseTags(str))));
 			}
 		}
+	}
+	
+	private class TagsCellEditor extends StyledTextCellEditor {
+		
+		TagsCellEditor(Composite parent) {
+			super(parent);
+		}
+		
+		TagsCellEditor(Composite parent, IContentProposalProvider contentProposalProvider,
+				KeyStroke keyStroke, char[] autoActivationCharacters) {
+			super(parent, contentProposalProvider, keyStroke, autoActivationCharacters);
+		}
+
+		@Override
+		protected StyleRange[] updateStyleRanges(String text) {
+			return UIUtils.getStyleRangesForTags(text);
+		}
+		
 	}
 	
 }

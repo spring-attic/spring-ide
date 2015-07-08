@@ -211,7 +211,7 @@ public class BootDashView extends ViewPartWithSections {
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
-		sections.add(new TagSearchSection(BootDashView.this, filterBoxModel.getText()));
+		sections.add(new TagSearchSection(BootDashView.this, filterBoxModel.getText(), model));
 
 		DynamicRunTargetSection runTargetSections = new DynamicRunTargetSection(this,
 				model.getSectionModels(),
