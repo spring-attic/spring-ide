@@ -138,7 +138,7 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 		MultiSelection<T> newSelection = MultiSelection.empty(selectionType);
 		for (SubSection s : sectionsMap.values()) {
 			if (s.section instanceof MultiSelectionSource) {
-				newSelection = MultiSelection.union(
+				newSelection = combineSelections(
 						newSelection,
 						((MultiSelectionSource)s.section).getSelection().filter(selectionType)
 				);
@@ -147,6 +147,10 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 		@SuppressWarnings("rawtypes")
 		LiveExpression newElements = newSelection.getElements();
 		elements.setDelegate(newElements);
+	}
+
+	protected <T> MultiSelection<T> combineSelections(MultiSelection<T> a, MultiSelection<T> b) {
+		return MultiSelection.union(a, b);
 	}
 
 	private void createSectionFor(M m) {
