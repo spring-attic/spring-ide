@@ -32,8 +32,8 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 
 	/**
 	 * This is used as a 'shared event bus' where all BootDashElementsTableSection post
-	 * their mousedown events. This allows tables to react to mousedown in their 'friend'
-	 * tables so they can clear their selection when element is selected in another table.
+	 * their mousedown events. This allows tables to clear their selection when the
+	 * user clicks in another table without holding down CTRL key.
 	 */
 	private LiveVariable<MouseEvent> tableMouseEvent;
 
