@@ -61,7 +61,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static final String DEFAULT_URL_PATH_PROP = "default.request-mapping.path";
-	
+
 	/**
 	 * Preference key for tags string
 	 */
@@ -386,7 +386,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return null;
 	}
 
-	public void setTags(final LinkedHashSet<String> tags) {		
+	public void setTags(final LinkedHashSet<String> tags) {
 		Job job = new Job("Saving Tags for project " + delegate.getName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -427,6 +427,20 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
+	}
+
+	@Override
+	public int getActualInstances() {
+		RunState s = getRunState();
+		if (s==RunState.RUNNING || s==RunState.DEBUGGING) {
+			return 1;
+		}
+		return 0;
+	}
+
+	@Override
+	public int getDesiredInstances() {
+		return 1;
 	}
 
 }

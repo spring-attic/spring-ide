@@ -100,15 +100,15 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  * @author Kris De Volder
  */
 public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
-	
+
 	private static final String PREF_KEY_SEPARATOR = "___";
-	
+
 	private static final String PREF_KEY_ORDER_SUFFIX = "order";
-	
+
 	private static final String PREF_KEY_WIDTH_SUFFIX = "width";
 
 	private static final String PREF_KEY_VISIBILITY_SUFFIX = "visibility";
-	
+
 	private TableViewer tv;
 	private BootDashViewModel viewModel;
 	private BootDashModel model;
@@ -157,7 +157,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			for (final BootDashColumn columnType :  model.getRunTarget().getDefaultColumns() ) {
 				initColumn(new TableViewerColumn(tv, columnType.getAllignment()), columnType);
 			}
-			initColumnsOrder();			
+			initColumnsOrder();
 			addSingleClickHandling();
 		}
 
@@ -167,9 +167,14 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			@Override
 			protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp,
 					Set<BootDashElement> value) {
-				if (!tv.getControl().isDisposed()) {
+				final Control control = tv.getControl();
+				if (!control.isDisposed()) {
 					tv.refresh();
-					page.getParent().layout(new Control[]{tv.getControl()});
+					control.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							control.getParent().layout();
+						}
+					});
 				}
 			}
 		});
@@ -234,7 +239,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			});
 		}
-		
+
 		tv.getTable().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
@@ -243,7 +248,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				BootDashActivator.getDefault().getPreferenceStore().setValue(orderKey, searializedOrder);
 			}
 		});
-		
+
 	}
 
 	public void addSingleClickHandling() {
@@ -358,7 +363,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
 			manager.add(a);
 		}
-		
+
 		IAction refreshAction = actions.getRefreshRunTargetAction();
 		if (refreshAction != null) {
 			manager.add(refreshAction);
@@ -367,7 +372,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		addPreferedConfigSelectionMenu(manager);
 
 		manager.add(new SettingsAction());
-		
+
 //		manager.add
 //		manager.add(new Separator());
 //		manager.add(refreshAction);
@@ -375,7 +380,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		// Other plug-ins can contribute there actions here
 //		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-	
+
 	private void addPreferedConfigSelectionMenu(IMenuManager parent) {
 		BootDashElement element = selection.getSingle();
 		if (element!=null) {
@@ -461,7 +466,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			actions = null;
 		}
 	}
-	
+
 	private static String serializeColumnOrder(int[] order) {
 		StringBuilder sb = new StringBuilder();
 		if (order.length > 0) {
@@ -473,7 +478,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		return sb.toString();
 	}
-	
+
 	private static int[] parseColumnOrder(String s) {
 		String[] split = s == null || s.isEmpty() ? new String[0] : s.split(",");
 		int[] order = new int[split.length];
@@ -482,7 +487,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		return order;
 	}
-	
+
 	private void initColumnsOrder() {
 		IPreferenceStore prefs = BootDashActivator.getDefault().getPreferenceStore();
 		String orderKey = getKey(getPreferencesKeyPrefix(), PREF_KEY_ORDER_SUFFIX);
@@ -499,23 +504,23 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		}
 	}
-	
+
 	private void initColumn(TableViewerColumn viewer, final BootDashColumn column) {
 		final TableColumn tc = viewer.getColumn();
 		tc.setText(column.getLabel());
 		tc.setData(column);
-		
+
 		final String prefix = getPreferencesKeyPrefix();
 		final IPreferenceStore prefStore = BootDashActivator.getDefault().getPreferenceStore();
-		
+
 		final String widthKey = getKey(prefix, column.toString(), PREF_KEY_WIDTH_SUFFIX);
 		final String visibilityKey = getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX);
-		
+
 		prefStore.setDefault(widthKey, column.getDefaultWidth());
 		prefStore.setDefault(visibilityKey, true);
-		
+
 		refreshBootDashColumnVisuals(tc);
-		
+
 		viewer.setLabelProvider(getLabelProvider(column));
 		if (column.getEditingSupportClass() != null) {
 			try {
@@ -540,7 +545,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
 			}
 		}
-		
+
 		tc.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
@@ -549,9 +554,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			}
 		});
-		
+
 	}
-	
+
 	private void refreshBootDashColumnVisuals(TableColumn tc) {
 		if (tc.getData() instanceof BootDashColumn) {
 			BootDashColumn column = (BootDashColumn) tc.getData();
@@ -559,11 +564,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			String prefix = getPreferencesKeyPrefix();
 			String widthKey = getKey(prefix, column.toString(), PREF_KEY_WIDTH_SUFFIX);
 			String visibilityKey = getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX);
-			
+
 			if (prefStore.getBoolean(visibilityKey)) {
 				tc.setWidth(prefStore.getInt(widthKey));
 				tc.setMoveable(true);
-				tc.setResizable(true);			
+				tc.setResizable(true);
 			} else {
 				tc.setWidth(0);
 				tc.setMoveable(false);
@@ -571,12 +576,12 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		}
 	}
-	
+
 	private String getPreferencesKeyPrefix() {
 		return model.getRunTarget() == null || model.getRunTarget().getId() == null ? ""
 				: model.getRunTarget().getId();
 	}
-	
+
 	private static String getKey(String... tokens) {
 		StringBuilder sb = new StringBuilder();
 		if (tokens.length > 0) {
@@ -588,9 +593,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		return sb.toString();
 	}
-	
+
 	private class SettingsAction extends Action {
-		
+
 		SettingsAction() {
 			super("Columns Settings...");
 		}
@@ -603,21 +608,21 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		@Override
 		public void run() {
 			ViewSettingsDialog viewSettingsDialog = new ViewSettingsDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()) {
-				
+
 				private List<FieldEditor> editors;
 
 				@Override
 				protected Control createDialogArea(Composite parent) {
 					Composite top = (Composite) super.createDialogArea(parent);
-					
+
 					Group group = new Group(top, SWT.NONE);
 					group.setText("Columns Visibility");
 					group.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
-					
+
 					final String prefix = getPreferencesKeyPrefix();
-					
+
 					editors = new ArrayList<FieldEditor>();
-					
+
 					for (BootDashColumn column : model.getRunTarget().getDefaultColumns()) {
 						BooleanFieldEditor editor = new BooleanFieldEditor(getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX), column.getLongLabel(), group);
 						editor.setPreferenceStore(BootDashActivator.getDefault().getPreferenceStore());
@@ -653,11 +658,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					super.configureShell(newShell);
 					newShell.setText("Columns Settings");
 				}
-				
+
 			};
 			viewSettingsDialog.open();
-		}		
-		
+		}
+
 	}
-	
+
 }

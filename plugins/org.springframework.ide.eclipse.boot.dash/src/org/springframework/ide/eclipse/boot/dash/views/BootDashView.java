@@ -189,20 +189,6 @@ public class BootDashView extends ViewPartWithSections {
 		toolbar.add(dropdownAction);
 	}
 
-	// private void hookDoubleClickAction() {
-	// tv.addDoubleClickListener(new IDoubleClickListener() {
-	// public void doubleClick(DoubleClickEvent event) {
-	// doubleClickAction.run();
-	// }
-	// });
-	// }
-	// private void showMessage(String message) {
-	// MessageDialog.openInformation(
-	// tv.getControl().getShell(),
-	// "Boot Dashboard",
-	// message);
-	// }
-
 	/**
 	 * Passing the focus request to the viewer's control.
 	 */
@@ -243,47 +229,4 @@ public class BootDashView extends ViewPartWithSections {
 		return sections;
 	}
 
-	// /* Alternate 'createSections' for quick-and-dirty testing of the
-	// 'DynamicComposite'. */
-	// @Override
-	// protected List<IPageSection> createSections() throws CoreException {
-	// final LiveSet<Integer> models = new LiveSet<Integer>();
-	// DynamicCompositeSection<Integer> wrapper = new
-	// DynamicCompositeSection<Integer>(
-	// this,
-	// models,
-	// new SectionFactory<Integer>() {
-	// public IPageSection create(Integer i) {
-	// BootDashElementsTableSection localApsTable = new
-	// BootDashElementsTableSection(BootDashView.this, model);
-	// localApsTable.setColumns(RUN_STATE_ICN, PROJECT, LIVE_PORT);
-	// return new ExpandableSectionWithSelection(BootDashView.this, "Local Boot
-	// Apps "+i, localApsTable);
-	// }
-	// },
-	// BootDashElement.class
-	// );
-	// List<IPageSection> sections = new ArrayList<IPageSection>();
-	// sections.add(wrapper);
-	// for (int _i = 0; _i < 4; _i++) {
-	// { final int i = _i+1;
-	// long delay = 5000 * i;
-	// UIJob j = new UIJob("Test") {
-	// @Override
-	// public IStatus runInUIThread(IProgressMonitor monitor) {
-	// if (i<=3) {
-	// System.out.println("Adding model: "+i);
-	// models.add(i);
-	// } else {
-	// System.out.println("Removing model: "+(i%3));
-	// models.remove(i%3);
-	// }
-	// return Status.OK_STATUS;
-	// }
-	// };
-	// j.schedule(delay);
-	// }
-	// }
-	// return sections;
-	// }
 }

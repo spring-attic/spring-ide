@@ -30,7 +30,8 @@ public enum BootDashColumn {
 	TAGS(			"Tags",		100),
 	LIVE_PORT(		"Port",		70),
 	DEFAULT_PATH(	"Path",		70),
-	HOST(           "Host",     70);
+	HOST(           "Host",     70),
+	INSTANCES(      "Instances", 50);
 
 	//Configure some odds and ends that don't apply to every column:
 	static {
