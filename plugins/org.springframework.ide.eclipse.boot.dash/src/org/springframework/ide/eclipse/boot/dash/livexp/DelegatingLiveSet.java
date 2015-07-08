@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
 import java.util.Collections;
@@ -19,6 +29,11 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  * @author Kris De Volder
  */
 public class DelegatingLiveSet<T> extends LiveExpression<Set<T>> {
+
+	//TODO: This implementation is known to be buggy.
+	// Because it is a basic LiveExpression it doesn't properly respond to
+	// changes in delegate if the delegate keeps returning the same
+	// object (but with mutated contents).
 
 	@SuppressWarnings("unchecked")
 	public DelegatingLiveSet() {

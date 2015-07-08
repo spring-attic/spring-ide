@@ -26,6 +26,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  */
 public abstract class ObservableSet<T> extends LiveExpression<Set<T>> {
 
+	//TODO: buggy... with respect to set mutation operations. Should work
+	// more like LiveSet and compare set contents.
+
+	// Realy the right thing to do in LiveExpression framework is move away from
+	// using mutable Set in LiveExpression and use a lib like guava that provides
+	// a good / efficient implementation of Immutable sets.
+
 	@SuppressWarnings("unchecked")
 	public ObservableSet() {
 		super(Collections.EMPTY_SET);

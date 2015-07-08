@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -119,16 +120,20 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private ValueListener<Filter<BootDashElement>> filterListener;
 
-	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model) {
-		this(owner, viewModel, model, null);
-	}
+	private LiveVariable<MouseEvent> tableMouseEvent;
 
-	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model, LiveExpression<Filter<BootDashElement>> searchFilterModel) {
+	private ValueListener<MouseEvent> tableMouseEventListener;
+
+	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model,
+			LiveExpression<Filter<BootDashElement>> searchFilterModel,
+			LiveVariable<MouseEvent> tableMouseEvent
+	) {
 		super(owner);
 		this.viewModel = viewModel;
 		this.model = model;
 		this.ui = owner instanceof BootDashView ? ((BootDashView)owner).getUserInteractions() : null;
 		this.searchFilterModel = searchFilterModel;
+		this.tableMouseEvent = tableMouseEvent;
 	}
 
 	class NameSorter extends ViewerSorter {
@@ -247,7 +252,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				BootDashActivator.getDefault().getPreferenceStore().setValue(orderKey, searializedOrder);
 			}
 		});
-
 	}
 
 	public void addSingleClickHandling() {
@@ -281,6 +285,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 			tv.getTable().addMouseListener(new MouseAdapter() {
 				public void mouseDown(MouseEvent e) {
+					if (tableMouseEvent!=null) {
+						tableMouseEvent.setValue(e);
+					}
+
 					ViewerCell cell = tv.getCell(new Point(e.x,e.y));
 					if (cell!=null) {
 						Object el = cell.getElement();
@@ -444,6 +452,18 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		if (tv!=null) {
 			addTableSelectionListener();
 		}
+		tableMouseEvent.addListener(tableMouseEventListener = new ValueListener<MouseEvent>() {
+			public void gotValue(LiveExpression<MouseEvent> exp, MouseEvent evt) {
+				//When user clicks in another table than the current table. Clear the current-table's selection
+				if (evt!=null) {
+					if (evt.widget!=tv.getTable()) { //only interested in clicks in other tables.
+						if ((evt.stateMask&SWT.CTRL)==0) { //CTRL not held down.
+							tv.setSelection(StructuredSelection.EMPTY);
+						}
+					}
+				}
+			}
+		});
 		return selection;
 	}
 
@@ -459,6 +479,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		if (filterListener!= null) {
 			searchFilterModel.removeListener(filterListener);
 			filterListener = null;
+		}
+		if (tableMouseEventListener!=null) {
+			tableMouseEvent.removeListener(tableMouseEventListener);
+			tableMouseEventListener = null;
 		}
 		if (actions!=null) {
 			actions.dispose();
