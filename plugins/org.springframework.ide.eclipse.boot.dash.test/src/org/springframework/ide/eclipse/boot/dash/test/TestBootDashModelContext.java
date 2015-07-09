@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
-
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 public class TestBootDashModelContext implements BootDashModelContext {
 
@@ -31,7 +31,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private ILaunchManager launchManager;
 	private IWorkspace workspace;
 	private IPropertyStore<IProject> projectProperties;
-	private IPropertyStore<?> runTargetProperties;
+	private IPropertyStore<RunTargetType> runTargetProperties;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
@@ -39,7 +39,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
 			this.projectProperties = new MockPropertyStore<IProject>();
-//			this.runTargetProperties = new MockPropertyStore<RunTargetType>();
+			this.runTargetProperties = new MockPropertyStore<RunTargetType>();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -71,15 +71,31 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	}
 
 	@Override
-	public IPropertyStore getRunTargetProperties() {
-		// TODO: add runtarget persisting tests
+	public IPropertyStore<RunTargetType> getRunTargetProperties() {
 		return runTargetProperties;
 	}
 
 	@Override
 	public SecuredCredentialsStore getSecuredCredentialsStore() {
 		// TODO: need to Mock
-		return null;
+		return new SecuredCredentialsStore() {
+
+			@Override
+			public void remove(String runTargetId) {
+
+			}
+
+			@Override
+			public String getPassword(String runTargetId) {
+				return null;
+			}
+
+			@Override
+			public void setPassword(String password, String runTargetId) {
+
+			}
+
+		};
 	}
 
 }
