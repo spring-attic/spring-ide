@@ -32,6 +32,8 @@ public class Stylers implements Disposable {
 			@Override
 			public void applyStyles(TextStyle textStyle) {
 				textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN);
+				textStyle.rise = 2;
+				textStyle.underline = true;
 				textStyle.font = getBoldFont();
 			}
 		};
