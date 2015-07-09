@@ -29,7 +29,10 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot.properties.editor,
  org.springframework.ide.eclipse.cloudfoundry.client,
  org.springsource.ide.eclipse.commons.receptor.client,
- com.google.guava;bundle-version="15.0.0"
+ com.google.guava;bundle-version="15.0.0",
+ org.codehaus.jackson.mapper,
+ org.codehaus.jackson.core,
+ org.eclipse.equinox.security
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash,
