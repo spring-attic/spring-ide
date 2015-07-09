@@ -585,6 +585,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				if (prefStore.getBoolean(visibilityKey)) {
 					prefStore.setValue(widthKey, tc.getWidth());
 				}
+				ReflowUtil.reflow(owner, tv.getControl());
 			}
 		});
 
