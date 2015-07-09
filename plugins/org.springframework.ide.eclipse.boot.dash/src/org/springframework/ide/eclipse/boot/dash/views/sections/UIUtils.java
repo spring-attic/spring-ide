@@ -20,35 +20,38 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 
 /**
  * SWT/JFace dependent utility methods and constants
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class UIUtils {
-	
+
 	public static final char[] PATH_CA_AUTO_ACTIVATION_CHARS = "/.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
-	
+
 	public static final char[] TAG_CA_AUTO_ACTIVATION_CHARS = "/,-.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
-	
+
 	public static final KeyStroke CTRL_SPACE = KeyStroke.getInstance(SWT.CTRL, SWT.SPACE);
-	
-	private static final String TAG_FONT_KEY = "tag"; 
-	
+
+	private static final String TAG_FONT_KEY = "tag";
+
 	private static FontRegistry fontRegistry = null;
-	
+
 	private static FontRegistry getFontRegistry() {
 		if (fontRegistry == null) {
-			fontRegistry = new FontRegistry(PlatformUI.getWorkbench().getDisplay());
-			fontRegistry.put(TAG_FONT_KEY, new FontData[] { new FontData("Open Sans", 12, SWT.BOLD) });
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			fontRegistry = new FontRegistry(display);
+			FontData systemFontData = display.getSystemFont().getFontData()[0];
+			fontRegistry.put(TAG_FONT_KEY, new FontData[] { new FontData(systemFontData.getName(), systemFontData.getHeight(), SWT.BOLD) });
 		}
 		return fontRegistry;
 	}
-	
+
 	private static StyleRange createTagStyleRange(int start, int length) {
 		StyleRange styleRange = new StyleRange();
 		styleRange.start = start;
@@ -59,7 +62,7 @@ public class UIUtils {
 		styleRange.foreground = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_CYAN);
 		return styleRange;
 	}
-	
+
 	/**
 	 * Creates styles for tags in a string
 	 * @param text tags in a string
