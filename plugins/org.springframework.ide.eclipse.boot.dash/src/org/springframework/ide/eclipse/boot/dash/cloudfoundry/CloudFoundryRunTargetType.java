@@ -25,7 +25,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 
 	public CloudFoundryRunTargetType() {
-		super("CloudFoundry");
+		super("Cloud Foundry");
 	}
 
 	@Override

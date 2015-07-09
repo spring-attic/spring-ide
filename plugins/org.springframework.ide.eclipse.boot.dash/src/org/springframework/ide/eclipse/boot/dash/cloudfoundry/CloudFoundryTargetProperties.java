@@ -67,8 +67,8 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	}
 
 	public static String getId(CloudFoundryTargetProperties cloudProps) {
-		return getId(cloudProps.getUserName(), cloudProps.getUrl(), cloudProps.getSpaceName(),
-				cloudProps.getOrganizationName());
+		return getId(cloudProps.getUserName(), cloudProps.getUrl(), cloudProps.getOrganizationName(),
+				cloudProps.getSpaceName());
 	}
 
 	public static String getId(String userName, String url, String orgName, String spaceName) {
