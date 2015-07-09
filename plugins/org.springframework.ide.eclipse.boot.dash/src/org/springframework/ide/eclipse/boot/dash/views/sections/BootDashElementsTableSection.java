@@ -79,6 +79,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
@@ -126,6 +127,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveVariable<MouseEvent> tableMouseEvent;
 
 	private ValueListener<MouseEvent> tableMouseEventListener;
+	private Stylers stylers;
 
 	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model,
 			LiveExpression<Filter<BootDashElement>> searchFilterModel,
@@ -143,7 +145,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
-		return new BootDashLabelProvider(columnType);
+		return new BootDashLabelProvider(columnType, stylers);
 	}
 
 	@Override
@@ -155,6 +157,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv.setSorter(new NameSorter());
 		tv.setInput(model);
 		tv.getTable().setHeaderVisible(true);
+		stylers = new Stylers(tv.getTable().getFont());
 
 		//tv.getTable().setLinesVisible(true);
 
@@ -492,6 +495,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			actions.dispose();
 			actions = null;
 		}
+		if (stylers!=null) {
+			stylers.dispose();
+		}
 	}
 
 	private static String serializeColumnOrder(int[] order) {
@@ -551,12 +557,12 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		viewer.setLabelProvider(getLabelProvider(column));
 		if (column.getEditingSupportClass() != null) {
 			try {
-				viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, BootDashViewModel.class)
-						.newInstance(tv, getSelection().toSingleSelection(), viewModel));
+				viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, BootDashViewModel.class, Stylers.class)
+						.newInstance(tv, getSelection().toSingleSelection(), viewModel, stylers));
 			} catch (NoSuchMethodException e) {
 				try {
-					viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class)
-							.newInstance(tv, getSelection().toSingleSelection()));
+					viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, Stylers.class)
+							.newInstance(tv, getSelection().toSingleSelection(), stylers));
 				} catch (Throwable t) {
 					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), t));
 				}

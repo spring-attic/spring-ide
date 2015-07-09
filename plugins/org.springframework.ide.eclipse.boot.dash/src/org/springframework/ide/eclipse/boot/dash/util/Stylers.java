@@ -15,6 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.swt.widgets.Display;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 public class Stylers implements Disposable {
@@ -24,6 +25,16 @@ public class Stylers implements Disposable {
 
 	public Stylers(Font baseFont) {
 		this.baseFont = baseFont;
+	}
+
+	public Styler tag() {
+		return new Styler() {
+			@Override
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN);
+				textStyle.font = getBoldFont();
+			}
+		};
 	}
 
 	public Styler bold() {

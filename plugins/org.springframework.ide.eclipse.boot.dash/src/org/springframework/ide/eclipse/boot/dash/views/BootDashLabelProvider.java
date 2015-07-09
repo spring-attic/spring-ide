@@ -13,12 +13,14 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 
@@ -28,8 +30,10 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
+	private Stylers stylers;
 
-	public BootDashLabelProvider(BootDashColumn target) {
+	public BootDashLabelProvider(BootDashColumn target, Stylers stylers) {
+		this.stylers = stylers;
 		this.forColum = target;
 	}
 
@@ -74,12 +78,16 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 			cell.setImage(getRunStateImage(e.getRunState()));
 			break;
 		case TAGS:
+			String txt;
 			if (e instanceof Taggable) {
-				cell.setText(TagUtils.toString(((Taggable)e).getTags()));
+				txt = TagUtils.toString(((Taggable)e).getTags());
 			} else {
+				txt = "";
 				cell.setText("");
 			}
-			cell.setStyleRanges(UIUtils.getStyleRangesForTags(cell.getText()));
+			StyledString styled = UIUtils.getStyleRangesForTags(txt, stylers.tag());
+			cell.setText(styled.getString());
+			cell.setStyleRanges(styled.getStyleRanges());
 			break;
 		case LIVE_PORT:
 			int port = e.getLivePort();

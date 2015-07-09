@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -23,7 +24,7 @@ public class DefaultPathEditorSupport extends EditingSupport {
 
 	private CellEditor editor;
 
-	public DefaultPathEditorSupport(TableViewer tableViewer, LiveExpression<BootDashElement> input) {
+	public DefaultPathEditorSupport(TableViewer tableViewer, LiveExpression<BootDashElement> input, Stylers stylers) {
 		super(tableViewer);
 			IContentProposalProvider proposalProvider =
 				//	new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
