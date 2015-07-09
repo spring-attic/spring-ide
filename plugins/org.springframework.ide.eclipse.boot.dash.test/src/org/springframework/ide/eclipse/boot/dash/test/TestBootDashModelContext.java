@@ -21,7 +21,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
+
 
 public class TestBootDashModelContext implements BootDashModelContext {
 
