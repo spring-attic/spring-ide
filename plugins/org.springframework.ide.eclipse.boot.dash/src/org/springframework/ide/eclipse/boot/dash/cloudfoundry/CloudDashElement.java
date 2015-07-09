@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -56,7 +57,6 @@ public class CloudDashElement implements BootDashElement {
 
 	@Override
 	public void openConfig(UserInteractions ui) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -67,25 +67,21 @@ public class CloudDashElement implements BootDashElement {
 
 	@Override
 	public LinkedHashSet<String> getTags() {
-		// TODO Auto-generated method stub
-		return null;
+		return new LinkedHashSet<String>(0);
 	}
 
 	@Override
 	public void setTags(LinkedHashSet<String> newTags) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public IJavaProject getJavaProject() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public IProject getProject() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -112,49 +108,41 @@ public class CloudDashElement implements BootDashElement {
 
 	@Override
 	public int getLivePort() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public String getLiveHost() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public List<RequestMapping> getLiveRequestMappings() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<RequestMapping>(0);
 	}
 
 	@Override
 	public ILaunchConfiguration getActiveConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ILaunchConfiguration getPreferredConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void setPreferredConfig(ILaunchConfiguration config) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public String getDefaultRequestMappingPath() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void setDefaultRequestMapingPath(String defaultPath) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -223,13 +211,11 @@ public class CloudDashElement implements BootDashElement {
 
 	@Override
 	public int getActualInstances() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 
 	@Override
 	public int getDesiredInstances() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 }
