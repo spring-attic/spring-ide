@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+
 public abstract class AbstractRunTarget implements RunTarget {
 
 	private String id;
@@ -64,5 +66,9 @@ public abstract class AbstractRunTarget implements RunTarget {
 		return true;
 	}
 
+	@Override
+	public final BootDashColumn[] getAllColumns() {
+		return BootDashColumn.values();
+	}
 
 }

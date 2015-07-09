@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -158,9 +160,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
 
-		if (model.getRunTarget() != null && model.getRunTarget().getDefaultColumns().length > 0) {
-			for (final BootDashColumn columnType :  model.getRunTarget().getDefaultColumns() ) {
-				initColumn(new TableViewerColumn(tv, columnType.getAllignment()), columnType);
+		if (model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0) {
+			EnumSet<BootDashColumn> defaultVisibleColumns = EnumSet.copyOf(Arrays.asList(model.getRunTarget().getDefaultColumns()));
+			for (final BootDashColumn columnType :  model.getRunTarget().getAllColumns() ) {
+				initColumn(new TableViewerColumn(tv, columnType.getAllignment()), columnType, defaultVisibleColumns);
 			}
 			initColumnsOrder();
 			addSingleClickHandling();
@@ -256,10 +259,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	public void addSingleClickHandling() {
-		final AbstractBootDashAction[] singleClickActions = new AbstractBootDashAction[model.getRunTarget().getDefaultColumns().length];
+		final AbstractBootDashAction[] singleClickActions = new AbstractBootDashAction[model.getRunTarget().getAllColumns().length];
 		boolean hasSingleClickActions = false;
-		for (int i = 0; i < model.getRunTarget().getDefaultColumns().length; i++) {
-			BootDashColumn columnType = model.getRunTarget().getDefaultColumns()[i];
+		for (int i = 0; i < model.getRunTarget().getAllColumns().length; i++) {
+			BootDashColumn columnType = model.getRunTarget().getAllColumns()[i];
 			BootDashActionFactory factory = columnType.getSingleClickAction();
 			if (factory!=null) {
 				hasSingleClickActions = true;
@@ -529,7 +532,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 	}
 
-	private void initColumn(TableViewerColumn viewer, final BootDashColumn column) {
+	private void initColumn(TableViewerColumn viewer, final BootDashColumn column, EnumSet<BootDashColumn> defaultVisibleColumns) {
 		final TableColumn tc = viewer.getColumn();
 		tc.setText(column.getLabel());
 		tc.setData(column);
@@ -541,7 +544,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		final String visibilityKey = getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX);
 
 		prefStore.setDefault(widthKey, column.getDefaultWidth());
-		prefStore.setDefault(visibilityKey, true);
+		prefStore.setDefault(visibilityKey, defaultVisibleColumns.contains(column));
 
 		refreshBootDashColumnVisuals(tc);
 
@@ -626,7 +629,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		@Override
 		public boolean isEnabled() {
-			return model.getRunTarget() != null && model.getRunTarget().getDefaultColumns().length > 0;
+			return model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0;
 		}
 
 		@Override
@@ -647,7 +650,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 					editors = new ArrayList<FieldEditor>();
 
-					for (BootDashColumn column : model.getRunTarget().getDefaultColumns()) {
+					for (BootDashColumn column : model.getRunTarget().getAllColumns()) {
 						BooleanFieldEditor editor = new BooleanFieldEditor(getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX), column.getLongLabel(), group);
 						editor.setPreferenceStore(BootDashActivator.getDefault().getPreferenceStore());
 						editor.load();

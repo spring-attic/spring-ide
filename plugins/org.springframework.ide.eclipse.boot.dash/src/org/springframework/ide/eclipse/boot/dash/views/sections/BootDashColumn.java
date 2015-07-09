@@ -22,15 +22,15 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public enum BootDashColumn {
 
+	RUN_STATE_ICN(	"",	        20),
+	INSTANCES(      "Instances", 50),
 	PROJECT(		"Project", 	150),
 	APP(    		"Application", 150),
-	RUN_TARGET(		"Target", 	60),
-	RUN_STATE_ICN(	"",	        20),
-	TAGS(			"Tags",		100),
+	HOST(           "Host",     70),
 	LIVE_PORT(		"Port",		70),
 	DEFAULT_PATH(	"Path",		70),
-	HOST(           "Host",     70),
-	INSTANCES(      "Instances", 50);
+	TAGS(			"Tags",		100);
+	// RUN_TARGET(		"Target", 	60); TODO: remove? Why display thsi in table ever since its at the top of the table.
 
 	//Configure some odds and ends that don't apply to every column:
 	static {

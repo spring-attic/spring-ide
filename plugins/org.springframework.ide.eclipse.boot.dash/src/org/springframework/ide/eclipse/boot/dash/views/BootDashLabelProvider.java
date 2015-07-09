@@ -66,9 +66,9 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 				}
 			}
 			break;
-		case RUN_TARGET:
-			cell.setText(e.getTarget().getName());
-			break;
+//		case RUN_TARGET:
+//			cell.setText(e.getTarget().getName());
+//			break;
 		case RUN_STATE_ICN:
 			cell.setText("");
 			cell.setImage(getRunStateImage(e.getRunState()));
