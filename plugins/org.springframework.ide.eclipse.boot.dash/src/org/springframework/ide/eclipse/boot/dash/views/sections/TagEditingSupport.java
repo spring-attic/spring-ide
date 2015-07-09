@@ -99,7 +99,7 @@ public class TagEditingSupport extends EditingSupport {
 
 		@Override
 		protected StyleRange[] updateStyleRanges(String text) {
-			StyledString styled = UIUtils.getStyleRangesForTags(text, stylers.tag());
+			StyledString styled = UIUtils.applyTagStyles(text, stylers.tag());
 			return styled.getStyleRanges();
 		}
 

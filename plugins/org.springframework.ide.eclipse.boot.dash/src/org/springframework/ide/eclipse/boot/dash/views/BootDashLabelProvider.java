@@ -78,14 +78,14 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 			cell.setImage(getRunStateImage(e.getRunState()));
 			break;
 		case TAGS:
-			String txt;
+			String txt = null;
 			if (e instanceof Taggable) {
 				txt = TagUtils.toString(((Taggable)e).getTags());
-			} else {
-				txt = "";
-				cell.setText("");
 			}
-			StyledString styled = UIUtils.getStyleRangesForTags(txt, stylers.tag());
+			if (txt==null) {
+				txt = "";
+			}
+			StyledString styled = UIUtils.applyTagStyles(txt, stylers.tag());
 			cell.setText(styled.getString());
 			cell.setStyleRanges(styled.getStyleRanges());
 			break;

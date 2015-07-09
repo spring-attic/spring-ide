@@ -68,7 +68,7 @@ public class UIUtils {
 	/**
 	 * Creates styled string applying tagStyle at appropriate locations in a raw tags string.
 	 */
-	public static StyledString getStyleRangesForTags(String text, Styler tagStyler) {
+	public static StyledString applyTagStyles(String text, Styler tagStyler) {
 		StyledString styledString = new StyledString(text);
 		Matcher matcher = Pattern.compile(TagUtils.SEPARATOR_REGEX).matcher(text);
 		int position = 0;
