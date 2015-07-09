@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
@@ -36,4 +37,11 @@ public interface RunTargetType extends Nameable {
 	 * run target.
 	 */
 	void openTargetCreationUi(LiveSet<RunTarget> targets);
+	
+	/**
+	 * 
+	 * @return if {@link #canInstantiate()} returns true, return a new {@link RunTarget}. Return null if this
+	 * type cannot be instantiated.
+	 */
+	RunTarget createRunTarget(TargetProperties properties);
 }

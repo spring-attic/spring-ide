@@ -13,6 +13,10 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 /**
  * Provides static helper methods to create IPropertyStore instances,
@@ -28,6 +32,18 @@ public class PropertyStoreFactory {
 				return prefs;
 			}
 		};
+	}
+
+	public static IPropertyStore<RunTargetType> createForRunTargets() {
+		return new PreferenceBasedStore<RunTargetType>() {
+			protected IEclipsePreferences createPrefs(RunTargetType runTargetType) {
+				return InstanceScope.INSTANCE.getNode(BootDashActivator.PLUGIN_ID + ':' + runTargetType.getName());
+			}
+		};
+	}
+
+	public static SecuredCredentialsStore createSecuredCredentialsStore() {
+		return new SecuredCredentialsStore();
 	}
 
 }

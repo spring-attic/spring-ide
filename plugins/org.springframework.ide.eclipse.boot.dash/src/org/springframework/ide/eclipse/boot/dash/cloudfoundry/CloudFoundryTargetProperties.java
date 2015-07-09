@@ -1,167 +1,77 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Pivotal, Inc. - initial API and implementation
+ *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 
-/**
- * Cloud Foundry Target properties that uses {@link LiveExpression} and
- * {@link Validator}.
- *
- */
-public class CloudFoundryTargetProperties {
+public class CloudFoundryTargetProperties extends TargetProperties {
 
-	private LiveVariable<String> url = new LiveVariable<String>();
-	private LiveVariable<CloudSpace> space = new LiveVariable<CloudSpace>();
-	private LiveVariable<Boolean> selfsigned = new LiveVariable<Boolean>(false);
-	private LiveVariable<String> userName = new LiveVariable<String>();
-	private LiveVariable<String> password = new LiveVariable<String>();
-
-	private Validator credentialsValidator = new CredentialsValidator();
-	private Validator spacesValidator = new SpacesValidator();
-	private CompositeValidator allPropertiesValidator = new CompositeValidator();
+	public final static String URL_PROP = "url";
+	public final static String USERNAME_PROP = "username";
+	public final static String ORG_PROP = "organization";
+	public final static String SPACE_PROP = "space";
+	public final static String SELF_SIGNED_PROP = "selfsigned";
 
 	public CloudFoundryTargetProperties() {
-		// The credentials validator should be notified any time there are
-		// changes
-		// to url, username, password and selfsigned setting.
-		credentialsValidator.dependsOn(url);
-		credentialsValidator.dependsOn(selfsigned);
-		credentialsValidator.dependsOn(userName);
-		credentialsValidator.dependsOn(password);
-
-		// Spaces validator is notified when there are changes to the space
-		// variable. This is a separate validator as space validation and spave
-		// value setting may only occur AFTER ALL credentials/URL are entered or
-		// validated, and different listeners may need to be registered for
-		// credential validation
-		// vs space validation
-		spacesValidator.dependsOn(space);
-
-		// Aggregate of the credentials and space validator.
-		allPropertiesValidator.addChild(credentialsValidator);
-		allPropertiesValidator.addChild(spacesValidator);
-		
-		setUrl(getDefaultTargetUrl());
+		super(RunTargetTypes.CLOUDFOUNDRY);
 	}
 
-	/**
-	 * 
-	 * @param allPropertiesValidationListener
-	 *            listener that is notified when any property is validated
-	 * @param credentialsValidationListener
-	 *            listener that is notified when only credential properties are
-	 *            validated (but not org/space)
-	 * @param cloudSpaceChangeListener
-	 *            listener that is notified when Cloud space is changed
-	 */
-	public void addListeners(ValueListener<ValidationResult> allPropertiesValidationListener,
-			ValueListener<ValidationResult> credentialsValidationListener,
-			ValueListener<CloudSpace> cloudSpaceChangeListener) {
-		allPropertiesValidator.addListener(allPropertiesValidationListener);
-		credentialsValidator.addListener(credentialsValidationListener);
-		space.addListener(cloudSpaceChangeListener);
+	public CloudFoundryTargetProperties(TargetProperties targetProperties) {
+		super(targetProperties.getAllProperties(), RunTargetTypes.CLOUDFOUNDRY);
+		if (get(RUN_TARGET_ID) == null) {
+			put(RUN_TARGET_ID, getId(this));
+		}
 	}
 
 	public String getUrl() {
-		return this.url.getValue();
+		return map.get(URL_PROP);
 	}
 
-	public void setUrl(String url) {
-		this.url.setValue(url);
+	public String getSpaceName() {
+		return map.get(SPACE_PROP);
 	}
 
-	public CloudSpace getSpace() {
-		return this.space.getValue();
-	}
-
-	public void setSpace(CloudSpace space) {
-		this.space.setValue(space);
+	public String getOrganizationName() {
+		return map.get(ORG_PROP);
 	}
 
 	public boolean isSelfsigned() {
-		return this.selfsigned.getValue();
-	}
-
-	public void setSelfsigned(boolean selfsigned) {
-		this.selfsigned.setValue(selfsigned);
+		return map.get(SELF_SIGNED_PROP) != null && Boolean.getBoolean(getAllProperties().get(SELF_SIGNED_PROP));
 	}
 
 	public String getUserName() {
-		return this.userName.getValue();
-	}
-
-	public void setUserName(String userName) {
-		this.userName.setValue(userName);
+		return map.get(USERNAME_PROP);
 	}
 
 	public String getPassword() {
-		return this.password.getValue();
+		return map.get(PASSWORD_PROP);
 	}
 
-	public void setPassword(String password) {
-		this.password.setValue(password);
+	@Override
+	public Map<String, String> getPropertiesToPersist() {
+		Map<String, String> map = super.getPropertiesToPersist();
+		// Exclude password as password are persisted separately
+		map.remove(PASSWORD_PROP);
+		return map;
 	}
 
-	class CredentialsValidator extends Validator {
-		@Override
-		protected ValidationResult compute() {
-			String infoMessage = null;
-
-			if (isEmpty(getUserName())) {
-				infoMessage = "Enter a username";
-			} else if (isEmpty(getPassword())) {
-				infoMessage = "Enter a password";
-			} else if (isEmpty(getUrl())) {
-				infoMessage = "Enter a target URL";
-			} else {
-				try {
-					new URL(getUrl());
-				} catch (MalformedURLException e) {
-					return ValidationResult.error(e.getMessage());
-				}
-			}
-			if (infoMessage != null) {
-				return ValidationResult.info(infoMessage);
-			}
-
-			return ValidationResult.OK;
-		}
-
-		protected boolean isEmpty(String value) {
-			return value == null || value.trim().length() == 0;
-		}
-	}
-	
-	protected String getDefaultTargetUrl() {
-		return "https://api.run.pivotal.io";
+	public static String getId(CloudFoundryTargetProperties cloudProps) {
+		return getId(cloudProps.getUserName(), cloudProps.getUrl(), cloudProps.getSpaceName(),
+				cloudProps.getOrganizationName());
 	}
 
-	class SpacesValidator extends Validator {
-
-		@Override
-		protected ValidationResult compute() {
-			if (getSpace() == null) {
-				return ValidationResult.info("Select a Cloud space");
-			} 
-			return ValidationResult.OK;
-		}
+	public static String getId(String userName, String url, String orgName, String spaceName) {
+		return userName + " : " + url + " : " + orgName + " : " + spaceName;
 	}
 }

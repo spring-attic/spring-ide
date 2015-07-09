@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.lattice.LatticeRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class RunTargetTypes {
@@ -31,12 +32,16 @@ public class RunTargetTypes {
 		@Override
 		public void openTargetCreationUi(LiveSet<RunTarget> targets) {
 			throw new UnsupportedOperationException(
-					this+" is a Singleton, it is not possible to create additional targets of this type.");
+					this + " is a Singleton, it is not possible to create additional targets of this type.");
+		}
+
+		@Override
+		public RunTarget createRunTarget(TargetProperties properties) {
+			return null;
 		};
 	};
 
 	public static final RunTargetType CLOUDFOUNDRY = new CloudFoundryRunTargetType();
 
 	public static final RunTargetType LATTICE = new LatticeRunTargetType();
-
 }

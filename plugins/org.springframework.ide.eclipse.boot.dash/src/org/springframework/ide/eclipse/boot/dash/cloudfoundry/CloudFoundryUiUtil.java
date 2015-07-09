@@ -45,14 +45,41 @@ public class CloudFoundryUiUtil {
 		return spaces;
 	}
 
+	/**
+	 * Get the client for an existing {@link CloudFoundryRunTarget}. Note that
+	 * this may require the password to be set for that runtarget.
+	 * 
+	 * @param runTarget
+	 * @return client if connection was successful.
+	 * @throws Exception
+	 *             if there was an error connecting, including if password is
+	 *             not set or invalid.
+	 */
+	public static CloudFoundryOperations getClient(CloudFoundryRunTarget runTarget) throws Exception {
+
+		CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) runTarget.getTargetProperties();
+
+		return getClient(targetProperties);
+	}
+
 	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
-		return targetProperties.getSpace() != null ? new CloudFoundryClient(
-				new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
-				new URL(targetProperties.getUrl()), targetProperties.getSpace(), targetProperties.isSelfsigned())
+		checkPassword(targetProperties.getPassword(), targetProperties.getUserName());
+		return targetProperties.getSpaceName() != null
+				? new CloudFoundryClient(
+						new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
+						new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
+						targetProperties.getSpaceName(), targetProperties.isSelfsigned())
 				: new CloudFoundryClient(
 						new CloudCredentials(targetProperties.getUserName(), targetProperties.getPassword()),
 						new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
 
+	}
+
+	public static void checkPassword(String password, String id) throws Exception {
+		if (password == null) {
+			throw new Error("No password stored or set for: " + id
+					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
+		}
 	}
 
 	public static Shell getShell() {

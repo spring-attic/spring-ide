@@ -27,20 +27,23 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-public class CloudFoundryRunTarget extends AbstractRunTarget {
+public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private CloudFoundryTargetProperties targetProperties;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties) {
-		super(getId(targetProperties), getId(targetProperties));
+		super(CloudFoundryTargetProperties.getId(targetProperties),
+				CloudFoundryTargetProperties.getId(targetProperties));
 		this.targetProperties = targetProperties;
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
-	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, APP};
+	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, APP };
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -57,18 +60,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget {
 		return null;
 	}
 
-	public static String getId(CloudFoundryTargetProperties properties) {
-		return getId(properties.getUserName(), properties.getUrl(), properties.getSpace().getOrganization().getName(),
-				properties.getSpace().getName());
-
-	}
-
-	public static String getId(String userName, String url, String orgName, String spaceName) {
-		return userName + " : " + url + " : " + orgName + " : " + spaceName;
-	}
-
 	public CloudFoundryOperations getClient() throws Exception {
-		return CloudFoundryUiUtil.getClient(targetProperties);
+		return CloudFoundryUiUtil.getClient(this);
 	}
 
 	@Override
@@ -79,6 +72,11 @@ public class CloudFoundryRunTarget extends AbstractRunTarget {
 	@Override
 	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
 		return new CloudFoundryBootDashModel(this);
+	}
+
+	@Override
+	public TargetProperties getTargetProperties() {
+		return targetProperties;
 	}
 
 }

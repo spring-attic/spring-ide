@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 
 public class TestBootDashModelContext implements BootDashModelContext {
 
@@ -29,6 +29,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private ILaunchManager launchManager;
 	private IWorkspace workspace;
 	private IPropertyStore<IProject> projectProperties;
+	private IPropertyStore<?> runTargetProperties;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
@@ -36,6 +37,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
 			this.projectProperties = new MockPropertyStore<IProject>();
+//			this.runTargetProperties = new MockPropertyStore<RunTargetType>();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -58,12 +60,24 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	}
 
 	public void log(Exception e) {
-		//No implementation we'll use Mockito to spy on the method instead.
+		// No implementation we'll use Mockito to spy on the method instead.
 	}
 
 	@Override
 	public IPropertyStore<IProject> getProjectProperties() {
 		return projectProperties;
+	}
+
+	@Override
+	public IPropertyStore getRunTargetProperties() {
+		// TODO: add runtarget persisting tests
+		return runTargetProperties;
+	}
+
+	@Override
+	public SecuredCredentialsStore getSecuredCredentialsStore() {
+		// TODO: need to Mock
+		return null;
 	}
 
 }

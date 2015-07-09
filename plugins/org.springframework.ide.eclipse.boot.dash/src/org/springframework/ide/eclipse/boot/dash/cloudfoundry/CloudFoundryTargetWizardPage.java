@@ -57,8 +57,11 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private boolean canFinish = false;
 
-	private CloudFoundryTargetProperties targetProperties = new CloudFoundryTargetProperties();
+	private CloudFoundryTargetWizardModel wizardModel = new CloudFoundryTargetWizardModel();
 
+	private EnableSpaceControlListener enableSpaceControlListener = null;
+
+	private SetSpaceValListener setSpaceValListener = null;
 	private LiveSet<RunTarget> targets;
 
 	public CloudFoundryTargetWizardPage(LiveSet<RunTarget> targets) {
@@ -99,7 +102,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		emailText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				targetProperties.setUserName(emailText.getText());
+				wizardModel.setUserName(emailText.getText());
 			}
 		});
 
@@ -113,7 +116,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		passwordText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				targetProperties.setPassword(passwordText.getText());
+				wizardModel.setPassword(passwordText.getText());
 			}
 		});
 
@@ -127,7 +130,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		urlText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				targetProperties.setUrl(urlText.getText());
+				wizardModel.setUrl(urlText.getText());
 			}
 		});
 
@@ -157,14 +160,14 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				// can be cancelled in the wizard's progress bar)
 				OrgsAndSpaces spaces = null;
 				try {
-					spaces = CloudFoundryUiUtil.getCloudSpaces(targetProperties, getWizard().getContainer());
+					spaces = CloudFoundryUiUtil.getCloudSpaces(wizardModel, getWizard().getContainer());
 				} catch (Exception e) {
 					setErrorMessage(e.getMessage());
 					refreshWizardUI();
 					return;
 				}
 				if (spaces != null) {
-					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(targets, spaces, targetProperties);
+					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(targets, spaces, wizardModel);
 					WizardDialog dialog = new WizardDialog(getShell(), spacesWizard);
 					dialog.open();
 				} else {
@@ -183,12 +186,13 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				targetProperties.setSelfsigned(trustSelfSigned.getSelection());
+				wizardModel.setSelfsigned(trustSelfSigned.getSelection());
 			}
 
 		});
 
-		targetProperties.addListeners(this, new EnableSpaceControlListener(), new SetSpaceValListener());
+		wizardModel.addListeners(this, enableSpaceControlListener = new EnableSpaceControlListener(),
+				setSpaceValListener = new SetSpaceValListener());
 
 		setValuesFromTargetProperties();
 		refreshWizardUI();
@@ -197,15 +201,15 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private void setValuesFromTargetProperties() {
 
-		String userName = targetProperties.getUserName();
+		String userName = wizardModel.getUserName();
 		if (emailText != null && !emailText.isDisposed() && userName != null) {
 			emailText.setText(userName);
 		}
-		String password = targetProperties.getPassword();
+		String password = wizardModel.getPassword();
 		if (passwordText != null && !passwordText.isDisposed() && password != null) {
 			passwordText.setText(password);
 		}
-		String url = targetProperties.getUrl();
+		String url = wizardModel.getUrl();
 		if (urlText != null && !urlText.isDisposed() && url != null) {
 			urlText.setText(url);
 		}
@@ -226,7 +230,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 	}
 
 	public RunTarget getRunTarget() {
-		return new CloudFoundryRunTarget(targetProperties);
+		return wizardModel.finish();
 	}
 
 	/*
@@ -263,6 +267,12 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 			}
 		}
 		refreshWizardUI();
+	}
+
+	@Override
+	public void dispose() {
+		wizardModel.removeListeners(this, enableSpaceControlListener, setSpaceValListener);
+		super.dispose();
 	}
 
 	class SetSpaceValListener implements ValueListener<CloudSpace> {

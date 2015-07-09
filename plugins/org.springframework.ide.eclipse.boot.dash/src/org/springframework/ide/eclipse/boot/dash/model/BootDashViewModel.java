@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -30,12 +31,20 @@ public class BootDashViewModel implements Disposable {
 	private Set<RunTargetType> runTargetTypes;
 
 	/**
-	 * Create an 'empty' BootDashViewModel with no run targets.
-	 * Targets can be added by adding them to the runTarget's LiveSet.
+	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
+	 * added by adding them to the runTarget's LiveSet.
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
 		runTargets = new LiveSet<RunTarget>();
+
 		models = new BootDashModelManager(context, runTargets);
+
+		// Load additional targets AFTER the manager loads the local target
+		RunTargetPropertiesManager manager = new RunTargetPropertiesManager(context, runTargetTypes);
+		List<RunTarget> existingtargets = manager.getStoredTargets();
+		runTargets.addAll(existingtargets);
+		runTargets.addListener(manager);
+
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(Arrays.asList(runTargetTypes));
 	}
 

@@ -14,6 +14,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.RunTargetWizard;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
@@ -45,6 +46,13 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	@Override
 	public boolean canInstantiate() {
 		return true;
+	}
+
+	@Override
+	public RunTarget createRunTarget(TargetProperties props) {
+		return props instanceof CloudFoundryTargetProperties
+				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props)
+				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props));
 	}
 
 }

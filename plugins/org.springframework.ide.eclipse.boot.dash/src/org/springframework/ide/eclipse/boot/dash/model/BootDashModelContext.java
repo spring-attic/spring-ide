@@ -15,13 +15,22 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 public interface BootDashModelContext {
 
 	IWorkspace getWorkspace();
+
 	ILaunchManager getLaunchManager();
+
 	void log(Exception e);
+
 	IPath getStateLocation();
+
 	IPropertyStore<IProject> getProjectProperties();
+
+	IPropertyStore<RunTargetType> getRunTargetProperties();
+	
+	SecuredCredentialsStore getSecuredCredentialsStore();
 
 }
