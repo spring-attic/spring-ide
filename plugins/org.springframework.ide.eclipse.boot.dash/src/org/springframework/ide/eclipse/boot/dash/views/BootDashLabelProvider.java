@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends StyledCellLabelProvider {
-	
+
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
@@ -68,10 +68,6 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 			break;
 		case RUN_TARGET:
 			cell.setText(e.getTarget().getName());
-			break;
-		case RUN_STATE:
-			//cell.setImage(getRunStateImage(e.getRunState()));
-			cell.setText(e.getRunState().toString());
 			break;
 		case RUN_STATE_ICN:
 			cell.setText("");

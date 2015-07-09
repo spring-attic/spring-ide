@@ -25,8 +25,7 @@ public enum BootDashColumn {
 	PROJECT(		"Project", 	150),
 	APP(    		"Application", 150),
 	RUN_TARGET(		"Target", 	60),
-	RUN_STATE(		"State", 	100),
-	RUN_STATE_ICN(	"",		"State",	20),
+	RUN_STATE_ICN(	"",	        20),
 	TAGS(			"Tags",		100),
 	LIVE_PORT(		"Port",		70),
 	DEFAULT_PATH(	"Path",		70),
@@ -35,6 +34,7 @@ public enum BootDashColumn {
 
 	//Configure some odds and ends that don't apply to every column:
 	static {
+		RUN_STATE_ICN.longLabel = "State";
 		TAGS.editingSupportClass = TagEditingSupport.class;
 		DEFAULT_PATH.editingSupportClass = DefaultPathEditorSupport.class;
 
@@ -46,39 +46,26 @@ public enum BootDashColumn {
 	}
 
 	private final String label;
-	private final String longLabel;
+	private String longLabel;
 	private final int defaultWidth;
-	private final int allignment;
+	private int allignment = SWT.LEFT;
 	private Class<? extends EditingSupport> editingSupportClass;
 	private BootDashActionFactory singleClickAction;
 
 	private BootDashColumn(String label, int defaultWidth) {
-		this(label, defaultWidth, SWT.LEFT);
-	}
-
-	private BootDashColumn(String label, String longLabel, int defaultWidth) {
-		this(label, longLabel, defaultWidth, SWT.LEFT);
-	}
-
-	private BootDashColumn(String label, int defaultWidth, int allignment) {
-		this(label, label, defaultWidth, allignment);
-	}
-
-	private BootDashColumn(String label, String longLabel, int defaultWidth, int allignment) {
 		this.label = label;
-		this.longLabel = longLabel;
+		this.longLabel = label;
 		this.defaultWidth = defaultWidth;
-		this.allignment = allignment;
 	}
 
 	public String getLabel() {
 		return label;
 	}
-	
+
 	public String getLongLabel() {
 		return longLabel;
 	}
-	
+
 	public int getDefaultWidth() {
 		return defaultWidth;
 	}
