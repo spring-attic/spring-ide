@@ -10,20 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 
 /**
@@ -39,31 +32,6 @@ public class UIUtils {
 	public static final char[] TAG_CA_AUTO_ACTIVATION_CHARS = "/,-.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
 
 	public static final KeyStroke CTRL_SPACE = KeyStroke.getInstance(SWT.CTRL, SWT.SPACE);
-
-//	private static final String TAG_FONT_KEY = "tag";
-
-//	private static FontRegistry fontRegistry = null;
-
-//	private static FontRegistry getFontRegistry() {
-//		if (fontRegistry == null) {
-//			Display display = PlatformUI.getWorkbench().getDisplay();
-//			fontRegistry = new FontRegistry(display);
-//			FontData systemFontData = display.getSystemFont().getFontData()[0];
-//			fontRegistry.put(TAG_FONT_KEY, new FontData[] { new FontData(systemFontData.getName(), systemFontData.getHeight(), SWT.BOLD) });
-//		}
-//		return fontRegistry;
-//	}
-
-//	private static StyleRange createTagStyleRange(int start, int length) {
-//		StyleRange styleRange = new StyleRange();
-//		styleRange.start = start;
-//		styleRange.length = length;
-//		styleRange.underline = true;
-//		styleRange.rise = 2;
-//		styleRange.font = getFontRegistry().get(TAG_FONT_KEY);
-//		styleRange.foreground = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_CYAN);
-//		return styleRange;
-//	}
 
 	/**
 	 * Creates styled string applying tagStyle at appropriate locations in a raw tags string.
