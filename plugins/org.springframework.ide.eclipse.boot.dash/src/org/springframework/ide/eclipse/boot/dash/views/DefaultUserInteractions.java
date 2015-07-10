@@ -27,7 +27,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
- * An implementation of 'UserInteractions' that uses real Dialogs, for use in 'production'.
+ * An implementation of 'UserInteractions' that uses real Dialogs, for use in
+ * 'production'.
  *
  * @author Kris De Volder
  */
@@ -44,10 +45,11 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public ILaunchConfiguration chooseConfigurationDialog(String dialogTitle, String message, List<ILaunchConfiguration> configs) {
+	public ILaunchConfiguration chooseConfigurationDialog(String dialogTitle, String message,
+			List<ILaunchConfiguration> configs) {
 		IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
 		try {
-			ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
+			ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
 			dialog.setElements(configs.toArray());
 			dialog.setTitle(dialogTitle);
 			dialog.setMessage(message);
@@ -69,16 +71,17 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public IType chooseMainType(final IType[] mainTypes, final String dialogTitle, final String message) {
-		if (mainTypes.length==1) {
+		if (mainTypes.length == 1) {
 			return mainTypes[0];
-		} else if (mainTypes.length>0) {
-			//Take care the UI interactions don't bork if called from non-ui thread.
+		} else if (mainTypes.length > 0) {
+			// Take care the UI interactions don't bork if called from non-ui
+			// thread.
 			final LiveVariable<IType> chosenType = new LiveVariable<IType>();
 			getShell().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
 					try {
-						ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
+						ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
 						dialog.setElements(mainTypes);
 						dialog.setTitle(dialogTitle);
 						dialog.setMessage(message);
@@ -111,7 +114,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	public void openLaunchConfigurationDialogOnGroup(final ILaunchConfiguration conf, final String launchGroup) {
 		getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
-				IStructuredSelection selection = new StructuredSelection(new Object[] {conf});
+				IStructuredSelection selection = new StructuredSelection(new Object[] { conf });
 				DebugUITools.openLaunchConfigurationDialogOnGroup(getShell(), selection, launchGroup);
 			}
 		});
@@ -119,9 +122,20 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public void openUrl(String url) {
-		if (url!=null) {
+		if (url != null) {
 			UiUtil.openUrl(url);
 		}
+	}
+
+	@Override
+	public boolean confirmOperation(final String title, final String message) {
+		final boolean[] confirm = { false };
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				confirm[0] = MessageDialog.openConfirm(getShell(), title, message);
+			}
+		});
+		return confirm[0];
 	}
 
 }

@@ -26,34 +26,48 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
  */
 public interface RunTarget extends IdAble, Nameable {
 
+	public abstract RunTargetType getType();
+
 	/**
-	 * @return Subset of the runstate that a user can request when changing a DashBoardElement's 'run-state'.
-	 * Essentially, this allows determining whether a given BootDahsElement can support the 'stop', 'run' and
-	 * 'debug' operations which request that the element be brought into a given run-state.
+	 * @return Subset of the runstate that a user can request when changing a
+	 *         DashBoardElement's 'run-state'. Essentially, this allows
+	 *         determining whether a given BootDahsElement can support the
+	 *         'stop', 'run' and 'debug' operations which request that the
+	 *         element be brought into a given run-state.
 	 */
 	public abstract EnumSet<RunState> supportedGoalStates();
 
 	/**
-	 * Retrieve all existing launch configurations that are applicable for launching a given BootDashElement on
-	 * this RunTarget.
+	 * Retrieve all existing launch configurations that are applicable for
+	 * launching a given BootDashElement on this RunTarget.
 	 */
 	public abstract List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element);
 
 	/**
-	 * Create a launch config for a given dash element and initialize it with some suitable defaults.
+	 * Create a launch config for a given dash element and initialize it with
+	 * some suitable defaults.
 	 *
-	 * @param mainType, may be null if the main type can not be 'guessed' unambiguosly.
+	 * @param mainType,
+	 *            may be null if the main type can not be 'guessed'
+	 *            unambiguosly.
 	 */
 	public abstract ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception;
 
 	public abstract BootDashColumn[] getAllColumns();
+
 	public abstract BootDashColumn[] getDefaultColumns();
 
 	/**
-	 * Factory method to create the model for the 'elements tabel' of this run target.
+	 * Factory method to create the model for the 'elements tabel' of this run
+	 * target.
 	 */
 	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context);
 
-	public abstract RunTargetType getType();
+	/**
+	 *
+	 * @return true if it is a run target that can be deleted (and any
+	 *         associated models). False otherwise
+	 */
+	public boolean canRemove();
 
 }

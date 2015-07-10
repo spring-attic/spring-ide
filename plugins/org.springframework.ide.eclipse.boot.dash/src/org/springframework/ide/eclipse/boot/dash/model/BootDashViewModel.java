@@ -73,4 +73,22 @@ public class BootDashViewModel implements Disposable {
 		return runTargetTypes;
 	}
 
+	public void removeTarget(RunTarget toRemove, UserInteractions userInteraction) {
+
+		if (toRemove != null) {
+			RunTarget found = null;
+			for (RunTarget existingTarget : runTargets.getValues()) {
+				if (existingTarget.getId().equals(toRemove.getId())) {
+					found = existingTarget;
+					break;
+				}
+			}
+			if (found != null && userInteraction.confirmOperation("Deleting run target: " + found.getName(),
+					"Are you sure that you want to delete " + found.getName()
+							+ "? All information regarding this target will be permanently removed.")) {
+				runTargets.remove(found);
+			}
+		}
+	}
+
 }
