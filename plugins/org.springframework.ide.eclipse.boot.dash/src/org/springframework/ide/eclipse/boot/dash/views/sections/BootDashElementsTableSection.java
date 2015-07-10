@@ -378,6 +378,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			manager.add(a);
 		}
 
+		IAction removeAction = actions.getRemoveRunTargetAction();
+		if (removeAction != null) {
+			manager.add(removeAction);
+		}
+
 		IAction refreshAction = actions.getRefreshRunTargetAction();
 		if (refreshAction != null) {
 			manager.add(refreshAction);
