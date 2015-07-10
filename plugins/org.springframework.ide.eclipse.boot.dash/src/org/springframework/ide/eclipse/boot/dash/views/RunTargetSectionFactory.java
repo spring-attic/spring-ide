@@ -52,7 +52,8 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 	public IPageSection create(BootDashModel model) {
 		RunTarget runTarget = model.getRunTarget();
 		String sectionName = runTarget.getName();
-		BootDashElementsTableSection section = new BootDashElementsTableSection(owner, viewModel, model, elementFilter, tableMouseEvent);
+		BootDashElementsTableSection section = new BootDashElementsTableSection(owner, viewModel, model, elementFilter,
+				tableMouseEvent, ui);
 		return new ExpandableSectionWithSelection(owner, sectionName, section);
 	}
 }

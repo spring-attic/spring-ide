@@ -85,7 +85,6 @@ import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -131,12 +130,13 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model,
 			LiveExpression<Filter<BootDashElement>> searchFilterModel,
-			LiveVariable<MouseEvent> tableMouseEvent
+			LiveVariable<MouseEvent> tableMouseEvent,
+			UserInteractions ui
 	) {
 		super(owner);
 		this.viewModel = viewModel;
 		this.model = model;
-		this.ui = owner instanceof BootDashView ? ((BootDashView)owner).getUserInteractions() : null;
+		this.ui = ui;
 		this.searchFilterModel = searchFilterModel;
 		this.tableMouseEvent = tableMouseEvent;
 	}
