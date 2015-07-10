@@ -16,6 +16,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -29,18 +30,19 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class LatticeRunTarget extends AbstractRunTarget {
 
 	private static final EnumSet<RunState> SUPPORTED_RUN_GOAL_STATES = EnumSet.of(RUNNING, INACTIVE);
 
-	private static final BootDashColumn[] DEFAULT_COLUMS = {RUN_STATE_ICN, APP, HOST, INSTANCES};
+	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, APP, HOST, INSTANCES, TAGS};
 
 	private String targetHost;
 
 	public LatticeRunTarget(String targetHost) {
-		super("LTC:"+targetHost, "Lattice @ "+targetHost);
+		super(RunTargetTypes.LATTICE, "LTC:"+targetHost, "Lattice @ "+targetHost);
 		this.targetHost = targetHost;
 	}
 
@@ -61,7 +63,7 @@ public class LatticeRunTarget extends AbstractRunTarget {
 
 	@Override
 	public BootDashColumn[] getDefaultColumns() {
-		return DEFAULT_COLUMS;
+		return DEFAULT_COLUMNS;
 	}
 
 	@Override

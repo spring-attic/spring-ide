@@ -18,14 +18,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>> {
 
-	private final IPropertyStore<RunTargetType> propertiesStore;
+	private final IScopedPropertyStore<RunTargetType> propertiesStore;
 	private final SecuredCredentialsStore credentialsStore;
 	private final RunTargetType[] types;
 

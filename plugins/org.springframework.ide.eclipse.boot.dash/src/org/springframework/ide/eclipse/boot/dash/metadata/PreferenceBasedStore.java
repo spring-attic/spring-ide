@@ -13,10 +13,10 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 /**
- * An abstract base class to create {@link IPropertyStore} that uses
+ * An abstract base class to create {@link IScopedPropertyStore} that uses
  * {@link IEclipsePreferences} to persist properties.
  */
-public abstract class PreferenceBasedStore<T> implements IPropertyStore<T> {
+public abstract class PreferenceBasedStore<T> implements IScopedPropertyStore<T> {
 
 	protected abstract IEclipsePreferences createPrefs(T element);
 

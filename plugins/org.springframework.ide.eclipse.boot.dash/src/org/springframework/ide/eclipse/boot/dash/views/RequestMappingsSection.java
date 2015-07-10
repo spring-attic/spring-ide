@@ -206,9 +206,6 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 
 	}
 
-//	class NameSorter extends ViewerSorter {
-//	}
-
 	@Override
 	public void dispose() {
 		if (modelListener!=null) {

@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 /**
@@ -52,5 +53,7 @@ public interface RunTarget extends IdAble, Nameable {
 	 * Factory method to create the model for the 'elements tabel' of this run target.
 	 */
 	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context);
+
+	public abstract RunTargetType getType();
 
 }

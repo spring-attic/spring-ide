@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
@@ -19,7 +20,7 @@ public class LocalRunTarget extends AbstractRunTarget {
 	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH, TAGS};
 
 	private LocalRunTarget() {
-		super("local");
+		super(RunTargetTypes.LOCAL, "local");
 	}
 
 	@Override

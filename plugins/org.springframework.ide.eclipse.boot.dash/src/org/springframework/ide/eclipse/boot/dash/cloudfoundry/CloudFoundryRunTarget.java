@@ -27,9 +27,10 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
@@ -37,7 +38,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private CloudFoundryTargetProperties targetProperties;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties) {
-		super(CloudFoundryTargetProperties.getId(targetProperties),
+		super(RunTargetTypes.CLOUDFOUNDRY, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getId(targetProperties));
 		this.targetProperties = targetProperties;
 	}
