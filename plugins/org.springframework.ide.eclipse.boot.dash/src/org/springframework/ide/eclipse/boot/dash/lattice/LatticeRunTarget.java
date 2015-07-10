@@ -77,4 +77,9 @@ public class LatticeRunTarget extends AbstractRunTarget {
 		return "receptor."+getHost();
 	}
 
+	@Override
+	public boolean canRemove() {
+		return true;
+	}
+
 }

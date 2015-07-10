@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashElementsTableSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicCompositeSection.SectionFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ExpandableSectionWithSelection;
@@ -29,19 +30,22 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 	protected final IPageWithSections owner;
 	private LiveExpression<Filter<BootDashElement>> elementFilter;
 	private BootDashViewModel viewModel;
-
+	private UserInteractions ui;
 	/**
-	 * This is used as a 'shared event bus' where all BootDashElementsTableSection post
-	 * their mousedown events. This allows tables to clear their selection when the
-	 * user clicks in another table without holding down CTRL key.
+	 * This is used as a 'shared event bus' where all
+	 * BootDashElementsTableSection post their mousedown events. This allows
+	 * tables to clear their selection when the user clicks in another table
+	 * without holding down CTRL key.
 	 */
 	private LiveVariable<MouseEvent> tableMouseEvent;
 
-	public RunTargetSectionFactory(IPageWithSections owner, BootDashViewModel model, LiveExpression<Filter<BootDashElement>> elementFilter) {
+	public RunTargetSectionFactory(IPageWithSections owner, BootDashViewModel model,
+			LiveExpression<Filter<BootDashElement>> elementFilter, UserInteractions ui) {
 		this.owner = owner;
 		this.viewModel = model;
 		this.elementFilter = elementFilter;
 		this.tableMouseEvent = new LiveVariable<MouseEvent>();
+		this.ui = ui;
 	}
 
 	@Override

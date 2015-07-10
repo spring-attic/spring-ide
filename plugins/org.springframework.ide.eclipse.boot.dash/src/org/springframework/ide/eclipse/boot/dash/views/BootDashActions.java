@@ -45,7 +45,7 @@ public class BootDashActions {
 	private OpenInBrowserAction openBrowserAction;
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
-	
+	private RemoveRunTargetAction removeTargetAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -54,17 +54,18 @@ public class BootDashActions {
 
 		makeActions();
 	}
-	
-	public BootDashActions(BootDashViewModel model, BootDashModel sectionModel, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+
+	public BootDashActions(BootDashViewModel model, BootDashModel sectionModel,
+			MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
 		this.selection = selection;
 		this.ui = ui;
-        this.sectionModel = sectionModel;
+		this.sectionModel = sectionModel;
 		makeActions();
 	}
 
 	protected void makeActions() {
-		
+
 		RunStateAction restartAction = new RunOrDebugStateAction(model, selection, ui, RunState.RUNNING);
 		restartAction.setText("(Re)start");
 		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
@@ -124,6 +125,9 @@ public class BootDashActions {
 
 		if (sectionModel != null) {
 			refreshAction = new RefreshRunTargetAction(sectionModel, selection, ui);
+			if (sectionModel.getRunTarget().canRemove()) {
+				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
+			}
 		}
 	}
 
@@ -195,9 +199,13 @@ public class BootDashActions {
 	public AddRunTargetAction[] getAddRunTargetActions() {
 		return addTargetActions;
 	}
-	
+
+	public RemoveRunTargetAction getRemoveRunTargetAction() {
+		return removeTargetAction;
+	}
+
 	/**
-	 * 
+	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
 	public RefreshRunTargetAction getRefreshRunTargetAction() {
@@ -220,7 +228,7 @@ public class BootDashActions {
 		if (openBrowserAction != null) {
 			openBrowserAction.dispose();
 		}
-		if (addTargetActions!=null) {
+		if (addTargetActions != null) {
 			for (AddRunTargetAction a : addTargetActions) {
 				a.dispose();
 			}

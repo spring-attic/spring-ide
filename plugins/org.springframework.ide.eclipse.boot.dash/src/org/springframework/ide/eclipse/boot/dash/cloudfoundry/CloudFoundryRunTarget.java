@@ -79,4 +79,9 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return targetProperties;
 	}
 
+	@Override
+	public boolean canRemove() {
+		return true;
+	}
+
 }

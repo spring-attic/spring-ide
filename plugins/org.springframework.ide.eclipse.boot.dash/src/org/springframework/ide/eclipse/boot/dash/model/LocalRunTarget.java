@@ -53,4 +53,9 @@ public class LocalRunTarget extends AbstractRunTarget {
 	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
 		return new LocalBootDashModel(context);
 	}
+
+	@Override
+	public boolean canRemove() {
+		return false;
+	}
 }

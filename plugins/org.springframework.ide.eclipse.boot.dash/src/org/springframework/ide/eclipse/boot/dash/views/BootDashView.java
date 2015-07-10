@@ -215,7 +215,7 @@ public class BootDashView extends ViewPartWithSections {
 
 		DynamicRunTargetSection runTargetSections = new DynamicRunTargetSection(this,
 				model.getSectionModels(),
-				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter())
+				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter(), ui)
 		);
 
 		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
