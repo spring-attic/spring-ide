@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
-
 /**
  * @author Kris De Volder
  */
@@ -32,11 +29,6 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 	@Override
 	public String toString() {
 		return "RunTargetType("+getName()+")";
-	}
-	
-	@Override
-	public RunTarget createRunTarget(TargetProperties properties) {
-		return null;
 	}
 
 }

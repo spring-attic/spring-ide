@@ -30,10 +30,12 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-public class LatticeRunTarget extends AbstractRunTarget {
+public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private static final EnumSet<RunState> SUPPORTED_RUN_GOAL_STATES = EnumSet.of(RUNNING, INACTIVE);
 
@@ -41,9 +43,21 @@ public class LatticeRunTarget extends AbstractRunTarget {
 
 	private String targetHost;
 
+	private final TargetProperties targetProperties;
+
+	public static final String HOST_PROP = "host";
+
 	public LatticeRunTarget(String targetHost) {
 		super(RunTargetTypes.LATTICE, "LTC:"+targetHost, "Lattice @ "+targetHost);
 		this.targetHost = targetHost;
+		targetProperties = new TargetProperties(RunTargetTypes.LATTICE, getId());
+		targetProperties.put(HOST_PROP, targetHost);
+	}
+	
+	public LatticeRunTarget(TargetProperties properties) {
+		super(RunTargetTypes.LATTICE, "LTC:" + properties.get(HOST_PROP), "Lattice @ " + properties.get(HOST_PROP));
+		this.targetHost = properties.get(HOST_PROP);
+		targetProperties = new TargetProperties(properties.getAllProperties(), RunTargetTypes.LATTICE, getId());
 	}
 
 	@Override
@@ -82,6 +96,11 @@ public class LatticeRunTarget extends AbstractRunTarget {
 	@Override
 	public boolean canRemove() {
 		return true;
+	}
+
+	@Override
+	public TargetProperties getTargetProperties() {
+		return targetProperties;
 	}
 
 }
