@@ -244,9 +244,13 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			searchFilterModel.addListener(this.filterListener = new ValueListener<Filter<BootDashElement>>() {
 				public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
 					tv.refresh();
-					Table t = tv.getTable();
-					Composite parent = t.getParent();
-					parent.layout(new Control[]{t});
+					final Table t = tv.getTable();
+					t.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							Composite parent = t.getParent();
+							parent.layout();
+						}
+					});
 				}
 			});
 		}
