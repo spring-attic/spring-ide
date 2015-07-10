@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -29,9 +28,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -57,6 +53,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -95,7 +93,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
-import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -105,13 +102,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
 
-	private static final String PREF_KEY_SEPARATOR = "___";
-
-	private static final String PREF_KEY_ORDER_SUFFIX = "order";
-
-	private static final String PREF_KEY_WIDTH_SUFFIX = "width";
-
-	private static final String PREF_KEY_VISIBILITY_SUFFIX = "visibility";
+	private static final String COLUMN_DATA = "boot-dash-column-data";
 
 	private TableViewer tv;
 	private BootDashViewModel viewModel;
@@ -128,6 +119,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	private ValueListener<MouseEvent> tableMouseEventListener;
 	private Stylers stylers;
+
+	private BootDashColumnModel[] columnModels;
 
 	public BootDashElementsTableSection(IPageWithSections owner, BootDashViewModel viewModel, BootDashModel model,
 			LiveExpression<Filter<BootDashElement>> searchFilterModel,
@@ -150,6 +143,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	@Override
 	public void createContents(final Composite page) {
+		initColumnModels();
+
 		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
 																	// Assumes its up to the page to be scrollable.
 		tv.setContentProvider(new BootDashContentProvider(model));
@@ -163,16 +158,17 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
 
-		if (model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0) {
-			EnumSet<BootDashColumn> defaultVisibleColumns = EnumSet.copyOf(Arrays.asList(model.getRunTarget().getDefaultColumns()));
-			for (final BootDashColumn columnType :  model.getRunTarget().getAllColumns() ) {
-				initColumn(new TableViewerColumn(tv, columnType.getAllignment()), columnType, defaultVisibleColumns);
-			}
-			initColumnsOrder();
-			addSingleClickHandling();
-		}
-
-		new TableResizeHelper(tv).enableResizing();
+//		if (model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0) {
+//			EnumSet<BootDashColumn> defaultVisibleColumns = EnumSet.copyOf(Arrays.asList(model.getRunTarget().getDefaultColumns()));
+//			for (final BootDashColumn columnType :  model.getRunTarget().getAllColumns() ) {
+//				initColumn(new TableViewerColumn(tv, columnType.getAllignment()), columnType, defaultVisibleColumns);
+//			}
+//			initColumnsOrder();
+//			addSingleClickHandling();
+//		}
+//
+//		new TableResizeHelper(tv).enableResizing();
+		refreshColumns();
 
 		model.getElements().addListener(new UIValueListener<Set<BootDashElement>>() {
 			@Override
@@ -254,11 +250,40 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv.getTable().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				String orderKey = getKey(getPreferencesKeyPrefix(), PREF_KEY_ORDER_SUFFIX);
-				String searializedOrder = serializeColumnOrder(tv.getTable().getColumnOrder());
-				BootDashActivator.getDefault().getPreferenceStore().setValue(orderKey, searializedOrder);
+				storeTableData();
 			}
 		});
+	}
+
+	private void initColumnModels() {
+		if (model.getRunTarget() == null || model.getRunTarget().getAllColumns().length == 0) {
+			columnModels = new BootDashColumnModel[0];
+		} else {
+			columnModels = new BootDashColumnModel[model.getRunTarget().getAllColumns().length];
+			EnumSet<BootDashColumn> defaultVisibleColumns = EnumSet.copyOf(Arrays.asList(model.getRunTarget().getDefaultColumns()));
+			for (int i = 0; i < model.getRunTarget().getAllColumns().length; i++) {
+				BootDashColumn column = model.getRunTarget().getAllColumns()[i];
+				columnModels[i] = new BootDashColumnModel(column, defaultVisibleColumns.contains(column), i, model.getRunTarget().getId());
+			}
+		}
+	}
+
+	private void refreshColumns() {
+		tv.getTable().setRedraw(false);
+		storeTableData();
+		for (TableColumn tc : tv.getTable().getColumns()) {
+			tc.dispose();
+		}
+		Arrays.sort(columnModels, BootDashColumnModel.INDEX_COMPARATOR);
+		for (final BootDashColumnModel columnModel :  columnModels) {
+			if (columnModel.getVisibility()) {
+				createColumn(columnModel);
+			}
+		}
+		addSingleClickHandling();
+		tv.getTable().setRedraw(true);
+		tv.refresh();
+		ReflowUtil.reflow(owner, tv.getControl());
 	}
 
 	public void addSingleClickHandling() {
@@ -500,132 +525,68 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 	}
 
-	private static String serializeColumnOrder(int[] order) {
-		StringBuilder sb = new StringBuilder();
-		if (order.length > 0) {
-			for (int i = 0; i < order.length -1; i++) {
-				sb.append(order[i]);
-				sb.append(',');
-			}
-			sb.append(order[order.length - 1]);
-		}
-		return sb.toString();
-	}
-
-	private static int[] parseColumnOrder(String s) {
-		String[] split = s == null || s.isEmpty() ? new String[0] : s.split(",");
-		int[] order = new int[split.length];
-		for (int i = 0; i < split.length; i++) {
-			order[i] = Integer.parseInt(split[i]);
-		}
-		return order;
-	}
-
-	private void initColumnsOrder() {
-		IPreferenceStore prefs = BootDashActivator.getDefault().getPreferenceStore();
-		String orderKey = getKey(getPreferencesKeyPrefix(), PREF_KEY_ORDER_SUFFIX);
-		prefs.setDefault(orderKey, serializeColumnOrder(tv.getTable().getColumnOrder()));
-		if (!prefs.isDefault(orderKey)) {
-			try {
-				tv.getTable().setColumnOrder(parseColumnOrder(prefs.getString(orderKey)));
-			} catch (Throwable t) {
-				BootDashActivator.getDefault().getLog()
-						.log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
-								"Failed to initialize column order for Boot Dashboard table '"
-										+ model.getRunTarget().getId() + "'",
-								t));
-			}
-		}
-	}
-
-	private void initColumn(TableViewerColumn viewer, final BootDashColumn column, EnumSet<BootDashColumn> defaultVisibleColumns) {
+	private void createColumn(final BootDashColumnModel columnModel) {
+		TableViewerColumn viewer = new TableViewerColumn(tv, columnModel.getAllignment());
 		final TableColumn tc = viewer.getColumn();
-		tc.setText(column.getLabel());
-		tc.setData(column);
+		tc.setText(columnModel.getLabel());
+		tc.setWidth(columnModel.getWidth());
+		tc.setResizable(true);
+		tc.setMoveable(true);
+		tc.setData(COLUMN_DATA, columnModel);
 
-		final String prefix = getPreferencesKeyPrefix();
-		final IPreferenceStore prefStore = BootDashActivator.getDefault().getPreferenceStore();
+		viewer.setLabelProvider(getLabelProvider(columnModel.getType()));
 
-		final String widthKey = getKey(prefix, column.toString(), PREF_KEY_WIDTH_SUFFIX);
-		final String visibilityKey = getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX);
-
-		prefStore.setDefault(widthKey, column.getDefaultWidth());
-		prefStore.setDefault(visibilityKey, defaultVisibleColumns.contains(column));
-
-		refreshBootDashColumnVisuals(tc);
-
-		viewer.setLabelProvider(getLabelProvider(column));
-		if (column.getEditingSupportClass() != null) {
+		if (columnModel.getEditingSupportClass() != null) {
 			try {
-				viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, BootDashViewModel.class, Stylers.class)
+				viewer.setEditingSupport(columnModel.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, BootDashViewModel.class, Stylers.class)
 						.newInstance(tv, getSelection().toSingleSelection(), viewModel, stylers));
 			} catch (NoSuchMethodException e) {
 				try {
-					viewer.setEditingSupport(column.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, Stylers.class)
+					viewer.setEditingSupport(columnModel.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, Stylers.class)
 							.newInstance(tv, getSelection().toSingleSelection(), stylers));
 				} catch (Throwable t) {
-					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), t));
+					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), t));
 				}
 			} catch (InstantiationException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
 			} catch (IllegalAccessException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
 			} catch (IllegalArgumentException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
 			} catch (InvocationTargetException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
 			} catch (SecurityException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + column.toString(), e));
+				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
 			}
 		}
 
+//		final int initIndex = tv.getTable().getColumns().length;
+
 		tc.addControlListener(new ControlAdapter() {
+//			@Override
+//			public void controlMoved(ControlEvent e) {
+//				columnModel.setIndex(Arrays.asList(tv.getTable().getColumnOrder()).indexOf(initIndex));
+//			}
 			@Override
 			public void controlResized(ControlEvent e) {
-				if (prefStore.getBoolean(visibilityKey)) {
-					prefStore.setValue(widthKey, tc.getWidth());
-				}
+//				columnModel.setWidth(tc.getWidth());
 				ReflowUtil.reflow(owner, tv.getControl());
 			}
 		});
 
 	}
 
-	private void refreshBootDashColumnVisuals(TableColumn tc) {
-		if (tc.getData() instanceof BootDashColumn) {
-			BootDashColumn column = (BootDashColumn) tc.getData();
-			IPreferenceStore prefStore = BootDashActivator.getDefault().getPreferenceStore();
-			String prefix = getPreferencesKeyPrefix();
-			String widthKey = getKey(prefix, column.toString(), PREF_KEY_WIDTH_SUFFIX);
-			String visibilityKey = getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX);
-
-			if (prefStore.getBoolean(visibilityKey)) {
-				tc.setWidth(prefStore.getInt(widthKey));
-				tc.setMoveable(true);
-				tc.setResizable(true);
-			} else {
-				tc.setWidth(0);
-				tc.setMoveable(false);
-				tc.setResizable(false);
+	private void storeTableData() {
+		for (int i = 0; i < tv.getTable().getColumns().length; i++) {
+			TableColumn tc = tv.getTable().getColumns()[i];
+			if (tc.getData(COLUMN_DATA) instanceof BootDashColumnModel) {
+				BootDashColumnModel columnModel = (BootDashColumnModel) tc.getData(COLUMN_DATA);
+				columnModel.setWidth(tc.getWidth());
+				int j = 0;
+				for (; j < tv.getTable().getColumnOrder().length && tv.getTable().getColumnOrder()[j] != i; j++);
+				columnModel.setIndex(j);
 			}
 		}
-	}
-
-	private String getPreferencesKeyPrefix() {
-		return model.getRunTarget() == null || model.getRunTarget().getId() == null ? ""
-				: model.getRunTarget().getId();
-	}
-
-	private static String getKey(String... tokens) {
-		StringBuilder sb = new StringBuilder();
-		if (tokens.length > 0) {
-			sb.append(tokens[0]);
-			for (int i = 1; i < tokens.length; i++) {
-				sb.append(PREF_KEY_SEPARATOR);
-				sb.append(tokens[i]);
-			}
-		}
-		return sb.toString();
 	}
 
 	private class SettingsAction extends Action {
@@ -643,7 +604,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		public void run() {
 			ViewSettingsDialog viewSettingsDialog = new ViewSettingsDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()) {
 
-				private List<FieldEditor> editors;
+				private Button[] editors;
+				private BootDashColumnModel[] sortedModels;
 
 				@Override
 				protected Control createDialogArea(Composite parent) {
@@ -652,16 +614,17 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					Group group = new Group(top, SWT.NONE);
 					group.setText("Columns Visibility");
 					group.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+					group.setLayout(new GridLayout());
 
-					final String prefix = getPreferencesKeyPrefix();
+					editors = new Button[columnModels.length];
 
-					editors = new ArrayList<FieldEditor>();
-
-					for (BootDashColumn column : model.getRunTarget().getAllColumns()) {
-						BooleanFieldEditor editor = new BooleanFieldEditor(getKey(prefix, column.toString(), PREF_KEY_VISIBILITY_SUFFIX), column.getLongLabel(), group);
-						editor.setPreferenceStore(BootDashActivator.getDefault().getPreferenceStore());
-						editor.load();
-						editors.add(editor);
+					sortedModels = Arrays.copyOf(columnModels, columnModels.length);
+					Arrays.sort(sortedModels, BootDashColumnModel.DEFAULT_INDEX_COMPARATOR);
+					for (int i = 0; i < sortedModels.length; i++) {
+						Button editor = new Button(group, SWT.CHECK);
+						editor.setText(sortedModels[i].getType().getLongLabel());
+						editor.setSelection(sortedModels[i].getVisibility());
+						editors[i] = editor;
 					}
 
 					Dialog.applyDialogFont(top);
@@ -671,19 +634,17 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 				@Override
 				protected void performDefaults() {
-					for (FieldEditor editor : editors) {
-						editor.loadDefault();
+					for (int i = 0; i < editors.length; i++) {
+						editors[i].setSelection(sortedModels[i].getDefaultVisibility());
 					}
 				}
 
 				@Override
 				protected void okPressed() {
-					for (FieldEditor editor : editors) {
-						editor.store();
+					for (int i = 0; i < editors.length; i++) {
+						sortedModels[i].setVisibility(editors[i].getSelection());
 					}
-					for (TableColumn tc : tv.getTable().getColumns()) {
-						refreshBootDashColumnVisuals(tc);
-					}
+					refreshColumns();
 					super.okPressed();
 				}
 
