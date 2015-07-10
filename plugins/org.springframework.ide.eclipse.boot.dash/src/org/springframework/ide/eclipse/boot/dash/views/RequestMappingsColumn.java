@@ -8,14 +8,33 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
+package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.swt.SWT;
 
-public interface RequestMapping {
-	public String getPath();
-	public String getMethod();
-	public String getFullyQualifiedClassName();
-	public IType getType();
-	public boolean isUserDefined();
+public enum RequestMappingsColumn {
+
+	PATH("Path", 80),
+	SRC("Source", 100);
+
+	private int defaultWidth;
+	private String label;
+
+	private RequestMappingsColumn(String label, int defaultWidth) {
+		this.defaultWidth = defaultWidth;
+		this.label= label;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public int getAlignment() {
+		return SWT.LEFT;
+	}
+
+	public int getDefaultWidth() {
+		return defaultWidth;
+	}
+
 }

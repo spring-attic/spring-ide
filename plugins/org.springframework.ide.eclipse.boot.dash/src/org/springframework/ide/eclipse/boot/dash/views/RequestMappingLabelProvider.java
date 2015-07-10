@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.swt.graphics.Font;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
@@ -26,37 +26,62 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 
 	private LiveExpression<BootDashElement> bde;
 	private Stylers stylers;
+	private RequestMappingsColumn column;
 
-	public RequestMappingLabelProvider(Font baseFont, LiveExpression<BootDashElement> bde) {
+	public RequestMappingLabelProvider(Stylers stylers, LiveExpression<BootDashElement> bde, RequestMappingsColumn column) {
 		this.bde = bde;
-		this.stylers = new Stylers(baseFont);
+		this.column = column;
+		this.stylers = stylers;
 	}
 
 	@Override
 	public void update(ViewerCell cell) {
-		StyledString styledText = getStyledText(cell);
-		if (styledText!=null) {
-			cell.setText(styledText.getString());
-			cell.setStyleRanges(styledText.getStyleRanges());
+		Object o = cell.getElement();
+		if (o instanceof String) {
+			if (column==RequestMappingsColumn.SRC) {
+				cell.setText((String) o);
+				cell.setStyleRanges(null);
+			} else {
+				cell.setText("");
+			}
+		} else if (o instanceof RequestMapping) {
+			StyledString styledText = getStyledText((RequestMapping)o);
+			if (styledText!=null) {
+				cell.setText(styledText.getString());
+				cell.setStyleRanges(styledText.getStyleRanges());
+			} else {
+				cell.setText(""+cell.getElement());
+				cell.setStyleRanges(null);
+			}
 		} else {
-			cell.setText(""+cell.getElement());
+			cell.setText("");
 			cell.setStyleRanges(null);
 		}
 	}
 
-	protected StyledString getStyledText(ViewerCell cell) {
-		Object o = cell.getElement();
-		if (o instanceof RequestMapping) {
-			RequestMapping rm = (RequestMapping) o;
+	protected StyledString getStyledText(RequestMapping rm) {
+		Styler deemphasize = Stylers.NULL;
+		if (!rm.isUserDefined()) {
+			 deemphasize = stylers.grey();
+		}
+		switch (column) {
+		case PATH:
 			String path = rm.getPath();
 			String defaultPath = getDefaultPath(bde.getValue());
 			if (defaultPath.equals(path)) {
 				return new StyledString(path, stylers.bold());
 			} else {
-				return new StyledString(path);
+				return new StyledString(path, deemphasize);
 			}
+		case SRC:
+			String m = rm.getMethod();
+			if (m!=null) {
+				return new StyledString(m, deemphasize);
+			}
+		default:
+			break;
 		}
-		return null;
+		return new StyledString("???", deemphasize);
 	}
 
 	private String getDefaultPath(BootDashElement value) {
@@ -67,15 +92,6 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 			}
 		}
 		return "";
-	}
-
-	@Override
-	public void dispose() {
-		if (stylers!=null) {
-			stylers.dispose();
-			stylers = null;
-		}
-		super.dispose();
 	}
 
 }

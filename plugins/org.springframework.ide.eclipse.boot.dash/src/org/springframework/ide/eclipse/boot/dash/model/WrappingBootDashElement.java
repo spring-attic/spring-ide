@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+
 public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	protected final T delegate;
-	
+	private TypeLookup typeLookup;
+
 	public WrappingBootDashElement(T delegate) {
 		this.delegate = delegate;
 	}
@@ -50,5 +56,26 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 	public String toString() {
 		return delegate.toString();
 	}
+
+	protected TypeLookup getTypeLookup() {
+		if (typeLookup==null) {
+			typeLookup = new TypeLookup() {
+				public IType findType(String fqName) {
+					try {
+						IJavaProject jp = getJavaProject();
+						if (jp!=null) {
+							return jp.findType(fqName);
+						}
+					} catch (Exception e) {
+						BootDashActivator.log(e);
+					}
+					return null;
+				}
+			};
+		}
+		return typeLookup;
+	}
+
+
 
 }

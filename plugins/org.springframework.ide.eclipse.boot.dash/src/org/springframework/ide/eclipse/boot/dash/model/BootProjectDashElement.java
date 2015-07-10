@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
@@ -352,7 +353,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		try {
 			URI target = getActuatorUrl();
 			if (target!=null) {
-				ActuatorClient client = new ActuatorClient(target);
+				ActuatorClient client = new ActuatorClient(target, getTypeLookup());
 				return client.getRequestMappings();
 			}
 		} catch (Exception e) {

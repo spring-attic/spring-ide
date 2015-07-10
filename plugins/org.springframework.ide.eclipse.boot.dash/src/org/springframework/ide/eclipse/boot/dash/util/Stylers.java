@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.util;
 
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.TextStyle;
@@ -20,6 +21,13 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 public class Stylers implements Disposable {
 
+	public static final Styler NULL = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+		}
+		public String toString() {
+			return "Styler.NULL";
+		};
+	};
 	private Font baseFont; // borrowed
 	private Font boldFont = null; //owned (must dispose!)
 
@@ -31,10 +39,15 @@ public class Stylers implements Disposable {
 		return new Styler() {
 			@Override
 			public void applyStyles(TextStyle textStyle) {
-				textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN);
+				textStyle.foreground = getSystemColor(SWT.COLOR_DARK_CYAN);
 				textStyle.font = getBoldFont();
 			}
+
 		};
+	}
+
+	private Color getSystemColor(int colorCode) {
+		return Display.getDefault().getSystemColor(colorCode);
 	}
 
 	public Styler bold() {
@@ -63,6 +76,19 @@ public class Stylers implements Disposable {
 			boldFont.dispose();
 			boldFont = null;
 		}
+	}
+
+	public Styler grey() {
+		return color(SWT.COLOR_GRAY);
+	}
+
+	private Styler color(int colorCode) {
+		final Color color = getSystemColor(colorCode);
+		return new Styler() {
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.foreground = color;
+			}
+		};
 	}
 
 }

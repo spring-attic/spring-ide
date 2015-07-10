@@ -28,7 +28,7 @@ public class ActuatorClient {
 	 *
 	 * @author Kris De Volder
 	 */
-	private static class RequestMappingImpl implements RequestMapping {
+	static class RequestMappingImpl extends AbstractRequestMapping {
 
 		/*
    There are two styles of entries:
@@ -48,8 +48,10 @@ public class ActuatorClient {
 		private String key;
 		private JSONObject beanInfo;
 		private String path;
+		private String fqClassName;
 
-		RequestMappingImpl(String key, JSONObject beanInfo) {
+		RequestMappingImpl(String key, JSONObject beanInfo, TypeLookup typeLookup) {
+			super(typeLookup);
 			this.key = key;
 			this.beanInfo = beanInfo;
 		}
@@ -82,13 +84,63 @@ public class ActuatorClient {
 		public String toString() {
 			return "RequestMapping("+key+")";
 		}
+
+		public String getFullyQualifiedClassName() {
+			if (fqClassName==null) {
+				fqClassName = computeFQClassName();
+			}
+			return fqClassName;
+		}
+
+		private String computeFQClassName() {
+			String methodString = getMethodString();
+			if (methodString!=null) {
+				// Example: public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.HealthMvcEndpoint.invoke(java.security.Principal)
+				String[] pieces = methodString.split("\\s");
+				if (pieces.length>=3) {
+					methodString = pieces[2];
+					int methodNameEnd = methodString.indexOf('(');
+					if (methodNameEnd>=0) {
+						int methodNameStart = methodString.lastIndexOf('.', methodNameEnd);
+						if (methodNameStart>=0) {
+							return methodString.substring(0, methodNameStart);
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		public String getMethod() {
+			return getMethodString();
+		}
+
+		/**
+		 * Returns the raw string found in the requestmapping info. This is a 'toString' value
+		 * of java.lang.reflect.Method object.
+		 */
+		private String getMethodString() {
+			try {
+				if (beanInfo!=null) {
+					if (beanInfo.has("method")) {
+						return beanInfo.getString("method");
+					}
+				}
+			} catch (Exception e) {
+				BootDashActivator.log(e);
+			}
+			return null;
+		}
+
 	}
 
 	private RestTemplate rest = new RestTemplate();
 	private URI target;
+	private TypeLookup typeLookup;
 
-	public ActuatorClient(URI target) {
+	public ActuatorClient(URI target, TypeLookup typeLookup) {
 		this.target = target;
+		this.typeLookup = typeLookup;
 	}
 
 	public List<RequestMapping> getRequestMappings() {
@@ -114,7 +166,7 @@ public class ActuatorClient {
 		while (keys.hasNext()) {
 			String key = keys.next();
 			JSONObject value = obj.getJSONObject(key);
-			result.add(new RequestMappingImpl(key, value));
+			result.add(new RequestMappingImpl(key, value, typeLookup));
 		}
 		return result;
 	}

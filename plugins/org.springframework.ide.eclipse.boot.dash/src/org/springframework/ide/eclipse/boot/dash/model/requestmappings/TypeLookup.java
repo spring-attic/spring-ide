@@ -12,10 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
 import org.eclipse.jdt.core.IType;
 
-public interface RequestMapping {
-	public String getPath();
-	public String getMethod();
-	public String getFullyQualifiedClassName();
-	public IType getType();
-	public boolean isUserDefined();
+/**
+ * Represents a context in which it is possible to find Java types. Typcially
+ * this context is some IJavaProject (or something that is linked to one, like a BDE)
+ *
+ * @author Kris De Volder
+ */
+public interface TypeLookup {
+	IType findType(String fqName);
 }

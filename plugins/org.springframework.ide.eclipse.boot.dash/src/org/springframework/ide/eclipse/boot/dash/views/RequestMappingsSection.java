@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -28,11 +29,13 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.TableColumn;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -52,6 +55,33 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 	private BootDashViewModel model;
 	private ElementStateListener modelListener;
 	private RequestMappingLabelProvider labelProvider;
+	private Stylers stylers;
+	private ViewerSorter sorter = new ViewerSorter() {
+
+		 @Override
+		 public int compare(Viewer viewer, Object e1, Object e2) {
+			 if (e1 instanceof RequestMapping && e2 instanceof RequestMapping) {
+				 RequestMapping rm1 = (RequestMapping) e1;
+				 RequestMapping rm2 = (RequestMapping) e2;
+				 int cat1 = getCategory(rm1);
+				 int cat2 = getCategory(rm2);
+				 if (cat1!=cat2) {
+					 return cat1-cat2;
+				 } else {
+					 return rm1.getPath().compareTo(rm2.getPath());
+				 }
+			 }
+			 return 0;
+		 }
+
+		private int getCategory(RequestMapping rm) {
+			if (rm.isUserDefined()) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	};
 
 	public RequestMappingsSection(IPageWithSections owner, BootDashViewModel model, LiveExpression<BootDashElement> selection) {
 		super(owner);
@@ -69,9 +99,20 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 		this.page = page;
 		this.tv = new TableViewer(page, SWT.BORDER|SWT.FULL_SELECTION|SWT.V_SCROLL);
 		tv.setContentProvider(new ContentProvider());
-		tv.setSorter(new NameSorter());
-		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
+		tv.setSorter(sorter);
+//		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
 		tv.setInput(model);
+		tv.getTable().setHeaderVisible(true);
+		stylers = new Stylers(tv.getTable().getFont());
+
+		for (RequestMappingsColumn colType : RequestMappingsColumn.values()) {
+			TableViewerColumn col = new TableViewerColumn(tv, colType.getAlignment());
+			col.setLabelProvider(new RequestMappingLabelProvider(stylers, input, colType));
+			TableColumn colWidget = col.getColumn();
+			colWidget.setText(colType.getLabel());
+			colWidget.setWidth(colType.getDefaultWidth());
+		}
+
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getTable());
 		this.input.addListener(new UIValueListener<BootDashElement>() {
 			public void uiGotValue(LiveExpression<BootDashElement> exp, BootDashElement value) {
@@ -109,12 +150,16 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 		model.addElementStateListener(modelListener = new ElementStateListener() {
 			public void stateChanged(BootDashElement e) {
 				if (e.equals(input.getValue())) {
-					tv.getControl().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							tv.refresh();
-							page.layout(new Control[] {tv.getControl()});
-						}
-					});
+					if (!tv.getControl().isDisposed()) {
+						tv.getControl().getDisplay().asyncExec(new Runnable() {
+							public void run() {
+								if (!tv.getControl().isDisposed()) {
+									tv.refresh();
+									page.layout(new Control[] {tv.getControl()});
+								}
+							}
+						});
+					}
 				}
 			}
 		});
@@ -161,8 +206,8 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 
 	}
 
-	class NameSorter extends ViewerSorter {
-	}
+//	class NameSorter extends ViewerSorter {
+//	}
 
 	@Override
 	public void dispose() {
@@ -173,6 +218,10 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 		if (labelProvider!=null) {
 			labelProvider.dispose();
 			labelProvider = null;
+		}
+		if (stylers!=null) {
+			stylers.dispose();
+			stylers = null;
 		}
 	}
 
