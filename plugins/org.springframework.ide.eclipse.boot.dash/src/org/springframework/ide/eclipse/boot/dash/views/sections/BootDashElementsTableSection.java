@@ -296,7 +296,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		});
 
 		columnOrderChanged = false;
-		page.layout(true);
+		ReflowUtil.reflow(owner, tv.getControl());
 
 	}
 
