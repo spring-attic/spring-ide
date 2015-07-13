@@ -142,33 +142,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	@Override
-	public void createContents(final Composite page) {
+	public void createContents(Composite page) {
 		initColumnModels();
 
-		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
-																	// Assumes its up to the page to be scrollable.
-		tv.setContentProvider(new BootDashContentProvider(model));
-		//tv.setLabelProvider(new ViewLabelProvider());
-		tv.setSorter(new NameSorter());
-		tv.setInput(model);
-		tv.getTable().setHeaderVisible(true);
-		stylers = new Stylers(tv.getTable().getFont());
-
-		//tv.getTable().setLinesVisible(true);
-
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
-
-//		if (model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0) {
-//			EnumSet<BootDashColumn> defaultVisibleColumns = EnumSet.copyOf(Arrays.asList(model.getRunTarget().getDefaultColumns()));
-//			for (final BootDashColumn columnType :  model.getRunTarget().getAllColumns() ) {
-//				initColumn(new TableViewerColumn(tv, columnType.getAllignment()), columnType, defaultVisibleColumns);
-//			}
-//			initColumnsOrder();
-//			addSingleClickHandling();
-//		}
-//
-//		new TableResizeHelper(tv).enableResizing();
-		refreshColumns();
+		refreshTableViewer(page);
 
 		model.getElements().addListener(new UIValueListener<Set<BootDashElement>>() {
 			@Override
@@ -190,16 +167,60 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			public void stateChanged(final BootDashElement e) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
-						tv.update(e, null);
+						if (tv != null && !tv.getControl().isDisposed()) {
+							tv.update(e, null);
+						}
 					}
 				});
 			}
 		});
 
+		if (searchFilterModel!=null) {
+			searchFilterModel.addListener(this.filterListener = new ValueListener<Filter<BootDashElement>>() {
+				public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
+					if (tv != null && !tv.getControl().isDisposed()) {
+						tv.refresh();
+						Table t = tv.getTable();
+						Composite parent = t.getParent();
+						parent.layout(new Control[]{t});
+					}
+				}
+			});
+		}
+
+	}
+
+	private void refreshTableViewer(final Composite page) {
+		// Cleanup first
+		if (tv != null && !tv.getControl().isDisposed()) {
+			tv.getControl().dispose();
+		}
+
+		// Create table viewer again and attach all listeners.
+		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
+		// Assumes its up to the page to be scrollable.
+		tv.setContentProvider(new BootDashContentProvider(model));
+		// tv.setLabelProvider(new ViewLabelProvider());
+		tv.setSorter(new NameSorter());
+		tv.setInput(model);
+		tv.getTable().setHeaderVisible(true);
+		stylers = new Stylers(tv.getTable().getFont());
+
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
+
+		Arrays.sort(columnModels, BootDashColumnModel.INDEX_COMPARATOR);
+		for (final BootDashColumnModel columnModel :  columnModels) {
+			if (columnModel.getVisibility()) {
+				createColumn(columnModel);
+			}
+		}
+		addSingleClickHandling();
+
 		tv.getControl().addControlListener(new ControlListener() {
 			public void controlResized(ControlEvent e) {
 				ReflowUtil.reflow(owner, tv.getControl());
 			}
+
 			public void controlMoved(ControlEvent e) {
 			}
 		});
@@ -207,19 +228,20 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		actions = new BootDashActions(viewModel, model, getSelection(), ui);
 		hookContextMenu();
 
-		//Careful, either selection or tableviewer might be created first.
+		// Careful, either selection or tableviewer might be created first.
 		// in either case we must make sure the listener is added when *both*
 		// have been created.
-		if (selection!=null) {
+		if (selection != null) {
 			addTableSelectionListener();
 		}
+
 		tv.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				if (selection!=null) {
+				if (selection != null) {
 					BootDashElement selected = selection.getSingle();
-					if (selected!=null) {
+					if (selected != null) {
 						String url = BootDashElementUtil.getUrl(selected, selected.getDefaultRequestMappingPath());
-						if (url!=null) {
+						if (url != null) {
 							UiUtil.openUrl(url);
 						}
 					}
@@ -227,7 +249,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		if (searchFilterModel!=null) {
+		if (searchFilterModel != null) {
 			tv.addFilter(new ViewerFilter() {
 				@Override
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -237,22 +259,33 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					return true;
 				}
 			});
-			searchFilterModel.addListener(this.filterListener = new ValueListener<Filter<BootDashElement>>() {
-				public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
-					tv.refresh();
-					Table t = tv.getTable();
-					Composite parent = t.getParent();
-					parent.layout(new Control[]{t});
-				}
-			});
 		}
 
 		tv.getTable().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				storeTableData();
+
+				hoverCell = null;
+				hoverElement = null;
+
+				if (tableMouseEventListener!=null) {
+					tableMouseEvent.removeListener(tableMouseEventListener);
+					tableMouseEventListener = null;
+				}
+				if (actions!=null) {
+					actions.dispose();
+					actions = null;
+				}
+				if (stylers != null) {
+					stylers.dispose();
+					stylers = null;
+				}
 			}
 		});
+
+		page.layout(true);
+
 	}
 
 	private void initColumnModels() {
@@ -266,24 +299,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				columnModels[i] = new BootDashColumnModel(column, defaultVisibleColumns.contains(column), i, model.getRunTarget().getId());
 			}
 		}
-	}
-
-	private void refreshColumns() {
-		tv.getTable().setRedraw(false);
-		storeTableData();
-		for (TableColumn tc : tv.getTable().getColumns()) {
-			tc.dispose();
-		}
-		Arrays.sort(columnModels, BootDashColumnModel.INDEX_COMPARATOR);
-		for (final BootDashColumnModel columnModel :  columnModels) {
-			if (columnModel.getVisibility()) {
-				createColumn(columnModel);
-			}
-		}
-		addSingleClickHandling();
-		tv.getTable().setRedraw(true);
-		tv.refresh();
-		ReflowUtil.reflow(owner, tv.getControl());
 	}
 
 	public void addSingleClickHandling() {
@@ -512,17 +527,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			searchFilterModel.removeListener(filterListener);
 			filterListener = null;
 		}
-		if (tableMouseEventListener!=null) {
-			tableMouseEvent.removeListener(tableMouseEventListener);
-			tableMouseEventListener = null;
-		}
-		if (actions!=null) {
-			actions.dispose();
-			actions = null;
-		}
-		if (stylers!=null) {
-			stylers.dispose();
-		}
 	}
 
 	private void createColumn(final BootDashColumnModel columnModel) {
@@ -644,8 +648,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					for (int i = 0; i < editors.length; i++) {
 						sortedModels[i].setVisibility(editors[i].getSelection());
 					}
-					refreshColumns();
 					super.okPressed();
+					refreshTableViewer(tv.getControl().getParent());
 				}
 
 				@Override
