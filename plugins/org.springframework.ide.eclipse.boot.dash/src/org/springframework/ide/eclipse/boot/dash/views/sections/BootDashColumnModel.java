@@ -3,7 +3,6 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import java.util.Comparator;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
@@ -30,7 +29,7 @@ public class BootDashColumnModel {
 
 	private final BootDashColumn feature;
 	private final int allignment;
-	private final Class<? extends EditingSupport> editingSupportClass;
+	private final EditingSupportFactory editingSupport;
 	private final BootDashActionFactory singleClickAction;
 
 	public final IPreferenceStore prefStore;
@@ -42,14 +41,14 @@ public class BootDashColumnModel {
 			int defaultIndex,
 			IPreferenceStore prefStore,
 			String prefKeysPrefix,
-			Class<? extends EditingSupport> editingSupportClass,
+			EditingSupportFactory editingSupport,
 			BootDashActionFactory singleClickAction,
 			int alignment
 			) {
 		super();
 		this.feature = feature;
 		this.allignment = alignment;
-		this.editingSupportClass = editingSupportClass;
+		this.editingSupport = editingSupport;
 		this.singleClickAction = singleClickAction;
 		this.prefStore = prefStore;
 		this.prefKeysPrefix = prefKeysPrefix == null ? "" : prefKeysPrefix;
@@ -66,10 +65,10 @@ public class BootDashColumnModel {
 			int defaultIndex,
 			IPreferenceStore prefStore,
 			String prefKeysPrefix,
-			Class<? extends EditingSupport> editingSupportClass,
+			EditingSupportFactory editingSupport,
 			BootDashActionFactory singleClickAction
 			) {
-		this(feature, defaultWidth, defaultVisible, defaultIndex, prefStore, prefKeysPrefix, editingSupportClass, singleClickAction, SWT.LEFT);
+		this(feature, defaultWidth, defaultVisible, defaultIndex, prefStore, prefKeysPrefix, editingSupport, singleClickAction, SWT.LEFT);
 	}
 
 	public BootDashColumnModel(BootDashColumn feature,
@@ -78,7 +77,7 @@ public class BootDashColumnModel {
 			int defaultIndex,
 			String prefKeysPrefix
 			) {
-		this(feature, defaultWidth, defaultVisible, defaultIndex, prefKeysPrefix, null, null);
+		this(feature, defaultWidth, defaultVisible, defaultIndex, prefKeysPrefix, feature.getEditingSupport(), feature.getSingleClickAction());
 	}
 
 	public BootDashColumnModel(BootDashColumn column, boolean defaultVisible, int defaultIndex, String prefKeysPrefix) {
@@ -90,10 +89,10 @@ public class BootDashColumnModel {
 			boolean defaultVisible,
 			int defaultIndex,
 			String prefKeysPrefix,
-			Class<? extends EditingSupport> editingSupportClass,
+			EditingSupportFactory editingSupport,
 			BootDashActionFactory singleClickAction
 			) {
-		this(feature, defaultWidth, defaultVisible, defaultIndex, BootDashActivator.getDefault().getPreferenceStore(), prefKeysPrefix, editingSupportClass, singleClickAction);
+		this(feature, defaultWidth, defaultVisible, defaultIndex, BootDashActivator.getDefault().getPreferenceStore(), prefKeysPrefix, editingSupport, singleClickAction);
 	}
 
 	public String getWidthPrefKey() {
@@ -156,8 +155,8 @@ public class BootDashColumnModel {
 		return allignment;
 	}
 
-	public Class<? extends EditingSupport> getEditingSupportClass() {
-		return editingSupportClass;
+	public EditingSupportFactory getEditingSupport() {
+		return editingSupport;
 	}
 
 	public BootDashActionFactory getSingleClickActionFactory() {

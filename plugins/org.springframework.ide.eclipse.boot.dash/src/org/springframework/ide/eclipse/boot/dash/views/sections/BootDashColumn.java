@@ -11,11 +11,13 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenInBrowserAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -35,12 +37,26 @@ public enum BootDashColumn {
 	//Configure some odds and ends that don't apply to every column:
 	static {
 		RUN_STATE_ICN.longLabel = "State";
-		TAGS.editingSupportClass = TagEditingSupport.class;
-		DEFAULT_PATH.editingSupportClass = DefaultPathEditorSupport.class;
 
 		RUN_STATE_ICN.singleClickAction = new BootDashActionFactory() {
 			public AbstractBootDashAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui) {
 				return new OpenInBrowserAction(model, MultiSelection.singletonOrEmpty(BootDashElement.class, hoverElement), ui);
+			}
+		};
+
+		TAGS.editingSupport = new EditingSupportFactory() {
+			@Override
+			public EditingSupport createEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection,
+					BootDashViewModel model, Stylers stylers) {
+				return new TagEditingSupport(viewer, selection, model, stylers);
+			}
+		};
+
+		DEFAULT_PATH.editingSupport = new EditingSupportFactory() {
+			@Override
+			public EditingSupport createEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection,
+					BootDashViewModel model, Stylers stylers) {
+				return new DefaultPathEditorSupport(viewer, selection, stylers);
 			}
 		};
 	}
@@ -49,7 +65,7 @@ public enum BootDashColumn {
 	private String longLabel;
 	private final int defaultWidth;
 	private int allignment = SWT.LEFT;
-	private Class<? extends EditingSupport> editingSupportClass;
+	private EditingSupportFactory editingSupport;
 	private BootDashActionFactory singleClickAction;
 
 	private BootDashColumn(String label, int defaultWidth) {
@@ -77,8 +93,8 @@ public enum BootDashColumn {
 		return allignment;
 	}
 
-	public Class<? extends EditingSupport> getEditingSupportClass() {
-		return editingSupportClass;
+	public EditingSupportFactory getEditingSupport() {
+		return editingSupport;
 	}
 
 	public BootDashActionFactory getSingleClickAction() {

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -18,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -65,7 +62,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ViewSettingsDialog;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
@@ -93,6 +89,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
+import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -215,6 +212,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		}
 		addSingleClickHandling();
+
+		new TableResizeHelper(tv).enableResizing();
 
 		tv.getControl().addControlListener(new ControlListener() {
 			public void controlResized(ControlEvent e) {
@@ -540,44 +539,16 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		viewer.setLabelProvider(getLabelProvider(columnModel.getType()));
 
-		if (columnModel.getEditingSupportClass() != null) {
-			try {
-				viewer.setEditingSupport(columnModel.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, BootDashViewModel.class, Stylers.class)
-						.newInstance(tv, getSelection().toSingleSelection(), viewModel, stylers));
-			} catch (NoSuchMethodException e) {
-				try {
-					viewer.setEditingSupport(columnModel.getEditingSupportClass().getConstructor(TableViewer.class, LiveExpression.class, Stylers.class)
-							.newInstance(tv, getSelection().toSingleSelection(), stylers));
-				} catch (Throwable t) {
-					BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), t));
-				}
-			} catch (InstantiationException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
-			} catch (IllegalAccessException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
-			} catch (IllegalArgumentException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
-			} catch (InvocationTargetException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
-			} catch (SecurityException e) {
-				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to initialize cell editor for column " + columnModel.getType().toString(), e));
-			}
+		if (columnModel.getEditingSupport() != null) {
+			viewer.setEditingSupport(columnModel.getEditingSupport().createEditingSupport(tv, getSelection().toSingleSelection(), viewModel, stylers));
 		}
 
-//		final int initIndex = tv.getTable().getColumns().length;
-
 		tc.addControlListener(new ControlAdapter() {
-//			@Override
-//			public void controlMoved(ControlEvent e) {
-//				columnModel.setIndex(Arrays.asList(tv.getTable().getColumnOrder()).indexOf(initIndex));
-//			}
 			@Override
 			public void controlResized(ControlEvent e) {
-//				columnModel.setWidth(tc.getWidth());
 				ReflowUtil.reflow(owner, tv.getControl());
 			}
 		});
-
 	}
 
 	private void storeTableData() {
