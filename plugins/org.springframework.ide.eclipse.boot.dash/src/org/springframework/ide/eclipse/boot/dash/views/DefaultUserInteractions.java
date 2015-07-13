@@ -45,24 +45,29 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public ILaunchConfiguration chooseConfigurationDialog(String dialogTitle, String message,
-			List<ILaunchConfiguration> configs) {
-		IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
-		try {
-			ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
-			dialog.setElements(configs.toArray());
-			dialog.setTitle(dialogTitle);
-			dialog.setMessage(message);
-			dialog.setMultipleSelection(false);
-			int result = dialog.open();
-			labelProvider.dispose();
-			if (result == Window.OK) {
-				return (ILaunchConfiguration) dialog.getFirstResult();
+	public ILaunchConfiguration chooseConfigurationDialog(final String dialogTitle, final String message,
+			final List<ILaunchConfiguration> configs) {
+		final LiveVariable<ILaunchConfiguration> chosen = new LiveVariable<ILaunchConfiguration>();
+		context.getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
+				try {
+					ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
+					dialog.setElements(configs.toArray());
+					dialog.setTitle(dialogTitle);
+					dialog.setMessage(message);
+					dialog.setMultipleSelection(false);
+					int result = dialog.open();
+					labelProvider.dispose();
+					if (result == Window.OK) {
+						chosen.setValue((ILaunchConfiguration) dialog.getFirstResult());
+					}
+				} finally {
+					labelProvider.dispose();
+				}
 			}
-			return null;
-		} finally {
-			labelProvider.dispose();
-		}
+		});
+		return chosen.getValue();
 	}
 
 	private Shell getShell() {
@@ -103,7 +108,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public void errorPopup(final String title, final String message) {
-		getShell().getDisplay().syncExec(new Runnable() {
+		getShell().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				MessageDialog.openError(getShell(), title, message);
 			}
@@ -112,7 +117,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public void openLaunchConfigurationDialogOnGroup(final ILaunchConfiguration conf, final String launchGroup) {
-		getShell().getDisplay().syncExec(new Runnable() {
+		getShell().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				IStructuredSelection selection = new StructuredSelection(new Object[] { conf });
 				DebugUITools.openLaunchConfigurationDialogOnGroup(getShell(), selection, launchGroup);
@@ -121,10 +126,14 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public void openUrl(String url) {
-		if (url != null) {
-			UiUtil.openUrl(url);
-		}
+	public void openUrl(final String url) {
+		getShell().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (url != null) {
+					UiUtil.openUrl(url);
+				}
+			}
+		});
 	}
 
 	@Override
