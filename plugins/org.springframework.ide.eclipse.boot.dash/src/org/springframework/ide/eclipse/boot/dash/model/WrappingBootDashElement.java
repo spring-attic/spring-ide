@@ -10,18 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 
 public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
+	public static final String TAGS_KEY = "tags";
+
 	protected final T delegate;
+
+	private BootDashModel parent;
 	private TypeLookup typeLookup;
 
-	public WrappingBootDashElement(T delegate) {
+	public WrappingBootDashElement(BootDashModel parent, T delegate) {
+		this.parent = parent;
 		this.delegate = delegate;
 	}
 
@@ -77,6 +86,37 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 		return typeLookup;
 	}
 
+	public abstract PropertyStoreApi getPersistentProperties();
 
+	@Override
+	public LinkedHashSet<String> getTags() {
+		try {
+			String[] tags = getPersistentProperties().get(TAGS_KEY, (String[])null);
+			if (tags!=null) {
+				return new LinkedHashSet<String>(Arrays.asList(tags));
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return new LinkedHashSet<String>();
+	}
+
+	@Override
+	public void setTags(LinkedHashSet<String> newTags) {
+		try {
+			if (newTags==null || newTags.isEmpty()) {
+				getPersistentProperties().put(TAGS_KEY, (String[])null);
+			} else {
+				getPersistentProperties().put(TAGS_KEY, newTags.toArray(new String[newTags.size()]));
+			}
+			parent.notifyElementChanged(this);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
+	public BootDashModel getParent() {
+		return parent;
+	}
 
 }
