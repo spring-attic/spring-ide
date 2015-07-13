@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Comparator;
@@ -6,6 +16,13 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
+/**
+ * Table section column model backed by plug-in preferences.
+ * Might need a super abstract class or interface in the near future.
+ *
+ * @author Alex Boyko
+ *
+ */
 public class BootDashColumnModel {
 
 	public static final Comparator<BootDashColumnModel> INDEX_COMPARATOR = new Comparator<BootDashColumnModel>() {
@@ -32,8 +49,8 @@ public class BootDashColumnModel {
 	private final EditingSupportFactory editingSupport;
 	private final BootDashActionFactory singleClickAction;
 
-	public final IPreferenceStore prefStore;
-	public final String prefKeysPrefix;
+	private final IPreferenceStore prefStore;
+	private final String prefKeysPrefix;
 
 	public BootDashColumnModel(BootDashColumn feature,
 			int defaultWidth,
