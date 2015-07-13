@@ -13,14 +13,14 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 
 /**
- * A memory-backed {@link IPropertyStore} suitable for testing.
+ * A memory-backed {@link IScopedPropertyStore} suitable for testing.
  *
  * @author Kris De Volder
  */
-public class MockPropertyStore<T> implements IPropertyStore<T> {
+public class MockPropertyStore<T> implements IScopedPropertyStore<T> {
 
 	private Map<Key,String> store = new HashMap<Key,String>();
 

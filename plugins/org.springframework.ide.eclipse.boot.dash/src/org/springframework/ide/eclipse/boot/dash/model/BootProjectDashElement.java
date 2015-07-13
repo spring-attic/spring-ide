@@ -37,10 +37,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
@@ -70,9 +69,9 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private LocalBootDashModel context;
 
-	private IPropertyStore<IProject> projectProperties;
+	private IScopedPropertyStore<IProject> projectProperties;
 
-	public BootProjectDashElement(IProject project, LocalBootDashModel context, IPropertyStore<IProject> projectProperties) {
+	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
 		super(project);
 		this.context = context;
 		this.projectProperties = projectProperties;

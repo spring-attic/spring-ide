@@ -8,27 +8,15 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
+package org.springframework.ide.eclipse.boot.dash.metadata;
 
 /**
- * @author Kris De Volder
+ * An instance of this provides a way to store and retrieve
+ * properties associated with some 'scope' object of type T.
+ * <p>
+ * The properties are persisted somehow.
  */
-public abstract class AbstractRunTargetType implements RunTargetType {
-
-	private String name;
-
-	public AbstractRunTargetType(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String toString() {
-		return "RunTargetType("+getName()+")";
-	}
-
+public interface IScopedPropertyStore<T> {
+	String get(T scope, String key);
+	void put(T scope, String key, String value) throws Exception;
 }

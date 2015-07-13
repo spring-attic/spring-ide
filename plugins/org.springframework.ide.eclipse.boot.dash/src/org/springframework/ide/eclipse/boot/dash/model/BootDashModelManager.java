@@ -11,7 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.ListenerList;
@@ -22,8 +25,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
- * An instance of this class manages a LiveSet of BootDashModels, one model per RunTarget.
- * New models are created or disposed to keep them in synch with the RunTargets.
+ * An instance of this class manages a LiveSet of BootDashModels, one model per
+ * RunTarget. New models are created or disposed to keep them in synch with the
+ * RunTargets.
  *
  * @author Nieraj Singh
  * @author Kris De Volder
@@ -31,7 +35,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 public class BootDashModelManager implements Disposable {
 
 	private LiveSet<BootDashModel> models;
-	private Map<RunTarget, BootDashModel> asMap;
+	private Map<String, BootDashModel> modelsPerTargetId;
 	private LiveExpression<Set<RunTarget>> targets;
 	private RunTargetChangeListener targetListener;
 	private ListenerList elementStateListeners = new ListenerList();
@@ -46,7 +50,7 @@ public class BootDashModelManager implements Disposable {
 	public LiveExpression<Set<BootDashModel>> getModels() {
 		if (models == null) {
 			models = new LiveSet<BootDashModel>();
-			asMap = new HashMap<RunTarget, BootDashModel>();
+			modelsPerTargetId = new HashMap<String, BootDashModel>();
 			models.dependsOn(targets);
 			targets.addListener(targetListener = new RunTargetChangeListener());
 		}
@@ -56,30 +60,61 @@ public class BootDashModelManager implements Disposable {
 	class RunTargetChangeListener implements ValueListener<Set<RunTarget>> {
 
 		@Override
-		public void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+		public void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> actualRunTargets) {
+			synchronized (modelsPerTargetId) {
+				Map<String, RunTarget> currentTargetsPerId = new HashMap<String, RunTarget>();
+				if (actualRunTargets != null) {
+					for (RunTarget runTarget : actualRunTargets) {
+						currentTargetsPerId.put(runTarget.getId(), runTarget);
+					}
+				}
 
-			if (value != null && !value.isEmpty()) {
-				for (RunTarget target : value) {
-					if (!asMap.containsKey(target)) {
-						BootDashModel model = target.createElementsTabelModel(context);
+				// To avoid firing unnecessary model change events, only modify
+				// list of models IF there is a change
+				boolean hasChanged = false;
+
+				// Add models for new targets
+				Set<BootDashModel> modelsToKeep = new HashSet<BootDashModel>();
+
+				for (Entry<String, RunTarget> entry : currentTargetsPerId.entrySet()) {
+					if (modelsPerTargetId.get(entry.getKey()) == null) {
+						BootDashModel model = entry.getValue().createElementsTabelModel(context);
 						if (model != null) {
-							asMap.put(target, model);
-							models.add(model);
+							modelsPerTargetId.put(entry.getKey(), model);
+							hasChanged = true;
 						}
 					}
+
+					if (modelsPerTargetId.get(entry.getKey()) != null) {
+						modelsToKeep.add(modelsPerTargetId.get(entry.getKey()));
+					}
+				}
+
+				// Remove models for deleted targets
+				for (Iterator<Entry<String, BootDashModel>> it = modelsPerTargetId.entrySet().iterator(); it
+						.hasNext();) {
+					Entry<String, BootDashModel> entry = it.next();
+					if (currentTargetsPerId.get(entry.getValue()) == null) {
+						it.remove();
+						hasChanged = true;
+					}
+				}
+
+				if (hasChanged) {
+					models.replaceAll(modelsToKeep);
 				}
 			}
 		}
 	}
 
 	public void dispose() {
-		if (targetListener!=null) {
+		if (targetListener != null) {
 			targets.removeListener(targetListener);
 			targetListener = null;
 		}
-		if (models!=null) {
+		if (models != null) {
 			for (BootDashModel m : models.getValues()) {
-				if (upstreamElementStateListener!=null) {
+				if (upstreamElementStateListener != null) {
 					m.removeElementStateListener(upstreamElementStateListener);
 				}
 				m.dispose();
@@ -95,12 +130,13 @@ public class BootDashModelManager implements Disposable {
 	}
 
 	private synchronized void ensureUpstreamStateListener() {
-		if (upstreamElementStateListener==null) {
+		if (upstreamElementStateListener == null) {
 			upstreamElementStateListener = new ElementStateListener() {
 				public void stateChanged(BootDashElement e) {
 					for (Object o : elementStateListeners.getListeners()) {
-						((ElementStateListener)o).stateChanged(e);
-					} ;
+						((ElementStateListener) o).stateChanged(e);
+					}
+					;
 				}
 			};
 			getModels().addListener(new ValueListener<Set<BootDashModel>>() {

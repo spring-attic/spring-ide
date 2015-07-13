@@ -14,6 +14,7 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.STARTING;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,6 +24,10 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -39,6 +44,9 @@ import io.pivotal.receptor.commands.DesiredLRPResponse;
 import io.pivotal.receptor.support.Route;
 
 public class LatticeBootDashElement extends WrappingBootDashElement<String> {
+
+	private static final String[] NO_STRINGS = {};
+	private static final String TAGS_KEY = "tags";
 
 	private String processGuid;
 	private RunTarget target;
@@ -89,14 +97,15 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 		}
 	};
 
+	private PropertyStoreApi persistentStore;
 
-
-	public LatticeBootDashElement(final BootDashModel parent, RunTarget target, String processGuid) {
+	public LatticeBootDashElement(final BootDashModel parent, RunTarget target, String processGuid, IPropertyStore store) {
 		super(processGuid);
 		this.processGuid = processGuid;
 		this.parent = parent;
 		this.target = target;
 		registerLiveExpListener();
+		this.persistentStore = PropertyStoreFactory.createApi(store);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -266,13 +275,29 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public LinkedHashSet<String> getTags() {
+		try {
+			String[] tags = persistentStore.get(TAGS_KEY, (String[])null);
+			if (tags!=null) {
+				return new LinkedHashSet<String>(Arrays.asList(tags));
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 		return new LinkedHashSet<String>();
 	}
 
 	@Override
 	public void setTags(LinkedHashSet<String> newTags) {
-		// TODO Auto-generated method stub
-
+		try {
+			if (newTags==null || newTags.isEmpty()) {
+				persistentStore.put(TAGS_KEY, (String[])null);
+			} else {
+				persistentStore.put(TAGS_KEY, newTags.toArray(new String[newTags.size()]));
+			}
+			parent.notifyElementChanged(LatticeBootDashElement.this);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 
 	public void setDesiredLrp(DesiredLRPResponse lrp) {

@@ -14,6 +14,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
@@ -38,6 +39,11 @@ public class LatticeRunTargetType extends AbstractRunTargetType {
 		Shell shell = CloudFoundryUiUtil.getShell();
 		WizardDialog dlg = new WizardDialog(shell, wiz);
 		dlg.open();
+	}
+
+	@Override
+	public RunTarget createRunTarget(TargetProperties properties) {
+		return new LatticeRunTarget(properties);
 	}
 
 }

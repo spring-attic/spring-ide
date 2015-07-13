@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.lattice;
 
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
@@ -36,8 +38,10 @@ public class LatticeCreateTargetWizardModel {
 
 	public boolean performFinish() throws Exception {
 		String targetHost = target.getValue();
-		if (targetHost!=null) {
-			RunTarget newTarget = new LatticeRunTarget(targetHost);
+		if (targetHost != null) {
+			TargetProperties props = new TargetProperties();
+			props.put(LatticeRunTarget.HOST_PROP, targetHost);
+			RunTarget newTarget = RunTargetTypes.LATTICE.createRunTarget(props);
 			targets.add(newTarget);
 		}
 		return true;

@@ -25,7 +25,7 @@ public class PropertyStoreFactory {
 
 	private static final String QUALIFIER = "microservice-metadata";
 
-	public static IPropertyStore<IProject> createForProjects() {
+	public static IScopedPropertyStore<IProject> createForProjects() {
 		return new PreferenceBasedStore<IProject>() {
 			protected IEclipsePreferences createPrefs(IProject p) {
 				IEclipsePreferences prefs = new ProjectScope(p).getNode(QUALIFIER);
@@ -34,7 +34,7 @@ public class PropertyStoreFactory {
 		};
 	}
 
-	public static IPropertyStore<RunTargetType> createForRunTargets() {
+	public static IScopedPropertyStore<RunTargetType> createForRunTargets() {
 		return new PreferenceBasedStore<RunTargetType>() {
 			protected IEclipsePreferences createPrefs(RunTargetType runTargetType) {
 				return InstanceScope.INSTANCE.getNode(BootDashActivator.PLUGIN_ID + ':' + runTargetType.getName());
@@ -44,6 +44,44 @@ public class PropertyStoreFactory {
 
 	public static SecuredCredentialsStore createSecuredCredentialsStore() {
 		return new SecuredCredentialsStore();
+	}
+
+	public static <S> IPropertyStore createForScope(final S scope, final IScopedPropertyStore<S> scopedStore) {
+		return new IPropertyStore() {
+
+			@Override
+			public void put(String key, String value) throws Exception {
+				scopedStore.put(scope, key, value);
+			}
+
+			@Override
+			public String get(String key) {
+				return scopedStore.get(scope, key);
+			}
+		};
+	}
+
+	public static PropertyStoreApi createApi(IPropertyStore backingStore) {
+		return new PropertyStoreApi(backingStore);
+	}
+
+	public static IPropertyStore createSubStore(final String subStoreId, final IPropertyStore backingStore) {
+		return new IPropertyStore() {
+
+			private String subkey(String key) {
+				return subStoreId+":"+key;
+			}
+
+			@Override
+			public void put(String key, String value) throws Exception {
+				backingStore.put(subkey(key), value);
+			}
+
+			@Override
+			public String get(String key) {
+				return backingStore.get(subkey(key));
+			}
+		};
 	}
 
 }

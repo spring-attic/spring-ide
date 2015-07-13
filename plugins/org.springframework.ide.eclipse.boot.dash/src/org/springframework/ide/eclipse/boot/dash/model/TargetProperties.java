@@ -42,6 +42,10 @@ public class TargetProperties {
 		this.type = type;
 	}
 
+	public TargetProperties() {
+		this.map = new HashMap<String, String>();
+	}
+
 	public TargetProperties(RunTargetType type) {
 		this(new HashMap<String, String>(), type);
 	}
@@ -51,12 +55,20 @@ public class TargetProperties {
 		put(RUN_TARGET_ID, runTargetId);
 	}
 
+	public TargetProperties(Map<String, String> map, RunTargetType type, String runTargetId) {
+		this(type);
+		if (map != null) {
+			this.map = map;
+		}
+		put(RUN_TARGET_ID, runTargetId);
+	}
+
 	public String get(String property) {
 		return map.get(property);
 	}
 
 	/**
-	 * 
+	 *
 	 * @return properties that should be persisted. May be a subset of all the
 	 *         properties from {@link #getAllProperties()}
 	 */

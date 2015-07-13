@@ -14,7 +14,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.dash.lattice.LatticeRunTarget;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 public interface BootDashModelContext {
@@ -27,10 +29,11 @@ public interface BootDashModelContext {
 
 	IPath getStateLocation();
 
-	IPropertyStore<IProject> getProjectProperties();
+	IScopedPropertyStore<IProject> getProjectProperties();
+	IScopedPropertyStore<RunTargetType> getRunTargetProperties();
 
-	IPropertyStore<RunTargetType> getRunTargetProperties();
-	
+
 	SecuredCredentialsStore getSecuredCredentialsStore();
+
 
 }

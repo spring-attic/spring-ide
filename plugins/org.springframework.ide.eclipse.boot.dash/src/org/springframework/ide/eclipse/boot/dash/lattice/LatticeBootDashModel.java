@@ -23,9 +23,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -47,9 +52,11 @@ public class LatticeBootDashModel extends BootDashModel {
 	private ReceptorClient receptor;
 	private BootDashModelContext context;
 	private Job refreshJob;
+	private IPropertyStore store;
 
 	public LatticeBootDashModel(LatticeRunTarget target, BootDashModelContext context) {
 		super(target);
+		this.store = PropertyStoreFactory.createForScope(target.getType(), context.getRunTargetProperties());
 		this.ltcTarget = target;
 		this.context = context;
 	}
@@ -150,7 +157,7 @@ public class LatticeBootDashModel extends BootDashModel {
 		synchronized (this) {
 			existing = elementByProcessGuid.get(processGuid);
 			if (existing==null) {
-				created = existing = new LatticeBootDashElement(this, ltcTarget, processGuid);
+				created = existing = new LatticeBootDashElement(this, ltcTarget, processGuid, PropertyStoreFactory.createSubStore(processGuid, store));
 				elementByProcessGuid.put(processGuid, created);
 			}
 		}

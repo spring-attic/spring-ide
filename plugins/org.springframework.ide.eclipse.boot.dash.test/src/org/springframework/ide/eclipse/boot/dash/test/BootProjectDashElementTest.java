@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -58,7 +58,7 @@ public class BootProjectDashElementTest extends Mocks {
 
 	public static class TestElement extends BootProjectDashElement {
 
-		public TestElement(IProject project, LocalBootDashModel context, IPropertyStore<IProject> projectProperties) {
+		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
 			super(project, context, projectProperties);
 		}
 
@@ -74,7 +74,7 @@ public class BootProjectDashElementTest extends Mocks {
 
 	private static final IType[] NO_TYPES = {};
 
-	public static TestElement createElement(LocalBootDashModel model, IJavaProject javaProject, RunTarget runTarget, IPropertyStore<IProject> projectProperties) {
+	public static TestElement createElement(LocalBootDashModel model, IJavaProject javaProject, RunTarget runTarget, IScopedPropertyStore<IProject> projectProperties) {
 		IProject project = javaProject.getProject();
 		TestElement element = spy(new TestElement(project, model, projectProperties));
 		when(element.getTarget()).thenReturn(runTarget);
@@ -93,7 +93,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test(expected=IllegalArgumentException.class)
 	public void restartWithBadArgument() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
@@ -115,7 +115,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartNoMainTypes() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
@@ -138,7 +138,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartOneMainType() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
@@ -161,7 +161,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartTwoMainTypes() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
@@ -194,7 +194,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithNoExistingConfs() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
@@ -215,7 +215,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithOneExistingConfs() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
@@ -237,7 +237,7 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithTwoExistingConfs() throws Exception {
 		String projectName = "fooProject";
-		IPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
+		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);

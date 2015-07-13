@@ -17,15 +17,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 public class DefaultBootDashModelContext implements BootDashModelContext {
 
-	private IPropertyStore<IProject> projectProperties = PropertyStoreFactory.createForProjects();
+	private IScopedPropertyStore<IProject> projectProperties = PropertyStoreFactory.createForProjects();
 
-	private IPropertyStore<RunTargetType> runTargetProperties = PropertyStoreFactory.createForRunTargets();
+	private IScopedPropertyStore<RunTargetType> runTargetProperties = PropertyStoreFactory.createForRunTargets();
 
 	private SecuredCredentialsStore securedStore = PropertyStoreFactory.createSecuredCredentialsStore();
 
@@ -50,12 +50,12 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	}
 
 	@Override
-	public IPropertyStore<IProject> getProjectProperties() {
+	public IScopedPropertyStore<IProject> getProjectProperties() {
 		return projectProperties;
 	}
 
 	@Override
-	public IPropertyStore<RunTargetType> getRunTargetProperties() {
+	public IScopedPropertyStore<RunTargetType> getRunTargetProperties() {
 		return runTargetProperties;
 	}
 

@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
@@ -30,8 +30,8 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private File stateLoc;
 	private ILaunchManager launchManager;
 	private IWorkspace workspace;
-	private IPropertyStore<IProject> projectProperties;
-	private IPropertyStore<RunTargetType> runTargetProperties;
+	private IScopedPropertyStore<IProject> projectProperties;
+	private IScopedPropertyStore<RunTargetType> runTargetProperties;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
@@ -66,12 +66,12 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	}
 
 	@Override
-	public IPropertyStore<IProject> getProjectProperties() {
+	public IScopedPropertyStore<IProject> getProjectProperties() {
 		return projectProperties;
 	}
 
 	@Override
-	public IPropertyStore<RunTargetType> getRunTargetProperties() {
+	public IScopedPropertyStore<RunTargetType> getRunTargetProperties() {
 		return runTargetProperties;
 	}
 

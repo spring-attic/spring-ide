@@ -12,13 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 
 /**
  * An instance of this provides a way to store and retrieve
- * properties associated with some object of type T.
- * <p>
- * The properties are persisted somehow.
+ * properties. The properties are persisted somehow.
  */
-public interface IPropertyStore<T> {
-
-	String get(T element, String key);
-	void put(T element, String key, String value) throws Exception;
-
+public interface IPropertyStore {
+	String get(String key);
+	void put(String key, String value) throws Exception;
 }

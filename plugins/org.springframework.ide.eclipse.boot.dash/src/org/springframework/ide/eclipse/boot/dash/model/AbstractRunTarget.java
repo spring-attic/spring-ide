@@ -10,20 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public abstract class AbstractRunTarget implements RunTarget {
 
 	private String id;
 	private String name;
+	private RunTargetType type;
 
-	public AbstractRunTarget(String id, String name) {
+	public AbstractRunTarget(RunTargetType type, String id, String name) {
 		this.id = id;
 		this.name = name;
+		this.type = type;
 	}
 
-	public AbstractRunTarget(String idAndName) {
-		this(idAndName, idAndName);
+	public AbstractRunTarget(RunTargetType type, String idAndName) {
+		this(type, idAndName, idAndName);
 	}
 
 	@Override
@@ -69,6 +72,11 @@ public abstract class AbstractRunTarget implements RunTarget {
 	@Override
 	public final BootDashColumn[] getAllColumns() {
 		return BootDashColumn.values();
+	}
+
+	@Override
+	public RunTargetType getType() {
+		return type;
 	}
 
 }

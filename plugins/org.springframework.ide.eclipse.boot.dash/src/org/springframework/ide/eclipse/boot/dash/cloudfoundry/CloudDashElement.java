@@ -24,14 +24,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 
-public class CloudDashElement implements BootDashElement {
+public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -40,6 +40,7 @@ public class CloudDashElement implements BootDashElement {
 	private final BootDashModel context;
 
 	public CloudDashElement(CloudFoundryRunTarget cloudTarget, CloudApplication app, BootDashModel context) {
+		super(app.getName());
 		this.cloudTarget = cloudTarget;
 		this.app = app;
 		this.context = context;
