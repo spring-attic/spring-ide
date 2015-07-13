@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -64,7 +65,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 					try {
 						IJavaProject jp = getJavaProject();
 						if (jp!=null) {
-							return jp.findType(fqName);
+							return jp.findType(fqName, new NullProgressMonitor());
 						}
 					} catch (Exception e) {
 						BootDashActivator.log(e);
