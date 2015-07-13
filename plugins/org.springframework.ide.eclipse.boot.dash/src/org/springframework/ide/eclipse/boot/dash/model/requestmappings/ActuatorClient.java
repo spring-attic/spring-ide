@@ -94,21 +94,7 @@ public class ActuatorClient {
 
 		private String computeFQClassName() {
 			String methodString = getMethodString();
-			if (methodString!=null) {
-				// Example: public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.HealthMvcEndpoint.invoke(java.security.Principal)
-				String[] pieces = methodString.split("\\s");
-				if (pieces.length>=3) {
-					methodString = pieces[2];
-					int methodNameEnd = methodString.indexOf('(');
-					if (methodNameEnd>=0) {
-						int methodNameStart = methodString.lastIndexOf('.', methodNameEnd);
-						if (methodNameStart>=0) {
-							return methodString.substring(0, methodNameStart);
-						}
-					}
-				}
-			}
-			return null;
+			return JLRMethodParser.getFQClassName(methodString);
 		}
 
 		public String getMethod() {
