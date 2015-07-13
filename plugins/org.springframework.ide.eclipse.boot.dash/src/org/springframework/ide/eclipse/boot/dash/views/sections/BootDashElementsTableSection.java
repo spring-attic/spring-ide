@@ -109,7 +109,48 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveVariable<ViewerCell> hoverCell;
 	private LiveExpression<BootDashElement> hoverElement;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
-	private ValueListener<Filter<BootDashElement>> filterListener;
+
+	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new ValueListener<Filter<BootDashElement>>() {
+		public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
+			tv.refresh();
+			final Table t = tv.getTable();
+			t.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					Composite parent = t.getParent();
+					parent.layout();
+				}
+			});
+		}
+	}
+			;
+	final private UIValueListener<Set<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<Set<BootDashElement>>() {
+		@Override
+		protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp,
+				Set<BootDashElement> value) {
+			final Control control = tv.getControl();
+			if (!control.isDisposed()) {
+				tv.refresh();
+				control.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						control.getParent().layout();
+					}
+				});
+			}
+		}
+	};
+
+	final private ElementStateListener ELEMENT_STATE_LISTENER = new ElementStateListener() {
+		public void stateChanged(final BootDashElement e) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					if (tv != null && !tv.getControl().isDisposed()) {
+						tv.update(e, null);
+					}
+				}
+			});
+		}
+	};
+
 	private boolean columnOrderChanged = false;
 
 	private LiveVariable<MouseEvent> tableMouseEvent;
@@ -141,62 +182,13 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	@Override
 	public void createContents(Composite page) {
-		initColumnModels();
-
-		refreshTableViewer(page);
-
-		model.getElements().addListener(new UIValueListener<Set<BootDashElement>>() {
-			@Override
-			protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp,
-					Set<BootDashElement> value) {
-				final Control control = tv.getControl();
-				if (!control.isDisposed()) {
-					tv.refresh();
-					control.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							control.getParent().layout();
-						}
-					});
-				}
-			}
-		});
-
-		model.addElementStateListener(new ElementStateListener() {
-			public void stateChanged(final BootDashElement e) {
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						if (tv != null && !tv.getControl().isDisposed()) {
-							tv.update(e, null);
-						}
-					}
-				});
-			}
-		});
-
-		if (searchFilterModel!=null) {
-			searchFilterModel.addListener(this.filterListener = new ValueListener<Filter<BootDashElement>>() {
-				public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
-					tv.refresh();
-					final Table t = tv.getTable();
-					t.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							Composite parent = t.getParent();
-							parent.layout();
-						}
-					});
-				}
-			});
-		}
-
-	}
-
-	private void refreshTableViewer(final Composite page) {
 		// Cleanup first
-		ISelection viewerSelection = null;
 		if (tv != null && !tv.getControl().isDisposed()) {
-			viewerSelection = tv.getSelection();
 			tv.getControl().dispose();
 		}
+
+		// Initialize column table state objects
+		initColumnModels();
 
 		// Create table viewer again and attach all listeners.
 		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
@@ -253,7 +245,12 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
+		model.getElements().addListener(ELEMENTS_SET_LISTENER);
+
+		model.addElementStateListener(ELEMENT_STATE_LISTENER);
+
 		if (searchFilterModel != null) {
+			searchFilterModel.addListener(FILTER_LISTENER);
 			tv.addFilter(new ViewerFilter() {
 				@Override
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -269,6 +266,16 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				storeTableData();
+
+				tableMouseEvent.setValue(null);
+
+				model.getElements().removeListener(ELEMENTS_SET_LISTENER);
+
+				model.removeElementStateListener(ELEMENT_STATE_LISTENER);
+
+				if (searchFilterModel!=null) {
+					searchFilterModel.removeListener(FILTER_LISTENER);
+				}
 
 				hoverCell = null;
 				hoverElement = null;
@@ -288,9 +295,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		if (viewerSelection != null) {
-			tv.setSelection(viewerSelection);
-		}
 		columnOrderChanged = false;
 		page.layout(true);
 
@@ -528,6 +532,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	private void addTableSelectionListener() {
+		tv.setSelection(new StructuredSelection(Arrays.asList(selection.getValue().toArray(new BootDashElement[selection.getValue().size()]))));
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				selection.getElements().refresh();
@@ -536,10 +541,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	public void dispose() {
-		if (filterListener!= null) {
-			searchFilterModel.removeListener(filterListener);
-			filterListener = null;
-		}
 	}
 
 	private void createColumn(final BootDashColumnModel columnModel) {
@@ -639,7 +640,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 						sortedModels[i].setVisibility(editors[i].getSelection());
 					}
 					super.okPressed();
-					refreshTableViewer(tv.getControl().getParent());
+					BootDashElementsTableSection.this.createContents(tv.getControl().getParent());
 				}
 
 				@Override
