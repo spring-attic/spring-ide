@@ -111,6 +111,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	private LiveExpression<BootDashElement> hoverElement;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private ValueListener<Filter<BootDashElement>> filterListener;
+	private boolean columnOrderChanged = false;
 
 	private LiveVariable<MouseEvent> tableMouseEvent;
 
@@ -189,7 +190,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	private void refreshTableViewer(final Composite page) {
 		// Cleanup first
+		ISelection viewerSelection = null;
 		if (tv != null && !tv.getControl().isDisposed()) {
+			viewerSelection = tv.getSelection();
 			tv.getControl().dispose();
 		}
 
@@ -283,6 +286,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
+		if (viewerSelection != null) {
+			tv.setSelection(viewerSelection);
+		}
+		columnOrderChanged = false;
 		page.layout(true);
 
 	}
@@ -545,6 +552,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		tc.addControlListener(new ControlAdapter() {
 			@Override
+			public void controlMoved(ControlEvent e) {
+				columnOrderChanged = true;			}
+			@Override
 			public void controlResized(ControlEvent e) {
 				ReflowUtil.reflow(owner, tv.getControl());
 			}
@@ -557,9 +567,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			if (tc.getData(COLUMN_DATA) instanceof BootDashColumnModel) {
 				BootDashColumnModel columnModel = (BootDashColumnModel) tc.getData(COLUMN_DATA);
 				columnModel.setWidth(tc.getWidth());
-				int j = 0;
-				for (; j < tv.getTable().getColumnOrder().length && tv.getTable().getColumnOrder()[j] != i; j++);
-				columnModel.setIndex(j);
+				if (columnOrderChanged) {
+					int j = 0;
+					for (; j < tv.getTable().getColumnOrder().length && tv.getTable().getColumnOrder()[j] != i; j++);
+					columnModel.setIndex(j);
+				}
 			}
 		}
 	}
