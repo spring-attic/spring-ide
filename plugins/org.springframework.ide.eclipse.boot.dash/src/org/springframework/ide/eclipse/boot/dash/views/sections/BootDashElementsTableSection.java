@@ -88,7 +88,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
-import org.springsource.ide.eclipse.commons.ui.TableResizeHelper;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -209,8 +208,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		}
 		addSingleClickHandling();
-
-		new TableResizeHelper(tv).enableResizing();
 
 		tv.getControl().addControlListener(new ControlListener() {
 			public void controlResized(ControlEvent e) {
