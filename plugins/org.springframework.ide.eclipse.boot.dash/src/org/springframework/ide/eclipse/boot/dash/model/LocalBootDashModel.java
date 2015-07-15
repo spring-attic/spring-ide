@@ -138,12 +138,12 @@ public class LocalBootDashModel extends BootDashModel {
 		return runStateTracker;
 	}
 
-	public ILaunchConfiguration getPreferredConfigs(BootProjectDashElement e) {
+	public ILaunchConfiguration getPreferredConfigs(WrappingBootDashElement<IProject> e) {
 		return modelState.getPreferredConfig(e);
 	}
 
 	public void setPreferredConfig(
-			BootProjectDashElement e,
+			WrappingBootDashElement<IProject> e,
 			ILaunchConfiguration c) {
 		modelState.setPreferredConfig(e, c);
 	}

@@ -72,7 +72,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	@Override
 	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
-		return new CloudFoundryBootDashModel(this);
+		return new CloudFoundryBootDashModel(this, context);
 	}
 
 	@Override

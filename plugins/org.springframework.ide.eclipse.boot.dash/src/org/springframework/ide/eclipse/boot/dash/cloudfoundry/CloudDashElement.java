@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
@@ -24,6 +23,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -39,11 +41,15 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private final BootDashModel context;
 
-	public CloudDashElement(CloudFoundryRunTarget cloudTarget, CloudApplication app, BootDashModel context) {
-		super(app.getName());
+	private PropertyStoreApi persistentProperties;
+
+	public CloudDashElement(CloudFoundryRunTarget cloudTarget, CloudApplication app, BootDashModel context, IPropertyStore modelStore) {
+		super(context, app.getName());
 		this.cloudTarget = cloudTarget;
 		this.app = app;
 		this.context = context;
+		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(delegate, modelStore);
+		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
 	@Override
@@ -64,16 +70,6 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	@Override
 	public String getName() {
 		return app.getName();
-	}
-
-	@Override
-	public LinkedHashSet<String> getTags() {
-		return new LinkedHashSet<String>(0);
-	}
-
-	@Override
-	public void setTags(LinkedHashSet<String> newTags) {
-
 	}
 
 	@Override
@@ -218,5 +214,10 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	@Override
 	public int getDesiredInstances() {
 		return 1;
+	}
+
+	@Override
+	public PropertyStoreApi getPersistentProperties() {
+		return persistentProperties;
 	}
 }

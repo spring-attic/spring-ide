@@ -406,6 +406,11 @@
 					<url>http://download.eclipse.org/tools/ajdt/44/dev/update/</url>
 				</repository>
 				<repository>
+					<id>m2e-16</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/m2e/releases/1.6/</url>
+				</repository>
+				<repository>
 					<id>orbit-luna-SR1</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</url>
