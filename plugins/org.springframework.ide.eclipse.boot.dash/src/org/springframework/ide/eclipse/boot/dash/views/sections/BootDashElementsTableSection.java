@@ -442,7 +442,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		addPreferedConfigSelectionMenu(manager);
 
-		manager.add(new SettingsAction());
+		addColumnsMenu(manager);
 
 //		manager.add
 //		manager.add(new Separator());
@@ -464,6 +464,15 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					menu.add(selectDefaultConfigAction(element, defaultConfig, conf));
 				}
 			}
+		}
+	}
+
+	private void addColumnsMenu(IMenuManager parent) {
+		if (tv.getTable().getColumnCount() > 0) {
+			MenuManager menu = new MenuManager("Columns");
+			menu.add(new RestoreDefaultColumnsAction());
+			menu.add(new CustomizeColumnsAction());
+			parent.add(menu);
 		}
 	}
 
@@ -584,10 +593,36 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 	}
 
-	private class SettingsAction extends Action {
+	private class RestoreDefaultColumnsAction extends Action {
 
-		SettingsAction() {
-			super("Columns Settings...");
+		RestoreDefaultColumnsAction() {
+			super("Restore Defaults");
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0;
+		}
+
+		@Override
+		public void run() {
+			columnOrderChanged = false;
+			for (BootDashColumnModel columnModel : columnModels) {
+				columnModel.restoreDefaults();
+			}
+			for (TableColumn tc : tv.getTable().getColumns()) {
+				if (tc.getData(COLUMN_DATA) instanceof BootDashColumnModel) {
+					tc.setWidth(((BootDashColumnModel)tc.getData(COLUMN_DATA)).getWidth());
+				}
+			}
+			BootDashElementsTableSection.this.createContents(tv.getControl().getParent());
+		}
+	}
+
+	private class CustomizeColumnsAction extends Action {
+
+		CustomizeColumnsAction() {
+			super("Customize...");
 		}
 
 		@Override

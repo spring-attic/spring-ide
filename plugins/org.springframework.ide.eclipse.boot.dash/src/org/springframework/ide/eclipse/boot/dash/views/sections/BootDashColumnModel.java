@@ -192,4 +192,10 @@ public class BootDashColumnModel {
 		return feature;
 	}
 
+	public void restoreDefaults() {
+		setWidth(getDefaultWidth());
+		setIndex(getDefaultIndex());
+		setVisibility(getDefaultVisibility());
+	}
+
 }
