@@ -38,6 +38,8 @@ import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
@@ -69,12 +71,13 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private LocalBootDashModel context;
 
-	private IScopedPropertyStore<IProject> projectProperties;
+	private PropertyStoreApi persistentProperties;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
-		super(project);
+		super(context, project);
 		this.context = context;
-		this.projectProperties = projectProperties;
+		this.persistentProperties = PropertyStoreFactory.createApi(
+				PropertyStoreFactory.createForScope(project, projectProperties));
 	}
 
 	public IProject getProject() {
@@ -387,11 +390,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	public void setTags(final LinkedHashSet<String> tags) {
+		//TODO: move job to implementation of ProjectProperties
 		Job job = new Job("Saving Tags for project " + delegate.getName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					projectProperties.put(delegate, TAGS_PROPERTY_KEY, tags == null || tags.size() == 0 ? null : ArrayEncoder.encode(tags.toArray(new String[tags.size()])));
+					getPersistentProperties().put(TAGS_PROPERTY_KEY, tags == null || tags.size() == 0 ? null : ArrayEncoder.encode(tags.toArray(new String[tags.size()])));
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					return new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to persist tags", e);
@@ -406,7 +410,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public LinkedHashSet<String> getTags() {
-		String str = projectProperties.get(delegate, TAGS_PROPERTY_KEY);
+		String str = getPersistentProperties().get(TAGS_PROPERTY_KEY);
 		if (str == null || str.isEmpty()) {
 			return new LinkedHashSet<String>();
 		} else {
@@ -416,13 +420,13 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public String getDefaultRequestMappingPath() {
-		return projectProperties.get(delegate, DEFAULT_URL_PATH_PROP);
+		return getPersistentProperties().get(DEFAULT_URL_PATH_PROP);
 	}
 
 	@Override
 	public void setDefaultRequestMapingPath(String defaultPath) {
 		try {
-			projectProperties.put(delegate, DEFAULT_URL_PATH_PROP, defaultPath);
+			getPersistentProperties().put(DEFAULT_URL_PATH_PROP, defaultPath);
 			context.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
@@ -441,6 +445,11 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	@Override
 	public int getDesiredInstances() {
 		return 1;
+	}
+
+	@Override
+	public PropertyStoreApi getPersistentProperties() {
+		return persistentProperties;
 	}
 
 }

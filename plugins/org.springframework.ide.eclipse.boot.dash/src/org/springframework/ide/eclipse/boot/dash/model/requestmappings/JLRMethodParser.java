@@ -37,7 +37,6 @@ public class JLRMethodParser {
 
 			//The spaces inside generics will mess this klunky parser up. So get rid of those first:
 			methodString = methodString.replaceAll(",\\s", ",");
-			System.out.println("methodString: '"+methodString+"'");
 			String[] pieces = methodString.split("\\s");
 			int modifiersEnd = 0;
 			while (modifiersEnd<pieces.length && isModifier(pieces[modifiersEnd])) {

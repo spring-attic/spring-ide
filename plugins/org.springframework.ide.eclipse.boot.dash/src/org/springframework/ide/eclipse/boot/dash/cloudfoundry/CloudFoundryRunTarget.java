@@ -13,7 +13,10 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -45,6 +48,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
 	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, APP };
+	private static final BootDashColumn[] ALL_COLUMNS = {RUN_STATE_ICN, APP, INSTANCES, DEFAULT_PATH, TAGS};
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -71,8 +75,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
+	public BootDashColumn[] getAllColumns() {
+		return ALL_COLUMNS;
+	}
+
+	@Override
 	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
-		return new CloudFoundryBootDashModel(this);
+		return new CloudFoundryBootDashModel(this, context);
 	}
 
 	@Override

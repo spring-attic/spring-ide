@@ -53,7 +53,7 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 		targetProperties = new TargetProperties(RunTargetTypes.LATTICE, getId());
 		targetProperties.put(HOST_PROP, targetHost);
 	}
-	
+
 	public LatticeRunTarget(TargetProperties properties) {
 		super(RunTargetTypes.LATTICE, "LTC:" + properties.get(HOST_PROP), "Lattice @ " + properties.get(HOST_PROP));
 		this.targetHost = properties.get(HOST_PROP);
@@ -77,6 +77,11 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 
 	@Override
 	public BootDashColumn[] getDefaultColumns() {
+		return DEFAULT_COLUMNS;
+	}
+
+	@Override
+	public BootDashColumn[] getAllColumns() {
 		return DEFAULT_COLUMNS;
 	}
 

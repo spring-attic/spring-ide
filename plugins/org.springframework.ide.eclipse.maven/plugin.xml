@@ -117,13 +117,20 @@
 	 </extension>
      
     <extension point="org.eclipse.m2e.core.lifecycleMappingMetadataSource" />
+
      <extension
            point="org.eclipse.m2e.core.projectConfigurators">
         <configurator
               class="org.springframework.ide.eclipse.maven.internal.core.SpringProjectConfigurator"
               id="com.springsource.sts.ide.maven.core.springProjectConfigurator"
               name="Spring"
-              secondaryTo="org.eclipse.m2e.jdt.javaConfigurator">
+              runsAfter="org.eclipse.m2e.jdt.javaConfigurator">
+        </configurator>
+        <configurator
+              class="org.springframework.ide.eclipse.maven.internal.core.JREProjectConfigurator"
+              id="org.springframework.ide.eclipse.maven.internal.core.JREProjectConfigurator"
+              name="Configure specific JRE"
+              runsAfter="org.eclipse.m2e.jdt.javaConfigurator">
         </configurator>
         <configurator
               class="org.springframework.ide.eclipse.maven.internal.core.DataNucleusProjectConfigurator"

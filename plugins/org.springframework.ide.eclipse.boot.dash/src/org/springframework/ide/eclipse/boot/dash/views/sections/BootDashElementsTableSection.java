@@ -150,8 +150,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 	};
 
-	private boolean columnOrderChanged = false;
-
 	private LiveVariable<MouseEvent> tableMouseEvent;
 
 	private ValueListener<MouseEvent> tableMouseEventListener;
@@ -262,7 +260,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv.getTable().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				storeTableData();
+//				storeTableData();
 
 				tableMouseEvent.setValue(null);
 
@@ -292,7 +290,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			}
 		});
 
-		columnOrderChanged = false;
 		ReflowUtil.reflow(owner, tv.getControl());
 
 	}
@@ -439,7 +436,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 		addPreferedConfigSelectionMenu(manager);
 
-		manager.add(new SettingsAction());
+		if (tv.getTable().getColumnCount() > 0) {
+			manager.add(new RestoreDefaultColumnsAction("Restore Default Columns"));
+			manager.add(new CustomizeColumnsAction("Customize Columns..."));
+		}
 
 //		manager.add
 //		manager.add(new Separator());
@@ -556,40 +556,64 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 
 		tc.addControlListener(new ControlAdapter() {
+
+			private int currentIndex = tv.getTable().getColumnCount() - 1;
+
 			@Override
 			public void controlMoved(ControlEvent e) {
-				columnOrderChanged = true;			}
+				int i = 0;
+				int[] order = tv.getTable().getColumnOrder();
+				while (i < order.length && tv.getTable().getColumn(order[i]) != tc) {
+					i++;
+				}
+				/*
+				 * Move event is caused by resizing as well therefore update the
+				 * column order if it was changed indeed
+				 */
+				if (i != currentIndex) {
+					columnModel.setIndex(i);
+					currentIndex = i;
+				}
+			}
+
 			@Override
 			public void controlResized(ControlEvent e) {
+				columnModel.setWidth(tc.getWidth());
 				ReflowUtil.reflow(owner, tv.getControl());
 			}
+
 		});
 	}
 
-	private void storeTableData() {
-		for (int i = 0; i < tv.getTable().getColumns().length; i++) {
-			TableColumn tc = tv.getTable().getColumns()[i];
-			if (tc.getData(COLUMN_DATA) instanceof BootDashColumnModel) {
-				BootDashColumnModel columnModel = (BootDashColumnModel) tc.getData(COLUMN_DATA);
-				columnModel.setWidth(tc.getWidth());
-				if (columnOrderChanged) {
-					int j = 0;
-					for (; j < tv.getTable().getColumnOrder().length && tv.getTable().getColumnOrder()[j] != i; j++);
-					columnModel.setIndex(j);
-				}
-			}
-		}
-	}
+	private class RestoreDefaultColumnsAction extends Action {
 
-	private class SettingsAction extends Action {
-
-		SettingsAction() {
-			super("Columns Settings...");
+		RestoreDefaultColumnsAction(String label) {
+			super(label);
 		}
 
 		@Override
 		public boolean isEnabled() {
-			return model.getRunTarget() != null && model.getRunTarget().getAllColumns().length > 0;
+			return tv.getTable().getColumnCount() > 0;
+		}
+
+		@Override
+		public void run() {
+			for (BootDashColumnModel columnModel : columnModels) {
+				columnModel.restoreDefaults();
+			}
+			BootDashElementsTableSection.this.createContents(tv.getControl().getParent());
+		}
+	}
+
+	private class CustomizeColumnsAction extends Action {
+
+		CustomizeColumnsAction(String label) {
+			super(label);
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return tv.getTable().getColumnCount() > 0;
 		}
 
 		@Override

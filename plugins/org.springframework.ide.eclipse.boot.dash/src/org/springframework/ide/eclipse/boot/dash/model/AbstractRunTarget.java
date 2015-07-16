@@ -70,7 +70,7 @@ public abstract class AbstractRunTarget implements RunTarget {
 	}
 
 	@Override
-	public final BootDashColumn[] getAllColumns() {
+	public BootDashColumn[] getAllColumns() {
 		return BootDashColumn.values();
 	}
 

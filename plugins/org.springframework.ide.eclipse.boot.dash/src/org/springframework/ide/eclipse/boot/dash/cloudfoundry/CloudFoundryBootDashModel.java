@@ -19,14 +19,23 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class CloudFoundryBootDashModel extends BootDashModel {
 
-	public CloudFoundryBootDashModel(CloudFoundryRunTarget target) {
+	private IPropertyStore modelStore;
+
+	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
 		super(target);
+		RunTargetType type = target.getType();
+		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
+		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
 	}
 
 	private LiveSet<BootDashElement> elements;
@@ -53,7 +62,7 @@ public class CloudFoundryBootDashModel extends BootDashModel {
 					if (apps != null) {
 						for (CloudApplication app : apps) {
 							updatedElements
-									.add(new CloudDashElement(getCloudTarget(), app, CloudFoundryBootDashModel.this));
+									.add(new CloudDashElement(getCloudTarget(), app, CloudFoundryBootDashModel.this, modelStore));
 						}
 					}
 					elements.replaceAll(updatedElements);
