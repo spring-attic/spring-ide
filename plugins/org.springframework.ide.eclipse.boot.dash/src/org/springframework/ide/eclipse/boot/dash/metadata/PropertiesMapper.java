@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
+package org.springframework.ide.eclipse.boot.dash.metadata;
 
 import java.io.IOException;
 
@@ -44,7 +44,7 @@ public class PropertiesMapper<T> {
 		return val;
 	}
 
-	public String convertToString(T properties) {
+	public String convertToString(T properties) throws Exception {
 
 		if (getMapper().canSerialize(properties.getClass())) {
 			try {
@@ -53,7 +53,7 @@ public class PropertiesMapper<T> {
 				BootDashActivator.log(e);
 			}
 		} else {
-			BootDashActivator.log(new Error("Failed to serialize: " + properties.getClass().getName()));
+			throw BootDashActivator.asCoreException("Failed to serialize: " + properties.getClass().getName());
 		}
 		return null;
 	}

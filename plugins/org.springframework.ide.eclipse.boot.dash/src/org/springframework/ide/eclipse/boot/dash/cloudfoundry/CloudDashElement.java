@@ -17,16 +17,12 @@ import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -39,27 +35,67 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private CloudApplication app;
 
-	private final BootDashModel context;
+	private final CloudBootDashOperations operations;
 
 	private PropertyStoreApi persistentProperties;
 
-	public CloudDashElement(CloudFoundryRunTarget cloudTarget, CloudApplication app, BootDashModel context, IPropertyStore modelStore) {
-		super(context, app.getName());
-		this.cloudTarget = cloudTarget;
+	private final IProject project;
+
+	public CloudDashElement(CloudFoundryBootDashModel model, CloudApplication app, IProject project,
+			CloudBootDashOperations operations, IPropertyStore modelStore) {
+		super(model, app.getName());
+		this.cloudTarget = model.getCloudTarget();
 		this.app = app;
-		this.context = context;
+		this.operations = operations;
+		this.project = project;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(delegate, modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-		runOp(getStop(), ui);
+
+		CloudApplicationDashOperation op = new CloudApplicationDashOperation("Stopping application", this,
+				cloudTarget.getClient(), ui) {
+
+			@Override
+			protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
+					throws Exception {
+				client.stopApplication(app.getName());
+				// fetch an updated Cloud Application that reflects changes that
+				// were
+				// performed on it
+				app = client.getApplication(element.getName());
+
+				getParent().notifyElementChanged(getElement());
+
+				return app;
+			}
+		};
+		operations.runOp(op);
 	}
 
 	@Override
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		runOp(getRestart(), ui);
+
+		CloudApplicationDashOperation op = new CloudApplicationDashOperation("Starting application", this,
+				cloudTarget.getClient(), ui) {
+
+			@Override
+			protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
+					throws Exception {
+				client.stopApplication(app.getName());
+				// fetch an updated Cloud Application that reflects changes that
+				// were
+				// performed on it
+				app = client.getApplication(element.getName());
+
+				getParent().notifyElementChanged(getElement());
+
+				return app;
+			}
+		};
+		operations.runOp(op);
 	}
 
 	@Override
@@ -74,12 +110,12 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public IJavaProject getJavaProject() {
-		return null;
+		return getProject() != null ? JavaCore.create(getProject()) : null;
 	}
 
 	@Override
 	public IProject getProject() {
-		return null;
+		return project;
 	}
 
 	@Override
@@ -140,69 +176,6 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public void setDefaultRequestMapingPath(String defaultPath) {
-
-	}
-
-	/*
-	 * Runnable Ops
-	 */
-	protected CloudApplicationOperation getRestart() throws Exception {
-		return new CloudApplicationOperation(app.getName(), cloudTarget.getClient(),
-				"Starting application: " + app.getName()) {
-
-			@Override
-			protected void doAppOperation(CloudFoundryOperations operations, IProgressMonitor monitor)
-					throws Exception {
-				operations.startApplication(appName);
-			}
-
-		};
-	}
-
-	protected CloudApplicationOperation getStop() throws Exception {
-		return new CloudApplicationOperation(app.getName(), cloudTarget.getClient(),
-				"Stopping application: " + app.getName()) {
-
-			@Override
-			protected void doAppOperation(CloudFoundryOperations operations, IProgressMonitor monitor)
-					throws Exception {
-				operations.stopApplication(appName);
-			}
-		};
-	}
-
-	protected void runOp(final CloudApplicationOperation runnable, final UserInteractions ui) throws Exception {
-
-		Job job = new Job(runnable.getName()) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					// Be sure to update the app after the app operation is
-					// performed so
-					// that it
-					// reflects changes done by the op on the app
-					app = runnable.run(monitor);
-					context.notifyElementChanged(CloudDashElement.this);
-
-				} catch (Exception e) {
-					final String message = e.getMessage();
-					Display.getCurrent().asyncExec(new Runnable() {
-
-						@Override
-						public void run() {
-							if (ui != null) {
-								ui.errorPopup("Error performing Cloud operation: ", message);
-							}
-						}
-					});
-				}
-				return Status.OK_STATUS;
-			}
-
-		};
-
-		job.schedule();
 
 	}
 

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
 public class CloudFoundryUiUtil {
@@ -48,7 +49,7 @@ public class CloudFoundryUiUtil {
 	/**
 	 * Get the client for an existing {@link CloudFoundryRunTarget}. Note that
 	 * this may require the password to be set for that runtarget.
-	 * 
+	 *
 	 * @param runTarget
 	 * @return client if connection was successful.
 	 * @throws Exception
@@ -77,7 +78,7 @@ public class CloudFoundryUiUtil {
 
 	public static void checkPassword(String password, String id) throws Exception {
 		if (password == null) {
-			throw new Error("No password stored or set for: " + id
+			throw BootDashActivator.asCoreException("No password stored or set for: " + id
 					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
 		}
 	}

@@ -1,0 +1,256 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.zip.ZipFile;
+
+import org.cloudfoundry.client.lib.archive.ApplicationArchive;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.springframework.boot.loader.tools.Libraries;
+import org.springframework.boot.loader.tools.Library;
+import org.springframework.boot.loader.tools.LibraryCallback;
+import org.springframework.boot.loader.tools.LibraryScope;
+import org.springframework.boot.loader.tools.Repackager;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+
+public class CloudApplicationArchiver {
+
+	private IJavaProject javaProject;
+
+	private String applicationName;
+
+	private final ManifestParser parser;
+
+	private static final String TEMP_FOLDER_NAME = "springidetempFolderForJavaAppJar";
+
+	public CloudApplicationArchiver(IJavaProject javaProject, String applicationName, ManifestParser parser) {
+		this.javaProject = javaProject;
+		this.applicationName = applicationName;
+		this.parser = parser;
+	}
+
+	public ApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
+
+		ApplicationArchive archive = getArchiveFromManifest();
+
+		if (archive == null) {
+
+			File packagedFile = null;
+
+			JavaPackageFragmentRootHandler rootResolver = getPackageFragmentRootHandler(javaProject, monitor);
+
+			IType mainType = rootResolver.getMainType(monitor);
+
+			final IPackageFragmentRoot[] roots = rootResolver.getPackageFragmentRoots(monitor);
+
+			if (roots == null || roots.length == 0) {
+				throw BootDashActivator.asCoreException("No package fragment roots found in Java project: "
+						+ javaProject.getElementName() + ". Unable to proceed with packaging");
+			}
+
+			JarPackageData jarPackageData = getJarPackageData(roots, mainType, monitor);
+
+			// generate a manifest file. Note that manifest files
+			// are only generated in the temporary jar meant for
+			// deployment.
+			// The associated Java project is no modified.
+			jarPackageData.setGenerateManifest(true);
+
+			// This ensures that folders in output folders appear at root
+			// level
+			// Example: src/main/resources, which is in the project's
+			// classpath, contains non-Java templates folder and
+			// has output folder target/classes. If not exporting output
+			// folder,
+			// templates will be packaged in the jar using this path:
+			// resources/templates
+			// This may cause problems with the application's dependencies
+			// if they are looking for just /templates at top level of the
+			// jar
+			// If exporting output folders, templates folder will be
+			// packaged at top level in the jar.
+			jarPackageData.setExportOutputFolders(true);
+
+			packagedFile = packageApplication(jarPackageData, monitor);
+
+			bootRepackage(roots, packagedFile);
+
+			archive = new CloudZipApplicationArchive(new ZipFile(packagedFile));
+		}
+
+		return archive;
+	}
+
+	protected JavaPackageFragmentRootHandler getPackageFragmentRootHandler(IJavaProject javaProject,
+			IProgressMonitor monitor) throws CoreException {
+
+		return new JavaPackageFragmentRootHandler(javaProject);
+	}
+
+	protected void bootRepackage(final IPackageFragmentRoot[] roots, File packagedFile) throws Exception {
+		Repackager bootRepackager = new Repackager(packagedFile);
+		bootRepackager.repackage(new Libraries() {
+
+			public void doWithLibraries(LibraryCallback callBack) throws IOException {
+				for (IPackageFragmentRoot root : roots) {
+
+					if (root.isArchive()) {
+
+						File rootFile = new File(root.getPath().toOSString());
+						if (rootFile.exists()) {
+							callBack.library(new Library(rootFile, LibraryScope.COMPILE));
+						}
+					}
+				}
+			}
+		});
+	}
+
+	protected JarPackageData getJarPackageData(IPackageFragmentRoot[] roots, IType mainType, IProgressMonitor monitor)
+			throws Exception {
+
+		String filePath = getTempJarPath();
+
+		IPath location = new Path(filePath);
+
+		// Note that if no jar builder is specified in the package data
+		// then a default one is used internally by the data that does NOT
+		// package any jar dependencies.
+		JarPackageData packageData = new JarPackageData();
+
+		packageData.setJarLocation(location);
+
+		// Don't create a manifest. A repackager should determine if a generated
+		// manifest is necessary
+		// or use a user-defined manifest.
+		packageData.setGenerateManifest(false);
+
+		// Since user manifest is not used, do not save to manifest (save to
+		// manifest saves to user defined manifest)
+		packageData.setSaveManifest(false);
+
+		packageData.setManifestMainClass(mainType);
+		packageData.setElements(roots);
+		return packageData;
+	}
+
+	protected File packageApplication(final JarPackageData packageData, IProgressMonitor monitor) throws Exception {
+
+		int progressWork = 10;
+		final SubMonitor subProgress = SubMonitor.convert(monitor, progressWork);
+
+		final File[] createdFile = new File[1];
+
+		final Exception[] error = new Exception[1];
+		Display.getDefault().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = CloudFoundryUiUtil.getShell();
+
+				IJarExportRunnable runnable = packageData.createJarExportRunnable(shell);
+				try {
+					runnable.run(subProgress);
+
+					File file = new File(packageData.getJarLocation().toString());
+					createdFile[0] = file;
+
+				} catch (InvocationTargetException e) {
+					error[0] = e;
+				} catch (InterruptedException ie) {
+					error[0] = ie;
+				} finally {
+					subProgress.done();
+				}
+			}
+
+		});
+		if (error[0] != null) {
+			throw error[0];
+		}
+
+		return createdFile[0];
+	}
+
+	public String getTempJarPath() throws Exception {
+		File tempFolder = File.createTempFile(TEMP_FOLDER_NAME, null);
+		tempFolder.delete();
+		tempFolder.mkdirs();
+
+		if (!tempFolder.exists()) {
+			throw BootDashActivator
+					.asCoreException("Failed to create temporary jar file when packaging application for deployment: "
+							+ tempFolder.getAbsolutePath());
+		}
+
+		File targetFile = new File(tempFolder, applicationName + ".jar");
+		targetFile.deleteOnExit();
+
+		String path = new Path(targetFile.getAbsolutePath()).toString();
+
+		return path;
+	}
+
+	public ApplicationArchive getArchiveFromManifest() throws Exception {
+		String archivePath = null;
+		// Read the path again instead of deployment info, as a user may be
+		// correcting the path after the module was creating and simply
+		// attempting to push it again without the
+		// deployment wizard
+		if (parser.hasManifest()) {
+			archivePath = parser.getApplicationProperty(null, ManifestParser.PATH_PROP);
+		}
+
+		File packagedFile = null;
+		if (archivePath != null) {
+			// Only support paths that point to archive files
+			IPath path = new Path(archivePath);
+			if (path.getFileExtension() != null) {
+				// Check if it is project relative first
+				IFile projectRelativeFile = javaProject.getProject().getFile(path);
+
+				if (projectRelativeFile != null && projectRelativeFile.exists()) {
+					packagedFile = projectRelativeFile.getLocation().toFile();
+				} else {
+					// See if it is an absolute path
+					File absoluteFile = new File(archivePath);
+					if (absoluteFile.exists() && absoluteFile.canRead()) {
+						packagedFile = absoluteFile;
+					}
+				}
+			}
+			// If a path is specified but no file found stop further deployment
+			if (packagedFile == null) {
+				throw BootDashActivator.asCoreException(
+						"No file found at: " + path + ". Unable to package the application for deployment");
+			} else {
+				return new CloudZipApplicationArchive(new ZipFile(packagedFile));
+
+			}
+		}
+		return null;
+	}
+}

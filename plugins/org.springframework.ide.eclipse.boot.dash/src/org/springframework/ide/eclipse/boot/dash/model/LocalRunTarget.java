@@ -59,4 +59,14 @@ public class LocalRunTarget extends AbstractRunTarget {
 	public boolean canRemove() {
 		return false;
 	}
+
+	@Override
+	public boolean canDeployAppsTo() {
+		return false;
+	}
+
+	@Override
+	public boolean canDeployAppsFrom() {
+		return true;
+	}
 }

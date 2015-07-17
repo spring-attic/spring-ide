@@ -65,5 +65,4 @@ public abstract class BootDashModel {
 		 */
 		void stateChanged(BootDashElement e);
 	}
-
 }

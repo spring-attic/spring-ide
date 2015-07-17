@@ -12,8 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * Operations that are performed on a Cloud Foundry application (e.g. start,
@@ -21,28 +20,18 @@ import org.springframework.ide.eclipse.boot.dash.model.Operation;
  * to date {@link CloudApplication} that reflects changes done by the operation.
  *
  */
-public abstract class CloudApplicationOperation extends Operation<CloudApplication> {
+public abstract class CloudApplicationDashOperation extends CloudOperation<CloudApplication> {
 
-	protected final String appName;
-	protected final CloudFoundryOperations operations;
+	protected final CloudDashElement element;
 
-	public CloudApplicationOperation(String appName, CloudFoundryOperations operations, String opName) {
-		super(appName);
-		this.operations = operations;
-		this.appName = appName;
+	public CloudApplicationDashOperation(String op, CloudDashElement element, CloudFoundryOperations client,
+			UserInteractions ui) {
+		super(op + ": " + element.getName(), client, ui);
+		this.element = element;
 	}
 
-	@Override
-	protected CloudApplication runOp(IProgressMonitor monitor) throws Exception {
-
-		doAppOperation(operations, monitor);
-
-		// fetch an updated Cloud Application that reflects changes that were
-		// performed on it
-		return operations.getApplication(appName);
+	public CloudDashElement getElement() {
+		return element;
 	}
-
-	abstract protected void doAppOperation(CloudFoundryOperations operations, IProgressMonitor monitor)
-			throws Exception;
 
 }

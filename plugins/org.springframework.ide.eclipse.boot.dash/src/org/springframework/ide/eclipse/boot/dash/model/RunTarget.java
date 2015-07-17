@@ -68,6 +68,18 @@ public interface RunTarget extends IdAble, Nameable {
 	 * @return true if it is a run target that can be deleted (and any
 	 *         associated models). False otherwise
 	 */
-	public boolean canRemove();
+	public abstract boolean canRemove();
+
+	/**
+	 *
+	 * @return true if this run target accepts application deployments. False otherwise.
+	 */
+	public abstract boolean canDeployAppsTo();
+
+	/**
+	 *
+	 * @return true if applications can be deployed from this run target to other run targets. False otherwise.
+	 */
+	public abstract boolean canDeployAppsFrom();
 
 }

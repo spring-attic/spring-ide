@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -98,6 +99,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 			message = "";
 		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+	}
+
+	public static CoreException asCoreException(String message) {
+		return new CoreException(createErrorStatus(null, message));
 	}
 
 	public static void log(Throwable e) {

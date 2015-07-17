@@ -42,7 +42,7 @@ public class OpenConsoleAction extends AbstractBootDashAction {
 	public void run() {
 		final Collection<BootDashElement> selecteds = getSelectedElements();
 
-		Display.getCurrent().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {

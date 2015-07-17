@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertiesMapper;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -72,7 +73,7 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 	public void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
 		Map<RunTargetType, List<RunTargetWithProperties>> propertiesToPersist = new HashMap<RunTargetType, List<RunTargetWithProperties>>();
 
-		// Only persist run target properties that can be instantiated 
+		// Only persist run target properties that can be instantiated
 		for (RunTargetType type : types) {
 			if (type.canInstantiate()) {
 				propertiesToPersist.put(type, new ArrayList<RunTargetWithProperties>());
@@ -110,14 +111,13 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 					credentialsStore.setPassword(targProps.getPassword(), targProps.getRunTargetId());
 				}
 			}
-
-			String serialisedVal = mapper.convertToString(asStringMap);
-			if (serialisedVal != null) {
-				try {
+			try {
+				String serialisedVal = mapper.convertToString(asStringMap);
+				if (serialisedVal != null) {
 					propertiesStore.put(entry.getKey(), RUN_TARGET_KEY, serialisedVal);
-				} catch (Exception e) {
-					BootDashActivator.log(e);
 				}
+			} catch (Exception e) {
+				BootDashActivator.log(e);
 			}
 		}
 	}
