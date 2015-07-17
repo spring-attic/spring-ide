@@ -17,6 +17,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -25,6 +29,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -37,9 +42,17 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -72,6 +85,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
@@ -289,6 +303,9 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			}
 		});
+
+		addDragSupport(tv);
+		addDropSupport(tv);
 
 		ReflowUtil.reflow(owner, tv.getControl());
 
@@ -676,4 +693,104 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 
 	}
 
+	private void addDropSupport(final TableViewer viewer) {
+
+		if (model.getRunTarget().canDeployAppsTo()) {
+			int ops = DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
+			Transfer[] transfers = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+
+			DropTarget dropTarget = new DropTarget(viewer.getTable().getParent(), ops);
+			dropTarget.setTransfer(transfers);
+			dropTarget.addDropListener(new ModelDropListener(viewer));
+		}
+	}
+
+	private void addDragSupport(final TableViewer viewer) {
+
+		if (model.getRunTarget().canDeployAppsFrom()) {
+			int ops = DND.DROP_COPY;
+
+			Transfer[] transfers = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+
+			DragSourceAdapter listener = new DragSourceAdapter() {
+				@Override
+				public void dragSetData(DragSourceEvent event) {
+					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+					event.data = selection.getFirstElement();
+					LocalSelectionTransfer.getTransfer().setSelection(selection);
+				}
+
+				@Override
+				public void dragStart(DragSourceEvent event) {
+					if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_DEFAULT) {
+						event.detail = DND.DROP_COPY;
+					}
+					dragSetData(event);
+				}
+			};
+
+			viewer.addDragSupport(ops, transfers, listener);
+		}
+	}
+
+	class ModelDropListener extends ViewerDropAdapter {
+
+		private IStructuredSelection selection;
+		private Object target;
+		private ModifiableModel modifiableModel;
+
+		protected ModelDropListener(Viewer viewer) {
+			super(viewer);
+			this.modifiableModel = model instanceof ModifiableModel ? (ModifiableModel) model : null;
+		}
+
+		@Override
+		public void dragEnter(DropTargetEvent event) {
+			if (event.detail == DND.DROP_DEFAULT || event.detail == DND.DROP_NONE) {
+				event.detail = DND.DROP_COPY;
+			}
+			super.dragEnter(event);
+		}
+
+		@Override
+		public boolean validateDrop(Object target, int operation, TransferData type) {
+			overrideOperation(DND.DROP_COPY);
+			this.target = target;
+			if (modifiableModel != null && (operation == DND.DROP_COPY || operation == DND.DROP_DEFAULT)) {
+				if (LocalSelectionTransfer.getTransfer().isSupportedType(type)) {
+					selection = (IStructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
+					Object[] selectionObjs = selection.toArray();
+
+					if (selectionObjs != null) {
+						return modifiableModel.canAccept(Arrays.asList(selectionObjs), target);
+					}
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean performDrop(Object dropObj) {
+			Job job = new Job("Performing deployment to " + model.getRunTarget().getName()) {
+
+				@Override
+				protected IStatus run(IProgressMonitor arg0) {
+					if (modifiableModel != null && selection != null) {
+						Object[] selectionObjs = selection.toArray();
+						try {
+							modifiableModel.add(Arrays.asList(selectionObjs), ModelDropListener.this.target, ui);
+
+						} catch (Exception e) {
+							ui.errorPopup("Failed to Add Element", e.getMessage());
+						}
+					}
+					return Status.OK_STATUS;
+				}
+
+			};
+			job.schedule();
+
+			return true;
+		}
+	}
 }

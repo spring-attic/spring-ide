@@ -94,4 +94,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return true;
 	}
 
+	@Override
+	public boolean canDeployAppsTo() {
+		return true;
+	}
+
+	@Override
+	public boolean canDeployAppsFrom() {
+		return true;
+	}
 }

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.zip.ZipFile;
 
-import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -52,9 +51,9 @@ public class CloudApplicationArchiver {
 		this.parser = parser;
 	}
 
-	public ApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
+	public CloudZipApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
 
-		ApplicationArchive archive = getArchiveFromManifest();
+		CloudZipApplicationArchive archive = getArchiveFromManifest();
 
 		if (archive == null) {
 
@@ -214,7 +213,7 @@ public class CloudApplicationArchiver {
 		return path;
 	}
 
-	public ApplicationArchive getArchiveFromManifest() throws Exception {
+	public CloudZipApplicationArchive getArchiveFromManifest() throws Exception {
 		String archivePath = null;
 		// Read the path again instead of deployment info, as a user may be
 		// correcting the path after the module was creating and simply

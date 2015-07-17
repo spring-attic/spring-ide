@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.resources.IProject;
@@ -184,7 +183,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	public void performDeployment(final List<IJavaProject> projectsToDeploy, UserInteractions ui) throws Exception {
-		CloudOperation<Void> op = new CloudOperation<Void>("Deploying: " + projectsToDeploy.toString(),
+		CloudOperation<Void> op = new CloudOperation<Void>("Deploying projects to " + getRunTarget().getName(),
 				getCloudTarget().getClient(), ui) {
 
 			@Override
@@ -237,23 +236,35 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 					// the updated version
 					app = client.getApplication(appName);
 
-
-
 					// Upload the application
-					CloudApplicationArchiver archiver = new CloudApplicationArchiver(javaProject, app.getName(),
-							parser);
-					ApplicationArchive archive = archiver.getApplicationArchive(subMonitor.newChild(60));
-					if (archive != null) {
-						client.uploadApplication(appName, archive);
+					CloudZipApplicationArchive archive = null;
 
-						// start the app
-						client.startApplication(appName);
+					try {
+						CloudApplicationArchiver archiver = new CloudApplicationArchiver(javaProject, app.getName(),
+								parser);
+						archive = archiver.getApplicationArchive(subMonitor.newChild(60));
+						if (archive != null) {
+							client.uploadApplication(appName, archive);
 
-						// if it successfully created add it to elements AFTER it uploads to ensure correct state
-						addElement(app, javaProject.getProject());
-					} else {
-						throw BootDashActivator
-								.asCoreException("Failed to generate application archive for " + appName);
+							// start the app
+							client.startApplication(appName);
+
+							// if it successfully created add it to elements
+							// AFTER it uploads to ensure correct state
+							addElement(app, javaProject.getProject());
+						} else {
+							throw BootDashActivator
+									.asCoreException("Failed to generate application archive for " + appName);
+						}
+					} finally {
+						// IMPORTANT: MUST close the archive to avoid resource
+						// leakage and
+						// potential bug were the same archive file keeps being
+						// pushes even if the
+						// archive file changes
+						if (archive != null) {
+							archive.close();
+						}
 					}
 
 					subMonitor.worked(20);

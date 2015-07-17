@@ -108,4 +108,13 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 		return targetProperties;
 	}
 
+	@Override
+	public boolean canDeployAppsTo() {
+		return true;
+	}
+
+	@Override
+	public boolean canDeployAppsFrom() {
+		return true;
+	}
 }
