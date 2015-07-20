@@ -265,6 +265,7 @@ public class ManifestParser {
 						"No application definition found in manifest.yml. Make sure at least one application is defined");
 			}
 			CloudDeploymentProperties properties = new CloudDeploymentProperties();
+			properties.setProject(project);
 
 			String appName = getStringValue(application, NAME_PROP);
 

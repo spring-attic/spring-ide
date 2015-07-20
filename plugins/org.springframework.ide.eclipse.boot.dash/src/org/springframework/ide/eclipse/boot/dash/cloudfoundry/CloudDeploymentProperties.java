@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -32,6 +33,7 @@ public class CloudDeploymentProperties {
 	private int memory = DEFAULT_MEMORY;
 	private int instances = DEFAULT_INSTANCES;
 	private String buildpackUrl;
+	private IProject project;
 
 	public static final int DEFAULT_MEMORY = 1024;
 	public static final int DEFAULT_INSTANCES = 1;
@@ -71,6 +73,14 @@ public class CloudDeploymentProperties {
 		if (environmentVariables != null) {
 			this.environmentVariables.putAll(environmentVariables);
 		}
+	}
+
+	public void setProject(IProject project) {
+		this.project = project;
+	}
+
+	public IProject getProject() {
+		return this.project;
 	}
 
 	public String getBuildpackUrl() {

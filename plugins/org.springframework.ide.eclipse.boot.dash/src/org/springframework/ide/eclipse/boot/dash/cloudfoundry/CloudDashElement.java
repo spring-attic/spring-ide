@@ -35,14 +35,14 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private CloudApplication app;
 
-	private final CloudBootDashOperations operations;
+	private final OperationsExecution operations;
 
 	private PropertyStoreApi persistentProperties;
 
 	private final IProject project;
 
 	public CloudDashElement(CloudFoundryBootDashModel model, CloudApplication app, IProject project,
-			CloudBootDashOperations operations, IPropertyStore modelStore) {
+			OperationsExecution operations, IPropertyStore modelStore) {
 		super(model, app.getName());
 		this.cloudTarget = model.getCloudTarget();
 		this.app = app;
@@ -84,7 +84,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 			@Override
 			protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
 					throws Exception {
-				client.stopApplication(app.getName());
+				client.startApplication(app.getName());
 				// fetch an updated Cloud Application that reflects changes that
 				// were
 				// performed on it
