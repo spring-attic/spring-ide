@@ -71,9 +71,9 @@ public class TagSearchSection extends PageSection implements Disposable {
 				}
 			}
 		});
-		
+
 		IContentProposalProvider proposalProvider = new TagContentProposalProvider(viewModel);
-		ContentProposalAdapter caAdapter = new ContentProposalAdapter(tagsSearchBox, new TextContentAdapter(), proposalProvider, UIUtils.CTRL_SPACE, UIUtils.TAG_CA_AUTO_ACTIVATION_CHARS);
+		ContentProposalAdapter caAdapter = new ContentProposalAdapter(tagsSearchBox, new TextContentAdapter(), proposalProvider, UIUtils.CTRL_SPACE, null);
 		caAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 
 	}
