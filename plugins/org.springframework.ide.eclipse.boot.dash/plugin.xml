@@ -25,4 +25,38 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+      <propertyContributor
+            contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor"
+            labelProvider="org.springframework.ide.eclipse.boot.dash.views.properties.BootDashElementLabelProvider">
+         <propertyCategory
+               category="org.springframework.ide.eclipse.boot.dash"></propertyCategory>
+      </propertyContributor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+      <propertyTabs
+            contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor">
+         <propertyTab
+               category="org.springframework.ide.eclipse.boot.dash"
+               id="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings"
+               label="Request Mappings">
+         </propertyTab>
+      </propertyTabs>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views.properties.tabbed.propertySections">
+      <propertySections
+            contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor">
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.RequestMappingPropertiesSection"
+               id="org.springframework.ide.eclipse.boot.dash.section.RequestMappingsSection"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+            </input>
+         </propertySection>
+      </propertySections>
+   </extension>
 </plugin>

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
@@ -20,12 +21,20 @@ import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.views.properties.IPropertySheetPage;
+import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
+import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -37,12 +46,14 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 /**
  * @author Kris De Volder
  */
-public class BootDashView extends ViewPartWithSections {
+public class BootDashView extends ViewPartWithSections implements ITabbedPropertySheetPageContributor, ISelectionProvider {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -66,6 +77,8 @@ public class BootDashView extends ViewPartWithSections {
 	private UserInteractions ui = new DefaultUserInteractions(this);
 
 	private MultiSelection<BootDashElement> selection = null; // lazy init
+
+	private List<ISelectionChangedListener> selectionListeners = new ArrayList<ISelectionChangedListener>();
 
 	/*
 	 * The content provider class is responsible for providing objects to the
@@ -97,16 +110,18 @@ public class BootDashView extends ViewPartWithSections {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
+		getSite().setSelectionProvider(this);
+
 		// Create the help context id for the viewer's control
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(),
 		// "org.springframework.ide.eclipse.boot.dash.viewer");
-		actions = new BootDashActions(model, getSelection(), ui);
+		actions = new BootDashActions(model, getRawSelection(), ui);
 		// hookContextMenu();
 		// hookDoubleClickAction();
 		contributeToActionBars();
 	}
 
-	public synchronized MultiSelection<BootDashElement> getSelection() {
+	public synchronized MultiSelection<BootDashElement> getRawSelection() {
 		if (this.selection == null) {
 			MultiSelection<BootDashElement> selection = MultiSelection.empty(BootDashElement.class);
 			for (IPageSection section : getSections()) {
@@ -117,13 +132,22 @@ public class BootDashView extends ViewPartWithSections {
 				}
 			}
 			this.selection = selection;
+			selection.getElements().addListener(new ValueListener<Set<BootDashElement>>() {
+				@Override
+				public void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
+					ISelection selection = getSelection();
+					for (ISelectionChangedListener selectionListener : selectionListeners) {
+						selectionListener.selectionChanged(new SelectionChangedEvent(BootDashView.this, selection));
+					}
+				}
+			});
 		}
 		return this.selection;
 	}
 
 	public List<BootDashElement> getSelectedElements() {
 		ArrayList<BootDashElement> elements = new ArrayList<BootDashElement>();
-		for (Object e : getSelection().getValue()) {
+		for (Object e : getRawSelection().getValue()) {
 			if (e instanceof BootDashElement) {
 				elements.add((BootDashElement) e);
 			}
@@ -218,15 +242,56 @@ public class BootDashView extends ViewPartWithSections {
 				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter(), ui)
 		);
 
-		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
-				this, model, runTargetSections.getSelection().cast(BootDashElement.class).toSingleSelection()
-		);
+//		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
+//				this, model, runTargetSections.getSelection().cast(BootDashElement.class).toSingleSelection()
+//		);
 
-		sections.add(new SashSection(this,
-				new ScrollerSection(this, runTargetSections),
-				detailsSection)
+		sections.add(/*new SashSection(this,*/
+				new ScrollerSection(this, runTargetSections)/*,
+				detailsSection)*/
 		);
 		return sections;
 	}
+
+	@Override
+	public String getContributorId() {
+		return "org.springframework.ide.eclipse.boot.dash.propertyContributor";
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter == IPropertySheetPage.class)
+			return (T) new TabbedPropertySheetPage(this);
+		return super.getAdapter(adapter);
+	}
+
+	@Override
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		selectionListeners.add(listener);
+	}
+
+	@Override
+	public ISelection getSelection() {
+		return new StructuredSelection(getRawSelection().getValue().toArray());
+	}
+
+	@Override
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+		selectionListeners.remove(listener);
+	}
+
+	@Override
+	public void setSelection(ISelection selection) {
+//		if (selection instanceof IStructuredSelection) {
+//			HashSet<BootDashElement> elements = new HashSet<BootDashElement>();
+//			for (Object o : ((IStructuredSelection)selection).toArray()) {
+//				if (o instanceof BootDashElement) {
+//					elements.add((BootDashElement)o);
+//				}
+//			}
+//		}
+	}
+
 
 }
