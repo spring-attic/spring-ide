@@ -16,8 +16,11 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -51,12 +54,30 @@ public class ViewPartWithSections extends ViewPart implements UIContext, IPageWi
 			page = new Composite(parent, SWT.NONE);
 		}
 		page.setLayout(new GridLayout());
-		
+
 		for (IPageSection s : getSections()) {
 			s.createContents(page);
 		}
+
+		Display display = page.getDisplay();
+		Color background = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+
+		stylePage(new Control[]{page}, background);
 	}
-	
+
+	protected void stylePage(Control[] controls, Color backgroundColor) {
+		if (controls == null || controls.length == 0) {
+			return;
+		}
+		for (Control control : controls) {
+			if (control instanceof Composite) {
+				control.setBackground(backgroundColor);
+				Control[] children = ((Composite)control).getChildren();
+				stylePage(children, backgroundColor);
+			}
+		}
+	}
+
 	@Override
 	public void setFocus() {
 		page.setFocus();
