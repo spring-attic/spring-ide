@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -176,31 +175,27 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		notifyElementChanged(addedElement);
 	}
 
-	public synchronized void addElements(Map<CloudApplication, IProject> apps) throws Exception {
+	/**
+	 *
+	 * @param apps
+	 *            updated list of applications. Elements will be created for the
+	 *            Cloud applications and replace all existing elements in the
+	 *            model
+	 * @throws Exception
+	 */
+	public synchronized void replaceElements(Map<CloudApplication, IProject> apps) throws Exception {
 
-		Set<BootDashElement> existing = elements.getValue();
-
-		Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
+		List<BootDashElement> updated = new ArrayList<BootDashElement>();
 
 		// Add new ones first
 		for (Entry<CloudApplication, IProject> entry : apps.entrySet()) {
 			BootDashElement addedElement = new CloudDashElement(this, entry.getKey(), entry.getValue(), opExecution,
 					modelStore);
-			updated.put(addedElement.getName(), addedElement);
-
+			updated.add(addedElement);
 		}
 
-		// Add any existing ones that weren't replaced by the new ones
-		// Replace the existing one with a new one for the given Cloud
-		// Application
-		for (BootDashElement element : existing) {
-			if (updated.get(element.getName()) == null) {
-				updated.put(element.getName(), element);
-			}
-		}
-
-		elements.replaceAll(updated.values());
-		projectAppStore.storeProjectToAppMapping(updated.values());
+		elements.replaceAll(updated);
+		projectAppStore.storeProjectToAppMapping(updated);
 	}
 
 	public ProjectAppStore getProjectToAppMappingStore() {

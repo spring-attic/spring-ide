@@ -33,11 +33,11 @@ final class CloudApplicationRefreshOperation extends Operation<Void> {
 	}
 
 	@Override
-	protected Void runOp(IProgressMonitor monitor) throws Exception {
+	protected synchronized Void runOp(IProgressMonitor monitor) throws Exception {
 		try {
 
 			List<CloudApplication> apps = this.cloudFoundryBootDashModel.getCloudTarget().getClient().getApplications();
-			Map<CloudApplication, IProject> updatedElements = new HashMap<CloudApplication, IProject>();
+			Map<CloudApplication, IProject> updatedApplications = new HashMap<CloudApplication, IProject>();
 
 			if (apps != null) {
 
@@ -50,16 +50,16 @@ final class CloudApplicationRefreshOperation extends Operation<Void> {
 					IProject project = null;
 					if (projectName != null) {
 						project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-						if (project != null && !project.isAccessible()) {
+						if (project == null || !project.isAccessible()) {
 							project = null;
 						}
 					}
 
-					updatedElements.put(app, project);
+					updatedApplications.put(app, project);
 				}
 			}
 
-			this.cloudFoundryBootDashModel.addElements(updatedElements);
+			this.cloudFoundryBootDashModel.replaceElements(updatedApplications);
 
 		} catch (Exception e) {
 			BootDashActivator.log(e);

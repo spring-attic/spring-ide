@@ -62,8 +62,9 @@ public class DeleteApplicationsAction extends AbstractBootDashAction {
 	public void updateEnablement() {
 		Collection<BootDashElement> modelElementsToDelete = getSelectedElementsForThisModel();
 
-		// For now only support deletion of elements ONLY if all are contained
-		// in the same model
+		// For now only support deletion of elements ONLY if all selections are in modifiable models.
+		// For example, if a selection includes a local app, disable the action
+
 		this.setEnabled(model instanceof ModifiableModel && !modelElementsToDelete.isEmpty()
 				&& modelElementsToDelete.size() == getSelectedElements().size());
 	}

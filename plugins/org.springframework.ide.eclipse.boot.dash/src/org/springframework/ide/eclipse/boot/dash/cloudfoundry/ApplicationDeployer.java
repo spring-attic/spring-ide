@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,12 +23,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class ApplicationDeployer {
-	/**
-	 *
-	 */
+
 	final CloudFoundryBootDashModel model;
 	private final List<IJavaProject> projectsToDeploy;
 	final CloudFoundryOperations client;
@@ -98,6 +101,9 @@ public class ApplicationDeployer {
 
 		deployInParallel(toDeploy, subMonitor);
 
+		// Add listener to start apps as they are deployed
+		model.getElements().addListener(new StartAppListener(toDeploy));
+
 	}
 
 	protected void deployInParallel(List<CloudDeploymentProperties> toDeploy, IProgressMonitor monitor) {
@@ -106,8 +112,45 @@ public class ApplicationDeployer {
 
 			model.getCloudOpExecution().runOp(new DeployAppOperation(client, properties, model, ui));
 			subMonitor.worked(10);
-
 		}
 	}
 
+	class StartAppListener implements ValueListener<Set<BootDashElement>> {
+
+		private final List<CloudDeploymentProperties> appsToStart;
+
+		public StartAppListener(List<CloudDeploymentProperties> appsToStart) {
+			// Make sure to work on a copy as it will be modified
+			this.appsToStart = new ArrayList<CloudDeploymentProperties>(appsToStart);
+		}
+
+		@Override
+		public synchronized void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> elements) {
+			if (elements != null && !appsToStart.isEmpty()) {
+				for (BootDashElement element : elements) {
+
+					boolean found = false;
+					for (CloudDeploymentProperties properties : appsToStart) {
+						if (properties.getAppName().equals(element.getName())) {
+							found = true;
+							break;
+						}
+					}
+
+					if (found) {
+						try {
+							element.restart(RunState.STARTING, ApplicationDeployer.this.ui);
+						} catch (Exception e) {
+							BootDashActivator.log(e);
+						}
+						appsToStart.remove(element.getName());
+					}
+				}
+			}
+
+			if (appsToStart.isEmpty()) {
+				model.getElements().removeListener(this);
+			}
+		}
+	}
 }
