@@ -98,6 +98,21 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 		operations.runOp(op);
 	}
 
+	public void delete(UserInteractions ui) throws Exception {
+		CloudApplicationDashOperation op = new CloudApplicationDashOperation("Removing application", this,
+				cloudTarget.getClient(), ui) {
+
+			@Override
+			protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
+					throws Exception {
+				client.deleteApplication(element.getName());
+
+				return null;
+			}
+		};
+		operations.runOp(op);
+	}
+
 	@Override
 	public void openConfig(UserInteractions ui) {
 

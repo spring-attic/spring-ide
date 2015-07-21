@@ -441,14 +441,19 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			manager.add(a);
 		}
 
-		IAction removeAction = actions.getRemoveRunTargetAction();
-		if (removeAction != null) {
-			manager.add(removeAction);
+		IAction removeTargetAction = actions.getRemoveRunTargetAction();
+		if (removeTargetAction != null) {
+			manager.add(removeTargetAction);
 		}
 
 		IAction refreshAction = actions.getRefreshRunTargetAction();
 		if (refreshAction != null) {
 			manager.add(refreshAction);
+		}
+
+		IAction deleteAppsAction = actions.getDeleteApplicationsAction();
+		if (deleteAppsAction != null) {
+			manager.add(deleteAppsAction);
 		}
 
 		addPreferedConfigSelectionMenu(manager);

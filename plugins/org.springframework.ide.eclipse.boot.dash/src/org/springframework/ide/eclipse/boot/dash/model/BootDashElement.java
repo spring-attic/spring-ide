@@ -77,6 +77,8 @@ public interface BootDashElement extends Nameable, Taggable {
 	String getDefaultRequestMappingPath();
 	void setDefaultRequestMapingPath(String defaultPath);
 
+	BootDashModel getParent();
+
 	void stopAsync(UserInteractions ui) throws Exception;
 	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
 	void openConfig(UserInteractions ui);

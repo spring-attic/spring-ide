@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -46,6 +47,7 @@ public class BootDashActions {
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
+	private DeleteApplicationsAction deleteApplicationsAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -128,6 +130,7 @@ public class BootDashActions {
 			if (sectionModel.getRunTarget().canRemove()) {
 				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
 			}
+			deleteApplicationsAction = new DeleteApplicationsAction( sectionModel, selection, ui);
 		}
 	}
 
@@ -200,7 +203,7 @@ public class BootDashActions {
 		return addTargetActions;
 	}
 
-	public RemoveRunTargetAction getRemoveRunTargetAction() {
+	public IAction getRemoveRunTargetAction() {
 		return removeTargetAction;
 	}
 
@@ -208,8 +211,16 @@ public class BootDashActions {
 	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
-	public RefreshRunTargetAction getRefreshRunTargetAction() {
+	public IAction getRefreshRunTargetAction() {
 		return refreshAction;
+	}
+
+	/**
+	 *
+	 * @return May be null as it may not be supported on all models.
+	 */
+	public IAction getDeleteApplicationsAction() {
+		return deleteApplicationsAction;
 	}
 
 	public void dispose() {

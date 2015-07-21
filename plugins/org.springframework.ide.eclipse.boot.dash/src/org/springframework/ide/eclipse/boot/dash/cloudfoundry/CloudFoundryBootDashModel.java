@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -141,7 +142,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy).deployAndStart(monitor);
+				new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy)
+						.deployAndStart(monitor);
 				return Status.OK_STATUS;
 			}
 
@@ -158,6 +160,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 		BootDashElement addedElement = new CloudDashElement(this, app, project, opExecution, modelStore);
 
+		updated.add(addedElement);
+
 		// Add any existing ones that weren't replaced by the new ones
 		// Replace the existing one with a new one for the given Cloud
 		// Application
@@ -167,7 +171,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			}
 		}
 
-		elements.addAll(updated);
+		elements.replaceAll(updated);
 		projectAppStore.storeProjectToAppMapping(updated);
 		notifyElementChanged(addedElement);
 	}
@@ -205,6 +209,55 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	public OperationsExecution getCloudOpExecution() {
 		return opExecution;
+	}
+
+	@Override
+	public void delete(List<BootDashElement> toRemove, UserInteractions ui) {
+
+		if (toRemove == null || toRemove.isEmpty()) {
+			return;
+		}
+
+		if (ui.confirmOperation("Deleting Applications",
+				"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
+
+			Set<BootDashElement> existing = elements.getValue();
+
+			Set<BootDashElement> updated = new HashSet<BootDashElement>();
+
+			Set<String> toRemoveNames = new HashSet<String>();
+
+			for (BootDashElement element : toRemove) {
+				if (element instanceof CloudDashElement) {
+					CloudDashElement cloudElement = (CloudDashElement) element;
+					try {
+						cloudElement.delete(ui);
+						toRemoveNames.add(element.getName());
+
+					} catch (Exception e) {
+						// Allow deletion to continue
+						BootDashActivator.log(e);
+					}
+				}
+			}
+
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (!toRemoveNames.contains(element.getName())) {
+					updated.add(element);
+				}
+			}
+
+			elements.replaceAll(updated);
+			try {
+				projectAppStore.storeProjectToAppMapping(updated);
+			} catch (Exception e) {
+				ui.errorPopup("Error saving project to application mappings", e.getMessage());
+			}
+		}
+
 	}
 
 }

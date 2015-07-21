@@ -76,8 +76,6 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 		// the updated version
 		app = client.getApplication(appName);
 
-		this.model.addElement(app, deploymentProperties.getProject());
-
 		// Upload the application
 		CloudZipApplicationArchive archive = null;
 
@@ -118,6 +116,10 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 				archive.close();
 			}
 		}
+
+		// Add the element to the model LAST to ensure the uploading occurred
+		this.model.addElement(app, deploymentProperties.getProject());
+
 		return app;
 	}
 

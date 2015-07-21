@@ -18,4 +18,6 @@ public interface ModifiableModel {
 
 	abstract public void add(List<Object> sources, Object target, UserInteractions ui) throws Exception;
 
+	abstract public void delete(List<BootDashElement> toRemove, UserInteractions ui);
+
 }
