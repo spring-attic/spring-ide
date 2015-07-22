@@ -31,6 +31,8 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 	private LiveExpression<Filter<BootDashElement>> elementFilter;
 	private BootDashViewModel viewModel;
 	private UserInteractions ui;
+	private ViewStyler viewerStyler;
+
 	/**
 	 * This is used as a 'shared event bus' where all
 	 * BootDashElementsTableSection post their mousedown events. This allows
@@ -40,12 +42,13 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 	private LiveVariable<MouseEvent> tableMouseEvent;
 
 	public RunTargetSectionFactory(IPageWithSections owner, BootDashViewModel model,
-			LiveExpression<Filter<BootDashElement>> elementFilter, UserInteractions ui) {
+			LiveExpression<Filter<BootDashElement>> elementFilter, UserInteractions ui, ViewStyler viewStyler) {
 		this.owner = owner;
 		this.viewModel = model;
 		this.elementFilter = elementFilter;
 		this.tableMouseEvent = new LiveVariable<MouseEvent>();
 		this.ui = ui;
+		this.viewerStyler = viewStyler;
 	}
 
 	@Override
@@ -54,6 +57,6 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 		String sectionName = runTarget.getName();
 		BootDashElementsTableSection section = new BootDashElementsTableSection(owner, viewModel, model, elementFilter,
 				tableMouseEvent, ui);
-		return new ExpandableSectionWithSelection(owner, sectionName, section);
+		return new ExpandableSectionWithSelection(owner, sectionName, section, viewerStyler);
 	}
 }

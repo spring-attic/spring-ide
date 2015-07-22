@@ -209,6 +209,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv.setSorter(new NameSorter());
 		tv.setInput(model);
 		tv.getTable().setHeaderVisible(true);
+		tv.getTable().setLinesVisible(true);
+
 		stylers = new Stylers(tv.getTable().getFont());
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());

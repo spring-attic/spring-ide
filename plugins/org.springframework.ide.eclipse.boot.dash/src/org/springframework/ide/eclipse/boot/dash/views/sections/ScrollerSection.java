@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
+import org.springframework.ide.eclipse.boot.dash.views.ViewStyler;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -29,9 +31,12 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
  */
 public class ScrollerSection extends PageSection implements Disposable, MultiSelectionSource {
 
-	public ScrollerSection(IPageWithSections owner, IPageSection scolledContent) {
+	private ViewStyler viewStyler;
+
+	public ScrollerSection(IPageWithSections owner, IPageSection scolledContent, ViewStyler viewStyler) {
 		super(owner);
 		this.scolledContent = scolledContent;
+		this.viewStyler = viewStyler;
 	}
 
 	private Scroller scroller;
@@ -58,6 +63,7 @@ public class ScrollerSection extends PageSection implements Disposable, MultiSel
 		scroller = new Scroller(page);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(scroller);
 		Composite body = scroller.getBody();
+		viewStyler.applyBackground(new Control[]{body});
 		body.setLayout(GridLayoutFactory.swtDefaults().create());
 		scolledContent.createContents(body);
 	}
