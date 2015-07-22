@@ -12,11 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,7 +47,7 @@ public class ApplicationDeployer {
 		this.ui = ui;
 	}
 
-	public void deployAndStart(IProgressMonitor monitor) {
+	public void deployAndStart(IProgressMonitor monitor) throws Exception {
 		// First load all deployment properties
 		SubMonitor subMonitor = SubMonitor.convert(monitor, projectsToDeploy.size() * 100);
 
@@ -53,9 +55,11 @@ public class ApplicationDeployer {
 
 		final List<CloudDeploymentProperties> toDeploy = new ArrayList<CloudDeploymentProperties>();
 
+		List<CloudDomain> domains  = client.getDomains();
+
 		for (Iterator<IJavaProject> it = projectsToDeploy.iterator(); proceedIfError && it.hasNext();) {
 			IJavaProject javaProject = it.next();
-			ManifestParser parser = new ManifestParser(javaProject.getProject());
+			ManifestParser parser = new ManifestParser(javaProject.getProject(), domains);
 
 			subMonitor.setTaskName("Loading deployment properties for project: " + javaProject.getProject().getName());
 

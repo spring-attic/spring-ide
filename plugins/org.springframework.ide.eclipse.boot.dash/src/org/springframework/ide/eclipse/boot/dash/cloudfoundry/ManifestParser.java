@@ -73,10 +73,6 @@ public class ManifestParser {
 
 	public static final String DEFAULT_PATH = "manifest.yml";
 
-	public ManifestParser(IProject project) {
-		this(project, new ArrayList<CloudDomain>(), DEFAULT_PATH);
-	}
-
 	public ManifestParser(IProject project, List<CloudDomain> domains) {
 		this(project, domains, DEFAULT_PATH);
 	}

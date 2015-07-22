@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -27,13 +28,16 @@ public abstract class CloudOperation<T> extends Operation<T> {
 		this.client = client;
 	}
 
-	abstract protected T doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor) throws Exception;
+	abstract protected T doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
+			throws Exception, OperationCanceledException;
 
 	@Override
 	protected T runOp(IProgressMonitor monitor) throws Exception {
 
 		try {
 			return doCloudOp(client, monitor);
+		} catch (OperationCanceledException oe) {
+			return null;
 		} catch (Exception e) {
 			final String message = e.getMessage();
 			Display.getDefault().asyncExec(new Runnable() {

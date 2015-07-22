@@ -141,8 +141,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy)
-						.deployAndStart(monitor);
+				try {
+					new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy)
+							.deployAndStart(monitor);
+				} catch (Exception e) {
+					ui.errorPopup("Application Deployment Failure", e.getMessage());
+				}
 				return Status.OK_STATUS;
 			}
 

@@ -16,6 +16,7 @@ import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.osgi.util.NLS;
@@ -40,7 +41,8 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 	}
 
 	@Override
-	protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor) throws Exception {
+	protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
+			throws Exception, OperationCanceledException {
 
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
@@ -76,7 +78,7 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 			subMonitor.setTaskName("Application created: " + appName);
 
 		} else if (!ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, appName))) {
-			return app;
+			throw new OperationCanceledException();
 		}
 
 		// get the created app to verify it exists as well as fetch
@@ -90,7 +92,7 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 
 			if (deploymentProperties.getProject() != null) {
 
-				ManifestParser parser = new ManifestParser(deploymentProperties.getProject());
+				ManifestParser parser = new ManifestParser(deploymentProperties.getProject(), client.getDomains());
 
 				CloudApplicationArchiver archiver = new CloudApplicationArchiver(
 						JavaCore.create(deploymentProperties.getProject()), app.getName(), parser);
