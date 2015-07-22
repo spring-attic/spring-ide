@@ -181,7 +181,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public int getActualInstances() {
-		return 1;
+		return app != null ? app.getInstances() : 1;
 	}
 
 	@Override
