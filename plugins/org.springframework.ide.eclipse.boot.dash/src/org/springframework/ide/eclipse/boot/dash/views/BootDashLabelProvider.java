@@ -47,7 +47,11 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 				cell.setText(javaLabels.getText(jp));
 				cell.setImage(javaLabels.getImage(jp));
 			} else {
-				cell.setText(""+e);
+				// Project and app (element) name are shown in separate columns now. If
+				// there is no project mapping
+				// do not show the element name anymore. That way the user knows that there is
+				// no mapping for that element.
+				cell.setText("???");
 			}
 			break;
 		case HOST:
