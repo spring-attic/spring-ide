@@ -89,13 +89,14 @@ public class ManifestParser {
 		this.domains = domains;
 	}
 
-	protected InputStream getInputStream() throws FileNotFoundException {
+	protected InputStream getInputStream() throws Exception {
 
 		File file = getManifestFile();
 		if (file != null && file.exists()) {
 			return new FileInputStream(file);
+		} else {
+			throw BootDashActivator.asCoreException("No manifest.yml file found in project: " + project.getName());
 		}
-		return null;
 	}
 
 	protected OutputStream getOutStream() throws IOException, FileNotFoundException {
@@ -273,7 +274,8 @@ public class ManifestParser {
 			if (appName != null) {
 				properties.setAppName(appName);
 			} else {
-				throw BootDashActivator.asCoreException("No application name found in manifest.yml. An application name is required.");
+				throw BootDashActivator
+						.asCoreException("No application name found in manifest.yml. An application name is required.");
 
 			}
 
@@ -397,15 +399,15 @@ public class ManifestParser {
 				if (gIndex > 0) {
 					memoryStringVal = memoryStringVal.substring(0, gIndex);
 				} else if (gIndex == 0) {
-					throw BootDashActivator.asCoreException("Failed to read memory value in manifest file: " + manifestPath
-							+ ". Invalid memory: " + memoryStringVal);
+					throw BootDashActivator.asCoreException("Failed to read memory value in manifest file: "
+							+ manifestPath + ". Invalid memory: " + memoryStringVal);
 				}
 
 				try {
 					memoryVal = Integer.valueOf(memoryStringVal);
 				} catch (NumberFormatException e) {
-					throw BootDashActivator.asCoreException("Failed to parse memory from manifest file: " + manifestPath + " due to: "
-							+ e.getMessage());
+					throw BootDashActivator.asCoreException("Failed to parse memory from manifest file: " + manifestPath
+							+ " due to: " + e.getMessage());
 				}
 			}
 		}
@@ -451,8 +453,8 @@ public class ManifestParser {
 				if (results instanceof Map<?, ?>) {
 					return (Map<Object, Object>) results;
 				} else {
-					throw BootDashActivator.asCoreException("Expected a map of values for manifest file: " + manifestPath
-							+ ". Unable to load manifest content.  Actual results: " + results);
+					throw BootDashActivator.asCoreException("Expected a map of values for manifest file: "
+							+ manifestPath + ". Unable to load manifest content.  Actual results: " + results);
 				}
 
 			} finally {

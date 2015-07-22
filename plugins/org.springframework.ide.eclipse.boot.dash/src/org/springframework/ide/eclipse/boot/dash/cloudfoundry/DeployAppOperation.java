@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -26,6 +27,10 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 	private final CloudFoundryBootDashModel model;
 
 	private final CloudDeploymentProperties deploymentProperties;
+
+	private final static String APP_FOUND_TITLE = "Existing Application Found";
+
+	private final static String APP_FOUND_MESSAGE = "An application with the name - {0} - already exists. Continuing with the deployment will replace all of the existing application's resources with those in the selected project. Are you sure that you want to continue?";
 
 	public DeployAppOperation(CloudFoundryOperations client, CloudDeploymentProperties deploymentProperties,
 			CloudFoundryBootDashModel model, UserInteractions ui) {
@@ -70,6 +75,8 @@ public class DeployAppOperation extends CloudOperation<CloudApplication> {
 
 			subMonitor.setTaskName("Application created: " + appName);
 
+		} else if (!ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, appName))) {
+			return app;
 		}
 
 		// get the created app to verify it exists as well as fetch

@@ -83,7 +83,9 @@ public class ApplicationDeployer {
 				errorMessage.append("Failed to deploy project: ");
 				errorMessage.append(javaProject.getProject().getName());
 				errorMessage.append(" - ");
-				errorMessage.append("Do you wish to continue deploying the remaining projects?");
+				if (projectsToDeploy.size() > 1) {
+					errorMessage.append("Do you wish to continue deploying the other projects?");
+				}
 				errorMessage.append(" Error: ");
 				errorMessage.append(status.getMessage());
 
