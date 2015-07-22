@@ -137,7 +137,7 @@ public class BootDashActions {
 			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
 				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();
 				if (runTargetWP.requiresCredentials()) {
-					updatePasswordAction = new UpdatePasswordAction(runTargetWP, model, selection, ui);
+					updatePasswordAction = new UpdatePasswordAction(runTargetWP, model, sectionModel, selection, ui);
 				}
 			}
 		}

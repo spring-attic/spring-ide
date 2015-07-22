@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
@@ -26,13 +27,15 @@ public class UpdatePasswordAction extends AbstractBootDashAction {
 
 	private BootDashViewModel model;
 	private RunTargetWithProperties runTarget;
+	private BootDashModel targetModel;
 
-	public UpdatePasswordAction(RunTargetWithProperties runTarget, BootDashViewModel model,
+	public UpdatePasswordAction(RunTargetWithProperties runTarget, BootDashViewModel model, BootDashModel targetModel,
 			MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
 		this.runTarget = runTarget;
 
 		this.model = model;
+		this.targetModel = targetModel;
 		this.setText("Update Password");
 		this.setToolTipText("Update password locally for the selected target.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.gif"));
@@ -54,6 +57,10 @@ public class UpdatePasswordAction extends AbstractBootDashAction {
 
 						// Only store if it validates
 						model.updatePropertiesInStore(runTarget);
+
+						// launch refresh if it validates
+						targetModel.refresh();
+
 					} catch (Exception e) {
 						ui.errorPopup("Update Password Failure", "Credentials for " + targetId
 								+ " are not valid. Please ensure that you entered the right credentials.");
