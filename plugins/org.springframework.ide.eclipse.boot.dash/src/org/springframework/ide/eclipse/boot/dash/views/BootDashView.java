@@ -239,7 +239,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 
 		DynamicRunTargetSection runTargetSections = new DynamicRunTargetSection(this,
 				model.getSectionModels(),
-				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter(), ui)
+				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter(), ui, viewStyler)
 		);
 
 //		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
@@ -247,7 +247,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 //		);
 
 		sections.add(/*new SashSection(this,*/
-				new ScrollerSection(this, runTargetSections)/*,
+				new ScrollerSection(this, runTargetSections, viewStyler)/*,
 				detailsSection)*/
 		);
 		return sections;

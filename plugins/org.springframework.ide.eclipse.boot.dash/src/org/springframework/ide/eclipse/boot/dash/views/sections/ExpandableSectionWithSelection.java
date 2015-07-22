@@ -18,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -25,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
+import org.springframework.ide.eclipse.boot.dash.views.ViewStyler;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -58,12 +60,14 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 	private String title;
 	private LiveVariable<Boolean> expansionState = new LiveVariable<Boolean>(true);
 	private MultiSelection<?> selection;
+	private ViewStyler viewStyler;
 
-	public ExpandableSectionWithSelection(IPageWithSections owner, String title, MultiSelectionSource expandableContent) {
+	public ExpandableSectionWithSelection(IPageWithSections owner, String title, MultiSelectionSource expandableContent, ViewStyler viewStyler) {
 		super(owner);
 		this.title = title;
 		this.child = expandableContent;
 		this.selection = null;
+		this.viewStyler = viewStyler;
 	}
 
 	protected <T> MultiSelection<?> createSelection() {
@@ -130,6 +134,9 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 
 		Composite client = new Composite(comp, SWT.NONE);
 		client.setLayout(new GridLayout());
+
+		viewStyler.applyBackground(new Control[]{comp, client});
+
 		child.createContents(client);
 		comp.setClient(client);
 	}
