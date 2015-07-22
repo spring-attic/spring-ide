@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
@@ -48,6 +49,7 @@ public class BootDashActions {
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
 	private DeleteApplicationsAction deleteApplicationsAction;
+	private UpdatePasswordAction updatePasswordAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -131,6 +133,13 @@ public class BootDashActions {
 				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
 			}
 			deleteApplicationsAction = new DeleteApplicationsAction( sectionModel, selection, ui);
+
+			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
+				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();
+				if (runTargetWP.requiresCredentials()) {
+					updatePasswordAction = new UpdatePasswordAction(runTargetWP, model, selection, ui);
+				}
+			}
 		}
 	}
 
@@ -221,6 +230,14 @@ public class BootDashActions {
 	 */
 	public IAction getDeleteApplicationsAction() {
 		return deleteApplicationsAction;
+	}
+
+	/**
+	 *
+	 * @return May be null as it may not be supported on all models.
+	 */
+	public IAction getUpdatePasswordAction() {
+		return updatePasswordAction;
 	}
 
 	public void dispose() {

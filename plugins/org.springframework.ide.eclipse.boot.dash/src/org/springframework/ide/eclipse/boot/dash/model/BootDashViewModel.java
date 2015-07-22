@@ -29,6 +29,7 @@ public class BootDashViewModel implements Disposable {
 	private LiveSet<RunTarget> runTargets;
 	private BootDashModelManager models;
 	private Set<RunTargetType> runTargetTypes;
+	private RunTargetPropertiesManager manager;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -40,7 +41,7 @@ public class BootDashViewModel implements Disposable {
 		models = new BootDashModelManager(context, runTargets);
 
 		// Load additional targets AFTER the manager loads the local target
-		RunTargetPropertiesManager manager = new RunTargetPropertiesManager(context, runTargetTypes);
+		manager = new RunTargetPropertiesManager(context, runTargetTypes);
 		List<RunTarget> existingtargets = manager.getStoredTargets();
 		runTargets.addAll(existingtargets);
 		runTargets.addListener(manager);
@@ -91,4 +92,8 @@ public class BootDashViewModel implements Disposable {
 		}
 	}
 
+	public void updatePropertiesInStore(RunTargetWithProperties target) {
+		// For now, only properties for secure storage can be updated (e.g. credentials for the run target)
+		manager.secureStorage(target.getTargetProperties());
+	}
 }

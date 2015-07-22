@@ -117,4 +117,14 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 	public boolean canDeployAppsFrom() {
 		return true;
 	}
+
+	@Override
+	public void validate() throws Exception {
+		// validate properties. Ignore for lattice for now.
+	}
+
+	@Override
+	public boolean requiresCredentials() {
+		return false;
+	}
 }

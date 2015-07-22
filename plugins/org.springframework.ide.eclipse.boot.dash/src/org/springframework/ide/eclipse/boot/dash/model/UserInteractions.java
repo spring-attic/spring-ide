@@ -29,4 +29,5 @@ public interface UserInteractions {
 	void openLaunchConfigurationDialogOnGroup(ILaunchConfiguration selection, String launchGroup);
 	void openUrl(String url);
 	boolean confirmOperation(String title, String message);
+	String updatePassword(String userName, String targetId);
 }

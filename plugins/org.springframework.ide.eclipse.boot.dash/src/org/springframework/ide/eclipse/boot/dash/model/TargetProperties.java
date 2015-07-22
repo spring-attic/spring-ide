@@ -35,6 +35,7 @@ public class TargetProperties {
 	private RunTargetType type;
 
 	public static final String RUN_TARGET_ID = "runTargetID";
+	public static final String USERNAME_PROP = "username";
 	public static final String PASSWORD_PROP = "password";
 
 	public TargetProperties(Map<String, String> map, RunTargetType type) {
@@ -89,10 +90,6 @@ public class TargetProperties {
 
 	public String getRunTargetId() {
 		return map.get(RUN_TARGET_ID);
-	}
-
-	public boolean hasPassword() {
-		return getPassword() != null;
 	}
 
 	public String getPassword() {

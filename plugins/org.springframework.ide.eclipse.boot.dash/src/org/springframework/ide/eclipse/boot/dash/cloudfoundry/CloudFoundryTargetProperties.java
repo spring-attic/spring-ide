@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public final static String URL_PROP = "url";
-	public final static String USERNAME_PROP = "username";
 	public final static String ORG_PROP = "organization";
 	public final static String SPACE_PROP = "space";
 	public final static String SELF_SIGNED_PROP = "selfsigned";

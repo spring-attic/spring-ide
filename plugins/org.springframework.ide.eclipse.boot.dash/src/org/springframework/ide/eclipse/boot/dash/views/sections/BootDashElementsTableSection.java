@@ -458,6 +458,11 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			manager.add(deleteAppsAction);
 		}
 
+		IAction updatePasswordAction = actions.getUpdatePasswordAction();
+		if (updatePasswordAction != null) {
+			manager.add(updatePasswordAction);
+		}
+
 		addPreferedConfigSelectionMenu(manager);
 
 		if (tv.getTable().getColumnCount() > 0) {

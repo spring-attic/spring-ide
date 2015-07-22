@@ -48,7 +48,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
 	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, APP };
-	private static final BootDashColumn[] ALL_COLUMNS = {RUN_STATE_ICN, APP, INSTANCES, DEFAULT_PATH, TAGS};
+	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, APP, INSTANCES, DEFAULT_PATH, TAGS };
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -101,6 +101,17 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	@Override
 	public boolean canDeployAppsFrom() {
+		return true;
+	}
+
+	@Override
+	public void validate() throws Exception {
+		// Fetching a client always validates the CF credentials
+		getClient();
+	}
+
+	@Override
+	public boolean requiresCredentials() {
 		return true;
 	}
 }

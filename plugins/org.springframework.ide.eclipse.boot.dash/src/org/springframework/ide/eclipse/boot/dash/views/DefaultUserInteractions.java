@@ -147,4 +147,17 @@ public class DefaultUserInteractions implements UserInteractions {
 		return confirm[0];
 	}
 
+	@Override
+	public String updatePassword(final String userName, final String targetId) {
+		final String[] password = new String[1];
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				UpdatePasswordDialog dialog = new UpdatePasswordDialog(getShell(), userName, targetId);
+				if (dialog.open() == Window.OK) {
+					password[0] = dialog.getPassword();
+				}
+			}
+		});
+		return password[0];
+	}
 }

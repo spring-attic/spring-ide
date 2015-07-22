@@ -70,7 +70,7 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 	}
 
 	@Override
-	public void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+	public synchronized void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
 		Map<RunTargetType, List<RunTargetWithProperties>> propertiesToPersist = new HashMap<RunTargetType, List<RunTargetWithProperties>>();
 
 		// Only persist run target properties that can be instantiated
@@ -106,10 +106,7 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 			for (RunTargetWithProperties storedProp : entry.getValue()) {
 				TargetProperties targProps = storedProp.getTargetProperties();
 				asStringMap.add(targProps.getPropertiesToPersist());
-
-				if (targProps.hasPassword() && targProps.getRunTargetId() != null) {
-					credentialsStore.setPassword(targProps.getPassword(), targProps.getRunTargetId());
-				}
+				secureStorage(targProps);
 			}
 			try {
 				String serialisedVal = mapper.convertToString(asStringMap);
@@ -119,6 +116,14 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 			} catch (Exception e) {
 				BootDashActivator.log(e);
 			}
+		}
+	}
+
+	public synchronized void secureStorage(TargetProperties targProps) {
+		// Only support changing passwords for now as its the only thing that
+		// requires secure storage. Other target properties should be immutable
+		if (targProps.getPassword() != null && targProps.getRunTargetId() != null) {
+			credentialsStore.setPassword(targProps.getPassword(), targProps.getRunTargetId());
 		}
 	}
 

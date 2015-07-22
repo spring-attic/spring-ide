@@ -19,4 +19,18 @@ public interface RunTargetWithProperties {
 
 	public TargetProperties getTargetProperties();
 
+	/**
+	 * Validate the properties against the run target.
+	 *
+	 * @throws Exception
+	 *             if validation failed
+	 */
+	public void validate() throws Exception;
+
+	/**
+	 *
+	 * @return true if the target requires credentials. False otherwise
+	 */
+	public abstract boolean requiresCredentials();
+
 }
