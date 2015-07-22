@@ -258,11 +258,12 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 		return "org.springframework.ide.eclipse.boot.dash.propertyContributor";
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public <T> T getAdapter(Class<T> adapter) {
-		if (adapter == IPropertySheetPage.class)
-			return (T) new TabbedPropertySheetPage(this);
+	public Object getAdapter(Class adapter) {
+		if (adapter == IPropertySheetPage.class) {
+			return new TabbedPropertySheetPage(this);
+		}
 		return super.getAdapter(adapter);
 	}
 
