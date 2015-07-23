@@ -711,7 +711,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 			int ops = DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
 			Transfer[] transfers = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 
-			DropTarget dropTarget = new DropTarget(viewer.getTable().getParent(), ops);
+			DropTarget dropTarget = new DropTarget(viewer.getTable(), ops);
 			dropTarget.setTransfer(transfers);
 			dropTarget.addDropListener(new ModelDropListener(viewer));
 		}
