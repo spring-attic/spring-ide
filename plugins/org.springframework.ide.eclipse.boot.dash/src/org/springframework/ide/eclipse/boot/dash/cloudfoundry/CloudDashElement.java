@@ -139,12 +139,11 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public String getLiveHost() {
-		//TODO: needed to make double-click for opening url in browser work
 		if (app!=null) {
 			List<String> uris = app.getUris();
 			if (uris!=null) {
 				for (String uri : uris) {
-					System.out.println(uri);
+					return uri;
 				}
 			}
 		}
