@@ -28,10 +28,6 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 	private Stylers stylers;
 	private RequestMappingsColumn column;
 
-	public RequestMappingLabelProvider(Stylers stylers, BootDashElement bde, RequestMappingsColumn column) {
-		this(stylers, LiveExpression.constant(bde), column);
-	}
-
 	public RequestMappingLabelProvider(Stylers stylers, LiveExpression<BootDashElement> bde, RequestMappingsColumn column) {
 		this.bde = bde;
 		this.column = column;

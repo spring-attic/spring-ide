@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsColumn;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
  * Tabbed properties view section for live request mappings
@@ -53,7 +54,7 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 
 	private Label labelText;
 
-	private BootDashElement input;
+	private LiveVariable<BootDashElement> input = new LiveVariable<BootDashElement>();
 
 	private static final Object[] NO_ELEMENTS = new Object[0];
 	private TabbedPropertySheetPage page;
@@ -114,7 +115,7 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 		tv.setContentProvider(new ContentProvider());
 		tv.setSorter(sorter);
 //		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
-		tv.setInput(input);
+		tv.setInput(input.getValue());
 		tv.getTable().setHeaderVisible(true);
 		stylers = new Stylers(tv.getTable().getFont());
 
@@ -132,7 +133,7 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 				Object clicked = sel.getFirstElement();
 				if(clicked instanceof RequestMapping){
 					RequestMapping rm = (RequestMapping) clicked;
-					String url = getUrl(input, rm);
+					String url = getUrl(input.getValue(), rm);
 					if (url!=null) {
 						openUrl(url);
 					}
@@ -144,7 +145,7 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 		});
 		BootDashActivator.getDefault().getModel().addElementStateListener(modelListener = new ElementStateListener() {
 			public void stateChanged(BootDashElement e) {
-				if (e.equals(input)) {
+				if (e.equals(input.getValue())) {
 					if (!page.getControl().isDisposed()) {
 						page.getControl().getDisplay().asyncExec(new Runnable() {
 							public void run() {
@@ -167,28 +168,33 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 		Assert.isTrue(selection instanceof IStructuredSelection);
 		IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 		if (structuredSelection.size() > 1) {
-			input = null;
+			input.setValue(null);
 		} else {
 			Object inputObj = structuredSelection.getFirstElement();
 			Assert.isTrue(inputObj instanceof BootDashElement);
-			input = (BootDashElement) inputObj;
+			System.out.println("input changed: "+inputObj);
+			input.setValue((BootDashElement) inputObj);
+			System.out.println(" bde name: "+input.getValue().getName());
+			System.out.println(" bde defaultPath: "+input.getValue().getDefaultRequestMappingPath());
 		}
 		refresh();
 	}
 
 	public void refresh() {
 		refreshControlsVisibility();
+		BootDashElement input = this.input.getValue();
 		tv.setInput(input);
 		if (input == null) {
 			labelText.setText("Select single element in Boot Dashboard to see Request Mappings");
 		} else if (input.getLiveRequestMappings() == null) {
-			labelText.setText("'" + this.input.getName() + "' must be running and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
+			labelText.setText("'" + input.getName() + "' must be running and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
 		} else {
 			labelText.setText("");
 		}
 	}
 
 	private void refreshControlsVisibility() {
+		BootDashElement input = this.input.getValue();
 		if (input == null || input.getLiveRequestMappings() == null) {
 			tv.getControl().setVisible(false);
 			labelText.setVisible(true);
