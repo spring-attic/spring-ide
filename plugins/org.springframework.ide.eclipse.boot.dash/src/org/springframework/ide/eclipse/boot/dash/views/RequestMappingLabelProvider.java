@@ -66,21 +66,12 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 		}
 		switch (column) {
 		case PATH:
-			System.out.println(">>> styled path for "+rm);
-			try {
-				String path = rm.getPath();
-				System.out.println("path = "+path);
-				String defaultPath = getDefaultPath(bde.getValue());
-				System.out.println("defaultPath = "+defaultPath);
-				if (defaultPath.equals(path)) {
-					System.out.println("BOLDED!");
-					return new StyledString(path, stylers.bold());
-				} else {
-					System.out.println("styler = "+deemphasize);
-					return new StyledString(path, deemphasize);
-				}
-			} finally {
-				System.out.println("<<< styled path for "+rm);
+			String path = rm.getPath();
+			String defaultPath = getDefaultPath(bde.getValue());
+			if (defaultPath.equals(path)) {
+				return new StyledString(path, stylers.bold());
+			} else {
+				return new StyledString(path, deemphasize);
 			}
 		case SRC:
 			String m = rm.getMethod();

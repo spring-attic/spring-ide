@@ -172,10 +172,7 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 		} else {
 			Object inputObj = structuredSelection.getFirstElement();
 			Assert.isTrue(inputObj instanceof BootDashElement);
-			System.out.println("input changed: "+inputObj);
 			input.setValue((BootDashElement) inputObj);
-			System.out.println(" bde name: "+input.getValue().getName());
-			System.out.println(" bde defaultPath: "+input.getValue().getDefaultRequestMappingPath());
 		}
 		refresh();
 	}
