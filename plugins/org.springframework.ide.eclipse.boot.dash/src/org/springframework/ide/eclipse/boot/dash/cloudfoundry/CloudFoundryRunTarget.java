@@ -17,6 +17,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 
 import java.util.Collections;
@@ -48,8 +49,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
-	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, APP, PROJECT, INSTANCES };
-	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
+	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
+	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, HOST, DEFAULT_PATH, TAGS };
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {

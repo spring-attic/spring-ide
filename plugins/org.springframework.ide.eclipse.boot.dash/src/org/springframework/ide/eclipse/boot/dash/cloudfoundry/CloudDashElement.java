@@ -19,8 +19,6 @@ import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -109,11 +107,6 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	}
 
 	@Override
-	public IJavaProject getJavaProject() {
-		return getProject() != null ? JavaCore.create(getProject()) : null;
-	}
-
-	@Override
 	public IProject getProject() {
 		return project;
 	}
@@ -141,11 +134,20 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public int getLivePort() {
-		return 0;
+		return 80;
 	}
 
 	@Override
 	public String getLiveHost() {
+		//TODO: needed to make double-click for opening url in browser work
+		if (app!=null) {
+			List<String> uris = app.getUris();
+			if (uris!=null) {
+				for (String uri : uris) {
+					System.out.println(uri);
+				}
+			}
+		}
 		return null;
 	}
 
@@ -166,16 +168,6 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public void setPreferredConfig(ILaunchConfiguration config) {
-
-	}
-
-	@Override
-	public String getDefaultRequestMappingPath() {
-		return null;
-	}
-
-	@Override
-	public void setDefaultRequestMapingPath(String defaultPath) {
 
 	}
 

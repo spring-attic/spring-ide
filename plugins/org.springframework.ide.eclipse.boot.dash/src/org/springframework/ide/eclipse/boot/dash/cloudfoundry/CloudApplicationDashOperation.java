@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 
 /**
  * Operations that are performed on a Cloud Foundry application (e.g. start,
@@ -22,15 +23,15 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  */
 public abstract class CloudApplicationDashOperation extends CloudOperation<CloudApplication> {
 
-	protected final CloudDashElement element;
+	protected final WrappingBootDashElement<String> element;
 
-	public CloudApplicationDashOperation(String op, CloudDashElement element, CloudFoundryOperations client,
+	public CloudApplicationDashOperation(String op, WrappingBootDashElement<String> element, CloudFoundryOperations client,
 			UserInteractions ui) {
 		super(op + ": " + element.getName(), client, ui);
 		this.element = element;
 	}
 
-	public CloudDashElement getElement() {
+	public WrappingBootDashElement<String> getElement() {
 		return element;
 	}
 

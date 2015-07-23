@@ -82,7 +82,7 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 
 	@Override
 	public BootDashColumn[] getAllColumns() {
-		return DEFAULT_COLUMNS;
+		return BootDashColumn.values();
 	}
 
 	@Override

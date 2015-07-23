@@ -16,13 +16,18 @@ import java.util.LinkedHashSet;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 
 public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
+
 	public static final String TAGS_KEY = "tags";
+
+	private static final String DEFAULT_RM_PATH_KEY = "default.request-mapping.path";
+	public static final String DEFAULT_RM_PATH_DEFAULT = "/";
 
 	protected final T delegate;
 
@@ -115,8 +120,29 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 		}
 	}
 
+	@Override
+	public final String getDefaultRequestMappingPath() {
+		return getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
+	}
+
+	@Override
+	public final void setDefaultRequestMapingPath(String defaultPath) {
+		try {
+			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
+			parent.notifyElementChanged(this);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 	public BootDashModel getParent() {
 		return parent;
 	}
+
+	@Override
+	public final IJavaProject getJavaProject() {
+		return getProject() != null ? JavaCore.create(getProject()) : null;
+	}
+
 
 }

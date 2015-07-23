@@ -62,13 +62,6 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	private static final String DEFAULT_URL_PATH_PROP = "default.request-mapping.path";
-
-	/**
-	 * Preference key for tags string
-	 */
-	private static final String TAGS_PROPERTY_KEY = "tags";
-
 	private LocalBootDashModel context;
 
 	private PropertyStoreApi persistentProperties;
@@ -82,11 +75,6 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	public IProject getProject() {
 		return delegate;
-	}
-
-	@Override
-	public IJavaProject getJavaProject() {
-		return JavaCore.create(getProject());
 	}
 
 	@Override
@@ -387,50 +375,6 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			}
 		}
 		return null;
-	}
-
-	public void setTags(final LinkedHashSet<String> tags) {
-		//TODO: move job to implementation of ProjectProperties
-		Job job = new Job("Saving Tags for project " + delegate.getName()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					getPersistentProperties().put(TAGS_PROPERTY_KEY, tags == null || tags.size() == 0 ? null : ArrayEncoder.encode(tags.toArray(new String[tags.size()])));
-					return Status.OK_STATUS;
-				} catch (Exception e) {
-					return new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Failed to persist tags", e);
-				} finally {
-					context.notifyElementChanged(BootProjectDashElement.this);
-				}
-			}
-		};
-		job.setRule(delegate);
-		job.schedule();
-	}
-
-	@Override
-	public LinkedHashSet<String> getTags() {
-		String str = getPersistentProperties().get(TAGS_PROPERTY_KEY);
-		if (str == null || str.isEmpty()) {
-			return new LinkedHashSet<String>();
-		} else {
-			return new LinkedHashSet<String>(Arrays.asList(ArrayEncoder.decode(str)));
-		}
-	}
-
-	@Override
-	public String getDefaultRequestMappingPath() {
-		return getPersistentProperties().get(DEFAULT_URL_PATH_PROP);
-	}
-
-	@Override
-	public void setDefaultRequestMapingPath(String defaultPath) {
-		try {
-			getPersistentProperties().put(DEFAULT_URL_PATH_PROP, defaultPath);
-			context.notifyElementChanged(this);
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
 	}
 
 	@Override

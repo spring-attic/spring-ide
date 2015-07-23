@@ -21,11 +21,9 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -130,11 +128,6 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 	}
 
 	@Override
-	public IJavaProject getJavaProject() {
-		return null;
-	}
-
-	@Override
 	public IProject getProject() {
 		return null;
 	}
@@ -226,18 +219,6 @@ public class LatticeBootDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public void setPreferredConfig(ILaunchConfiguration config) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public String getDefaultRequestMappingPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setDefaultRequestMapingPath(String defaultPath) {
 		// TODO Auto-generated method stub
 
 	}
