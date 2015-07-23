@@ -28,6 +28,10 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 	private Stylers stylers;
 	private RequestMappingsColumn column;
 
+	public RequestMappingLabelProvider(Stylers stylers, BootDashElement bde, RequestMappingsColumn column) {
+		this(stylers, LiveExpression.constant(bde), column);
+	}
+
 	public RequestMappingLabelProvider(Stylers stylers, LiveExpression<BootDashElement> bde, RequestMappingsColumn column) {
 		this.bde = bde;
 		this.column = column;
@@ -66,12 +70,21 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 		}
 		switch (column) {
 		case PATH:
-			String path = rm.getPath();
-			String defaultPath = getDefaultPath(bde.getValue());
-			if (defaultPath.equals(path)) {
-				return new StyledString(path, stylers.bold());
-			} else {
-				return new StyledString(path, deemphasize);
+			System.out.println(">>> styled path for "+rm);
+			try {
+				String path = rm.getPath();
+				System.out.println("path = "+path);
+				String defaultPath = getDefaultPath(bde.getValue());
+				System.out.println("defaultPath = "+defaultPath);
+				if (defaultPath.equals(path)) {
+					System.out.println("BOLDED!");
+					return new StyledString(path, stylers.bold());
+				} else {
+					System.out.println("styler = "+deemphasize);
+					return new StyledString(path, deemphasize);
+				}
+			} finally {
+				System.out.println("<<< styled path for "+rm);
 			}
 		case SRC:
 			String m = rm.getMethod();

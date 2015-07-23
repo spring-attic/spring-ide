@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
+import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsColumn;
 
 /**
