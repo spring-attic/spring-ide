@@ -140,7 +140,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 	}
 
 	@Override
-	public final IJavaProject getJavaProject() {
+	public IJavaProject getJavaProject() {
 		return getProject() != null ? JavaCore.create(getProject()) : null;
 	}
 
