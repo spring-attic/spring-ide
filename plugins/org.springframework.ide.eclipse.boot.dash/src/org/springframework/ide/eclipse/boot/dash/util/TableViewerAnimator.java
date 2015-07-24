@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,20 +20,31 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.viewers.ViewerRow;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.progress.UIJob;
 
 /**
  * A TableViewerAnimator manages a Job that periodically updates labels for
  * 'animated' label icons in a TableViewwer.
  *
- * TODO: This implementation calls refresh for animated table elements which
- * will cause the whole table row to refresh. This is overkill just to
- * replace one image on a single cell in the row. Can we do better?
- *
  * @author Kris De Volder
  */
 public class TableViewerAnimator {
+
+	public class CellAnimation {
+		public final int col;
+		public final Image[] imgs;
+		public final TableItem item;
+
+		public CellAnimation(ViewerCell cell, Image[] imgs) {
+			this.item = (TableItem)cell.getViewerRow().getItem();
+			this.col = cell.getColumnIndex();
+			this.imgs = imgs;
+		}
+
+	}
 
 	protected static final long INTERVAL = 300;
 
@@ -44,42 +56,43 @@ public class TableViewerAnimator {
 		this.tv = tv;
 	}
 
-	private Map<Object, Image[]> animatedElements = new HashMap<Object, Image[]>();
+	private Map<ViewerCell, CellAnimation> animatedElements = new HashMap<ViewerCell, CellAnimation>();
 
 	private Job job;
 
 	public void setAnimation(ViewerCell cell, Image[] images) {
-		Object e = cell.getElement();
-		if (e!=null) {
-			if (images==null) {
-				cell.setImage(null);
-				stopAnimation(e);
-			} else if (images.length==1) {
-				stopAnimation(e);
-				cell.setImage(images[0]);
-			} else {
-				cell.setImage(currentImage(images));
-				startAnimation(e, images);
-			}
+		if (images==null) {
+			cell.setImage(null);
+			stopAnimation(cell);
+		} else if (images.length==1) {
+			stopAnimation(cell);
+			cell.setImage(images[0]);
+		} else {
+			cell.setImage(currentImage(images));
+			startAnimation(cell, images);
 		}
 	}
-
-
 
 	private void stopAnimation(Object e) {
 		animatedElements.remove(e);
 	}
 
-	private synchronized void startAnimation(Object e, Image[] imgs) {
-		animatedElements.put(e, imgs);
+	private synchronized void startAnimation(ViewerCell cell, Image[] imgs) {
+		animatedElements.put(cell, new CellAnimation(cell, imgs));
+		ensureJob();
+		job.schedule();
+	}
+
+	private void ensureJob() {
 		if (job==null) {
 			job = new UIJob("Animate table icons") {
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					if (!tv.getTable().isDisposed()) {
 						animationCounter++;
-						for (Object e : animatedElements.keySet()) {
-							tv.refresh(e);
+						for (CellAnimation a : animatedElements.values()) {
+							Image[] imgs = a.imgs;
+							a.item.setImage(a.col, imgs[animationCounter%imgs.length]);
 						}
 						if (job!=null && animatedElements.size()>0) {
 							job.schedule(INTERVAL);
@@ -90,7 +103,6 @@ public class TableViewerAnimator {
 			};
 			job.setSystem(true);
 		}
-		job.schedule();
 	}
 
 	private Image currentImage(Image[] images) {
