@@ -119,7 +119,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				} else if (obj instanceof IJavaProject) {
 					project = ((IJavaProject) obj).getProject();
 				} else if (obj instanceof IAdaptable) {
-					project = ((IAdaptable) obj).getAdapter(IProject.class);
+					project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
 				} else if (obj instanceof BootDashElement) {
 					project = ((BootDashElement) obj).getProject();
 				}
