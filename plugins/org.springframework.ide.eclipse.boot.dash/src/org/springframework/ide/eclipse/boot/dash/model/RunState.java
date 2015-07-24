@@ -33,6 +33,6 @@ public enum RunState {
 	}
 
 	public String getImageUrl() {
-		return "icons/rs_"+toString().toLowerCase()+".png";
+		return "icons/rs_"+toString().toLowerCase()+".gif";
 	}
 }

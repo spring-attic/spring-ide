@@ -14,12 +14,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.util.TableViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
@@ -27,12 +30,18 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends StyledCellLabelProvider {
 
+	private static final long ANIMATION_INTERVAL = 300; //millis
+
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
 	private Stylers stylers;
+	private TableViewerAnimator animator;
 
-	public BootDashLabelProvider(BootDashColumn target, Stylers stylers) {
+	private TableViewer tv;
+
+	public BootDashLabelProvider(TableViewer tv, BootDashColumn target, Stylers stylers) {
+		this.tv = tv;
 		this.stylers = stylers;
 		this.forColum = target;
 	}
@@ -79,7 +88,7 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 //			break;
 		case RUN_STATE_ICN:
 			cell.setText("");
-			cell.setImage(getRunStateImage(e.getRunState()));
+			animate(cell, getRunStateAnimation(e.getRunState()));
 			break;
 		case TAGS:
 			String txt = null;
@@ -111,11 +120,23 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 		}
 	}
 
-	private Image getRunStateImage(RunState runState) {
-		if (runStateImages==null) {
-			runStateImages = new RunStateImages();
+	private void animate(ViewerCell cell, Image[] images) {
+		if (animator==null) {
+			animator = new TableViewerAnimator(tv);
 		}
-		return runStateImages.getImg(runState);
+		animator.setAnimation(cell, images);
+	}
+
+	private Image[] getRunStateAnimation(RunState runState) {
+		try {
+			if (runStateImages==null) {
+				runStateImages = new RunStateImages();
+			}
+			return runStateImages.getAnimation(runState);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
 	}
 
 	@Override
@@ -125,6 +146,10 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 		if (runStateImages!=null) {
 			runStateImages.dispose();
 			runStateImages = null;
+		}
+		if (animator!=null) {
+			animator.dispose();
+			animator = null;
 		}
 	}
 }

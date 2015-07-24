@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
@@ -23,31 +26,43 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
  */
 public class RunStateImages {
 
-	private Map<RunState, Image> images = new HashMap<RunState, Image>();
+	private Map<RunState, Image[]> animations = new HashMap<RunState, Image[]>();
 
-	public synchronized Image getImg(RunState state) {
-		Image img = images.get(state);
-		if (img==null) {
+	public synchronized Image[] getAnimation(RunState state) throws Exception {
+		Image[] anim = animations.get(state);
+		if (anim==null) {
 			String url = state.getImageUrl();
-			images.put(state, img = createImage(url));
+			animations.put(state, anim = createAnimation(url));
 		}
-		return img;
+		return anim;
 	}
 
-	private Image createImage(String url) {
-		ImageDescriptor dsc = BootDashActivator.getImageDescriptor(url);
-		if (dsc!=null) {
-			return dsc.createImage(true);
+	private Image[] createAnimation(String urlString) throws Exception {
+		ImageLoader loader = new ImageLoader();
+		InputStream input = this.getClass().getClassLoader().getResourceAsStream(urlString);
+		try {
+			ImageData[] data = loader.load(input);
+			Image[] imgs = new Image[data.length];
+			for (int i = 0; i < imgs.length; i++) {
+				imgs[i] = new Image(Display.getDefault(), data[i]);
+			}
+			return imgs;
+		} finally {
+			input.close();
 		}
-		return null;
 	}
 
 	void dispose() {
-		if (images!=null) {
-			for (Image im : images.values()) {
-				im.dispose();
+		if (animations!=null) {
+			for (RunState s : animations.keySet()) {
+				Image[] anim = animations.get(s);
+				if (anim!=null) {
+					for (Image image : anim) {
+						image.dispose();
+					}
+				}
 			}
-			images = null;
+			animations = null;
 		}
 	}
 

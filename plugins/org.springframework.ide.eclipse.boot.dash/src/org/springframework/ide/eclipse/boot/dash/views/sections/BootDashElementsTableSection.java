@@ -188,7 +188,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
-		return new BootDashLabelProvider(columnType, stylers);
+		return new BootDashLabelProvider(tv, columnType, stylers);
 	}
 
 	@Override
