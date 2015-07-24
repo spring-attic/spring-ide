@@ -16,10 +16,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-public abstract class Operation<T> {
+public abstract class Operation<T> implements Nameable {
 
 	private final String opName;
 
@@ -38,6 +39,15 @@ public abstract class Operation<T> {
 	}
 
 	protected abstract T runOp(IProgressMonitor monitor) throws Exception;
+
+	/**
+	 * Optional. Return null if no scheduling rule is needed
+	 *
+	 * @return
+	 */
+	public ISchedulingRule getSchedulingRule() {
+		return null;
+	}
 
 	public T run(IRunnableContext context, boolean fork) throws Exception {
 
@@ -61,5 +71,10 @@ public abstract class Operation<T> {
 			throw ite.getTargetException() instanceof Exception ? (Exception) ite.getTargetException() : ite;
 		}
 		return val.get(0);
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,6 +35,9 @@ public class CloudDeploymentProperties {
 	private int instances = DEFAULT_INSTANCES;
 	private String buildpackUrl;
 	private IProject project;
+
+	private boolean shouldRestart = true;
+	private boolean shouldAutoReplace = false;
 
 	public static final int DEFAULT_MEMORY = 1024;
 	public static final int DEFAULT_INSTANCES = 1;
@@ -77,6 +81,22 @@ public class CloudDeploymentProperties {
 
 	public void setProject(IProject project) {
 		this.project = project;
+	}
+
+	public void setShouldRestart(boolean shouldRestart) {
+		this.shouldRestart = shouldRestart;
+	}
+
+	public boolean shouldRestart() {
+		return this.shouldRestart;
+	}
+
+	public void setShoudAutoReplace(boolean shouldAutoReplace) {
+		this.shouldAutoReplace = shouldAutoReplace;
+	}
+
+	public boolean shouldAutoReplace() {
+		return this.shouldAutoReplace;
 	}
 
 	public IProject getProject() {
@@ -141,6 +161,18 @@ public class CloudDeploymentProperties {
 		} else {
 			return BootDashActivator.createErrorStatus(null, errorMessage);
 		}
+	}
+
+	public static CloudDeploymentProperties getFor(CloudApplication app) {
+		CloudDeploymentProperties properties = new CloudDeploymentProperties();
+		properties.setAppName(app.getName());
+		properties.setBuildpackUrl(app.getStaging() != null ? app.getStaging().getBuildpackUrl() : null);
+		properties.setEnvironmentVariables(app.getEnvAsMap());
+		properties.setInstances(app.getInstances());
+		properties.setMemory(app.getMemory());
+		properties.setServices(app.getServices());
+		properties.setUrls(app.getUris());
+		return properties;
 	}
 
 }

@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,10 +22,7 @@ import java.util.Set;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
@@ -111,16 +110,34 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		// For now, only support new deployments (no mapping to existing apps in
 		// CF)
 		// Therefore ignore the target
-		List<IJavaProject> javaProjects = new ArrayList<IJavaProject>();
+		Map<IProject, BootDashElement> projects = new LinkedHashMap<IProject, BootDashElement>();
 		if (sources != null) {
 			for (Object obj : sources) {
-				IJavaProject javaProject = getJavaProject(obj);
-				if (javaProject != null) {
-					javaProjects.add(javaProject);
+				IProject project = null;
+				if (obj instanceof IProject) {
+					project = (IProject) obj;
+				} else if (obj instanceof IJavaProject) {
+					project = ((IJavaProject) obj).getProject();
+				} else if (obj instanceof IAdaptable) {
+					project = ((IAdaptable) obj).getAdapter(IProject.class);
+				} else if (obj instanceof BootDashElement) {
+					project = ((BootDashElement) obj).getProject();
+				}
+
+				if (project != null) {
+					projects.put(project, null);
 				}
 			}
+			BootDashElement element = target instanceof BootDashElement ? (BootDashElement) target : null;
 
-			performDeployment(javaProjects, ui);
+			// If only one project was drag/dropped to element, map it
+			Iterator<Entry<IProject, BootDashElement>> it = projects.entrySet().iterator();
+			if (projects.size() == 1 && it.hasNext()) {
+				Entry<IProject, BootDashElement> entry = it.next();
+				entry.setValue(element);
+			}
+
+			performDeployment(projects, ui);
 		}
 	}
 
@@ -133,29 +150,21 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		return null;
 	}
 
-	public void performDeployment(final List<IJavaProject> projectsToDeploy, final UserInteractions ui)
+	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
 			throws Exception {
 
 		final CloudFoundryOperations client = CloudFoundryBootDashModel.this.getCloudTarget().getClient();
-		Job job = new Job("Deploying projects to " + getRunTarget().getName()) {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy)
-							.deployAndStart(monitor);
-				} catch (Exception e) {
-					ui.errorPopup("Application Deployment Failure", e.getMessage());
-				}
-				return Status.OK_STATUS;
-			}
+		// When deploying or mapping app to project, always prompt user if they
+		// want to replace the existing app
+		boolean shouldAutoReplaceApp = false;
 
-		};
-		job.schedule();
+		opExecution.runOp(new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
+				shouldAutoReplaceApp, opExecution));
 
 	}
 
-	public synchronized void addElement(CloudApplication app, IProject project) throws Exception {
+	public synchronized BootDashElement addElement(CloudApplication app, IProject project) throws Exception {
 
 		Set<BootDashElement> existing = elements.getValue();
 
@@ -177,6 +186,23 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		elements.replaceAll(updated);
 		projectAppStore.storeProjectToAppMapping(updated);
 		notifyElementChanged(addedElement);
+		return addedElement;
+	}
+
+	public synchronized CloudDashElement getElement(String appName) throws Exception {
+
+		Set<BootDashElement> existing = elements.getValue();
+
+		// Add any existing ones that weren't replaced by the new ones
+		// Replace the existing one with a new one for the given Cloud
+		// Application
+		for (BootDashElement element : existing) {
+			if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
+				return (CloudDashElement) element;
+			}
+		}
+
+		return null;
 	}
 
 	/**

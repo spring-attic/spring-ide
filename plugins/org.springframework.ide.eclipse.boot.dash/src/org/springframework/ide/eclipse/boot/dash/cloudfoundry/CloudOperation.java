@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -39,13 +40,19 @@ public abstract class CloudOperation<T> extends Operation<T> {
 		} catch (OperationCanceledException oe) {
 			return null;
 		} catch (Exception e) {
-			final String message = e.getMessage();
+
+			String message = e.getMessage();
+			if (e instanceof CloudFoundryException) {
+				message = ((CloudFoundryException) e).getDescription();
+			}
+
+			final String[] error = { message };
 			Display.getDefault().asyncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					if (ui != null) {
-						ui.errorPopup("Error performing Cloud operation: ", message);
+						ui.errorPopup("Error performing Cloud operation: ", error[0]);
 					}
 				}
 			});

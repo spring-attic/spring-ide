@@ -18,6 +18,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
@@ -25,24 +26,24 @@ final class CloudApplicationRefreshOperation extends Operation<Void> {
 	/**
 	 *
 	 */
-	private final CloudFoundryBootDashModel cloudFoundryBootDashModel;
+	private final CloudFoundryBootDashModel model;
 
-	CloudApplicationRefreshOperation(CloudFoundryBootDashModel cloudFoundryBootDashModel) {
-		super("Refreshing list of Cloud applications for: " + cloudFoundryBootDashModel.getRunTarget().getName());
-		this.cloudFoundryBootDashModel = cloudFoundryBootDashModel;
+	CloudApplicationRefreshOperation(CloudFoundryBootDashModel model) {
+		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName());
+		this.model = model;
 	}
 
 	@Override
 	protected synchronized Void runOp(IProgressMonitor monitor) throws Exception {
 		try {
 
-			List<CloudApplication> apps = this.cloudFoundryBootDashModel.getCloudTarget().getClient().getApplications();
+			List<CloudApplication> apps = this.model.getCloudTarget().getClient().getApplications();
 			Map<CloudApplication, IProject> updatedApplications = new HashMap<CloudApplication, IProject>();
 
 			if (apps != null) {
 
-				Map<String, String> existingProjectToAppMappings = this.cloudFoundryBootDashModel
-						.getProjectToAppMappingStore().getMapping();
+				Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
+						.getMapping();
 
 				for (CloudApplication app : apps) {
 
@@ -59,11 +60,15 @@ final class CloudApplicationRefreshOperation extends Operation<Void> {
 				}
 			}
 
-			this.cloudFoundryBootDashModel.replaceElements(updatedApplications);
+			this.model.replaceElements(updatedApplications);
 
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
 		return null;
+	}
+
+	public ISchedulingRule getSchedulingRule() {
+		return new RefreshSchedulingRule(model.getRunTarget());
 	}
 }
