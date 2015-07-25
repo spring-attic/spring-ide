@@ -16,8 +16,14 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationDeleteOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationStopOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.StartOnlyUpdateListener;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -28,11 +34,17 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 
+/**
+ * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
+ * application state as it may be discarded and created multiple times for the
+ * same app for any reason.
+ * <p/>
+ * Cloud application state should always be resolved from external sources
+ *
+ */
 public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private final CloudFoundryRunTarget cloudTarget;
-
-	private CloudApplication app;
 
 	private final OperationsExecution opExecution;
 
@@ -40,15 +52,18 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private final IProject project;
 
-	public CloudDashElement(CloudFoundryBootDashModel model, CloudApplication app, IProject project,
+	public CloudDashElement(CloudFoundryBootDashModel model, String appName, IProject project,
 			OperationsExecution operations, IPropertyStore modelStore) {
-		super(model, app.getName());
+		super(model, appName);
 		this.cloudTarget = model.getCloudTarget();
-		this.app = app;
 		this.opExecution = operations;
 		this.project = project;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(delegate, modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
+	}
+
+	protected CloudFoundryBootDashModel getCloudModel() {
+		return (CloudFoundryBootDashModel) getParent();
 	}
 
 	@Override
@@ -56,24 +71,35 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 		CloudApplicationOperation op = new CloudApplicationStopOperation(cloudTarget.getClient(), this,
 				(CloudFoundryBootDashModel) getParent(), ui);
-		opExecution.runOp(op);
+		opExecution.runOpSynch(op);
 	}
 
 	@Override
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		boolean shouldAutoReplaceApp = true;
-		Operation<?> op = getProject() != null
-				? new ApplicationDeployer((CloudFoundryBootDashModel) getParent(), cloudTarget.getClient(), ui,
-						Arrays.asList(getProject()), shouldAutoReplaceApp, opExecution)
-				: new ApplicationStartOperation(getName(), (CloudFoundryBootDashModel) getParent(),
-						cloudTarget.getClient(), ui);
-		opExecution.runOp(op);
+
+		Operation<?> op = null;
+
+		getCloudModel().getAppCache().update(getName(), RunState.STARTING);
+
+		if (getProject() != null) {
+			boolean shouldAutoReplaceApp = true;
+			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), cloudTarget.getClient(), ui,
+					Arrays.asList(getProject()), shouldAutoReplaceApp);
+		} else {
+
+			CloudApplicationOperation cloudOp = new ApplicationStartOperation(getName(),
+					(CloudFoundryBootDashModel) getParent(), cloudTarget.getClient(), ui);
+			cloudOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
+			op = cloudOp;
+		}
+
+		opExecution.runOpSynch(op);
 	}
 
 	public void delete(UserInteractions ui) throws Exception {
 		CloudApplicationOperation op = new CloudApplicationDeleteOperation(cloudTarget.getClient(), getName(),
 				(CloudFoundryBootDashModel) getParent(), ui);
-		opExecution.runOp(op);
+		opExecution.runOpSynch(op);
 	}
 
 	@Override
@@ -83,7 +109,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public String getName() {
-		return app.getName();
+		return delegate;
 	}
 
 	@Override
@@ -93,35 +119,16 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public RunState getRunState() {
-		if (app != null && app.getState() != null) {
-			switch (this.app.getState()) {
-			case STARTED:
-				return RunState.RUNNING;
-			case STOPPED:
-				return RunState.INACTIVE;
-			case UPDATING:
-				return RunState.STARTING;
-			}
-		}
-
-		return RunState.INACTIVE;
+		return getCloudModel().getAppCache().getRunState(getName());
 	}
 
-	public CloudApplication refreshCloudApplication(IProgressMonitor monitor) throws Exception {
-		app = cloudTarget.getClient().getApplication(getName());
-		return app;
-	}
-
-	public CloudDeploymentProperties getCurrentDeploymentProperties() {
+	public CloudDeploymentProperties getDeploymentProperties() {
+		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
 		if (app != null) {
-			CloudDeploymentProperties.getFor(app);
+			return CloudDeploymentProperties.getFor(app);
 		}
-		return null;
-	}
 
-	public CloudDeploymentProperties refreshDeploymentProperties(IProgressMonitor monitor) throws Exception {
-		refreshCloudApplication(monitor);
-		return getCurrentDeploymentProperties();
+		return null;
 	}
 
 	@Override
@@ -136,9 +143,10 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public String getLiveHost() {
-		if (app!=null) {
+		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
+		if (app != null) {
 			List<String> uris = app.getUris();
-			if (uris!=null) {
+			if (uris != null) {
 				for (String uri : uris) {
 					return uri;
 				}
@@ -169,7 +177,8 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public int getActualInstances() {
-		return app != null ? app.getInstances() : 1;
+		return getCloudModel().getAppCache().getApp(getName()) != null
+				? getCloudModel().getAppCache().getApp(getName()).getInstances() : 1;
 	}
 
 	@Override

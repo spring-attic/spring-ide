@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -17,6 +17,12 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class UploadApplicationOperation extends CloudApplicationOperation {
@@ -45,7 +51,8 @@ public class UploadApplicationOperation extends CloudApplicationOperation {
 							+ deploymentProperties.getAppName());
 		}
 
-		CloudApplication app = element.refreshCloudApplication(subMonitor);
+
+		CloudApplication app = getCloudApplication();
 		if (app == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "
@@ -74,6 +81,9 @@ public class UploadApplicationOperation extends CloudApplicationOperation {
 				subMonitor.setTaskName("Uploading archive to Cloud Foundry for application: " + appName);
 
 				client.uploadApplication(appName, archive);
+
+				getAppUpdateListener().applicationUploaded(app);
+
 
 				subMonitor.setTaskName("Archive uploaded to Cloud Foundry for application: " + appName);
 

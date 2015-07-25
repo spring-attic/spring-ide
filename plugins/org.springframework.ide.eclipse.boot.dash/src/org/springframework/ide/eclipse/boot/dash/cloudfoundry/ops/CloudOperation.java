@@ -8,13 +8,14 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -22,11 +23,14 @@ public abstract class CloudOperation<T> extends Operation<T> {
 
 	protected final UserInteractions ui;
 	protected final CloudFoundryOperations client;
+	protected final CloudFoundryBootDashModel model;
 
-	public CloudOperation(String opName, CloudFoundryOperations client, UserInteractions ui) {
+	public CloudOperation(String opName, CloudFoundryOperations client, CloudFoundryBootDashModel model,
+			UserInteractions ui) {
 		super(opName);
 		this.ui = ui;
 		this.client = client;
+		this.model = model;
 	}
 
 	abstract protected T doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
@@ -59,4 +63,5 @@ public abstract class CloudOperation<T> extends Operation<T> {
 		}
 		return null;
 	}
+
 }

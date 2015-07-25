@@ -25,6 +25,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -44,6 +47,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	private ProjectAppStore projectAppStore;
 
+	private CloudAppCache cloudAppCache;
+
 	public static final String PROJECT_TO_APP_MAPPING = "projectToAppMapping";
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
@@ -53,9 +58,14 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
 		this.opExecution = new OperationsExecution();
 		this.projectAppStore = new ProjectAppStore(this.modelStore);
+		this.cloudAppCache = new CloudAppCache(this);
 	}
 
 	LiveSet<BootDashElement> elements;
+
+	public CloudAppCache getAppCache() {
+		return cloudAppCache;
+	}
 
 	@Override
 	public LiveSet<BootDashElement> getElements() {
@@ -74,7 +84,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 
 		Operation<Void> op = new CloudApplicationRefreshOperation(this);
-		opExecution.runOp(op);
+		opExecution.runOpAsynch(op);
 	}
 
 	@Override
@@ -92,10 +102,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public boolean canAccept(List<Object> source, Object target) {
+	public boolean canBeAdded(List<Object> source, Object target) {
 		if (!source.isEmpty()) {
 			for (Object obj : source) {
-				if (getJavaProject(obj) == null) {
+				// IMPORTANT: to avoid drag/drop into the SAME target, be sure
+				// all sources are from a different target
+				if (getProject(obj) == null || !isFromDifferentTarget(obj)) {
 					return false;
 				}
 			}
@@ -141,13 +153,23 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 	}
 
-	protected IJavaProject getJavaProject(Object source) {
-		if (source instanceof IJavaProject) {
-			return (IJavaProject) source;
+	protected IProject getProject(Object source) {
+		if (source instanceof IProject) {
+			return (IProject) source;
+		} else if (source instanceof IJavaProject) {
+			return ((IJavaProject) source).getProject();
 		} else if (source instanceof BootDashElement) {
-			return ((BootDashElement) source).getJavaProject();
+			return ((BootDashElement) source).getProject();
 		}
 		return null;
+	}
+
+	protected boolean isFromDifferentTarget(Object dropSource) {
+		if (dropSource instanceof BootDashElement) {
+			return ((BootDashElement) dropSource).getParent() != this;
+		}
+
+		return false;
 	}
 
 	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
@@ -159,8 +181,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		// want to replace the existing app
 		boolean shouldAutoReplaceApp = false;
 
-		opExecution.runOp(new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
-				shouldAutoReplaceApp, opExecution));
+		opExecution.runOpSynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
+				shouldAutoReplaceApp));
 
 	}
 
@@ -170,7 +192,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 		Set<BootDashElement> updated = new HashSet<BootDashElement>();
 
-		BootDashElement addedElement = new CloudDashElement(this, app, project, opExecution, modelStore);
+		BootDashElement addedElement = new CloudDashElement(this, app.getName(), project, opExecution, modelStore);
 
 		updated.add(addedElement);
 
@@ -185,11 +207,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 		elements.replaceAll(updated);
 		projectAppStore.storeProjectToAppMapping(updated);
+
 		notifyElementChanged(addedElement);
 		return addedElement;
 	}
 
-	public synchronized CloudDashElement getElement(String appName) throws Exception {
+	public synchronized CloudDashElement getElement(String appName) {
 
 		Set<BootDashElement> existing = elements.getValue();
 
@@ -219,13 +242,15 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 		// Add new ones first
 		for (Entry<CloudApplication, IProject> entry : apps.entrySet()) {
-			BootDashElement addedElement = new CloudDashElement(this, entry.getKey(), entry.getValue(), opExecution,
-					modelStore);
+			BootDashElement addedElement = new CloudDashElement(this, entry.getKey().getName(), entry.getValue(),
+					opExecution, modelStore);
 			updated.add(addedElement);
 		}
 
 		elements.replaceAll(updated);
 		projectAppStore.storeProjectToAppMapping(updated);
+		getAppCache().updateAll(apps.keySet());
+
 	}
 
 	public ProjectAppStore getProjectToAppMappingStore() {

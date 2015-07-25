@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
@@ -35,7 +37,6 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 		super("Deploying application: " + deploymentProperties.getAppName(), client, deploymentProperties.getAppName(),
 				model, ui);
 		this.deploymentProperties = deploymentProperties;
-
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 
 		// See if the application already exists
 		subMonitor.setTaskName("Verifying application exists: " + appName);
-		app = getExistingCloudApplication();
+		app = getCloudApplication();
 
 		subMonitor.worked(10);
 
@@ -71,9 +72,14 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
 		}
 
-		updateExistingApplication(deploymentProperties, subMonitor);
+		updateExistingApplicationInCloud(deploymentProperties, subMonitor);
 
-		// Add the element to the model LAST to ensure the uploading occurred
+		// Notify FIRST before adding the element in the model
+		// That way the app state tracker is updated first before
+		// any model element listeners ask for the app state when the
+		// element is added
+		getAppUpdateListener().applicationCreated(app);
+
 		this.model.addElement(app, deploymentProperties.getProject());
 
 		return app;
@@ -92,14 +98,14 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 		} catch (Exception e) {
 			// If app creation failed, check if the app was created anyway
 			// and delete it to allow users to redeploy
-			app = getExistingCloudApplication();
+			app = getCloudApplication();
 			if (app != null) {
 				client.deleteApplication(app.getName());
 				app = null;
 			}
 			throw e;
 		}
-		// Fetch directly from the client
+		// Fetch the created Cloud Application
 		try {
 			app = client.getApplication(deploymentProperties.getAppName());
 		} catch (Exception e) {
@@ -108,10 +114,10 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 		return app;
 	}
 
-	protected void updateExistingApplication(CloudDeploymentProperties properties, IProgressMonitor monitor)
+	protected void updateExistingApplicationInCloud(CloudDeploymentProperties properties, IProgressMonitor monitor)
 			throws Exception {
 
-		CloudApplication app = getExistingCloudApplication();
+		CloudApplication app = getCloudApplication();
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		if (app != null) {
 			String appName = properties.getAppName();
@@ -156,15 +162,16 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 
 			}
 
-//			if (properties.getUrls() != null && !properties.getUrls().equals(app.getUris())) {
-//
-//				subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
-//
-//				client.updateApplicationUris(appName, properties.getUrls());
-//
-//				subMonitor.worked(1);
-//
-//			}
+			// if (properties.getUrls() != null &&
+			// !properties.getUrls().equals(app.getUris())) {
+			//
+			// subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
+			//
+			// client.updateApplicationUris(appName, properties.getUrls());
+			//
+			// subMonitor.worked(1);
+			//
+			// }
 		}
 
 	}

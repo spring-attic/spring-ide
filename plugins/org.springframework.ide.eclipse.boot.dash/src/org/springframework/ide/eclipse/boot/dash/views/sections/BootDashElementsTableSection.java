@@ -774,7 +774,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					Object[] selectionObjs = selection.toArray();
 
 					if (selectionObjs != null) {
-						return modifiableModel.canAccept(Arrays.asList(selectionObjs), target);
+						return modifiableModel.canBeAdded(Arrays.asList(selectionObjs), target);
 					}
 				}
 			}

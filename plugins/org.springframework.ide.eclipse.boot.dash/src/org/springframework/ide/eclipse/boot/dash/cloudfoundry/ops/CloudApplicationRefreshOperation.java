@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,15 +20,16 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
-final class CloudApplicationRefreshOperation extends Operation<Void> {
+public final class CloudApplicationRefreshOperation extends Operation<Void> {
 	/**
 	 *
 	 */
 	private final CloudFoundryBootDashModel model;
 
-	CloudApplicationRefreshOperation(CloudFoundryBootDashModel model) {
+	public CloudApplicationRefreshOperation(CloudFoundryBootDashModel model) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName());
 		this.model = model;
 	}

@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -28,22 +28,24 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class ApplicationDeployer extends Operation<Void> {
+public class ProjectsDeployer extends Operation<Void> {
 
 	private final CloudFoundryBootDashModel model;
 	private final Map<IProject, BootDashElement> projectsToDeploy;
 	private final CloudFoundryOperations client;
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplaceApps;
-	private final OperationsExecution opExecution;
 
-	public ApplicationDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, CloudFoundryOperations client,
-			UserInteractions ui, Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps,
-			OperationsExecution opExecution) {
+	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, CloudFoundryOperations client,
+			UserInteractions ui, Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
 
 		super("Deploying Applications");
 
@@ -52,32 +54,35 @@ public class ApplicationDeployer extends Operation<Void> {
 		this.client = client;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
-		this.opExecution = opExecution;
 	}
 
-	public ApplicationDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, CloudFoundryOperations client,
-			UserInteractions ui, List<IProject> projectsToDeploy, boolean shouldAutoReplaceApps,
-			OperationsExecution opExecution) {
+	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, CloudFoundryOperations client,
+			UserInteractions ui, List<IProject> projectsToDeploy, boolean shouldAutoReplaceApps) {
 
 		super("Deploying Applications");
-
-		this.model = cloudFoundryBootDashModel;
 
 		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
 		for (IProject project : projectsToDeploy) {
 			this.projectsToDeploy.put(project, null);
 		}
+
+		this.model = cloudFoundryBootDashModel;
 		this.client = client;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
-		this.opExecution = opExecution;
-
 	}
 
 	public Void runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		// First load all deployment properties
-		SubMonitor subMonitor = SubMonitor.convert(monitor, projectsToDeploy.size() * 100);
 
+		List<CloudDeploymentProperties> toDeploy = prepareToDeploy(monitor);
+
+		deploy(toDeploy, monitor);
+
+		return null;
+	}
+
+	protected List<CloudDeploymentProperties> prepareToDeploy(IProgressMonitor monitor) throws Exception {
 		final List<CloudDeploymentProperties> toDeploy = new ArrayList<CloudDeploymentProperties>();
 
 		for (Iterator<Entry<IProject, BootDashElement>> it = projectsToDeploy.entrySet().iterator(); it.hasNext();) {
@@ -100,10 +105,7 @@ public class ApplicationDeployer extends Operation<Void> {
 			toDeploy.add(deploymentProperties);
 
 		}
-
-		deployInParallel(toDeploy, subMonitor);
-
-		return null;
+		return toDeploy;
 	}
 
 	protected CloudDeploymentProperties getDeploymentProperties(IProject project, BootDashElement element,
@@ -123,21 +125,14 @@ public class ApplicationDeployer extends Operation<Void> {
 
 		} else if (element instanceof CloudDashElement) {
 			CloudDashElement cloudElement = (CloudDashElement) element;
-
-			try {
-				deploymentProperties = cloudElement.refreshDeploymentProperties(subMonitor);
-
-			} catch (Throwable t) {
-				// ignore...app may not exist anymore
-			}
-
+			deploymentProperties = cloudElement.getDeploymentProperties();
 		}
 
 		IStatus status = Status.OK_STATUS;
 
 		if (deploymentProperties == null) {
-			status = BootDashActivator.createErrorStatus(null,
-					"No deployment propreties found. Please ensure the project contains a valid manifest.yml or launch configuration.");
+			status = BootDashActivator.createErrorStatus(null, "No deployment propreties found for " + project.getName()
+					+ ". Please ensure that the project contains a valid manifest.yml or launch configuration.");
 		} else {
 			status = deploymentProperties.validate();
 		}
@@ -149,17 +144,28 @@ public class ApplicationDeployer extends Operation<Void> {
 		return deploymentProperties;
 	}
 
-	protected void deployInParallel(List<CloudDeploymentProperties> toDeploy, IProgressMonitor monitor) {
+	protected void deploy(List<CloudDeploymentProperties> toDeploy, IProgressMonitor monitor)
+			throws Exception {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, toDeploy.size() * 10);
 		for (CloudDeploymentProperties properties : toDeploy) {
-			// Chain operations: 1. create/update app 2. upload archive 3.
-			// restart app
-			Operation<?> createOp = new CreateAndUpdateCloudAppOp(client, properties, model, ui);
-			Operation<?> uploadOp = new UploadApplicationOperation(client, properties, model, ui);
-			Operation<?> restartOp = new ApplicationStartOperation(properties.getAppName(), model, client, ui);
 
-			opExecution.runAsOneOp(new Operation<?>[]{createOp, uploadOp, restartOp},
-					"Deploying: " + properties.getAppName());
+			CloudApplicationOperation createOp = new CreateAndUpdateCloudAppOp(client, properties, model, ui);
+			CloudApplicationOperation uploadOp = new UploadApplicationOperation(client, properties, model, ui);
+			CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model, client,
+					ui);
+
+			List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
+			deploymentOperations.add(createOp);
+			deploymentOperations.add(uploadOp);
+			deploymentOperations.add(restartOp);
+
+			CloudApplicationOperation compositeOp = new CompositeCloudAppOp("Deploying " + properties.getAppName(),
+					client, properties.getAppName(), model, ui, deploymentOperations);
+
+			compositeOp.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
+
+			model.getCloudOpExecution().runOpSynch(compositeOp);
+
 			subMonitor.worked(10);
 		}
 	}

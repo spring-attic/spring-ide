@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -16,9 +16,11 @@ import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class ApplicationStartOperation extends CloudOperation<CloudApplication> {
+public class ApplicationStartOperation extends CloudApplicationOperation {
 
 	public static final long START_TIMEOUT = 1000 * 60 * 5;
 
@@ -26,13 +28,10 @@ public class ApplicationStartOperation extends CloudOperation<CloudApplication> 
 
 	private final String appName;
 
-	private final CloudFoundryBootDashModel model;
-
 	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model, CloudFoundryOperations client,
 			UserInteractions ui) {
-		super("Starting application", client, ui);
+		super("Starting application", client, appName, model, ui);
 		this.appName = appName;
-		this.model = model;
 	}
 
 	@Override
@@ -45,9 +44,13 @@ public class ApplicationStartOperation extends CloudOperation<CloudApplication> 
 					+ ". Unable to restart the application. Refresh the target and make sure the application still exists.");
 		}
 
+		// use the cached Cloud app instead of fetching a new one to avoid
+		// network I/O
+		getAppUpdateListener().applicationStarting(getCachedApplication());
+
 		client.startApplication(appName);
 
-		CloudApplication app = element.refreshCloudApplication(monitor);
+		CloudApplication app = getCloudApplication();
 
 		// fetch an updated Cloud Application that reflects changes that
 		// were
@@ -62,10 +65,10 @@ public class ApplicationStartOperation extends CloudOperation<CloudApplication> 
 			} catch (InterruptedException e) {
 
 			}
-			app = element.refreshCloudApplication(monitor);
+			app = getCloudApplication();
 		}
 
-		model.notifyElementChanged(element);
+		getAppUpdateListener().applicationStarted(app);
 
 		return app;
 	}

@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertiesMapper;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 
-class ProjectAppStore {
+public class ProjectAppStore {
 
 	private final IPropertyStore modelStore;
 

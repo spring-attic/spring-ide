@@ -8,11 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class CloudApplicationStopOperation extends CloudApplicationOperation {
@@ -31,8 +33,9 @@ public class CloudApplicationStopOperation extends CloudApplicationOperation {
 		// fetch an updated Cloud Application that reflects changes that
 		// were
 		// performed on it
-		CloudApplication app = element.refreshCloudApplication(monitor);
+		CloudApplication app = client.getApplication(appName);
 
+		model.getAppCache().update(app);
 		model.notifyElementChanged(element);
 
 		return app;
