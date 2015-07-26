@@ -181,7 +181,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		// want to replace the existing app
 		boolean shouldAutoReplaceApp = false;
 
-		opExecution.runOpSynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
+		opExecution.runOpAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
 				shouldAutoReplaceApp));
 
 	}

@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -47,9 +46,5 @@ public class OperationsExecution {
 
 		job.schedule();
 
-	}
-
-	public void runOpSynch(final Operation<?> op) throws Exception {
-		op.run(new NullProgressMonitor());
 	}
 }

@@ -71,7 +71,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 		CloudApplicationOperation op = new CloudApplicationStopOperation(cloudTarget.getClient(), this,
 				(CloudFoundryBootDashModel) getParent(), ui);
-		opExecution.runOpSynch(op);
+		opExecution.runOpAsynch(op);
 	}
 
 	@Override
@@ -93,13 +93,13 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 			op = cloudOp;
 		}
 
-		opExecution.runOpSynch(op);
+		opExecution.runOpAsynch(op);
 	}
 
 	public void delete(UserInteractions ui) throws Exception {
 		CloudApplicationOperation op = new CloudApplicationDeleteOperation(cloudTarget.getClient(), getName(),
 				(CloudFoundryBootDashModel) getParent(), ui);
-		opExecution.runOpSynch(op);
+		opExecution.runOpAsynch(op);
 	}
 
 	@Override

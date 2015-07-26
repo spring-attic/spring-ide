@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ProjectsDeployer extends Operation<Void> {
@@ -144,8 +145,7 @@ public class ProjectsDeployer extends Operation<Void> {
 		return deploymentProperties;
 	}
 
-	protected void deploy(List<CloudDeploymentProperties> toDeploy, IProgressMonitor monitor)
-			throws Exception {
+	protected void deploy(List<CloudDeploymentProperties> toDeploy, IProgressMonitor monitor) throws Exception {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, toDeploy.size() * 10);
 		for (CloudDeploymentProperties properties : toDeploy) {
 
@@ -164,7 +164,8 @@ public class ProjectsDeployer extends Operation<Void> {
 
 			compositeOp.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 
-			model.getCloudOpExecution().runOpSynch(compositeOp);
+			model.getAppCache().update(properties.getAppName(), RunState.STARTING);
+			model.getCloudOpExecution().runOpAsynch(compositeOp);
 
 			subMonitor.worked(10);
 		}
