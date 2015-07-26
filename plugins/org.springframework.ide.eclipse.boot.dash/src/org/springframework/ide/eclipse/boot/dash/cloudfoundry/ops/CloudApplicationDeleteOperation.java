@@ -25,7 +25,13 @@ public class CloudApplicationDeleteOperation extends CloudApplicationOperation {
 
 	@Override
 	protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor) throws Exception {
-		client.deleteApplication(appName);
+		try {
+			client.deleteApplication(appName);
+		} catch (Exception e) {
+			if (!is404Error(e)) {
+				throw e;
+			}
+		}
 		return null;
 	}
 

@@ -19,12 +19,12 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class CompositeCloudAppOp extends CloudApplicationOperation {
+public class CompositeAppOp extends CloudApplicationOperation {
 
 	private List<CloudApplicationOperation> operations;
 
-	public CompositeCloudAppOp(String opName, CloudFoundryOperations client, String appName,
-			CloudFoundryBootDashModel model, UserInteractions ui, List<CloudApplicationOperation> operations) {
+	public CompositeAppOp(String opName, CloudFoundryOperations client, String appName, CloudFoundryBootDashModel model,
+			UserInteractions ui, List<CloudApplicationOperation> operations) {
 		super(opName, client, appName, model, ui);
 		this.operations = operations;
 	}

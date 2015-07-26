@@ -38,6 +38,10 @@ public abstract class ApplicationUpdateListener {
 		model.getAppCache().update(app);
 	}
 
+	public void onError(Exception e) {
+		model.getAppCache().update(appName, RunState.INACTIVE);
+	}
+
 	abstract public void applicationCreated(CloudApplication app);
 
 	abstract public void applicationUploaded(CloudApplication app);

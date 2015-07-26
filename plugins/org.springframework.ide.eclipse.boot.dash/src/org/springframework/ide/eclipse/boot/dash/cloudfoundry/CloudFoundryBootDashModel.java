@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,10 +101,11 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public boolean canBeAdded(List<Object> source, Object target) {
-		if (!source.isEmpty()) {
-			for (Object obj : source) {
-				// IMPORTANT: to avoid drag/drop into the SAME target, be sure
+	public boolean canBeAdded(List<Object> sources, Object target) {
+		if (sources != null && !sources.isEmpty()) {
+			for (Object obj : sources) {
+				// IMPORTANT: to avoid drag/drop into the SAME target, be
+				// sure
 				// all sources are from a different target
 				if (getProject(obj) == null || !isFromDifferentTarget(obj)) {
 					return false;
@@ -119,49 +119,33 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	@Override
 	public void add(List<Object> sources, Object target, UserInteractions ui) throws Exception {
-		// For now, only support new deployments (no mapping to existing apps in
-		// CF)
-		// Therefore ignore the target
+
 		Map<IProject, BootDashElement> projects = new LinkedHashMap<IProject, BootDashElement>();
 		if (sources != null) {
 			for (Object obj : sources) {
-				IProject project = null;
-				if (obj instanceof IProject) {
-					project = (IProject) obj;
-				} else if (obj instanceof IJavaProject) {
-					project = ((IJavaProject) obj).getProject();
-				} else if (obj instanceof IAdaptable) {
-					project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
-				} else if (obj instanceof BootDashElement) {
-					project = ((BootDashElement) obj).getProject();
-				}
+				IProject project = getProject(obj);
 
 				if (project != null) {
 					projects.put(project, null);
 				}
-			}
-			BootDashElement element = target instanceof BootDashElement ? (BootDashElement) target : null;
-
-			// If only one project was drag/dropped to element, map it
-			Iterator<Entry<IProject, BootDashElement>> it = projects.entrySet().iterator();
-			if (projects.size() == 1 && it.hasNext()) {
-				Entry<IProject, BootDashElement> entry = it.next();
-				entry.setValue(element);
 			}
 
 			performDeployment(projects, ui);
 		}
 	}
 
-	protected IProject getProject(Object source) {
-		if (source instanceof IProject) {
-			return (IProject) source;
-		} else if (source instanceof IJavaProject) {
-			return ((IJavaProject) source).getProject();
-		} else if (source instanceof BootDashElement) {
-			return ((BootDashElement) source).getProject();
+	protected IProject getProject(Object obj) {
+		IProject project = null;
+		if (obj instanceof IProject) {
+			project = (IProject) obj;
+		} else if (obj instanceof IJavaProject) {
+			project = ((IJavaProject) obj).getProject();
+		} else if (obj instanceof IAdaptable) {
+			project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
+		} else if (obj instanceof BootDashElement) {
+			project = ((BootDashElement) obj).getProject();
 		}
-		return null;
+		return project;
 	}
 
 	protected boolean isFromDifferentTarget(Object dropSource) {
@@ -181,8 +165,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		// want to replace the existing app
 		boolean shouldAutoReplaceApp = false;
 
-		opExecution.runOpAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
-				shouldAutoReplaceApp));
+		getCloudOpExecution().runOpAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui,
+				projectsToDeploy, shouldAutoReplaceApp));
 
 	}
 

@@ -41,27 +41,37 @@ public abstract class CloudOperation<T> extends Operation<T> {
 
 		try {
 			return doCloudOp(client, monitor);
-		} catch (OperationCanceledException oe) {
-			return null;
 		} catch (Exception e) {
+			handleError(e);
+		}
+		return null;
+	}
 
-			String message = e.getMessage();
-			if (e instanceof CloudFoundryException) {
-				message = ((CloudFoundryException) e).getDescription();
-			}
+	protected void handleError(Exception e) throws Exception {
 
-			final String[] error = { message };
+		final Exception[] error = { e };
+		if (!(e instanceof OperationCanceledException)) {
 			Display.getDefault().asyncExec(new Runnable() {
 
 				@Override
 				public void run() {
+
+					String message = error[0].getMessage();
+					if (error[0] instanceof CloudFoundryException) {
+						message = ((CloudFoundryException) error[0]).getDescription();
+					}
+
+					if (message == null || message.trim().length() == 0) {
+						message = "Cloud operation failure of type: " + error[0].getClass().getName();
+					}
+
 					if (ui != null) {
-						ui.errorPopup("Error performing Cloud operation: ", error[0]);
+						ui.errorPopup("Error performing Cloud operation: ", message);
 					}
 				}
 			});
 		}
-		return null;
+		throw e;
 	}
 
 }

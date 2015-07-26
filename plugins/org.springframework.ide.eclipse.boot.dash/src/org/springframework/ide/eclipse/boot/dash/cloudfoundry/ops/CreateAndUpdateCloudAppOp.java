@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -30,9 +30,9 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 
 	private final static String APP_FOUND_MESSAGE = "An application with the name - {0} - already exists. Continuing with the deployment will replace all of the existing application's resources with those in the selected project. Are you sure that you want to continue?";
 
-	private final CloudDeploymentProperties deploymentProperties;
+	private final CloudApplicationDeploymentProperties deploymentProperties;
 
-	public CreateAndUpdateCloudAppOp(CloudFoundryOperations client, CloudDeploymentProperties deploymentProperties,
+	public CreateAndUpdateCloudAppOp(CloudFoundryOperations client, CloudApplicationDeploymentProperties deploymentProperties,
 			CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Deploying application: " + deploymentProperties.getAppName(), client, deploymentProperties.getAppName(),
 				model, ui);
@@ -114,7 +114,7 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 		return app;
 	}
 
-	protected void updateExistingApplicationInCloud(CloudDeploymentProperties properties, IProgressMonitor monitor)
+	protected void updateExistingApplicationInCloud(CloudApplicationDeploymentProperties properties, IProgressMonitor monitor)
 			throws Exception {
 
 		CloudApplication app = getCloudApplication();

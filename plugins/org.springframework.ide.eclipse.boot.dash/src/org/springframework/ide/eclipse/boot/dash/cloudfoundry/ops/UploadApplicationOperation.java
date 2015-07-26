@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
@@ -27,9 +27,9 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class UploadApplicationOperation extends CloudApplicationOperation {
 
-	private final CloudDeploymentProperties deploymentProperties;
+	private final CloudApplicationDeploymentProperties deploymentProperties;
 
-	public UploadApplicationOperation(CloudFoundryOperations client, CloudDeploymentProperties deploymentProperties,
+	public UploadApplicationOperation(CloudFoundryOperations client, CloudApplicationDeploymentProperties deploymentProperties,
 			CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Uploading application: " + deploymentProperties.getAppName(), client, deploymentProperties.getAppName(),
 				model, ui);

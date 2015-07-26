@@ -248,7 +248,7 @@ public class ManifestParser {
 		return application;
 	}
 
-	public CloudDeploymentProperties load(IProgressMonitor monitor) throws Exception {
+	public CloudApplicationDeploymentProperties load(IProgressMonitor monitor) throws Exception {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 		subMonitor.beginTask("Loading manifest.yml", 6);
 
@@ -261,7 +261,7 @@ public class ManifestParser {
 				throw BootDashActivator.asCoreException(
 						"No application definition found in manifest.yml. Make sure at least one application is defined");
 			}
-			CloudDeploymentProperties properties = new CloudDeploymentProperties();
+			CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 			properties.setProject(project);
 
 			String appName = getStringValue(application, NAME_PROP);
@@ -304,7 +304,7 @@ public class ManifestParser {
 
 	}
 
-	protected void readEnvVars(CloudDeploymentProperties properties, Map<?, ?> applications) {
+	protected void readEnvVars(CloudApplicationDeploymentProperties properties, Map<?, ?> applications) {
 		Map<?, ?> propertiesMap = getContainingPropertiesMap(applications, ENV_PROP);
 
 		if (propertiesMap == null) {
@@ -325,7 +325,7 @@ public class ManifestParser {
 		properties.setEnvironmentVariables(loadedVars);
 	}
 
-	protected void readServices(CloudDeploymentProperties properties, Map<?, ?> applications) {
+	protected void readServices(CloudApplicationDeploymentProperties properties, Map<?, ?> applications) {
 
 		Object yamlElementObj = applications.get(SERVICES_PROP);
 		if (yamlElementObj instanceof List<?>) {
@@ -341,7 +341,7 @@ public class ManifestParser {
 		}
 	}
 
-	protected void readApplicationURL(Map<?, ?> application, CloudDeploymentProperties properties, String appName,
+	protected void readApplicationURL(Map<?, ?> application, CloudApplicationDeploymentProperties properties, String appName,
 			IProgressMonitor monitor) {
 		String subdomain = getStringValue(application, SUB_DOMAIN_PROP);
 		String domain = getStringValue(application, DOMAIN_PROP);
@@ -370,7 +370,7 @@ public class ManifestParser {
 		properties.setUrls(urls);
 	}
 
-	protected void readMemory(Map<?, ?> application, CloudDeploymentProperties properties) throws Exception {
+	protected void readMemory(Map<?, ?> application, CloudApplicationDeploymentProperties properties) throws Exception {
 		Integer memoryVal = getIntegerValue(application, MEMORY_PROP);
 
 		// If not in Integer form, try String as the memory may end in with a

@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  */
 public abstract class CloudApplicationOperation extends CloudOperation<CloudApplication> {
 
-	protected final String appName;
+	protected String appName;
 
 	private ApplicationUpdateListener applicationUpdateListener;
 
@@ -78,20 +78,25 @@ public abstract class CloudApplicationOperation extends CloudOperation<CloudAppl
 	}
 
 	protected Exception getApplicationException(Exception e) {
-		if (e.getMessage() != null) {
-			if (e.getMessage().contains("404")) {
-				IStatus status = BootDashActivator.createErrorStatus(e,
-						"Application not found in Cloud Foundry target when verifying that it exists: "
-								+ e.getMessage());
-				return new CoreException(status);
-			}
-
+		if (is404Error(e)) {
+			IStatus status = BootDashActivator.createErrorStatus(e,
+					"Application not found in Cloud Foundry target when verifying that it exists: " + e.getMessage());
+			return new CoreException(status);
 		}
 		return e;
+	}
+
+	protected boolean is404Error(Exception e) {
+		return e.getMessage() != null && e.getMessage().contains("404");
 	}
 
 	public ISchedulingRule getSchedulingRule() {
 		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
 	}
 
+	@Override
+	protected void handleError(Exception e) throws Exception {
+		applicationUpdateListener.onError(e);
+		super.handleError(e);
+	}
 }

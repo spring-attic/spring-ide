@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
-public class CloudDeploymentProperties {
+public class CloudApplicationDeploymentProperties {
 
 	/*
 	 * These should never be null
@@ -163,8 +163,8 @@ public class CloudDeploymentProperties {
 		}
 	}
 
-	public static CloudDeploymentProperties getFor(CloudApplication app) {
-		CloudDeploymentProperties properties = new CloudDeploymentProperties();
+	public static CloudApplicationDeploymentProperties getFor(CloudApplication app) {
+		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 		properties.setAppName(app.getName());
 		properties.setBuildpackUrl(app.getStaging() != null ? app.getStaging().getBuildpackUrl() : null);
 		properties.setEnvironmentVariables(app.getEnvAsMap());

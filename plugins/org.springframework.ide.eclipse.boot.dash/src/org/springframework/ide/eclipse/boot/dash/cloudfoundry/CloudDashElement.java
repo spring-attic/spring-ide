@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -27,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.StartOnlyUpdat
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -83,10 +83,11 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 		if (getProject() != null) {
 			boolean shouldAutoReplaceApp = true;
-			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), cloudTarget.getClient(), ui,
-					Arrays.asList(getProject()), shouldAutoReplaceApp);
+			List<BootDashElement> elements = new ArrayList<BootDashElement>();
+			elements.add(this);
+			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), cloudTarget.getClient(), ui, elements,
+					shouldAutoReplaceApp);
 		} else {
-
 			CloudApplicationOperation cloudOp = new ApplicationStartOperation(getName(),
 					(CloudFoundryBootDashModel) getParent(), cloudTarget.getClient(), ui);
 			cloudOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
@@ -122,10 +123,10 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 		return getCloudModel().getAppCache().getRunState(getName());
 	}
 
-	public CloudDeploymentProperties getDeploymentProperties() {
+	public CloudApplicationDeploymentProperties getDeploymentProperties() {
 		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
 		if (app != null) {
-			return CloudDeploymentProperties.getFor(app);
+			return CloudApplicationDeploymentProperties.getFor(app);
 		}
 
 		return null;

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -32,13 +33,13 @@ public abstract class Operation<T> implements Nameable {
 		return this.opName;
 	}
 
-	public T run(IProgressMonitor monitor) throws Exception {
+	public T run(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		SubMonitor sub = SubMonitor.convert(monitor);
 		sub.subTask(opName);
 		return runOp(sub.newChild(100));
 	}
 
-	protected abstract T runOp(IProgressMonitor monitor) throws Exception;
+	protected abstract T runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException;
 
 	/**
 	 * Optional. Return null if no scheduling rule is needed
