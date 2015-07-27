@@ -162,18 +162,14 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 
 			}
 
-			// if (properties.getUrls() != null &&
-			// !properties.getUrls().equals(app.getUris())) {
-			//
-			// subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
-			//
-			// client.updateApplicationUris(appName, properties.getUrls());
-			//
-			// subMonitor.worked(1);
-			//
-			// }
-		}
+			if (properties.getUrls() != null && !properties.getUrls().equals(app.getUris())) {
 
+				subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
+				client.updateApplicationUris(appName, properties.getUrls());
+
+				subMonitor.worked(1);
+			}
+		}
 	}
 
 }
