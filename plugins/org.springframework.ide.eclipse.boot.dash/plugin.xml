@@ -29,7 +29,7 @@
          point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
       <propertyContributor
             contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor"
-            labelProvider="org.springframework.ide.eclipse.boot.dash.views.properties.BootDashElementLabelProvider">
+            labelProvider="org.springframework.ide.eclipse.boot.dash.views.properties.PropertiesTitleLabelProvider">
          <propertyCategory
                category="org.springframework.ide.eclipse.boot.dash"></propertyCategory>
       </propertyContributor>
@@ -39,6 +39,12 @@
       <propertyTabs
             contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor">
          <propertyTab
+               category="org.springframework.ide.eclipse.boot.dash"
+               id="org.springframework.ide.eclipse.boot.dash.tab.General"
+               label="General">
+         </propertyTab>
+         <propertyTab
+               afterTab="org.springframework.ide.eclipse.boot.dash.tab.General"
                category="org.springframework.ide.eclipse.boot.dash"
                id="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings"
                label="Request Mappings">
@@ -50,9 +56,28 @@
       <propertySections
             contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor">
          <propertySection
+               afterSection="org.springframework.ide.eclipse.boot.dash.section.LocalGeneral, org.springframework.ide.eclipse.boot.dash.section.CloudFoundryGeneral"
                class="org.springframework.ide.eclipse.boot.dash.views.properties.RequestMappingPropertiesSection"
                id="org.springframework.ide.eclipse.boot.dash.section.RequestMappingsSection"
                tab="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+            </input>
+         </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.LocalGeneralPropertiesSection"
+               filter="org.springframework.ide.eclipse.boot.dash.views.properties.LocalElementFilter"
+               id="org.springframework.ide.eclipse.boot.dash.section.LocalGeneral"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.General">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+            </input>
+         </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.CloudFoundryGeneralPropertiesSection"
+               filter="org.springframework.ide.eclipse.boot.dash.views.properties.CloudFoundryElementFilter"
+               id="org.springframework.ide.eclipse.boot.dash.section.CloudFoundryGeneral"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
                   type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
             </input>

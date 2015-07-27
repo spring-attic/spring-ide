@@ -83,7 +83,7 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashLabelProvider;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashCellLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -179,7 +179,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	protected CellLabelProvider getLabelProvider(BootDashColumn columnType) {
-		return new BootDashLabelProvider(tv, columnType, stylers);
+		return new BootDashCellLabelProvider(tv, columnType, stylers);
 	}
 
 	@Override

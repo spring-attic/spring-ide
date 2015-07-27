@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
  * @author Alex Boyko
  *
  */
-public class BootDashElementLabelProvider implements ILabelProvider {
+public class PropertiesTitleLabelProvider implements ILabelProvider {
 
 	@Override
 	public void addListener(ILabelProviderListener listener) {

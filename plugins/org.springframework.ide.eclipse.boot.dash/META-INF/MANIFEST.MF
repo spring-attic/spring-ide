@@ -31,7 +31,8 @@ Require-Bundle: org.eclipse.ui,
  org.codehaus.jackson.mapper,
  org.codehaus.jackson.core,
  org.eclipse.equinox.security,
- org.eclipse.ui.views.properties.tabbed
+ org.eclipse.ui.views.properties.tabbed,
+ org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
