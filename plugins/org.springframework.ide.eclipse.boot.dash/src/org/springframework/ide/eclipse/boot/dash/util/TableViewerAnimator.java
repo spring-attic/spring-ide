@@ -46,7 +46,7 @@ public class TableViewerAnimator {
 
 	}
 
-	protected static final long INTERVAL = 300;
+	protected static final long INTERVAL = 100;
 
 	private int animationCounter = 0;
 
