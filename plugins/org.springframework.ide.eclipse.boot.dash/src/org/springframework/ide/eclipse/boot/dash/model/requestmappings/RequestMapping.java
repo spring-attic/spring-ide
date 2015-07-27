@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
 public interface RequestMapping {
 	public String getPath();
-	public String getMethod();
 	public String getFullyQualifiedClassName();
+	public String getMethodName();
 	public IType getType();
+	public IMethod getMethod();
 	public boolean isUserDefined();
+	public String getMethodString();
 }

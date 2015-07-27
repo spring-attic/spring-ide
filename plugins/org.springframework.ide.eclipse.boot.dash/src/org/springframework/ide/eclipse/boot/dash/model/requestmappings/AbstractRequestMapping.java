@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -31,6 +32,29 @@ public abstract class AbstractRequestMapping implements RequestMapping {
 		String fqName = getFullyQualifiedClassName();
 		if (fqName!=null) {
 			return typeLookup.findType(fqName);
+		}
+		return null;
+	}
+
+	public IMethod getMethod() {
+		try {
+			IType type = getType();
+			if (type!=null) {
+				String mName = getMethodName();
+				if (mName!=null) {
+					IMethod[] methods = type.getMethods();
+					if (methods!=null && methods.length>0) {
+						for (IMethod m : methods) {
+							//TODO: handle method overloading
+							if (mName.equals(m.getElementName())) {
+								return m;
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
 		}
 		return null;
 	}

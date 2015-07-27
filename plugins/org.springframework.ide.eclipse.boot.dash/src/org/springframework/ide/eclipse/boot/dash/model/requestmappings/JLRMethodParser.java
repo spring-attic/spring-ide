@@ -23,14 +23,21 @@ import java.util.Set;
  */
 public class JLRMethodParser {
 
-	private static final Set<String> MODIFIERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-			"public", "protected", "private", "abstract",
-		    "static", "final", "synchronized", "native", "strictfp"
-	)));
+	public static class JLRMethod {
 
+		/**
+		 * The whole 'raw' string (i.e. not parsed or processed in any way).
+		 */
+		private String rawString;
 
-	public static String getFQClassName(String methodString) {
-		if (methodString!=null) {
+		private String fqClass;
+		private String methodName;
+
+		//TODO: parsing arguments to handle overloading
+
+		public JLRMethod(String method) {
+			this.rawString = method;
+			String methodString = method;
 			// Example: public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.HealthMvcEndpoint.invoke(java.security.Principal)
 			// Example: java.util.Collection<demo.Reservation> demo.ReservationRestController.reservations()
 			// public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.BasicErrorController.error(javax.servlet.http.HttpServletRequest)'
@@ -48,18 +55,61 @@ public class JLRMethodParser {
 				if (methodNameEnd>=0) {
 					int methodNameStart = methodString.lastIndexOf('.', methodNameEnd);
 					if (methodNameStart>=0) {
-						return methodString.substring(0, methodNameStart);
+						fqClass = methodString.substring(0, methodNameStart);
+						if (methodNameStart>=0) {
+							methodNameStart = methodNameStart +1; //+1 because actauly pointing at the '.', not the name start
+						}
+						methodName = methodString.substring(methodNameStart, methodNameEnd);
 					}
 				}
 			}
 		}
-		return null;
+
+		@Override
+		public String toString() {
+			return rawString;
+		}
+
+		public String getFQClassName() {
+			return fqClass;
+		}
+
+		public String getMethodName() {
+			return methodName;
+		}
+
 	}
+
+	private static final Set<String> MODIFIERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+			"public", "protected", "private", "abstract",
+		    "static", "final", "synchronized", "native", "strictfp"
+	)));
 
 	private static boolean isModifier(String string) {
 		return MODIFIERS.contains(string);
 	}
 
+	public static JLRMethod parse(String method) {
+		if (method!=null) {
+			return new JLRMethod(method);
+		}
+		return null;
+	}
 
+	public static String parseFQClassName(String data) {
+		JLRMethod m = parse(data);
+		if (m!=null) {
+			return m.getFQClassName();
+		}
+		return null;
+	}
+
+	public static String parseMethodName(String data) {
+		JLRMethod m = parse(data);
+		if (m!=null) {
+			return m.getMethodName();
+		}
+		return null;
+	}
 
 }

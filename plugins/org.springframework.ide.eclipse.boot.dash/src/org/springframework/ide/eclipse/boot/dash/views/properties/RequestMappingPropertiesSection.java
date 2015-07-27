@@ -16,16 +16,19 @@ import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
@@ -38,19 +41,59 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 /**
  * Tabbed properties view section for live request mappings
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 public class RequestMappingPropertiesSection extends AbstractPropertySection {
+
+	private class DoubleClickListener extends MouseAdapter {
+		DoubleClickListener(TableViewer tv) {
+			tv.getTable().addMouseListener(this);
+		}
+
+		@Override
+		public void mouseDoubleClick(MouseEvent e) {
+			ViewerCell cell = tv.getCell(new Point(e.x, e.y));
+			if (cell!=null) {
+				Object clicked = cell.getElement();
+				if (clicked instanceof RequestMapping){
+					RequestMapping rm = (RequestMapping) clicked;
+					int colIdx = cell.getColumnIndex();
+					RequestMappingsColumn col = RequestMappingsColumn.values()[colIdx];
+					switch (col) {
+					case PATH:
+						String url = getUrl(input.getValue(), rm);
+						if (url!=null) {
+							openUrl(url);
+						}
+						break;
+					case SRC:
+						IMethod method = rm.getMethod();
+						if (method!=null) {
+							SpringUIUtils.openInEditor(method);
+						}
+					default:
+						break;
+					}
+	//						MessageDialog.openInformation(page.getShell(), "clickety click!",
+	//								"Double-click on : "+ clicked);
+				}
+			}
+		}
+
+	}
 
 	private Label labelText;
 
@@ -127,22 +170,7 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 			colWidget.setWidth(colType.getDefaultWidth());
 		}
 
-		tv.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-				Object clicked = sel.getFirstElement();
-				if(clicked instanceof RequestMapping){
-					RequestMapping rm = (RequestMapping) clicked;
-					String url = getUrl(input.getValue(), rm);
-					if (url!=null) {
-						openUrl(url);
-					}
-//					MessageDialog.openInformation(page.getShell(), "clickety click!",
-//							"Double-click on : "+ clicked);
-				}
-			}
-
-		});
+		new DoubleClickListener(tv);
 		BootDashActivator.getDefault().getModel().addElementStateListener(modelListener = new ElementStateListener() {
 			public void stateChanged(BootDashElement e) {
 				if (e.equals(input.getValue())) {
@@ -160,7 +188,6 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 				}
 			}
 		});
-
 	}
 
 	public void setInput(IWorkbenchPart part, ISelection selection) {
@@ -256,7 +283,5 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 			}
 			return NO_ELEMENTS;
 		}
-
 	}
-
 }

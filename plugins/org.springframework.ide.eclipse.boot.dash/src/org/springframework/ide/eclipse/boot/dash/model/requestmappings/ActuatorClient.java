@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.IMethod;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
 import org.springframework.web.client.RestTemplate;
 
 public class ActuatorClient {
@@ -48,7 +50,7 @@ public class ActuatorClient {
 		private String key;
 		private JSONObject beanInfo;
 		private String path;
-		private String fqClassName;
+		private JLRMethod methodData;
 
 		RequestMappingImpl(String key, JSONObject beanInfo, TypeLookup typeLookup) {
 			super(typeLookup);
@@ -85,27 +87,29 @@ public class ActuatorClient {
 			return "RequestMapping("+key+")";
 		}
 
+		@Override
 		public String getFullyQualifiedClassName() {
-			if (fqClassName==null) {
-				fqClassName = computeFQClassName();
+			JLRMethod m = getMethodData();
+			if (m!=null) {
+				return m.getFQClassName();
 			}
-			return fqClassName;
+			return null;
 		}
 
-		private String computeFQClassName() {
-			String methodString = getMethodString();
-			return JLRMethodParser.getFQClassName(methodString);
-		}
-
-		public String getMethod() {
-			return getMethodString();
+		@Override
+		public String getMethodName() {
+			JLRMethod m = getMethodData();
+			if (m!=null) {
+				return m.getMethodName();
+			}
+			return null;
 		}
 
 		/**
 		 * Returns the raw string found in the requestmapping info. This is a 'toString' value
 		 * of java.lang.reflect.Method object.
 		 */
-		private String getMethodString() {
+		public String getMethodString() {
 			try {
 				if (beanInfo!=null) {
 					if (beanInfo.has("method")) {
@@ -118,6 +122,15 @@ public class ActuatorClient {
 			return null;
 		}
 
+		private JLRMethod getMethodData() {
+			if (methodData==null) {
+				methodData = JLRMethodParser.parse(getMethodString());
+			}
+			return methodData;
+		}
+
+
+
 	}
 
 	private RestTemplate rest = new RestTemplate();
@@ -128,7 +141,6 @@ public class ActuatorClient {
 		this.target = target;
 		this.typeLookup = typeLookup;
 	}
-
 	public List<RequestMapping> getRequestMappings() {
 		try {
 			String json = rest.getForObject(target+"/mappings", String.class);

@@ -74,7 +74,7 @@ public class RequestMappingLabelProvider extends StyledCellLabelProvider {
 				return new StyledString(path, deemphasize);
 			}
 		case SRC:
-			String m = rm.getMethod();
+			String m = rm.getMethodString();
 			if (m!=null) {
 				return new StyledString(m, deemphasize);
 			}
