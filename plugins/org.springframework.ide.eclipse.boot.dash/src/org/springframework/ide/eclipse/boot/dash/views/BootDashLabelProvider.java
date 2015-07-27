@@ -54,7 +54,7 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 			IJavaProject jp = e.getJavaProject();
 			if (jp!=null) {
 				cell.setText(javaLabels.getText(jp));
-				cell.setImage(javaLabels.getImage(jp));
+				//cell.setImage(javaLabels.getImage(jp));
 			} else {
 				// Project and app (element) name are shown in separate columns now. If
 				// there is no project mapping
