@@ -153,7 +153,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			return ((BootDashElement) dropSource).getParent() != this;
 		}
 
-		return false;
+		//If not a boot element that is being dropped, it is an element external to the boot dash view (e.g. project from project explorer)
+		return true;
 	}
 
 	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)

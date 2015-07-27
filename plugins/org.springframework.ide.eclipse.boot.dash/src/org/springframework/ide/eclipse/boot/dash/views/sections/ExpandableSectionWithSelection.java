@@ -14,7 +14,11 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -26,6 +30,9 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.ViewStyler;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -61,13 +68,18 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 	private LiveVariable<Boolean> expansionState = new LiveVariable<Boolean>(true);
 	private MultiSelection<?> selection;
 	private ViewStyler viewStyler;
+	private BootDashModel model;
+	private UserInteractions ui;
+	private DropTarget dropTarget;
 
-	public ExpandableSectionWithSelection(IPageWithSections owner, String title, MultiSelectionSource expandableContent, ViewStyler viewStyler) {
+	public ExpandableSectionWithSelection(IPageWithSections owner, String title, MultiSelectionSource expandableContent, ViewStyler viewStyler, BootDashModel model, UserInteractions ui) {
 		super(owner);
 		this.title = title;
 		this.child = expandableContent;
 		this.selection = null;
 		this.viewStyler = viewStyler;
+		this.model = model;
+		this.ui = ui;
 	}
 
 	protected <T> MultiSelection<?> createSelection() {
@@ -105,9 +117,24 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 		return OK_VALIDATOR;
 	}
 
+	private void addDropSupport(Composite composite) {
+
+		if (model instanceof ModifiableModel && model.getRunTarget().canDeployAppsTo()) {
+			int ops = DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
+			Transfer[] transfers = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+
+			dropTarget = new DropTarget(composite, ops);
+			dropTarget.setTransfer(transfers);
+			dropTarget.addDropListener(new ModelDropListener(model, ui));
+		}
+	}
+
 	@Override
 	public void createContents(final Composite page) {
 		final ExpandableComposite comp = new ExpandableComposite(page, SWT.NONE);
+
+		addDropSupport(comp);
+
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(comp);
 		comp.setText(title);
 		comp.setLayout(new FillLayout());
@@ -161,6 +188,7 @@ public class ExpandableSectionWithSelection extends PageSection implements Multi
 			}
 			child = null;
 		}
-	}
-
-}
+		if (dropTarget != null && !dropTarget.isDisposed()) {
+			dropTarget.dispose();
+		}
+	}}
