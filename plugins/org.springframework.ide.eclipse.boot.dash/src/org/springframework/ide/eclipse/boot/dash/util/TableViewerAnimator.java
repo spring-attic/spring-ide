@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,6 +82,11 @@ public class TableViewerAnimator {
 		job.schedule();
 	}
 
+	private synchronized CellAnimation[] getAnimations() {
+		//Copy elements to avoid CME.
+		return animatedElements.values().toArray(new CellAnimation[animatedElements.size()]);
+	}
+
 	private void ensureJob() {
 		if (job==null) {
 			job = new UIJob("Animate table icons") {
@@ -88,7 +94,7 @@ public class TableViewerAnimator {
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					if (!tv.getTable().isDisposed()) {
 						animationCounter++;
-						for (CellAnimation a : animatedElements.values()) {
+						for (CellAnimation a : getAnimations()) {
 							Image[] imgs = a.imgs;
 							a.item.setImage(a.col, imgs[animationCounter%imgs.length]);
 						}
@@ -98,6 +104,7 @@ public class TableViewerAnimator {
 					}
 					return Status.OK_STATUS;
 				}
+
 			};
 			job.setSystem(true);
 		}
