@@ -8,10 +8,11 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -23,50 +24,7 @@ public class OperationsExecution {
 	public OperationsExecution() {
 	}
 
-	/**
-	 * Runs the list of ops in one atomic Job. The scheduling rule of the first
-	 * op in the list is used for the Job
-	 *
-	 * @param ops
-	 *            to run in sequence
-	 * @param opName
-	 *            for all the operations. If null, name of the first op will be
-	 *            used
-	 */
-	public void runAsOneOp(final Operation<?>[] ops, String opName) {
-		if (ops == null || ops.length == 0) {
-			return;
-		}
-
-		String operationName = opName == null ? ops[0].getName() : opName;
-
-		Job job = new Job(operationName) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					for (Operation<?> op : ops) {
-						op.run(monitor);
-					}
-				} catch (Exception e) {
-					return BootDashActivator.createErrorStatus(e);
-				}
-				return Status.OK_STATUS;
-			}
-
-		};
-
-		// Use the first scheduling rule for all of the ops
-		ISchedulingRule rule = ops[0].getSchedulingRule();
-		if (rule != null) {
-			job.setRule(rule);
-		}
-
-		job.schedule();
-
-	}
-
-	public void runOp(final Operation<?> op) {
+	public void runOpAsynch(final Operation<?> op) {
 
 		Job job = new Job(op.getName()) {
 
@@ -75,8 +33,13 @@ public class OperationsExecution {
 				try {
 					op.run(monitor);
 				} catch (Exception e) {
-					return BootDashActivator.createErrorStatus(e);
+					if (!(e instanceof OperationCanceledException)) {
+						BootDashActivator.log(e);
+					}
 				}
+				// Only return OK status to avoid a second error dialogue
+				// appearing, which is opened by Eclipse when a job returns
+				// error status.
 				return Status.OK_STATUS;
 			}
 

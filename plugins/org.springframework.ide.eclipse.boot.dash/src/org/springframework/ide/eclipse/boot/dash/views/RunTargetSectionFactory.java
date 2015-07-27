@@ -57,6 +57,6 @@ class RunTargetSectionFactory implements SectionFactory<BootDashModel> {
 		String sectionName = runTarget.getName();
 		BootDashElementsTableSection section = new BootDashElementsTableSection(owner, viewModel, model, elementFilter,
 				tableMouseEvent, ui);
-		return new ExpandableSectionWithSelection(owner, sectionName, section, viewerStyler);
+		return new ExpandableSectionWithSelection(owner, sectionName, section, viewerStyler, model, ui);
 	}
 }

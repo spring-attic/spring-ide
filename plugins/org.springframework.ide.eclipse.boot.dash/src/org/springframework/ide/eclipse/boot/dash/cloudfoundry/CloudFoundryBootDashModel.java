@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -32,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
@@ -44,6 +47,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	private ProjectAppStore projectAppStore;
 
+	private CloudAppCache cloudAppCache;
+
 	public static final String PROJECT_TO_APP_MAPPING = "projectToAppMapping";
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
@@ -53,9 +58,14 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
 		this.opExecution = new OperationsExecution();
 		this.projectAppStore = new ProjectAppStore(this.modelStore);
+		this.cloudAppCache = new CloudAppCache(this);
 	}
 
 	LiveSet<BootDashElement> elements;
+
+	public CloudAppCache getAppCache() {
+		return cloudAppCache;
+	}
 
 	@Override
 	public LiveSet<BootDashElement> getElements() {
@@ -74,7 +84,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 
 		Operation<Void> op = new CloudApplicationRefreshOperation(this);
-		opExecution.runOp(op);
+		opExecution.runOpAsynch(op);
 	}
 
 	@Override
@@ -92,10 +102,13 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public boolean canAccept(List<Object> source, Object target) {
-		if (!source.isEmpty()) {
-			for (Object obj : source) {
-				if (getJavaProject(obj) == null) {
+	public boolean canBeAdded(List<Object> sources, Object target) {
+		if (sources != null && !sources.isEmpty()) {
+			for (Object obj : sources) {
+				// IMPORTANT: to avoid drag/drop into the SAME target, be
+				// sure
+				// all sources are from a different target
+				if (getProject(obj) == null || !isFromDifferentTarget(obj)) {
 					return false;
 				}
 			}
@@ -107,47 +120,43 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	@Override
 	public void add(List<Object> sources, Object target, UserInteractions ui) throws Exception {
-		// For now, only support new deployments (no mapping to existing apps in
-		// CF)
-		// Therefore ignore the target
+
 		Map<IProject, BootDashElement> projects = new LinkedHashMap<IProject, BootDashElement>();
 		if (sources != null) {
 			for (Object obj : sources) {
-				IProject project = null;
-				if (obj instanceof IProject) {
-					project = (IProject) obj;
-				} else if (obj instanceof IJavaProject) {
-					project = ((IJavaProject) obj).getProject();
-				} else if (obj instanceof IAdaptable) {
-					project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
-				} else if (obj instanceof BootDashElement) {
-					project = ((BootDashElement) obj).getProject();
-				}
+				IProject project = getProject(obj);
 
 				if (project != null) {
 					projects.put(project, null);
 				}
-			}
-			BootDashElement element = target instanceof BootDashElement ? (BootDashElement) target : null;
-
-			// If only one project was drag/dropped to element, map it
-			Iterator<Entry<IProject, BootDashElement>> it = projects.entrySet().iterator();
-			if (projects.size() == 1 && it.hasNext()) {
-				Entry<IProject, BootDashElement> entry = it.next();
-				entry.setValue(element);
 			}
 
 			performDeployment(projects, ui);
 		}
 	}
 
-	protected IJavaProject getJavaProject(Object source) {
-		if (source instanceof IJavaProject) {
-			return (IJavaProject) source;
-		} else if (source instanceof BootDashElement) {
-			return ((BootDashElement) source).getJavaProject();
+	protected IProject getProject(Object obj) {
+		IProject project = null;
+		if (obj instanceof IProject) {
+			project = (IProject) obj;
+		} else if (obj instanceof IJavaProject) {
+			project = ((IJavaProject) obj).getProject();
+		} else if (obj instanceof IAdaptable) {
+			project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
+		} else if (obj instanceof BootDashElement) {
+			project = ((BootDashElement) obj).getProject();
 		}
-		return null;
+		return project;
+	}
+
+	protected boolean isFromDifferentTarget(Object dropSource) {
+		if (dropSource instanceof BootDashElement) {
+			return ((BootDashElement) dropSource).getParent() != this;
+		}
+
+		// If not a boot element that is being dropped, it is an element
+		// external to the boot dash view (e.g. project from project explorer)
+		return true;
 	}
 
 	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
@@ -159,50 +168,59 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		// want to replace the existing app
 		boolean shouldAutoReplaceApp = false;
 
-		opExecution.runOp(new ApplicationDeployer(CloudFoundryBootDashModel.this, client, ui, projectsToDeploy,
-				shouldAutoReplaceApp, opExecution));
+		getCloudOpExecution().runOpAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui,
+				projectsToDeploy, shouldAutoReplaceApp));
 
 	}
 
-	public synchronized BootDashElement addElement(CloudApplication app, IProject project) throws Exception {
-
-		Set<BootDashElement> existing = elements.getValue();
-
+	public BootDashElement addElement(CloudApplication app, IProject project, RunState overrideRunstate)
+			throws Exception {
+		BootDashElement addedElement = null;
 		Set<BootDashElement> updated = new HashSet<BootDashElement>();
 
-		BootDashElement addedElement = new CloudDashElement(this, app, project, opExecution, modelStore);
+		synchronized (this) {
+			Set<BootDashElement> existing = elements.getValue();
 
-		updated.add(addedElement);
+			addedElement = new CloudDashElement(this, app.getName(), project, opExecution, modelStore);
 
-		// Add any existing ones that weren't replaced by the new ones
-		// Replace the existing one with a new one for the given Cloud
-		// Application
-		for (BootDashElement element : existing) {
-			if (!addedElement.getName().equals(element.getName())) {
-				updated.add(element);
+			updated.add(addedElement);
+
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (!addedElement.getName().equals(element.getName())) {
+					updated.add(element);
+				}
 			}
-		}
+			elements.getValue().clear();
 
-		elements.replaceAll(updated);
-		projectAppStore.storeProjectToAppMapping(updated);
+			projectAppStore.storeProjectToAppMapping(updated);
+
+			getAppCache().updateCache(app, overrideRunstate);
+		}
+		elements.addAll(updated);
+
 		notifyElementChanged(addedElement);
 		return addedElement;
 	}
 
-	public synchronized CloudDashElement getElement(String appName) throws Exception {
+	public CloudDashElement getElement(String appName) {
 
-		Set<BootDashElement> existing = elements.getValue();
+		synchronized (this) {
+			Set<BootDashElement> existing = elements.getValue();
 
-		// Add any existing ones that weren't replaced by the new ones
-		// Replace the existing one with a new one for the given Cloud
-		// Application
-		for (BootDashElement element : existing) {
-			if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
-				return (CloudDashElement) element;
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
+					return (CloudDashElement) element;
+				}
 			}
+			return null;
 		}
 
-		return null;
 	}
 
 	/**
@@ -219,13 +237,15 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 		// Add new ones first
 		for (Entry<CloudApplication, IProject> entry : apps.entrySet()) {
-			BootDashElement addedElement = new CloudDashElement(this, entry.getKey(), entry.getValue(), opExecution,
-					modelStore);
+			BootDashElement addedElement = new CloudDashElement(this, entry.getKey().getName(), entry.getValue(),
+					opExecution, modelStore);
 			updated.add(addedElement);
 		}
 
 		elements.replaceAll(updated);
 		projectAppStore.storeProjectToAppMapping(updated);
+		getAppCache().updateAll(apps.keySet());
+
 	}
 
 	public ProjectAppStore getProjectToAppMappingStore() {
@@ -236,52 +256,70 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		return opExecution;
 	}
 
+	public void notifyApplicationChanged(String appName, RunState runState) {
+		getAppCache().updateCache(appName, runState);
+		CloudDashElement element = getElement(appName);
+		if (element != null) {
+			notifyElementChanged(element);
+		}
+	}
+
+	public void notifyApplicationChanged(CloudApplication app, RunState runState) {
+		getAppCache().updateCache(app, runState);
+		CloudDashElement element = getElement(app.getName());
+		if (element != null) {
+			notifyElementChanged(element);
+		}
+	}
+
 	@Override
 	public void delete(List<BootDashElement> toRemove, UserInteractions ui) {
 
-		if (toRemove == null || toRemove.isEmpty()) {
-			return;
-		}
+		Set<BootDashElement> updated = new HashSet<BootDashElement>();
 
-		if (ui.confirmOperation("Deleting Applications",
-				"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
+		synchronized (this) {
+			if (toRemove == null || toRemove.isEmpty()) {
+				return;
+			}
 
-			Set<BootDashElement> existing = elements.getValue();
+			if (ui.confirmOperation("Deleting Applications",
+					"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
 
-			Set<BootDashElement> updated = new HashSet<BootDashElement>();
+				Set<BootDashElement> existing = elements.getValue();
 
-			Set<String> toRemoveNames = new HashSet<String>();
+				Set<String> toRemoveNames = new HashSet<String>();
 
-			for (BootDashElement element : toRemove) {
-				if (element instanceof CloudDashElement) {
-					CloudDashElement cloudElement = (CloudDashElement) element;
-					try {
-						cloudElement.delete(ui);
-						toRemoveNames.add(element.getName());
-
-					} catch (Exception e) {
-						// Allow deletion to continue
-						BootDashActivator.log(e);
+				for (BootDashElement element : toRemove) {
+					if (element instanceof CloudDashElement) {
+						CloudDashElement cloudElement = (CloudDashElement) element;
+						try {
+							cloudElement.delete(ui);
+							toRemoveNames.add(element.getName());
+							getAppCache().remove(element.getName());
+						} catch (Exception e) {
+							// Allow deletion to continue
+							BootDashActivator.log(e);
+						}
 					}
 				}
-			}
 
-			// Add any existing ones that weren't replaced by the new ones
-			// Replace the existing one with a new one for the given Cloud
-			// Application
-			for (BootDashElement element : existing) {
-				if (!toRemoveNames.contains(element.getName())) {
-					updated.add(element);
+				// Add any existing ones that weren't replaced by the new ones
+				// Replace the existing one with a new one for the given Cloud
+				// Application
+				for (BootDashElement element : existing) {
+					if (!toRemoveNames.contains(element.getName())) {
+						updated.add(element);
+					}
+				}
+
+				try {
+					projectAppStore.storeProjectToAppMapping(updated);
+				} catch (Exception e) {
+					ui.errorPopup("Error saving project to application mappings", e.getMessage());
 				}
 			}
-
-			elements.replaceAll(updated);
-			try {
-				projectAppStore.storeProjectToAppMapping(updated);
-			} catch (Exception e) {
-				ui.errorPopup("Error saving project to application mappings", e.getMessage());
-			}
 		}
+		elements.replaceAll(updated);
 
 	}
 

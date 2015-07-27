@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
@@ -22,8 +23,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
-import org.springframework.ide.eclipse.boot.dash.util.TableViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
+import org.springframework.ide.eclipse.boot.dash.util.TableViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 
@@ -56,11 +57,18 @@ public class BootDashLabelProvider extends StyledCellLabelProvider {
 				cell.setText(javaLabels.getText(jp));
 				//cell.setImage(javaLabels.getImage(jp));
 			} else {
-				// Project and app (element) name are shown in separate columns now. If
-				// there is no project mapping
-				// do not show the element name anymore. That way the user knows that there is
-				// no mapping for that element.
-				cell.setText("???");
+				// Not all projects in elements are Java projects. CF elements accept any project that contains a valid manifest.yml since the manifest.yml may
+				// point to an executable archive for the app (.jar/.war)
+				IProject project = e.getProject();
+				if (project != null) {
+					cell.setText(project.getName());
+				} else {
+					// Project and app (element) name are shown in separate columns now. If
+					// there is no project mapping
+					// do not show the element name anymore. That way the user knows that there is
+					// no mapping for that element.
+					cell.setText("");
+				}
 			}
 			break;
 		case HOST:

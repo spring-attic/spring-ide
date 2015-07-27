@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -16,18 +16,46 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
+/**
+ * A cloud operation that is performed on a Cloud application.
+ *
+ */
 public abstract class CloudApplicationOperation extends CloudOperation<CloudApplication> {
 
-	protected final String appName;
-	protected final CloudFoundryBootDashModel model;
+	protected String appName;
+
+	private ApplicationUpdateListener applicationUpdateListener;
 
 	public CloudApplicationOperation(String opName, CloudFoundryOperations client, String appName,
 			CloudFoundryBootDashModel model, UserInteractions ui) {
-		super(opName, client, ui);
-		this.model = model;
+		super(opName, client, model, ui);
+		applicationUpdateListener = new ApplicationUpdateListener.DefaultListener(appName, model);
 		this.appName = appName;
+	}
+
+	protected CloudApplication getCloudApplication() throws Exception {
+		return getCloudApplication(client, appName);
+	}
+
+	protected CloudApplication getCachedApplication() {
+		return model.getAppCache().getApp(appName);
+	}
+
+	public void addApplicationUpdateListener(ApplicationUpdateListener appUpdateListener) {
+		if (appUpdateListener != null) {
+			this.applicationUpdateListener = appUpdateListener;
+		}
+	}
+
+	/**
+	 * @return listener that updates the application state when notified. Should
+	 *         not be null.
+	 */
+	protected ApplicationUpdateListener getAppUpdateListener() {
+		return applicationUpdateListener;
 	}
 
 	/**
@@ -37,7 +65,7 @@ public abstract class CloudApplicationOperation extends CloudOperation<CloudAppl
 	 * @throws Exception
 	 *             if error occurred while fetching Cloud application
 	 */
-	protected CloudApplication getExistingCloudApplication() throws Exception {
+	public static CloudApplication getCloudApplication(CloudFoundryOperations client, String appName) throws Exception {
 		try {
 			return client.getApplication(appName);
 		} catch (Exception e) {
@@ -50,20 +78,25 @@ public abstract class CloudApplicationOperation extends CloudOperation<CloudAppl
 	}
 
 	protected Exception getApplicationException(Exception e) {
-		if (e.getMessage() != null) {
-			if (e.getMessage().contains("404")) {
-				IStatus status = BootDashActivator.createErrorStatus(e,
-						"Application not found in Cloud Foundry target when verifying that it exists: "
-								+ e.getMessage());
-				return new CoreException(status);
-			}
-
+		if (is404Error(e)) {
+			IStatus status = BootDashActivator.createErrorStatus(e,
+					"Application not found in Cloud Foundry target when verifying that it exists: " + e.getMessage());
+			return new CoreException(status);
 		}
 		return e;
+	}
+
+	protected boolean is404Error(Exception e) {
+		return e.getMessage() != null && e.getMessage().contains("404");
 	}
 
 	public ISchedulingRule getSchedulingRule() {
 		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
 	}
 
+	@Override
+	protected void handleError(Exception e) throws Exception {
+		applicationUpdateListener.onError(e);
+		super.handleError(e);
+	}
 }
