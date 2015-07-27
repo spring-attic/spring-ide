@@ -29,10 +29,7 @@ public class CloudAppCache {
 
 	private final Map<String, CacheItem> cacheItem = new HashMap<String, CacheItem>();
 
-	private final CloudFoundryBootDashModel model;
-
 	public CloudAppCache(CloudFoundryBootDashModel model) {
-		this.model = model;
 	}
 
 	public synchronized void updateAll(Collection<CloudApplication> apps) {
@@ -46,15 +43,37 @@ public class CloudAppCache {
 		}
 	}
 
-	public synchronized void update(String appName, RunState runState) {
+	/**
+	 * Update the cache
+	 *
+	 * @param appName
+	 * @param runState
+	 */
+	public synchronized void updateCache(String appName, RunState runState) {
 		CacheItem item = cacheItem.get(appName);
 		if (item != null) {
 			item.runState = runState;
 		}
-		CloudDashElement element = model.getElement(appName);
-		if (element != null) {
-			model.notifyElementChanged(element);
-		}
+	}
+
+	/**
+	 * Update the cache
+	 *
+	 * @param app
+	 * @param runState
+	 *            optional. It overrides the run state in the Cloud app. For
+	 *            example, it may be used for handling {@link RunState#STARTING}
+	 */
+	public synchronized void updateCache(CloudApplication app, RunState runState) {
+		CacheItem item = new CacheItem();
+		item.app = app;
+		item.runState = runState != null ? runState : getRunStateFromCloudApp(app);
+
+		cacheItem.put(app.getName(), item);
+	}
+
+	public synchronized void remove(String appName) {
+		cacheItem.remove(appName);
 	}
 
 	public synchronized CloudApplication getApp(String appName) {
@@ -63,20 +82,6 @@ public class CloudAppCache {
 			return item.app;
 		}
 		return null;
-	}
-
-	public synchronized void update(CloudApplication app) {
-		CacheItem item = new CacheItem();
-		item.app = app;
-		item.runState = getRunStateFromCloudApp(app);
-
-		cacheItem.put(app.getName(), item);
-
-		CloudDashElement element = model.getElement(app.getName());
-		if (element != null) {
-			model.notifyElementChanged(element);
-		}
-
 	}
 
 	public synchronized RunState getRunState(String appName) {

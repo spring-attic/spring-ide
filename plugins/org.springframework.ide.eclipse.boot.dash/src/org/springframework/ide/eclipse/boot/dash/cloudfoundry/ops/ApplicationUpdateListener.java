@@ -30,16 +30,15 @@ public abstract class ApplicationUpdateListener {
 	}
 
 	public void updateModel(RunState runState) {
-		model.getAppCache().update(appName, runState);
-
+		model.notifyApplicationChanged(appName, runState);
 	}
 
-	public void updateModel(CloudApplication app) {
-		model.getAppCache().update(app);
+	public void updateModel(CloudApplication app, RunState runState) {
+		model.notifyApplicationChanged(app, runState);
 	}
 
 	public void onError(Exception e) {
-		model.getAppCache().update(appName, RunState.INACTIVE);
+		model.notifyApplicationChanged(appName, RunState.INACTIVE);
 	}
 
 	abstract public void applicationCreated(CloudApplication app);

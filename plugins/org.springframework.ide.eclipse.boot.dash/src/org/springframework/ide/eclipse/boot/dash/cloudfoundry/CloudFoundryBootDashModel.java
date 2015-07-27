@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
@@ -70,7 +72,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	public LiveSet<BootDashElement> getElements() {
 
 		if (elements == null) {
-			elements = new LiveSet<BootDashElement>();
+			elements = new ReplaceableLiveSet();
 
 			asyncRefreshElements();
 		}
@@ -153,7 +155,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			return ((BootDashElement) dropSource).getParent() != this;
 		}
 
-		//If not a boot element that is being dropped, it is an element external to the boot dash view (e.g. project from project explorer)
+		// If not a boot element that is being dropped, it is an element
+		// external to the boot dash view (e.g. project from project explorer)
 		return true;
 	}
 
@@ -171,46 +174,52 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	}
 
-	public synchronized BootDashElement addElement(CloudApplication app, IProject project) throws Exception {
+	public BootDashElement addElement(CloudApplication app, IProject project, RunState overrideRunstate)
+			throws Exception {
+		BootDashElement addedElement = null;
+		synchronized (this) {
+			Set<BootDashElement> existing = elements.getValue();
 
-		Set<BootDashElement> existing = elements.getValue();
+			Set<BootDashElement> updated = new HashSet<BootDashElement>();
 
-		Set<BootDashElement> updated = new HashSet<BootDashElement>();
+			addedElement = new CloudDashElement(this, app.getName(), project, opExecution, modelStore);
 
-		BootDashElement addedElement = new CloudDashElement(this, app.getName(), project, opExecution, modelStore);
+			updated.add(addedElement);
 
-		updated.add(addedElement);
-
-		// Add any existing ones that weren't replaced by the new ones
-		// Replace the existing one with a new one for the given Cloud
-		// Application
-		for (BootDashElement element : existing) {
-			if (!addedElement.getName().equals(element.getName())) {
-				updated.add(element);
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (!addedElement.getName().equals(element.getName())) {
+					updated.add(element);
+				}
 			}
+
+			elements.replaceAll(updated);
+			projectAppStore.storeProjectToAppMapping(updated);
+
+			getAppCache().updateCache(app, overrideRunstate);
 		}
-
-		elements.replaceAll(updated);
-		projectAppStore.storeProjectToAppMapping(updated);
-
 		notifyElementChanged(addedElement);
 		return addedElement;
 	}
 
-	public synchronized CloudDashElement getElement(String appName) {
+	public CloudDashElement getElement(String appName) {
 
-		Set<BootDashElement> existing = elements.getValue();
+		synchronized (this) {
+			Set<BootDashElement> existing = elements.getValue();
 
-		// Add any existing ones that weren't replaced by the new ones
-		// Replace the existing one with a new one for the given Cloud
-		// Application
-		for (BootDashElement element : existing) {
-			if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
-				return (CloudDashElement) element;
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
+					return (CloudDashElement) element;
+				}
 			}
+			return null;
 		}
 
-		return null;
 	}
 
 	/**
@@ -246,53 +255,107 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		return opExecution;
 	}
 
+	public void notifyApplicationChanged(String appName, RunState runState) {
+		getAppCache().updateCache(appName, runState);
+		CloudDashElement element = getElement(appName);
+		if (element != null) {
+			notifyElementChanged(element);
+		}
+	}
+
+	public void notifyApplicationChanged(CloudApplication app, RunState runState) {
+		getAppCache().updateCache(app, runState);
+		CloudDashElement element = getElement(app.getName());
+		if (element != null) {
+			notifyElementChanged(element);
+		}
+	}
+
 	@Override
 	public void delete(List<BootDashElement> toRemove, UserInteractions ui) {
 
-		if (toRemove == null || toRemove.isEmpty()) {
-			return;
-		}
+		synchronized (this) {
+			if (toRemove == null || toRemove.isEmpty()) {
+				return;
+			}
 
-		if (ui.confirmOperation("Deleting Applications",
-				"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
+			if (ui.confirmOperation("Deleting Applications",
+					"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
 
-			Set<BootDashElement> existing = elements.getValue();
+				Set<BootDashElement> existing = elements.getValue();
 
-			Set<BootDashElement> updated = new HashSet<BootDashElement>();
+				Set<BootDashElement> updated = new HashSet<BootDashElement>();
 
-			Set<String> toRemoveNames = new HashSet<String>();
+				Set<String> toRemoveNames = new HashSet<String>();
 
-			for (BootDashElement element : toRemove) {
-				if (element instanceof CloudDashElement) {
-					CloudDashElement cloudElement = (CloudDashElement) element;
-					try {
-						cloudElement.delete(ui);
-						toRemoveNames.add(element.getName());
-
-					} catch (Exception e) {
-						// Allow deletion to continue
-						BootDashActivator.log(e);
+				for (BootDashElement element : toRemove) {
+					if (element instanceof CloudDashElement) {
+						CloudDashElement cloudElement = (CloudDashElement) element;
+						try {
+							cloudElement.delete(ui);
+							toRemoveNames.add(element.getName());
+							getAppCache().remove(element.getName());
+						} catch (Exception e) {
+							// Allow deletion to continue
+							BootDashActivator.log(e);
+						}
 					}
 				}
-			}
 
-			// Add any existing ones that weren't replaced by the new ones
-			// Replace the existing one with a new one for the given Cloud
-			// Application
-			for (BootDashElement element : existing) {
-				if (!toRemoveNames.contains(element.getName())) {
-					updated.add(element);
+				// Add any existing ones that weren't replaced by the new ones
+				// Replace the existing one with a new one for the given Cloud
+				// Application
+				for (BootDashElement element : existing) {
+					if (!toRemoveNames.contains(element.getName())) {
+						updated.add(element);
+					}
+				}
+
+				elements.replaceAll(updated);
+				try {
+					projectAppStore.storeProjectToAppMapping(updated);
+				} catch (Exception e) {
+					ui.errorPopup("Error saving project to application mappings", e.getMessage());
 				}
 			}
 
-			elements.replaceAll(updated);
-			try {
-				projectAppStore.storeProjectToAppMapping(updated);
-			} catch (Exception e) {
-				ui.errorPopup("Error saving project to application mappings", e.getMessage());
-			}
 		}
 
+	}
+
+	/**
+	 * Replace all feature in LiveSet does not work always work with
+	 * CloudDashElement (CDE). Replace all in LiveSet only replaces "old"
+	 * entries rather than force a clean replace. Sometime LiveSet thinks
+	 * something hasn't changed because contains(..) check on the
+	 * CloudDashElement delegate, which is the app name, does not change from
+	 * one CDE to another when other properties of the CDE change, like the
+	 * mapped IProject
+	 *
+	 * <p/>
+	 * For now overriding the replaceAll to do a a clean replace.
+	 * <p/>
+	 * TODO: To properly use LiveSet with CloudDashElement, either change the
+	 * delegate in the CDE to be some identity that is BOTH the name of the
+	 * application and the IProject, or override the equals and hashCode methods
+	 * in CDE to also include the IProject
+	 *
+	 */
+	class ReplaceableLiveSet extends LiveSet<BootDashElement> {
+
+		@Override
+		public void replaceAll(Collection<BootDashElement> newElements) {
+			synchronized (this) {
+
+				if (newElements == null) {
+					newElements = new HashSet<BootDashElement>();
+				}
+				value.clear();
+				// Be sure to delegate to the parent to force the set to be
+				// dirty
+				super.replaceAll(newElements);
+			}
+		}
 	}
 
 }

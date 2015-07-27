@@ -41,7 +41,7 @@ public class FullAppDeploymentListener extends ApplicationUpdateListener {
 		// Update the model to indicate the application is starting
 		// Run state is set to STARTING after the application is created
 		// as before, the element in the model may not yet exist
-		updateModel(RunState.STARTING);
+		updateModel(app, RunState.STARTING);
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class FullAppDeploymentListener extends ApplicationUpdateListener {
 	public void applicationStarted(CloudApplication app) {
 		// Update the model with the latest CloudApplication so that the
 		// model will be synched with the app state in Cloud Foundry
-		updateModel(app);
+		updateModel(app, null);
 	}
 
 	@Override

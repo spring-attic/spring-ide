@@ -35,8 +35,7 @@ public class CloudApplicationStopOperation extends CloudApplicationOperation {
 		// performed on it
 		CloudApplication app = client.getApplication(appName);
 
-		model.getAppCache().update(app);
-		model.notifyElementChanged(element);
+		model.notifyApplicationChanged(app, null);
 
 		return app;
 	}

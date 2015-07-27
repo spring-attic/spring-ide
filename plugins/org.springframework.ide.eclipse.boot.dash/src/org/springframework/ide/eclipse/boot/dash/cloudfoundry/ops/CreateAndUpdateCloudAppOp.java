@@ -22,6 +22,7 @@ import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
@@ -80,7 +81,7 @@ public class CreateAndUpdateCloudAppOp extends CloudApplicationOperation {
 		// element is added
 		getAppUpdateListener().applicationCreated(app);
 
-		this.model.addElement(app, deploymentProperties.getProject());
+		this.model.addElement(app, deploymentProperties.getProject(), RunState.STARTING);
 
 		return app;
 	}

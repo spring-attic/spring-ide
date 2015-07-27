@@ -79,7 +79,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 		Operation<?> op = null;
 
-		getCloudModel().getAppCache().update(getName(), RunState.STARTING);
+		getCloudModel().notifyApplicationChanged(getName(), RunState.STARTING);
 
 		if (getProject() != null) {
 			boolean shouldAutoReplaceApp = true;
