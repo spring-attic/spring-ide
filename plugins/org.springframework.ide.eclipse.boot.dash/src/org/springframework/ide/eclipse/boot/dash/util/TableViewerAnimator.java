@@ -71,7 +71,7 @@ public class TableViewerAnimator {
 		}
 	}
 
-	private void stopAnimation(Object e) {
+	private synchronized void stopAnimation(Object e) {
 		animatedElements.remove(e);
 	}
 
