@@ -31,8 +31,6 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 @SuppressWarnings("restriction")
 public class BootDashLabelProvider extends StyledCellLabelProvider {
 
-	private static final long ANIMATION_INTERVAL = 300; //millis
-
 	private AppearanceAwareLabelProvider javaLabels = new AppearanceAwareLabelProvider();
 	protected final BootDashColumn forColum;
 	private RunStateImages runStateImages;
