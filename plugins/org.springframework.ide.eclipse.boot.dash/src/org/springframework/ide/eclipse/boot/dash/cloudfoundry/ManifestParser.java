@@ -314,9 +314,14 @@ public class ManifestParser {
 		Map<String, String> loadedVars = new HashMap<String, String>();
 
 		for (Entry<?, ?> entry : propertiesMap.entrySet()) {
-			if ((entry.getKey() instanceof String) && (entry.getValue() instanceof String)) {
+			if ((entry.getKey() instanceof String) ) {
 				String varName = (String) entry.getKey();
-				String varValue = (String) entry.getValue();
+				String varValue = null;
+				if (entry.getValue() instanceof String) {
+					varValue =(String) entry.getValue();
+				} else if (entry.getValue() instanceof Integer) {
+					varValue = Integer.toString((Integer) entry.getValue());
+				}
 				if (varName != null && varValue != null) {
 					loadedVars.put(varName, varValue);
 				}

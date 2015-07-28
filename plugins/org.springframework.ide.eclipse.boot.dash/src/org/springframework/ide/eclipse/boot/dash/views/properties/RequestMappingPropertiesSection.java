@@ -15,11 +15,9 @@ import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -35,14 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.views.properties.tabbed.AbstractPropertySection;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvider;
@@ -56,7 +49,7 @@ import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
  * @author Alex Boyko
  * @author Kris De Volder
  */
-public class RequestMappingPropertiesSection extends AbstractPropertySection {
+public class RequestMappingPropertiesSection extends AbstractBdePropertiesSection {
 
 	private class DoubleClickListener extends MouseAdapter {
 		DoubleClickListener(TableViewer tv) {
@@ -103,7 +96,6 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 	private TabbedPropertySheetPage page;
 	private Composite composite;
 	private TableViewer tv;
-	private ElementStateListener modelListener;
 	private RequestMappingLabelProvider labelProvider;
 	private Stylers stylers;
 	private ViewerSorter sorter = new ViewerSorter() {
@@ -171,55 +163,31 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 		}
 
 		new DoubleClickListener(tv);
-		BootDashActivator.getDefault().getModel().addElementStateListener(modelListener = new ElementStateListener() {
-			public void stateChanged(BootDashElement e) {
-				if (e.equals(input.getValue())) {
-					if (!page.getControl().isDisposed()) {
-						page.getControl().getDisplay().asyncExec(new Runnable() {
-							public void run() {
-								if (!page.getControl().isDisposed()) {
-									refresh();
-									tv.refresh();
-									page.getControl().getParent().layout(true, true);
-								}
-							}
-						});
-					}
-				}
-			}
-		});
 	}
 
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		Assert.isTrue(selection instanceof IStructuredSelection);
-		IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-		if (structuredSelection.size() > 1) {
-			input.setValue(null);
-		} else {
-			Object inputObj = structuredSelection.getFirstElement();
-			Assert.isTrue(inputObj instanceof BootDashElement);
-			input.setValue((BootDashElement) inputObj);
-		}
-		refresh();
+		input.setValue(getBootDashElement());
+		tv.setInput(getBootDashElement());
 	}
 
 	public void refresh() {
 		refreshControlsVisibility();
-		BootDashElement input = this.input.getValue();
-		tv.setInput(input);
-		if (input == null) {
+		BootDashElement bde = getBootDashElement();
+		if (bde == null) {
 			labelText.setText("Select single element in Boot Dashboard to see Request Mappings");
-		} else if (input.getLiveRequestMappings() == null) {
-			labelText.setText("'" + input.getName() + "' must be running and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
+		} else if (bde.getLiveRequestMappings() == null) {
+			labelText.setText("'" + bde.getName() + "' must be running and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
 		} else {
 			labelText.setText("");
 		}
+		tv.refresh();
+		page.getControl().getParent().layout(true, true);
 	}
 
 	private void refreshControlsVisibility() {
-		BootDashElement input = this.input.getValue();
-		if (input == null || input.getLiveRequestMappings() == null) {
+		BootDashElement bde = getBootDashElement();
+		if (bde == null || bde.getLiveRequestMappings() == null) {
 			tv.getControl().setVisible(false);
 			labelText.setVisible(true);
 		} else {
@@ -230,10 +198,6 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 
 	@Override
 	public void dispose() {
-		if (modelListener!=null) {
-			BootDashActivator.getDefault().getModel().removeElementStateListener(modelListener);
-			modelListener = null;
-		}
 		if (labelProvider!=null) {
 			labelProvider.dispose();
 			labelProvider = null;
@@ -254,14 +218,9 @@ public class RequestMappingPropertiesSection extends AbstractPropertySection {
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			tv.refresh();
-			tv.getControl().getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					if (!page.getControl().isDisposed()) {
-						page.getControl().getParent().layout(true, true);
-					}
-				}
-			});
+			/*
+			 * Nothing. Rely on the section refresh mechanism that should refresh the table
+			 */
 		}
 
 		@Override
