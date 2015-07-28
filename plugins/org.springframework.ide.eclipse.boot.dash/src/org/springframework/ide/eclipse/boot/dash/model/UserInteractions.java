@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
  * An instance of this interface handles interactions with the GUI code from
@@ -30,4 +31,5 @@ public interface UserInteractions {
 	void openUrl(String url);
 	boolean confirmOperation(String title, String message);
 	String updatePassword(String userName, String targetId);
+	void openDialog(ToggleFiltersDialogModel model);
 }

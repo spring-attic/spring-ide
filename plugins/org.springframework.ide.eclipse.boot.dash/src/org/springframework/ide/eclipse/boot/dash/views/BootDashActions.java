@@ -53,6 +53,7 @@ public class BootDashActions {
 	private DeleteApplicationsAction deleteApplicationsAction;
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
+	private ToggleFiltersAction toggleFiltersAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -146,6 +147,7 @@ public class BootDashActions {
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
+		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), selection, ui);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -230,7 +232,6 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
 	public IAction getDeleteApplicationsAction() {
@@ -275,6 +276,14 @@ public class BootDashActions {
 			}
 			addTargetActions = null;
 		}
+		if (toggleFiltersAction != null) {
+			toggleFiltersAction.dispose();
+			toggleFiltersAction = null;
+		}
+	}
+
+	public IAction getToggleFiltersAction() {
+		return toggleFiltersAction;
 	}
 
 }

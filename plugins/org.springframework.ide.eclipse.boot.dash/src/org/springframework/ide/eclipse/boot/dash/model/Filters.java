@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+
 /**
  * Helper methods for creating common filters.
  *
@@ -29,4 +31,30 @@ public class Filters {
 		return ACCEPT_ALL;
 	}
 
+	public static <T> Filter<T> compose(final Filter<T> f1, final Filter<T> f2) {
+		if (f1==ACCEPT_ALL) {
+			return f2;
+		} else if (f2==ACCEPT_ALL) {
+			return f1;
+		}
+		return new Filter<T>() {
+			public boolean accept(T t) {
+				return f1.accept(t) && f2.accept(t);
+			}
+
+		};
+	}
+
+	public static <T> LiveExpression<Filter<T>> compose(final LiveExpression<Filter<T>> f1, final LiveExpression<Filter<T>> f2) {
+		final Filter<T> initial = acceptAll();
+		return new LiveExpression<Filter<T>>(initial) {
+			{
+				dependsOn(f1);
+				dependsOn(f2);
+			}
+			protected Filter<T> compute() {
+				return Filters.compose(f1.getValue(), f2.getValue());
+			}
+		};
+	}
 }

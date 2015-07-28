@@ -22,6 +22,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
@@ -159,5 +161,16 @@ public class DefaultUserInteractions implements UserInteractions {
 			}
 		});
 		return password[0];
+	}
+
+	@Override
+	public void openDialog(final ToggleFiltersDialogModel model) {
+		final Shell shell = getShell();
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				ToggleFiltersDialog dlg = new ToggleFiltersDialog("Select Filters", model, shell);
+				dlg.open();
+			}
+		});
 	}
 }

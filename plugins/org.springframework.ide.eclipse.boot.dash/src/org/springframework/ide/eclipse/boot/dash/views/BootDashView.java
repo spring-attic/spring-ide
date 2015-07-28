@@ -21,6 +21,7 @@ import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -40,7 +41,6 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
@@ -66,7 +66,6 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 	private static final boolean ENABLE_SCROLLING = false;
 
 	private BootDashViewModel model = BootDashActivator.getDefault().getModel();
-	private TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 
 	// private Action refreshAction;
 	// private Action doubleClickAction;
@@ -164,6 +163,17 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 	 * Fills the pull-down menu for this view (accessible from the toolbar)
 	 */
 	private void fillLocalPullDown(IMenuManager manager) {
+		for (RunStateAction a : actions.getRunStateActions()) {
+			manager.add(a);
+		}
+		manager.add(actions.getOpenBrowserAction());
+		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getOpenConfigAction());
+		manager.add(actions.getShowPropertiesViewAction());
+
+		manager.add(new Separator());
+
+		manager.add(actions.getToggleFiltersAction());
 		// manager.add(refreshAction);
 		// manager.add(new Separator());
 		// manager.add(action2);
@@ -177,6 +187,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
+		manager.add(actions.getToggleFiltersAction());
 		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
@@ -235,11 +246,11 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 
-		sections.add(new TagSearchSection(BootDashView.this, filterBoxModel.getText(), model));
+		sections.add(new TagSearchSection(BootDashView.this, model.getFilterBox().getText(), model));
 
 		DynamicRunTargetSection runTargetSections = new DynamicRunTargetSection(this,
 				model.getSectionModels(),
-				new RunTargetSectionFactory(this, model, filterBoxModel.getFilter(), ui, viewStyler)
+				new RunTargetSectionFactory(this, model, model.getFilter(), ui, viewStyler)
 		);
 
 //		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
@@ -284,15 +295,8 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 
 	@Override
 	public void setSelection(ISelection selection) {
-//		if (selection instanceof IStructuredSelection) {
-//			HashSet<BootDashElement> elements = new HashSet<BootDashElement>();
-//			for (Object o : ((IStructuredSelection)selection).toArray()) {
-//				if (o instanceof BootDashElement) {
-//					elements.add((BootDashElement)o);
-//				}
-//			}
-//		}
+		//This method isn't implemented. Probably this is okay, nobody needs to set our selection.
+		// If the need arises to do this in the future, then the 'setSelection' needs to be distributed to
+		// our subsections so each subsection can select whichever elements in the selection apply to them.
 	}
-
-
 }

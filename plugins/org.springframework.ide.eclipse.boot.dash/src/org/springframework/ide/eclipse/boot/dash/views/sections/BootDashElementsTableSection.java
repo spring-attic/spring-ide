@@ -196,7 +196,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
 		// Assumes its up to the page to be scrollable.
 		tv.setContentProvider(new BootDashContentProvider(model));
-		// tv.setLabelProvider(new ViewLabelProvider());
 		tv.setSorter(new NameSorter());
 		tv.setInput(model);
 		tv.getTable().setHeaderVisible(true);
@@ -267,8 +266,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		tv.getTable().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-//				storeTableData();
-
 				tableMouseEvent.setValue(null);
 
 				model.getElements().removeListener(ELEMENTS_SET_LISTENER);
@@ -300,7 +297,6 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		addDragSupport(tv);
 
 		ReflowUtil.reflow(owner, tv.getControl());
-
 	}
 
 	private void initColumnModels() {

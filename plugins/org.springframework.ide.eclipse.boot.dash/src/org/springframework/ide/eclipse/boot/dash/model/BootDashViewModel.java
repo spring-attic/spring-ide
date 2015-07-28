@@ -15,6 +15,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jface.action.Action;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -31,6 +33,9 @@ public class BootDashViewModel implements Disposable {
 	private BootDashModelManager models;
 	private Set<RunTargetType> runTargetTypes;
 	private RunTargetPropertiesManager manager;
+	private ToggleFiltersModel toggleFiltersModel;
+	private TagFilterBoxModel filterBox;
+	private LiveExpression<Filter<BootDashElement>> filter;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -46,6 +51,9 @@ public class BootDashViewModel implements Disposable {
 		runTargets.addListener(manager);
 
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(Arrays.asList(runTargetTypes));
+		filterBox = new TagFilterBoxModel();
+		toggleFiltersModel = new ToggleFiltersModel();
+		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
 	}
 
 	public LiveSet<RunTarget> getRunTargets() {
@@ -94,5 +102,17 @@ public class BootDashViewModel implements Disposable {
 	public void updatePropertiesInStore(RunTargetWithProperties target) {
 		// For now, only properties for secure storage can be updated (e.g. credentials for the run target)
 		manager.secureStorage(target.getTargetProperties());
+	}
+
+	public ToggleFiltersModel getToggleFilters() {
+		return toggleFiltersModel;
+	}
+
+	public TagFilterBoxModel getFilterBox() {
+		return filterBox;
+	}
+
+	public LiveExpression<Filter<BootDashElement>> getFilter() {
+		return filter;
 	}
 }
