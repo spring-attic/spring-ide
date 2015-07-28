@@ -30,15 +30,19 @@ public abstract class ApplicationUpdateListener {
 	}
 
 	public void updateModel(RunState runState) {
-		model.notifyApplicationChanged(appName, runState);
+		model.notifyApplicationRunStateChanged(appName, runState);
 	}
 
 	public void updateModel(CloudApplication app, RunState runState) {
-		model.notifyApplicationChanged(app, runState);
+		model.notifyApplicationRunStateChanged(app, runState);
+	}
+
+	public void updateModel(CloudApplication app) {
+		model.notifyApplicationChanged(app);
 	}
 
 	public void onError(Exception e) {
-		model.notifyApplicationChanged(appName, RunState.INACTIVE);
+		model.notifyApplicationRunStateChanged(appName, RunState.INACTIVE);
 	}
 
 	abstract public void applicationCreated(CloudApplication app);

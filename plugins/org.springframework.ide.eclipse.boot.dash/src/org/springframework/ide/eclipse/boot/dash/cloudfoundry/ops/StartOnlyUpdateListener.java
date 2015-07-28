@@ -38,7 +38,7 @@ public class StartOnlyUpdateListener extends ApplicationUpdateListener {
 
 	@Override
 	public void applicationStarted(CloudApplication app) {
-		updateModel(app, null);
+		updateModel(app);
 	}
 
 	@Override

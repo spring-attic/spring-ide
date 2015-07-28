@@ -55,7 +55,7 @@ public class FullAppDeploymentListener extends ApplicationUpdateListener {
 	public void applicationStarted(CloudApplication app) {
 		// Update the model with the latest CloudApplication so that the
 		// model will be synched with the app state in Cloud Foundry
-		updateModel(app, null);
+		updateModel(app);
 	}
 
 	@Override

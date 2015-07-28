@@ -61,7 +61,7 @@ public final class CloudApplicationRefreshOperation extends Operation<Void> {
 				}
 			}
 
-			this.model.replaceElements(updatedApplications);
+			this.model.updateElements(updatedApplications);
 
 		} catch (Exception e) {
 			BootDashActivator.log(e);

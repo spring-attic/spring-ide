@@ -55,7 +55,7 @@ public class ApplicationDeploymentOperation extends CloudApplicationOperation {
 
 		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, element, monitor);
 
-		model.notifyApplicationChanged(properties.getAppName(), RunState.STARTING);
+		model.notifyApplicationRunStateChanged(properties.getAppName(), RunState.STARTING);
 
 		CloudApplicationOperation createOp = new CreateAndUpdateCloudAppOp(client, properties, model, ui);
 		CloudApplicationOperation uploadOp = new UploadApplicationOperation(client, properties, model, ui);

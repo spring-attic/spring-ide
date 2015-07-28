@@ -50,14 +50,12 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	private PropertyStoreApi persistentProperties;
 
-	private final IProject project;
-
-	public CloudDashElement(CloudFoundryBootDashModel model, String appName, IProject project,
-			OperationsExecution operations, IPropertyStore modelStore) {
+	public CloudDashElement(CloudFoundryBootDashModel model, String appName, OperationsExecution operations,
+			IPropertyStore modelStore) {
 		super(model, appName);
 		this.cloudTarget = model.getCloudTarget();
 		this.opExecution = operations;
-		this.project = project;
+
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(delegate, modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
@@ -79,7 +77,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 		Operation<?> op = null;
 
-		getCloudModel().notifyApplicationChanged(getName(), RunState.STARTING);
+		getCloudModel().notifyApplicationRunStateChanged(getName(), RunState.STARTING);
 
 		if (getProject() != null) {
 			boolean shouldAutoReplaceApp = true;
@@ -115,7 +113,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public IProject getProject() {
-		return project;
+		return getCloudModel().getAppCache().getProject(getName());
 	}
 
 	@Override
@@ -191,5 +189,4 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	public PropertyStoreApi getPersistentProperties() {
 		return persistentProperties;
 	}
-
 }
