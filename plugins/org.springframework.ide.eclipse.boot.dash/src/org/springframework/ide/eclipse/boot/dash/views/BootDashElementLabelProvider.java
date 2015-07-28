@@ -76,6 +76,9 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 
 	public StyledString getStyledText(BootDashElement element, BootDashColumn column, Stylers stylers) {
 		StyledString label = new StyledString();
+		if (element == null) {
+			return label;
+		}
 		switch(column) {
 		case TAGS:
 			String text = getText(element, column);
@@ -94,6 +97,9 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 
 	public Image getImage(BootDashElement element, BootDashColumn column) {
 		Image image = null;
+		if (element == null) {
+			return image;
+		}
 		switch (column) {
 		case PROJECT:
 			IJavaProject jp = element.getJavaProject();
@@ -109,7 +115,10 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
-		Image[] image;
+		Image[] image = new Image[0];
+		if (element == null) {
+			return image;
+		}
 		switch (column) {
 		case PROJECT:
 			IJavaProject jp = element.getJavaProject();
@@ -131,6 +140,9 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 
 	public String getText(BootDashElement element, BootDashColumn column) {
 		String label = "";
+		if (element == null) {
+			return label;
+		}
 		switch(column) {
 		case PROJECT:
 			IJavaProject jp = element.getJavaProject();

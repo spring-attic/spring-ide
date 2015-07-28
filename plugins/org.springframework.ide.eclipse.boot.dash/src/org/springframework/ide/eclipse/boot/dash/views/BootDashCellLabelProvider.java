@@ -41,7 +41,7 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 		switch (forColum) {
 		case PROJECT:
 			cell.setText(bdeLabels.getText(e, forColum));
-			cell.setImage(bdeLabels.getImage(e, forColum));
+//			cell.setImage(bdeLabels.getImage(e, forColum));
 			break;
 		case HOST:
 			cell.setText(bdeLabels.getText(e, forColum));

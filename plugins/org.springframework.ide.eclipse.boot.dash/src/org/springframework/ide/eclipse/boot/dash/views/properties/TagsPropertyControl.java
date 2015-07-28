@@ -49,10 +49,10 @@ public class TagsPropertyControl extends AbstractBdePropertyControl {
 				String str = (String) tags.getValue();
 				BootDashElement element = getBootDashElement();
 				if (element != null) {
-					if (str.isEmpty()) {
-						element.setTags(null);
-					} else {
-						element.setTags(new LinkedHashSet<String>(Arrays.asList(TagUtils.parseTags(str))));
+					LinkedHashSet<String> tagsSet = str.isEmpty() ? new LinkedHashSet<String>()
+							: new LinkedHashSet<String>(Arrays.asList(TagUtils.parseTags(str)));
+					if (!tagsSet.equals(element.getTags())) {
+						element.setTags(tagsSet);
 					}
 				}
 			}
