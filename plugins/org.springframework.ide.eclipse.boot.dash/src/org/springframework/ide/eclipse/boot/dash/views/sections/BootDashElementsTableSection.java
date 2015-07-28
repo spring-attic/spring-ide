@@ -82,8 +82,8 @@ import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashCellLabelProvider;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashContentProvider;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -429,6 +429,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		}
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getShowPropertiesViewAction());
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
 			manager.add(a);
 		}

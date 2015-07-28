@@ -33,6 +33,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 
 public class BootDashActions {
 
+	private final static String PROPERTIES_VIEW_ID = "org.eclipse.ui.views.PropertySheet"; //$NON-NLS-1$
+
 	///// context info //////////////
 	private BootDashViewModel model;
 	private MultiSelection<BootDashElement> selection;
@@ -50,6 +52,7 @@ public class BootDashActions {
 	private RemoveRunTargetAction removeTargetAction;
 	private DeleteApplicationsAction deleteApplicationsAction;
 	private UpdatePasswordAction updatePasswordAction;
+	private ShowViewAction showPropertiesViewAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this.model = model;
@@ -141,6 +144,8 @@ public class BootDashActions {
 				}
 			}
 		}
+
+		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -238,6 +243,14 @@ public class BootDashActions {
 	 */
 	public IAction getUpdatePasswordAction() {
 		return updatePasswordAction;
+	}
+
+	/**
+	 *
+	 * @return show properties view action instance
+	 */
+	public IAction getShowPropertiesViewAction() {
+		return showPropertiesViewAction;
 	}
 
 	public void dispose() {

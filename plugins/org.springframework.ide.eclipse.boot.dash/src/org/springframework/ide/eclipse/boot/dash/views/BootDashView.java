@@ -42,7 +42,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.sections.SashSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
@@ -177,6 +176,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
+		manager.add(actions.getShowPropertiesViewAction());
 		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
