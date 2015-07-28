@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -49,9 +51,8 @@ public class BootDashModelManager implements Disposable {
 
 	public LiveExpression<Set<BootDashModel>> getModels() {
 		if (models == null) {
-			models = new LiveSet<BootDashModel>();
-			modelsPerTargetId = new HashMap<String, BootDashModel>();
-			models.dependsOn(targets);
+			models = new LiveSet<BootDashModel>(new LinkedHashSet<BootDashModel>());
+			modelsPerTargetId = new LinkedHashMap<String, BootDashModel>();
 			targets.addListener(targetListener = new RunTargetChangeListener());
 		}
 		return models;
@@ -62,7 +63,7 @@ public class BootDashModelManager implements Disposable {
 		@Override
 		public void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> actualRunTargets) {
 			synchronized (modelsPerTargetId) {
-				Map<String, RunTarget> currentTargetsPerId = new HashMap<String, RunTarget>();
+				Map<String, RunTarget> currentTargetsPerId = new LinkedHashMap<String, RunTarget>();
 				if (actualRunTargets != null) {
 					for (RunTarget runTarget : actualRunTargets) {
 						currentTargetsPerId.put(runTarget.getId(), runTarget);
@@ -74,7 +75,7 @@ public class BootDashModelManager implements Disposable {
 				boolean hasChanged = false;
 
 				// Add models for new targets
-				Set<BootDashModel> modelsToKeep = new HashSet<BootDashModel>();
+				Set<BootDashModel> modelsToKeep = new LinkedHashSet<BootDashModel>();
 
 				for (Entry<String, RunTarget> entry : currentTargetsPerId.entrySet()) {
 					if (modelsPerTargetId.get(entry.getKey()) == null) {
@@ -94,7 +95,7 @@ public class BootDashModelManager implements Disposable {
 				for (Iterator<Entry<String, BootDashModel>> it = modelsPerTargetId.entrySet().iterator(); it
 						.hasNext();) {
 					Entry<String, BootDashModel> entry = it.next();
-					if (currentTargetsPerId.get(entry.getValue()) == null) {
+					if (currentTargetsPerId.get(entry.getKey()) == null) {
 						it.remove();
 						hasChanged = true;
 					}

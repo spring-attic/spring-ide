@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
@@ -36,11 +37,9 @@ public class BootDashViewModel implements Disposable {
 	 * added by adding them to the runTarget's LiveSet.
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
-		runTargets = new LiveSet<RunTarget>();
-
+		runTargets = new LiveSet<RunTarget>(new LinkedHashSet<RunTarget>());
 		models = new BootDashModelManager(context, runTargets);
 
-		// Load additional targets AFTER the manager loads the local target
 		manager = new RunTargetPropertiesManager(context, runTargetTypes);
 		List<RunTarget> existingtargets = manager.getStoredTargets();
 		runTargets.addAll(existingtargets);
