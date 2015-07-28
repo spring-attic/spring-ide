@@ -116,7 +116,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 					RunTargetTypes.CLOUDFOUNDRY,
 					RunTargetTypes.LATTICE
 			);
-			model.getRunTargets().add(RunTargets.LOCAL);
 		}
 		return model;
 	}

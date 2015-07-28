@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertiesMapper;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -43,7 +45,9 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 		List<RunTarget> targets = new ArrayList<RunTarget>();
 		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<List<Map<String, String>>>();
 		for (RunTargetType type : types) {
-			if (type.canInstantiate()) {
+			if (type==RunTargetTypes.LOCAL) {
+				targets.add(RunTargets.LOCAL);
+			} else if (type.canInstantiate()) {
 				String runTypesVal = propertiesStore.get(type, RUN_TARGET_KEY);
 				if (runTypesVal != null) {
 					List<Map<String, String>> asList = mapper.convert(runTypesVal);

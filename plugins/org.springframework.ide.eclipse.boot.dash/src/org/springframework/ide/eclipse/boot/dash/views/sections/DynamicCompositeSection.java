@@ -14,9 +14,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
@@ -109,7 +111,7 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 		Set<M> currentModels = models.getValue();
 
 		//Missing: current models for which we have no section
-		Set<M> missing = new HashSet<M>(currentModels);
+		Set<M> missing = new LinkedHashSet<M>(currentModels);
 		missing.removeAll(sectionsMap.keySet());
 
 		//Extra: current sections for which there is no more model
