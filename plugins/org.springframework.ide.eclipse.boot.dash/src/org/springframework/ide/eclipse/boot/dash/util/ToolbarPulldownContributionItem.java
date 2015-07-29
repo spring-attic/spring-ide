@@ -556,7 +556,6 @@ public class ToolbarPulldownContributionItem extends ContributionItem {
 						if (mc != null) {
 							Menu m = mc.getMenu(ti.getParent());
 							if (m != null) {
-								System.out.println("loc = "+e.x+", "+e.y);
 								// position the menu below the drop down item
 								//Point point = ti.getParent().toDisplay(
 								//		new Point(e.x, e.y));
@@ -569,7 +568,6 @@ public class ToolbarPulldownContributionItem extends ContributionItem {
 									point.x = bnds.x;
 									point.y = bnds.y+bnds.height;
 								}
-								System.out.println("loc: "+point.x+", "+point.y);
 								point = ti.getParent().toDisplay(point);
 								//HACK CHANGE end
 								m.setLocation(point.x, point.y); // waiting
