@@ -195,10 +195,9 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 					updated.add(element);
 				}
 			}
+			changed = getAppCache().replace(app, project, overrideRunstate);
 
 			projectAppStore.storeProjectToAppMapping(updated);
-
-			changed = getAppCache().replace(app, project, overrideRunstate);
 		}
 
 		// These trigger events, therefore be sure to call them outside of the
@@ -243,8 +242,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				updated.put(addedElement.getName(), addedElement);
 			}
 
-			projectAppStore.storeProjectToAppMapping(updated.values());
 			toNotify = getAppCache().updateAll(apps);
+			projectAppStore.storeProjectToAppMapping(updated.values());
 		}
 
 		// Fire events outside of synch block

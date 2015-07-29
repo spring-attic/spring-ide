@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.maven.internal.core;
 
 import java.util.LinkedHashMap;
 
+import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -57,7 +59,7 @@ public class JREProjectConfigurator extends AbstractSpringProjectConfigurator im
 	
 	@Override
 	public void configureRawClasspath(ProjectConfigurationRequest configRequest, IClasspathDescriptor classpathDescriptor, IProgressMonitor progressMonitor) throws CoreException {
-		String jreProperty = configRequest.getMavenProject().getProperties().getProperty("java.classpath.jre");
+		String jreProperty = getJREConfigIfPresent(configRequest);
 
 		if (jreProperty != null) {
 			String environmentID = ENVIRONMENTS.get(jreProperty);
@@ -71,6 +73,24 @@ public class JREProjectConfigurator extends AbstractSpringProjectConfigurator im
 				updateJREClasspathContainer(classpathDescriptor, environmentID);
 			}
 		}
+	}
+
+	protected String getJREConfigIfPresent(ProjectConfigurationRequest configRequest) {
+		MavenProject mavenProject = configRequest.getMavenProject();
+		Plugin plugin = mavenProject.getBuild().getPluginManagement().getPluginsAsMap().get("org.apache.maven.plugins:maven-compiler-plugin");
+		if (plugin != null) {
+			Object configuration = plugin.getConfiguration();
+			if (configuration instanceof Xpp3Dom) {
+				Xpp3Dom jrelevel = ((Xpp3Dom) configuration).getChild("java.classpath.jre");
+				if (jrelevel != null) {
+					String value = jrelevel.getValue();
+					if (value != null) {
+						return value;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	protected void updateJREClasspathContainer(IClasspathDescriptor classpathDescriptor, String environmentID) {
