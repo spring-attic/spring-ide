@@ -40,6 +40,7 @@ public class TagSearchSection extends PageSection implements Disposable {
 	private Text tagsSearchBox;
 	private BootDashViewModel viewModel;
 	private LiveVariable<String> model;
+	private ValueListener<String> modelListener;
 
 	public TagSearchSection(IPageWithSections owner, LiveVariable<String> model, BootDashViewModel viewModel) {
 		super(owner);
@@ -63,7 +64,7 @@ public class TagSearchSection extends PageSection implements Disposable {
 				model.setValue(tagsSearchBox.getText());
 			}
 		});
-		this.model.addListener(new ValueListener<String>() {
+		this.model.addListener(modelListener = new ValueListener<String>() {
 			public void gotValue(LiveExpression<String> exp, String newText) {
 				String oldText = tagsSearchBox.getText();
 				if (!oldText.equals(newText)) { //Avoid cursor bug on macs.
@@ -80,6 +81,10 @@ public class TagSearchSection extends PageSection implements Disposable {
 
 	@Override
 	public void dispose() {
+		if (modelListener!=null) {
+			this.model.removeListener(modelListener);
+			modelListener = null;
+		}
 		tagsSearchBox.dispose();
 	}
 

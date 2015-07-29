@@ -55,12 +55,14 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -102,9 +104,78 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
 
+	public class HiddenElementsLabel implements ValueListener<Integer> {
+		private Label label;
+		private LiveVariable<Integer> hiddenElementCount;
+
+		public HiddenElementsLabel(Composite page, LiveVariable<Integer> hiddenElementCount) {
+			this.label = new Label(page, SWT.NONE);
+			label.setBackground(page.getBackground());
+			this.hiddenElementCount = hiddenElementCount;
+			hiddenElementCount.addListener(this);
+		}
+
+		@Override
+		public void gotValue(LiveExpression<Integer> exp, Integer value) {
+			if (label.isDisposed()) {
+				hiddenElementCount.removeListener(this);
+			} else {
+				label.setText(value+" elements hidden by filter");
+				hide(value==0);
+				label.getParent().layout(new Control[]{label});
+				//May need this is we make element 'disapear' from layout:
+				// ReflowUtil.reflow(owner, this);
+			}
+		}
+
+		private void hide(boolean shouldHide) {
+			if (isHide()!=shouldHide) {
+				GridData d = new GridData();
+				d.exclude = shouldHide;
+				label.setLayoutData(d);
+			}
+		}
+
+		private boolean isHide() {
+			if (label!=null) {
+				Object d = label.getLayoutData();
+				if (d instanceof GridData) {
+					return ((GridData) d).exclude;
+				}
+			}
+			return false;
+		}
+	}
+
+	public class CustomTableViewer extends TableViewer {
+
+		private LiveVariable<Integer> hiddenElementCount = new LiveVariable<Integer>(0);
+
+		public CustomTableViewer(Composite page, int style) {
+			super(page, style);
+		}
+
+
+		@Override
+		protected Object[] getFilteredChildren(Object parent) {
+			int totalElements = sizeof(getRawChildren(parent));
+			Object[] filteredElements = super.getFilteredChildren(parent);
+			hiddenElementCount.setValue(totalElements - sizeof(filteredElements));
+			return filteredElements;
+		}
+
+		private int sizeof(Object[] os) {
+			if (os!=null) {
+				return os.length;
+			}
+			return 0;
+		}
+
+	}
+
 	private static final String COLUMN_DATA = "boot-dash-column-data";
 
-	private TableViewer tv;
+	private CustomTableViewer tv;
 	private BootDashViewModel viewModel;
 	private BootDashModel model;
 	private MultiSelection<BootDashElement> selection;
@@ -193,7 +264,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		initColumnModels();
 
 		// Create table viewer again and attach all listeners.
-		tv = new TableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
+		tv = new CustomTableViewer(page, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION | SWT.NO_SCROLL); // Note: No SWT.SCROLL options.
 		// Assumes its up to the page to be scrollable.
 		tv.setContentProvider(new BootDashContentProvider(model));
 		tv.setSorter(new NameSorter());
@@ -204,6 +275,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 		stylers = new Stylers(tv.getTable().getFont());
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(tv.getControl());
+
+		HiddenElementsLabel hiddenElementsLabel = new HiddenElementsLabel(page, tv.hiddenElementCount);
 
 		Arrays.sort(columnModels, BootDashColumnModel.INDEX_COMPARATOR);
 		for (final BootDashColumnModel columnModel :  columnModels) {
