@@ -17,21 +17,29 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
@@ -42,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
@@ -171,6 +180,8 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
 
+		manager.add(createAddRunTargetMenuManager());
+
 		manager.add(new Separator());
 
 		manager.add(actions.getToggleFiltersAction());
@@ -188,10 +199,23 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
 		manager.add(actions.getToggleFiltersAction());
+
+// This ought to work, but it doesn't.
+//		manager.add(createAddRunTargetMenuManager());
+// Must write specific code to create toolbar pull-down button / menu:
 		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
 	}
+
+	private MenuManager createAddRunTargetMenuManager() {
+		final MenuManager menu = new MenuManager("Add Run Target...", BootDashActivator.getImageDescriptor("icons/add_target.png"), null);
+		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
+			menu.add(a);
+		}
+		return menu;
+	}
+
 
 	public void createAddRunTargetPulldown(IToolBarManager toolbar) {
 		Action dropdownAction=new Action("Create Target",SWT.DROP_DOWN){};
@@ -207,11 +231,13 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 			@Override
 			public Menu getMenu(Control parent) {
 				if (theMenu==null) {
-					MenuManager menu = new MenuManager();
-					for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
-						menu.add(a);
-					}
+					final MenuManager menu = createAddRunTargetMenuManager();
 					theMenu = menu.createContextMenu(parent);
+					theMenu.addDisposeListener(new DisposeListener() {
+						public void widgetDisposed(DisposeEvent e) {
+							menu.dispose();
+						}
+					});
 				}
 				return theMenu;
 			}
@@ -221,7 +247,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 			}
 		});
 
-		toolbar.add(dropdownAction);
+		toolbar.add(new ToolbarPulldownContributionItem(dropdownAction));
 	}
 
 	/**
