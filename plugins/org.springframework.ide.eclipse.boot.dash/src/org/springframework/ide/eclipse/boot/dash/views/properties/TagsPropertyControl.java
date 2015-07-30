@@ -68,7 +68,9 @@ public class TagsPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		tags.setValue(getLabelProvider().getText(getBootDashElement(), BootDashColumn.TAGS));
+		if (tags != null && !tags.getControl().isDisposed()) {
+			tags.setValue(getLabelProvider().getText(getBootDashElement(), BootDashColumn.TAGS));
+		}
 	}
 
 	@Override

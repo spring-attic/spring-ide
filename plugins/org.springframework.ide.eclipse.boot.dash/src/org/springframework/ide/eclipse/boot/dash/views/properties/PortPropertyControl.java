@@ -36,8 +36,10 @@ public class PortPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		BootDashElement bde = getBootDashElement();
-		port.setText(getLabelProvider().getText(bde, BootDashColumn.LIVE_PORT));
+		if (port != null && !port.isDisposed()) {
+			BootDashElement bde = getBootDashElement();
+			port.setText(getLabelProvider().getText(bde, BootDashColumn.LIVE_PORT));
+		}
 	}
 
 }

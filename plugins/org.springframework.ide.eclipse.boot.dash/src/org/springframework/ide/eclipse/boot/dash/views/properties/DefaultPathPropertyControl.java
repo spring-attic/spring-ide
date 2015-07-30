@@ -61,8 +61,10 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		BootDashElement bde = getBootDashElement();
-		defaultPath.setText(getLabelProvider().getText(bde, BootDashColumn.DEFAULT_PATH));
+		if (defaultPath != null && !defaultPath.isDisposed()) {
+			BootDashElement bde = getBootDashElement();
+			defaultPath.setText(getLabelProvider().getText(bde, BootDashColumn.DEFAULT_PATH));
+		}
 	}
 
 }

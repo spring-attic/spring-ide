@@ -40,9 +40,11 @@ public class ProjectPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		BootDashElement bde = getBootDashElement();
-		project.setText(getLabelProvider().getText(bde, BootDashColumn.PROJECT));
-		project.setImage(getLabelProvider().getImage(bde, BootDashColumn.PROJECT));
+		if (project != null && !project.isDisposed()) {
+			BootDashElement bde = getBootDashElement();
+			project.setText(getLabelProvider().getText(bde, BootDashColumn.PROJECT));
+			project.setImage(getLabelProvider().getImage(bde, BootDashColumn.PROJECT));
+		}
 	}
 
 }
