@@ -24,7 +24,7 @@ public class ShowBootDashboardHanlder extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		new ShowViewAction(BootDashView.ID).run();
+		new ShowViewAction(BootDashTreeView.ID).run();
 		return null;
 	}
 

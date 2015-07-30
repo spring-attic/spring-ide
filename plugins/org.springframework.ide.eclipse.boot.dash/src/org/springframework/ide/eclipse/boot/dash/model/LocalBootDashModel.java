@@ -31,7 +31,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectCha
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
- * Model of the contents for {@link BootDashView}, provides mechanism to attach listeners to model
+ * Model of the contents for {@link BootDashTreeView}, provides mechanism to attach listeners to model
  * and attaches itself as a workspace listener to keep the model in synch with workspace changes.
  *
  * @author Kris De Volder

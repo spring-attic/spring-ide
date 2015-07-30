@@ -45,7 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
-import org.springframework.ide.eclipse.boot.dash.views.sections.ScrollerSection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -55,18 +55,18 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 /**
  * @author Kris De Volder
  */
-public class BootDashView extends ViewPartWithSections implements ITabbedPropertySheetPageContributor, ISelectionProvider {
+public class BootDashTreeView extends ViewPartWithSections implements ITabbedPropertySheetPageContributor, ISelectionProvider {
 
 	/**
 	 * The ID of the view as specified by the extension.
 	 */
-	public static final String ID = "org.springframework.ide.eclipse.boot.dash.views.BootDashViewOld";
+	public static final String ID = "org.springframework.ide.eclipse.boot.dash.views.BootDashView";
 
 	/**
 	 * Adds scroll support to the whole view. You probably want to disable this
 	 * if view is broken into pieces that have their own scrollbars
 	 */
-	private static final boolean ENABLE_SCROLLING = true;
+	private static final boolean ENABLE_SCROLLING = false;
 
 	private BootDashViewModel model = BootDashActivator.getDefault().getModel();
 
@@ -92,7 +92,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 	/**
 	 * The constructor.
 	 */
-	public BootDashView() {
+	public BootDashTreeView() {
 		super(ENABLE_SCROLLING);
 	}
 
@@ -138,7 +138,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 				public void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
 					ISelection selection = getSelection();
 					for (ISelectionChangedListener selectionListener : selectionListeners) {
-						selectionListener.selectionChanged(new SelectionChangedEvent(BootDashView.this, selection));
+						selectionListener.selectionChanged(new SelectionChangedEvent(BootDashTreeView.this, selection));
 					}
 				}
 			});
@@ -265,22 +265,9 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 	@Override
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
+		sections.add(new TagSearchSection(BootDashTreeView.this, model.getFilterBox().getText(), model));
+		sections.add(new BootDashUnifiedTreeSection(this, model, viewStyler));
 
-		sections.add(new TagSearchSection(BootDashView.this, model.getFilterBox().getText(), model));
-
-		DynamicRunTargetSection runTargetSections = new DynamicRunTargetSection(this,
-				model.getSectionModels(),
-				new RunTargetSectionFactory(this, model, model.getFilter(), ui, viewStyler)
-		);
-
-//		BootDashElementDetailsSection detailsSection = new BootDashElementDetailsSection(
-//				this, model, runTargetSections.getSelection().cast(BootDashElement.class).toSingleSelection()
-//		);
-
-		sections.add(/*new SashSection(this,*/
-				new ScrollerSection(this, runTargetSections, viewStyler)/*,
-				detailsSection)*/
-		);
 		return sections;
 	}
 

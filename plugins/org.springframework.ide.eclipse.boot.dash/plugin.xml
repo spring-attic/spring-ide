@@ -5,10 +5,17 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="Boot Dashboard"
+            name="Boot Dashboard Old"
             icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-icon.png"
             category="org.springframework.ide.eclipse.ui.views"
             class="org.springframework.ide.eclipse.boot.dash.views.BootDashView"
+            id="org.springframework.ide.eclipse.boot.dash.views.OldBootDashView">
+      </view>
+      <view
+            name="Boot Dashboard"
+            icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-icon.png"
+            category="org.springframework.ide.eclipse.ui.views"
+            class="org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView"
             id="org.springframework.ide.eclipse.boot.dash.views.BootDashView">
       </view>
    </extension>

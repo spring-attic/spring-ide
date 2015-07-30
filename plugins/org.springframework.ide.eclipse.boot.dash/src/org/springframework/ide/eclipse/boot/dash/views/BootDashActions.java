@@ -19,7 +19,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -285,5 +288,24 @@ public class BootDashActions {
 	public IAction getToggleFiltersAction() {
 		return toggleFiltersAction;
 	}
+
+	public IAction selectDefaultConfigAction(
+			final BootDashElement target,
+			final ILaunchConfiguration currentDefault,
+			final ILaunchConfiguration newDefault
+	) {
+		Action action = new Action(newDefault.getName(), SWT.CHECK) {
+			@Override
+			public void run() {
+				target.setPreferredConfig(newDefault);
+				//target.openConfig(getSite().getShell());
+			}
+		};
+		action.setChecked(newDefault.equals(currentDefault));
+		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
+				+ "be used the next time you (re)launch '"+target.getName());
+		return action;
+	}
+
 
 }

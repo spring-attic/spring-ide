@@ -55,14 +55,12 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -80,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
@@ -103,49 +102,6 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  * @author Kris De Volder
  */
 public class BootDashElementsTableSection extends PageSection implements MultiSelectionSource, Disposable {
-
-	public class HiddenElementsLabel implements ValueListener<Integer> {
-		private Label label;
-		private LiveVariable<Integer> hiddenElementCount;
-
-		public HiddenElementsLabel(Composite page, LiveVariable<Integer> hiddenElementCount) {
-			this.label = new Label(page, SWT.NONE);
-			label.setBackground(page.getBackground());
-			this.hiddenElementCount = hiddenElementCount;
-			hiddenElementCount.addListener(this);
-		}
-
-		@Override
-		public void gotValue(LiveExpression<Integer> exp, Integer value) {
-			if (label.isDisposed()) {
-				hiddenElementCount.removeListener(this);
-			} else {
-				label.setText(value+" elements hidden by filter");
-				hide(value==0);
-				label.getParent().layout(new Control[]{label});
-				//May need this is we make element 'disapear' from layout:
-				// ReflowUtil.reflow(owner, this);
-			}
-		}
-
-		private void hide(boolean shouldHide) {
-			if (isHide()!=shouldHide) {
-				GridData d = new GridData();
-				d.exclude = shouldHide;
-				label.setLayoutData(d);
-			}
-		}
-
-		private boolean isHide() {
-			if (label!=null) {
-				Object d = label.getLayoutData();
-				if (d instanceof GridData) {
-					return ((GridData) d).exclude;
-				}
-			}
-			return false;
-		}
-	}
 
 	public class CustomTableViewer extends TableViewer {
 
@@ -196,8 +152,8 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				}
 			});
 		}
-	}
-			;
+	};
+
 	final private UIValueListener<Set<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<Set<BootDashElement>>() {
 		@Override
 		protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp,
@@ -547,28 +503,10 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 				MenuManager menu = new MenuManager("Default Config...");
 				parent.add(menu);
 				for (ILaunchConfiguration conf : allConfigs) {
-					menu.add(selectDefaultConfigAction(element, defaultConfig, conf));
+					menu.add(actions.selectDefaultConfigAction(element, defaultConfig, conf));
 				}
 			}
 		}
-	}
-
-	private IAction selectDefaultConfigAction(
-			final BootDashElement target,
-			final ILaunchConfiguration currentDefault,
-			final ILaunchConfiguration newDefault
-	) {
-		Action action = new Action(newDefault.getName(), SWT.CHECK) {
-			@Override
-			public void run() {
-				target.setPreferredConfig(newDefault);
-				//target.openConfig(getSite().getShell());
-			}
-		};
-		action.setChecked(newDefault.equals(currentDefault));
-		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
-				+ "be used the next time you (re)launch '"+target.getName());
-		return action;
 	}
 
 	@Override
