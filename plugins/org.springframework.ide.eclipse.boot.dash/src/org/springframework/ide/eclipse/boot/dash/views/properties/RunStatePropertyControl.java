@@ -45,34 +45,36 @@ public class RunStatePropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		BootDashElement bde = getBootDashElement();
-		runState.setText(getLabelProvider().getText(bde, BootDashColumn.RUN_STATE_ICN));
+		if (runState != null && !runState.isDisposed()) {
+			BootDashElement bde = getBootDashElement();
+			runState.setText(getLabelProvider().getText(bde, BootDashColumn.RUN_STATE_ICN));
 
-		UIJob job = new UIJob("Boot App run state animation") {
+			UIJob job = new UIJob("Boot App run state animation") {
 
-			private int counter = 0;
+				private int counter = 0;
 
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				BootDashElement bde = getBootDashElement();
-				if (bde != null && !runState.isDisposed()) {
-					Image[] images = getLabelProvider().getImageAnimation(bde, BootDashColumn.RUN_STATE_ICN);
-					if (images == null || images.length == 0) {
-						runState.setImage(null);
-					} else if (images.length == 1) {
-						runState.setImage(images[0]);
-					} else {
-						runState.setImage(images[counter % images.length]);
-						counter++;
-						schedule(100);
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					BootDashElement bde = getBootDashElement();
+					if (bde != null && !runState.isDisposed()) {
+						Image[] images = getLabelProvider().getImageAnimation(bde, BootDashColumn.RUN_STATE_ICN);
+						if (images == null || images.length == 0) {
+							runState.setImage(null);
+						} else if (images.length == 1) {
+							runState.setImage(images[0]);
+						} else {
+							runState.setImage(images[counter % images.length]);
+							counter++;
+							schedule(100);
+						}
 					}
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
 
-		};
-		job.setSystem(true);
-		job.schedule();
+			};
+			job.setSystem(true);
+			job.schedule();
+		}
 	}
 
 }

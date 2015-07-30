@@ -15,17 +15,22 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.STARTING;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -42,6 +47,10 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private CloudFoundryTargetProperties targetProperties;
+
+	// Cache these to avoid frequent client calls
+	private List<CloudDomain> domains = new ArrayList<CloudDomain>();
+	private List<CloudSpace> spaces = new ArrayList<CloudSpace>();
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties) {
 		super(RunTargetTypes.CLOUDFOUNDRY, CloudFoundryTargetProperties.getId(targetProperties),
@@ -116,6 +125,60 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public boolean requiresCredentials() {
 		return true;
+	}
+
+	public synchronized List<CloudDomain> getDomains() {
+		return domains;
+	}
+
+	public synchronized List<CloudSpace> getSpaces() {
+		return spaces;
+	}
+
+	/**
+	 * To avoid frequent requests to Cloud Foundry, certain Cloud options, like
+	 * list of domains or Cloud spaces, that are less likely to change, are
+	 * cached. This update will force a re-fresh of that cache.
+	 *
+	 * @param monitor
+	 * @throws Exception
+	 */
+	public void updateCloudCache(IProgressMonitor monitor) throws Exception {
+
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+		/// Do not synchronize on client ops as they may be long running
+		subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
+		List<CloudDomain> updatedDomains = getClient().getDomains();
+		subMonitor.worked(5);
+
+		subMonitor.beginTask("Refreshing list of spaces for " + getName(), 5);
+		List<CloudSpace> updateSpaces = getClient().getSpaces();
+		subMonitor.worked(5);
+
+		synchronized (this) {
+			if (updatedDomains != null) {
+				domains.clear();
+				domains.addAll(updatedDomains);
+			}
+
+			if (updateSpaces != null) {
+				spaces.clear();
+				spaces.addAll(updateSpaces);
+			}
+		}
+	}
+
+	public CloudSpace getCloudSpace(String org, String space) {
+		CloudSpace cloudSpace = null;
+		synchronized (this) {
+			for (CloudSpace cSpace : spaces) {
+				if (cSpace.getName().equals(space) && cSpace.getOrganization().getName().equals(org)) {
+					cloudSpace = cSpace;
+					break;
+				}
+			}
+		}
+		return cloudSpace;
 	}
 
 }

@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -66,8 +65,8 @@ public class ApplicationDeploymentOperation extends CloudApplicationOperation {
 		deploymentOperations.add(uploadOp);
 		deploymentOperations.add(restartOp);
 
-		CloudApplicationOperation compositeOp = new CompositeAppOp(getName(), client,
-				appName, model, ui, deploymentOperations);
+		CloudApplicationOperation compositeOp = new CompositeAppOp(getName(), client, appName, model, ui,
+				deploymentOperations);
 		compositeOp.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 
 		model.getCloudOpExecution().runOpAsynch(compositeOp);
@@ -83,9 +82,7 @@ public class ApplicationDeploymentOperation extends CloudApplicationOperation {
 
 		CloudApplicationDeploymentProperties deploymentProperties = null;
 
-		List<CloudDomain> domains = client.getDomains();
-
-		ManifestParser parser = new ManifestParser(project, domains);
+		ManifestParser parser = new ManifestParser(project, model.getCloudTarget().getDomains());
 
 		if (parser.hasManifest()) {
 			deploymentProperties = parser.load(subMonitor.newChild(100));

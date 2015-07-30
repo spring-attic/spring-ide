@@ -130,7 +130,7 @@ public class BootDashActions {
 		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction };
 
 		openConfigAction = new OpenLaunchConfigAction(selection, ui);
-		openConsoleAction = new OpenConsoleAction(selection, ui);
+		openConsoleAction = new OpenConsoleAction(selection, model, ui);
 		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
 		addTargetActions = createAddTargetActions();
 

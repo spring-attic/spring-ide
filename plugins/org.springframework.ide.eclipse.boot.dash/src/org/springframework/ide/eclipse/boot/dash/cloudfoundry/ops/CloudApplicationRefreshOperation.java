@@ -38,6 +38,8 @@ public final class CloudApplicationRefreshOperation extends Operation<Void> {
 	protected synchronized Void runOp(IProgressMonitor monitor) throws Exception {
 		try {
 
+			this.model.getCloudTarget().updateCloudCache(monitor);
+
 			List<CloudApplication> apps = this.model.getCloudTarget().getClient().getApplications();
 			Map<CloudApplication, IProject> updatedApplications = new HashMap<CloudApplication, IProject>();
 
