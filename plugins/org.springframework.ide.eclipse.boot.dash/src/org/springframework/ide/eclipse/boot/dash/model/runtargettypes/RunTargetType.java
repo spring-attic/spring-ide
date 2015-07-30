@@ -22,7 +22,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
  *
  * @author Kris De Volder
  */
-public interface RunTargetType extends Nameable {
+public interface RunTargetType extends Nameable, Comparable<RunTargetType> {
 
 	/**
 	 * @return Whether it is possible to create instances of this type. Not all
@@ -37,11 +37,14 @@ public interface RunTargetType extends Nameable {
 	 * run target.
 	 */
 	void openTargetCreationUi(LiveSet<RunTarget> targets);
-	
+
 	/**
-	 * 
+	 *
 	 * @return if {@link #canInstantiate()} returns true, return a new {@link RunTarget}. Return null if this
 	 * type cannot be instantiated.
 	 */
 	RunTarget createRunTarget(TargetProperties properties);
+
+	int compareTo(RunTargetType type);
+
 }

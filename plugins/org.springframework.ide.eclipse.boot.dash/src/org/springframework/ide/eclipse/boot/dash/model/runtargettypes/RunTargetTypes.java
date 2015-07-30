@@ -44,4 +44,11 @@ public class RunTargetTypes {
 	public static final RunTargetType CLOUDFOUNDRY = new CloudFoundryRunTargetType();
 
 	public static final RunTargetType LATTICE = new LatticeRunTargetType();
+
+	public static final RunTargetType[] ALL = {
+			LOCAL,
+			CLOUDFOUNDRY,
+			LATTICE
+	};
+
 }

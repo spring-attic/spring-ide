@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
@@ -74,7 +75,11 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class BootDashUnifiedTreeSection extends PageSection implements MultiSelectionSource {
 
-	//TODO: update nodes in representing section when element of section changes
+	//TODO: update nodes in representing section when element in any of section changes
+	//TODO: update treeviewer when models / added removed
+	//TODO: update treeviewer when elements in section added / removed
+	//TODO: label provider for section nodes
+	//TODO: label provider for element nodes with runstate animation
 
 	private CustomTreeViewer tv;
 	private BootDashViewModel viewModel;
@@ -87,7 +92,16 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	private Stylers stylers;
 	private HiddenElementsLabel hiddenElementsLabel;
 
-	class NameSorter extends ViewerSorter {
+	public class MySorter extends ViewerSorter {
+		@Override
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			if (e1 instanceof BootDashModel && e2 instanceof BootDashModel) {
+				BootDashModel m1 = (BootDashModel) e1;
+				BootDashModel m2 = (BootDashModel) e2;
+				return m1.getRunTarget().compareTo(m2.getRunTarget());
+			}
+			return super.compare(viewer, e1, e2);
+		}
 	}
 
 	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new ValueListener<Filter<BootDashElement>>() {
@@ -153,7 +167,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 		tv.setContentProvider(new BootDashTreeContentProvider());
 //		tv.setLabelProvider(new BootDashTreeLabelProvider());
-		tv.setSorter(new NameSorter());
+		tv.setSorter(new MySorter());
 		tv.setInput(model);
 		tv.getTree().setLinesVisible(true);
 

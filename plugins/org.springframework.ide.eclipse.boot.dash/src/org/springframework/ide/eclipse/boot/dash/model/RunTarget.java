@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
  *
  * @author Kris De Volder
  */
-public interface RunTarget extends IdAble, Nameable {
+public interface RunTarget extends IdAble, Nameable, Comparable<RunTarget> {
 
 	public abstract RunTargetType getType();
 
