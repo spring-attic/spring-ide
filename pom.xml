@@ -479,6 +479,11 @@
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
 				</repository>
+				<repository>
+		  			<id>cf-eclipse</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.com/release/TOOLS/cloudfoundry/</url>
+				</repository>
 			</repositories>
 		</profile>
 		
