@@ -38,6 +38,14 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 @SuppressWarnings("restriction")
 public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabelProvider {
 
+	//TODO: (from Kris) don't like the way the super-class is a styledtext label provider
+	// but without having any stylers... so it actually doesn't produce styled labels at all.
+	// so anything that wants actualy create styled labels has to subclass or wrap it.
+	//Also, the method which take 'column' as argument don't seem to be getting called by the methods
+	// that are implementing ILabelProvider, IStyledLabelProvider... so why are they even here?
+	// shouldn't they rather be in some separate helper class for people needing to implement
+	// different label providers?
+
 	private static final String UNKNOWN_LABEL = "???";
 
 	private AppearanceAwareLabelProvider javaLabels = null;

@@ -58,7 +58,6 @@ import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
-import org.springframework.ide.eclipse.boot.dash.views.ViewStyler;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -82,15 +81,12 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	//TODO: label provider for element nodes with runstate animation
 
 	private CustomTreeViewer tv;
-	private BootDashViewModel viewModel;
-	private Object viewStyler;
 	private BootDashViewModel model;
 	private MultiSelection<BootDashElement> selection;
 	private BootDashActions actions;
 	private UserInteractions ui;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private Stylers stylers;
-	private HiddenElementsLabel hiddenElementsLabel;
 
 	public class MySorter extends ViewerSorter {
 		@Override
@@ -154,28 +150,27 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	}
 
-	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model, ViewStyler viewStyler) {
+	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model) {
 		super(owner);
-		this.viewStyler = viewStyler;
 		this.model = model;
 		this.searchFilterModel = model.getFilter();
 	}
 
 	@Override
 	public void createContents(Composite page) {
-		tv = new CustomTreeViewer(page, SWT.V_SCROLL | SWT.H_SCROLL);
+		tv = new CustomTreeViewer(page, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 
 		tv.setContentProvider(new BootDashTreeContentProvider());
-//		tv.setLabelProvider(new BootDashTreeLabelProvider());
 		tv.setSorter(new MySorter());
 		tv.setInput(model);
 		tv.getTree().setLinesVisible(true);
 
 		stylers = new Stylers(tv.getTree().getFont());
+		tv.setLabelProvider(new BootDashTreeLabelProvider(stylers, tv));
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getTree());
 
-		hiddenElementsLabel = new HiddenElementsLabel(page, tv.hiddenElementCount);
+		new HiddenElementsLabel(page, tv.hiddenElementCount);
 
 		tv.getControl().addControlListener(new ControlListener() {
 			public void controlResized(ControlEvent e) {

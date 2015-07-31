@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,28 +17,63 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.progress.UIJob;
 
 /**
- * A TableViewerAnimator manages a Job that periodically updates labels for
- * 'animated' label icons in a TableViewwer.
+ * A ColumnViewerAnimator manages a Job that periodically updates labels for
+ * 'animated' label icons in a ColumnViewer (actually, only TableViewer or
+ * TreeViewer are supported with current implementation).
  *
  * @author Kris De Volder
  */
-public class TableViewerAnimator {
+public class ColumnViewerAnimator {
+
+	/**
+	 * Target provides abstraction needed so that we can 'setImage' easily on ViewerCell
+	 * from either Table or Tree viewer.
+	 */
+	private static abstract class Target {
+		private static final Target NULL_TARGET = new Target() {
+			void setImage(Image image) {
+				//ignore
+			}
+		};
+
+		static Target from(ViewerCell cell) {
+			final Widget item = cell.getItem();
+			final int col = cell.getColumnIndex();
+			if (item instanceof TableItem) {
+				return new Target() {
+					void setImage(Image image) {
+						((TableItem)item).setImage(col, image);
+					}
+				};
+			} else if (item instanceof TreeItem) {
+				return new Target() {
+					void setImage(Image image) {
+						((TreeItem)item).setImage(col, image);
+					}
+				};
+			} else {
+				return NULL_TARGET;
+			}
+		}
+
+		abstract void setImage(Image image);
+	}
 
 	public class CellAnimation {
-		public final int col;
 		public final Image[] imgs;
-		public final TableItem item;
+		public final Target item; //could be TableItem or TreeItem
 
 		public CellAnimation(ViewerCell cell, Image[] imgs) {
-			this.item = (TableItem)cell.getViewerRow().getItem();
-			this.col = cell.getColumnIndex();
+			this.item = Target.from(cell);
 			this.imgs = imgs;
 		}
 
@@ -49,9 +83,9 @@ public class TableViewerAnimator {
 
 	private int animationCounter = 0;
 
-	private TableViewer tv;
+	private ColumnViewer tv;
 
-	public TableViewerAnimator(TableViewer tv) {
+	public ColumnViewerAnimator(ColumnViewer tv) {
 		this.tv = tv;
 	}
 
@@ -92,11 +126,12 @@ public class TableViewerAnimator {
 			job = new UIJob("Animate table icons") {
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					if (!tv.getTable().isDisposed()) {
+					System.out.println("animating...");
+					if (!tv.getControl().isDisposed()) {
 						animationCounter++;
 						for (CellAnimation a : getAnimations()) {
 							Image[] imgs = a.imgs;
-							a.item.setImage(a.col, imgs[animationCounter%imgs.length]);
+							a.item.setImage(imgs[animationCounter%imgs.length]);
 						}
 						if (job!=null && animatedElements.size()>0) {
 							job.schedule(INTERVAL);

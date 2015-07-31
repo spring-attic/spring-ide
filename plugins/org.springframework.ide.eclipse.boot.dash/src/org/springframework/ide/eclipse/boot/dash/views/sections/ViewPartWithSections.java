@@ -33,6 +33,9 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
 
+/**
+ * @author Kris De Volder
+ */
 public class ViewPartWithSections extends ViewPart implements UIContext, IPageWithSections, Reflowable {
 
 	private final boolean enableScrolling;

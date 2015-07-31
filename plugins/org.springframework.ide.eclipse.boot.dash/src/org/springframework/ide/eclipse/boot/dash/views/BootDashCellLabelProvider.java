@@ -10,74 +10,88 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.util.ColumnViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
-import org.springframework.ide.eclipse.boot.dash.util.TableViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 
-	private BootDashElementLabelProvider bdeLabels = new BootDashElementLabelProvider();
 	protected final BootDashColumn forColum;
 	private Stylers stylers;
-	private TableViewerAnimator animator;
+	private ColumnViewerAnimator animator;
 
-	private TableViewer tv;
+	private ColumnViewer tv;
+	private BootDashElementLabelProvider bdeLabels;
 
-	public BootDashCellLabelProvider(TableViewer tv, BootDashColumn target, Stylers stylers) {
+	public BootDashCellLabelProvider(ColumnViewer tv, BootDashColumn target, Stylers stylers) {
 		this.tv = tv;
 		this.stylers = stylers;
+		this.bdeLabels = new BootDashElementLabelProvider();
 		this.forColum = target;
 	}
 
 	@Override
 	public void update(ViewerCell cell) {
-		BootDashElement e = (BootDashElement) cell.getElement();
+		Object e = cell.getElement();
+		BootDashElement bde = null;
+		if (e instanceof BootDashElement) {
+			bde = (BootDashElement) cell.getElement();
+		}
 		switch (forColum) {
+		case TREE_VIEWER_MAIN:
+			if (bde!=null) {
+				cell.setText(bdeLabels.getText(bde, APP));
+				animate(cell, bdeLabels.getImageAnimation(bde, RUN_STATE_ICN));
+			}
+			break;
 		case PROJECT:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 //			cell.setImage(bdeLabels.getImage(e, forColum));
 			break;
 		case HOST:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 			break;
 		case APP:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 			break;
 //		case RUN_TARGET:
 //			cell.setText(e.getTarget().getName());
 //			break;
 		case RUN_STATE_ICN:
 			cell.setText("");
-			animate(cell, bdeLabels.getImageAnimation(e, forColum));
+			animate(cell, bdeLabels.getImageAnimation(bde, forColum));
 			break;
 		case TAGS:
-			StyledString styled = bdeLabels.getStyledText(e, forColum, stylers);
+			StyledString styled = bdeLabels.getStyledText(bde, forColum, stylers);
 			cell.setText(styled.getString());
 			cell.setStyleRanges(styled.getStyleRanges());
 			break;
 		case LIVE_PORT:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 			break;
 		case DEFAULT_PATH:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 			break;
 		case INSTANCES:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 			break;
 		default:
-			cell.setText(bdeLabels.getText(e, forColum));
+			cell.setText(bdeLabels.getText(bde, forColum));
 		}
 	}
 
 	private void animate(ViewerCell cell, Image[] images) {
 		if (animator==null) {
-			animator = new TableViewerAnimator(tv);
+			animator = new ColumnViewerAnimator(tv);
 		}
 		animator.setAnimation(cell, images);
 	}

@@ -137,7 +137,6 @@ public class BootDashModelManager implements Disposable {
 					for (Object o : elementStateListeners.getListeners()) {
 						((ElementStateListener) o).stateChanged(e);
 					}
-					;
 				}
 			};
 			getModels().addListener(new ValueListener<Set<BootDashModel>>() {

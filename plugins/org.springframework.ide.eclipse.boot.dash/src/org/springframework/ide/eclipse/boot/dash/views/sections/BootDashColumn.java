@@ -31,8 +31,8 @@ public enum BootDashColumn {
 	HOST(           "Host",     70),
 	LIVE_PORT(		"Port",		70),
 	DEFAULT_PATH(	"Path",		70),
-	TAGS(			"Tags",		100);
-	// RUN_TARGET(		"Target", 	60); TODO: remove? Why display thsi in table ever since its at the top of the table.
+	TAGS(			"Tags",		100),
+	TREE_VIEWER_MAIN("", 100); //this is a 'fake' column which corresponds to the single column shown in unified tree viewer.
 
 	//Configure some odds and ends that don't apply to every column:
 	static {
