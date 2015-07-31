@@ -15,7 +15,6 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.ColumnViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -39,7 +38,7 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 
 	@Override
 	public void update(ViewerCell cell) {
-		BootDashElement e = (BootDashElement) cell.getElement();
+		Object e = cell.getElement();
 		Image[] imgs = bdeLabels.getImageAnimation(e, forColum);
 		StyledString label = bdeLabels.getStyledText(e, forColum);
 		cell.setText(label.getString());

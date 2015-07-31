@@ -34,7 +34,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.views.properties.tabbed,
  org.cloudfoundry.ide.eclipse.server.core,
  org.cloudfoundry.ide.eclipse.server.ui,
- org.eclipse.wst.server.core
+ org.eclipse.wst.server.core,
+ org.springframework.ide.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

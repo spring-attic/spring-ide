@@ -52,6 +52,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
@@ -60,6 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -122,6 +124,14 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 					}
 				}
 			});
+		}
+	};
+
+	final private ValueListener<Set<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<Set<RunTarget>>() {
+		protected void uiGotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+			if (tv != null && !tv.getControl().isDisposed()) {
+				tv.refresh();
+			}
 		}
 	};
 
@@ -205,6 +215,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			}
 		});
 
+		model.getRunTargets().addListener(RUN_TARGET_LISTENER);
 		//TODO: must listen on all section models and change listener when section models get added / removed.
 		//model.getElements().addListener(ELEMENTS_SET_LISTENER);
 
@@ -227,6 +238,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				model.removeElementStateListener(ELEMENT_STATE_LISTENER);
+				model.getRunTargets().removeListener(RUN_TARGET_LISTENER);
 
 				if (searchFilterModel!=null) {
 					searchFilterModel.removeListener(FILTER_LISTENER);

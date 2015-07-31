@@ -31,6 +31,11 @@ public class Stylers implements Disposable {
 	private Font baseFont; // borrowed
 	private Font boldFont = null; //owned (must dispose!)
 
+	/**
+	 * The 'Stylers' requires baseFont to render styles using bold
+	 * properly. If baseFont is null, then styler created will try to
+	 * render things as well as it can, but it will not do 'bold'.
+	 */
 	public Stylers(Font baseFont) {
 		this.baseFont = baseFont;
 	}
@@ -61,7 +66,9 @@ public class Stylers implements Disposable {
 	}
 
 	private synchronized Font getBoldFont() {
-		if (boldFont==null) {
+		//If baseFont is null, this Stylers is a bit 'handicapped' and won't
+		// be capable of doing 'bold' styling.
+		if (boldFont==null && baseFont!=null) {
 			FontData[] data= baseFont.getFontData();
 			for (int i= 0; i < data.length; i++) {
 				data[i].setStyle(SWT.BOLD);
@@ -83,6 +90,14 @@ public class Stylers implements Disposable {
 		return color(SWT.COLOR_GRAY);
 	}
 
+	public Styler red() {
+		return color(SWT.COLOR_RED);
+	}
+
+	/**
+	 * Don't make this public. Instead define additional methods. That way it will be easier if we
+	 * need to refactor specific color styles later to somehting user-defined.
+	 */
 	private Styler color(int colorCode) {
 		final Color color = getSystemColor(colorCode);
 		return new Styler() {
@@ -91,5 +106,6 @@ public class Stylers implements Disposable {
 			}
 		};
 	}
+
 
 }

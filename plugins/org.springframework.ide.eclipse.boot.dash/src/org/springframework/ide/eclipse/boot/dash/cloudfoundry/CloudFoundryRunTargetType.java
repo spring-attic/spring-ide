@@ -11,8 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
@@ -23,6 +25,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
  * @author Kris De Volder
  */
 public class CloudFoundryRunTargetType extends AbstractRunTargetType {
+
+	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
 	public CloudFoundryRunTargetType() {
 		super("Cloud Foundry");
@@ -53,6 +57,11 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 		return props instanceof CloudFoundryTargetProperties
 				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props)
 				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props));
+	}
+
+	@Override
+	public ImageDescriptor getIcon() {
+		return SMALL_ICON;
 	}
 
 }

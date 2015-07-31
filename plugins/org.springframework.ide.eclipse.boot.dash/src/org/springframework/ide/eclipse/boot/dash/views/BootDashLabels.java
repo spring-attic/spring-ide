@@ -13,15 +13,21 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+
+import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
 /**
  * Provides various methods for implementing various Label providers for the Boot Dash
@@ -47,21 +53,32 @@ public class BootDashLabels implements Disposable {
 	private AppearanceAwareLabelProvider javaLabels = null;
 	private RunStateImages runStateImages = null;
 
+	/**
+	 * TODO replace 'runStateImages' and this registry with a single registry
+	 * for working with both animatons & simple images.
+	 */
+	private ImageDescriptorRegistry images;
+
 	private Stylers stylers;
 
 	/**
 	 * This constructor is deprecated. It produces something incapable of
-	 * properly styling its labels. Use the alternate constructor which
+	 * properly styling some kinds of labels (e.g. those requiring the use
+	 * of a 'bold' font. Use the alternate constructor which
 	 * takes a {@link Stylers} argument.
 	 */
 	@Deprecated
 	public BootDashLabels() {
-		this(null);
+		//Create slighly less-capable 'Stylers':
+		this(new Stylers(null));
 	}
 
 	public BootDashLabels(Stylers stylers) {
 		this.stylers = stylers;
 	}
+
+	///////////////////////////////////////////////////////////////
+	//// Main apis that clients should use:
 
 	@Override
 	public void dispose() {
@@ -72,14 +89,62 @@ public class BootDashLabels implements Disposable {
 			runStateImages.dispose();
 			runStateImages = null;
 		}
+		if (images!=null) {
+			images.dispose();
+			images = null;
+		}
 	}
 
-	public Image getImage(BootDashElement element, BootDashColumn column) {
+	public Image[] getImageAnimation(Object e, BootDashColumn forColum) {
+		if (e instanceof BootDashElement) {
+			return getImageAnimation((BootDashElement)e, forColum);
+		} else if (e instanceof BootDashModel) {
+			return getImageAnimation((BootDashModel)e, forColum);
+		}
+		return NO_IMAGES;
+	}
+
+	/**
+	 * For those who don't care about animations, fetches the first image
+	 * of the animation sequence only; or if the icon is non-animated just
+	 * the image.
+	 */
+	public final Image getImage(Object element, BootDashColumn column) {
 		Image[] imgs = getImageAnimation(element, column);
 		if (imgs!=null && imgs.length>0) {
 			return imgs[0];
 		}
 		return null;
+	}
+
+	public StyledString getStyledText(Object element, BootDashColumn column) {
+		if (element instanceof BootDashElement) {
+			return getStyledText((BootDashElement)element, column);
+		} else if (element instanceof BootDashModel) {
+			return getStyledText((BootDashModel)element, column);
+		}
+		return new StyledString(""+element);
+	}
+
+	///////////////////////////////////////////////////
+	// Type-specific apis below
+	//
+	// Some label providers may be only for specific types of elements and can use these
+	// methods instead.
+
+	public Image[] getImageAnimation(BootDashModel element, BootDashColumn column) {
+		return toAnimation(element.getRunTarget().getType().getIcon());
+	}
+
+	private Image[] toAnimation(ImageDescriptor icon) {
+		if (images==null) {
+			images = new ImageDescriptorRegistry();
+		}
+		Image img = images.get(icon);
+		if (img!=null) {
+			return new Image[]{img};
+		}
+		return NO_IMAGES;
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
@@ -92,18 +157,27 @@ public class BootDashLabels implements Disposable {
 			case RUN_STATE_ICN:
 				return getRunStateAnimation(element.getRunState());
 			default:
-				return new Image[0];
+				return NO_IMAGES;
 			}
 		}
 		return NO_IMAGES;
 	}
 
-	/**
-	 * Deprecated: use getStyledText.
-	 */
-	@Deprecated
-	public String getText(BootDashElement element, BootDashColumn column) {
-		return getStyledText(element, column).getString();
+	public StyledString getStyledText(BootDashModel element, BootDashColumn column) {
+		if (element!=null) {
+			return getStyledText(element.getRunTarget(), column);
+		}
+		return stylers==null?new StyledString("null"):new StyledString("null", stylers.red());
+	}
+
+	public StyledString getStyledText(RunTarget element, BootDashColumn column) {
+		//TODO: We don't care about columns (yet?)
+		if (element!=null) {
+			//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
+			// colorfully.
+			return new StyledString(element.getName());
+		}
+		return new StyledString(UNKNOWN_LABEL);
 	}
 
 	public StyledString getStyledText(BootDashElement element, BootDashColumn column) {
@@ -174,12 +248,16 @@ public class BootDashLabels implements Disposable {
 		return new StyledString(UNKNOWN_LABEL);
 	}
 
-	public String getText(Object element) {
-		if (element instanceof BootDashElement) {
-			return ((BootDashElement)element).getName();
-		}
-		return null;
+	/**
+	 * Deprecated: use getStyledText.
+	 */
+	@Deprecated
+	public String getText(BootDashElement element, BootDashColumn column) {
+		return getStyledText(element, column).getString();
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// private / helper stuff
 
 	private AppearanceAwareLabelProvider getJavaLabels() {
 		if (javaLabels == null) {

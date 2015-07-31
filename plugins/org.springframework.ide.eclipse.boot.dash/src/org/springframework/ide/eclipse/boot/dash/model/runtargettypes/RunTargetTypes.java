@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import java.net.URL;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.lattice.LatticeRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -38,6 +42,11 @@ public class RunTargetTypes {
 		@Override
 		public RunTarget createRunTarget(TargetProperties properties) {
 			return null;
+		}
+
+		@Override
+		public ImageDescriptor getIcon() {
+			return BootDashActivator.getImageDescriptor("icons/boot-icon.png");
 		};
 	};
 

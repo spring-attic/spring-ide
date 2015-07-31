@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.lattice;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
@@ -22,6 +24,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
  * @author Kris De Volder
  */
 public class LatticeRunTargetType extends AbstractRunTargetType {
+
+	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/lattice-16x16.png");
 
 	public LatticeRunTargetType() {
 		super("Lattice");
@@ -44,6 +48,11 @@ public class LatticeRunTargetType extends AbstractRunTargetType {
 	@Override
 	public RunTarget createRunTarget(TargetProperties properties) {
 		return new LatticeRunTarget(properties);
+	}
+
+	@Override
+	public ImageDescriptor getIcon() {
+		return SMALL_ICON;
 	}
 
 }
