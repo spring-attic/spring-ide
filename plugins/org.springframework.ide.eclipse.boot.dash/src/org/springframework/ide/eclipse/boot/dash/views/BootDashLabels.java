@@ -74,10 +74,6 @@ public class BootDashLabels implements Disposable {
 		}
 	}
 
-	public StyledString getStyledText(Object element) {
-		return new StyledString(getText(element));
-	}
-
 	public Image getImage(BootDashElement element, BootDashColumn column) {
 		Image[] imgs = getImageAnimation(element, column);
 		if (imgs!=null && imgs.length>0) {
