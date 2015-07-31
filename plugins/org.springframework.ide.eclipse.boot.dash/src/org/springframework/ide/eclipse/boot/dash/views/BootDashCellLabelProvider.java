@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;

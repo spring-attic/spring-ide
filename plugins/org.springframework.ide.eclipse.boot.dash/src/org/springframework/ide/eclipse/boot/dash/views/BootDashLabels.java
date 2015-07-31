@@ -23,6 +23,9 @@ import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+
 /**
  * Provides various methods for implementing various Label providers for the Boot Dash
  * and its related views, dialogs etc.
@@ -88,6 +91,7 @@ public class BootDashLabels implements Disposable {
 			case PROJECT:
 				IJavaProject jp = element.getJavaProject();
 				return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
+			case TREE_VIEWER_MAIN:
 			case RUN_STATE_ICN:
 				return getRunStateAnimation(element.getRunState());
 			default:
@@ -113,6 +117,9 @@ public class BootDashLabels implements Disposable {
 
 		if (element != null) {
 			switch(column) {
+			case TREE_VIEWER_MAIN:
+				styledLabel = getStyledText(element, APP);
+				break;
 			case TAGS:
 				String text = TagUtils.toString(element.getTags());
 				styledLabel = stylers == null ? new StyledString(text) : TagUtils.applyTagStyles(text, stylers.tag());
