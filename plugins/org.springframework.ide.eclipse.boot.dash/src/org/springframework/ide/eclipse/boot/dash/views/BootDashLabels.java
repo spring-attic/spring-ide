@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -22,9 +24,6 @@ import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
-
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 /**
  * Provides various methods for implementing various Label providers for the Boot Dash
@@ -117,9 +116,6 @@ public class BootDashLabels implements Disposable {
 
 		if (element != null) {
 			switch(column) {
-			case TREE_VIEWER_MAIN:
-				styledLabel = getStyledText(element, APP);
-				break;
 			case TAGS:
 				String text = TagUtils.toString(element.getTags());
 				styledLabel = stylers == null ? new StyledString(text) : TagUtils.applyTagStyles(text, stylers.tag());
@@ -147,6 +143,7 @@ public class BootDashLabels implements Disposable {
 				String host = element.getLiveHost();
 				label = host == null ? UNKNOWN_LABEL : host;
 				break;
+			case TREE_VIEWER_MAIN:
 			case APP:
 				String app = element.getName();
 				label = app == null ? UNKNOWN_LABEL : app;
