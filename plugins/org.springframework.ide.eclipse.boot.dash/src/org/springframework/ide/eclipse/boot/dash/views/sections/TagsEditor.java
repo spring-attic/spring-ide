@@ -16,6 +16,7 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Composite;
+import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 
 /**
@@ -42,7 +43,7 @@ public class TagsEditor extends StyledTextEditor {
 
 	@Override
 	protected StyleRange[] updateStyleRanges(String text) {
-		StyledString styled = UIUtils.applyTagStyles(text, stylers.tag());
+		StyledString styled = TagUtils.applyTagStyles(text, stylers.tag());
 		return styled.getStyleRanges();
 	}
 

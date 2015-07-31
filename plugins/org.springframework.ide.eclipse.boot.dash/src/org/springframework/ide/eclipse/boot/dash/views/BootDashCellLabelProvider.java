@@ -23,70 +23,31 @@ import org.springframework.ide.eclipse.boot.dash.util.ColumnViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
+/**
+ * @author Kris De Volder
+ */
 public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 
 	protected final BootDashColumn forColum;
-	private Stylers stylers;
 	private ColumnViewerAnimator animator;
+	private BootDashLabels bdeLabels;
 
 	private ColumnViewer tv;
-	private BootDashElementLabelProvider bdeLabels;
 
 	public BootDashCellLabelProvider(ColumnViewer tv, BootDashColumn target, Stylers stylers) {
 		this.tv = tv;
-		this.stylers = stylers;
-		this.bdeLabels = new BootDashElementLabelProvider();
 		this.forColum = target;
+		this.bdeLabels = new BootDashLabels(stylers);
 	}
 
 	@Override
 	public void update(ViewerCell cell) {
-		Object e = cell.getElement();
-		BootDashElement bde = null;
-		if (e instanceof BootDashElement) {
-			bde = (BootDashElement) cell.getElement();
-		}
-		switch (forColum) {
-		case TREE_VIEWER_MAIN:
-			if (bde!=null) {
-				cell.setText(bdeLabels.getText(bde, APP));
-				animate(cell, bdeLabels.getImageAnimation(bde, RUN_STATE_ICN));
-			}
-			break;
-		case PROJECT:
-			cell.setText(bdeLabels.getText(bde, forColum));
-//			cell.setImage(bdeLabels.getImage(e, forColum));
-			break;
-		case HOST:
-			cell.setText(bdeLabels.getText(bde, forColum));
-			break;
-		case APP:
-			cell.setText(bdeLabels.getText(bde, forColum));
-			break;
-//		case RUN_TARGET:
-//			cell.setText(e.getTarget().getName());
-//			break;
-		case RUN_STATE_ICN:
-			cell.setText("");
-			animate(cell, bdeLabels.getImageAnimation(bde, forColum));
-			break;
-		case TAGS:
-			StyledString styled = bdeLabels.getStyledText(bde, forColum, stylers);
-			cell.setText(styled.getString());
-			cell.setStyleRanges(styled.getStyleRanges());
-			break;
-		case LIVE_PORT:
-			cell.setText(bdeLabels.getText(bde, forColum));
-			break;
-		case DEFAULT_PATH:
-			cell.setText(bdeLabels.getText(bde, forColum));
-			break;
-		case INSTANCES:
-			cell.setText(bdeLabels.getText(bde, forColum));
-			break;
-		default:
-			cell.setText(bdeLabels.getText(bde, forColum));
-		}
+		BootDashElement e = (BootDashElement) cell.getElement();
+		Image[] imgs = bdeLabels.getImageAnimation(e, forColum);
+		StyledString label = bdeLabels.getStyledText(e, forColum);
+		cell.setText(label.getString());
+		cell.setStyleRanges(label.getStyleRanges());
+		animate(cell, imgs);
 	}
 
 	private void animate(ViewerCell cell, Image[] images) {

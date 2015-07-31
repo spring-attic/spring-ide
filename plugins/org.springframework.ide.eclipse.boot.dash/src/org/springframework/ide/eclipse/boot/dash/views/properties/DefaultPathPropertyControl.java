@@ -49,7 +49,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.character == '\u001b') { // Escape character
-					defaultPath.setText(getLabelProvider().getText(getBootDashElement(), BootDashColumn.DEFAULT_PATH));
+					defaultPath.setText(getLabels().getText(getBootDashElement(), BootDashColumn.DEFAULT_PATH));
 					composite.getDisplay().getActiveShell().forceFocus();
 				} else if (e.character == '\r') { // Return key
 					composite.getDisplay().getActiveShell().forceFocus();
@@ -63,7 +63,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (defaultPath != null && !defaultPath.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			defaultPath.setText(getLabelProvider().getText(bde, BootDashColumn.DEFAULT_PATH));
+			defaultPath.setText(getLabels().getText(bde, BootDashColumn.DEFAULT_PATH));
 		}
 	}
 
