@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
- * Provides various methds for implementing various Label providers for the Boot Dash
+ * Provides various methods for implementing various Label providers for the Boot Dash
  * and its related views, dialogs etc.
  * <p>
  * This is meant to be used as a 'delegate' object that different label provider
