@@ -38,7 +38,7 @@ public class InstancesPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (instances != null && !instances.isDisposed()) {
 			BootDashElement element = getBootDashElement();
-			instances.setText(getLabelProvider().getText(element, BootDashColumn.INSTANCES));
+			instances.setText(getLabels().getText(element, BootDashColumn.INSTANCES));
 		}
 	}
 

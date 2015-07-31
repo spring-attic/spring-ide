@@ -20,9 +20,12 @@ import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.util.TableViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
+/**
+ * @author Kris De Volder
+ */
 public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 
-	private BootDashElementLabelProvider bdeLabels = new BootDashElementLabelProvider();
+	private BootDashLabels bdeLabels;
 	protected final BootDashColumn forColum;
 	private Stylers stylers;
 	private TableViewerAnimator animator;
@@ -33,6 +36,7 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 		this.tv = tv;
 		this.stylers = stylers;
 		this.forColum = target;
+		this.bdeLabels = new BootDashLabels();
 	}
 
 	@Override

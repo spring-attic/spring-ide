@@ -47,7 +47,7 @@ public class RunStatePropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (runState != null && !runState.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			runState.setText(getLabelProvider().getText(bde, BootDashColumn.RUN_STATE_ICN));
+			runState.setText(getLabels().getText(bde, BootDashColumn.RUN_STATE_ICN));
 
 			UIJob job = new UIJob("Boot App run state animation") {
 
@@ -57,7 +57,7 @@ public class RunStatePropertyControl extends AbstractBdePropertyControl {
 				public IStatus runInUIThread(IProgressMonitor monitor) {
 					BootDashElement bde = getBootDashElement();
 					if (bde != null && !runState.isDisposed()) {
-						Image[] images = getLabelProvider().getImageAnimation(bde, BootDashColumn.RUN_STATE_ICN);
+						Image[] images = getLabels().getImageAnimation(bde, BootDashColumn.RUN_STATE_ICN);
 						if (images == null || images.length == 0) {
 							runState.setImage(null);
 						} else if (images.length == 1) {

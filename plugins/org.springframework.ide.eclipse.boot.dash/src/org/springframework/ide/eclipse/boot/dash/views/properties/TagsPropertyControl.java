@@ -58,7 +58,7 @@ public class TagsPropertyControl extends AbstractBdePropertyControl {
 			}
 			@Override
 			public void cancelEditor() {
-				tags.setValue(getLabelProvider().getText(getBootDashElement(), BootDashColumn.TAGS));
+				tags.setValue(getLabels().getText(getBootDashElement(), BootDashColumn.TAGS));
 			}
 			@Override
 			public void editorValueChanged(boolean oldValidState, boolean newValidState) {
@@ -69,7 +69,7 @@ public class TagsPropertyControl extends AbstractBdePropertyControl {
 	@Override
 	public void refreshControl() {
 		if (tags != null && !tags.getControl().isDisposed()) {
-			tags.setValue(getLabelProvider().getText(getBootDashElement(), BootDashColumn.TAGS));
+			tags.setValue(getLabels().getText(getBootDashElement(), BootDashColumn.TAGS));
 		}
 	}
 

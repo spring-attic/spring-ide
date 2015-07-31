@@ -38,7 +38,7 @@ public class HostPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (host != null && !host.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			host.setText(getLabelProvider().getText(bde, BootDashColumn.HOST));
+			host.setText(getLabels().getText(bde, BootDashColumn.HOST));
 		}
 	}
 

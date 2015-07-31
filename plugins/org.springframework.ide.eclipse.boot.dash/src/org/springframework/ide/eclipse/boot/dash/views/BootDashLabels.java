@@ -10,15 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -28,29 +22,31 @@ import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
- * Label provider for {@link BootDashElement} and its properties
+ * Provides various methds for implementing various Label providers for the Boot Dash
+ * and its related views, dialogs etc.
+ * <p>
+ * This is meant to be used as a 'delegate' object that different label provider
+ * implementations can wrap and use rather than a direct implementation of
+ * a particular label provider interface.
+ * <p>
+ * Instances of this class may allocate resources (e.g. images)
+ * and must be disposed when they are not needed anymore.
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabelProvider {
+public class BootDashLabels implements Disposable {
 
 	private static final String UNKNOWN_LABEL = "???";
 
 	private AppearanceAwareLabelProvider javaLabels = null;
 	private RunStateImages runStateImages = null;
-	private List<ILabelProviderListener> listeners;
 
-	public BootDashElementLabelProvider() {
-		this.listeners = new ArrayList<ILabelProviderListener>();
-	}
-
-	@Override
-	public void addListener(ILabelProviderListener listener) {
-		listeners.add(listener);
+	public BootDashLabels() {
 	}
 
 	@Override
@@ -62,16 +58,6 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 			runStateImages.dispose();
 			runStateImages = null;
 		}
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-		listeners.remove(listener);
 	}
 
 	public StyledString getStyledText(BootDashElement element, BootDashColumn column, Stylers stylers) {
@@ -90,7 +76,6 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 		return label;
 	}
 
-	@Override
 	public StyledString getStyledText(Object element) {
 		return new StyledString(getText(element));
 	}
@@ -131,11 +116,6 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 			image = new Image[0];
 		}
 		return image;
-	}
-
-	@Override
-	public Image getImage(Object element) {
-		return null;
 	}
 
 	public String getText(BootDashElement element, BootDashColumn column) {
@@ -196,7 +176,6 @@ public class BootDashElementLabelProvider implements ILabelProvider, IStyledLabe
 		return label;
 	}
 
-	@Override
 	public String getText(Object element) {
 		if (element instanceof BootDashElement) {
 			return ((BootDashElement)element).getName();
