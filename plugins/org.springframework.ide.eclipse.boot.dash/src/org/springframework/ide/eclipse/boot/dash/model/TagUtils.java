@@ -12,8 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 /**
  * Utilities for generating tags array from text, generating string from tags array and others
@@ -79,6 +83,25 @@ public class TagUtils {
 	 */
 	public static String toString(String[] tags) {
 		return StringUtils.join(tags, SEPARATOR);
+	}
+
+	/**
+	 * Creates styled string applying tagStyle at appropriate locations in a raw tags string.
+	 */
+	public static StyledString applyTagStyles(String text, Styler tagStyler) {
+		StyledString styledString = new StyledString(text);
+		Matcher matcher = Pattern.compile(SEPARATOR_REGEX).matcher(text);
+		int position = 0;
+		while (matcher.find()) {
+			if (position < matcher.start()) {
+				styledString.setStyle(position, matcher.start() - position, tagStyler);
+			}
+			position = matcher.end();
+		}
+		if (position < text.length()) {
+			styledString.setStyle(position, text.length() - position, tagStyler);
+		}
+		return styledString;
 	}
 
 }

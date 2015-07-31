@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +59,7 @@ public class TableViewerAnimator {
 	private Job job;
 
 	public void setAnimation(ViewerCell cell, Image[] images) {
-		if (images==null) {
+		if (images==null || images.length==0) {
 			cell.setImage(null);
 			stopAnimation(cell);
 		} else if (images.length==1) {

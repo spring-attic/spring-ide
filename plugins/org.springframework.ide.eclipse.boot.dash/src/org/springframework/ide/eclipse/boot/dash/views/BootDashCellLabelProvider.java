@@ -27,56 +27,24 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 
 	private BootDashLabels bdeLabels;
 	protected final BootDashColumn forColum;
-	private Stylers stylers;
 	private TableViewerAnimator animator;
 
 	private TableViewer tv;
 
 	public BootDashCellLabelProvider(TableViewer tv, BootDashColumn target, Stylers stylers) {
 		this.tv = tv;
-		this.stylers = stylers;
 		this.forColum = target;
-		this.bdeLabels = new BootDashLabels();
+		this.bdeLabels = new BootDashLabels(stylers);
 	}
 
 	@Override
 	public void update(ViewerCell cell) {
 		BootDashElement e = (BootDashElement) cell.getElement();
-		switch (forColum) {
-		case PROJECT:
-			cell.setText(bdeLabels.getText(e, forColum));
-//			cell.setImage(bdeLabels.getImage(e, forColum));
-			break;
-		case HOST:
-			cell.setText(bdeLabels.getText(e, forColum));
-			break;
-		case APP:
-			cell.setText(bdeLabels.getText(e, forColum));
-			break;
-//		case RUN_TARGET:
-//			cell.setText(e.getTarget().getName());
-//			break;
-		case RUN_STATE_ICN:
-			cell.setText("");
-			animate(cell, bdeLabels.getImageAnimation(e, forColum));
-			break;
-		case TAGS:
-			StyledString styled = bdeLabels.getStyledText(e, forColum, stylers);
-			cell.setText(styled.getString());
-			cell.setStyleRanges(styled.getStyleRanges());
-			break;
-		case LIVE_PORT:
-			cell.setText(bdeLabels.getText(e, forColum));
-			break;
-		case DEFAULT_PATH:
-			cell.setText(bdeLabels.getText(e, forColum));
-			break;
-		case INSTANCES:
-			cell.setText(bdeLabels.getText(e, forColum));
-			break;
-		default:
-			cell.setText(bdeLabels.getText(e, forColum));
-		}
+		Image[] imgs = bdeLabels.getImageAnimation(e, forColum);
+		StyledString label = bdeLabels.getStyledText(e, forColum);
+		cell.setText(label.getString());
+		cell.setStyleRanges(label.getStyleRanges());
+		animate(cell, imgs);
 	}
 
 	private void animate(ViewerCell cell, Image[] images) {
