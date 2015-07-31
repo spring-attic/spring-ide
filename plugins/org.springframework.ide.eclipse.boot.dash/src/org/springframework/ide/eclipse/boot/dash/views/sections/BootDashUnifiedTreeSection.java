@@ -39,9 +39,11 @@ import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
@@ -135,6 +137,33 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
+	private final ValueListener<Set<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<Set<BootDashElement>>() {
+		protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
+			if (tv != null && !tv.getControl().isDisposed()) {
+				//TODO: refreshing the whole table is overkill, but is a bit tricky to figure out which BDM
+				// this set of elements belong to. If we did know then we could just refresh the node representing its section
+				// only.
+				tv.refresh();
+			} else {
+				//This listener can't easily be removed because of the intermediary adapter that adds it to a numner of different
+				// things. So at least remove it when model remains chatty after view got disposed.
+				exp.removeListener(this);
+			}
+		}
+	};
+
+	/**
+	 * Listener which adds element set listener to each section model.
+	 */
+	final private ValueListener<Set<BootDashModel>> ELEMENTS_SET_LISTENER_ADAPTER = new ElementwiseListener<BootDashModel>() {
+		protected void added(LiveExpression<Set<BootDashModel>> exp, BootDashModel e) {
+			e.getElements().addListener(ELEMENTS_SET_LISTENER);
+		}
+		protected void removed(LiveExpression<Set<BootDashModel>> exp, BootDashModel e) {
+			e.getElements().addListener(ELEMENTS_SET_LISTENER);
+		}
+	};
+
 	public class CustomTreeViewer extends TreeViewer {
 
 		private LiveVariable<Integer> hiddenElementCount = new LiveVariable<Integer>(0);
@@ -216,8 +245,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		});
 
 		model.getRunTargets().addListener(RUN_TARGET_LISTENER);
-		//TODO: must listen on all section models and change listener when section models get added / removed.
-		//model.getElements().addListener(ELEMENTS_SET_LISTENER);
+		model.getSectionModels().addListener(ELEMENTS_SET_LISTENER_ADAPTER);
 
 		model.addElementStateListener(ELEMENT_STATE_LISTENER);
 
@@ -239,6 +267,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			public void widgetDisposed(DisposeEvent e) {
 				model.removeElementStateListener(ELEMENT_STATE_LISTENER);
 				model.getRunTargets().removeListener(RUN_TARGET_LISTENER);
+				model.getSectionModels().removeListener(ELEMENTS_SET_LISTENER_ADAPTER);
 
 				if (searchFilterModel!=null) {
 					searchFilterModel.removeListener(FILTER_LISTENER);

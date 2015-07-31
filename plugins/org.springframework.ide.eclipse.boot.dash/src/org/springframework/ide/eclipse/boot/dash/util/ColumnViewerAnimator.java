@@ -126,7 +126,6 @@ public class ColumnViewerAnimator {
 			job = new UIJob("Animate table icons") {
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					System.out.println("animating...");
 					if (!tv.getControl().isDisposed()) {
 						animationCounter++;
 						for (CellAnimation a : getAnimations()) {
