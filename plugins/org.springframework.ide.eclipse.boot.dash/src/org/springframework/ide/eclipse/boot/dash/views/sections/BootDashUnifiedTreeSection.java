@@ -16,12 +16,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -31,15 +36,23 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
@@ -54,6 +67,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
@@ -61,6 +75,7 @@ import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
+import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
@@ -78,6 +93,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class BootDashUnifiedTreeSection extends PageSection implements MultiSelectionSource {
 
+	protected static final Object[] NO_OBJECTS = new Object[0];
 	//TODO: update nodes in representing section when element in any of section changes
 	//TODO: update treeviewer when models / added removed
 	//TODO: update treeviewer when elements in section added / removed
@@ -283,6 +299,9 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				}
 			}
 		});
+
+		addDragSupport(tv);
+		addDropSupport(tv);
 	}
 
 	@Override
@@ -393,6 +412,163 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				}
 			}
 		}
+	}
+
+	private void addDragSupport(final TreeViewer viewer) {
+		int ops = DND.DROP_COPY;
+
+		final Transfer[] transfers = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+
+		DragSourceAdapter listener = new DragSourceAdapter() {
+
+//			@Override
+//			public void dragSetData(DragSourceEvent event) {
+//				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+//				event.data = selection.getFirstElement();
+//				LocalSelectionTransfer.getTransfer().setSelection(selection);
+//			}
+//
+//			@Override
+//			public void dragStart(DragSourceEvent event) {
+//				if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_DEFAULT) {
+//					event.detail = DND.DROP_COPY;
+//				}
+//				dragSetData(event);
+//			}
+
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				Set<BootDashElement> selection = getSelection().getValue();
+				BootDashElement[] elements = selection.toArray(new BootDashElement[selection.size()]);
+				LocalSelectionTransfer.getTransfer().setSelection(new StructuredSelection(elements));
+				event.detail = DND.DROP_COPY;
+			}
+
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				if (!canDeploySelection(getSelection().getValue())) {
+					event.doit = false;
+				} else {
+					dragSetData(event);
+				}
+			}
+		};
+		viewer.addDragSupport(ops, transfers, listener);
+	}
+
+	private void addDropSupport(final TreeViewer tv) {
+		int ops = DND.DROP_COPY;
+		final LocalSelectionTransfer transfer = LocalSelectionTransfer.getTransfer();
+		Transfer[] transfers = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+		DropTarget dropTarget = new DropTarget(tv.getTree(), ops);
+		dropTarget.setTransfer(transfers);
+		dropTarget.addDropListener(new DropTargetAdapter() {
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				checkDropable(event);
+			}
+
+			@Override
+			public void dragOver(DropTargetEvent event) {
+				checkDropable(event);
+			}
+
+			@Override
+			public void dropAccept(DropTargetEvent event) {
+				checkDropable(event);
+			}
+
+			private void checkDropable(DropTargetEvent event) {
+				if (canDrop(event)) {
+					event.detail = DND.DROP_COPY & event.operations;
+				} else {
+					event.detail = DND.DROP_NONE;
+				}
+			}
+
+			private boolean canDrop(DropTargetEvent event) {
+				BootDashModel droppedOn = getDropTarget(event);
+				if (droppedOn!=null && droppedOn instanceof ModifiableModel) {
+					ModifiableModel target = (ModifiableModel) droppedOn;
+					if (transfer.isSupportedType(event.currentDataType)) {
+						Object[] elements = getDraggedElements();
+						if (ArrayUtils.hasElements(elements) && target.canBeAdded(Arrays.asList(elements))) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+
+			/**
+			 * Determines which BootDashModel a droptarget event represents (i.e. what thing
+			 * are we dropping or dragging onto?
+			 */
+			private BootDashModel getDropTarget(DropTargetEvent event) {
+				Point loc = tv.getTree().toControl(new Point(event.x, event.y));
+				ViewerCell cell = tv.getCell(loc);
+				if (cell!=null) {
+					Object el = cell.getElement();
+					if (el instanceof BootDashModel) {
+						return (BootDashModel) el;
+					}
+				}
+				//Not a valid place to drop
+				return null;
+			}
+
+			@Override
+			public void drop(DropTargetEvent event) {
+				if (canDrop(event)) {
+					BootDashModel model = getDropTarget(event);
+					final Object[] elements = getDraggedElements();
+					if (model instanceof ModifiableModel) {
+						final ModifiableModel modifiableModel = (ModifiableModel) model;
+						Job job = new Job("Performing deployment to " + model.getRunTarget().getName()) {
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								if (modifiableModel != null && selection != null) {
+									try {
+										modifiableModel.add(Arrays.asList(elements), ui);
+
+									} catch (Exception e) {
+										ui.errorPopup("Failed to Add Element", e.getMessage());
+									}
+								}
+								return Status.OK_STATUS;
+							}
+
+						};
+						job.schedule();
+					}
+				}
+				super.drop(event);
+			}
+
+			private Object[] getDraggedElements() {
+				ISelection sel = transfer.getSelection();
+				if (sel instanceof IStructuredSelection) {
+					return ((IStructuredSelection)sel).toArray();
+				}
+				return NO_OBJECTS;
+			}
+
+		});
+	}
+
+	private boolean canDeploySelection(Set<BootDashElement> selection) {
+		if (selection.isEmpty()) {
+			//Careful... don't return 'true' if nothing is selected.
+			return false;
+		}
+		for (BootDashElement e : selection) {
+			if (!e.getParent().getRunTarget().canDeployAppsFrom()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

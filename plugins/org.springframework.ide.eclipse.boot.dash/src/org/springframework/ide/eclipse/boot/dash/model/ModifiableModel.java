@@ -14,9 +14,9 @@ import java.util.List;
 
 public interface ModifiableModel {
 
-	abstract public boolean canBeAdded(List<Object> sources, Object target);
+	abstract public boolean canBeAdded(List<Object> sources);
 
-	abstract public void add(List<Object> sources, Object target, UserInteractions ui) throws Exception;
+	abstract public void add(List<Object> sources, UserInteractions ui) throws Exception;
 
 	abstract public void delete(List<BootDashElement> toRemove, UserInteractions ui);
 

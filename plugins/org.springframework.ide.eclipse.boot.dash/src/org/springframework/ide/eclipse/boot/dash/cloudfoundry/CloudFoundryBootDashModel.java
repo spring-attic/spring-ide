@@ -102,7 +102,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public boolean canBeAdded(List<Object> sources, Object target) {
+	public boolean canBeAdded(List<Object> sources) {
 		if (sources != null && !sources.isEmpty()) {
 			for (Object obj : sources) {
 				// IMPORTANT: to avoid drag/drop into the SAME target, be
@@ -119,7 +119,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public void add(List<Object> sources, Object target, UserInteractions ui) throws Exception {
+	public void add(List<Object> sources, UserInteractions ui) throws Exception {
 
 		Map<IProject, BootDashElement> projects = new LinkedHashMap<IProject, BootDashElement>();
 		if (sources != null) {

@@ -52,7 +52,7 @@ public class ModelDropListener extends DropTargetAdapter {
 					if (modifiableModel != null && selection != null) {
 						Object[] selectionObjs = selection.toArray();
 						try {
-							modifiableModel.add(Arrays.asList(selectionObjs), ModelDropListener.this.target, ui);
+							modifiableModel.add(Arrays.asList(selectionObjs), ui);
 
 						} catch (Exception e) {
 							ui.errorPopup("Failed to Add Element", e.getMessage());
@@ -80,7 +80,7 @@ public class ModelDropListener extends DropTargetAdapter {
 				Object[] selectionObjs = selection.toArray();
 
 				if (selectionObjs != null) {
-					canDrop = modifiableModel.canBeAdded(Arrays.asList(selectionObjs), target);
+					canDrop = modifiableModel.canBeAdded(Arrays.asList(selectionObjs));
 				}
 			}
 		}
