@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,11 +127,17 @@ public class BeansJavaGroovyConfigTest {
 		IBean processor5 = BeansModelUtils.getBean(AnnotationConfigUtils.PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME, config);
 		assertNotNull(processor5);
 
+		IBean processor6 = BeansModelUtils.getBean(AnnotationConfigUtils.EVENT_LISTENER_FACTORY_BEAN_NAME, config);
+		assertNotNull(processor6);
+
+		IBean processor7 = BeansModelUtils.getBean(AnnotationConfigUtils.EVENT_LISTENER_PROCESSOR_BEAN_NAME, config);
+		assertNotNull(processor7);
+
 		Set<IBean> beans = BeansModelUtils.getBeans(config);
-		assertEquals(7, beans.size());
+		assertEquals(9, beans.size());
 
 		IModelElement[] children = config.getElementChildren();
-		assertEquals(7, children.length);
+		assertEquals(9, children.length);
 	}
 
 	@Test
