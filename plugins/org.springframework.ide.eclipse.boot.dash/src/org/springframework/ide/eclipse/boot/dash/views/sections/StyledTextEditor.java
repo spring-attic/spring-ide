@@ -37,7 +37,7 @@ public abstract class StyledTextEditor extends StyledTextCellEditor {
 
 	@Override
 	public void deactivate() {
-		if (text.getDisplay() != null && text.getDisplay().getActiveShell() != null) {
+		if (text.getDisplay() != null && text.isFocusControl() && text.getDisplay().getActiveShell() != null) {
 			text.getDisplay().getActiveShell().forceFocus();
 		}
 	}
