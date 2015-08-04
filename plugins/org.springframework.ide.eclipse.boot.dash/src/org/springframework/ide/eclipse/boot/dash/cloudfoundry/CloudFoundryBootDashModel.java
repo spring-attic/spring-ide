@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -301,17 +302,17 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public void delete(List<BootDashElement> toRemove, UserInteractions ui) {
+	public void delete(Collection<BootDashElement> toRemove, UserInteractions ui) {
 
 		Set<BootDashElement> updated = new HashSet<BootDashElement>();
 
-		synchronized (this) {
-			if (toRemove == null || toRemove.isEmpty()) {
-				return;
-			}
+		if (toRemove == null || toRemove.isEmpty()) {
+			return;
+		}
 
-			if (ui.confirmOperation("Deleting Applications",
-					"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
+		if (ui.confirmOperation("Deleting Applications",
+				"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
+			synchronized (this) {
 
 				// Safe iterate via getValues(); a copy, instead of getValue()
 				List<BootDashElement> existing = elements.getValues();
@@ -347,8 +348,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 					ui.errorPopup("Error saving project to application mappings", e.getMessage());
 				}
 			}
+			elements.replaceAll(updated);
 		}
-		elements.replaceAll(updated);
-
 	}
 }
