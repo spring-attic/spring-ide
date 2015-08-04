@@ -21,7 +21,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -40,7 +39,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
@@ -79,7 +77,6 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
@@ -1273,20 +1270,11 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 	 */
 	static class ToolingFriendlyBeanDefinitionDocumentReader extends DefaultBeanDefinitionDocumentReader {
 
-		private Environment environment;
-
 		private BeanDefinitionParserDelegate delegate;
-
 		private BeansConfig beansConfig;
 
 		public ToolingFriendlyBeanDefinitionDocumentReader(BeansConfig beansConfig) {
 			this.beansConfig = beansConfig;
-		}
-
-		@Override
-		public void setEnvironment(Environment environment) {
-			super.setEnvironment(environment);
-			this.environment = environment;
 		}
 
 		/**
@@ -1308,7 +1296,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 		 */
 		@Override
 		protected BeanDefinitionParserDelegate createDelegate(XmlReaderContext readerContext, Element root, BeanDefinitionParserDelegate parentDelegate) {
-			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext, environment);
+			BeanDefinitionParserDelegate delegate = new ErrorSuppressingBeanDefinitionParserDelegate(readerContext);
 			delegate.initDefaults(root, parentDelegate);
 			return delegate;
 		}
@@ -1411,8 +1399,8 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 		private final XmlReaderContext readerContext;
 
-		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext, Environment environment) {
-			super(readerContext, environment);
+		public ErrorSuppressingBeanDefinitionParserDelegate(XmlReaderContext readerContext) {
+			super(readerContext);
 			this.readerContext = readerContext;
 		}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,18 +37,16 @@ public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataRead
 	private final String desc;
 	private final String name;
 	private final IType mainType;
-	private final String returnType;
 
 	private IMethod method;
 
 	public JdtConnectedMethodMetadataReadingVisitor(IType mainType, String name, int access, String desc, String declaringClassName, ClassLoader classLoader,
 			Set<MethodMetadata> methodMetadataMap, String returnType) {
-		super(name, access, declaringClassName, classLoader, methodMetadataMap);
+		super(name, access, declaringClassName, returnType, classLoader, methodMetadataMap);
 
 		this.mainType = mainType;
 		this.desc = desc;
 		this.name = name;
-		this.returnType = returnType;
 		this.method = null;
 	}
 
@@ -60,7 +58,7 @@ public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataRead
 	}
 	
 	public JavaModelSourceLocation createSourceLocation() throws JavaModelException {
-		return new JavaModelMethodSourceLocation(getJavaElement(), returnType);
+		return new JavaModelMethodSourceLocation(getJavaElement(), getReturnTypeName());
 	}
 
 	private IMethod getMethodFromSignature(final String name, final String desc) {
