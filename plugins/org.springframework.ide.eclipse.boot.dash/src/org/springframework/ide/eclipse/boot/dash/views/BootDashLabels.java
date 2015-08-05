@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -25,9 +26,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
-
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * Provides various methods for implementing various Label providers for the Boot Dash
@@ -216,6 +216,20 @@ public class BootDashLabels implements Disposable {
 				label = host == null ? UNKNOWN_LABEL : host;
 				break;
 			case TREE_VIEWER_MAIN:
+				BootDashColumn[] cols = element.getParent().getRunTarget().getDefaultColumns();
+				styledLabel = new StyledString();
+				boolean first = true;
+				for (BootDashColumn col : cols) {
+					//Ignore RUN_STATE_ICN because its already represented in the label's icon.
+					if (col!=RUN_STATE_ICN) {
+						if (!first) {
+							styledLabel = styledLabel.append(" ");
+						}
+						styledLabel = styledLabel.append(getStyledText(element, col));
+						first = false;
+					}
+				}
+				break;
 			case APP:
 				String app = element.getName();
 				label = app == null ? UNKNOWN_LABEL : app;
