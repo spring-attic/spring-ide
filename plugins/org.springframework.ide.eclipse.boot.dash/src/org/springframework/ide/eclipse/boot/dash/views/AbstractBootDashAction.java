@@ -10,49 +10,22 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.Collection;
-import java.util.Set;
-
 import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
-public class AbstractBootDashAction extends Action {
+/**
+ * @author Kris De Volder
+ */
+public class AbstractBootDashAction extends Action implements Disposable {
 
-	private final MultiSelection<BootDashElement> selection;
 	protected final UserInteractions ui;
 
-	public AbstractBootDashAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		this.selection = selection;
+	protected AbstractBootDashAction(UserInteractions ui) {
 		this.ui = ui;
-		selection.getElements().addListener(new ValueListener<Set<BootDashElement>>() {
-			public void gotValue(LiveExpression<Set<BootDashElement>> exp,
-					Set<BootDashElement> selecteds) {
-				updateEnablement();
-			}
-		});
-	}
-
-	/**
-	 * Subclass can override to compuet enablement differently.
-	 * The default implementation enables if a single element is selected.
-	 */
-	public void updateEnablement() {
-		Collection<BootDashElement> selecteds = getSelectedElements();
-		this.setEnabled(selecteds.size()==1);
-	}
-
-	protected Collection<BootDashElement> getSelectedElements() {
-		return selection.getValue();
-	}
-
-	protected BootDashElement getSingleSelectedElement() {
-		return selection.getSingle();
 	}
 
 	public void dispose() {
 	}
+
 }

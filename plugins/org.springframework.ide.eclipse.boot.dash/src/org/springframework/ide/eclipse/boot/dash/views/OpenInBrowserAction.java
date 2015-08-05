@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class OpenInBrowserAction extends AbstractBootDashAction {
+public class OpenInBrowserAction extends AbstractBootDashElementsAction {
 
 	private ElementStateListener listener;
 	private BootDashViewModel model;

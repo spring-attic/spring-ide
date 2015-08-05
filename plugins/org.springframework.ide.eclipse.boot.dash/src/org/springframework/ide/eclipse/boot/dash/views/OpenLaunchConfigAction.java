@@ -17,7 +17,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class OpenLaunchConfigAction extends AbstractBootDashAction {
+public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
 	public OpenLaunchConfigAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);

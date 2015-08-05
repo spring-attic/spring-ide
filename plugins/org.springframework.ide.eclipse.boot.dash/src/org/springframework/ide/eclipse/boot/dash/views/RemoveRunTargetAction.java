@@ -17,7 +17,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class RemoveRunTargetAction extends AbstractBootDashAction {
+public class RemoveRunTargetAction extends AbstractBootDashElementsAction {
 
 	private BootDashViewModel model;
 	private RunTarget runTargetToRemove;

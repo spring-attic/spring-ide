@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class BootDashActions {
 
@@ -40,14 +41,14 @@ public class BootDashActions {
 
 	///// context info //////////////
 	private BootDashViewModel model;
-	private MultiSelection<BootDashElement> selection;
+	private MultiSelection<BootDashElement> elementsSelection;
 	private UserInteractions ui;
-	private BootDashModel sectionModel;
+	private LiveExpression<BootDashModel> sectionSelection;
 
 	///// actions ///////////////////
 
 	private RunStateAction[] runStateActions;
-	private AbstractBootDashAction openConsoleAction;
+	private AbstractBootDashElementsAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
 	private AddRunTargetAction[] addTargetActions;
@@ -59,38 +60,51 @@ public class BootDashActions {
 	private ToggleFiltersAction toggleFiltersAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+		this(
+				model,
+				selection,
+				null,
+				ui
+		);
+	}
+
+	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, UserInteractions ui) {
 		Assert.isNotNull(ui);
 		this.model = model;
-		this.selection = selection;
+		this.elementsSelection = selection;
+		this.sectionSelection = section;
 		this.ui = ui;
 
 		makeActions();
 	}
 
+	/**
+	 * Create BDA tied to a specific section (in the old dashboard which has one section per RunTarget).
+	 */
 	public BootDashActions(BootDashViewModel model, BootDashModel sectionModel,
 			MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		this.model = model;
-		this.selection = selection;
-		this.ui = ui;
-		this.sectionModel = sectionModel;
-		makeActions();
+		this(
+				model,
+				selection,
+				LiveExpression.constant(sectionModel),
+				ui
+		);
 	}
 
 	protected void makeActions() {
-
-		RunStateAction restartAction = new RunOrDebugStateAction(model, selection, ui, RunState.RUNNING);
+		RunStateAction restartAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.RUNNING);
 		restartAction.setText("(Re)start");
 		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
 		restartAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
 		restartAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
 
-		RunStateAction rebugAction = new RunOrDebugStateAction(model, selection, ui, RunState.DEBUGGING);
+		RunStateAction rebugAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.DEBUGGING);
 		rebugAction.setText("(Re)debug");
 		rebugAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode");
 		rebugAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
 		rebugAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 
-		RunStateAction stopAction = new RunStateAction(model, selection, ui, RunState.INACTIVE) {
+		RunStateAction stopAction = new RunStateAction(model, elementsSelection, ui, RunState.INACTIVE) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				return s == RunState.DEBUGGING || s == RunState.RUNNING;
@@ -98,7 +112,7 @@ public class BootDashActions {
 
 			@Override
 			protected Job createJob() {
-				final Collection<BootDashElement> selecteds = selection.getValue();
+				final Collection<BootDashElement> selecteds = elementsSelection.getValue();
 				if (!selecteds.isEmpty()) {
 					return new Job("Stopping " + selecteds.size() + " Boot Dash Elements") {
 						protected IStatus run(IProgressMonitor monitor) {
@@ -130,29 +144,30 @@ public class BootDashActions {
 
 		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction };
 
-		openConfigAction = new OpenLaunchConfigAction(selection, ui);
-		openConsoleAction = new OpenConsoleAction(selection, model, ui);
-		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
+		openConfigAction = new OpenLaunchConfigAction(elementsSelection, ui);
+		openConsoleAction = new OpenConsoleAction(elementsSelection, model, ui);
+		openBrowserAction = new OpenInBrowserAction(model, elementsSelection, ui);
 		addTargetActions = createAddTargetActions();
 
-		deleteApplicationsAction = new DeleteApplicationsAction(selection, ui);
+		deleteApplicationsAction = new DeleteApplicationsAction(elementsSelection, ui);
 
-		if (sectionModel != null) {
-			refreshAction = new RefreshRunTargetAction(sectionModel, selection, ui);
-			if (sectionModel.getRunTarget().canRemove()) {
-				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
-			}
-
-			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
-				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();
-				if (runTargetWP.requiresCredentials()) {
-					updatePasswordAction = new UpdatePasswordAction(runTargetWP, model, sectionModel, selection, ui);
-				}
-			}
+		if (sectionSelection != null) {
+			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
+			//TODO: porting the code below to a BootDashModelAction
+//			if (getSectionModel().getRunTarget().canRemove()) {
+//				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
+//			}
+//
+//			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
+//				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();
+//				if (runTargetWP.requiresCredentials()) {
+//					updatePasswordAction = new UpdatePasswordAction(runTargetWP, model, sectionModel, selection, ui);
+//				}
+//			}
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
-		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), selection, ui);
+		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), elementsSelection, ui);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -160,7 +175,7 @@ public class BootDashActions {
 		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
 		for (RunTargetType tt : targetTypes) {
 			if (tt.canInstantiate()) {
-				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), selection, ui));
+				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), elementsSelection, ui));
 			}
 		}
 		return actions.toArray(new AddRunTargetAction[actions.size()]);
@@ -208,11 +223,11 @@ public class BootDashActions {
 		return runStateActions;
 	}
 
-	public AbstractBootDashAction getOpenBrowserAction() {
+	public AbstractBootDashElementsAction getOpenBrowserAction() {
 		return openBrowserAction;
 	}
 
-	public AbstractBootDashAction getOpenConsoleAction() {
+	public AbstractBootDashElementsAction getOpenConsoleAction() {
 		return openConsoleAction;
 	}
 

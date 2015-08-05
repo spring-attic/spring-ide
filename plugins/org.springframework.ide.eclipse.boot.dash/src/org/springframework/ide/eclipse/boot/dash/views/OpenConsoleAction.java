@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class OpenConsoleAction extends AbstractBootDashAction {
+public class OpenConsoleAction extends AbstractBootDashElementsAction {
 
 	private final BootDashViewModel viewModel;
 

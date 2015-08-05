@@ -80,7 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashCellLabelProvider;
@@ -342,7 +342,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 	}
 
 	public void addSingleClickHandling() {
-		final AbstractBootDashAction[] singleClickActions = new AbstractBootDashAction[model.getRunTarget().getAllColumns().length];
+		final AbstractBootDashElementsAction[] singleClickActions = new AbstractBootDashElementsAction[model.getRunTarget().getAllColumns().length];
 		boolean hasSingleClickActions = false;
 		for (int i = 0; i < model.getRunTarget().getAllColumns().length; i++) {
 			BootDashColumn columnType = model.getRunTarget().getAllColumns()[i];
@@ -360,7 +360,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 					Table table = tv.getTable();
 					if (cell!=null) {
 						int colIdx = cell.getColumnIndex();
-						AbstractBootDashAction action = singleClickActions[colIdx];
+						AbstractBootDashElementsAction action = singleClickActions[colIdx];
 						if (action!=null && action.isEnabled()) {
 							table.setCursor(CursorProviders.HAND_CURSOR.getCursor(cell));
 							return;
@@ -381,7 +381,7 @@ public class BootDashElementsTableSection extends PageSection implements MultiSe
 						Object el = cell.getElement();
 						if (el instanceof BootDashElement) {
 							int idx = cell.getColumnIndex();
-							AbstractBootDashAction action = singleClickActions[idx];
+							AbstractBootDashElementsAction action = singleClickActions[idx];
 							if (action!=null) {
 								action.run();
 							}

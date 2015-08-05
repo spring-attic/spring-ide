@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -87,6 +88,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Displays all runtargets and elements in a single 'unified' tree viewer.
  *
@@ -94,16 +97,25 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class BootDashUnifiedTreeSection extends PageSection implements MultiSelectionSource {
 
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private <T> void debug(final String name, LiveExpression<T> watchable) {
+		if (DEBUG) {
+			watchable.addListener(new ValueListener<T>() {
+				public void gotValue(LiveExpression<T> exp, T value) {
+					System.out.println(name +": "+ value);
+				}
+			});
+		}
+	}
+
 	protected static final Object[] NO_OBJECTS = new Object[0];
-	//TODO: update nodes in representing section when element in any of section changes
-	//TODO: update treeviewer when models / added removed
-	//TODO: update treeviewer when elements in section added / removed
-	//TODO: label provider for section nodes
-	//TODO: label provider for element nodes with runstate animation
 
 	private CustomTreeViewer tv;
 	private BootDashViewModel model;
+	private MultiSelection<Object> mixedSelection; // selection that may contain section or element nodes or both.
 	private MultiSelection<BootDashElement> selection;
+	private LiveExpression<BootDashModel> sectionSelection;
 	private BootDashActions actions;
 	private UserInteractions ui;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
@@ -239,7 +251,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			}
 		});
 
-		actions = new BootDashActions(model, null, getSelection(), ui);
+		actions = new BootDashActions(model, getSelection(), getSectionSelection(), ui);
 		hookContextMenu();
 
 		// Careful, either selection or tableviewer might be created first.
@@ -307,43 +319,52 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addDropSupport(tv);
 	}
 
-	@Override
-	public synchronized MultiSelection<BootDashElement> getSelection() {
-		if (selection==null) {
-			selection = MultiSelection.from(BootDashElement.class, new ObservableSet<BootDashElement>() {
+	private LiveExpression<BootDashModel> getSectionSelection() {
+		if (sectionSelection==null) {
+			sectionSelection = getMixedSelection().toSingleSelection().filter(BootDashModel.class);
+			debug("sectionSelection", sectionSelection);
+		}
+		return sectionSelection;
+	}
+
+	private synchronized MultiSelection<Object> getMixedSelection() {
+		if (mixedSelection==null) {
+			mixedSelection = MultiSelection.from(Object.class, new ObservableSet<Object>() {
 				@Override
-				protected Set<BootDashElement> compute() {
+				protected Set<Object> compute() {
 					if (tv!=null) {
 						ISelection s = tv.getSelection();
 						if (s instanceof IStructuredSelection) {
 							Object[] elements = ((IStructuredSelection) s).toArray();
-							if (elements!=null && elements.length>0) {
-								HashSet<BootDashElement> set = new HashSet<BootDashElement>();
-								for (Object o : elements) {
-									if (o instanceof BootDashElement) {
-										set.add((BootDashElement) o);
-									}
-									//TODO: if section is selected then add all elements from the section to the selection?
-								}
-								return set;
-							}
+							return ImmutableSet.copyOf(elements);
 						}
 					}
 					return Collections.emptySet();
 				}
 			});
+			debug("mixedSelection", mixedSelection.getElements());
 		}
 		if (tv!=null) {
 			addViewerSelectionListener();
+		}
+		return mixedSelection;
+	}
+
+
+	@Override
+	public synchronized MultiSelection<BootDashElement> getSelection() {
+		if (selection==null) {
+			selection = getMixedSelection().filter(BootDashElement.class);
+			debug("selection", selection.getElements());
 		}
 		return selection;
 	}
 
 	private void addViewerSelectionListener() {
-		tv.setSelection(new StructuredSelection(Arrays.asList(selection.getValue().toArray(new BootDashElement[selection.getValue().size()]))));
+		tv.setSelection(new StructuredSelection(Arrays.asList(mixedSelection.getValue().toArray())));
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				selection.getElements().refresh();
+				mixedSelection.getElements().refresh();
 			}
 		});
 	}
@@ -578,4 +599,5 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	public LiveExpression<ValidationResult> getValidator() {
 		return Validator.OK;
 	}
+
 }

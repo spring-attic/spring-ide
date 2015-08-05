@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenInBrowserAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -39,7 +39,7 @@ public enum BootDashColumn {
 		RUN_STATE_ICN.longLabel = "State";
 
 		RUN_STATE_ICN.singleClickAction = new BootDashActionFactory() {
-			public AbstractBootDashAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui) {
+			public AbstractBootDashElementsAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui) {
 				return new OpenInBrowserAction(model, MultiSelection.singletonOrEmpty(BootDashElement.class, hoverElement), ui);
 			}
 		};

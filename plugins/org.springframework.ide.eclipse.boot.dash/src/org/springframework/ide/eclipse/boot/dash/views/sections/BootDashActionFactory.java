@@ -13,11 +13,11 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public interface BootDashActionFactory {
 
-	AbstractBootDashAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui);
+	AbstractBootDashElementsAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui);
 
 }

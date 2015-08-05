@@ -11,18 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-public class RefreshRunTargetAction extends AbstractBootDashAction {
+public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 
-	private BootDashModel model;
-
-	public RefreshRunTargetAction(BootDashModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
-		this.model = model;
+	public RefreshRunTargetAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
+		super(section, ui);
 		this.setText("Refresh");
 		this.setToolTipText("Manually refresh contents of the section");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/refresh.gif"));
@@ -30,13 +26,10 @@ public class RefreshRunTargetAction extends AbstractBootDashAction {
 
 	@Override
 	public void run() {
-		model.refresh();
-	}
-
-	@Override
-	public void updateEnablement() {
-		// Always enable
-		this.setEnabled(true);
+		BootDashModel model = section.getValue();
+		if (model!=null) {
+			model.refresh();
+		}
 	}
 
 }

@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 /**
  * @author Kris De Volder
  */
-public class ToggleFiltersAction extends AbstractBootDashAction {
+public class ToggleFiltersAction extends AbstractBootDashElementsAction {
 
 	/**
 	 * Represents the filters in the view (i.e. the ones currently in effect when dlg opens).

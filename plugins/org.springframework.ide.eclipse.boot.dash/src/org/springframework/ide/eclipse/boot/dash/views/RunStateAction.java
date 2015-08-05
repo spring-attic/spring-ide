@@ -31,7 +31,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
  *
  * @author Kris De Volder
  */
-public abstract class RunStateAction extends AbstractBootDashAction {
+public abstract class RunStateAction extends AbstractBootDashElementsAction {
 
 
 	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");

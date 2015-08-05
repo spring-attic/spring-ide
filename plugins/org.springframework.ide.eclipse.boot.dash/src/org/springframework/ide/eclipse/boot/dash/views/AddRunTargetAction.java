@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
-public class AddRunTargetAction extends AbstractBootDashAction {
+public class AddRunTargetAction extends AbstractBootDashElementsAction {
 
 	private LiveSet<RunTarget> targets;
 	private RunTargetType runTargetType;

@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class UpdatePasswordAction extends AbstractBootDashAction {
+public class UpdatePasswordAction extends AbstractBootDashElementsAction {
 
 	private BootDashViewModel model;
 	private RunTargetWithProperties runTarget;
