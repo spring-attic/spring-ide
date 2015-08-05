@@ -15,27 +15,22 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-public class UpdatePasswordAction extends AbstractBootDashElementsAction {
+public class UpdatePasswordAction extends AbstractBootDashModelAction {
 
 	private BootDashViewModel model;
-	private RunTargetWithProperties runTarget;
-	private BootDashModel targetModel;
 
-	public UpdatePasswordAction(RunTargetWithProperties runTarget, BootDashViewModel model, BootDashModel targetModel,
-			MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
-		this.runTarget = runTarget;
-
+	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection, BootDashViewModel model,
+			UserInteractions ui) {
+		super(sectionSelection, ui);
 		this.model = model;
-		this.targetModel = targetModel;
 		this.setText("Update Password");
 		this.setToolTipText("Update password locally for the selected target.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.gif"));
@@ -43,39 +38,56 @@ public class UpdatePasswordAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void run() {
-		final String userName = runTarget.getTargetProperties().get(TargetProperties.USERNAME_PROP);
-		final String targetId = runTarget.getTargetProperties().getRunTargetId();
-		Job job = new Job("Updating password") {
+		final BootDashModel targetModel = sectionSelection.getValue();
+		final RunTargetWithProperties runTarget = getCredentialsHolder(targetModel);
+		if (runTarget!=null) {
+			final String userName = runTarget.getTargetProperties().get(TargetProperties.USERNAME_PROP);
+			final String targetId = runTarget.getId();
+			Job job = new Job("Updating password") {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				String password = ui.updatePassword(userName, targetId);
-				if (password != null) {
-					runTarget.getTargetProperties().put(TargetProperties.PASSWORD_PROP, password);
-					try {
-						runTarget.validate();
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					String password = ui.updatePassword(userName, targetId);
+					if (password != null) {
+						runTarget.getTargetProperties().put(TargetProperties.PASSWORD_PROP, password);
+						try {
+							runTarget.validate();
 
-						// Only store if it validates
-						model.updatePropertiesInStore(runTarget);
+							// Only store if it validates
+							model.updatePropertiesInStore(runTarget);
 
-						// launch refresh if it validates
-						targetModel.refresh();
+							// launch refresh if it validates
+							targetModel.refresh();
 
-					} catch (Exception e) {
-						ui.errorPopup("Update Password Failure", "Credentials for " + targetId
-								+ " are not valid. Please ensure that you entered the right credentials.");
+						} catch (Exception e) {
+							ui.errorPopup("Update Password Failure", "Credentials for " + targetId
+									+ " are not valid. Please ensure that you entered the right credentials.");
+						}
+
 					}
-
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.schedule();
+			};
+			job.schedule();
+		}
 	}
 
 	@Override
 	public void updateEnablement() {
-		this.setEnabled(true);
+		this.setEnabled(getCredentialsHolder(sectionSelection.getValue())!=null);
+	}
+
+	private RunTargetWithProperties getCredentialsHolder(BootDashModel section) {
+		if (section!=null) {
+			RunTarget target = section.getRunTarget();
+			if (target instanceof RunTargetWithProperties) {
+				RunTargetWithProperties targetWithProps = (RunTargetWithProperties) target;
+				if (targetWithProps.requiresCredentials()) {
+					return targetWithProps;
+				}
+			}
+		}
+		return null;
 	}
 
 }

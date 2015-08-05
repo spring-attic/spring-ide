@@ -15,7 +15,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
  * Not all run targets define properties (e.g. the local run target)
  *
  */
-public interface RunTargetWithProperties {
+public interface RunTargetWithProperties extends RunTarget {
 
 	public TargetProperties getTargetProperties();
 

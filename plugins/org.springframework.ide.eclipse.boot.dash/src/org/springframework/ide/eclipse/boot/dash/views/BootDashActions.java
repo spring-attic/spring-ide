@@ -45,7 +45,6 @@ public class BootDashActions {
 	private LiveExpression<BootDashModel> sectionSelection;
 
 	///// actions ///////////////////
-
 	private RunStateAction[] runStateActions;
 	private AbstractBootDashElementsAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
@@ -153,14 +152,7 @@ public class BootDashActions {
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
-
-			//TODO: porting the code below to a BootDashModelAction
-//			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
-//				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();
-//				if (runTargetWP.requiresCredentials()) {
-//					updatePasswordAction = new UpdatePasswordAction(runTargetWP, model, sectionModel, selection, ui);
-//				}
-//			}
+			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
