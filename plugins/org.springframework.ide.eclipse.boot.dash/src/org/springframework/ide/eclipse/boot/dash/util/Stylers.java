@@ -45,7 +45,7 @@ public class Stylers implements Disposable {
 			@Override
 			public void applyStyles(TextStyle textStyle) {
 				textStyle.foreground = getSystemColor(SWT.COLOR_DARK_CYAN);
-				textStyle.rise = 2;
+				//textStyle.rise = 2; //Why?? it makes mixed text with this style and others togther look really ugly!
 				textStyle.underline = true;
 				textStyle.font = getBoldFont();
 			}
@@ -84,6 +84,10 @@ public class Stylers implements Disposable {
 			boldFont.dispose();
 			boldFont = null;
 		}
+	}
+
+	public Styler darkGrey() {
+		return color(SWT.COLOR_DARK_GRAY);
 	}
 
 	public Styler grey() {

@@ -175,7 +175,7 @@ public class BootDashLabels implements Disposable {
 		if (element!=null) {
 			//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
 			// colorfully.
-			return new StyledString(element.getName());
+			return new StyledString(element.getName(), stylers.bold());
 		}
 		return new StyledString(UNKNOWN_LABEL);
 	}
@@ -218,15 +218,14 @@ public class BootDashLabels implements Disposable {
 			case TREE_VIEWER_MAIN:
 				BootDashColumn[] cols = element.getParent().getRunTarget().getDefaultColumns();
 				styledLabel = new StyledString();
-				boolean first = true;
 				for (BootDashColumn col : cols) {
 					//Ignore RUN_STATE_ICN because its already represented in the label's icon.
 					if (col!=RUN_STATE_ICN) {
-						if (!first) {
-							styledLabel = styledLabel.append(" ");
+						StyledString append = getStyledText(element, col);
+						if (hasText(styledLabel) && hasText(append)) {
+							styledLabel = styledLabel.append(":", stylers.darkGrey());
 						}
-						styledLabel = styledLabel.append(getStyledText(element, col));
-						first = false;
+						styledLabel = styledLabel.append(append);
 					}
 				}
 				break;
@@ -272,6 +271,10 @@ public class BootDashLabels implements Disposable {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// private / helper stuff
+
+	private boolean hasText(StyledString stext) {
+		return !stext.getString().isEmpty();
+	}
 
 	private AppearanceAwareLabelProvider getJavaLabels() {
 		if (javaLabels == null) {
