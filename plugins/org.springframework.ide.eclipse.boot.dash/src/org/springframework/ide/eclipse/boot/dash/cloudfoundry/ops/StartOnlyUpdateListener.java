@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -27,23 +27,17 @@ public class StartOnlyUpdateListener extends ApplicationUpdateListener {
 	}
 
 	@Override
-	public void applicationCreated(CloudApplication app) {
+	public void applicationCreated(CloudAppInstances appInstances) {
 		// Ignore. Not applicable
 	}
 
 	@Override
-	public void applicationUploaded(CloudApplication app) {
-		// Ignore. Not applicable
+	public void applicationStarting(CloudAppInstances appInstances) {
+		updateModel(appInstances, RunState.STARTING);
 	}
 
 	@Override
-	public void applicationStarted(CloudApplication app) {
-		updateModel(app);
+	public void applicationUpdated(CloudAppInstances appInstances) {
+		// Ignore for now
 	}
-
-	@Override
-	public void applicationStarting(CloudApplication app) {
-		updateModel(RunState.STARTING);
-	}
-
 }

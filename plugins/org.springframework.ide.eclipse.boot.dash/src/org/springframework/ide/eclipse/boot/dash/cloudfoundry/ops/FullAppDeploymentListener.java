@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -36,32 +36,22 @@ public class FullAppDeploymentListener extends ApplicationUpdateListener {
 	}
 
 	@Override
-	public void applicationCreated(CloudApplication app) {
+	public void applicationCreated(CloudAppInstances appInstances) {
 		// This is the "starting" point of a full deployment
 		// Update the model to indicate the application is starting
 		// Run state is set to STARTING after the application is created
 		// as before, the element in the model may not yet exist
-		updateModel(app, RunState.STARTING);
+		updateModel(appInstances, RunState.STARTING);
 	}
 
 	@Override
-	public void applicationUploaded(CloudApplication app) {
-		// Ignore. this is a "middle" operation so do not update
-		// the model as to avoid setting incorrect run state for the application
-		// while full deployment is occurring
-	}
-
-	@Override
-	public void applicationStarted(CloudApplication app) {
-		// Update the model with the latest CloudApplication so that the
-		// model will be synched with the app state in Cloud Foundry
-		updateModel(app);
-	}
-
-	@Override
-	public void applicationStarting(CloudApplication app) {
+	public void applicationStarting(CloudAppInstances appInstances) {
 		// Ignore since the actual starting operation in a full deployment is
 		// not the "starting" point
 	}
 
+	@Override
+	public void applicationUpdated(CloudAppInstances appInstances) {
+		updateModel(appInstances, RunState.STARTING);
+	}
 }

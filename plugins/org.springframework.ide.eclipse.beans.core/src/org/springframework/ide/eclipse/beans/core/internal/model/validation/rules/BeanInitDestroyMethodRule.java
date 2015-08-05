@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 Spring IDE Developers
+ * Copyright (c) 2007, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,10 +45,10 @@ public class BeanInitDestroyMethodRule extends AbstractBeanMethodValidationRule 
 
 			// For non-factory beans validate bean's init-method and destroy-method
 			if (!JdtUtils.doesImplement(context.getRootElementResource(), type, FactoryBean.class.getName(), typeEngine)) {
-				if (mergedBd.isEnforceInitMethod()) {
+				if (mergedBd.isEnforceInitMethod() && bd.getInitMethodName() != null && bd.getInitMethodName().length() > 0) {
 					validateMethod(bean, type, MethodType.INIT, bd.getInitMethodName(), 0, Static.DONT_CARE, context);
 				}
-				if (mergedBd.isEnforceDestroyMethod()) {
+				if (mergedBd.isEnforceDestroyMethod() && bd.getDestroyMethodName() != null && bd.getDestroyMethodName().length() > 0) {
 					validateMethod(bean, type, MethodType.DESTROY, bd.getDestroyMethodName(), 0, Static.DONT_CARE,
 							context);
 				}

@@ -21,18 +21,23 @@ import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
- * Caches {@link CloudApplication} by application name. Fetching an updated
- * cloud application can be a long process, therefore for responsiveness, a
- * cache is maintained.
+ * Caches {@link CloudApplication} and associated information, like the project
+ * mapping and running app instances and stats, by application name. Fetching an
+ * updated cloud application and its instance and stat information can be a
+ * long-running process, therefore for responsiveness, a cache is maintained.
  * <p/>
- * API is also available to update the cache for Cloud operations that fetch an
- * updated cloud application as part of their execution.
+ * It also allows the {@link BootDashElement} for Cloud applications to be a
+ * stateless handle, making the element life-cycle management simpler and more
+ * likely to be consistent in terms of providing information about the actual
+ * application regardless how many times the element is created or deleted.
+ * <p/>
+ * API is also available to update the cache
  */
 public class CloudAppCache {
 
 	private final Map<String, CacheItem> appCache = new HashMap<String, CacheItem>();
 
-	public CloudAppCache(CloudFoundryBootDashModel model) {
+	public CloudAppCache() {
 	}
 
 	/**
@@ -40,34 +45,40 @@ public class CloudAppCache {
 	 * @param apps
 	 * @return list of all applications that have changed.
 	 */
-	public synchronized List<String> updateAll(Map<CloudApplication, IProject> apps) {
+	public synchronized List<String> updateAll(Map<CloudAppInstances, IProject> apps) {
 
-		appCache.clear();
+		Map<String, CacheItem> updatedCache = new HashMap<String, CacheItem>();
 		List<String> changedApps = new ArrayList<String>();
-		for (Entry<CloudApplication, IProject> entry : apps.entrySet()) {
-			CacheItem old = appCache.get(entry.getKey().getName());
+		for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
 
-			// Preserve any run state as some run states are "derived" (e.g.
-			// STARTING)
-			RunState runState = null;
-			if (old != null) {
-				runState = old.runState;
-			} else {
-				runState = getRunStateFromCloudApp(entry.getKey());
-			}
+			CloudAppInstances appInstances = entry.getKey();
+			IProject project = entry.getValue();
+			CacheItem old = appCache.get(appInstances.getApplication().getName());
 
-			CacheItem newItem = new CacheItem(entry.getKey(), entry.getValue(), runState);
+			// Preserving any old state to avoid state briefly "flashing" to
+			// UNKNOWN on refresh
+			RunState runState = old != null && old.runState != null ? old.runState
+					: ApplicationRunningStateTracker.getRunState(appInstances);
+
+			CacheItem newItem = new CacheItem(appInstances, project, runState);
 
 			if (!newItem.equals(old)) {
 				changedApps.add(newItem.appName);
 			}
-			appCache.put(newItem.appName, newItem);
+			updatedCache.put(newItem.appName, newItem);
 		}
+
+		appCache.clear();
+		appCache.putAll(updatedCache);
 		return changedApps;
 	}
 
 	/**
-	 * Update the cache
+	 * Update the cache for an existing entry with the given application name.
+	 * If the entry does not exist, not update is performed as there is not
+	 * sufficient information passed to create a new one.
+	 * <p/>
+	 * This method should only be used to update existing cache items.
 	 *
 	 * @param appName
 	 * @param runState
@@ -78,32 +89,49 @@ public class CloudAppCache {
 		// can only update existing items
 		if (oldItem != null) {
 			IProject project = oldItem.project;
-			CloudApplication app = oldItem.app;
-			CacheItem newItem = new CacheItem(app, project, runState);
+			CloudAppInstances appInstances = oldItem.appInstances;
+			CacheItem newItem = new CacheItem(appInstances, project, runState);
 			return !newItem.equals(oldItem);
 		}
-
 		return false;
 	}
 
-	public synchronized boolean replace(CloudApplication app, IProject project, RunState runState) {
+	/**
+	 *
+	 * @param instances
+	 * @param project
+	 * @param runState
+	 * @return true if the application cached state changed. False otherwise
+	 *         (meaning the old and new state are identical even after
+	 *         replacing)
+	 */
+	public synchronized boolean replace(CloudAppInstances instances, IProject project, RunState runState) {
 		// Do a full replace as all the information is available to replace
-		CacheItem oldItem = appCache.get(app.getName());
-		CacheItem newItem = new CacheItem(app, project, runState);
+		CacheItem oldItem = appCache.get(instances.getApplication().getName());
+		CacheItem newItem = new CacheItem(instances, project, runState);
 
 		appCache.put(newItem.appName, newItem);
 
 		return !newItem.equals(oldItem);
 	}
 
-	public synchronized boolean updateCache(CloudApplication app, RunState runState) {
+	/**
+	 * Updates the cache with the given app instances and run state. If the item
+	 * in the cache does not exist, it will create one for that application
+	 *
+	 * @param instances
+	 * @param runState
+	 * @return true if the application cached state changed. False otherwise
+	 *         (meaning the old and new state are identical)
+	 */
+	public synchronized boolean updateCache(CloudAppInstances instances, RunState runState) {
 
-		CacheItem old = appCache.get(app.getName());
+		CacheItem old = appCache.get(instances.getApplication().getName());
 
 		IProject project = old != null ? old.project : null;
-		CacheItem newItem = new CacheItem(app, project, runState != null ? runState : getRunStateFromCloudApp(app));
+		CacheItem newItem = new CacheItem(instances, project, runState);
 
-		appCache.put(app.getName(), newItem);
+		appCache.put(instances.getApplication().getName(), newItem);
 
 		return !newItem.equals(old);
 	}
@@ -115,9 +143,26 @@ public class CloudAppCache {
 	public synchronized CloudApplication getApp(String appName) {
 		CacheItem item = appCache.get(appName);
 		if (item != null) {
-			return item.app;
+			return item.appInstances.getApplication();
 		}
 		return null;
+	}
+
+	public synchronized CloudAppInstances getAppInstances(String appName) {
+		CacheItem item = appCache.get(appName);
+		if (item != null) {
+			return item.appInstances;
+		}
+		return null;
+	}
+
+	public synchronized List<CloudAppInstances> getAppInstances() {
+		List<CloudAppInstances> instances = new ArrayList<CloudAppInstances>();
+
+		for (CacheItem item : appCache.values()) {
+			instances.add(item.appInstances);
+		}
+		return instances;
 	}
 
 	public synchronized RunState getRunState(String appName) {
@@ -125,7 +170,7 @@ public class CloudAppCache {
 		if (item != null) {
 			return item.runState;
 		}
-		return RunState.INACTIVE;
+		return RunState.UNKNOWN;
 	}
 
 	public synchronized IProject getProject(String appName) {
@@ -136,42 +181,32 @@ public class CloudAppCache {
 		return null;
 	}
 
-	public static RunState getRunStateFromCloudApp(CloudApplication app) {
-		RunState appState = RunState.INACTIVE;
-
-		if (app != null) {
-			switch (app.getState()) {
-			case STARTED:
-				appState = RunState.RUNNING;
-				break;
-			case STOPPED:
-				appState = RunState.INACTIVE;
-				break;
-			case UPDATING:
-				appState = RunState.STARTING;
-				break;
-			}
-		}
-
-		return appState;
-	}
-
+	/*
+	 *
+	 * TODO: replace with CloudApplicationDeploymentProperties to use one
+	 * "model" to represent deployment properties of an app
+	 */
 	static class CacheItem {
 
-		final CloudApplication app;
+		final CloudAppInstances appInstances;
 		final String appName;
 		final RunState runState;
 		final IProject project;
+		final int totalInstances;
+		final int runningInstances;
 
-		public CacheItem(CloudApplication app, IProject project, RunState runState) {
-			this.app = app;
+		public CacheItem(CloudAppInstances appInstances, IProject project, RunState runState) {
+			this.appInstances = appInstances;
 			this.project = project;
 			this.runState = runState;
-			this.appName = app.getName();
+			this.appName = appInstances.getApplication().getName();
+			this.totalInstances = appInstances.getApplication().getInstances();
+			this.runningInstances = appInstances.getApplication().getRunningInstances();
 		}
 
-		// Don't use the CloudApplication to indicate equality. Only project,
-		// runstate and appName
+		// Don't use the CloudApplication to indicate equality. Only those
+		// properties
+		// that should trigger an app change event
 
 		@Override
 		public int hashCode() {
@@ -180,6 +215,8 @@ public class CloudAppCache {
 			result = prime * result + ((appName == null) ? 0 : appName.hashCode());
 			result = prime * result + ((project == null) ? 0 : project.hashCode());
 			result = prime * result + ((runState == null) ? 0 : runState.hashCode());
+			result = prime * result + runningInstances;
+			result = prime * result + totalInstances;
 			return result;
 		}
 
@@ -204,9 +241,11 @@ public class CloudAppCache {
 				return false;
 			if (runState != other.runState)
 				return false;
+			if (runningInstances != other.runningInstances)
+				return false;
+			if (totalInstances != other.totalInstances)
+				return false;
 			return true;
 		}
-
 	}
-
 }

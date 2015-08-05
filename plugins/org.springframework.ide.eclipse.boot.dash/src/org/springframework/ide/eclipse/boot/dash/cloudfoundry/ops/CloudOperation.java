@@ -12,65 +12,48 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public abstract class CloudOperation<T> extends Operation<T> {
+public abstract class CloudOperation extends Operation<Void> {
 
-	protected final UserInteractions ui;
-	protected final CloudFoundryOperations client;
-	protected final CloudFoundryBootDashModel model;
-
-	public CloudOperation(String opName, CloudFoundryOperations client, CloudFoundryBootDashModel model,
-			UserInteractions ui) {
+	public CloudOperation(String opName) {
 		super(opName);
-		this.ui = ui;
-		this.client = client;
-		this.model = model;
 	}
 
-	abstract protected T doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
-			throws Exception, OperationCanceledException;
+	abstract protected CloudFoundryOperations getClient() throws Exception;
+
+	abstract protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException;
 
 	@Override
-	protected T runOp(IProgressMonitor monitor) throws Exception {
+	protected Void runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		try {
-			return doCloudOp(client, monitor);
+			doCloudOp(monitor);
 		} catch (Exception e) {
-			handleError(e);
+			checkCancelledAndHandleError(e);
 		}
 		return null;
 	}
 
-	protected void handleError(Exception e) throws Exception {
+	protected void checkCancelledAndHandleError(Exception e) throws Exception {
 
-		final Exception[] error = { e };
-		if (!(e instanceof OperationCanceledException)) {
-			Display.getDefault().asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-
-					String message = error[0].getMessage();
-					if (error[0] instanceof CloudFoundryException) {
-						message = ((CloudFoundryException) error[0]).getDescription();
-					}
-
-					if (message == null || message.trim().length() == 0) {
-						message = "Cloud operation failure of type: " + error[0].getClass().getName();
-					}
-
-					if (ui != null) {
-						ui.errorPopup("Error performing Cloud operation: ", message);
-					}
-				}
-			});
+		// Special case for CF exceptions:
+		// CF exceptions may not contain the error in the message but rather
+		// the description
+		if (e instanceof CloudFoundryException) {
+			String message = ((CloudFoundryException) e).getDescription();
+			if (message == null || message.trim().length() == 0) {
+				message = "Cloud operation failure of type: " + e.getClass().getName();
+			}
+			IStatus status = BootDashActivator.createErrorStatus(e, message);
+			throw new CoreException(status);
 		}
+
 		throw e;
 	}
 

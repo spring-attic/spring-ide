@@ -23,29 +23,31 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class ProjectsDeployer extends Operation<Void> {
+public class ProjectsDeployer extends CloudOperation {
 
 	private final CloudFoundryBootDashModel model;
 	private final Map<IProject, BootDashElement> projectsToDeploy;
-	private final CloudFoundryOperations client;
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplaceApps;
 
-	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, CloudFoundryOperations client,
-			UserInteractions ui, Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
+	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, UserInteractions ui,
+			Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
 		super("Deploying projects");
 		this.model = cloudFoundryBootDashModel;
 		this.projectsToDeploy = projectsToDeploy;
-		this.client = client;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 	}
 
-	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, CloudFoundryOperations client,
-			UserInteractions ui, List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps) {
+	@Override
+	protected CloudFoundryOperations getClient() throws Exception {
+		return this.model.getCloudTarget().getClient();
+	}
+
+	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, UserInteractions ui,
+			List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps) {
 		super("Deploying projects");
 		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
 
@@ -54,24 +56,24 @@ public class ProjectsDeployer extends Operation<Void> {
 		}
 
 		this.model = cloudFoundryBootDashModel;
-		this.client = client;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 	}
 
-	public Void runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		SubMonitor subMonitor = SubMonitor.convert(monitor, projectsToDeploy.size() * 100);
 		for (Iterator<Entry<IProject, BootDashElement>> it = projectsToDeploy.entrySet().iterator(); it.hasNext();) {
 			Entry<IProject, BootDashElement> entry = it.next();
 
-			CloudApplicationOperation compositeOp = new ApplicationDeploymentOperation(client, entry.getKey(),
-					entry.getValue(), model, ui, shouldAutoReplaceApps);
+			if (subMonitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 
-			compositeOp.run(subMonitor.newChild(100));
+			CloudApplicationOperation fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model,
+					ui, shouldAutoReplaceApps);
 
+			fullDeploymentOp.run(subMonitor.newChild(100));
 		}
-		return null;
 	}
-
 }

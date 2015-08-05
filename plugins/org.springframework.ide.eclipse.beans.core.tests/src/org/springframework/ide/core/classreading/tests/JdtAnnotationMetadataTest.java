@@ -245,15 +245,17 @@ public class JdtAnnotationMetadataTest {
 		assertEquals("", configAttributes.get("value"));
 
 		Map<String, Object> importResourceAttributesAsStrings = annotationMetadata.getAnnotationAttributes(ImportResource.class.getName(), true);
-		assertEquals(2, importResourceAttributesAsStrings.size());
+		assertEquals(3, importResourceAttributesAsStrings.size());
 		assertEquals("org.springframework.beans.factory.support.BeanDefinitionReader", importResourceAttributesAsStrings.get("reader"));
 		assertEquals("classpath:/com/acme/database-config.xml", ((String[])importResourceAttributesAsStrings.get("value"))[0]);
+		assertEquals(0, ((String[])importResourceAttributesAsStrings.get("locations")).length);
 		
 		Map<String, Object> importResourceAttributesAsObjects = annotationMetadata.getAnnotationAttributes(ImportResource.class.getName(), false);
-		assertEquals(2, importResourceAttributesAsObjects.size());
+		assertEquals(3, importResourceAttributesAsObjects.size());
 		assertTrue(importResourceAttributesAsObjects.get("reader") instanceof Class);
 		assertEquals("org.springframework.beans.factory.support.BeanDefinitionReader", ((Class<?>)importResourceAttributesAsObjects.get("reader")).getName());
 		assertEquals("classpath:/com/acme/database-config.xml", ((String[])importResourceAttributesAsObjects.get("value"))[0]);
+		assertEquals(0, ((String[])importResourceAttributesAsStrings.get("locations")).length);
 
 		Map<String, Object> importAttributesAsStrings = annotationMetadata.getAnnotationAttributes(Import.class.getName(), true);
 		assertEquals(1, importAttributesAsStrings.size());
@@ -468,10 +470,13 @@ public class JdtAnnotationMetadataTest {
 		AnnotationAttributes[] excludeFilters = (AnnotationAttributes[]) attributes.get("excludeFilters");
 		assertEquals(1, excludeFilters.length);
 
-		assertEquals(3, excludeFilters[0].size());
+		assertEquals(4, excludeFilters[0].size());
 		
 		String[] pattern = (String[]) excludeFilters[0].get("pattern");
 		assertEquals(0, pattern.length);
+
+		Class<?>[] classes = (Class[]) excludeFilters[0].get("classes");
+		assertEquals(0, classes.length);
 
 		assertEquals(FilterType.ANNOTATION, excludeFilters[0].get("type"));
 
@@ -499,11 +504,14 @@ public class JdtAnnotationMetadataTest {
 		AnnotationAttributes[] excludeFilters = (AnnotationAttributes[]) attributes.get("excludeFilters");
 		assertEquals(1, excludeFilters.length);
 		
-		assertEquals(3, excludeFilters[0].size());
+		assertEquals(4, excludeFilters[0].size());
 		assertEquals(FilterType.ANNOTATION, excludeFilters[0].get("type"));
 
 		String[] pattern = (String[]) excludeFilters[0].get("pattern");
 		assertEquals(0, pattern.length);
+
+		Class<?>[] classes = (Class[]) excludeFilters[0].get("classes");
+		assertEquals(0, classes.length);
 
 		Class<?>[] filterTypes = (Class[]) excludeFilters[0].get("value");
 		assertEquals(0, filterTypes.length);

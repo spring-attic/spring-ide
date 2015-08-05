@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -18,46 +17,43 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiver;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class UploadApplicationOperation extends CloudApplicationOperation {
+/**
+ * Operation that uploads an application's archive. The application must have an
+ * accessible workspace project.
+ *
+ */
+public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 
-	public UploadApplicationOperation(CloudFoundryOperations client, CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, UserInteractions ui) {
-		super("Uploading application: " + deploymentProperties.getAppName(), client, deploymentProperties.getAppName(),
-				model, ui);
+	public ApplicationUploadOperation(CloudApplicationDeploymentProperties deploymentProperties,
+			CloudFoundryBootDashModel model) {
+		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
 	}
 
 	@Override
-	protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor)
-			throws Exception, OperationCanceledException {
+	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 
-		// Find existing element
-		CloudDashElement element = this.model.getElement(deploymentProperties.getAppName());
-
-		if (element == null) {
-			throw BootDashActivator.asCoreException(
-					"Unable to upload application archive. Application not correctly created in the dash view. No dash view element found for: "
-							+ deploymentProperties.getAppName());
-		}
-
-
+		// Must perform this check otherwise if the app does not exist
+		// and an upload is attempted, CF backend or client may throw an
+		// unintelligible
+		// error that does not indicate that the app is missing (e.g. it does
+		// not indicate 404 error)
 		CloudApplication app = getCloudApplication();
 		if (app == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "
 							+ deploymentProperties.getAppName());
 		}
+
 		// Upload the application
 		CloudZipApplicationArchive archive = null;
 		String appName = deploymentProperties.getAppName();
@@ -66,7 +62,8 @@ public class UploadApplicationOperation extends CloudApplicationOperation {
 
 			if (deploymentProperties.getProject() != null) {
 
-				ManifestParser parser = new ManifestParser(deploymentProperties.getProject(), client.getDomains());
+				ManifestParser parser = new ManifestParser(deploymentProperties.getProject(),
+						this.model.getCloudTarget().getDomains(subMonitor));
 
 				CloudApplicationArchiver archiver = new CloudApplicationArchiver(
 						JavaCore.create(deploymentProperties.getProject()), appName, parser);
@@ -80,10 +77,7 @@ public class UploadApplicationOperation extends CloudApplicationOperation {
 
 				subMonitor.setTaskName("Uploading archive to Cloud Foundry for application: " + appName);
 
-				client.uploadApplication(appName, archive);
-
-				getAppUpdateListener().applicationUploaded(app);
-
+				getClient().uploadApplication(appName, archive);
 
 				subMonitor.setTaskName("Archive uploaded to Cloud Foundry for application: " + appName);
 
@@ -102,7 +96,6 @@ public class UploadApplicationOperation extends CloudApplicationOperation {
 				archive.close();
 			}
 		}
-		return null;
 	}
 
 }

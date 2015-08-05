@@ -18,6 +18,7 @@ import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -33,7 +34,7 @@ public class CloudFoundryUiUtil {
 
 		Operation<List<CloudSpace>> op = new Operation<List<CloudSpace>>(
 				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
-			protected List<CloudSpace> runOp(IProgressMonitor monitor) throws Exception {
+			protected List<CloudSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				return getClient(targetProperties).getSpaces();
 			}
 		};

@@ -10,29 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
-public class CloudApplicationDeleteOperation extends CloudApplicationOperation {
+public class ApplicationStopOperation extends CloudApplicationOperation {
 
-	public CloudApplicationDeleteOperation(CloudFoundryOperations client, String appName,
-			CloudFoundryBootDashModel model, UserInteractions ui) {
-		super("Deleting application", client, appName, model, ui);
+	private CloudDashElement element;
+
+	public ApplicationStopOperation(CloudDashElement element, CloudFoundryBootDashModel model) {
+		super("Stopping application", model, element.getName());
+		this.element = element;
 	}
 
 	@Override
-	protected CloudApplication doCloudOp(CloudFoundryOperations client, IProgressMonitor monitor) throws Exception {
-		try {
-			client.deleteApplication(appName);
-		} catch (Exception e) {
-			if (!is404Error(e)) {
-				throw e;
-			}
-		}
-		return null;
+	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+		getClient().stopApplication(element.getName());
 	}
 
 }

@@ -14,10 +14,13 @@ public enum RunState {
 
 	//Note that the order in which these are listed is important as the implementation of 'merge'
 	// depends on it.
+	UNKNOWN,
 	INACTIVE,
 	STARTING,
 	RUNNING,
-	DEBUGGING;
+	DEBUGGING,
+	FLAPPING,
+	CRASHED; // Crashed has higher priority. If at least one instance Crashed, indicate that to the user over any other state of any other instance
 
 	/**
 	 * Combine the runstates of two processes. This operation is used so that we can
