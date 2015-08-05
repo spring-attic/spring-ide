@@ -153,10 +153,7 @@ public class BootDashActions {
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
-//			if (getSectionModel().getRunTarget().canRemove()) {
-//				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
-//			}
-//
+
 			//TODO: porting the code below to a BootDashModelAction
 //			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
 //				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();
