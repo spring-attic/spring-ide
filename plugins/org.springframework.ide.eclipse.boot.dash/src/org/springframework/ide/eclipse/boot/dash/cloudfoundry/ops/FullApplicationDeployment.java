@@ -39,8 +39,8 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplace;
 
-	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model,
-			UserInteractions ui, boolean shouldAutoReplace) {
+	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
+			boolean shouldAutoReplace) {
 		super("Deploying project " + project.getName(), model, project.getName());
 
 		this.project = project;
@@ -49,8 +49,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 	}
 
 	@Override
-	protected void doCloudOp(IProgressMonitor monitor)
-			throws Exception, OperationCanceledException {
+	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, monitor);
 
@@ -106,22 +105,27 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 		subMonitor.setTaskName("Resolving deployment properties for project: " + project.getName());
 
-		CloudApplicationDeploymentProperties deploymentProperties = null;
-
 		ManifestParser parser = new ManifestParser(project, model.getCloudTarget().getDomains(monitor));
 
+		List<CloudApplicationDeploymentProperties> appProperties = null;
+
 		if (parser.hasManifest()) {
-			deploymentProperties = parser.load(subMonitor.newChild(100));
+			appProperties = parser.load(subMonitor.newChild(100));
 		}
 
 		IStatus status = Status.OK_STATUS;
 
-		if (deploymentProperties == null) {
+		// For now just support one application deployment from a manifest.yml
+		CloudApplicationDeploymentProperties deploymentProperties = null;
+		if (appProperties == null || appProperties.isEmpty()) {
 			status = BootDashActivator.createErrorStatus(null, "No deployment propreties found for " + project.getName()
 					+ ". Only projects with valid manifest.yml are currently supported. Please add a manifest.yml to your project and try again.");
 		} else {
 			// Update the app name
+			deploymentProperties = appProperties.get(0);
 			this.appName = deploymentProperties.getAppName();
+			deploymentProperties.setShoudAutoReplace(shouldAutoReplace);
+
 			status = deploymentProperties.validate();
 		}
 
@@ -129,7 +133,6 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 			throw new CoreException(status);
 		}
 
-		deploymentProperties.setShoudAutoReplace(shouldAutoReplace);
 		return deploymentProperties;
 	}
 
