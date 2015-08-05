@@ -59,6 +59,7 @@ public class BootDashActions {
 	private ToggleFiltersAction toggleFiltersAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+		Assert.isNotNull(ui);
 		this.model = model;
 		this.selection = selection;
 		this.ui = ui;
@@ -134,12 +135,13 @@ public class BootDashActions {
 		openBrowserAction = new OpenInBrowserAction(model, selection, ui);
 		addTargetActions = createAddTargetActions();
 
+		deleteApplicationsAction = new DeleteApplicationsAction(selection, ui);
+
 		if (sectionModel != null) {
 			refreshAction = new RefreshRunTargetAction(sectionModel, selection, ui);
 			if (sectionModel.getRunTarget().canRemove()) {
 				removeTargetAction = new RemoveRunTargetAction(sectionModel.getRunTarget(), model, selection, ui);
 			}
-			deleteApplicationsAction = new DeleteApplicationsAction( sectionModel, selection, ui);
 
 			if (sectionModel.getRunTarget() instanceof RunTargetWithProperties) {
 				RunTargetWithProperties runTargetWP = (RunTargetWithProperties) sectionModel.getRunTarget();

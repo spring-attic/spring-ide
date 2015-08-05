@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,15 +25,15 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 public class DeleteApplicationsAction extends AbstractBootDashAction {
 
-	private BootDashModel model;
-
-	public DeleteApplicationsAction(BootDashModel model, MultiSelection<BootDashElement> selection,
+	public DeleteApplicationsAction(MultiSelection<BootDashElement> selection,
 			UserInteractions ui) {
 		super(selection, ui);
-
-		this.model = model;
+		Assert.isNotNull(ui);
 		this.setText("Delete Application");
 		this.setToolTipText(
 				"Delete the selected application. The application will be permanently removed from the target.");
@@ -42,14 +42,23 @@ public class DeleteApplicationsAction extends AbstractBootDashAction {
 
 	@Override
 	public void run() {
-		final List<BootDashElement> modelElementsToDelete = getSelectedElementsForThisModel();
-
-		if (model instanceof ModifiableModel) {
-			Job job = new Job("Deleting application") {
-
+		//Deletes are implemented per BootDashModel. So sort selection into bins per model.
+		Multimap<BootDashModel, BootDashElement> sortingBins = HashMultimap.create();
+		for (BootDashElement e : getSelectedElements()) {
+			BootDashModel model = e.getParent();
+			//We are only capable of removing elements from a ModifiableModel (the 'local' model is read-only).
+			if (model instanceof ModifiableModel) {
+				sortingBins.put(model, e);
+			}
+		}
+		//Now delete elements from corresponding models.
+		for (final Entry<BootDashModel, Collection<BootDashElement>> workitem : sortingBins.asMap().entrySet()) {
+			BootDashModel model = workitem.getKey();
+			final ModifiableModel modifiable = (ModifiableModel)model; //cast is safe. Only ModifiableModel are added to sortingBins
+			Job job = new Job("Deleting apps from "+model.getRunTarget().getName()) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					((ModifiableModel) model).delete(modelElementsToDelete, ui);
+					modifiable.delete(workitem.getValue(), ui);
 					return Status.OK_STATUS;
 				}
 
@@ -60,25 +69,21 @@ public class DeleteApplicationsAction extends AbstractBootDashAction {
 
 	@Override
 	public void updateEnablement() {
-		Collection<BootDashElement> modelElementsToDelete = getSelectedElementsForThisModel();
-
-		// For now only support deletion of elements ONLY if all selections are in modifiable models.
-		// For example, if a selection includes a local app, disable the action
-
-		this.setEnabled(model instanceof ModifiableModel && !modelElementsToDelete.isEmpty()
-				&& modelElementsToDelete.size() == getSelectedElements().size());
+		this.setEnabled(shouldEnableFor(getSelectedElements()));
 	}
 
-	protected List<BootDashElement> getSelectedElementsForThisModel() {
-		Collection<BootDashElement> all = getSelectedElements();
-		List<BootDashElement> toDelete = new ArrayList<BootDashElement>();
-		if (all != null) {
-			for (BootDashElement el : all) {
-				if (el.getParent() == model) {
-					toDelete.add(el);
-				}
+	private boolean shouldEnableFor(Collection<BootDashElement> selectedElements) {
+		//All selected elements must be deletable, then this action is enabled.
+		for (BootDashElement bde : selectedElements) {
+			if (!canDelete(bde)) {
+				return false;
 			}
 		}
-		return toDelete;
+		return true;
 	}
+
+	private boolean canDelete(BootDashElement bde) {
+		return bde.getParent() instanceof ModifiableModel;
+	}
+
 }

@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -205,8 +206,10 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	}
 
-	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model) {
+	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model, UserInteractions ui) {
 		super(owner);
+		Assert.isNotNull(ui);
+		this.ui = ui;
 		this.model = model;
 		this.searchFilterModel = model.getFilter();
 	}

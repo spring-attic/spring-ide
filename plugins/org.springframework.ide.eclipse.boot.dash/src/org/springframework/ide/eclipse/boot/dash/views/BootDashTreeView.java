@@ -266,7 +266,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<IPageSection>();
 		sections.add(new TagSearchSection(BootDashTreeView.this, model.getFilterBox().getText(), model));
-		sections.add(new BootDashUnifiedTreeSection(this, model));
+		sections.add(new BootDashUnifiedTreeSection(this, model, ui));
 
 		return sections;
 	}

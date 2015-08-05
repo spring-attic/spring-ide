@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ModifiableModel {
@@ -18,6 +19,6 @@ public interface ModifiableModel {
 
 	abstract public void add(List<Object> sources, UserInteractions ui) throws Exception;
 
-	abstract public void delete(List<BootDashElement> toRemove, UserInteractions ui);
+	abstract public void delete(Collection<BootDashElement> collection, UserInteractions ui);
 
 }
