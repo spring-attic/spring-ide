@@ -11,37 +11,50 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * A cloud operation that is performed on a Cloud application.
  *
  */
-public abstract class CloudApplicationOperation extends CloudOperation<CloudApplication> {
+public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected String appName;
 
+	protected final CloudFoundryBootDashModel model;
+
 	private ApplicationUpdateListener applicationUpdateListener;
 
-	public CloudApplicationOperation(String opName, CloudFoundryOperations client, String appName,
-			CloudFoundryBootDashModel model, UserInteractions ui) {
-		super(opName, client, model, ui);
+	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
+		super(opName);
+		this.model = model;
 		applicationUpdateListener = new ApplicationUpdateListener.DefaultListener(appName, model);
 		this.appName = appName;
 	}
 
-	protected CloudApplication getCloudApplication() throws Exception {
-		return getCloudApplication(client, appName);
+	@Override
+	protected CloudFoundryOperations getClient() throws Exception {
+		return this.model.getCloudTarget().getClient();
 	}
 
-	protected CloudApplication getCachedApplication() {
-		return model.getAppCache().getApp(appName);
+	protected CloudAppInstances getCloudApplicationInstances() throws Exception {
+		CloudApplication app = getCloudApplication();
+		if (app != null) {
+			ApplicationStats stats = getClient().getApplicationStats(app);
+			return new CloudAppInstances(app, stats);
+		}
+		return null;
+	}
+
+	protected CloudAppInstances getCachedApplication() {
+		return model.getAppCache().getAppInstances(appName);
 	}
 
 	public void addApplicationUpdateListener(ApplicationUpdateListener appUpdateListener) {
@@ -59,15 +72,17 @@ public abstract class CloudApplicationOperation extends CloudOperation<CloudAppl
 	}
 
 	/**
+	 * This may be a slow process. Call only when really needed. Otherwise, use
+	 * a cache version.
 	 *
 	 * @return existing Cloud application in Cloud Foundry backend or null if it
 	 *         does not exist.
 	 * @throws Exception
 	 *             if error occurred while fetching Cloud application
 	 */
-	public static CloudApplication getCloudApplication(CloudFoundryOperations client, String appName) throws Exception {
+	protected CloudApplication getCloudApplication() throws Exception {
 		try {
-			return client.getApplication(appName);
+			return getClient().getApplication(appName);
 		} catch (Exception e) {
 			// Ignore if 404
 			if (!e.getMessage().contains("404")) {
@@ -94,9 +109,4 @@ public abstract class CloudApplicationOperation extends CloudOperation<CloudAppl
 		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
 	}
 
-	@Override
-	protected void handleError(Exception e) throws Exception {
-		applicationUpdateListener.onError(e);
-		super.handleError(e);
-	}
 }

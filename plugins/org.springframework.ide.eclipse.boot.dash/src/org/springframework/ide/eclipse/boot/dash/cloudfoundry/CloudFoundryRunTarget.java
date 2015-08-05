@@ -21,7 +21,6 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -49,12 +48,14 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private CloudFoundryTargetProperties targetProperties;
 
 	// Cache these to avoid frequent client calls
-	private List<CloudDomain> domains = new ArrayList<CloudDomain>();
-	private List<CloudSpace> spaces = new ArrayList<CloudSpace>();
+	private List<CloudDomain> domains;
+	private List<CloudSpace> spaces;
+
+	private CloudFoundryOperations cachedClient;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties) {
 		super(RunTargetTypes.CLOUDFOUNDRY, CloudFoundryTargetProperties.getId(targetProperties),
-				CloudFoundryTargetProperties.getId(targetProperties));
+				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
 	}
 
@@ -78,6 +79,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	public CloudFoundryOperations getClient() throws Exception {
+		if (cachedClient == null) {
+			cachedClient = createClient();
+		}
+		return cachedClient;
+	}
+
+	protected CloudFoundryOperations createClient() throws Exception {
 		return CloudFoundryUiUtil.getClient(this);
 	}
 
@@ -119,7 +127,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public void validate() throws Exception {
 		// Fetching a client always validates the CF credentials
-		getClient();
+		cachedClient = createClient();
 	}
 
 	@Override
@@ -127,45 +135,27 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return true;
 	}
 
-	public synchronized List<CloudDomain> getDomains() {
+	public synchronized List<CloudDomain> getDomains(IProgressMonitor monitor) throws Exception {
+		if (domains == null) {
+			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+			subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
+
+			domains = getClient().getDomains();
+
+			subMonitor.worked(5);
+		}
 		return domains;
 	}
 
-	public synchronized List<CloudSpace> getSpaces() {
-		return spaces;
-	}
+	public synchronized List<CloudSpace> getSpaces(IProgressMonitor monitor) throws Exception {
+		if (spaces == null) {
+			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 
-	/**
-	 * To avoid frequent requests to Cloud Foundry, certain Cloud options, like
-	 * list of domains or Cloud spaces, that are less likely to change, are
-	 * cached. This update will force a re-fresh of that cache.
-	 *
-	 * @param monitor
-	 * @throws Exception
-	 */
-	public void updateCloudCache(IProgressMonitor monitor) throws Exception {
-
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
-		/// Do not synchronize on client ops as they may be long running
-		subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
-		List<CloudDomain> updatedDomains = getClient().getDomains();
-		subMonitor.worked(5);
-
-		subMonitor.beginTask("Refreshing list of spaces for " + getName(), 5);
-		List<CloudSpace> updateSpaces = getClient().getSpaces();
-		subMonitor.worked(5);
-
-		synchronized (this) {
-			if (updatedDomains != null) {
-				domains.clear();
-				domains.addAll(updatedDomains);
-			}
-
-			if (updateSpaces != null) {
-				spaces.clear();
-				spaces.addAll(updateSpaces);
-			}
+			subMonitor.beginTask("Refreshing list of spaces for " + getName(), 5);
+			spaces = getClient().getSpaces();
+			subMonitor.worked(5);
 		}
+		return spaces;
 	}
 
 	public CloudSpace getCloudSpace(String org, String space) {

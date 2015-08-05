@@ -70,6 +70,10 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 				cloudProps.getSpaceName());
 	}
 
+	public static String getName(CloudFoundryTargetProperties cloudProps) {
+		return cloudProps.getOrganizationName() + " : " + cloudProps.getSpaceName() + " - [" + cloudProps.getUrl() + "]";
+	}
+
 	public static String getId(String userName, String url, String orgName, String spaceName) {
 		return userName + " : " + url + " : " + orgName + " : " + spaceName;
 	}

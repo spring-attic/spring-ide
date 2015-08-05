@@ -18,15 +18,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -43,25 +41,22 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	IPropertyStore modelStore;
 
-	private OperationsExecution opExecution;
-
 	private ProjectAppStore projectAppStore;
 
 	private CloudAppCache cloudAppCache;
 
 	public static final String PROJECT_TO_APP_MAPPING = "projectToAppMapping";
 
+	LiveSet<BootDashElement> elements;
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
 		super(target);
 		RunTargetType type = target.getType();
 		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
-		this.opExecution = new OperationsExecution();
 		this.projectAppStore = new ProjectAppStore(this.modelStore);
-		this.cloudAppCache = new CloudAppCache(this);
+		this.cloudAppCache = new CloudAppCache();
 	}
-
-	LiveSet<BootDashElement> elements;
 
 	public CloudAppCache getAppCache() {
 		return cloudAppCache;
@@ -83,8 +78,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			return;
 		}
 
-		Operation<Void> op = new CloudApplicationRefreshOperation(this);
-		opExecution.runOpAsynch(op);
+		try {
+			Operation<Void> op = new TargetApplicationsRefreshOperation(this);
+			getOperationsExecution().runOpAsynch(op);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 
 	@Override
@@ -162,19 +161,16 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
 			throws Exception {
 
-		final CloudFoundryOperations client = CloudFoundryBootDashModel.this.getCloudTarget().getClient();
-
 		// When deploying or mapping app to project, always prompt user if they
 		// want to replace the existing app
 		boolean shouldAutoReplaceApp = false;
 
-		getCloudOpExecution().runOpAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, client, ui,
-				projectsToDeploy, shouldAutoReplaceApp));
+		getOperationsExecution(ui).runOpAsynch(
+				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, shouldAutoReplaceApp));
 
 	}
 
-	public BootDashElement addElement(CloudApplication app, IProject project, RunState overrideRunstate)
-			throws Exception {
+	public BootDashElement addElement(CloudAppInstances appInstances, IProject project) throws Exception {
 		BootDashElement addedElement = null;
 		Set<BootDashElement> updated = new HashSet<BootDashElement>();
 		boolean changed = false;
@@ -183,7 +179,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			// Safe iterate via getValues(); a copy, instead of getValue()
 			List<BootDashElement> existing = elements.getValues();
 
-			addedElement = new CloudDashElement(this, app.getName(), opExecution, modelStore);
+			addedElement = new CloudDashElement(this, appInstances.getApplication().getName(), modelStore);
 
 			updated.add(addedElement);
 
@@ -195,7 +191,11 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 					updated.add(element);
 				}
 			}
-			changed = getAppCache().replace(app, project, overrideRunstate);
+
+			// Update the cache BEFORE updating the model, since the model
+			// elements are handles to the cache
+			changed = getAppCache().replace(appInstances, project,
+					ApplicationRunningStateTracker.getRunState(appInstances));
 
 			projectAppStore.storeProjectToAppMapping(updated);
 		}
@@ -229,28 +229,37 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	}
 
-	public void updateElements(Map<CloudApplication, IProject> apps) throws Exception {
+	public void updateElements(Map<CloudAppInstances, IProject> apps) throws Exception {
 
 		Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
 		List<String> toNotify = null;
 		synchronized (this) {
 
-			// Add new ones first
-			for (Entry<CloudApplication, IProject> entry : apps.entrySet()) {
-				BootDashElement addedElement = new CloudDashElement(this, entry.getKey().getName(), opExecution,
+			// Update external cache that keeps track of additional element
+			// state (e.g the running state,
+			// app instances, and project mapping)
+			toNotify = getAppCache().updateAll(apps);
+
+			// Create new handles to the applications. Note that the cache
+			// should be updated first before creating elements
+			// as elements are handles to state in the cache
+			for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
+				BootDashElement addedElement = new CloudDashElement(this, entry.getKey().getApplication().getName(),
 						modelStore);
 				updated.put(addedElement.getName(), addedElement);
 			}
 
-			toNotify = getAppCache().updateAll(apps);
 			projectAppStore.storeProjectToAppMapping(updated.values());
 		}
 
-		// Fire events outside of synch block
+		// Fire events outside of synch block to avoid deadlock
 
 		// This only fires a model CHANGE event (adding/removing elements). It
-		// does not fire an app state change (app runstate changed, project
-		// changed...). The latter is handled separately below.
+		// does not fire an event for app state changes that are tracked
+		// externally
+		// (runstate, instances, project) in the cache. The latter is handled
+		// separately
+		// below.
 		elements.replaceAll(updated.values());
 
 		// Fire app state change based on changes to the app cache
@@ -268,11 +277,15 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		return projectAppStore;
 	}
 
-	public OperationsExecution getCloudOpExecution() {
-		return opExecution;
+	public OperationsExecution getOperationsExecution(UserInteractions ui) {
+		return new OperationsExecution(ui);
 	}
 
-	public void notifyApplicationRunStateChanged(String appName, RunState runState) {
+	public OperationsExecution getOperationsExecution() {
+		return new OperationsExecution(null);
+	}
+
+	public void updateApplication(String appName, RunState runState) {
 		CloudDashElement element = getElement(appName);
 		if (element != null && element.getRunState() != runState) {
 			getAppCache().updateCache(appName, runState);
@@ -281,23 +294,19 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 	}
 
-	public void notifyApplicationRunStateChanged(CloudApplication app, RunState runState) {
-		CloudDashElement element = getElement(app.getName());
-		if (element != null && element.getRunState() != runState) {
-			getAppCache().updateCache(app, runState);
+	public void updateApplication(CloudAppInstances appInstance, RunState runState) {
+		RunState updatedRunState = runState != null ? runState
+				: ApplicationRunningStateTracker.getRunState(appInstance);
+		CloudDashElement element = getElement(appInstance.getApplication().getName());
 
+		boolean notifyChanged = getAppCache().updateCache(appInstance, updatedRunState);
+		if (notifyChanged && element != null) {
 			notifyElementChanged(element);
 		}
 	}
 
-	public void notifyApplicationChanged(CloudApplication app) {
-
-		if (getAppCache().updateCache(app, null)) {
-			CloudDashElement updated = getElement(app.getName());
-			if (updated != null) {
-				notifyElementChanged(updated);
-			}
-		}
+	public void updateApplication(CloudAppInstances app) {
+		updateApplication(app, null);
 	}
 
 	@Override
@@ -324,6 +333,10 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 						try {
 							cloudElement.delete(ui);
 							toRemoveNames.add(element.getName());
+
+							// Be sure it is removed from the cache as well as
+							// elements
+							// are handles to the cache
 							getAppCache().remove(element.getName());
 						} catch (Exception e) {
 							// Allow deletion to continue

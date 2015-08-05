@@ -18,10 +18,14 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OperationsExecution {
 
-	public OperationsExecution() {
+	private final UserInteractions ui;
+
+	public OperationsExecution(UserInteractions ui) {
+		this.ui = ui;
 	}
 
 	public void runOpAsynch(final Operation<?> op) {
@@ -34,7 +38,11 @@ public class OperationsExecution {
 					op.run(monitor);
 				} catch (Exception e) {
 					if (!(e instanceof OperationCanceledException)) {
-						BootDashActivator.log(e);
+						if (ui != null) {
+							ui.errorPopup("Operation failure: ", e.getMessage());
+						} else {
+							BootDashActivator.log(e);
+						}
 					}
 				}
 				// Only return OK status to avoid a second error dialogue
@@ -50,7 +58,7 @@ public class OperationsExecution {
 			job.setRule(rule);
 		}
 
+		job.setPriority(Job.INTERACTIVE);
 		job.schedule();
-
 	}
 }

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -29,29 +29,27 @@ public abstract class ApplicationUpdateListener {
 		this.appName = appName;
 	}
 
+	public String getApplicationName() {
+		return appName;
+	}
+
 	public void updateModel(RunState runState) {
-		model.notifyApplicationRunStateChanged(appName, runState);
+		model.updateApplication(appName, runState);
 	}
 
-	public void updateModel(CloudApplication app, RunState runState) {
-		model.notifyApplicationRunStateChanged(app, runState);
+	public void updateModel(CloudAppInstances appInstances, RunState runState) {
+		model.updateApplication(appInstances, runState);
 	}
 
-	public void updateModel(CloudApplication app) {
-		model.notifyApplicationChanged(app);
+	public void updateModel(CloudAppInstances appInstances) {
+		model.updateApplication(appInstances);
 	}
 
-	public void onError(Exception e) {
-		model.notifyApplicationRunStateChanged(appName, RunState.INACTIVE);
-	}
+	abstract public void applicationCreated(CloudAppInstances app);
 
-	abstract public void applicationCreated(CloudApplication app);
+	abstract public void applicationStarting(CloudAppInstances app);
 
-	abstract public void applicationUploaded(CloudApplication app);
-
-	abstract public void applicationStarted(CloudApplication app);
-
-	abstract public void applicationStarting(CloudApplication app);
+	abstract public void applicationUpdated(CloudAppInstances app);
 
 	static class DefaultListener extends ApplicationUpdateListener {
 
@@ -60,21 +58,18 @@ public abstract class ApplicationUpdateListener {
 		}
 
 		@Override
-		public void applicationCreated(CloudApplication app) {
+		public void applicationCreated(CloudAppInstances app) {
+			// TODO Auto-generated method stub
 		}
 
 		@Override
-		public void applicationUploaded(CloudApplication app) {
+		public void applicationStarting(CloudAppInstances app) {
+			// TODO Auto-generated method stub
 		}
 
 		@Override
-		public void applicationStarted(CloudApplication app) {
+		public void applicationUpdated(CloudAppInstances app) {
+			// TODO Auto-generated method stub
 		}
-
-		@Override
-		public void applicationStarting(CloudApplication app) {
-		}
-
 	}
-
 }

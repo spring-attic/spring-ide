@@ -108,6 +108,13 @@ public class BootDashActivator extends AbstractUIPlugin {
 		getDefault().getLog().log(createErrorStatus(e));
 	}
 
+	public static void logWarning(String message) {
+		if (message == null) {
+			message = "";
+		}
+		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null));
+	}
+
 	public BootDashViewModel getModel() {
 		if (model==null) {
 			model = new BootDashViewModel(new DefaultBootDashModelContext(),

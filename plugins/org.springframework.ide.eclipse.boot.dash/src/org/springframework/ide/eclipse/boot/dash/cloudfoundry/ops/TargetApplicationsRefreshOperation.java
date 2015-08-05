@@ -14,35 +14,59 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
-public final class CloudApplicationRefreshOperation extends Operation<Void> {
+/**
+ * This performs a "two-tier" refresh as fetching list of
+ * {@link CloudApplication} can be slow, especially if also fetching each app's
+ * instances.
+ * <p/>
+ * This refresh operation only fetches a "basic" shallow list of
+ * {@link CloudApplication}, which may be quicker to resolve, and notifies the
+ * model when element changes occur.
+ *
+ * <p/>
+ * It also launches a separate refresh job that may take longer to complete
+ * which is fetching instances and app running state.
+ *
+ * @see AppInstancesRefreshOperation
+ */
+public final class TargetApplicationsRefreshOperation extends CloudOperation {
 	/**
 	 *
 	 */
 	private final CloudFoundryBootDashModel model;
 
-	public CloudApplicationRefreshOperation(CloudFoundryBootDashModel model) {
+	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName());
 		this.model = model;
 	}
 
 	@Override
-	protected synchronized Void runOp(IProgressMonitor monitor) throws Exception {
+	protected CloudFoundryOperations getClient() throws Exception {
+		return this.model.getCloudTarget().getClient();
+	}
+
+	@Override
+	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		try {
 
-			this.model.getCloudTarget().updateCloudCache(monitor);
+			// 1. Fetch basic list of applications. Should be the "faster" of
+			// the
+			// two refresh operations
 
-			List<CloudApplication> apps = this.model.getCloudTarget().getClient().getApplications();
-			Map<CloudApplication, IProject> updatedApplications = new HashMap<CloudApplication, IProject>();
+			List<CloudApplication> apps = this.model.getCloudTarget().getClient().getApplicationsWithBasicInfo();
 
+			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 			if (apps != null) {
 
 				Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
@@ -59,16 +83,20 @@ public final class CloudApplicationRefreshOperation extends Operation<Void> {
 						}
 					}
 
-					updatedApplications.put(app, project);
+					// No stats available at this stage. Just set stats to null
+					// for now.
+					updatedApplications.put(new CloudAppInstances(app, null), project);
 				}
 			}
 
 			this.model.updateElements(updatedApplications);
 
+			// 2. Launch the slower app stats/instances refresh operation.
+			this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
+
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
-		return null;
 	}
 
 	public ISchedulingRule getSchedulingRule() {
