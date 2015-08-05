@@ -136,11 +136,10 @@ public class ManifestParser {
 	 * @return Value of property, or null if not found, or entry for application
 	 *         in manifest does not exist.
 	 */
-	public String getApplicationProperty(String applicationName, String propertyName) {
+	public String getApplicationProperty(Map<?, ?> app, String propertyName) {
 		try {
-			Map<?, ?> map = getApplication(applicationName);
-			if (map != null) {
-				return getStringValue(map, propertyName);
+			if (app != null) {
+				return getStringValue(app, propertyName);
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);
@@ -196,12 +195,7 @@ public class ManifestParser {
 		return null;
 	}
 
-	protected Map<?, ?> getApplication(String applicationName) throws Exception {
-		Map<Object, Object> results = parseManifestFromFile();
-
-		if (results == null) {
-			return null;
-		}
+	protected List<Map<?, ?>> getApplications(Map<Object, Object> results) throws Exception {
 
 		Object applicationsObj = results.get(APPLICATIONS_PROP);
 		if (!(applicationsObj instanceof List<?>)) {
@@ -211,91 +205,86 @@ public class ManifestParser {
 
 		List<?> applicationsList = (List<?>) applicationsObj;
 
+		List<Map<?, ?>> applications = new ArrayList<Map<?, ?>>();
+
 		// Use only the first application entry
-		if (applicationsList.isEmpty()) {
-			return null;
-		}
-
-		Map<?, ?> application = null;
-		String errorMessage = null;
-		// If no application name specified, get the first one.
-		if (applicationName == null) {
-			Object mapObj = applicationsList.get(0);
-			application = (mapObj instanceof Map<?, ?>) ? (Map<?, ?>) mapObj : null;
-			if (application == null) {
-				errorMessage = "Expected a map of application properties in: " + manifestPath
-						+ ". Unable to continue parsing manifest values. No manifest values will be loaded into the application deployment info."; //$NON-NLS-1$
-
-			}
-		} else {
-			for (Object mapObj : applicationsList) {
-				if (mapObj instanceof Map<?, ?>) {
-					application = (Map<?, ?>) mapObj;
-					String appName = getStringValue(application, NAME_PROP);
-					if (applicationName.equals(appName)) {
-						break;
-					} else {
-						application = null;
-					}
+		if (!applicationsList.isEmpty()) {
+			for (Object val : applicationsList) {
+				if (val instanceof Map<?, ?>) {
+					applications.add((Map<?, ?>) val);
 				}
+
 			}
 		}
 
-		if (errorMessage != null) {
-			throw BootDashActivator.asCoreException(errorMessage);
-		}
-
-		return application;
+		return applications;
 	}
 
-	public CloudApplicationDeploymentProperties load(IProgressMonitor monitor) throws Exception {
+	protected CloudApplicationDeploymentProperties getDeploymentProperties(Map<?, ?> appMap,
+			Map<Object, Object> allResults, SubMonitor subMonitor) throws Exception {
+
+		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
+		properties.setProject(project);
+
+		String appName = getStringValue(appMap, NAME_PROP);
+
+		subMonitor.worked(1);
+		if (appName != null) {
+			properties.setAppName(appName);
+		} else {
+			throw BootDashActivator
+					.asCoreException("No application name found in manifest.yml. An application name is required.");
+
+		}
+
+		readMemory(appMap, allResults, properties);
+		subMonitor.worked(1);
+
+		readApplicationURL(appMap, allResults, properties);
+		subMonitor.worked(1);
+
+		readBuildpackURL(appMap, allResults, properties);
+
+		readEnvVars(appMap, allResults, properties);
+		subMonitor.worked(1);
+
+		readServices(appMap, allResults, properties);
+		subMonitor.worked(1);
+
+		readInstances(appMap, allResults, properties);
+
+		return properties;
+	}
+
+	public List<CloudApplicationDeploymentProperties> load(IProgressMonitor monitor) throws Exception {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 		subMonitor.beginTask("Loading manifest.yml", 6);
 
 		try {
 
-			Map<?, ?> application = getApplication(null);
+			Map<Object, Object> allResults = parseManifestFromFile();
 
-			subMonitor.worked(1);
-			if (application == null) {
+			if (allResults == null || allResults.isEmpty()) {
+				throw BootDashActivator
+						.asCoreException("No content found in manifest.yml. Make sure the manifest is valid.");
+
+			}
+
+			List<Map<?, ?>> appMaps = getApplications(allResults);
+
+			if (appMaps == null || appMaps.isEmpty()) {
 				throw BootDashActivator.asCoreException(
 						"No application definition found in manifest.yml. Make sure at least one application is defined");
 			}
-			CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
-			properties.setProject(project);
+			List<CloudApplicationDeploymentProperties> properties = new ArrayList<CloudApplicationDeploymentProperties>();
 
-			String appName = getStringValue(application, NAME_PROP);
-
-			subMonitor.worked(1);
-			if (appName != null) {
-				properties.setAppName(appName);
-			} else {
-				throw BootDashActivator
-						.asCoreException("No application name found in manifest.yml. An application name is required.");
-
+			for (Map<?, ?> app : appMaps) {
+				CloudApplicationDeploymentProperties props = getDeploymentProperties(app, allResults, subMonitor);
+				if (props != null) {
+					properties.add(props);
+				}
 			}
 
-			readMemory(application, properties);
-			subMonitor.worked(1);
-
-			readApplicationURL(application, properties, appName, monitor);
-			subMonitor.worked(1);
-
-			String buildpackurl = getStringValue(application, BUILDPACK_PROP);
-			if (buildpackurl != null) {
-				properties.setBuildpackUrl(buildpackurl);
-			}
-
-			readEnvVars(properties, application);
-			subMonitor.worked(1);
-
-			readServices(properties, application);
-			subMonitor.worked(1);
-
-			Integer instances = getIntegerValue(application, INSTANCES_PROP);
-			if (instances != null) {
-				properties.setInstances(instances);
-			}
 			return properties;
 
 		} finally {
@@ -304,8 +293,12 @@ public class ManifestParser {
 
 	}
 
-	protected void readEnvVars(CloudApplicationDeploymentProperties properties, Map<?, ?> applications) {
-		Map<?, ?> propertiesMap = getContainingPropertiesMap(applications, ENV_PROP);
+	protected void readEnvVars(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		Map<?, ?> propertiesMap = getContainingPropertiesMap(allResults, ENV_PROP);
+		if (propertiesMap == null) {
+			propertiesMap = getContainingPropertiesMap(application, ENV_PROP);
+		}
 
 		if (propertiesMap == null) {
 			return;
@@ -314,11 +307,11 @@ public class ManifestParser {
 		Map<String, String> loadedVars = new HashMap<String, String>();
 
 		for (Entry<?, ?> entry : propertiesMap.entrySet()) {
-			if ((entry.getKey() instanceof String) ) {
+			if ((entry.getKey() instanceof String)) {
 				String varName = (String) entry.getKey();
 				String varValue = null;
 				if (entry.getValue() instanceof String) {
-					varValue =(String) entry.getValue();
+					varValue = (String) entry.getValue();
 				} else if (entry.getValue() instanceof Integer) {
 					varValue = Integer.toString((Integer) entry.getValue());
 				}
@@ -330,38 +323,79 @@ public class ManifestParser {
 		properties.setEnvironmentVariables(loadedVars);
 	}
 
-	protected void readServices(CloudApplicationDeploymentProperties properties, Map<?, ?> applications) {
+	protected void readServices(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
 
-		Object yamlElementObj = applications.get(SERVICES_PROP);
+		Object yamlElementObj = allResults.get(SERVICES_PROP);
+		List<String> cloudServices = new ArrayList<String>();
+
 		if (yamlElementObj instanceof List<?>) {
-			List<?> servListFromYaml = (List<?>) yamlElementObj;
-			List<String> cloudServices = new ArrayList<String>();
-			for (Object servNameObj : servListFromYaml) {
-				if (servNameObj instanceof String && !cloudServices.contains(servNameObj)) {
-					String serviceName = (String) servNameObj;
-					cloudServices.add(serviceName);
-				}
+			addServices((List<?>) yamlElementObj, cloudServices);
+		}
+
+		yamlElementObj = application.get(SERVICES_PROP);
+		if (yamlElementObj instanceof List<?>) {
+			addServices((List<?>) yamlElementObj, cloudServices);
+		}
+
+		properties.setServices(cloudServices);
+	}
+
+	protected void addServices(List<?> servicesToAdd, List<String> cloudServices) {
+
+		for (Object servNameObj : servicesToAdd) {
+			if (servNameObj instanceof String && !cloudServices.contains(servNameObj)) {
+				String serviceName = (String) servNameObj;
+				cloudServices.add(serviceName);
 			}
-			properties.setServices(cloudServices);
 		}
 	}
 
-	protected void readApplicationURL(Map<?, ?> application, CloudApplicationDeploymentProperties properties, String appName,
-			IProgressMonitor monitor) {
+	protected void readInstances(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		Integer instances = getIntegerValue(allResults, INSTANCES_PROP);
+		if (instances == null) {
+			instances = getIntegerValue(application, INSTANCES_PROP);
+		}
+		if (instances != null) {
+			properties.setInstances(instances);
+		}
+	}
+
+	protected void readBuildpackURL(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		String buildpackurl = getStringValue(allResults, BUILDPACK_PROP);
+		if (buildpackurl == null) {
+			buildpackurl = getStringValue(application, BUILDPACK_PROP);
+		}
+		if (buildpackurl != null) {
+			properties.setBuildpackUrl(buildpackurl);
+		}
+	}
+
+	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		// See if there is a common domain defined for all apps
+		String domain = getStringValue(allResults, DOMAIN_PROP);
+		if (domain == null) {
+			domain = getStringValue(application, DOMAIN_PROP);
+		}
+
 		String subdomain = getStringValue(application, SUB_DOMAIN_PROP);
-		String domain = getStringValue(application, DOMAIN_PROP);
 
 		// A URL can only be constructed from the manifest if either a domain or
 		// a subdomain is specified. If neither is specified, but the app name
 		// is, the app name is used as the subdomain.Otherwise the
 		// deployment process will generate a URL from the app name, but it is
 		// not necessary to specify that URL here.
-		if (subdomain == null && domain == null && appName == null) {
+		if (subdomain == null && domain == null && properties.getAppName() == null) {
 			return;
 		}
 		CloudApplicationURL cloudURL = null;
 		if (subdomain == null) {
-			subdomain = appName;
+			subdomain = properties.getAppName();
 		}
 
 		if (domain == null && !domains.isEmpty()) {
@@ -375,13 +409,24 @@ public class ManifestParser {
 		properties.setUrls(urls);
 	}
 
-	protected void readMemory(Map<?, ?> application, CloudApplicationDeploymentProperties properties) throws Exception {
-		Integer memoryVal = getIntegerValue(application, MEMORY_PROP);
+	protected void readMemory(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) throws Exception {
+
+		// First see if there is a "common" memory value that applies to all
+		// applications:
+
+		Integer memoryVal = getIntegerValue(allResults, MEMORY_PROP);
+		if (memoryVal == null) {
+			memoryVal = getIntegerValue(application, MEMORY_PROP);
+		}
 
 		// If not in Integer form, try String as the memory may end in with a
 		// 'G' or 'M'
 		if (memoryVal == null) {
-			String memoryStringVal = getStringValue(application, MEMORY_PROP);
+			String memoryStringVal = getStringValue(allResults, MEMORY_PROP);
+			if (memoryStringVal == null) {
+				memoryStringVal = getStringValue(application, MEMORY_PROP);
+			}
 			if (memoryStringVal != null && memoryStringVal.length() > 0) {
 
 				char memoryIndicator[] = { 'M', 'G', 'm', 'g' };
