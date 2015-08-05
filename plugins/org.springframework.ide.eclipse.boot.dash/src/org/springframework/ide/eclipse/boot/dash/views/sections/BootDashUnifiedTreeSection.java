@@ -12,14 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -74,6 +72,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
@@ -97,7 +96,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class BootDashUnifiedTreeSection extends PageSection implements MultiSelectionSource {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false;
 
 	private <T> void debug(final String name, LiveExpression<T> watchable) {
 		if (DEBUG) {
@@ -384,43 +383,56 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 	private void fillContextMenu(IMenuManager manager) {
 		for (RunStateAction a : actions.getRunStateActions()) {
-			manager.add(a);
+			addVisible(manager, a);
 		}
-		manager.add(actions.getOpenConfigAction());
-		manager.add(actions.getOpenConsoleAction());
-		manager.add(actions.getShowPropertiesViewAction());
+		addVisible(manager, actions.getOpenConfigAction());
+		addVisible(manager, actions.getOpenConsoleAction());
+		addVisible(manager, actions.getShowPropertiesViewAction());
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
-			manager.add(a);
+			addVisible(manager, a);
 		}
 
 		IAction removeTargetAction = actions.getRemoveRunTargetAction();
 		if (removeTargetAction != null) {
-			manager.add(removeTargetAction);
+			addVisible(manager, removeTargetAction);
 		}
 
 		IAction refreshAction = actions.getRefreshRunTargetAction();
 		if (refreshAction != null) {
-			manager.add(refreshAction);
+			addVisible(manager, refreshAction);
 		}
 
 		IAction deleteAppsAction = actions.getDeleteApplicationsAction();
 		if (deleteAppsAction != null) {
-			manager.add(deleteAppsAction);
+			addVisible(manager, deleteAppsAction);
 		}
 
 		IAction updatePasswordAction = actions.getUpdatePasswordAction();
 		if (updatePasswordAction != null) {
-			manager.add(updatePasswordAction);
+			addVisible(manager, updatePasswordAction);
 		}
 
 		addPreferedConfigSelectionMenu(manager);
 
 //		manager.add
-//		manager.add(new Separator());
-//		manager.add(refreshAction);
-//		manager.add(action2);
+//		addVisible(manager, new Separator());
+//		addVisible(manager, refreshAction);
+//		addVisible(manager, action2);
 		// Other plug-ins can contribute there actions here
 //		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
+
+	private void addVisible(IMenuManager manager, IAction a) {
+		if (isVisible(a)) {
+			manager.add(a);
+		}
+	}
+
+	private boolean isVisible(IAction a) {
+		if (a instanceof AbstractBootDashAction) {
+			return ((AbstractBootDashAction) a).isVisible();
+		}
+		return true;
 	}
 
 	private void addPreferedConfigSelectionMenu(IMenuManager parent) {

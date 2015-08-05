@@ -31,6 +31,7 @@ public abstract class AbstractBootDashModelAction extends AbstractBootDashAction
 		this.sectionSelection = section;
 		this.sectionSelection.addListener(sectionListener = new ValueListener<BootDashModel>() {
 			public void gotValue(LiveExpression<BootDashModel> exp, BootDashModel value) {
+				updateVisibility();
 				updateEnablement();
 			}
 		});
@@ -38,6 +39,10 @@ public abstract class AbstractBootDashModelAction extends AbstractBootDashAction
 
 	public void updateEnablement() {
 		this.setEnabled(sectionSelection.getValue()!=null);
+	}
+
+	public void updateVisibility() {
+		this.setVisible(sectionSelection.getValue()!=null);
 	}
 
 	@Override
