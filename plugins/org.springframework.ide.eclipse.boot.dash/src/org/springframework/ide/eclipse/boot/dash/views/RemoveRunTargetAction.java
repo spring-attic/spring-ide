@@ -11,37 +11,46 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-public class RemoveRunTargetAction extends AbstractBootDashElementsAction {
+public class RemoveRunTargetAction extends AbstractBootDashModelAction {
 
-	private BootDashViewModel model;
-	private RunTarget runTargetToRemove;
+	private BootDashViewModel viewModel;
 
-	public RemoveRunTargetAction(RunTarget runTargetToRemove, BootDashViewModel model,
-			MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
-		this.runTargetToRemove = runTargetToRemove;
+	public RemoveRunTargetAction(LiveExpression<BootDashModel> sectionSelection, BootDashViewModel viewModel,
+			UserInteractions ui) {
+		super(sectionSelection, ui);
 
-		this.model = model;
+		this.viewModel = viewModel;
 		this.setText("Remove Target");
 		this.setToolTipText("Remove the connection to the target and its dashboard section.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/remove_target.gif"));
 	}
 
+
 	@Override
 	public void run() {
-		model.removeTarget(runTargetToRemove, ui);
+		RunTarget target = getRunTargetToRemove();
+		viewModel.removeTarget(target, ui);
 	}
 
 	@Override
 	public void updateEnablement() {
-		// Always enable
-		this.setEnabled(true);
+		RunTarget runTargetToRemove = getRunTargetToRemove();
+		this.setEnabled(runTargetToRemove!=null && runTargetToRemove.canRemove());
+	}
+
+
+	private RunTarget getRunTargetToRemove() {
+		BootDashModel section = sectionSelection.getValue();
+		if (section!=null) {
+			return section.getRunTarget();
+		}
+		return null;
 	}
 
 }

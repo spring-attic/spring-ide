@@ -23,13 +23,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  */
 public abstract class AbstractBootDashModelAction extends AbstractBootDashAction {
 
-	protected final LiveExpression<BootDashModel> section;
+	protected final LiveExpression<BootDashModel> sectionSelection;
 	private ValueListener<BootDashModel> sectionListener;
 
 	protected AbstractBootDashModelAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
 		super(ui);
-		this.section = section;
-		this.section.addListener(sectionListener = new ValueListener<BootDashModel>() {
+		this.sectionSelection = section;
+		this.sectionSelection.addListener(sectionListener = new ValueListener<BootDashModel>() {
 			public void gotValue(LiveExpression<BootDashModel> exp, BootDashModel value) {
 				updateEnablement();
 			}
@@ -37,13 +37,13 @@ public abstract class AbstractBootDashModelAction extends AbstractBootDashAction
 	}
 
 	public void updateEnablement() {
-		this.setEnabled(section.getValue()!=null);
+		this.setEnabled(sectionSelection.getValue()!=null);
 	}
 
 	@Override
 	public void dispose() {
 		if (sectionListener!=null) {
-			section.removeListener(sectionListener);
+			sectionSelection.removeListener(sectionListener);
 			sectionListener = null;
 		}
 		super.dispose();

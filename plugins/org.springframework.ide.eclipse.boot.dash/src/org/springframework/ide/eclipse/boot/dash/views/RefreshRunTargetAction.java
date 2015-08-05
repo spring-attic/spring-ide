@@ -26,7 +26,7 @@ public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 
 	@Override
 	public void run() {
-		BootDashModel model = section.getValue();
+		BootDashModel model = sectionSelection.getValue();
 		if (model!=null) {
 			model.refresh();
 		}
