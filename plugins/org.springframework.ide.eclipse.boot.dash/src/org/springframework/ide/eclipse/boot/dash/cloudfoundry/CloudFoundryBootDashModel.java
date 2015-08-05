@@ -351,4 +351,9 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			elements.replaceAll(updated);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return this.getClass().getName()+"("+getRunTarget().getName()+")";
+	}
 }
