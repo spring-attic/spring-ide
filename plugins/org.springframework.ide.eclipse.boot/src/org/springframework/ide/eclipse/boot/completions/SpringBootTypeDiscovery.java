@@ -37,6 +37,7 @@ import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTyp
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeEntry;
 import org.springsource.ide.eclipse.commons.completions.util.Requestor;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager.DownloadRequestor;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
@@ -45,43 +46,43 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * This example 'discovers' types by reading a large xml file. This xml file is 
+ * This example 'discovers' types by reading a large xml file. This xml file is
  * created 'offline' and contains a dependency graph of maven artifacts and types.
- * 
+ *
  * @author Kris De Volder
  */
 public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
-	
+
 	private static final long SECOND = 1000;
 	private static final long MINUTE = 60 * SECOND;
 
 	private static StsProperties stsProps = StsProperties.getInstance();
-	
+
 	/**
 	 * When requesting graph data from webservice we may have to retry... because
 	 * the webservice may return a 'I am busy' result while it is computing the data.
 	 * This constant specifies the 'retry interval'. I.e the time we wait in between
 	 * retries.
 	 */
-	private static final long RETRY_INTERVAL = 15 * SECOND; 
-	
+	private static final long RETRY_INTERVAL = 15 * SECOND;
+
 	/**
 	 *  Retries are not unlimited. When this limit is reached we stop retrying.
 	 */
 	private static final int RETRIES = (int) ((5 * MINUTE)/RETRY_INTERVAL);
-	
+
 	private static final boolean DEBUG = false;// (""+Platform.getLocation()).contains("kdvolder");
 
 	/**
-	 * If this option is 'true' then when a dependency is added the managedVersion is 
+	 * If this option is 'true' then when a dependency is added the managedVersion is
 	 * never overridden (i.e. an explicit version is only inserted in the pom
 	 * if there is no managed version).
-	 * 
-	 * If this option is 'false' then a version dependency will be included in the 
+	 *
+	 * If this option is 'false' then a version dependency will be included in the
 	 * pom if it does not match the managed version).
 	 */
 	private boolean preferManagedVersion = true;
-	
+
 	/**
 	 * If this option is selected transitive dependencies are considered. If is not
 	 * selected then only a jar that directly provides a type will be suggested.
@@ -89,11 +90,11 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	 * Note that even when this option deselected, spring-boot-starters will be suggested
 	 * for some types because of the graph simplification algorithm that transforms the
 	 * graph such that it appears as though those types are provided directly by
-	 * the starter. 
+	 * the starter.
 	 */
 	private boolean transitive = false;
 	private String bootVersion;
-	
+
 	public class DGraphTypeSource extends AbstractExternalTypeSource {
 
 		private DirectedGraph dgraph;
@@ -126,7 +127,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		public Collection<MavenCoordinates> getProviders() {
 			Collection<MavenCoordinates> sources;
 			if (transitive) {
-				sources = (Collection<MavenCoordinates>) dgraph.getDescendants(type);
+				sources = dgraph.getDescendants(type);
 			} else {
 				sources = dgraph.getSuccessors(type);
 			}
@@ -135,7 +136,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 
 		/**
 		 * Open a dialog to let user choose one of the several ways a type can get added to
-		 * the classpath. 
+		 * the classpath.
 		 * <p>
 		 * If only one choice is available the dialog is skipped and that choice is returned immediately.
 		 * <p>
@@ -169,7 +170,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			if (!ancestors.isEmpty()) {
 				StringBuilder description = new StringBuilder();
 				description.append(
-						"Add type <b>"+type.getName()+"</b> from<br>"+ 
+						"Add type <b>"+type.getName()+"</b> from<br>"+
 						"package <b>"+type.getPackage()+"</b><br>"+
 						"to the classpath via one of the following:<p>");
 				description.append("<ul>");
@@ -197,7 +198,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 	}
 
-	//TODO: should generate or obtain this data based on spring boot version of project. For now only use rest api call that 
+	//TODO: should generate or obtain this data based on spring boot version of project. For now only use rest api call that
 	// retrieves type graph data for default version of spring boot.
 	private static URI XML_DATA_LOCATION;
 	static {
@@ -211,12 +212,13 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 	}
 
 	private static class MyHandler extends DefaultHandler {
+
 		Stack<Object> path = new Stack<Object>();
-		
+
 		/**
 		 * Map used to 'reuse' strings if they have the same content. We expect a packag name to be used
 		 * many times (depending on the number of types in the package). So reusing the Stirng
-		 * objects could save memory. 
+		 * objects could save memory.
 		 */
 		private HashMap<String, String> strings = new HashMap<String, String>();
 
@@ -275,12 +277,13 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 
 		public void dispose() {
+			//Assert.isLegal(debugStack.isEmpty(), "Unpopped: "+debugStack);
 			Assert.isLegal(path.isEmpty(), "Bug: pops and pushes are out of whack!");
 			strings = null;
 		}
-		
+
 		/**
-		 * Parse from a string like: 		
+		 * Parse from a string like:
 		 * org.springframework:spring-core:4.0.0.RC1
 		 * <p>
 		 * We are really only interested in jars. So if the dependency is not a jar
@@ -297,6 +300,12 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				if ("jar".equals(type)) {
 					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[3]));
 				}
+			} else if (pieces.length==5) {
+				//e.g: net.java.dev.jna:jna:jar:platform:3.3.0
+				String type = pieces[2];
+				if ("jar".equals(type)) {
+					return new MavenCoordinates(intern(pieces[0]), intern(pieces[1]), intern(pieces[3]), intern(pieces[4]));
+				}
 			}
 			throw new IllegalArgumentException("Unsupported artifact string: '"+artifact+"'");
 		}
@@ -309,7 +318,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			}
 			return existing;
 		}
-		
+
 	}
 
 	public SpringBootTypeDiscovery(String bootVersion) {
@@ -327,17 +336,17 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			// at least one maven artifact that contains them. Therefore type nodes are
 			// never leaf nodes.
 			for (Object node : nodes) {
-	
+
 				//Not all non-leaf nodes in the graph represent types. Some (fewer) of them represent artifacts
 				// that were added to the graph because they are depended on by other artifacts.
 				if (node instanceof ExternalType) {
 					ExternalType type = (ExternalType) node;
 					requestor.receive(new ExternalTypeEntry(type, new DGraphTypeSource(dgraph, type)));
 				}
-	
+
 				if (DEBUG) {
 					if (node instanceof MavenCoordinates) {
-						Set ancestors = dgraph.getDescendants(node); 
+						Set ancestors = dgraph.getDescendants(node);
 						if (!ancestors.isEmpty()) {
 							System.out.println(node+" has ancestors: ");
 							for (Object anc : ancestors) {
@@ -357,16 +366,31 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		SAXParser saxParser = factory.newSAXParser();
 		MyHandler handler = new MyHandler(dgraph);
+		Throwable caught = null;
 		try {
 			saxParser.parse(xmlFile, handler);
+		} catch (Throwable e) {
+			caught = e;
 		} finally {
-			handler.dispose();
+			//This is a bit convoluted because if we already caught an
+			// exception we don't want to 'mask' it by the exception
+			// that will almost certainly be thrown here.
+			try {
+				handler.dispose();
+			} catch (Throwable e) {
+				if (caught==null) {
+					caught = e;
+				}
+			}
+		}
+		if (caught!=null) {
+			throw ExceptionUtil.exception(caught);
 		}
 		return dgraph;
 	}
-	
+
 	private DownloadManager downloader = null;
-	
+
 	private synchronized DownloadManager downloader() throws IOException {
 		if (downloader==null) {
 			File cacheFolder = new File(BootActivator.getDefault().getStateLocation().toFile(), "typegraphs");
@@ -391,7 +415,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 
 	/**
 	 * DownloadablItem for a 'type graph' xml file. Overrides default 'getFileName' method
-	 * to provide more readable/debugable name for the typegrpah files. In all other respects it 
+	 * to provide more readable/debugable name for the typegrpah files. In all other respects it
 	 * the same as super class.
 	 */
 	private static class TypeGraphFile extends DownloadableItem {
@@ -401,13 +425,13 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			super(new URL(XML_DATA_LOCATION.toString()+"/"+bootVersion), downloader);
 			this.bootVersion = bootVersion;
 		}
-		
+
 		@Override
 		protected String getFileName() {
 			return bootVersion;
 		}
 	}
-	
+
 	private DirectedGraph createGraph() throws Exception {
 		DownloadManager downloader = downloader();
 		final DirectedGraph[] result = new DirectedGraph[]{null};
