@@ -297,7 +297,6 @@ public class BootDashActions {
 		return toggleFiltersAction;
 	}
 
-<<<<<<< Updated upstream
 	public IAction selectDefaultConfigAction(
 			final BootDashElement target,
 			final ILaunchConfiguration currentDefault,
@@ -316,11 +315,8 @@ public class BootDashActions {
 		return action;
 	}
 
-
-=======
 	public IAction getExposeAppAction() {
 		return exposeAppAction;
 	}
 
->>>>>>> Stashed changes
 }
