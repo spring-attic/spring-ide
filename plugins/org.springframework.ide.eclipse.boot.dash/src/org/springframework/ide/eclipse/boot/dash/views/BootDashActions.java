@@ -56,6 +56,7 @@ public class BootDashActions {
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ToggleFiltersAction toggleFiltersAction;
+	private ExposeAppAction exposeAppAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -157,6 +158,7 @@ public class BootDashActions {
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
 		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), elementsSelection, ui);
+		exposeAppAction = new ExposeAppAction(model, elementsSelection, ui);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -295,6 +297,7 @@ public class BootDashActions {
 		return toggleFiltersAction;
 	}
 
+<<<<<<< Updated upstream
 	public IAction selectDefaultConfigAction(
 			final BootDashElement target,
 			final ILaunchConfiguration currentDefault,
@@ -314,4 +317,10 @@ public class BootDashActions {
 	}
 
 
+=======
+	public IAction getExposeAppAction() {
+		return exposeAppAction;
+	}
+
+>>>>>>> Stashed changes
 }
