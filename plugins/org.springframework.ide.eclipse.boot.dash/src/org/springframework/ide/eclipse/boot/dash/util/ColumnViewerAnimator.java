@@ -39,23 +39,30 @@ public class ColumnViewerAnimator {
 	 * from either Table or Tree viewer.
 	 */
 	private static abstract class Target {
-		private static final Target NULL_TARGET = new Target() {
+		private static final Target NULL_TARGET = new Target(null) {
+			//Using 'widget = null' means this Target behaves like a disposed widget, which
+			// means that the animator will ignore / remove it and not keep a Job spinning
+			// to essentially do nothing animating it.
 			void setImage(Image image) {
-				//ignore
 			}
 		};
+		private Widget widget;
+
+		public Target(Widget widget) {
+			this.widget = widget;
+		}
 
 		static Target from(ViewerCell cell) {
 			final Widget item = cell.getItem();
 			final int col = cell.getColumnIndex();
 			if (item instanceof TableItem) {
-				return new Target() {
+				return new Target(item) {
 					void setImage(Image image) {
 						((TableItem)item).setImage(col, image);
 					}
 				};
 			} else if (item instanceof TreeItem) {
-				return new Target() {
+				return new Target(item) {
 					void setImage(Image image) {
 						((TreeItem)item).setImage(col, image);
 					}
@@ -66,6 +73,10 @@ public class ColumnViewerAnimator {
 		}
 
 		abstract void setImage(Image image);
+
+		public boolean isDisposed() {
+			return widget==null || widget.isDisposed();
+		}
 	}
 
 	public class CellAnimation {
@@ -130,7 +141,12 @@ public class ColumnViewerAnimator {
 						animationCounter++;
 						for (CellAnimation a : getAnimations()) {
 							Image[] imgs = a.imgs;
-							a.item.setImage(imgs[animationCounter%imgs.length]);
+							if (a.item.isDisposed()) {
+								//See bug: https://www.pivotaltracker.com/story/show/100608788
+								stopAnimation(a);
+							} else {
+								a.item.setImage(imgs[animationCounter%imgs.length]);
+							}
 						}
 						if (job!=null && animatedElements.size()>0) {
 							job.schedule(INTERVAL);
