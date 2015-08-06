@@ -34,7 +34,7 @@ public class BootDashViewModel implements Disposable {
 	private ToggleFiltersModel toggleFiltersModel;
 	private TagFilterBoxModel filterBox;
 	private LiveExpression<Filter<BootDashElement>> filter;
-	private ExternalModelObserver externalModelObserver;
+//	private ExternalModelObserver externalModelObserver;
 	private BootDashConsoleManager consoleManager;
 
 	/**
@@ -56,7 +56,7 @@ public class BootDashViewModel implements Disposable {
 		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
 
 		consoleManager = new BootDashConsoleManager(this);
-		externalModelObserver = ExternalApplicationHandler.load(this);
+//		externalModelObserver = ExternalApplicationHandler.load(this);
 	}
 
 	public LiveSet<RunTarget> getRunTargets() {
@@ -119,9 +119,9 @@ public class BootDashViewModel implements Disposable {
 		return filter;
 	}
 
-	public ExternalModelObserver getExternalModelObserver() {
-		return externalModelObserver;
-	}
+//	public ExternalModelObserver getExternalModelObserver() {
+//		return externalModelObserver;
+//	}
 
 	public BootDashConsoleManager getConsoleManager() {
 		return consoleManager;

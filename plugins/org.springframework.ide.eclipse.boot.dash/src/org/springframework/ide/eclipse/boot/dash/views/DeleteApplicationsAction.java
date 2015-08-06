@@ -55,15 +55,18 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 		for (final Entry<BootDashModel, Collection<BootDashElement>> workitem : sortingBins.asMap().entrySet()) {
 			BootDashModel model = workitem.getKey();
 			final ModifiableModel modifiable = (ModifiableModel)model; //cast is safe. Only ModifiableModel are added to sortingBins
-			Job job = new Job("Deleting apps from "+model.getRunTarget().getName()) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					modifiable.delete(workitem.getValue(), ui);
-					return Status.OK_STATUS;
-				}
+			if (ui.confirmOperation("Deleting Applications",
+					"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
+				Job job = new Job("Deleting apps from "+model.getRunTarget().getName()) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						modifiable.delete(workitem.getValue(), ui);
+						return Status.OK_STATUS;
+					}
 
-			};
-			job.schedule();
+				};
+				job.schedule();
+			}
 		}
 	}
 
