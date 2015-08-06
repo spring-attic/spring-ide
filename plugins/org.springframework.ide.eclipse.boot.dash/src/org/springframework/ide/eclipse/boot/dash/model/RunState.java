@@ -36,6 +36,13 @@ public enum RunState {
 	}
 
 	public String getImageUrl() {
-		return "icons/rs_"+toString().toLowerCase()+".gif";
+		String iconSuffix = "gif";
+		String state = toString().toLowerCase();
+		if (state.contains("inactive") ||
+			state.contains("starting") ||
+			state.contains("running")) {
+			iconSuffix = "png";
+		}
+		return "icons/rs_"+toString().toLowerCase()+"."+iconSuffix;
 	}
 }
