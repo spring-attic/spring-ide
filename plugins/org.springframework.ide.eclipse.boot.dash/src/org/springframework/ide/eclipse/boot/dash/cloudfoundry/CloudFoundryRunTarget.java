@@ -158,10 +158,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return spaces;
 	}
 
-	public CloudSpace getCloudSpace(String org, String space) {
+	public CloudSpace getCloudSpace(String org, String space, IProgressMonitor monitor) throws Exception {
 		CloudSpace cloudSpace = null;
 		synchronized (this) {
-			for (CloudSpace cSpace : spaces) {
+			for (CloudSpace cSpace : getSpaces(monitor)) {
 				if (cSpace.getName().equals(space) && cSpace.getOrganization().getName().equals(org)) {
 					cloudSpace = cSpace;
 					break;

@@ -311,9 +311,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public void delete(Collection<BootDashElement> toRemove, UserInteractions ui) {
-
-		Set<BootDashElement> updated = new HashSet<BootDashElement>();
+	public void delete(Collection<BootDashElement> toRemove, UserInteractions ui)  {
 
 		if (toRemove == null || toRemove.isEmpty()) {
 			return;
@@ -321,52 +319,64 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 		if (ui.confirmOperation("Deleting Applications",
 				"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
-			synchronized (this) {
-
-				// Safe iterate via getValues(); a copy, instead of getValue()
-				List<BootDashElement> existing = elements.getValues();
-
-				Set<String> toRemoveNames = new HashSet<String>();
-
-				for (BootDashElement element : toRemove) {
-					if (element instanceof CloudDashElement) {
-						CloudDashElement cloudElement = (CloudDashElement) element;
-						try {
-							cloudElement.delete(ui);
-							toRemoveNames.add(element.getName());
-
-							// Be sure it is removed from the cache as well as
-							// elements
-							// are handles to the cache
-							getAppCache().remove(element.getName());
-						} catch (Exception e) {
-							// Allow deletion to continue
-							BootDashActivator.log(e);
-						}
+			for (BootDashElement element : toRemove) {
+				if (element instanceof CloudDashElement) {
+					try {
+						remove((CloudDashElement) element, ui);
+					} catch (Exception e) {
+						BootDashActivator.log(e);
 					}
-				}
-
-				// Add any existing ones that weren't replaced by the new ones
-				// Replace the existing one with a new one for the given Cloud
-				// Application
-				for (BootDashElement element : existing) {
-					if (!toRemoveNames.contains(element.getName())) {
-						updated.add(element);
-					}
-				}
-
-				try {
-					projectAppStore.storeProjectToAppMapping(updated);
-				} catch (Exception e) {
-					ui.errorPopup("Error saving project to application mappings", e.getMessage());
 				}
 			}
-			elements.replaceAll(updated);
 		}
+	}
+
+	/**
+	 * Remove one element at a time, which updates the model
+	 *
+	 * @param element
+	 * @return
+	 * @throws Exception
+	 */
+	protected void remove(CloudDashElement cloudElement, UserInteractions ui) throws Exception {
+
+		// Delete from CF first. Do it outside of synch block to avoid deadlock
+		cloudElement.delete(ui);
+
+		Set<BootDashElement> updatedElements = new HashSet<BootDashElement>();
+
+		synchronized (this) {
+			// Safe iterate via getValues(); a copy, instead of getValue()
+			List<BootDashElement> existing = elements.getValues();
+
+			// Be sure it is removed from the cache as well as
+			// elements
+			// are handles to the cache
+			getAppCache().remove(cloudElement.getName());
+
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (!cloudElement.getName().equals(element.getName())) {
+					updatedElements.add(element);
+				}
+			}
+
+			try {
+				projectAppStore.storeProjectToAppMapping(updatedElements);
+			} catch (Exception e) {
+				ui.errorPopup("Error saving project to application mappings", e.getMessage());
+			}
+		}
+
+		// do this outside the synch block
+
+		elements.replaceAll(updatedElements);
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getName()+"("+getRunTarget().getName()+")";
+		return this.getClass().getName() + "(" + getRunTarget().getName() + ")";
 	}
 }

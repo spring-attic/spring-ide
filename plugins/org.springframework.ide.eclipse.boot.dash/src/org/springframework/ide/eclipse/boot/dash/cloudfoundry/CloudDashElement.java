@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationDeleteOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
@@ -95,7 +96,8 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	public void delete(UserInteractions ui) throws Exception {
 		CloudApplicationOperation op = new ApplicationDeleteOperation(getName(),
 				(CloudFoundryBootDashModel) getParent());
-		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
+		// Perform this synchronously
+		op.run(new NullProgressMonitor());
 	}
 
 	@Override

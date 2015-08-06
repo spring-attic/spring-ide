@@ -37,9 +37,9 @@ public class BootDashConsoleManager {
 	public void openConsole(BootDashElement element, UserInteractions ui) throws Exception {
 		// Not nice to add special cases. Should be refactored.
 		if (element instanceof CloudDashElement) {
-			if (viewModel.getExternalModelObserver() != null) {
-				viewModel.getExternalModelObserver().showLogs(element);
-			}
+//			if (viewModel.getExternalModelObserver() != null) {
+//				viewModel.getExternalModelObserver().showLogs(element);
+//			}
 		} else {
 			IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
 
