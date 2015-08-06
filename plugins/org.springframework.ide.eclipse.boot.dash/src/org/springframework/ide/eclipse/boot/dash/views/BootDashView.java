@@ -212,36 +212,42 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 
 
 	public void createAddRunTargetPulldown(IToolBarManager toolbar) {
-		Action dropdownAction=new Action("Create Target",SWT.DROP_DOWN){};
-		dropdownAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target.png"));
-		dropdownAction.setMenuCreator(new IMenuCreator() {
-			Menu theMenu;
+		if (actions.getAddRunTargetActions().length==1) {
+			//Special case. Creationg a pulldown for just one item isn't very logical.
+			AddRunTargetAction action = actions.getAddRunTargetActions()[0];
+			toolbar.add(action);
+		} else {
+			Action dropdownAction=new Action("Create Target",SWT.DROP_DOWN){};
+			dropdownAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target.png"));
+			dropdownAction.setMenuCreator(new IMenuCreator() {
+				Menu theMenu;
 
-			@Override
-			public Menu getMenu(Menu parent) {
-				return null;
-			}
-
-			@Override
-			public Menu getMenu(Control parent) {
-				if (theMenu==null) {
-					final MenuManager menu = createAddRunTargetMenuManager();
-					theMenu = menu.createContextMenu(parent);
-					theMenu.addDisposeListener(new DisposeListener() {
-						public void widgetDisposed(DisposeEvent e) {
-							menu.dispose();
-						}
-					});
+				@Override
+				public Menu getMenu(Menu parent) {
+					return null;
 				}
-				return theMenu;
-			}
 
-			@Override
-			public void dispose() {
-			}
-		});
+				@Override
+				public Menu getMenu(Control parent) {
+					if (theMenu==null) {
+						final MenuManager menu = createAddRunTargetMenuManager();
+						theMenu = menu.createContextMenu(parent);
+						theMenu.addDisposeListener(new DisposeListener() {
+							public void widgetDisposed(DisposeEvent e) {
+								menu.dispose();
+							}
+						});
+					}
+					return theMenu;
+				}
 
-		toolbar.add(new ToolbarPulldownContributionItem(dropdownAction));
+				@Override
+				public void dispose() {
+				}
+			});
+
+			toolbar.add(new ToolbarPulldownContributionItem(dropdownAction));
+		}
 	}
 
 	/**

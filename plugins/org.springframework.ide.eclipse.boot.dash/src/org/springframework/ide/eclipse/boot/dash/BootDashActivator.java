@@ -118,7 +118,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public BootDashViewModel getModel() {
 		if (model==null) {
 			model = new BootDashViewModel(new DefaultBootDashModelContext(),
-					RunTargetTypes.ALL);
+					RunTargetTypes.LOCAL,
+					RunTargetTypes.CLOUDFOUNDRY
+					// RunTargetTypes.LATTICE
+			);
 		}
 		return model;
 	}
