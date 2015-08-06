@@ -74,6 +74,9 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 
 	private boolean shouldEnableFor(Collection<BootDashElement> selectedElements) {
 		//All selected elements must be deletable, then this action is enabled.
+		if (selectedElements.isEmpty()) {
+			return false;
+		}
 		for (BootDashElement bde : selectedElements) {
 			if (!canDelete(bde)) {
 				return false;
