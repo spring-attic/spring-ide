@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -40,12 +41,14 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	private YamlStructureProvider structureProvider;
 	private PropertyCompletionFactory completionFactory;
 	private TypeUtilProvider typeUtilProvider;
+	private RelaxedNameConfig conf;
 
 	public YamlCompletionEngine(Yaml yaml,
 			SpringPropertyIndexProvider indexProvider,
 			DocumentContextFinder documentContextFinder,
 			YamlStructureProvider structureProvider,
-			TypeUtilProvider typeUtilProvider
+			TypeUtilProvider typeUtilProvider,
+			RelaxedNameConfig conf
 	) {
 		//this.yaml = yaml;
 		this.indexProvider = indexProvider;
@@ -53,6 +56,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 		this.structureProvider = structureProvider;
 		this.completionFactory = new PropertyCompletionFactory(contextFinder);
 		this.typeUtilProvider = typeUtilProvider;
+		this.conf = conf;
 	}
 
 	@Override
@@ -75,16 +79,16 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	private YamlAssistContext getContext(YamlDocument doc, SNode node, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
 		TypeUtil typeUtil = typeUtilProvider.getTypeUtil(doc.getDocument());
 		if (node==null) {
-			return YamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory, typeUtil);
+			return YamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory, typeUtil, conf);
 		}
 		if (node.getNodeType()==SNodeType.KEY) {
 			//slight complication. The area in the key and value of a key node represent different
 			// contexts for content assistance
 			SKeyNode keyNode = (SKeyNode)node;
 			if (keyNode.isInValue(offset)) {
-				return YamlAssistContext.forPath(keyNode.getPath(), index, completionFactory, typeUtil);
+				return YamlAssistContext.forPath(keyNode.getPath(), index, completionFactory, typeUtil, conf);
 			} else {
-				return YamlAssistContext.forPath(keyNode.getParent().getPath(), index, completionFactory, typeUtil);
+				return YamlAssistContext.forPath(keyNode.getParent().getPath(), index, completionFactory, typeUtil, conf);
 			}
 		} else if (node.getNodeType()==SNodeType.RAW) {
 			//Treat raw node as a 'key node'. This is basically assuming that is misclasified
@@ -101,16 +105,16 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getNodeType()!=SNodeType.DOC)) {
 				node = node.getParent();
 			}
-			return YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil);
+			return YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil, conf);
 		} else if (node.getNodeType()==SNodeType.SEQ) {
 			SSeqNode seqNode = (SSeqNode)node;
 			if (seqNode.isInValue(offset)) {
-				return YamlAssistContext.forPath(seqNode.getPath(), index, completionFactory, typeUtil);
+				return YamlAssistContext.forPath(seqNode.getPath(), index, completionFactory, typeUtil, conf);
 			} else {
-				return YamlAssistContext.forPath(seqNode.getParent().getPath(), index, completionFactory, typeUtil);
+				return YamlAssistContext.forPath(seqNode.getParent().getPath(), index, completionFactory, typeUtil, conf);
 			}
 		} else if (node.getNodeType()==SNodeType.DOC) {
-			return  YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil);
+			return  YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil, conf);
 		} else {
 			throw new IllegalStateException("Missing case");
 		}

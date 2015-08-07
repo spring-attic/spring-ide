@@ -138,7 +138,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"snuggem|Unknown property",
 				"bogus|Unknown property"
 		);
-
 	}
 
 	public void test_STS_4140_StringArrayReconciling() throws Exception {
@@ -236,6 +235,116 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 		assertProblems(editor,
 				"- a\n    - b|Expecting a 'Scalar' node but got a 'Sequence' node"
+		);
+	}
+
+	public void testReconcileCamelCaseBasic() throws Exception {
+		MockEditor editor;
+		data("something.with-many-parts", "java.lang.Integer", "For testing tolerance of camelCase", null);
+		data("something.with-parts.and-more", "java.lang.Integer", "For testing tolerance of camelCase", null);
+
+		//Nothing special... not using camel case
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  with-many-parts: not-a-number"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check that reconcile also tolerates camel case and reports no error for it
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  withManyParts: 123"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		//Now check that reconciler traverses camelCase and reports errors assigning to camelCase names
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  withManyParts: not-a-number"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check also that camelcase tolerance works if its not in the end of the path
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  withParts:\n" +
+				"    andMore: not-a-number\n" +
+				"    bad: wrong\n" +
+				"    something-bad: also wrong\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'",
+				"bad|Unknown property",
+				"something-bad|Unknown property"
+		);
+	}
+
+	public void testReconcileCamelCaseBeanProp() throws Exception {
+		MockEditor editor;
+
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+
+		data("demo.bean", "demo.CamelCaser", "For testing tolerance of camelCase", null);
+
+		//Nothing special... not using camel case
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    the-answer-to-everything: not-a-number\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check that reconcile also tolerates camel case and reports no error for it
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    theAnswerToEverything: 42\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		//Now check that reconciler traverses camelCase and reports errors assigning to camelCase names
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    theAnswerToEverything: not-a-number\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check also that camelcase tolerance works if its not in the end of the path
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    theAnswerToEverything: not-a-number\n"+
+				"    theLeft:\n"+
+				"      bad: wrong\n"+
+				"      theAnswerToEverything: not-this\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'",
+				"bad|Unknown property",
+				"not-this|Expecting a 'int'"
 		);
 	}
 

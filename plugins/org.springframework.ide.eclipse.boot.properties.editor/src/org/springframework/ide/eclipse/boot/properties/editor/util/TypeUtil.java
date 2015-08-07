@@ -68,6 +68,28 @@ public class TypeUtil {
 	private static final String STRING_TYPE_NAME = String.class.getName();
 	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
 
+	public enum BeanPropertyNameMode {
+		HYPHENATED(true,false), //bean property name in hyphenated form. E.g 'some-property-name'
+		CAMEL_CASE(false,true), //bean property name in camelCase. E.g. 'somePropertyName'
+		ALIASED(true,true);     //use both as aliases of one another.
+
+		private final boolean includesHyphenated;
+		private final boolean includesCamelCase;
+
+		BeanPropertyNameMode(boolean hyphenated, boolean camelCase) {
+			this.includesCamelCase = camelCase;
+			this.includesHyphenated = hyphenated;
+		}
+
+		public boolean includesHyphenated() {
+			return includesHyphenated;
+		}
+
+		public boolean includesCamelCase() {
+			return includesCamelCase;
+		}
+	}
+
 	public enum EnumCaseMode {
 		LOWER_CASE, //convert enum names to lower case
 		ORIGNAL,    //keep orignal enum name
@@ -479,7 +501,7 @@ public class TypeUtil {
 	 *
 	 * @return A list of known properties or null if the list of properties is unknown.
 	 */
-	public List<TypedProperty> getProperties(Type type, EnumCaseMode mode) {
+	public List<TypedProperty> getProperties(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		if (type==null) {
 			return null;
 		}
@@ -490,7 +512,7 @@ public class TypeUtil {
 		if (isMap(type)) {
 			Type keyType = getKeyType(type);
 			if (keyType!=null) {
-				String[] keyValues = getAllowedValues(keyType, mode);
+				String[] keyValues = getAllowedValues(keyType, enumMode);
 				if (hasElements(keyValues)) {
 					Type valueType = getDomainType(type);
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
@@ -508,11 +530,18 @@ public class TypeUtil {
 			if (eclipseType!=null) {
 				List<IMethod> setters = getSetterMethods(eclipseType);
 				//TODO: setters inherited from super classes?
+				//TODO: the code below is too simplistic. More complex cases allow for non-atomic property types
+				//   to be defined by having only a setter (e.g. when the type is a pre-initialized collection, array or bean).
 				if (setters!=null && !setters.isEmpty()) {
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(setters.size());
 					for (IMethod m : setters) {
 						Type propType = Type.fromSignature(m.getParameterTypes()[0], eclipseType);
-						properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType));
+						if (beanMode.includesHyphenated()) {
+							properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType));
+						}
+						if (beanMode.includesCamelCase()) {
+							properties.add(new TypedProperty(setterNameToCamelName(m.getElementName()), propType));
+						}
 					}
 					return properties;
 				}
@@ -522,9 +551,14 @@ public class TypeUtil {
 	}
 
 	private String setterNameToProperty(String name) {
+		String camelName = setterNameToCamelName(name);
+		return StringUtil.camelCaseToHyphens(camelName);
+	}
+
+	public String setterNameToCamelName(String name) {
 		Assert.isLegal(name.startsWith("set"));
 		String camelName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
-		return StringUtil.camelCaseToHyphens(camelName);
+		return camelName;
 	}
 
 	private List<IMethod> getSetterMethods(IType eclipseType) {
@@ -553,10 +587,10 @@ public class TypeUtil {
 		return null;
 	}
 
-	public Map<String,Type> getPropertiesMap(Type type, EnumCaseMode mode) {
+	public Map<String,Type> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		//TODO: optimize, produce directly as a map instead of
 		// first creating list and then coverting it.
-		List<TypedProperty> list = getProperties(type, mode);
+		List<TypedProperty> list = getProperties(type, enumMode, beanMode);
 		if (list!=null) {
 			Map<String, Type> map = new HashMap<String, Type>();
 			for (TypedProperty p : list) {

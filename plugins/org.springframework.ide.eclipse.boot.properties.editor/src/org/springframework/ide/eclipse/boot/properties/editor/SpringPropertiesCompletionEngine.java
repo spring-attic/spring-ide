@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -191,7 +192,8 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 			if (navOp=='.') {
 				String prefix = doc.get(navOffset+1, offset-(navOffset+1));
 				EnumCaseMode caseMode = caseMode(prefix);
-				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode);
+				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode, BeanPropertyNameMode.HYPHENATED);
+				   //Note: properties editor itself deals with relaxed names. So it expects the properties here to be returned in hyphenated form only.
 				if (objectProperties!=null && !objectProperties.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (TypedProperty prop : objectProperties) {
