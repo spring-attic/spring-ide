@@ -289,6 +289,21 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testContentAssistCamelCaseBasic() throws Exception {
+		data("something.with-many-parts", "java.lang.Integer", "For testing tolerance of camelCase", null);
+		data("something.with-parts.and-more", "java.lang.Integer", "For testing tolerance of camelCase", null);
+
+		assertCompletion(
+				"something:\n" +
+				"  withParts:\n" +
+				"    <*>",
+				// =>
+				"something:\n" +
+				"  withParts:\n" +
+				"    and-more: <*>"
+		);
+	}
+
 	public void testReconcileCamelCaseBeanProp() throws Exception {
 		MockEditor editor;
 
@@ -347,6 +362,27 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"not-this|Expecting a 'int'"
 		);
 	}
+
+	public void testContentAssistCamelCaseBeanProp() throws Exception {
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+
+		data("demo.bean", "demo.CamelCaser", "For testing tolerance of camelCase", null);
+
+		assertCompletion(
+				"demo:\n" +
+				"  bean:\n" +
+				"    theLeft:\n" +
+				"      answer<*>\n",
+				// =>
+				"demo:\n" +
+				"  bean:\n" +
+				"    theLeft:\n" +
+				"      the-answer-to-everything: <*>\n"
+		);
+	}
+
 
 	public void testReconcileBeanPropName() throws Exception {
 		IProject p = createPredefinedProject("demo-list-of-pojo");

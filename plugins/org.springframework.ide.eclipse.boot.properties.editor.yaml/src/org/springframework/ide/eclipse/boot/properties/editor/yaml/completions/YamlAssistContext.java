@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.LOWER_CASE;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ORIGNAL;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,11 +20,11 @@ import java.util.Set;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
@@ -53,6 +50,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
  * Represents a context relative to which we can provide content assistance.
@@ -391,7 +389,18 @@ public abstract class YamlAssistContext {
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
-				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
+				String key = s.toPropString();
+				IndexNavigator subIndex = indexNav.selectSubProperty(key);
+				if (subIndex.isEmpty()) {
+					//Nothing found for actual key... maybe its a 'camelCased' alias of real key?
+					String keyAlias = StringUtil.camelCaseToHyphens(key);
+					if (!keyAlias.equals(key)) { // no point checking alias is the same (likely key was not camelCased)
+						IndexNavigator aliasedSubIndex = indexNav.selectSubProperty(keyAlias);
+						if (!aliasedSubIndex.isEmpty()) {
+							subIndex = aliasedSubIndex;
+						}
+					}
+				}
 				if (subIndex.getExtensionCandidate()!=null) {
 					return new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
 				} else if (subIndex.getExactMatch()!=null) {
