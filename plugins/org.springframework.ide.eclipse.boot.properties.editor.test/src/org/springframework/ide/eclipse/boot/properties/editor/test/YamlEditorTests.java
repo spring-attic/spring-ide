@@ -383,6 +383,37 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
+	public void testContentAssistCamelCaseInsertInExistingContext() throws Exception {
+		data("demo-bean.first", "java.lang.String", "For testing tolerance of camelCase", null);
+		data("demo-bean.second", "java.lang.String", "For testing tolerance of camelCase", null);
+
+		//Confirm first it works correctly without camelizing complications
+//		assertCompletion(
+//				"demo-bean:\n" +
+//				"  first: numero uno\n" +
+//				"something-else: separator\n"+
+//				"sec<*>",
+//				// =>
+//				"demo-bean:\n" +
+//				"  first: numero uno\n" +
+//				"  second: <*>\n" +
+//				"something-else: separator\n"
+//		);
+
+		//Now with camels
+		assertCompletion(
+				"demoBean:\n" +
+				"  first: numero uno\n" +
+				"something-else: separator\n"+
+				"sec<*>",
+				// =>
+				"demoBean:\n" +
+				"  first: numero uno\n" +
+				"  second: <*>\n" +
+				"something-else: separator\n"
+		);
+	}
+
 
 	public void testReconcileBeanPropName() throws Exception {
 		IProject p = createPredefinedProject("demo-list-of-pojo");

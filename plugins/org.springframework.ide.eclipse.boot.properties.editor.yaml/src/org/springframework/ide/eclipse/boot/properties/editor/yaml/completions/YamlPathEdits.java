@@ -61,7 +61,7 @@ public class YamlPathEdits extends DocumentEdits {
 			YamlPathSegment s = path.getSegment(0);
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				String key = s.toPropString();
-				SKeyNode existing = findChildForKey(node, key);
+				SKeyNode existing = node.getChildWithKey(key);
 				if (existing==null) {
 					createNewPath(node, path, appendText);
 				} else {
@@ -139,16 +139,17 @@ public class YamlPathEdits extends DocumentEdits {
 	}
 
 	private SKeyNode findChildForKey(SChildBearingNode node, String key) throws Exception {
-		for (SNode c : node.getChildren()) {
-			if (c.getNodeType()==SNodeType.KEY) {
-				String nodeKey = ((SKeyNode)c).getKey();
-				//TODO: relax matching camel-case -> hyphens
-				if (key.equals(nodeKey)) {
-					return (SKeyNode)c;
-				}
-			}
-		}
-		return null;
+		return (SKeyNode) node.traverse(YamlPathSegment.valueAt(key));
+//		for (SNode c : node.getChildren()) {
+//			if (c.getNodeType()==SNodeType.KEY) {
+//				String nodeKey = ((SKeyNode)c).getKey();
+//				//TODO: relax matching camel-case -> hyphens
+//				if (key.equals(nodeKey)) {
+//					return (SKeyNode)c;
+//				}
+//			}
+//		}
+//		return null;
 	}
 
 	public void createPathInPlace(SNode contextNode, YamlPath relativePath, int insertionPoint, String appendText) throws Exception {
