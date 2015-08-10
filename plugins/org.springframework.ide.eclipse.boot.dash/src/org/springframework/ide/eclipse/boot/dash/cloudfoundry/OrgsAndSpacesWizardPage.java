@@ -185,7 +185,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected RunTarget getExistingRunTarget(CloudSpace space) {
 		if (space != null) {
-			String targetId = CloudFoundryTargetProperties.getId(targetProperties.getUserName(), targetProperties.getUrl(),
+			String targetId = CloudFoundryTargetProperties.getId(targetProperties.getUsername(), targetProperties.getUrl(),
 					space.getOrganization().getName(), space.getName());
 			for (RunTarget target : targets.getValues()) {
 				if (targetId.equals(target.getId())) {

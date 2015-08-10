@@ -67,7 +67,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	/**
-	 * 
+	 *
 	 * @param allPropertiesValidationListener
 	 *            listener that is notified when any property is validated
 	 * @param credentialsValidationListener
@@ -92,6 +92,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		space.removeListener(cloudSpaceChangeListener);
 	}
 
+	@Override
 	public String getUrl() {
 		return this.url.getValue();
 	}
@@ -116,14 +117,16 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		this.selfsigned.setValue(selfsigned);
 	}
 
-	public String getUserName() {
+	@Override
+	public String getUsername() {
 		return this.userName.getValue();
 	}
 
-	public void setUserName(String userName) {
+	public void setUsername(String userName) {
 		this.userName.setValue(userName);
 	}
 
+	@Override
 	public String getPassword() {
 		return this.password.getValue();
 	}
@@ -137,7 +140,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		protected ValidationResult compute() {
 			String infoMessage = null;
 
-			if (isEmpty(getUserName())) {
+			if (isEmpty(getUsername())) {
 				infoMessage = "Enter a username";
 			} else if (isEmpty(getPassword())) {
 				infoMessage = "Enter a password";
@@ -191,12 +194,12 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		put(TargetProperties.RUN_TARGET_ID, CloudFoundryTargetProperties.getId(this));
 		return RunTargetTypes.CLOUDFOUNDRY.createRunTarget(this);
 	}
-	
+
 	@Override
 	public Map<String, String> getAllProperties() {
 		Map<String, String> map = super.getAllProperties();
 		map.put(URL_PROP, getUrl());
-		map.put(USERNAME_PROP, getUserName());
+		map.put(USERNAME_PROP, getUsername());
 		map.put(ORG_PROP, getOrganizationName());
 		map.put(SPACE_PROP, getSpaceName());
 		map.put(SELF_SIGNED_PROP, Boolean.toString(isSelfsigned()));

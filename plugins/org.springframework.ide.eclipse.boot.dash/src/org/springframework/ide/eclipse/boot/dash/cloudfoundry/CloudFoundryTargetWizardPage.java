@@ -102,7 +102,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		emailText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				wizardModel.setUserName(emailText.getText());
+				wizardModel.setUsername(emailText.getText());
 			}
 		});
 
@@ -201,7 +201,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private void setValuesFromTargetProperties() {
 
-		String userName = wizardModel.getUserName();
+		String userName = wizardModel.getUsername();
 		if (emailText != null && !emailText.isDisposed() && userName != null) {
 			emailText.setText(userName);
 		}
