@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
-import java.beans.Expression;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -39,8 +39,8 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Type;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
@@ -51,6 +51,7 @@ import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -336,7 +337,8 @@ public class NewSpringBootWizardModel {
 						try {
 							String versionStr = bootVersion.getSelection().selection.getValue().getValue();
 							if (versionStr!=null) {
-								Version version = new Version(versionStr);
+								Version version = new Version(versionStr.replace("BUILD-SNAPSHOT", "ZZZZZZZZZZZZZ"));
+								//replacement of BS -> ZZ: see bug https://www.pivotaltracker.com/story/show/100963226
 								return range.includes(version);
 							}
 						} catch (Exception e) {
