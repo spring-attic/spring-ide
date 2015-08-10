@@ -14,11 +14,13 @@ import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 
 /**
  * A cloud operation that is performed on a Cloud application.
@@ -32,11 +34,14 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	private ApplicationUpdateListener applicationUpdateListener;
 
+	protected final AppOperationLogger appLogger;
+
 	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
 		super(opName);
 		this.model = model;
 		applicationUpdateListener = new ApplicationUpdateListener.DefaultListener(appName, model);
 		this.appName = appName;
+		appLogger = new AppOperationLogger(model, appName);
 	}
 
 	@Override
@@ -109,4 +114,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
 	}
 
+	protected void logAndUpdateMonitor(String message, IProgressMonitor monitor) {
+		appLogger.logAndUpdateMonitor(message, LogType.LOCALSTDOUT, monitor);
+	}
 }

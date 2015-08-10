@@ -12,16 +12,16 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
 
-	public final static String URL_PROP = "url";
+
 	public final static String ORG_PROP = "organization";
 	public final static String SPACE_PROP = "space";
 	public final static String SELF_SIGNED_PROP = "selfsigned";
-
+	
 	public CloudFoundryTargetProperties() {
 		super(RunTargetTypes.CLOUDFOUNDRY);
 	}
@@ -31,10 +31,6 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		if (get(RUN_TARGET_ID) == null) {
 			put(RUN_TARGET_ID, getId(this));
 		}
-	}
-
-	public String getUrl() {
-		return map.get(URL_PROP);
 	}
 
 	public String getSpaceName() {
@@ -49,14 +45,6 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		return map.get(SELF_SIGNED_PROP) != null && Boolean.getBoolean(getAllProperties().get(SELF_SIGNED_PROP));
 	}
 
-	public String getUserName() {
-		return map.get(USERNAME_PROP);
-	}
-
-	public String getPassword() {
-		return map.get(PASSWORD_PROP);
-	}
-
 	@Override
 	public Map<String, String> getPropertiesToPersist() {
 		Map<String, String> map = super.getPropertiesToPersist();
@@ -66,12 +54,13 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	}
 
 	public static String getId(CloudFoundryTargetProperties cloudProps) {
-		return getId(cloudProps.getUserName(), cloudProps.getUrl(), cloudProps.getOrganizationName(),
+		return getId(cloudProps.getUsername(), cloudProps.getUrl(), cloudProps.getOrganizationName(),
 				cloudProps.getSpaceName());
 	}
 
 	public static String getName(CloudFoundryTargetProperties cloudProps) {
-		return cloudProps.getOrganizationName() + " : " + cloudProps.getSpaceName() + " - [" + cloudProps.getUrl() + "]";
+		return cloudProps.getOrganizationName() + " : " + cloudProps.getSpaceName() + " - [" + cloudProps.getUrl()
+				+ "]";
 	}
 
 	public static String getId(String userName, String url, String orgName, String spaceName) {

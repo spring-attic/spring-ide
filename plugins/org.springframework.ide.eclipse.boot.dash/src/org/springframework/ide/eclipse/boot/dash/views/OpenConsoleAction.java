@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -62,8 +63,11 @@ public class OpenConsoleAction extends AbstractBootDashElementsAction {
 			// Show first element only for now
 			if (it.hasNext()) {
 				BootDashElement element = selectedElements.iterator().next();
+				BootDashModel model = element.getParent();
 				try {
-					viewModel.getConsoleManager().openConsole(element, ui);
+					if (model.getElementConsoleManager() != null) {
+						model.getElementConsoleManager().showConsole(element);
+					}
 				} catch (Exception e) {
 					ui.errorPopup("Open Console Failure", e.getMessage());
 				}

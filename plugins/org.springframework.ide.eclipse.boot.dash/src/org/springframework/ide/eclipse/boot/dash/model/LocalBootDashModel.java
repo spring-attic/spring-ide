@@ -16,14 +16,14 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashView;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
@@ -44,6 +44,7 @@ public class LocalBootDashModel extends BootDashModel {
 	BootDashElementFactory elementFactory;
 	ProjectRunStateTracker runStateTracker;
 	LiveSet<BootDashElement> elements; //lazy created
+	private BootDashModelConsoleManager consoleManager;
 
 	private BootDashModelStateSaver modelState;
 
@@ -64,6 +65,7 @@ public class LocalBootDashModel extends BootDashModel {
 		super(RunTargets.LOCAL);
 		this.workspace = context.getWorkspace();
 		this.elementFactory = new BootDashElementFactory(this, context.getProjectProperties());
+		this.consoleManager = new LocalElementConsoleManager();
 		try {
 			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, elementFactory));
 			modelState.restore(lastState);
@@ -128,6 +130,10 @@ public class LocalBootDashModel extends BootDashModel {
 		updateElementsFromWorkspace();
 	}
 
+	@Override
+	public BootDashModelConsoleManager getElementConsoleManager() {
+		return consoleManager;
+	}
 
 
 	////////////// listener cruft ///////////////////////////

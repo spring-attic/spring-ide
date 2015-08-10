@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
@@ -39,11 +40,12 @@ import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class CloudFoundryBootDashModel extends BootDashModel implements ModifiableModel {
 
-	IPropertyStore modelStore;
+	private IPropertyStore modelStore;
 
 	private ProjectAppStore projectAppStore;
 
@@ -51,7 +53,11 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	public static final String PROJECT_TO_APP_MAPPING = "projectToAppMapping";
 
-	LiveSet<BootDashElement> elements;
+	private CloudDashElementFactory elementFactory;
+
+	private LiveSet<BootDashElement> elements;
+
+	private BootDashModelConsoleManager consoleManager;
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
 		super(target);
@@ -60,6 +66,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
 		this.projectAppStore = new ProjectAppStore(this.modelStore);
 		this.cloudAppCache = new CloudAppCache();
+		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
+		this.consoleManager = new CloudAppLogManager(target);
 	}
 
 	public CloudAppCache getAppCache() {
@@ -183,7 +191,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			// Safe iterate via getValues(); a copy, instead of getValue()
 			List<BootDashElement> existing = elements.getValues();
 
-			addedElement = new CloudDashElement(this, appInstances.getApplication().getName(), modelStore);
+			addedElement = elementFactory.create(appInstances.getApplication().getName());
 
 			updated.add(addedElement);
 
@@ -248,8 +256,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			// should be updated first before creating elements
 			// as elements are handles to state in the cache
 			for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
-				BootDashElement addedElement = new CloudDashElement(this, entry.getKey().getApplication().getName(),
-						modelStore);
+				BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
 				updated.put(addedElement.getName(), addedElement);
 			}
 
@@ -323,7 +330,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		for (BootDashElement element : toRemove) {
 			if (element instanceof CloudDashElement) {
 				try {
-					remove((CloudDashElement) element, ui);
+					delete((CloudDashElement) element, ui);
 				} catch (Exception e) {
 					BootDashActivator.log(e);
 				}
@@ -338,7 +345,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	 * @return
 	 * @throws Exception
 	 */
-	protected void remove(final CloudDashElement cloudElement, final UserInteractions ui) throws Exception {
+	protected void delete(final CloudDashElement cloudElement, final UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation operation = new CloudApplicationOperation("Deleting: " + cloudElement.getName(), this,
 				cloudElement.getName()) {
@@ -390,5 +397,10 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	@Override
 	public String toString() {
 		return this.getClass().getName() + "(" + getRunTarget().getName() + ")";
+	}
+
+	@Override
+	public BootDashModelConsoleManager getElementConsoleManager() {
+		return this.consoleManager;
 	}
 }
