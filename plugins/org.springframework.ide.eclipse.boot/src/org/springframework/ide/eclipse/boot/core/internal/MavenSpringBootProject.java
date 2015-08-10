@@ -266,7 +266,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 						String aid = getTextValue(findChild(c, ARTIFACT_ID));
 						String gid = getTextValue(findChild(c, GROUP_ID));
 						if (aid!=null && gid!=null) { //ignore invalid entries that don't have gid or aid
-							if (aid.startsWith(SpringBootStarter.AID_PREFIX)) {
+							if (SpringBootStarter.isStarterAId(aid)) {
 								StarterId id = new StarterId(gid, aid);
 								boolean keep = starters.remove(id);
 								if (!keep) {
