@@ -106,8 +106,6 @@ public class NewSpringBootWizardModel {
 	private final String JSON_URL;
 	private final String CONTENT_TYPE;
 
-	private final Map<String, LiveExpression<Boolean>> dependencyEnablement = new HashMap<String, LiveExpression<Boolean>>();
-
 	public NewSpringBootWizardModel() throws Exception {
 		this(new URLConnectionFactory(), StsProperties.getInstance(new NullProgressMonitor()));
 	}
