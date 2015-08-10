@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertiesMapper;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 

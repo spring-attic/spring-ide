@@ -32,21 +32,25 @@ public abstract class CloudOperation extends Operation<Void> {
 	@Override
 	protected Void runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		try {
 			doCloudOp(monitor);
 		} catch (Exception e) {
-			checkCancelledAndHandleError(e);
+			checkError(e);
 		}
 		return null;
 	}
 
-	protected void checkCancelledAndHandleError(Exception e) throws Exception {
+	protected void checkError(Exception e) throws Exception {
 
 		// Special case for CF exceptions:
 		// CF exceptions may not contain the error in the message but rather
 		// the description
 		if (e instanceof CloudFoundryException) {
 			String message = ((CloudFoundryException) e).getDescription();
+
 			if (message == null || message.trim().length() == 0) {
 				message = "Cloud operation failure of type: " + e.getClass().getName();
 			}

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public abstract class BootDashModel {
@@ -35,6 +36,8 @@ public abstract class BootDashModel {
 	}
 
 	abstract public LiveSet<BootDashElement> getElements();
+
+	abstract public BootDashModelConsoleManager getElementConsoleManager();
 
 	/**
 	 * When no longer needed the model should be disposed, otherwise it will

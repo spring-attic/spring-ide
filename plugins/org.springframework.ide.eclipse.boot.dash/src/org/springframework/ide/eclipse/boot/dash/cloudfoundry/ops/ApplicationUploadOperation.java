@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiver;
@@ -40,14 +39,15 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor);
-
+		monitor.beginTask("Generating application archiving and uploading to Cloud Foundry", 10);
 		// Must perform this check otherwise if the app does not exist
 		// and an upload is attempted, CF backend or client may throw an
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
 		CloudApplication app = getCloudApplication();
+
+		monitor.worked(3);
 		if (app == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "
@@ -63,23 +63,27 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 			if (deploymentProperties.getProject() != null) {
 
 				ManifestParser parser = new ManifestParser(deploymentProperties.getProject(),
-						this.model.getCloudTarget().getDomains(subMonitor));
+						this.model.getCloudTarget().getDomains(monitor));
 
 				CloudApplicationArchiver archiver = new CloudApplicationArchiver(
 						JavaCore.create(deploymentProperties.getProject()), appName, parser);
 
-				subMonitor.setTaskName("Generating archive for application: " + appName);
+				logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
 
-				archive = archiver.getApplicationArchive(subMonitor.newChild(50));
+				archive = archiver.getApplicationArchive(monitor);
+				monitor.worked(2);
+
 			}
 
 			if (archive != null) {
 
-				subMonitor.setTaskName("Uploading archive to Cloud Foundry for application: " + appName);
+				logAndUpdateMonitor("Uploading archive to Cloud Foundry for application: " + appName, monitor);
 
 				getClient().uploadApplication(appName, archive);
 
-				subMonitor.setTaskName("Archive uploaded to Cloud Foundry for application: " + appName);
+				monitor.worked(5);
+
+				logAndUpdateMonitor("Archive uploaded to Cloud Foundry for application: " + appName, monitor);
 
 			} else {
 				throw BootDashActivator.asCoreException("Failed to generate application archive for " + appName

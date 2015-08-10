@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+
 /**
  * A run target that contains a list of properties that describe the run target.
  * Not all run targets define properties (e.g. the local run target)
@@ -20,17 +22,16 @@ public interface RunTargetWithProperties extends RunTarget {
 	public TargetProperties getTargetProperties();
 
 	/**
-	 * Validate the properties against the run target.
-	 *
+	 * Refresh the target properties.
+	 * 
 	 * @throws Exception
-	 *             if validation failed
+	 *             if refresh failed or target properties are invalid
 	 */
-	public void validate() throws Exception;
+	public void refresh() throws Exception;
 
 	/**
 	 *
 	 * @return true if the target requires credentials. False otherwise
 	 */
 	public abstract boolean requiresCredentials();
-
 }

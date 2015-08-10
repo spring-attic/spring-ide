@@ -21,23 +21,24 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 	private final String appName;
 
 	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model) {
-		super("Starting application", model, appName);
+		super("Starting application: " + appName, model, appName);
 		this.appName = appName;
 	}
 
 	@Override
-	protected void doCloudOp( IProgressMonitor monitor)
-			throws Exception, OperationCanceledException {
+	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		// Use the cached Cloud app instead of fetching a new one to avoid
 		// unnecessary
 		// network I/O. An updated Cloud application will be fetched when the op
 		// completes
+		logAndUpdateMonitor("Starting application: " + appName, monitor);
+
 		getAppUpdateListener().applicationStarting(getCachedApplication());
 
-		getClient().startApplication(appName);
+		getClient().restartApplication(appName);
 
-		new ApplicationRunningStateTracker(appName, getClient()).startTracking(monitor);
+		new ApplicationRunningStateTracker(appName, getClient(), appLogger).startTracking(monitor);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

@@ -24,16 +24,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -171,4 +167,8 @@ public class LatticeBootDashModel extends BootDashModel {
 		return elementByProcessGuid.get(processGuid);
 	}
 
+	@Override
+	public BootDashModelConsoleManager getElementConsoleManager() {
+		return null;
+	}
 }

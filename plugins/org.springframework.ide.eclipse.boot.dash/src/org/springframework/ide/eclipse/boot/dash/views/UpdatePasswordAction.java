@@ -19,8 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
-import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class UpdatePasswordAction extends AbstractBootDashModelAction {
@@ -51,7 +51,7 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 					if (password != null) {
 						runTarget.getTargetProperties().put(TargetProperties.PASSWORD_PROP, password);
 						try {
-							runTarget.validate();
+							runTarget.refresh();
 
 							// Only store if it validates
 							model.updatePropertiesInStore(runTarget);
