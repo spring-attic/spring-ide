@@ -38,7 +38,8 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		getClient().restartApplication(appName);
 
-		new ApplicationRunningStateTracker(appName, getClient(), appLogger).startTracking(monitor);
+		new ApplicationRunningStateTracker(appName, getClient(), new AppOperationLogger(model, appName))
+				.startTracking(monitor);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

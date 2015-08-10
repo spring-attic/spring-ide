@@ -57,7 +57,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
 
-		logAndUpdateMonitor("Checking if application exists: " + properties.getAppName(), monitor);
+		logAndUpdateMonitor("Checking application: " + properties.getAppName(), monitor);
 		CloudApplication app = getCloudApplication();
 		monitor.worked(5);
 
@@ -74,7 +74,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		if (existingElements != null) {
 			for (BootDashElement el : existingElements) {
 				if (!properties.getAppName().equals(el.getName()) && project.equals(el.getProject())) {
-					ui.errorPopup("Existing application already exists",
+					ui.errorPopup("Application already exists",
 							"An application [" + el.getName() + "] linked to project [" + project
 									.getName()
 							+ "] already exists. Only one application can be linked to the same project in the same space. Please delete the existing one and try deploying again.");

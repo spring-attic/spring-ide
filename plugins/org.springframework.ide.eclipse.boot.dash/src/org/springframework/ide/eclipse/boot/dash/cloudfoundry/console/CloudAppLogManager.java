@@ -14,6 +14,7 @@ import java.io.StringWriter;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.StreamingLogToken;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -119,8 +120,19 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 
 		if (appConsole.getLoggregatorToken() == null) {
 			CloudFoundryOperations client = runTarget.getClient();
-			StreamingLogToken token = client.streamLogs(appName, appConsole);
-			appConsole.setLoggregatorToken(token);
+
+			// Must verify that the application exists before attaching
+			// loggregator listener
+			CloudApplication app = null;
+			try {
+				app = client.getApplication(appName);
+			} catch (Throwable e) {
+				// Ignore.
+			}
+			if (app != null) {
+				StreamingLogToken token = client.streamLogs(appName, appConsole);
+				appConsole.setLoggregatorToken(token);
+			}
 		}
 
 		return appConsole;
@@ -152,11 +164,12 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 			// TODO: enable when required.fetch recent.
 
 			// CloudFoundryOperations client = runTarget.getClient();
-//
-//			if (console.wasLoggregatorContentCleared()) {
-//				List<ApplicationLog> recentLogs = client.getRecentLogs(element.getName());
-//				console.writeLoggregatorLogs(recentLogs);
-//			}
+			//
+			// if (console.wasLoggregatorContentCleared()) {
+			// List<ApplicationLog> recentLogs =
+			// client.getRecentLogs(element.getName());
+			// console.writeLoggregatorLogs(recentLogs);
+			// }
 
 			consoleManager.showConsoleView(console);
 		}

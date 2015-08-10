@@ -34,14 +34,12 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	private ApplicationUpdateListener applicationUpdateListener;
 
-	protected final AppOperationLogger appLogger;
 
 	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
 		super(opName);
 		this.model = model;
 		applicationUpdateListener = new ApplicationUpdateListener.DefaultListener(appName, model);
 		this.appName = appName;
-		appLogger = new AppOperationLogger(model, appName);
 	}
 
 	@Override
@@ -115,6 +113,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 	}
 
 	protected void logAndUpdateMonitor(String message, IProgressMonitor monitor) {
-		appLogger.logAndUpdateMonitor(message, LogType.LOCALSTDOUT, monitor);
+		// Don't catch the logger as the appName may change
+		new AppOperationLogger(model, appName).logAndUpdateMonitor(message, LogType.LOCALSTDOUT, monitor);
 	}
 }
