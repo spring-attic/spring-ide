@@ -153,13 +153,23 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	public static String getConsoleDisplayName(TargetProperties targetProperties, String appName) {
 		StringWriter writer = new StringWriter();
 		writer.append(appName);
-		writer.append(' ');
-		writer.append('[');
-		writer.append(targetProperties.get(CloudFoundryTargetProperties.ORG_PROP));
-		writer.append(',');
-		writer.append(' ');
-		writer.append(targetProperties.get(CloudFoundryTargetProperties.SPACE_PROP));
-		writer.append(']');
+
+		String orgName = null;
+		String spaceName = null;
+
+		if (targetProperties instanceof CloudFoundryTargetProperties) {
+			orgName = ((CloudFoundryTargetProperties) targetProperties).getOrganizationName();
+			spaceName = ((CloudFoundryTargetProperties) targetProperties).getSpaceName();
+		}
+		if (orgName != null && spaceName != null) {
+			writer.append(' ');
+			writer.append('[');
+			writer.append(orgName);
+			writer.append(',');
+			writer.append(' ');
+			writer.append(spaceName);
+			writer.append(']');
+		}
 
 		return writer.toString();
 	}
