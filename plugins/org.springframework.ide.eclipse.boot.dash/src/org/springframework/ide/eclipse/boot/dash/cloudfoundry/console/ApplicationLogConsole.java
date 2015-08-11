@@ -32,8 +32,6 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 
 	private StreamingLogToken loggregatorToken;
 
-	private boolean wasCleared = true;
-
 	public ApplicationLogConsole(String name, String type) {
 		super(name, type, null, true);
 	}
@@ -47,6 +45,9 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 	}
 
 	public synchronized void setLoggregatorToken(StreamingLogToken loggregatorToken) {
+		if (this.loggregatorToken != null) {
+			this.loggregatorToken.cancel();
+		}
 		this.loggregatorToken = loggregatorToken;
 	}
 
@@ -59,21 +60,7 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 			return;
 		}
 		final LogType logType = LogType.getLoggregatorType(log.getMessageType());
-		if (writeApplicationLog(log.getMessage(), logType)) {
-			wasCleared = false;
-		}
-	}
-
-	@Override
-	public void clearConsole() {
-		synchronized (this) {
-			wasCleared = true;
-		}
-		super.clearConsole();
-	}
-
-	public synchronized boolean wasLoggregatorContentCleared() {
-		return this.wasCleared;
+		writeApplicationLog(log.getMessage(), logType);
 	}
 
 	/**
@@ -108,10 +95,7 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 	}
 
 	public synchronized void close() {
-		if (loggregatorToken != null) {
-			loggregatorToken.cancel();
-			loggregatorToken = null;
-		}
+		setLoggregatorToken(null);
 
 		for (IOConsoleOutputStream outputStream : activeStreams.values()) {
 			if (!outputStream.isClosed()) {

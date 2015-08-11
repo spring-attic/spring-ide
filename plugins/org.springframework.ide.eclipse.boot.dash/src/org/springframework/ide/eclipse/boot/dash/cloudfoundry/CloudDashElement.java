@@ -65,7 +65,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	public void stopAsync(UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(
-				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()));
+				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()), false);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
@@ -85,7 +85,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 			restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
-			op = new ApplicationOperationWithModelUpdate(restartOp);
+			op = new ApplicationOperationWithModelUpdate(restartOp, true);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -98,7 +98,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 		restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
-		cloudModel.getOperationsExecution(ui).runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp));
+		cloudModel.getOperationsExecution(ui).runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp, true));
 	}
 
 	@Override

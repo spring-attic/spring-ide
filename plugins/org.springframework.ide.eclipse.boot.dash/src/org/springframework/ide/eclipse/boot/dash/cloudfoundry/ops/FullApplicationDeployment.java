@@ -57,7 +57,6 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
 
-		logAndUpdateMonitor("Checking application: " + properties.getAppName(), monitor);
 		CloudApplication app = getCloudApplication();
 		monitor.worked(5);
 
@@ -98,7 +97,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		deploymentOperations.add(restartOp);
 
 		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(getName(), model, appName,
-				deploymentOperations);
+				deploymentOperations, true);
 		op.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 
 		model.getOperationsExecution(ui).runOpAsynch(op);

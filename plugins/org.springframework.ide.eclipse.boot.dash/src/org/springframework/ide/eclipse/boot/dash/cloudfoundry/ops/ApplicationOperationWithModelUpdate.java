@@ -33,17 +33,21 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 
 	private List<CloudApplicationOperation> operations;
 
+	private boolean resetConsole;
+
 	public ApplicationOperationWithModelUpdate(String opName, CloudFoundryBootDashModel model, String appName,
-			List<CloudApplicationOperation> operations) {
+			List<CloudApplicationOperation> operations, boolean resetConsole) {
 		super(opName, model, appName);
 		this.operations = operations;
+		this.resetConsole = resetConsole;
 	}
 
-	public ApplicationOperationWithModelUpdate(CloudApplicationOperation enclosedOp) {
+	public ApplicationOperationWithModelUpdate(CloudApplicationOperation enclosedOp, boolean resetConsole) {
 		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName);
 
 		this.operations = new ArrayList<CloudApplicationOperation>();
 		this.operations.add(enclosedOp);
+		this.resetConsole = resetConsole;
 	}
 
 	@Override
@@ -58,6 +62,9 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		try {
 			// Run ops in series
+			if (resetConsole) {
+				resetAndShowConsole();
+			}
 			for (CloudApplicationOperation op : operations) {
 				op.run(monitor);
 			}
