@@ -138,7 +138,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"snuggem|Unknown property",
 				"bogus|Unknown property"
 		);
-
 	}
 
 	public void test_STS_4140_StringArrayReconciling() throws Exception {
@@ -238,6 +237,183 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"- a\n    - b|Expecting a 'Scalar' node but got a 'Sequence' node"
 		);
 	}
+
+	public void testReconcileCamelCaseBasic() throws Exception {
+		MockEditor editor;
+		data("something.with-many-parts", "java.lang.Integer", "For testing tolerance of camelCase", null);
+		data("something.with-parts.and-more", "java.lang.Integer", "For testing tolerance of camelCase", null);
+
+		//Nothing special... not using camel case
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  with-many-parts: not-a-number"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check that reconcile also tolerates camel case and reports no error for it
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  withManyParts: 123"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		//Now check that reconciler traverses camelCase and reports errors assigning to camelCase names
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  withManyParts: not-a-number"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check also that camelcase tolerance works if its not in the end of the path
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"something:\n" +
+				"  withParts:\n" +
+				"    andMore: not-a-number\n" +
+				"    bad: wrong\n" +
+				"    something-bad: also wrong\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'",
+				"bad|Unknown property",
+				"something-bad|Unknown property"
+		);
+	}
+
+	public void testContentAssistCamelCaseBasic() throws Exception {
+		data("something.with-many-parts", "java.lang.Integer", "For testing tolerance of camelCase", null);
+		data("something.with-parts.and-more", "java.lang.Integer", "For testing tolerance of camelCase", null);
+
+		assertCompletion(
+				"something:\n" +
+				"  withParts:\n" +
+				"    <*>",
+				// =>
+				"something:\n" +
+				"  withParts:\n" +
+				"    and-more: <*>"
+		);
+	}
+
+	public void testReconcileCamelCaseBeanProp() throws Exception {
+		MockEditor editor;
+
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+
+		data("demo.bean", "demo.CamelCaser", "For testing tolerance of camelCase", null);
+
+		//Nothing special... not using camel case
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    the-answer-to-everything: not-a-number\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check that reconcile also tolerates camel case and reports no error for it
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    theAnswerToEverything: 42\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		//Now check that reconciler traverses camelCase and reports errors assigning to camelCase names
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    theAnswerToEverything: not-a-number\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'"
+		);
+
+		//Now check also that camelcase tolerance works if its not in the end of the path
+		editor = new MockEditor(
+				"#Comment for good measure\n" +
+				"demo:\n" +
+				"  bean:\n"+
+				"    theAnswerToEverything: not-a-number\n"+
+				"    theLeft:\n"+
+				"      bad: wrong\n"+
+				"      theAnswerToEverything: not-this\n"
+		);
+		assertProblems(editor,
+				"not-a-number|Expecting a 'int'",
+				"bad|Unknown property",
+				"not-this|Expecting a 'int'"
+		);
+	}
+
+	public void testContentAssistCamelCaseBeanProp() throws Exception {
+		IProject p = createPredefinedProject("demo");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+
+		data("demo.bean", "demo.CamelCaser", "For testing tolerance of camelCase", null);
+
+		assertCompletion(
+				"demo:\n" +
+				"  bean:\n" +
+				"    theLeft:\n" +
+				"      answer<*>\n",
+				// =>
+				"demo:\n" +
+				"  bean:\n" +
+				"    theLeft:\n" +
+				"      the-answer-to-everything: <*>\n"
+		);
+	}
+
+	public void testContentAssistCamelCaseInsertInExistingContext() throws Exception {
+		data("demo-bean.first", "java.lang.String", "For testing tolerance of camelCase", null);
+		data("demo-bean.second", "java.lang.String", "For testing tolerance of camelCase", null);
+
+		//Confirm first it works correctly without camelizing complications
+//		assertCompletion(
+//				"demo-bean:\n" +
+//				"  first: numero uno\n" +
+//				"something-else: separator\n"+
+//				"sec<*>",
+//				// =>
+//				"demo-bean:\n" +
+//				"  first: numero uno\n" +
+//				"  second: <*>\n" +
+//				"something-else: separator\n"
+//		);
+
+		//Now with camels
+		assertCompletion(
+				"demoBean:\n" +
+				"  first: numero uno\n" +
+				"something-else: separator\n"+
+				"sec<*>",
+				// =>
+				"demoBean:\n" +
+				"  first: numero uno\n" +
+				"  second: <*>\n" +
+				"something-else: separator\n"
+		);
+	}
+
 
 	public void testReconcileBeanPropName() throws Exception {
 		IProject p = createPredefinedProject("demo-list-of-pojo");

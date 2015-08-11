@@ -122,7 +122,7 @@ public class SpringBootProjectTests extends TestCase {
 		assertStarters(project, Arrays.asList(knownStarters.get("test")));
 	}
 
-	private void assertContainsStarters(List<SpringBootStarter> starters, String... artifactIds) {
+	public static void assertContainsStarters(List<SpringBootStarter> starters, String... artifactIds) {
 		HashSet<String> expecteds = new HashSet<String>(Arrays.asList(artifactIds));
 		for (SpringBootStarter starter : starters) {
 			String name = starter.getName();
@@ -166,7 +166,7 @@ public class SpringBootProjectTests extends TestCase {
 
 	}
 
-	private void assertStarters(ISpringBootProject project, Collection<SpringBootStarter> _expected) throws Exception {
+	public static void assertStarters(ISpringBootProject project, Collection<SpringBootStarter> _expected) throws Exception {
 		HashSet<SpringBootStarter> expected = new HashSet<SpringBootStarter>(_expected);
 
 		StringBuilder unexpected = new StringBuilder();

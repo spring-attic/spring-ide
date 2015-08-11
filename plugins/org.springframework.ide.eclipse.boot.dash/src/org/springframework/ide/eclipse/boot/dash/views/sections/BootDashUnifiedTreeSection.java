@@ -402,6 +402,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, refreshAction);
 		}
 
+		IAction restartOnlyAction = actions.getRestartOnlyApplicationAction();
+		if (restartOnlyAction != null) {
+			addVisible(manager, restartOnlyAction);
+		}
+
 		IAction deleteAppsAction = actions.getDeleteApplicationsAction();
 		if (deleteAppsAction != null) {
 			addVisible(manager, deleteAppsAction);

@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -34,8 +33,6 @@ public class BootDashViewModel implements Disposable {
 	private ToggleFiltersModel toggleFiltersModel;
 	private TagFilterBoxModel filterBox;
 	private LiveExpression<Filter<BootDashElement>> filter;
-	private ExternalModelObserver externalModelObserver;
-	private BootDashConsoleManager consoleManager;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -54,9 +51,6 @@ public class BootDashViewModel implements Disposable {
 		filterBox = new TagFilterBoxModel();
 		toggleFiltersModel = new ToggleFiltersModel();
 		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
-
-		consoleManager = new BootDashConsoleManager(this);
-		externalModelObserver = ExternalApplicationHandler.load(this);
 	}
 
 	public LiveSet<RunTarget> getRunTargets() {
@@ -117,13 +111,5 @@ public class BootDashViewModel implements Disposable {
 
 	public LiveExpression<Filter<BootDashElement>> getFilter() {
 		return filter;
-	}
-
-	public ExternalModelObserver getExternalModelObserver() {
-		return externalModelObserver;
-	}
-
-	public BootDashConsoleManager getConsoleManager() {
-		return consoleManager;
 	}
 }

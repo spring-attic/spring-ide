@@ -8,12 +8,12 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
+package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
 /**
  * Properties for a particular {@link RunTarget}.
@@ -30,13 +30,13 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
  */
 public class TargetProperties {
 
-	protected Map<String, String> map;
-
-	private RunTargetType type;
-
 	public static final String RUN_TARGET_ID = "runTargetID";
 	public static final String USERNAME_PROP = "username";
 	public static final String PASSWORD_PROP = "password";
+	public static final String URL_PROP = "url";
+
+	protected Map<String, String> map;
+	private RunTargetType type;
 
 	public TargetProperties(Map<String, String> map, RunTargetType type) {
 		this.map = map;
@@ -84,20 +84,27 @@ public class TargetProperties {
 		return new HashMap<String, String>(map);
 	}
 
+	public String getRunTargetId() {
+		return map.get(RUN_TARGET_ID);
+	}
+
 	public RunTargetType getRunTargetType() {
 		return type;
 	}
 
-	public String getRunTargetId() {
-		return map.get(RUN_TARGET_ID);
+	public String getUsername() {
+		return map.get(USERNAME_PROP);
 	}
 
 	public String getPassword() {
 		return map.get(PASSWORD_PROP);
 	}
 
+	public String getUrl() {
+		return map.get(URL_PROP);
+	}
+
 	public void put(String key, String value) {
 		map.put(key, value);
 	}
-
 }

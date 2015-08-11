@@ -21,8 +21,12 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
@@ -36,11 +40,12 @@ import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class CloudFoundryBootDashModel extends BootDashModel implements ModifiableModel {
 
-	IPropertyStore modelStore;
+	private IPropertyStore modelStore;
 
 	private ProjectAppStore projectAppStore;
 
@@ -48,7 +53,11 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	public static final String PROJECT_TO_APP_MAPPING = "projectToAppMapping";
 
-	LiveSet<BootDashElement> elements;
+	private CloudDashElementFactory elementFactory;
+
+	private LiveSet<BootDashElement> elements;
+
+	private BootDashModelConsoleManager consoleManager;
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
 		super(target);
@@ -57,6 +66,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
 		this.projectAppStore = new ProjectAppStore(this.modelStore);
 		this.cloudAppCache = new CloudAppCache();
+		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
+		this.consoleManager = new CloudAppLogManager(target);
 	}
 
 	public CloudAppCache getAppCache() {
@@ -180,7 +191,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			// Safe iterate via getValues(); a copy, instead of getValue()
 			List<BootDashElement> existing = elements.getValues();
 
-			addedElement = new CloudDashElement(this, appInstances.getApplication().getName(), modelStore);
+			addedElement = elementFactory.create(appInstances.getApplication().getName());
 
 			updated.add(addedElement);
 
@@ -245,8 +256,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			// should be updated first before creating elements
 			// as elements are handles to state in the cache
 			for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
-				BootDashElement addedElement = new CloudDashElement(this, entry.getKey().getApplication().getName(),
-						modelStore);
+				BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
 				updated.put(addedElement.getName(), addedElement);
 			}
 
@@ -313,60 +323,86 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	@Override
 	public void delete(Collection<BootDashElement> toRemove, UserInteractions ui) {
 
-		Set<BootDashElement> updated = new HashSet<BootDashElement>();
-
 		if (toRemove == null || toRemove.isEmpty()) {
 			return;
 		}
 
-		if (ui.confirmOperation("Deleting Applications",
-				"Are you sure that you want to delete the selected applications from this target? The applications will be permanently removed.")) {
-			synchronized (this) {
-
-				// Safe iterate via getValues(); a copy, instead of getValue()
-				List<BootDashElement> existing = elements.getValues();
-
-				Set<String> toRemoveNames = new HashSet<String>();
-
-				for (BootDashElement element : toRemove) {
-					if (element instanceof CloudDashElement) {
-						CloudDashElement cloudElement = (CloudDashElement) element;
-						try {
-							cloudElement.delete(ui);
-							toRemoveNames.add(element.getName());
-
-							// Be sure it is removed from the cache as well as
-							// elements
-							// are handles to the cache
-							getAppCache().remove(element.getName());
-						} catch (Exception e) {
-							// Allow deletion to continue
-							BootDashActivator.log(e);
-						}
-					}
-				}
-
-				// Add any existing ones that weren't replaced by the new ones
-				// Replace the existing one with a new one for the given Cloud
-				// Application
-				for (BootDashElement element : existing) {
-					if (!toRemoveNames.contains(element.getName())) {
-						updated.add(element);
-					}
-				}
-
+		for (BootDashElement element : toRemove) {
+			if (element instanceof CloudDashElement) {
 				try {
-					projectAppStore.storeProjectToAppMapping(updated);
+					delete((CloudDashElement) element, ui);
 				} catch (Exception e) {
-					ui.errorPopup("Error saving project to application mappings", e.getMessage());
+					BootDashActivator.log(e);
 				}
 			}
-			elements.replaceAll(updated);
 		}
+	}
+
+	/**
+	 * Remove one element at a time, which updates the model
+	 *
+	 * @param element
+	 * @return
+	 * @throws Exception
+	 */
+	protected void delete(final CloudDashElement cloudElement, final UserInteractions ui) throws Exception {
+
+		CloudApplicationOperation operation = new CloudApplicationOperation("Deleting: " + cloudElement.getName(), this,
+				cloudElement.getName()) {
+
+			@Override
+			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+				// Delete from CF first. Do it outside of synch block to avoid
+				// deadlock
+				getClient().deleteApplication(appName);
+				Set<BootDashElement> updatedElements = new HashSet<BootDashElement>();
+
+				synchronized (CloudFoundryBootDashModel.this) {
+					// Safe iterate via getValues(); a copy, instead of
+					// getValue()
+					List<BootDashElement> existing = elements.getValues();
+
+					// Be sure it is removed from the cache as well as
+					// elements
+					// are handles to the cache
+					getAppCache().remove(cloudElement.getName());
+
+					getElementConsoleManager().terminateConsole(cloudElement.getName());
+
+					// Add any existing ones that weren't replaced by the new
+					// ones
+					// Replace the existing one with a new one for the given
+					// Cloud
+					// Application
+					for (BootDashElement element : existing) {
+						if (!cloudElement.getName().equals(element.getName())) {
+							updatedElements.add(element);
+						}
+					}
+
+					try {
+						projectAppStore.storeProjectToAppMapping(updatedElements);
+					} catch (Exception e) {
+						ui.errorPopup("Error saving project to application mappings", e.getMessage());
+					}
+				}
+
+				// do this outside the synch block
+
+				elements.replaceAll(updatedElements);
+			}
+		};
+		getOperationsExecution(ui).runOpAsynch(operation);
+
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getName()+"("+getRunTarget().getName()+")";
+		return this.getClass().getName() + "(" + getRunTarget().getName() + ")";
+	}
+
+	@Override
+	public BootDashModelConsoleManager getElementConsoleManager() {
+		return this.consoleManager;
 	}
 }

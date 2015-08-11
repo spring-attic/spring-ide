@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
@@ -35,24 +34,26 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+		String appName = deploymentProperties.getAppName();
+
+		monitor.beginTask("Checking application: " + appName, 10);
 
 		IStatus status = deploymentProperties.validate();
+		monitor.worked(5);
+
 		if (!status.isOK()) {
 			throw new CoreException(status);
 		}
 
-		String appName = deploymentProperties.getAppName();
-
 		// See if the application already exists
-		subMonitor.setTaskName("Verifying that the application exists: " + appName);
-
-		subMonitor.worked(10);
+		logAndUpdateMonitor("Verifying that the application exists: " + appName, monitor);
 
 		CloudAppInstances appInstances = getCloudApplicationInstances();
 		if (appInstances == null) {
-			appInstances = createApplication(subMonitor);
+			appInstances = createApplication(monitor);
 		}
+
+		monitor.worked(5);
 
 		if (appInstances == null) {
 			throw BootDashActivator.asCoreException("Failed to create or resolve a Cloud application for : "
@@ -64,13 +65,16 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 		getAppUpdateListener().applicationCreated(appInstances);
 	}
 
-	protected CloudAppInstances createApplication(SubMonitor subMonitor) throws Exception {
-		try {
-			subMonitor.setTaskName("Creating application: " + deploymentProperties.getAppName());
+	protected CloudAppInstances createApplication(IProgressMonitor monitor) throws Exception {
 
+		monitor.beginTask("Creating application: " + deploymentProperties.getAppName(), 10);
+		try {
+
+			logAndUpdateMonitor("Creating application: " + deploymentProperties.getAppName(), monitor);
 			getClient().createApplication(deploymentProperties.getAppName(),
 					new Staging(null, deploymentProperties.getBuildpackUrl()), deploymentProperties.getMemory(),
 					deploymentProperties.getUrls(), deploymentProperties.getServices());
+			monitor.worked(5);
 
 		} catch (Exception e) {
 			// If app creation failed, check if the app was created anyway
@@ -83,9 +87,13 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 		}
 		// Fetch the created Cloud Application
 		try {
-			subMonitor.setTaskName(
-					"Verifying that the application was created successfully: " + deploymentProperties.getAppName());
-			return getCloudApplicationInstances();
+			logAndUpdateMonitor(
+					"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
+					monitor);
+			CloudAppInstances instances = getCloudApplicationInstances();
+			monitor.worked(5);
+
+			return instances;
 		} catch (Exception e) {
 			throw getApplicationException(e);
 		}

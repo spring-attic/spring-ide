@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
@@ -66,7 +67,7 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 						String key = path.getLastSegment().toPropString();
 						path = path.dropLast().append(YamlPathSegment.valueAt(key));
 					}
-					YamlAssistContext assistContext = YamlAssistContext.forPath(path, index, null, new TypeUtil(jp));
+					YamlAssistContext assistContext = YamlAssistContext.forPath(path, index, null, new TypeUtil(jp), RelaxedNameConfig.ALIASSED);
 					if (assistContext!=null) {
 						return assistContext.getHoverInfo();
 					}

@@ -196,7 +196,7 @@ public class PropertyNavigator {
 			}
 			String key = StringUtil.camelCaseToHyphens(textBetween(keyStart, keyEnd));
 
-			List<TypedProperty> properties = typeUtil.getProperties(type, EnumCaseMode.ALIASED);
+			List<TypedProperty> properties = typeUtil.getProperties(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 			if (properties!=null) {
 				TypedProperty prop = null;
 				for (TypedProperty p : properties) {

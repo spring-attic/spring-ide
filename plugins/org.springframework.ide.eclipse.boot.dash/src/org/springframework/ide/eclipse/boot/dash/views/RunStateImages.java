@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
@@ -38,7 +41,34 @@ public class RunStateImages {
 
 	private Image[] createAnimation(String urlString) throws Exception {
 		ImageLoader loader = new ImageLoader();
-		InputStream input = this.getClass().getClassLoader().getResourceAsStream(urlString);
+		InputStream input = null;
+		ClassLoader cl = this.getClass().getClassLoader();
+
+
+		// For a png there might be animation frames to load (ImageLoader cannot
+		// pull out frames for an animated png)
+		// Given an input url of the form "foo.png" this will search
+		// for "foo_1.png", "foo_2.png" etc, until it can find no more frames
+		int dot = urlString.lastIndexOf('.');
+		String prefix = urlString.substring(0, dot);
+		String suffix = urlString.substring(dot+1);
+
+		List<Image> images = new ArrayList<Image>();
+		int count = 1;
+		while ((input = cl.getResourceAsStream(prefix+"_"+Integer.toString(count++)+"."+suffix))!=null) {
+			ImageData[] data = loader.load(input);
+			for (ImageData idata: data) {
+				images.add(new Image(Display.getDefault(),idata));
+			}
+		}
+		if (images.size()!=0) {
+			// Animation frames were found, return them
+			return images.toArray(new Image[images.size()]);
+		}
+
+		// Just load it in the regular way, this route does cope
+		// with animated gifs
+		input = cl.getResourceAsStream(urlString);
 		try {
 			ImageData[] data = loader.load(input);
 			Image[] imgs = new Image[data.length];

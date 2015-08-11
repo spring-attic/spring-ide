@@ -17,34 +17,53 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 	private final String group;
 	private final String artifact;
 	private final String version;
-	
+	private final String classifier;
+
+	public MavenCoordinates(String group, String artifact, String classifier, String version) {
+		this.group = group;
+		this.artifact = artifact;
+		this.version = version;
+		this.classifier = classifier;
+	}
+
 	public MavenCoordinates(String group, String artifact, String version) {
 		this.group = group;
 		this.artifact = artifact;
 		this.version = version;
+		this.classifier = null;
 	}
 
 	@Override
 	public String getGroupId() {
 		return group;
 	}
-	
+
 	@Override
 	public String getArtifactId() {
 		return artifact;
 	}
-	
+
+	@Override
+	public String getClassifier() {
+		return classifier;
+	}
+
 	@Override
 	public String getVersion() {
 		return version;
 	}
 
 	@Override
+	public String toString() {
+		return group + ":"+ artifact+":"+(classifier!=null?classifier+":":"")+version;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((artifact == null) ? 0 : artifact.hashCode());
+		result = prime * result + ((artifact == null) ? 0 : artifact.hashCode());
+		result = prime * result + ((classifier == null) ? 0 : classifier.hashCode());
 		result = prime * result + ((group == null) ? 0 : group.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		return result;
@@ -64,6 +83,11 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 				return false;
 		} else if (!artifact.equals(other.artifact))
 			return false;
+		if (classifier == null) {
+			if (other.classifier != null)
+				return false;
+		} else if (!classifier.equals(other.classifier))
+			return false;
 		if (group == null) {
 			if (other.group != null)
 				return false;
@@ -75,11 +99,6 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 		} else if (!version.equals(other.version))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return group + ":"+ artifact+":"+version;
 	}
 
 	@Override

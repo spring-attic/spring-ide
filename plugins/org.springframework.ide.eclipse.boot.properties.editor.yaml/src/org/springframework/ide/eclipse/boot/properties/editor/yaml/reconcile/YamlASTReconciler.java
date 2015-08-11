@@ -22,10 +22,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -92,6 +94,19 @@ public class YamlASTReconciler {
 			IndexNavigator subNav = nav.selectSubProperty(key);
 			PropertyInfo match = subNav.getExactMatch();
 			PropertyInfo extension = subNav.getExtensionCandidate();
+			if (match==null && extension==null) {
+				//nothing found for this key. Maybe user is using camelCase variation of the key?
+				String keyAlias = StringUtil.camelCaseToHyphens(key);
+				IndexNavigator subNavAlias = nav.selectSubProperty(keyAlias);
+				match = subNavAlias.getExactMatch();
+				extension = subNavAlias.getExtensionCandidate();
+				if (match!=null || extension!=null) {
+					//Got something for the alias, so use that instead.
+					//Note: do not swap for alias unless we actually found something.
+					// This gives more logical errors (in terms of user's key, not its canonical alias)
+					subNav = subNavAlias;
+				}
+			}
 			if (match!=null && extension!=null) {
 				//This is an odd situation, the current prefix lands on a propery
 				//but there are also other properties that have it as a prefix.
@@ -155,7 +170,7 @@ public class YamlASTReconciler {
 			}
 		} else {
 			// Neither atomic, map or sequence-like => bean-like
-			Map<String, Type> props = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED);
+			Map<String, Type> props = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 			if (props!=null) {
 				for (NodeTuple entry : mapping.getValue()) {
 					Node keyNode = entry.getKeyNode();

@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.core;
 /**
  * An instance of this interface represents the typical 'Maven coordinates' for an
  * artifact, consisting of a groupId, artifactId and version.
- * 
+ *
  * @author Kris De Volder
  */
 public interface IMavenCoordinates {
@@ -21,6 +21,8 @@ public interface IMavenCoordinates {
 	String getGroupId();
 
 	String getArtifactId();
+
+	String getClassifier();
 
 	String getVersion();
 

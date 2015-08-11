@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
  * A robust, coarse-grained parser that guesses the structure of a
@@ -447,7 +448,12 @@ public class YamlStructureParser {
 
 		public SKeyNode getChildWithKey(String key) throws Exception {
 			if (CollectionUtil.hasElements(children)) {
-				return keyMap().get(key);
+				SKeyNode child = keyMap().get(key);
+				if (child==null) {
+					String keyAlias = StringUtil.hyphensToCamelCase(key, false);
+					child = keyMap().get(keyAlias);
+				}
+				return child;
 			}
 			return null;
 		}

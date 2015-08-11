@@ -39,8 +39,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
-import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
@@ -125,9 +125,11 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public void validate() throws Exception {
-		// Fetching a client always validates the CF credentials
+	public void refresh() throws Exception {
+		// Fetching a new client always validates the CF credentials
 		cachedClient = createClient();
+		domains = null;
+		spaces = null;
 	}
 
 	@Override
@@ -157,18 +159,4 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 		return spaces;
 	}
-
-	public CloudSpace getCloudSpace(String org, String space) {
-		CloudSpace cloudSpace = null;
-		synchronized (this) {
-			for (CloudSpace cSpace : spaces) {
-				if (cSpace.getName().equals(space) && cSpace.getOrganization().getName().equals(org)) {
-					cloudSpace = cSpace;
-					break;
-				}
-			}
-		}
-		return cloudSpace;
-	}
-
 }

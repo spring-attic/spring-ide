@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ALIASED;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.LOWER_CASE;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode.ORIGNAL;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +24,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
@@ -40,6 +37,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
@@ -52,13 +50,14 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
  * Represents a context relative to which we can provide content assistance.
  */
 public abstract class YamlAssistContext {
 
-	private boolean preferLowerCasedEnums = true; //make user configurable?
+	protected final RelaxedNameConfig conf;
 
 // This may prove useful later but we don't need it for now
 	//	/**
@@ -77,10 +76,11 @@ public abstract class YamlAssistContext {
 	protected final YamlPath contextPath;
 	protected final TypeUtil typeUtil;
 
-	public YamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil) {
+	public YamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		this.documentSelector = documentSelector;
 		this.contextPath = contextPath;
 		this.typeUtil = typeUtil;
+		this.conf = conf;
 	}
 
 	/**
@@ -111,7 +111,6 @@ public abstract class YamlAssistContext {
 		}
 	};
 
-
 	/**
 	 * @return the type expected at this context, may return null if unknown.
 	 */
@@ -119,15 +118,15 @@ public abstract class YamlAssistContext {
 
 	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
 
-	public static YamlAssistContext global(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil);
+	public static YamlAssistContext global(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil, conf);
 	}
 
-	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
+	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		YamlPathSegment documentSelector = contextPath.getSegment(0);
 		if (documentSelector!=null) {
 			contextPath = contextPath.dropFirst(1);
-			YamlAssistContext context = YamlAssistContext.global(documentSelector.toIndex(), index, completionFactory, typeUtil);
+			YamlAssistContext context = YamlAssistContext.global(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
 			for (YamlPathSegment s : contextPath.getSegments()) {
 				if (context==null) return null;
 				context = context.navigate(s);
@@ -158,8 +157,8 @@ public abstract class YamlAssistContext {
 		private Type type;
 		private YamlAssistContext parent;
 
-		public TypeContext(YamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-			super(parent.documentSelector, contextPath, typeUtil);
+		public TypeContext(YamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+			super(parent.documentSelector, contextPath, typeUtil, conf);
 			this.parent = parent;
 			this.completionFactory = completionFactory;
 			this.type = type;
@@ -169,24 +168,26 @@ public abstract class YamlAssistContext {
 		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
 			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
 			EnumCaseMode enumCaseMode = enumCaseMode(query);
+			BeanPropertyNameMode beanMode = conf.getBeanMode();
 			List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query, enumCaseMode);
 			if (!valueCompletions.isEmpty()) {
 				return valueCompletions;
 			}
-			return getKeyCompletions(doc, offset, query, enumCaseMode);
+			return getKeyCompletions(doc, offset, query, enumCaseMode, beanMode);
 		}
 
 		private EnumCaseMode enumCaseMode(String query) {
 			if (query.isEmpty()) {
-				return preferLowerCasedEnums?LOWER_CASE:ORIGNAL;
+				return conf.getEnumMode();
 			} else {
-				return ALIASED; // will match candidates from both lower and original based on what user typed
+				return EnumCaseMode.ALIASED; // will match candidates from both lower and original based on what user typed
 			}
 		}
 
-		public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) throws Exception {
+		public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query,
+				EnumCaseMode enumCaseMode, BeanPropertyNameMode beanMode) throws Exception {
 			int queryOffset = offset - query.length();
-			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode);
+			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode, beanMode);
 			if (CollectionUtil.hasElements(properties)) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
 				SNode contextNode = getContextNode(doc);
@@ -271,7 +272,7 @@ public abstract class YamlAssistContext {
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
 				String key = s.toPropString();
-				Map<String, Type> subproperties = typeUtil.getPropertiesMap(type, ALIASED);
+				Map<String, Type> subproperties = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 				if (subproperties!=null) {
 					return contextWith(s, subproperties.get(key));
 				}
@@ -285,7 +286,7 @@ public abstract class YamlAssistContext {
 
 		private YamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
 			if (nextType!=null) {
-				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil);
+				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil, conf);
 			}
 			return null;
 		}
@@ -321,8 +322,8 @@ public abstract class YamlAssistContext {
 		PropertyCompletionFactory completionFactory;
 
 		public IndexContext(int documentSelector, YamlPath contextPath, IndexNavigator indexNav,
-				PropertyCompletionFactory completionFactory, TypeUtil typeUtil) {
-			super(documentSelector, contextPath, typeUtil);
+				PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+			super(documentSelector, contextPath, typeUtil, conf);
 			this.indexNav = indexNav;
 			this.completionFactory = completionFactory;
 		}
@@ -388,13 +389,24 @@ public abstract class YamlAssistContext {
 		@Override
 		protected YamlAssistContext navigate(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
-				IndexNavigator subIndex = indexNav.selectSubProperty(s.toPropString());
+				String key = s.toPropString();
+				IndexNavigator subIndex = indexNav.selectSubProperty(key);
+				if (subIndex.isEmpty()) {
+					//Nothing found for actual key... maybe its a 'camelCased' alias of real key?
+					String keyAlias = StringUtil.camelCaseToHyphens(key);
+					if (!keyAlias.equals(key)) { // no point checking alias is the same (likely key was not camelCased)
+						IndexNavigator aliasedSubIndex = indexNav.selectSubProperty(keyAlias);
+						if (!aliasedSubIndex.isEmpty()) {
+							subIndex = aliasedSubIndex;
+						}
+					}
+				}
 				if (subIndex.getExtensionCandidate()!=null) {
-					return new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil);
+					return new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
 				} else if (subIndex.getExactMatch()!=null) {
-					IndexContext asIndexContext = new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil);
+					IndexContext asIndexContext = new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
 					PropertyInfo prop = subIndex.getExactMatch();
-					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil);
+					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil, conf);
 				}
 			}
 			//Unsuported navigation => no context for assist

@@ -31,8 +31,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
-import org.springframework.ide.eclipse.boot.dash.model.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
@@ -117,10 +117,10 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 	public boolean canDeployAppsFrom() {
 		return true;
 	}
-
+	
 	@Override
-	public void validate() throws Exception {
-		// validate properties. Ignore for lattice for now.
+	public void refresh() throws Exception {
+		// Ignore for lattice for now
 	}
 
 	@Override

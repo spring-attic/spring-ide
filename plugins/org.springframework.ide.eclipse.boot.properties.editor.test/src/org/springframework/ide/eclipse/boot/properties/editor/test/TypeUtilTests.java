@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 
 /**
@@ -25,8 +26,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
  */
 public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 
-	private Type getPropertyType(Type type, String propName, EnumCaseMode mode) {
-		List<TypedProperty> props = engine.getTypeUtil().getProperties(type, mode);
+	private Type getPropertyType(Type type, String propName, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
+		List<TypedProperty> props = engine.getTypeUtil().getProperties(type, enumMode, beanMode);
 		for (TypedProperty prop : props) {
 			if (prop.getName().equals(propName)) {
 				return prop.getType();
@@ -59,6 +60,23 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 				getPropertyType(data, "mapped-children"));
 		assertType("java.util.Map<demo.Color,demo.ColorData>",
 				getPropertyType(data, "color-children"));
+
+		//Also gets aliased as camelCased names?
+		assertType("java.util.Map<demo.Color,demo.ColorData>",
+				getPropertyType(data, "colorChildren"));
+		assertType("java.util.Map<java.lang.String,demo.ColorData>",
+				getPropertyType(data, "mappedChildren"));
+
+		//Gets aliased names only if asked for it?
+		assertType("java.util.Map<java.lang.String,demo.ColorData>",
+				getPropertyType(data, "mappedChildren", EnumCaseMode.ORIGNAL, BeanPropertyNameMode.CAMEL_CASE));
+		assertType(null,
+				getPropertyType(data, "mappedChildren", EnumCaseMode.ORIGNAL, BeanPropertyNameMode.HYPHENATED));
+		assertType(null,
+				getPropertyType(data, "mapped-children", EnumCaseMode.ORIGNAL, BeanPropertyNameMode.CAMEL_CASE));
+		assertType("java.util.Map<java.lang.String,demo.ColorData>",
+				getPropertyType(data, "mapped-children", EnumCaseMode.ORIGNAL, BeanPropertyNameMode.HYPHENATED));
+
 	}
 
 	public void testGetEnumKeyedProperties() throws Exception {
@@ -77,7 +95,7 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 	}
 
 	private Type getPropertyType(Type type, String propName) {
-		return getPropertyType(type, propName, EnumCaseMode.ALIASED);
+		return getPropertyType(type, propName, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 	}
 
 	private void assertType(String expectedType, Type actualType) {

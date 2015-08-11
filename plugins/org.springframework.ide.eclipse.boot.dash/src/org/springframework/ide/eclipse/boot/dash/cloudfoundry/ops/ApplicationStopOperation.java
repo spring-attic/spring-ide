@@ -27,6 +27,7 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		getClient().stopApplication(element.getName());
+		model.getElementConsoleManager().terminateConsole(element.getName());
 	}
 
 }

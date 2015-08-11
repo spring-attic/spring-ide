@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
@@ -54,8 +53,12 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, monitor);
 
 		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
+
+		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
+
 		CloudApplication app = getCloudApplication();
+		monitor.worked(5);
 
 		if (app != null && !properties.shouldAutoReplace()
 				&& !ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, appName))) {
@@ -70,7 +73,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		if (existingElements != null) {
 			for (BootDashElement el : existingElements) {
 				if (!properties.getAppName().equals(el.getName()) && project.equals(el.getProject())) {
-					ui.errorPopup("Existing application already exists",
+					ui.errorPopup("Application already exists",
 							"An application [" + el.getName() + "] linked to project [" + project
 									.getName()
 							+ "] already exists. Only one application can be linked to the same project in the same space. Please delete the existing one and try deploying again.");
@@ -78,6 +81,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 				}
 			}
 		}
+		monitor.worked(5);
 
 		// Compose all the different operations that form a full deployment and
 		// add them in the order that they should be executed
@@ -93,7 +97,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		deploymentOperations.add(restartOp);
 
 		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(getName(), model, appName,
-				deploymentOperations);
+				deploymentOperations, true);
 		op.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 
 		model.getOperationsExecution(ui).runOpAsynch(op);
@@ -102,23 +106,22 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 	protected CloudApplicationDeploymentProperties getDeploymentProperties(IProject project, IProgressMonitor monitor)
 			throws Exception {
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor);
-		subMonitor.setTaskName("Resolving deployment properties for project: " + project.getName());
+		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
 
 		ManifestParser parser = new ManifestParser(project, model.getCloudTarget().getDomains(monitor));
 
 		List<CloudApplicationDeploymentProperties> appProperties = null;
 
 		if (parser.hasManifest()) {
-			appProperties = parser.load(subMonitor.newChild(100));
+			appProperties = parser.load(monitor);
 		}
-
+		monitor.worked(10);
 		IStatus status = Status.OK_STATUS;
 
 		// For now just support one application deployment from a manifest.yml
 		CloudApplicationDeploymentProperties deploymentProperties = null;
 		if (appProperties == null || appProperties.isEmpty()) {
-			status = BootDashActivator.createErrorStatus(null, "No deployment propreties found for " + project.getName()
+			status = BootDashActivator.createErrorStatus(null, "No deployment properties found for " + project.getName()
 					+ ". Only projects with valid manifest.yml are currently supported. Please add a manifest.yml to your project and try again.");
 		} else {
 			// Update the app name
@@ -127,6 +130,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 			deploymentProperties.setShoudAutoReplace(shouldAutoReplace);
 
 			status = deploymentProperties.validate();
+			monitor.worked(10);
 		}
 
 		if (!status.isOK()) {

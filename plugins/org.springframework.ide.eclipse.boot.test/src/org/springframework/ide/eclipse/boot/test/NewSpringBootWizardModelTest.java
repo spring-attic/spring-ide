@@ -88,7 +88,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioGroup group = model.getRadioGroups().getGroup("javaVersion");
 		assertNotNull(group);
 		assertGroupValues(group, "1.6", "1.7", "1.8");
-		assertEquals("1.7", group.getDefault().getValue());
+		assertEquals("1.8", group.getDefault().getValue());
 	}
 
 	public void testBuildTypeRadios() throws Exception {
@@ -171,6 +171,28 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		return choices;
 	}
 
+	public void testVersionRangesBuildSnaphotBug() throws Exception {
+		//See https://www.pivotaltracker.com/story/show/100963226
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		Dependency devtools = getDependencyById(model, "devtools");
+
+		RadioGroup bootVersion = model.getBootVersion();
+		RadioInfo newer1 = bootVersion.getRadio("1.3.0.M2");
+		RadioInfo newer2 = bootVersion.getRadio("1.3.0.BUILD-SNAPSHOT");
+		RadioInfo older = bootVersion.getRadio("1.2.6.BUILD-SNAPSHOT");
+
+		LiveExpression<Boolean> devtoolsEnabled  = getEnablement(model.dependencies, devtools);
+
+		bootVersion.setValue(older);
+		assertFalse(devtoolsEnabled.getValue());
+
+		bootVersion.setValue(newer1);
+		assertTrue(devtoolsEnabled.getValue());
+
+		bootVersion.setValue(newer2);
+		assertTrue(devtoolsEnabled.getValue());
+	}
+
 	public void testVersionRanges() throws Exception {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 		Dependency bitronix = getDependencyById(model, "jta-bitronix");
@@ -181,14 +203,15 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioGroup bootVersion = model.getBootVersion();
 		assertNotNull(bootVersion);
 		assertGroupValues(bootVersion,
-				"1.2.2.BUILD-SNAPSHOT",
-				"1.2.1.RELEASE",
-				"1.1.11.BUILD-SNAPSHOT",
-				"1.1.10.RELEASE"
+		      "1.3.0.M2",
+		      "1.3.0.BUILD-SNAPSHOT",
+		      "1.2.6.BUILD-SNAPSHOT",
+		      "1.2.5.RELEASE",
+		      "1.1.12.RELEASE"
 		);
 
-		RadioInfo older = bootVersion.getRadio("1.1.10.RELEASE");
-		RadioInfo newer = bootVersion.getRadio("1.2.1.RELEASE");
+		RadioInfo older = bootVersion.getRadio("1.1.12.RELEASE");
+		RadioInfo newer = bootVersion.getRadio("1.2.5.RELEASE");
 
 		LiveExpression<Boolean> bitronixEnabled  = getEnablement(model.dependencies, bitronix);
 		LiveExpression<Boolean> thymeleafEnabled = getEnablement(model.dependencies, thymeleaf);

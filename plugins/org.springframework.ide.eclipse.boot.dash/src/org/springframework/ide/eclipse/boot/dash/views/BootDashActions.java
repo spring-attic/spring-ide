@@ -53,6 +53,8 @@ public class BootDashActions {
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
 	private DeleteApplicationsAction deleteApplicationsAction;
+	private RestartApplicationOnlyAction restartOnlyAction;
+
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ToggleFiltersAction toggleFiltersAction;
@@ -149,6 +151,7 @@ public class BootDashActions {
 		addTargetActions = createAddTargetActions();
 
 		deleteApplicationsAction = new DeleteApplicationsAction(elementsSelection, ui);
+		restartOnlyAction = new RestartApplicationOnlyAction(elementsSelection, ui);
 
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
@@ -247,6 +250,10 @@ public class BootDashActions {
 	 */
 	public IAction getDeleteApplicationsAction() {
 		return deleteApplicationsAction;
+	}
+
+	public IAction getRestartOnlyApplicationAction() {
+		return restartOnlyAction;
 	}
 
 	/**

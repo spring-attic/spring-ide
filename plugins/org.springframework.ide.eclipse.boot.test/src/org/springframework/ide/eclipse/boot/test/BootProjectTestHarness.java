@@ -1,0 +1,166 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.test;
+
+import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+/**
+ * @author Kris De Volder
+ */
+public class BootProjectTestHarness {
+
+	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 3*60*1000; // long, may download maven dependencies
+
+	private IWorkspace workspace;
+
+	public BootProjectTestHarness(IWorkspace workspace) {
+		this.workspace = workspace;
+	}
+
+	public interface WizardConfigurer {
+
+		void apply(NewSpringBootWizardModel wizard);
+
+		WizardConfigurer NULL = new WizardConfigurer(){
+			public void apply(NewSpringBootWizardModel wizard) {/*do nothing*/}
+		};
+	}
+
+	public static WizardConfigurer withStarters(final String... ids) {
+		if (ids.length>0) {
+			return new WizardConfigurer() {
+				public void apply(NewSpringBootWizardModel wizard) {
+					for (String id : ids) {
+						wizard.addDependency(id);
+					}
+				}
+			};
+		}
+		return WizardConfigurer.NULL;
+	}
+
+	/**
+	 * @return A wizard configurer that ensures the selected 'boot version' is at least
+	 * a given version of boot.
+	 */
+	public static WizardConfigurer bootVersionAtLeast(final String wantedVersion) throws Exception {
+		final VersionRange WANTED_RANGE = new VersionRange(wantedVersion);
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				RadioInfo selected = bootVersionRadio.getValue();
+				Version selectedVersion = getVersion(selected);
+				if (WANTED_RANGE.includes(selectedVersion)) {
+					//existing selection is fine
+				} else {
+					//try to select the latest available version and verify it meets the requirement
+					bootVersionRadio.setValue(selected =  getLatestVersion(bootVersionRadio));
+					selectedVersion = getVersion(selected);
+					Assert.isTrue(WANTED_RANGE.includes(selectedVersion));
+				}
+			}
+
+			private RadioInfo getLatestVersion(RadioGroup bootVersionRadio) {
+				RadioInfo[] infos = bootVersionRadio.getRadios();
+				Arrays.sort(infos, new Comparator<RadioInfo>() {
+					public int compare(RadioInfo o1, RadioInfo o2) {
+						Version v1 = getVersion(o1);
+						Version v2 = getVersion(o2);
+						return v2.compareTo(v1);
+					}
+				});
+				return infos[0];
+			}
+
+			private Version getVersion(RadioInfo info) {
+				String versionString = info.getValue();
+				Version v = new Version(versionString);
+				if ("BUILD-SNAPSHOT".equals(v.getQualifier())) {
+					// Caveat "M1" will be treated as 'later' than "BUILD-SNAPSHOT" so that is wrong.
+					return new Version(v.getMajor(), v.getMinor(), v.getMicro(), "SNAPSHOT"); //Comes after "MX" but before "RELEASE"
+				}
+				return v;
+			}
+		};
+	}
+
+
+	public IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
+		final Job job = new Job("Create boot project '"+projectName+"'") {
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel();
+					wizard.getProjectName().setValue(projectName);
+					wizard.getArtifactId().setValue(projectName);
+					//Note: unlike most of the rest of the wizard's behavior, the 'use default location'
+					//  checkbox and its effect is not part of the model but part of the GUI code (this is
+					//  wrong, really, but that's how it is, so we have to explictly set the project
+					//  location in the model.
+					wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
+					wizard.addDependency("web");
+					for (WizardConfigurer extraConf : extraConfs) {
+						extraConf.apply(wizard);
+					}
+					wizard.performFinish(new NullProgressMonitor());
+					return Status.OK_STATUS;
+				} catch (Throwable e) {
+					return ExceptionUtil.status(e);
+				}
+			}
+		};
+		job.setRule(workspace.getRuleFactory().buildRule());
+		job.schedule();
+
+		new ACondition() {
+			@Override
+			public boolean test() throws Exception {
+				assertOk(job.getResult());
+				StsTestUtil.assertNoErrors(getProject(projectName));
+				return true;
+			}
+
+		}.waitFor(BOOT_PROJECT_CREATION_TIMEOUT);
+		return getProject(projectName);
+	}
+
+	public IProject getProject(String projectName) {
+		return workspace.getRoot().getProject(projectName);
+	}
+
+	public static void assertOk(IStatus result) throws Exception {
+		if (!result.isOK()) {
+			throw ExceptionUtil.coreException(result);
+		}
+	}
+
+
+
+}

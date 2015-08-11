@@ -7,6 +7,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 		SpringBootProjectTests.class,
+		DevToolsStarterTests.class,
+
 		NewSpringBootWizardModelTest.class,
 		SpringBootValidationTest.class
 })
