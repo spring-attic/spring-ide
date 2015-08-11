@@ -29,6 +29,7 @@ public class ProjectPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Project:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		project = page.getWidgetFactory().createCLabel(composite, ""); //$NON-NLS-1$
 		project.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -42,7 +43,7 @@ public class ProjectPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (project != null && !project.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			project.setText(getLabels().getText(bde, BootDashColumn.PROJECT));
+			project.setText(getLabels().getStyledText(bde, BootDashColumn.PROJECT).getString());
 			project.setImage(getLabels().getImage(bde, BootDashColumn.PROJECT));
 		}
 	}

@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.AppOperationLogger;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
@@ -31,12 +30,13 @@ public class ApplicationRunningStateTracker {
 
 	private final String appName;
 
-	private final AppOperationLogger logger;
+	private final CloudFoundryBootDashModel model;
 
-	public ApplicationRunningStateTracker(String appName, CloudFoundryOperations client, AppOperationLogger logger) {
+	public ApplicationRunningStateTracker(String appName, CloudFoundryOperations client,
+			CloudFoundryBootDashModel model) {
 		this.client = client;
 		this.appName = appName;
-		this.logger = logger;
+		this.model = model;
 	}
 
 	public RunState startTracking(IProgressMonitor monitor) throws Exception, OperationCanceledException {
@@ -56,14 +56,17 @@ public class ApplicationRunningStateTracker {
 
 		int estimatedAttempts = (int) (TIMEOUT / (WAIT_TIME + roughEstimateFetchStatsms));
 		monitor.beginTask("Checking if the application is running", estimatedAttempts);
-		logger.logAndUpdateMonitor("Fetching application instances to verify if application is running. Please wait...",
-				LogType.LOCALSTDOUT, monitor);
-		while (runState != RunState.RUNNING && runState != RunState.FLAPPING
-				&& currentTime < totalTime) {
+		model.getElementConsoleManager().writeToConsole(appName,
+				"Verifying if application is running. Please wait...",
+				LogType.LOCALSTDOUT);
+
+		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && currentTime < totalTime) {
 			int timeLeft = (int) ((totalTime - currentTime) / 1000);
+
+			// Don't log this. Only update the monitor
 			monitor.setTaskName(
-					"Fetching application instances to verify if application is running. Time left: " + timeLeft + 's');
-			currentTime = System.currentTimeMillis();
+					"Verifying if application is running. Time left before timeout: "
+							+ timeLeft + 's');
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -77,17 +80,18 @@ public class ApplicationRunningStateTracker {
 			} catch (InterruptedException e) {
 
 			}
+			currentTime = System.currentTimeMillis();
 		}
 
 		if (runState != RunState.RUNNING) {
 			String warning = "Timed out waiting for application - " + appName
 					+ " to start. Please wait and manually refresh the target, or check if the application logs show any errors.";
-			logger.logAndUpdateMonitor(warning, LogType.LOCALSTDEROR, monitor);
+			model.getElementConsoleManager().writeToConsole(appName, warning, LogType.LOCALSTDERROR);
 			BootDashActivator.logWarning(warning);
 
 		} else {
-			logger.logAndUpdateMonitor("Application appears to have started - " + appName, LogType.LOCALSTDOUT,
-					monitor);
+			model.getElementConsoleManager().writeToConsole(appName, "Application appears to have started - " + appName,
+					LogType.LOCALSTDOUT);
 		}
 		return runState;
 	}

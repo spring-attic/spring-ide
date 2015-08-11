@@ -367,6 +367,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 					// are handles to the cache
 					getAppCache().remove(cloudElement.getName());
 
+					getElementConsoleManager().terminateConsole(cloudElement.getName());
+
 					// Add any existing ones that weren't replaced by the new
 					// ones
 					// Replace the existing one with a new one for the given

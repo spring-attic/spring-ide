@@ -25,7 +25,7 @@ public class LogType {
 	 *
 	 */
 	public static final LogType LOCALSTDOUT = new LogType(SWT.COLOR_DARK_BLUE);
-	public static final LogType LOCALSTDEROR = new LogType(SWT.COLOR_RED);
+	public static final LogType LOCALSTDERROR = new LogType(SWT.COLOR_RED);
 
 	public static final LogType[] LOGGREGATORTYPES = { CFSTDOUT, CFSTDERROR };
 

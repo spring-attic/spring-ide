@@ -20,7 +20,6 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagContentProposalProvider;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagsEditor;
@@ -35,13 +34,12 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 public class TagsPropertyControl extends AbstractBdePropertyControl {
 
 	private TagsEditor tags;
-	private Stylers stylers;
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
-		this.stylers = new Stylers(composite.getFont());
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Tags:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
-		tags = new TagsEditor(composite, stylers, new TagContentProposalProvider(BootDashActivator.getDefault().getModel()), UIUtils.CTRL_SPACE, UIUtils.TAG_CA_AUTO_ACTIVATION_CHARS);
+		tags = new TagsEditor(composite, getStylers(), new TagContentProposalProvider(BootDashActivator.getDefault().getModel()), UIUtils.CTRL_SPACE, UIUtils.TAG_CA_AUTO_ACTIVATION_CHARS);
 		tags.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		tags.addListener(new ICellEditorListener() {
 			@Override
@@ -58,7 +56,7 @@ public class TagsPropertyControl extends AbstractBdePropertyControl {
 			}
 			@Override
 			public void cancelEditor() {
-				tags.setValue(getLabels().getText(getBootDashElement(), BootDashColumn.TAGS));
+				tags.setValue(getLabels().getStyledText(getBootDashElement(), BootDashColumn.TAGS).getString());
 			}
 			@Override
 			public void editorValueChanged(boolean oldValidState, boolean newValidState) {
@@ -69,14 +67,8 @@ public class TagsPropertyControl extends AbstractBdePropertyControl {
 	@Override
 	public void refreshControl() {
 		if (tags != null && !tags.getControl().isDisposed()) {
-			tags.setValue(getLabels().getText(getBootDashElement(), BootDashColumn.TAGS));
+			tags.setValue(getLabels().getStyledText(getBootDashElement(), BootDashColumn.TAGS).getString());
 		}
-	}
-
-	@Override
-	public void dispose() {
-		stylers.dispose();
-		super.dispose();
 	}
 
 }

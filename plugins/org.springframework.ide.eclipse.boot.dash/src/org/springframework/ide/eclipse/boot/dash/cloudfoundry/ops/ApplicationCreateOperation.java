@@ -34,8 +34,9 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
+		String appName = deploymentProperties.getAppName();
+
 		monitor.beginTask("Checking application: " + appName, 10);
-		logAndUpdateMonitor("Validating deployment properties: " + appName, monitor);
 
 		IStatus status = deploymentProperties.validate();
 		monitor.worked(5);
@@ -44,15 +45,11 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			throw new CoreException(status);
 		}
 
-		String appName = deploymentProperties.getAppName();
-
 		// See if the application already exists
 		logAndUpdateMonitor("Verifying that the application exists: " + appName, monitor);
 
 		CloudAppInstances appInstances = getCloudApplicationInstances();
 		if (appInstances == null) {
-			logAndUpdateMonitor("Creating the application: " + appName, monitor);
-
 			appInstances = createApplication(monitor);
 		}
 

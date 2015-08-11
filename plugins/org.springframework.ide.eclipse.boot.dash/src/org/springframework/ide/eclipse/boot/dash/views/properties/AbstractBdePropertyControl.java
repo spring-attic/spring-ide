@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 
 /**
@@ -23,7 +26,8 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 public abstract class AbstractBdePropertyControl implements BootDashElementPropertyControl {
 
 	private BootDashElement bde = null;
-	private BootDashLabels bdeLabels = new BootDashLabels();
+	private Stylers stylers;
+	private BootDashLabels bdeLabels;
 
 	public void setInput(BootDashElement bde) {
 		if (bde != this.bde) {
@@ -42,6 +46,17 @@ public abstract class AbstractBdePropertyControl implements BootDashElementPrope
 	@Override
 	public void dispose() {
 		bdeLabels.dispose();
+		stylers.dispose();
+	}
+
+	@Override
+	public void createControl(Composite composite, TabbedPropertySheetPage page) {
+		stylers = new Stylers(composite.getFont());
+		bdeLabels = new BootDashLabels(stylers);
+	}
+
+	protected Stylers getStylers() {
+		return stylers;
 	}
 
 }

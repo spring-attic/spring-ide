@@ -14,6 +14,7 @@ import java.io.StringWriter;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.StreamingLogToken;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -43,17 +44,25 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	}
 
 	@Override
-	public void writeToConsole(BootDashElement element, String message, LogType type) throws Exception {
-		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), element.getName());
-		console.writeApplicationLog(message, type);
-		consoleManager.showConsoleView(console);
+	protected void doWriteToConsole(BootDashElement element, String message, LogType type) throws Exception {
+		doWriteToConsole(element.getName(), message, type);
 	}
 
 	@Override
-	public void writeToConsole(String appName, String message, LogType type) throws Exception {
-		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), appName);
-		console.writeApplicationLog(message, type);
-		consoleManager.showConsoleView(console);
+	protected void doWriteToConsole(String appName, String message, LogType type) throws Exception {
+		ApplicationLogConsole console = getExisitingConsole(runTarget.getTargetProperties(), appName);
+		if (console != null) {
+			console.writeApplicationLog(message, type);
+			consoleManager.showConsoleView(console);
+		}
+	}
+
+	public synchronized void resetConsole(String appName) {
+		ApplicationLogConsole console = getExisitingConsole(runTarget.getTargetProperties(), appName);
+		if (console != null) {
+			console.clearConsole();
+			console.setLoggregatorToken(null);
+		}
 	}
 
 	/**
@@ -80,7 +89,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		return null;
 	}
 
-	public void stopConsole(String appName) throws Exception {
+	public synchronized void terminateConsole(String appName) throws Exception {
 		ApplicationLogConsole console = getExisitingConsole(runTarget.getTargetProperties(), appName);
 		if (console != null) {
 			console.close();
@@ -119,8 +128,19 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 
 		if (appConsole.getLoggregatorToken() == null) {
 			CloudFoundryOperations client = runTarget.getClient();
-			StreamingLogToken token = client.streamLogs(appName, appConsole);
-			appConsole.setLoggregatorToken(token);
+
+			// Must verify that the application exists before attaching
+			// loggregator listener
+			CloudApplication app = null;
+			try {
+				app = client.getApplication(appName);
+			} catch (Throwable e) {
+				// Ignore.
+			}
+			if (app != null) {
+				StreamingLogToken token = client.streamLogs(appName, appConsole);
+				appConsole.setLoggregatorToken(token);
+			}
 		}
 
 		return appConsole;
@@ -133,32 +153,35 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	public static String getConsoleDisplayName(TargetProperties targetProperties, String appName) {
 		StringWriter writer = new StringWriter();
 		writer.append(appName);
-		writer.append(' ');
-		writer.append('[');
-		writer.append(targetProperties.get(CloudFoundryTargetProperties.ORG_PROP));
-		writer.append(',');
-		writer.append(' ');
-		writer.append(targetProperties.get(CloudFoundryTargetProperties.SPACE_PROP));
-		writer.append(']');
+
+		String orgName = null;
+		String spaceName = null;
+
+		if (targetProperties instanceof CloudFoundryTargetProperties) {
+			orgName = ((CloudFoundryTargetProperties) targetProperties).getOrganizationName();
+			spaceName = ((CloudFoundryTargetProperties) targetProperties).getSpaceName();
+		}
+		if (orgName != null && spaceName != null) {
+			writer.append(' ');
+			writer.append('[');
+			writer.append(orgName);
+			writer.append(',');
+			writer.append(' ');
+			writer.append(spaceName);
+			writer.append(']');
+		}
 
 		return writer.toString();
 	}
 
 	@Override
 	public void showConsole(BootDashElement element) throws Exception {
-		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), element.getName());
+		showConsole(element.getName());
+	}
 
-		if (console != null) {
-			// TODO: enable when required.fetch recent.
-
-			// CloudFoundryOperations client = runTarget.getClient();
-//
-//			if (console.wasLoggregatorContentCleared()) {
-//				List<ApplicationLog> recentLogs = client.getRecentLogs(element.getName());
-//				console.writeLoggregatorLogs(recentLogs);
-//			}
-
-			consoleManager.showConsoleView(console);
-		}
+	@Override
+	public void showConsole(String appName) throws Exception {
+		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), appName);
+		consoleManager.showConsoleView(console);
 	}
 }
