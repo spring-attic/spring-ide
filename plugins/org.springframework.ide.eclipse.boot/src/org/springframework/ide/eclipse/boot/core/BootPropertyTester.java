@@ -97,7 +97,6 @@ public class BootPropertyTester extends PropertyTester {
 		return false;
 	}
 
-
 	/**
 	 * Attempt to determine spring-boot version from project's classpath, in a form that
 	 * is easy to compare to version ranges. May return null if the version couldn't be

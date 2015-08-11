@@ -69,13 +69,10 @@
             adaptable="true"
             id="org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools">
          <visibility>
-         	<!-- TODO: only allow this for spring boot projects? -->
-         	<and>
-		        <objectState
-		              name="nature"
-		              value="org.springframework.ide.eclipse.core.springnature">
-		        </objectState>
-         	</and>
+	        <objectState
+	              name="nature"
+	              value="org.springframework.ide.eclipse.core.springnature">
+	        </objectState>
          	<!--
 	        		           	   <adapt type="org.eclipse.core.resources.IResource">
 		           	      <test property="org.eclipse.core.resources.name"
@@ -177,4 +174,28 @@
 		class="org.springframework.ide.eclipse.boot.quickfix.BootMarkerResolutionGenerator">
 	</markerResolutionGenerator>
 </extension>
+
+<extension point="org.eclipse.ui.decorators">
+<decorator
+    id="org.springframework.ide.eclipse.boot.ui.DevtoolsProjectDecorator"
+    label="Spring Boot Project Decorator"
+    lightweight="true"
+    state="true"
+    class= "org.springframework.ide.eclipse.boot.ui.BootProjectDecorator">
+    <description>
+      Decorates projects to show when a project's classpath contains Spring Boot Elements. 
+    </description>
+    <enablement>
+       <or>
+	       <objectClass
+	             name="org.eclipse.jdt.core.IJavaProject">
+	       </objectClass>
+	       <objectClass
+	             name="org.eclipse.core.resources.IProject">
+	       </objectClass>
+	   </or>
+    </enablement>
+  </decorator>
+</extension>
+
 </plugin>
