@@ -39,7 +39,22 @@ public class AppOperationLogger {
 				String dateVal = DateFormat.getDateTimeInstance().format(date);
 
 				message = "[" + dateVal + " - Boot Dashboard] - " + message;
-				model.getElementConsoleManager().writeToConsole(appName, message, LogType.LOCALSTDOUT);
+				model.getElementConsoleManager().writeToConsole(appName, message, type);
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
+	public void logError(String message) {
+
+		try {
+			if (model.getElementConsoleManager() != null) {
+				Date date = new Date(System.currentTimeMillis());
+				String dateVal = DateFormat.getDateTimeInstance().format(date);
+
+				message = "[" + dateVal + " - Boot Dashboard] - " + message;
+				model.getElementConsoleManager().writeToConsole(appName, message, LogType.LOCALSTDERROR);
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);

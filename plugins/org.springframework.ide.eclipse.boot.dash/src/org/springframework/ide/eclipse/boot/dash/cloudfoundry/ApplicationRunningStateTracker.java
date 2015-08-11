@@ -61,6 +61,8 @@ public class ApplicationRunningStateTracker {
 		while (runState != RunState.RUNNING && runState != RunState.FLAPPING
 				&& currentTime < totalTime) {
 			int timeLeft = (int) ((totalTime - currentTime) / 1000);
+
+			// Don't log this. Only update the monitor
 			monitor.setTaskName(
 					"Fetching application instances to verify if application is running. Time left: " + timeLeft + 's');
 			currentTime = System.currentTimeMillis();
@@ -82,7 +84,7 @@ public class ApplicationRunningStateTracker {
 		if (runState != RunState.RUNNING) {
 			String warning = "Timed out waiting for application - " + appName
 					+ " to start. Please wait and manually refresh the target, or check if the application logs show any errors.";
-			logger.logAndUpdateMonitor(warning, LogType.LOCALSTDEROR, monitor);
+			logger.logError(warning);
 			BootDashActivator.logWarning(warning);
 
 		} else {
