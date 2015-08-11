@@ -73,16 +73,6 @@
 	              name="nature"
 	              value="org.springframework.ide.eclipse.core.springnature">
 	        </objectState>
-         	<!--
-	        		           	   <adapt type="org.eclipse.core.resources.IResource">
-		           	      <test property="org.eclipse.core.resources.name"
-		           	            value="pom.xml"/>
-			       	      <test
-			                    forcePluginActivation="true"
-			                    property="org.springsource.ide.eclipse.boot.isBootResource"
-			                    value="true"/>
-		           	   </adapt>
-	        -->
          </visibility>
          <action
                    class="org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools"
