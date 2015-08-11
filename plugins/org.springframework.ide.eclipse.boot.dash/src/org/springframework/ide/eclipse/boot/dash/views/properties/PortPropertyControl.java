@@ -29,6 +29,7 @@ public class PortPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Port:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		port = page.getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
 		port.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -38,7 +39,7 @@ public class PortPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (port != null && !port.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			port.setText(getLabels().getText(bde, BootDashColumn.LIVE_PORT));
+			port.setText(getLabels().getStyledText(bde, BootDashColumn.LIVE_PORT).getString());
 		}
 	}
 

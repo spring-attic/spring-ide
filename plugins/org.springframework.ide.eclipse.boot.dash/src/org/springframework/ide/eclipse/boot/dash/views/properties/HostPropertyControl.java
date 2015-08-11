@@ -29,6 +29,7 @@ public class HostPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Host:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		host = page.getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
 		host.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -38,7 +39,7 @@ public class HostPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (host != null && !host.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			host.setText(getLabels().getText(bde, BootDashColumn.HOST));
+			host.setText(getLabels().getStyledText(bde, BootDashColumn.HOST).getString());
 		}
 	}
 

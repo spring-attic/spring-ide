@@ -29,6 +29,7 @@ public class InstancesPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Instances:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		instances = page.getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
 		instances.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -38,7 +39,7 @@ public class InstancesPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (instances != null && !instances.isDisposed()) {
 			BootDashElement element = getBootDashElement();
-			instances.setText(getLabels().getText(element, BootDashColumn.INSTANCES));
+			instances.setText(getLabels().getStyledText(element, BootDashColumn.INSTANCES).getString());
 		}
 	}
 
