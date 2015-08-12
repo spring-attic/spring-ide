@@ -62,7 +62,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	@Override
 	public boolean isPageComplete() {
-		return targetProperties.getSpace() != null;
+		return targetProperties.getSpaceName() != null && targetProperties.getOrganizationName() != null;
 	}
 
 	@Override
@@ -185,8 +185,8 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected RunTarget getExistingRunTarget(CloudSpace space) {
 		if (space != null) {
-			String targetId = CloudFoundryTargetProperties.getId(targetProperties.getUsername(), targetProperties.getUrl(),
-					space.getOrganization().getName(), space.getName());
+			String targetId = CloudFoundryTargetProperties.getId(targetProperties.getUsername(),
+					targetProperties.getUrl(), space.getOrganization().getName(), space.getName());
 			for (RunTarget target : targets.getValues()) {
 				if (targetId.equals(target.getId())) {
 					return target;
@@ -198,7 +198,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	private void refreshWizardUI() {
 		if (getWizard() != null && getWizard().getContainer() != null) {
-			setPageComplete(targetProperties.getSpace() != null);
+			setPageComplete(targetProperties.getSpaceName() != null && targetProperties.getOrganizationName() != null);
 
 			getWizard().getContainer().updateButtons();
 		}
