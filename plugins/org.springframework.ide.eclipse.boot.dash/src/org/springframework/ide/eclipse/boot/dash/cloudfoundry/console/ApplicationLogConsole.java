@@ -33,7 +33,7 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 	private StreamingLogToken loggregatorToken;
 
 	public ApplicationLogConsole(String name, String type) {
-		super(name, type, null, true);
+		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
 	}
 
 	public synchronized void writeLoggregatorLogs(List<ApplicationLog> logs) {

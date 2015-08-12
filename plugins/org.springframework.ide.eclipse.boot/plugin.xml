@@ -62,6 +62,28 @@
       </menuContribution>
    </extension>
  
+       <extension
+         point="org.eclipse.ui.popupMenus">
+   	      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools">
+         <visibility>
+	        <objectState
+	              name="nature"
+	              value="org.springframework.ide.eclipse.core.springnature">
+	        </objectState>
+         </visibility>
+         <action
+                   class="org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools"
+                   enablesFor="1"
+                   id="org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools"
+                   label="Add/Remove Boot Devtools"
+                   menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
+         </action>
+      </objectContribution>
+   	</extension>
+ 
   
 <extension
        point="org.eclipse.core.expressions.propertyTesters">
@@ -142,4 +164,28 @@
 		class="org.springframework.ide.eclipse.boot.quickfix.BootMarkerResolutionGenerator">
 	</markerResolutionGenerator>
 </extension>
+
+<extension point="org.eclipse.ui.decorators">
+<decorator
+    id="org.springframework.ide.eclipse.boot.ui.DevtoolsProjectDecorator"
+    label="Spring Boot Project Decorator"
+    lightweight="true"
+    state="true"
+    class= "org.springframework.ide.eclipse.boot.ui.BootProjectDecorator">
+    <description>
+      Decorates projects to show when a project's classpath contains Spring Boot Elements. 
+    </description>
+    <enablement>
+       <or>
+	       <objectClass
+	             name="org.eclipse.jdt.core.IJavaProject">
+	       </objectClass>
+	       <objectClass
+	             name="org.eclipse.core.resources.IProject">
+	       </objectClass>
+	   </or>
+    </enablement>
+  </decorator>
+</extension>
+
 </plugin>

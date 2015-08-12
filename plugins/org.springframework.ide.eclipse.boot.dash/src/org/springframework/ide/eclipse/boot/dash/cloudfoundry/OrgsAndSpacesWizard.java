@@ -25,7 +25,8 @@ public class OrgsAndSpacesWizard extends Wizard {
 
 	private CloudFoundryTargetWizardModel properties;
 
-	public OrgsAndSpacesWizard(LiveSet<RunTarget> targets, OrgsAndSpaces spaces, CloudFoundryTargetWizardModel targetProperties) {
+	public OrgsAndSpacesWizard(LiveSet<RunTarget> targets, OrgsAndSpaces spaces,
+			CloudFoundryTargetWizardModel targetProperties) {
 		cloudSpacePage = new OrgsAndSpacesWizardPage(targets, spaces, targetProperties);
 		this.properties = targetProperties;
 		setWindowTitle("Select space for: " + targetProperties.getUrl());
@@ -40,6 +41,6 @@ public class OrgsAndSpacesWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		return properties.getSpace() != null;
+		return properties.getSpaceName() != null && properties.getOrganizationName() != null;
 	}
 }

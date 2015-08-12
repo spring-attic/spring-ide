@@ -33,6 +33,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void createControl(final Composite composite, TabbedPropertySheetPage page) {
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Path:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		defaultPath = page.getWidgetFactory().createText(composite, ""); //$NON-NLS-1$
 		defaultPath.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -49,7 +50,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.character == '\u001b') { // Escape character
-					defaultPath.setText(getLabels().getText(getBootDashElement(), BootDashColumn.DEFAULT_PATH));
+					defaultPath.setText(getLabels().getStyledText(getBootDashElement(), BootDashColumn.DEFAULT_PATH).getString());
 					composite.getDisplay().getActiveShell().forceFocus();
 				} else if (e.character == '\r') { // Return key
 					composite.getDisplay().getActiveShell().forceFocus();
@@ -63,7 +64,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (defaultPath != null && !defaultPath.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			defaultPath.setText(getLabels().getText(bde, BootDashColumn.DEFAULT_PATH));
+			defaultPath.setText(getLabels().getStyledText(bde, BootDashColumn.DEFAULT_PATH).getString());
 		}
 	}
 

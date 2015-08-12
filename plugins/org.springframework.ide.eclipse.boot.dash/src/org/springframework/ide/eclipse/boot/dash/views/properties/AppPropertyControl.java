@@ -29,6 +29,7 @@ public class AppPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
+		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Application:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		app = page.getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
 		app.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -38,7 +39,7 @@ public class AppPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (app != null && !app.isDisposed()) {
 			BootDashElement element = getBootDashElement();
-			app.setText(getLabels().getText(element, BootDashColumn.APP));
+			app.setText(getLabels().getStyledText(element, BootDashColumn.APP).getString());
 		}
 	}
 

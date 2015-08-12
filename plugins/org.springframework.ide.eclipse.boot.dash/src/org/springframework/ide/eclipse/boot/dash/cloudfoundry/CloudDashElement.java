@@ -16,6 +16,7 @@ import java.util.List;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -41,7 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
  * Cloud application state should always be resolved from external sources
  *
  */
-public class CloudDashElement extends WrappingBootDashElement<String> {
+public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> {
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -50,10 +51,10 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	private PropertyStoreApi persistentProperties;
 
 	public CloudDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
-		super(model, appName);
+		super(model, new CloudElementIdentity(appName, model.getRunTarget()));
 		this.cloudTarget = model.getCloudTarget();
 		this.cloudModel = model;
-		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(delegate, modelStore);
+		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
@@ -108,7 +109,7 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public String getName() {
-		return delegate;
+		return delegate.getAppName();
 	}
 
 	@Override
@@ -189,5 +190,53 @@ public class CloudDashElement extends WrappingBootDashElement<String> {
 	@Override
 	public PropertyStoreApi getPersistentProperties() {
 		return persistentProperties;
+	}
+
+	static class CloudElementIdentity {
+
+		private final String appName;
+		private final RunTarget runTarget;
+
+		CloudElementIdentity(String appName, RunTarget runTarget) {
+			this.appName = appName;
+			this.runTarget = runTarget;
+		}
+
+		public String getAppName() {
+			return this.appName;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((appName == null) ? 0 : appName.hashCode());
+			result = prime * result + ((runTarget == null) ? 0 : runTarget.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			CloudElementIdentity other = (CloudElementIdentity) obj;
+			if (appName == null) {
+				if (other.appName != null)
+					return false;
+			} else if (!appName.equals(other.appName))
+				return false;
+			if (runTarget == null) {
+				if (other.runTarget != null)
+					return false;
+			} else if (!runTarget.equals(other.runTarget))
+				return false;
+			return true;
+		}
+
+
 	}
 }
