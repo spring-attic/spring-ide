@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -180,6 +181,29 @@ public class BootDashLabels implements Disposable {
 		return new StyledString(UNKNOWN_LABEL);
 	}
 
+	/**
+	 * For a given column type return the styler to use for any [...] that are
+	 * added around it. Return null
+	 */
+	public Styler getPrefixSuffixStyler(BootDashColumn column) {
+		switch (column) {
+		case TAGS:
+			return stylers.tagBrackets();
+		case LIVE_PORT:
+			return stylers.darkGreen();
+		case INSTANCES:
+			return stylers.darkBlue();
+		case APP:
+		case PROJECT:
+//			return null;
+		case HOST:
+		case RUN_STATE_ICN:
+		case DEFAULT_PATH:
+		default:
+			return stylers.NULL;
+		}
+	}
+
 	public StyledString getStyledText(BootDashElement element, BootDashColumn column) {
 		//The big case below should set either one of 'label' or'styledLabel', depending
 		// on whether it is 'styling capable'.
@@ -222,10 +246,19 @@ public class BootDashLabels implements Disposable {
 					//Ignore RUN_STATE_ICN because its already represented in the label's icon.
 					if (col!=RUN_STATE_ICN) {
 						StyledString append = getStyledText(element, col);
-						if (hasText(styledLabel) && hasText(append)) {
-							styledLabel = styledLabel.append(":", stylers.darkGrey());
+						if (hasText(append)) {
+							Styler styler = getPrefixSuffixStyler(col);
+							if (!hasText(styledLabel)) {
+								// Nothing in the label so far, don't added brackets to first piece
+								styledLabel = styledLabel.append(append);
+							} else {
+								if (styler == null) {
+									styledLabel = styledLabel.append(" [").append(append).append("]");
+								} else {
+									styledLabel = styledLabel.append(" [",styler).append(append).append("]",styler);
+								}
+							}
 						}
-						styledLabel = styledLabel.append(append);
 					}
 				}
 				break;
@@ -237,8 +270,16 @@ public class BootDashLabels implements Disposable {
 				label = element.getRunState().toString();
 				break;
 			case LIVE_PORT:
-				int port = element.getLivePort();
-				label = port < 0 ? UNKNOWN_LABEL : String.valueOf(port);
+				RunState runState = element.getRunState();
+				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
+					int port = element.getLivePort();
+					String textLabel = port < 0 ? "unknown port" : String.valueOf(port);
+					if (stylers == null) {
+						label = textLabel;
+					} else {
+						styledLabel = new StyledString(textLabel,stylers.darkGreen());
+					}
+				}
 				break;
 			case DEFAULT_PATH:
 				String path = element.getDefaultRequestMappingPath();
@@ -247,7 +288,11 @@ public class BootDashLabels implements Disposable {
 			case INSTANCES:
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
-				label = actual + "/" + desired;
+				if (stylers == null) {
+					label = actual + "/" + desired;
+				} else {
+					styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+				}
 				break;
 			default:
 				label = UNKNOWN_LABEL;
@@ -258,7 +303,7 @@ public class BootDashLabels implements Disposable {
 		} else if (label!=null) {
 			return new StyledString(label);
 		}
-		return new StyledString(UNKNOWN_LABEL);
+		return new StyledString("");
 	}
 
 	/**
