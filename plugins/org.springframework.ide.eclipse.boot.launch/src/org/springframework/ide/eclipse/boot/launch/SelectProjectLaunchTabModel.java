@@ -17,7 +17,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
 public class SelectProjectLaunchTabModel extends LaunchTabSelectionModel<IProject> {
 
@@ -27,8 +29,8 @@ public class SelectProjectLaunchTabModel extends LaunchTabSelectionModel<IProjec
 		return new SelectProjectLaunchTabModel(project, validator);
 	}
 
-	protected SelectProjectLaunchTabModel(LiveVariable<IProject> p,
-			ExistingBootProjectSelectionValidator pv) {
+	public SelectProjectLaunchTabModel(LiveVariable<IProject> p,
+			LiveExpression<ValidationResult> pv) {
 		super(p, pv);
 	}
 

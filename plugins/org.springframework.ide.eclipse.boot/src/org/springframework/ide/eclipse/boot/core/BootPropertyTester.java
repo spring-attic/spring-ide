@@ -52,6 +52,36 @@ public class BootPropertyTester extends PropertyTester {
 		return false;
 	}
 
+	public static boolean isDevtoolsJar(IClasspathEntry e) {
+		if (e.getEntryKind()==IClasspathEntry.CPE_LIBRARY) {
+			IPath path = e.getPath();
+			String name = path.lastSegment();
+			return name.endsWith(".jar") && name.startsWith("spring-boot-devtools");
+		}
+		return false;
+	}
+
+
+	public static boolean hasDevtools(IProject p) {
+		try {
+			if (p!=null) {
+				IJavaProject jp = JavaCore.create(p);
+				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+				if (classpath!=null) {
+					for (IClasspathEntry e : classpath) {
+						if (BootPropertyTester.isDevtoolsJar(e)) {
+							return true;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return false;
+	}
+
+
 	public static boolean isBootProject(IProject project) {
 		if (project==null || ! project.isAccessible()) {
 			return false;

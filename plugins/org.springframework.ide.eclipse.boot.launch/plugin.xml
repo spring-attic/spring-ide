@@ -60,6 +60,14 @@
           sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
           sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
     </launchConfigurationType>
+    <launchConfigurationType
+          id="org.springframework.ide.eclipse.boot.devtools.client.launch"
+          name="Spring Boot Devtools Client"
+          delegate="org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate"
+          modes="run,debug"
+          sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+          sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
+    </launchConfigurationType>
   </extension>
  
  <extension
@@ -105,6 +113,11 @@
         configTypeID="org.springframework.ide.eclipse.boot.launch"
         id="org.springframework.ide.eclipse.boot.launch.image">
     </launchConfigurationTypeImage>
+    <launchConfigurationTypeImage
+        icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-devtools-icon.png"
+        configTypeID="org.springframework.ide.eclipse.boot.devtools.client.launch"
+        id="org.springframework.ide.eclipse.boot.launch.image">
+    </launchConfigurationTypeImage>
 </extension>
  
 <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
@@ -112,6 +125,11 @@
         type="org.springframework.ide.eclipse.boot.launch"
         class="org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationTabGroup"
         id="org.springframework.ide.eclipse.boot.launch.LaunchConfigurationTabGroup">
+    </launchConfigurationTabGroup>
+    <launchConfigurationTabGroup
+        type="org.springframework.ide.eclipse.boot.devtools.client.launch"
+        class="org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationTabGroup"
+        id="org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationTabGroup">
     </launchConfigurationTabGroup>
 </extension>
  

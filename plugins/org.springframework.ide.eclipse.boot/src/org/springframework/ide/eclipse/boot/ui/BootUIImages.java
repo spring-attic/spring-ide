@@ -22,11 +22,12 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
  * @author Kris De Volder
  */
 public class BootUIImages {
-	
+
 	public static final String BOOT_ICON = "icons/boot-icon.png";
-	
+	public static final String BOOT_DEVTOOLS_ICON = "icons/boot-devtools-icon.png";
+
 	private static ImageRegistry images;
-	
+
 	public static Image getImage(String key) {
 		return getRegistry().get(key);
 	}
@@ -35,13 +36,14 @@ public class BootUIImages {
 		if (images==null) {
 			images = new ImageRegistry();
 			register(BOOT_ICON);
+			register(BOOT_DEVTOOLS_ICON);
 		}
 		return images;
 	}
 
 	private static void register(String key) {
 		try {
-			images.put(BOOT_ICON, descriptor(BOOT_ICON));
+			images.put(key, descriptor(key));
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
