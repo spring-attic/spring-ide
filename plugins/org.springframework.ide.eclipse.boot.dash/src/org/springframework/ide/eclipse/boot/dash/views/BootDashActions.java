@@ -238,7 +238,6 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
 	public IAction getRefreshRunTargetAction() {
@@ -257,7 +256,6 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
 	public IAction getUpdatePasswordAction() {
@@ -265,11 +263,14 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return show properties view action instance
 	 */
 	public IAction getShowPropertiesViewAction() {
 		return showPropertiesViewAction;
+	}
+
+	public IAction getExposeAppAction() {
+		return exposeAppAction;
 	}
 
 	public void dispose() {
@@ -298,6 +299,11 @@ public class BootDashActions {
 			toggleFiltersAction.dispose();
 			toggleFiltersAction = null;
 		}
+
+		if (exposeAppAction != null) {
+			exposeAppAction.dispose();
+			exposeAppAction = null;
+		}
 	}
 
 	public IAction getToggleFiltersAction() {
@@ -320,10 +326,6 @@ public class BootDashActions {
 		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
 				+ "be used the next time you (re)launch '"+target.getName());
 		return action;
-	}
-
-	public IAction getExposeAppAction() {
-		return exposeAppAction;
 	}
 
 }

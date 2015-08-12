@@ -33,7 +33,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.equinox.security,
  org.eclipse.ui.views.properties.tabbed,
  org.eclipse.wst.server.core,
- org.springframework.ide.eclipse.ui
+ org.springframework.ide.eclipse.ui,
+ org.apache.httpcomponents.httpclient;bundle-version="4.3.6"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

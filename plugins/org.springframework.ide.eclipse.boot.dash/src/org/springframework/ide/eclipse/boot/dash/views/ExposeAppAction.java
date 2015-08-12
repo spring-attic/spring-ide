@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 
 /**
  * @author Martin Lippert
@@ -67,15 +68,8 @@ public class ExposeAppAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void run() {
-		ProcessBuilder processBuilder = new ProcessBuilder("/Users/mlippert/Desktop/ngrok", "start", "--none");
-
-		try {
-			process = processBuilder.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		System.out.println("Expose...");
+		NGROKClient client = new NGROKClient();
+		client.createTunnel("test", "http", "8080");
 	}
 
 	@Override
