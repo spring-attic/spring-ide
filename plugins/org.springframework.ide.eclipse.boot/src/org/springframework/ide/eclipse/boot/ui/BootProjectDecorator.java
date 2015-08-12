@@ -66,9 +66,9 @@ public class BootProjectDecorator implements ILightweightLabelDecorator {
 //		decoration.setForegroundColor(Display.getDefault().getSystemColor(SWT.COLOR_MAGENTA));
 		if (project!=null) {
 			if (BootPropertyTester.isBootProject(project)) {
-				decoration.addSuffix("[boot]");
+				decoration.addSuffix(" [boot]");
 				if (hasDevtools(project)) {
-					decoration.addSuffix("[devtools]");
+					decoration.addSuffix(" [devtools]");
 				}
 			}
 		}
