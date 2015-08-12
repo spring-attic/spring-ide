@@ -103,7 +103,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 				subMonitor.worked(1);
 			}
 
-			if (properties.getInstances() > 1 && properties.getInstances() != app.getInstances()) {
+			if (properties.getInstances() > 0 && properties.getInstances() != app.getInstances()) {
 				subMonitor.setTaskName("Updating " + appName + " instances.");
 
 				getClient().updateApplicationInstances(appName, properties.getInstances());

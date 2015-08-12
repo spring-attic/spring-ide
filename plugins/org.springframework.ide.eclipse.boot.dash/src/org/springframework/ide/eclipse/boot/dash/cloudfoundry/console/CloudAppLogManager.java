@@ -80,7 +80,9 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 					String id = (String) ((MessageConsole) console).getAttribute(APP_CONSOLE_ID);
 					String idToCheck = getConsoleId(targetProperties, appName);
 					if (idToCheck.equals(id)) {
-						return (ApplicationLogConsole) console;
+						ApplicationLogConsole appConsole = (ApplicationLogConsole) console;
+						checkIfLoggregatorStreamingIsPresent(appConsole, appName);
+						return appConsole;
 					}
 				}
 			}
@@ -124,26 +126,38 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 			appConsole.setAttribute(APP_CONSOLE_ID, getConsoleId(targetProperties, appName));
 
 			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { appConsole });
-		}
-
-		if (appConsole.getLoggregatorToken() == null) {
-			CloudFoundryOperations client = runTarget.getClient();
-
-			// Must verify that the application exists before attaching
-			// loggregator listener
-			CloudApplication app = null;
-			try {
-				app = client.getApplication(appName);
-			} catch (Throwable e) {
-				// Ignore.
-			}
-			if (app != null) {
-				StreamingLogToken token = client.streamLogs(appName, appConsole);
-				appConsole.setLoggregatorToken(token);
-			}
+			
+			checkIfLoggregatorStreamingIsPresent(appConsole, appName);
 		}
 
 		return appConsole;
+	}
+
+	protected void checkIfLoggregatorStreamingIsPresent(ApplicationLogConsole logConsole, String appName) {
+		if (logConsole == null) {
+			return;
+		}
+		if (logConsole.getLoggregatorToken() == null) {
+			try {
+				CloudFoundryOperations client = runTarget.getClient();
+
+				// Must verify that the application exists before attaching
+				// loggregator listener
+				CloudApplication app = null;
+				try {
+					app = client.getApplication(appName);
+				} catch (Throwable e) {
+					// Ignore. checks on loggregator connection may occur before the app is created
+				}
+				if (app != null) {
+					StreamingLogToken token = client.streamLogs(appName, logConsole);
+					logConsole.setLoggregatorToken(token);
+				}
+			} catch (Exception e) {
+				logConsole.writeApplicationLog("Failed to stream contents from Cloud Foundry due to: " + e.getMessage(),
+						LogType.LOCALSTDERROR);
+			}
+		}
 	}
 
 	public static String getConsoleId(TargetProperties targetProperties, String appName) {

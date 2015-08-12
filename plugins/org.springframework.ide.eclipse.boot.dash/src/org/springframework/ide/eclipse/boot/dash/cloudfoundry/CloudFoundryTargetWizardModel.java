@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -28,6 +27,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 /**
  * Cloud Foundry Target properties that uses {@link LiveExpression} and
  * {@link Validator}.
+ *
+ *
  *
  */
 public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties {
@@ -92,46 +93,52 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		space.removeListener(cloudSpaceChangeListener);
 	}
 
-	@Override
-	public String getUrl() {
-		return this.url.getValue();
-	}
-
+	/*
+	 *
+	 * NOTE: for the setters, make sure the values are placed in the underlying
+	 * backed map first before setting them in the live variables, as live
+	 * variables trigger validation events.
+	 *
+	 * This hybrid model with both live expressions and a non-event driven map
+	 * may not be ideal, but to avoid regressions in implementation it is kept
+	 * as it is for now, with the observation that the map needs to be updated
+	 * first before updating the live variable.
+	 *
+	 */
 	public void setUrl(String url) {
+		put(URL_PROP, url);
+
 		this.url.setValue(url);
 	}
 
-	public CloudSpace getSpace() {
-		return this.space.getValue();
-	}
-
 	public void setSpace(CloudSpace space) {
+
+		if (space != null) {
+			put(ORG_PROP, space.getOrganization().getName());
+			put(SPACE_PROP, space.getName());
+		} else {
+			put(ORG_PROP, null);
+			put(SPACE_PROP, null);
+		}
+
 		this.space.setValue(space);
 	}
 
-	public boolean isSelfsigned() {
-		return this.selfsigned.getValue();
-	}
-
 	public void setSelfsigned(boolean selfsigned) {
+		put(SELF_SIGNED_PROP, Boolean.toString(selfsigned));
+
 		this.selfsigned.setValue(selfsigned);
 	}
 
-	@Override
-	public String getUsername() {
-		return this.userName.getValue();
-	}
-
 	public void setUsername(String userName) {
+		put(USERNAME_PROP, userName);
+
 		this.userName.setValue(userName);
 	}
 
-	@Override
-	public String getPassword() {
-		return this.password.getValue();
-	}
-
 	public void setPassword(String password) {
+		put(PASSWORD_PROP, password);
+
 		this.password.setValue(password);
 	}
 
@@ -173,38 +180,15 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 		@Override
 		protected ValidationResult compute() {
-			if (getSpace() == null) {
+			if (getSpaceName() == null || getOrganizationName() == null) {
 				return ValidationResult.info("Select a Cloud space");
 			}
 			return ValidationResult.OK;
 		}
 	}
 
-	@Override
-	public String getSpaceName() {
-		return getSpace() != null ? getSpace().getName() : null;
-	}
-
-	@Override
-	public String getOrganizationName() {
-		return getSpace() != null ? getSpace().getOrganization().getName() : null;
-	}
-
 	public RunTarget finish() {
 		put(TargetProperties.RUN_TARGET_ID, CloudFoundryTargetProperties.getId(this));
 		return RunTargetTypes.CLOUDFOUNDRY.createRunTarget(this);
 	}
-
-	@Override
-	public Map<String, String> getAllProperties() {
-		Map<String, String> map = super.getAllProperties();
-		map.put(URL_PROP, getUrl());
-		map.put(USERNAME_PROP, getUsername());
-		map.put(ORG_PROP, getOrganizationName());
-		map.put(SPACE_PROP, getSpaceName());
-		map.put(SELF_SIGNED_PROP, Boolean.toString(isSelfsigned()));
-		map.put(PASSWORD_PROP, getPassword());
-		return map;
-	}
-
 }
