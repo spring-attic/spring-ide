@@ -31,7 +31,7 @@ public abstract class LaunchTabSelectionModel<T> extends SelectionModel<T> imple
 
 	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
 
-	public LaunchTabSelectionModel(LiveVariable<T> selection, LiveExpression<ValidationResult> validator) {
+	public LaunchTabSelectionModel(final LiveVariable<T> selection, LiveExpression<ValidationResult> validator) {
 		super(selection, validator);
 		selection.addListener(new ValueListener<T>() {
 			@Override
@@ -39,6 +39,10 @@ public abstract class LaunchTabSelectionModel<T> extends SelectionModel<T> imple
 				getDirtyState().setValue(true);
 			}
 		});
+	}
+
+	public LaunchTabSelectionModel(SelectionModel<T> selection) {
+		this(selection.selection, selection.validator);
 	}
 
 	@Override

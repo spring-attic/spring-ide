@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;

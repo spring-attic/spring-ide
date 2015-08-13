@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.devtools;
 
-import static org.springframework.ide.eclipse.boot.ui.BootUIImages.*;
+import static org.springframework.ide.eclipse.boot.ui.BootUIImages.BOOT_DEVTOOLS_ICON;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabSection;
+import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
+import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
@@ -42,13 +44,15 @@ public class BootDevtoolsClientMainTab extends LaunchConfigurationTabWithSection
 		BootDevtoolsClientLaunchUIModel model = new BootDevtoolsClientLaunchUIModel();
 		return Arrays.asList(new IPageSection[] {
 				SelectProjectLaunchTabSection.create(this, model.project),
+				StringFieldLaunchTabSection.create(this, model.remoteUrl),
+				StringFieldLaunchTabSection.create(this, model.remoteSecret),
 //				new MainTypeLaunchTabSection(this, model.project.selection).readonly(true),
 //				new ProfileLaunchTabSection(this, model.profile),
-//				new HLineSection(this),
+				new HLineSection(this),
 //				new EnableDebugSection(this, model.enableDebug),
 //				new EnableJmxSection(this, model.enableJmx),
 //				new HLineSection(this),
-//				new PropertiesTableSection(this, model.project.selection)
+				new PropertiesTableSection(this, model.project.selection)
 		});
 	}
 

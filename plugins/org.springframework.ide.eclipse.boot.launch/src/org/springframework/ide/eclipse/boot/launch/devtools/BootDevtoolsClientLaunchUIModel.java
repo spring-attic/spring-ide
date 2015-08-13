@@ -11,22 +11,12 @@
 package org.springframework.ide.eclipse.boot.launch.devtools;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.springframework.ide.eclipse.boot.launch.EnableDebugLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.ExistingBootProjectSelectionValidator;
-import org.springframework.ide.eclipse.boot.launch.IProfileHistory;
-import org.springframework.ide.eclipse.boot.launch.LaunchTabSelectionModel;
-import org.springframework.ide.eclipse.boot.launch.MainTypeNameLaunchTabModel;
-import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
-import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
+import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 
 /**
  * Model for the 'main type' selection widgetry on a launchconfiguration tab.
@@ -39,33 +29,30 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
  */
 public class BootDevtoolsClientLaunchUIModel {
 
-	// TODO pulling out all of the logic for regression testing is a work in progress.
-	//   Only some of the UI elements are represented in here. The other ones
-	//   still are 'tangled' with the UI widgetry code.
-
-	public static class MainTypeValidator extends Validator {
-
-		private LiveVariable<String> mainTypeName;
-
-		public MainTypeValidator(LiveVariable<String> n) {
-			this.mainTypeName = n;
-			dependsOn(mainTypeName);
-		}
-
-		protected ValidationResult compute() {
-			String name = mainTypeName.getValue();
-			if (!StringUtil.hasText(name)) {
-				return ValidationResult.error("No Main type selected");
-			}
-			return ValidationResult.OK;
-		}
-	}
-
 	public final SelectProjectLaunchTabModel project;
+	public final StringFieldLaunchTabModel remoteUrl;
+	public final StringFieldLaunchTabModel remoteSecret;
 
 	public BootDevtoolsClientLaunchUIModel() {
 		project = createProjectSelectionModel();
+		remoteUrl = createRemoteUrlModel();
+		remoteSecret = createRemoteSecretModel();
 	}
+
+	private StringFieldLaunchTabModel createRemoteUrlModel() {
+		StringFieldModel field = new StringFieldModel("Remote Url", "");
+		field.validator(
+				new UrlValidator(field)
+					.allowedSchemes("http", "https")
+		);
+		return new StringFieldLaunchTabModel(field, BootDevtoolsClientLaunchConfigurationDelegate.REMOTE_URL);
+	}
+
+	private StringFieldLaunchTabModel createRemoteSecretModel() {
+		StringFieldModel field = new StringFieldModel("Remote Secret", "");
+		return new StringFieldLaunchTabModel(field, BootDevtoolsClientLaunchConfigurationDelegate.REMOTE_SECRET);
+	}
+
 
 	private SelectProjectLaunchTabModel createProjectSelectionModel() {
 		LiveVariable<IProject> project = new LiveVariable<IProject>();

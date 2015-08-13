@@ -21,7 +21,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;

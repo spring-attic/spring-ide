@@ -47,9 +47,7 @@ public class BootProjectDecorator implements ILightweightLabelDecorator {
 
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
-		//System.out.println("Decorating "+element);
 		IProject project = getProject(element);
-//		decoration.setForegroundColor(Display.getDefault().getSystemColor(SWT.COLOR_MAGENTA));
 		if (project!=null) {
 			if (BootPropertyTester.isBootProject(project)) {
 				decoration.addSuffix(" [boot]");
