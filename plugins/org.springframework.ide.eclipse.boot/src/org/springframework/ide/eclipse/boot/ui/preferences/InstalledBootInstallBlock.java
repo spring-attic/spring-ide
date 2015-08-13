@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
+import org.springframework.ide.eclipse.boot.util.SWTFactory;
 
 
 /**

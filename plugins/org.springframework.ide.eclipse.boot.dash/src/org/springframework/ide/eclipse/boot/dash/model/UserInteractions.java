@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -32,4 +33,21 @@ public interface UserInteractions {
 	boolean confirmOperation(String title, String message);
 	String updatePassword(String userName, String targetId);
 	void openDialog(ToggleFiltersDialogModel model);
+
+	/**
+	 * select a file
+	 * @param title The title of the open file dialog
+	 * @param file The default path/file that should be used when opening the dialog
+	 * @return The full path of the selected file
+	 */
+	String chooseFile(String title, String file);
+
+	/**
+	 * @param title
+	 * @param message
+	 * @param initialValue
+	 * @param validator
+	 * @return
+	 */
+	String inputText(String title, String message, String initialValue, IInputValidator validator);
 }

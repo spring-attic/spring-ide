@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class BootDashActions {
@@ -58,6 +59,7 @@ public class BootDashActions {
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ToggleFiltersAction toggleFiltersAction;
+	private ExposeAppAction exposeAppAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -159,8 +161,14 @@ public class BootDashActions {
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
+
 		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), elementsSelection, ui);
-	}
+		exposeAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
+		exposeAppAction.setText("(Re)start and Expose via ngrok");
+		exposeAppAction.setToolTipText("Start or restart the process associated with the selected elements and expose it to the outside world via an ngrok tunnel");
+		exposeAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
+		exposeAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+}
 
 	private AddRunTargetAction[] createAddTargetActions() {
 		Set<RunTargetType> targetTypes = model.getRunTargetTypes();
@@ -236,7 +244,6 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
 	public IAction getRefreshRunTargetAction() {
@@ -255,7 +262,6 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return May be null as it may not be supported on all models.
 	 */
 	public IAction getUpdatePasswordAction() {
@@ -263,11 +269,14 @@ public class BootDashActions {
 	}
 
 	/**
-	 *
 	 * @return show properties view action instance
 	 */
 	public IAction getShowPropertiesViewAction() {
 		return showPropertiesViewAction;
+	}
+
+	public IAction getExposeAppAction() {
+		return exposeAppAction;
 	}
 
 	public void dispose() {
@@ -296,6 +305,11 @@ public class BootDashActions {
 			toggleFiltersAction.dispose();
 			toggleFiltersAction = null;
 		}
+
+		if (exposeAppAction != null) {
+			exposeAppAction.dispose();
+			exposeAppAction = null;
+		}
 	}
 
 	public IAction getToggleFiltersAction() {
@@ -319,6 +333,5 @@ public class BootDashActions {
 				+ "be used the next time you (re)launch '"+target.getName());
 		return action;
 	}
-
 
 }

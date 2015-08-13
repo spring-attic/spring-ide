@@ -12,7 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -22,11 +26,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -35,6 +41,8 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
@@ -386,6 +394,93 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	@Override
 	public PropertyStoreApi getPersistentProperties() {
 		return persistentProperties;
+	}
+
+	public void restartAndExpose(NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {
+		int freePort = SocketUtil.findFreePort();
+		NGROKTunnel tunnel = ngrokClient.createTunnel("tunnel", "http", Integer.toString(freePort));
+
+		String tunnelURL = tunnel.getPublic_url();
+
+		if (tunnelURL.startsWith("http://")) {
+			tunnelURL = tunnelURL.substring(7);
+		}
+
+		Map<String, String> extraAttributes = new HashMap<String, String>();
+		extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(freePort));
+		extraAttributes.put("spring.boot.prop.eureka.instance.hostname", "1" + tunnelURL);
+		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
+		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
+
+		stopSync();
+		start(ILaunchManager.DEBUG_MODE, ui, extraAttributes);
+	}
+
+	private void start(final String runMode, UserInteractions ui, Map<String, String> extraAttributes) {
+		try {
+			List<ILaunchConfiguration> configs = getTarget().getLaunchConfigs(this);
+			ILaunchConfiguration conf = null;
+			if (configs.isEmpty()) {
+				IType mainType = chooseMainType(ui);
+				if (mainType!=null) {
+					RunTarget target = getTarget();
+					IJavaProject jp = getJavaProject();
+					conf = target.createLaunchConfig(jp, mainType);
+				}
+			} else {
+				conf = chooseConfig(ui, configs);
+			}
+			if (conf!=null) {
+				ILaunchConfigurationWorkingCopy workingCopy = conf.getWorkingCopy();
+
+				removeOverriddenAttributes(workingCopy, extraAttributes);
+				addAdditionalAttributes(workingCopy, extraAttributes);
+
+				launch(runMode, workingCopy);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+	}
+
+	private void addAdditionalAttributes(ILaunchConfigurationWorkingCopy workingCopy, Map<String, String> extraAttributes) {
+		if (extraAttributes != null && extraAttributes.size() > 0) {
+			Iterator<String> iterator = extraAttributes.keySet().iterator();
+			while (iterator.hasNext()) {
+				String key = iterator.next();
+				String value = extraAttributes.get(key);
+
+				workingCopy.setAttribute(key, value);
+			}
+		}
+	}
+
+	private void removeOverriddenAttributes(ILaunchConfigurationWorkingCopy workingCopy, Map<String, String> attributesToOverride) {
+		try {
+			Map<String, Object> attributes = workingCopy.getAttributes();
+			Set<String> keys = attributes.keySet();
+
+			Iterator<String> iter = keys.iterator();
+			while (iter.hasNext()) {
+				String existingKey = iter.next();
+				if (containsSimilarKey(attributesToOverride, existingKey)) {
+					workingCopy.removeAttribute(existingKey);
+				}
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private boolean containsSimilarKey(Map<String, String> attributesToOverride, String existingKey) {
+		Iterator<String> iter = attributesToOverride.keySet().iterator();
+		while (iter.hasNext()) {
+			String overridingKey = iter.next();
+			if (existingKey.startsWith(overridingKey)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

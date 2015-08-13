@@ -1,14 +1,14 @@
 /*******************************************************************************
- *  Copyright (c) 2012,2013 GoPivotal, Inc.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2015 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ * Contributors:
+ *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.ui.preferences;
+package org.springframework.ide.eclipse.boot.dash.ngrok;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,29 +25,28 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
-import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.util.SWTFactory;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
-
 
 /**
  * @author Christian Dupuis
  * @author Steffen Pingel
  * @author Kris De Volder
  */
-public class BootInstallPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+public class NGROKInstallPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private InstalledBootInstallBlock fJREBlock;
-	private BootInstallManager installManager;
+	private static final String NGROK_DIALOGSETTINGS = "org.springframework.ide.eclipse.boot.dash.ngrok.dialogsettings";
 
-	public BootInstallPreferencePage() {
-		super("Spring Boot Installations");
+	private NGROKInstallBlock ngrokBlock;
+	private NGROKInstallManager installManager;
+
+	public NGROKInstallPreferencePage() {
+		super("ngrok installation");
 	}
 
 	public void init(IWorkbench workbench) {
 		try {
-			installManager = BootInstallManager.getInstance();
+			installManager = NGROKInstallManager.getInstance();
 		} catch (Exception e) {
 			throw ExceptionUtil.unchecked(e);
 		}
@@ -55,13 +54,17 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 
 	@Override
 	public boolean isValid() {
-		if (super.isValid()) {
-			if (getCurrentDefaultVM() == null && fJREBlock.getJREs().length > 0) {
-				setErrorMessage("Select a default Boot installation");
-				return false;
-			}
-		}
+//		if (super.isValid()) {
+//			if (getCurrentDefaultVM() == null && fJREBlock.getJREs().length > 0) {
+//				setErrorMessage("Select a default Boot installation");
+//				return false;
+//			}
+//		}
 		return true;
+	}
+
+	private String getCurrentDefaultNGROK() {
+		return ngrokBlock.getCheckedNGROK();
 	}
 
 	@Override
@@ -69,18 +72,18 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 		final boolean[] canceled = new boolean[] { false };
 		BusyIndicator.showWhile(null, new Runnable() {
 			public void run() {
-				Set<IBootInstall> newInstalls = new LinkedHashSet<IBootInstall>();
-				IBootInstall defaultVM = getCurrentDefaultVM();
-				IBootInstall[] vms = fJREBlock.getJREs();
-				for (IBootInstall vm : vms) {
+				Set<String> newInstalls = new LinkedHashSet<String>();
+				String defaultNgrok = getCurrentDefaultNGROK();
+				String[] ngroks = ngrokBlock.getNGROKs();
+				for (String ngrok : ngroks) {
 					try {
-						newInstalls.add(installManager.newInstall(vm.getUrl(), vm.getName()));
+						newInstalls.add(ngrok);
 					} catch (Exception e) {
 						BootActivator.log(e);
 					}
 				}
 
-				installManager.setDefaultInstall(defaultVM);
+				installManager.setDefaultInstall(defaultNgrok);
 				installManager.setInstalls(newInstalls);
 				installManager.save();
 			}
@@ -92,13 +95,9 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 
 		// save column widths
 		IDialogSettings settings = BootActivator.getDefault().getDialogSettings();
-		fJREBlock.saveColumnSettings(settings, "com.springsource.sts.boot.ui.dialogsettings");
+		ngrokBlock.saveColumnSettings(settings, NGROK_DIALOGSETTINGS);
 
 		return super.performOk();
-	}
-
-	private IBootInstall getCurrentDefaultVM() {
-		return fJREBlock.getCheckedJRE();
 	}
 
 	@Override
@@ -116,34 +115,33 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 		SWTFactory
 				.createWrapLabel(
 						ancestor,
-						"Add, edit or remove Boot installations. By default the checked Boot installation will be used to launch 'app.groovy' Spring Boot CLI scripts",
+						"Add, edit or remove ngrok installations. By default the checked ngrok installation will be used to expose apps",
 						1, 300);
 		SWTFactory.createVerticalSpacer(ancestor, 1);
 
-		fJREBlock = new InstalledBootInstallBlock(installManager);
-		fJREBlock.createControl(ancestor);
-		fJREBlock.addSelectionChangedListener(new ISelectionChangedListener() {
-
+		ngrokBlock = new NGROKInstallBlock(installManager);
+		ngrokBlock.createControl(ancestor);
+		ngrokBlock.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				isValid();
 			}
 		});
 
-		Control control = fJREBlock.getControl();
+		Control control = ngrokBlock.getControl();
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.horizontalSpan = 1;
 		control.setLayoutData(data);
 
-		fJREBlock.restoreColumnSettings(BootActivator.getDefault().getDialogSettings(),
-				"com.springsource.sts.boot.ui.dialogsettings");
+		ngrokBlock.restoreColumnSettings(BootActivator.getDefault().getDialogSettings(),
+				NGROK_DIALOGSETTINGS);
 
-		fJREBlock.addSelectionChangedListener(new ISelectionChangedListener() {
+		ngrokBlock.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				setValid(false);
 
-				IBootInstall install = getCurrentDefaultVM();
+				String install = getCurrentDefaultNGROK();
 				if (install == null) {
-					setErrorMessage("Select a default Boot installation");
+					setErrorMessage("Select a default ngrok installation");
 				}
 				else {
 					setErrorMessage(null);

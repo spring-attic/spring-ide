@@ -87,7 +87,15 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	private boolean appliesTo(BootDashElement e) {
-		return goalStateAppliesTo(e) && currentStateAcceptable(e.getRunState());
+		return goalStateAppliesTo(e) && currentStateAcceptable(e.getRunState()) && appliesToElement(e);
+	}
+
+	/**
+	 * Subclass can override when action should only apply to
+	 * certain boot dash elements
+	 */
+	protected boolean appliesToElement(BootDashElement e) {
+		return true;
 	}
 
 	/**

@@ -32,6 +32,7 @@
          </view>
       </perspectiveExtension>
    </extension>
+   
    <extension
          point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
       <propertyContributor
@@ -41,6 +42,7 @@
                category="org.springframework.ide.eclipse.boot.dash"></propertyCategory>
       </propertyContributor>
    </extension>
+   
    <extension
          point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
       <propertyTabs
@@ -58,6 +60,7 @@
          </propertyTab>
       </propertyTabs>
    </extension>
+   
    <extension
          point="org.eclipse.ui.views.properties.tabbed.propertySections">
       <propertySections
@@ -91,6 +94,7 @@
          </propertySection>
       </propertySections>
    </extension>
+   
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -106,6 +110,7 @@
             commandId="org.springframework.ide.eclipse.boot.dash.ShowBootDashboard">
       </handler>
    </extension>
+   
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -124,4 +129,14 @@
          </toolbar>
       </menuContribution>
    </extension>
+   
+    <extension point="org.eclipse.ui.preferencePages">
+	 	<page
+         category="org.springsource.ide.eclipse.commons.preferencePage"
+         class="org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallPreferencePage"
+         id="org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallPreferencePage"
+         name="ngrok">
+   		</page>
+   	</extension>
+   	
 </plugin>

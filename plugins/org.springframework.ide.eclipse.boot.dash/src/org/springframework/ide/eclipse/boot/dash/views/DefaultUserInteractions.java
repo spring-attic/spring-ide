@@ -16,10 +16,13 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
@@ -172,5 +175,26 @@ public class DefaultUserInteractions implements UserInteractions {
 				dlg.open();
 			}
 		});
+	}
+
+	@Override
+	public String chooseFile(String title, String file) {
+		FileDialog fileDialog = new FileDialog(getShell());
+		fileDialog.setText(title);
+		fileDialog.setFileName(file);
+
+		String result = fileDialog.open();
+		return result;
+	}
+
+	@Override
+	public String inputText(String title, String message, String initialValue, IInputValidator validator) {
+		InputDialog inputDialog = new InputDialog(getShell(), title, message, initialValue, validator);
+
+		if (inputDialog.open() == Window.OK) {
+			return inputDialog.getValue();
+		}
+
+		return null;
 	}
 }
