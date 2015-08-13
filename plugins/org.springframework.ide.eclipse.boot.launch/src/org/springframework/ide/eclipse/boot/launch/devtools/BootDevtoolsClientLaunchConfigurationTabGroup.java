@@ -30,7 +30,7 @@ public class BootDevtoolsClientLaunchConfigurationTabGroup  extends AbstractLaun
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
 			new BootDevtoolsClientMainTab(),
-			new JavaArgumentsTab(),
+			//new JavaArgumentsTab(), // Removed client is launched with specific arguments set from main tab params
 			new JavaJRETab(),
 			new JavaClasspathTab(),
 			new SourceLookupTab(),
