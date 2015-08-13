@@ -396,7 +396,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return persistentProperties;
 	}
 
-	public void restartAndExpose(NGROKClient ngrokClient, UserInteractions ui) throws Exception {
+	public void restartAndExpose(NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {
 		int freePort = SocketUtil.findFreePort();
 		NGROKTunnel tunnel = ngrokClient.createTunnel("tunnel", "http", Integer.toString(freePort));
 
@@ -410,7 +410,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(freePort));
 		extraAttributes.put("spring.boot.prop.eureka.instance.hostname", "1" + tunnelURL);
 		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
-		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + "http://eureka-ml.cfapps.io/eureka/");
+		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
 
 		stopSync();
 		start(ILaunchManager.DEBUG_MODE, ui, extraAttributes);

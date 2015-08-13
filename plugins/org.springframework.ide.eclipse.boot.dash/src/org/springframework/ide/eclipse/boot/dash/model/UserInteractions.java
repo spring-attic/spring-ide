@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -40,4 +41,13 @@ public interface UserInteractions {
 	 * @return The full path of the selected file
 	 */
 	String chooseFile(String title, String file);
+
+	/**
+	 * @param title
+	 * @param message
+	 * @param initialValue
+	 * @param validator
+	 * @return
+	 */
+	String inputText(String title, String message, String initialValue, IInputValidator validator);
 }

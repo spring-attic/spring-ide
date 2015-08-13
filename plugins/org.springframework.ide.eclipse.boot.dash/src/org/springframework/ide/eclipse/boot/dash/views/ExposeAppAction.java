@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -66,33 +67,53 @@ public class ExposeAppAction extends RunStateAction {
 			if (ngrokInstall != null) {
 				final NGROKClient ngrokClient = new NGROKClient(ngrokInstall);
 
-				return new Job("Restarting " + selecteds.size() + " Dash Elements") {
-					@Override
-					public IStatus run(IProgressMonitor monitor) {
-						monitor.beginTask("Restart Boot Dash Elements", selecteds.size());
-						try {
-							for (BootDashElement el : selecteds) {
-								if (el instanceof BootProjectDashElement) {
-									monitor.subTask("Restarting: " + el.getName());
-									try {
-										BootProjectDashElement localDashProject = (BootProjectDashElement) el;
-										localDashProject.restartAndExpose(ngrokClient, ui);
-									} catch (Exception e) {
-										return BootActivator.createErrorStatus(e);
+				final String eurekaInstance = getEurekaInstance();
+				if (eurekaInstance != null) {
+					return new Job("Restarting and Exposing " + selecteds.size() + " Dash Elements") {
+						@Override
+						public IStatus run(IProgressMonitor monitor) {
+							monitor.beginTask("Restart and Expose Boot Dash Elements", selecteds.size());
+							try {
+								for (BootDashElement el : selecteds) {
+									if (el instanceof BootProjectDashElement) {
+										monitor.subTask("Restarting: " + el.getName());
+										try {
+											BootProjectDashElement localDashProject = (BootProjectDashElement) el;
+											localDashProject.restartAndExpose(ngrokClient, eurekaInstance, ui);
+										} catch (Exception e) {
+											return BootActivator.createErrorStatus(e);
+										}
 									}
+									monitor.worked(1);
 								}
-								monitor.worked(1);
+								return Status.OK_STATUS;
+							} finally {
+								monitor.done();
 							}
-							return Status.OK_STATUS;
-						} finally {
-							monitor.done();
 						}
-					}
-
-				};
+					};
+				}
 			}
 		}
 		return null;
+	}
+
+	private String getEurekaInstance() {
+		String eurekaInstance = ui.inputText("Eureka URL", "please enter the full URL of the Eureka instance you would like to use", "", null);
+
+		if (eurekaInstance != null) {
+			if (eurekaInstance.endsWith("/eureka") || eurekaInstance.endsWith("/eureka/")) {
+				return eurekaInstance;
+			}
+			else if (eurekaInstance.endsWith("/")) {
+				eurekaInstance = eurekaInstance + "eureka/";
+			}
+			else {
+				eurekaInstance = eurekaInstance + "/eureka/";
+			}
+		}
+
+		return eurekaInstance;
 	}
 
 	@Override
