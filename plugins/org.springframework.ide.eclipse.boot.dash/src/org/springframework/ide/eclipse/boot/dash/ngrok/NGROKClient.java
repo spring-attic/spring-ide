@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Pivotal, Inc. - initial API and implementation
+ *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.ngrok;
 
@@ -26,15 +26,12 @@ import org.json.JSONObject;
  */
 public class NGROKClient {
 
+	private String path;
 	private String url;
 	private List<Process> processes;
 
-	public NGROKClient() {
-		this("http://localhost:4040");
-	}
-
-	public NGROKClient(String url) {
-		this.url = url;
+	public NGROKClient(String path) {
+		this.path = path;
 		this.processes = new ArrayList<Process>();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -97,12 +94,13 @@ public class NGROKClient {
 	public NGROKTunnel createTunnel(String name, String proto, String addr) {
 
 		try {
-			ProcessBuilder processBuilder = new ProcessBuilder("/Users/mlippert/Desktop/ngrok", proto, addr);
+			ProcessBuilder processBuilder = new ProcessBuilder(path, proto, addr);
 
 			Process process = null;
 			try {
 				process = processBuilder.start();
 				processes.add(process);
+				url = "http://localhost:4040";
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

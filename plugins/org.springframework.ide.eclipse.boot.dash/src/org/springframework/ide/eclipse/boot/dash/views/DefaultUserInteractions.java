@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
@@ -172,5 +173,15 @@ public class DefaultUserInteractions implements UserInteractions {
 				dlg.open();
 			}
 		});
+	}
+
+	@Override
+	public String chooseFile(String title, String file) {
+		FileDialog fileDialog = new FileDialog(getShell());
+		fileDialog.setText(title);
+		fileDialog.setFileName(file);
+
+		String result = fileDialog.open();
+		return result;
 	}
 }

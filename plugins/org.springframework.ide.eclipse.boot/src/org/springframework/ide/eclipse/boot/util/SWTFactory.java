@@ -8,7 +8,7 @@
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.ui.preferences;
+package org.springframework.ide.eclipse.boot.util;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Text;
  * NOTE: this class has been copied from Eclipse 3.5.
  * @author Christian Dupuis
  */
-class SWTFactory {
+public class SWTFactory {
 
 	public static int getButtonWidthHint(Button button) {
 		button.setFont(JFaceResources.getDialogFont());

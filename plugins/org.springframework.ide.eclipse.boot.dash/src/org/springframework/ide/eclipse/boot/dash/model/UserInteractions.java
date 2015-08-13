@@ -32,4 +32,12 @@ public interface UserInteractions {
 	boolean confirmOperation(String title, String message);
 	String updatePassword(String userName, String targetId);
 	void openDialog(ToggleFiltersDialogModel model);
+
+	/**
+	 * select a file
+	 * @param title The title of the open file dialog
+	 * @param file The default path/file that should be used when opening the dialog
+	 * @return The full path of the selected file
+	 */
+	String chooseFile(String title, String file);
 }
