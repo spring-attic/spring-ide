@@ -48,11 +48,11 @@ public class BootDevtoolsClientMainTab extends LaunchConfigurationTabWithSection
 				StringFieldLaunchTabSection.create(this, model.remoteSecret),
 //				new MainTypeLaunchTabSection(this, model.project.selection).readonly(true),
 //				new ProfileLaunchTabSection(this, model.profile),
-				new HLineSection(this),
+//				new HLineSection(this),
 //				new EnableDebugSection(this, model.enableDebug),
 //				new EnableJmxSection(this, model.enableJmx),
 //				new HLineSection(this),
-				new PropertiesTableSection(this, model.project.selection)
+//				new PropertiesTableSection(this, model.project.selection)
 		});
 	}
 

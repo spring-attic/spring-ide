@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.util;
+package org.springframework.ide.eclipse.boot.util;
 
 import static org.eclipse.debug.core.DebugEvent.CREATE;
 import static org.eclipse.debug.core.DebugEvent.TERMINATE;
@@ -17,6 +17,7 @@ import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 
 /**
@@ -25,14 +26,15 @@ import org.eclipse.debug.core.model.IProcess;
 public class ProcessTracker {
 
 	public interface ProcessListener {
-		void processTerminated(IProcess process);
-		void processCreated(IProcess process);
+		void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target);
+		void processTerminated(ProcessTracker tracker, IProcess process);
+		void processCreated(ProcessTracker tracker, IProcess process);
 	}
 
 	private IDebugEventSetListener debugListener;
 	private ProcessListener listener;
 
-	protected ProcessTracker(ProcessListener listener) {
+	public ProcessTracker(ProcessListener listener) {
 		this.listener = listener;
 		//Pick up any processes already running
 		DebugPlugin.getDefault().addDebugEventListener(debugListener = new IDebugEventSetListener() {
@@ -59,16 +61,18 @@ public class ProcessTracker {
 
 	protected final void handleDebugEvent(DebugEvent debugEvent) {
 		int kind = debugEvent.getKind();
+		Object source = debugEvent.getSource();
 		switch (kind) {
 		case CREATE:
-			if (debugEvent.getSource() instanceof IProcess) {
-				//We can only track one process. Ignore additional events.
-				processCreated((IProcess)debugEvent.getSource());
+			if (source instanceof IProcess) {
+				processCreated((IProcess)source);
 			}
 			break;
 		case TERMINATE:
-			if (debugEvent.getSource() instanceof IProcess) {
-				processTerminated((IProcess)debugEvent.getSource());
+			if (source instanceof IProcess) {
+				processTerminated((IProcess)source);
+			} else if (source instanceof IDebugTarget) {
+				debugTargetTerminated((IDebugTarget)source);
 			}
 			break;
 		default:
@@ -76,12 +80,16 @@ public class ProcessTracker {
 		}
 	}
 
+	private void debugTargetTerminated(IDebugTarget source) {
+		listener.debugTargetTerminated(this, source);
+	}
+
 	private void processCreated(IProcess process) {
-		listener.processCreated(process);
+		listener.processCreated(this, process);
 	}
 
 	private void processTerminated(IProcess process) {
-		listener.processTerminated(process);
+		listener.processTerminated(this, process);
 	}
 
 	/**

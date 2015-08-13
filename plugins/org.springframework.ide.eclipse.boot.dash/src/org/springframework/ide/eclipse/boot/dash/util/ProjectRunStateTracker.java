@@ -19,24 +19,24 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.util.ProcessTracker.ProcessListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
+import org.springframework.ide.eclipse.boot.util.ProcessTracker;
+import org.springframework.ide.eclipse.boot.util.ProcessTracker.ProcessListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  * @author Kris De Volder
  */
-public class ProjectRunStateTracker implements ProcessListener {
+public class ProjectRunStateTracker extends ProcessListenerAdapter {
 
 	//// public API ///////////////////////////////////////////////////////////////////
 
@@ -246,13 +246,13 @@ public class ProjectRunStateTracker implements ProcessListener {
 	}
 
 	@Override
-	public void processTerminated(IProcess process) {
+	public void processTerminated(ProcessTracker tracker, IProcess process) {
 		updateProjectStatesAndFireEvents();
 		cleanupReadyStateTrackers();
 	}
 
 	@Override
-	public void processCreated(IProcess process) {
+	public void processCreated(ProcessTracker tracker, IProcess process) {
 		updateProjectStatesAndFireEvents();
 	}
 }
