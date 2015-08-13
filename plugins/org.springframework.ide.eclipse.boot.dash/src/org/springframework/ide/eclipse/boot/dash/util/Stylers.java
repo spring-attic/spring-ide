@@ -30,7 +30,7 @@ public class Stylers implements Disposable {
 	};
 	private Font baseFont; // borrowed
 	private Font boldFont = null; //owned (must dispose!)
-
+	private Font italicFont = null; //owner (must dispose!)
 	/**
 	 * The 'Stylers' requires baseFont to render styles using bold
 	 * properly. If baseFont is null, then styler created will try to
@@ -48,6 +48,18 @@ public class Stylers implements Disposable {
 				//textStyle.rise = 2; //Why?? it makes mixed text with this style and others togther look really ugly!
 				textStyle.underline = true;
 				textStyle.font = getBoldFont();
+			}
+		};
+	}
+
+	public Styler tagBrackets() {
+		return new Styler() {
+			@Override
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.foreground = getSystemColor(SWT.COLOR_DARK_CYAN);
+				//textStyle.rise = 2; //Why?? it makes mixed text with this style and others togther look really ugly!
+//				textStyle.underline = true;
+//				textStyle.font = getBoldFont();
 			}
 		};
 	}
@@ -78,16 +90,41 @@ public class Stylers implements Disposable {
 		return boldFont;
 	}
 
+	public synchronized Font getItalicFont() {
+		//If baseFont is null, this Stylers is a bit 'handicapped' and won't
+		// be capable of doing 'bold' styling.
+		if (italicFont==null && baseFont!=null) {
+			FontData[] data= baseFont.getFontData();
+			for (int i= 0; i < data.length; i++) {
+				data[i].setStyle(SWT.ITALIC);
+			}
+			italicFont = new Font(baseFont.getDevice(), data);
+		}
+		return italicFont;
+	}
+
 	@Override
 	public void dispose() {
 		if (boldFont!=null) {
 			boldFont.dispose();
 			boldFont = null;
 		}
+		if (italicFont!=null) {
+			italicFont.dispose();
+			italicFont = null;
+		}
 	}
 
 	public Styler darkGrey() {
 		return color(SWT.COLOR_DARK_GRAY);
+	}
+
+	public Styler darkGreen() {
+		return color(SWT.COLOR_DARK_GREEN);
+	}
+
+	public Styler darkBlue() {
+		return color(SWT.COLOR_DARK_BLUE);
 	}
 
 	public Styler grey() {
@@ -111,5 +148,12 @@ public class Stylers implements Disposable {
 		};
 	}
 
+	public Styler italic() {
+		return new Styler() {
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.font = getItalicFont();
+			}
+		};
+	}
 
 }
