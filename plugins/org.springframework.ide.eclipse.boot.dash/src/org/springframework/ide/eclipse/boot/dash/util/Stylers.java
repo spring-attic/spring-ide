@@ -156,4 +156,14 @@ public class Stylers implements Disposable {
 		};
 	}
 
+	public Styler italicColoured(int colorCode) {
+		final Color color = getSystemColor(colorCode);
+		return new Styler() {
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.font = getItalicFont();
+				textStyle.foreground = color;
+			}
+		};
+	}
+
 }

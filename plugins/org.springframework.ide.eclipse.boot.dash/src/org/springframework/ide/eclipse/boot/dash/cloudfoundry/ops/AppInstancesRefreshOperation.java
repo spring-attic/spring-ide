@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
 
 /**
  * Refreshes the application instances.
@@ -59,6 +60,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				this.model.updateApplication(instances);
 			}
 		}
+		model.internalSetState(State.READY);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

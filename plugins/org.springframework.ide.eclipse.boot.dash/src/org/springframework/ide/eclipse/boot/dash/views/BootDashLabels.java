@@ -18,12 +18,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -165,20 +166,21 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public StyledString getStyledText(BootDashModel element, BootDashColumn column) {
-		if (element!=null) {
-			return getStyledText(element.getRunTarget(), column);
+		if (element != null) {
+			//TODO: We don't care about columns (yet?)
+			if (element.getRunTarget() != null) {
+				//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
+				// colorfully.
+				if (element.getState() == State.LOADING) {
+					return new StyledString("Loading... - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY)).append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
+				} else {
+					return new StyledString(element.getRunTarget().getName(), stylers.bold());
+				}
+			} else {
+				return new StyledString(UNKNOWN_LABEL);
+			}
 		}
 		return stylers==null?new StyledString("null"):new StyledString("null", stylers.red());
-	}
-
-	public StyledString getStyledText(RunTarget element, BootDashColumn column) {
-		//TODO: We don't care about columns (yet?)
-		if (element!=null) {
-			//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
-			// colorfully.
-			return new StyledString(element.getName(), stylers.bold());
-		}
-		return new StyledString(UNKNOWN_LABEL);
 	}
 
 	/**

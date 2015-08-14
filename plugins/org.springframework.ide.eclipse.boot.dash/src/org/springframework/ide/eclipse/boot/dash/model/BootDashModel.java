@@ -16,7 +16,14 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public abstract class BootDashModel {
 
+	public enum State {
+		READY,
+		LOADING
+	}
+
 	private RunTarget target;
+
+	private State state = State.READY;
 
 	public BootDashModel(RunTarget target) {
 		super();
@@ -28,6 +35,8 @@ public abstract class BootDashModel {
 	}
 
 	ListenerList elementStateListeners = new ListenerList();
+
+	private ListenerList modelStateListeners = new ListenerList();
 
 	public void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
@@ -51,12 +60,37 @@ public abstract class BootDashModel {
 	 */
 	abstract public void refresh();
 
+	/**
+	 * Returns the state of the model
+	 * @return
+	 */
+	public synchronized State getState() {
+		return state;
+	}
+
+	protected final synchronized void setState(State newState) {
+		if (state != newState) {
+			state = newState;
+			for (Object l : modelStateListeners.getListeners()) {
+				((ModelStateListener) l).stateChanged(this);
+			}
+		}
+	}
+
 	public void addElementStateListener(ElementStateListener l) {
 		elementStateListeners.add(l);
 	}
 
 	public void removeElementStateListener(ElementStateListener l) {
 		elementStateListeners.remove(l);
+	}
+
+	public void addModelStateListener(ModelStateListener l) {
+		modelStateListeners.add(l);
+	}
+
+	public void removeModelStateListener(ModelStateListener l) {
+		modelStateListeners.remove(l);
 	}
 
 	public interface ElementStateListener {
@@ -68,4 +102,12 @@ public abstract class BootDashModel {
 		 */
 		void stateChanged(BootDashElement e);
 	}
+
+	public interface ModelStateListener {
+		/**
+		 * Called when the model state has changed
+		 */
+		void stateChanged(BootDashModel model);
+	}
+
 }
