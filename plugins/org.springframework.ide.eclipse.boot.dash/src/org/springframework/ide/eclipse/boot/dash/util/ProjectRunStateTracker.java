@@ -19,9 +19,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -89,7 +91,7 @@ public class ProjectRunStateTracker extends ProcessListenerAdapter {
 	private Map<IProject, RunState> getCurrentActiveStates() {
 		Map<IProject, RunState> states = new HashMap<IProject, RunState>();
 		for (ILaunch l : launchManager().getLaunches()) {
-			if (!l.isTerminated()) {
+			if (!l.isTerminated() && isInteresting(l)) {
 				IProject p = LaunchUtil.getProject(l);
 				RunState s1 = getState(states, p);
 				RunState s2 = getActiveState(l);
@@ -97,6 +99,19 @@ public class ProjectRunStateTracker extends ProcessListenerAdapter {
 			}
 		}
 		return states;
+	}
+
+	private boolean isInteresting(ILaunch l) {
+		try {
+			ILaunchConfiguration conf = l.getLaunchConfiguration();
+			if (conf!=null) {
+					String type = conf.getType().getIdentifier();
+				return BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID.equals(type);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return false;
 	}
 
 	/**
