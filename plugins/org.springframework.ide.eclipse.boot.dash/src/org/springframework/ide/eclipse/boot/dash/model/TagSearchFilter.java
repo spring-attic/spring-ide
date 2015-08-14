@@ -16,25 +16,25 @@ import java.util.regex.Pattern;
 
 /**
  * The filter for searching for tags.
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class TagSearchFilter implements Filter<BootDashElement> {
-	
+
 	private String searchTerm;
-	
+
 	private String[] searchTags;
-	
+
 	public TagSearchFilter() {
 		this(null, null);
 	}
-	
+
 	public TagSearchFilter(String[] searchTags, String searchTerm) {
 		this.searchTags = searchTags == null ? new String[0] : searchTags;
 		this.searchTerm = searchTerm == null ? "" : searchTerm;
 	}
-	
+
 	public TagSearchFilter(String s) {
 		this();
 		if (!s.isEmpty()) {
@@ -44,12 +44,12 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 					this.searchTags = splitSearchStr;
 				} else {
 					this.searchTags = Arrays.copyOfRange(splitSearchStr, 0, splitSearchStr.length - 1);
-					this.searchTerm = splitSearchStr[splitSearchStr.length - 1]; 
+					this.searchTerm = splitSearchStr[splitSearchStr.length - 1];
 				}
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean accept(BootDashElement element) {
 		if (searchTags.length == 0 && searchTerm.isEmpty()) {
@@ -64,7 +64,7 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 				return true;
 			} else {
 				for (String elementTag : elementTags) {
-					if (elementTag.startsWith(searchTerm)) {
+					if (elementTag.contains(searchTerm)) {
 						return true;
 					}
 				}
@@ -81,5 +81,5 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 		}
 		return initSearchText;
 	}
-	
+
 }
