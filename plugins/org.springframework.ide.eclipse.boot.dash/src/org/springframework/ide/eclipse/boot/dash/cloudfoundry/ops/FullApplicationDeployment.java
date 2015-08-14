@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDe
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class FullApplicationDeployment extends CloudApplicationOperation {
@@ -37,14 +38,16 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 	private final IProject project;
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplace;
+	private final RunState runOrDebug;
 
 	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
-			boolean shouldAutoReplace) {
+			boolean shouldAutoReplace, RunState runOrDebug) {
 		super("Deploying project " + project.getName(), model, project.getName());
 
 		this.project = project;
 		this.shouldAutoReplace = shouldAutoReplace;
 		this.ui = ui;
+		this.runOrDebug = runOrDebug;
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		CloudApplicationOperation createOp = new ApplicationCreateOperation(properties, model);
 		CloudApplicationOperation uploadOp = new ApplicationUploadOperation(properties, model);
 		CloudApplicationOperation updateOp = new ApplicationDeploymentUpdateOperation(properties, model);
-		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model);
+		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model, runOrDebug);
 
 		deploymentOperations.add(createOp);
 		deploymentOperations.add(updateOp);

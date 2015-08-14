@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ProjectsDeployer extends CloudOperation {
@@ -31,6 +32,7 @@ public class ProjectsDeployer extends CloudOperation {
 	private final Map<IProject, BootDashElement> projectsToDeploy;
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplaceApps;
+	private final RunState runOrDebug;
 
 	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, UserInteractions ui,
 			Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
@@ -39,6 +41,7 @@ public class ProjectsDeployer extends CloudOperation {
 		this.projectsToDeploy = projectsToDeploy;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
+		this.runOrDebug = RunState.RUNNING;
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class ProjectsDeployer extends CloudOperation {
 	}
 
 	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, UserInteractions ui,
-			List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps) {
+			List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps, RunState runOrDebug) {
 		super("Deploying projects");
 		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
 
@@ -58,6 +61,7 @@ public class ProjectsDeployer extends CloudOperation {
 		this.model = cloudFoundryBootDashModel;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
+		this.runOrDebug = runOrDebug;
 	}
 
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
@@ -70,8 +74,8 @@ public class ProjectsDeployer extends CloudOperation {
 				throw new OperationCanceledException();
 			}
 
-			CloudApplicationOperation fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model,
-					ui, shouldAutoReplaceApps);
+			CloudApplicationOperation fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model, ui,
+					shouldAutoReplaceApps, runOrDebug);
 
 			fullDeploymentOp.run(subMonitor.newChild(100));
 		}

@@ -85,10 +85,10 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 			boolean shouldAutoReplaceApp = true;
 			List<BootDashElement> elements = new ArrayList<BootDashElement>();
 			elements.add(this);
-			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), ui, elements, shouldAutoReplaceApp);
+			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), ui, elements, shouldAutoReplaceApp, runingOrDebugging);
 		} else {
 			CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getParent());
+					(CloudFoundryBootDashModel) getParent(), runingOrDebugging);
 
 			restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
@@ -101,7 +101,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getParent());
+				(CloudFoundryBootDashModel) getParent(), runingOrDebugging);
 
 		restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 

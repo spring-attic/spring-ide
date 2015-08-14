@@ -10,19 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationStartOperation extends CloudApplicationOperation {
 
 	private final String appName;
+	private final RunState startMode;
 
-	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model) {
+	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model, RunState startMode) {
 		super("Starting application: " + appName, model, appName);
 		this.appName = appName;
+		this.startMode = startMode;
 	}
 
 	@Override
@@ -39,6 +47,23 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		getClient().restartApplication(appName);
 
 		new ApplicationRunningStateTracker(appName, getClient(), model).startTracking(monitor);
+	}
+
+	protected void updateEnvVars(Map<String, String> toAdd) throws Exception {
+		CloudAppInstances instances = getCachedApplication();
+		Map<String, Object> existingVars = getClient()
+				.getApplicationEnvironment(instances.getApplication().getMeta().getGuid());
+
+		Map<String, String> varsToUpdate = new HashMap<String, String>();
+		if (existingVars != null) {
+			for (Entry<String, Object> var : existingVars.entrySet()) {
+				varsToUpdate.put(var.getKey(), var.getValue().toString());
+			}
+		}
+
+		varsToUpdate.putAll(toAdd);
+
+		getClient().updateApplicationEnv(appName, varsToUpdate);
 	}
 
 	public ISchedulingRule getSchedulingRule() {
