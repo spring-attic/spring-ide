@@ -42,6 +42,37 @@
                mode="debug">
          </description>
     </shortcut>
+    
+    <shortcut
+          class="org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchShortcut"
+          description="Connect Spring Devtools Client to a Remote Spring Boot Application"
+          id="org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchShortcut"
+          icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-devtools-icon.png"
+          label="Spring Devtools Client"
+          modes="run, debug">
+        <contextualLaunch>
+           <enablement>
+             <count value="1"/>
+             <iterate>
+                <adapt type="org.eclipse.core.resources.IResource">
+                	<test property="org.springsource.ide.eclipse.boot.isBootProject"/>
+                </adapt>
+             </iterate>
+           </enablement>
+        </contextualLaunch>
+        <configurationType
+               id="org.springframework.ide.eclipse.boot.devtools.client.launch">
+         </configurationType>
+        <description
+               description="Run as Spring Devtools Client"
+               mode="run">
+         </description>
+         <description
+               description="Debug as Spring Devtools Client"
+               mode="debug">
+         </description>
+    </shortcut>
+    
  </extension>
  
  <extension point="org.eclipse.debug.core.launchConfigurationTypes">

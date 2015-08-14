@@ -43,6 +43,13 @@ public class BootPropertyTester extends PropertyTester {
 
 	//@Override
 	public boolean test(Object rsrc, String property, Object[] args, Object expectedValue) {
+		if (expectedValue==null) {
+			expectedValue = true;
+		}
+//		System.out.println(">>> BootPropertyTester");
+//		System.out.println(" rsrc = "+rsrc);
+//		System.out.println(" property = "+property);
+//		System.out.println(" expectedValue = "+expectedValue);
 		if (rsrc instanceof IProject && "isBootProject".equals(property)) {
 			return expectedValue.equals(isBootProject((IProject)rsrc));
 		}

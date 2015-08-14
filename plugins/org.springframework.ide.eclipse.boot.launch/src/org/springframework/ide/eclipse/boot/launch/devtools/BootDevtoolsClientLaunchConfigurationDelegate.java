@@ -40,12 +40,13 @@ import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurati
 import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
-import org.springframework.ide.eclipse.boot.util.ProcessTracker.ProcessListener;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 @SuppressWarnings("restriction")
 public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootLaunchConfigurationDelegate {
+
+	public static final String TYPE_ID = "org.springframework.ide.eclipse.boot.devtools.client.launch";
 
 	private static final long DEBUG_CONNECT_TIMEOUT = 10000;
 	public static final String REMOTE_SPRING_APPLICATION = "org.springframework.boot.devtools.RemoteSpringApplication";
