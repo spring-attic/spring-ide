@@ -188,7 +188,9 @@ public class BootDevtoolsClientLaunchShortcut implements ILaunchShortcut {
 			if (el instanceof IResource) {
 				return (IResource) el;
 			} else if (el instanceof IAdaptable) {
-				return ((IAdaptable) el).getAdapter(IResource.class);
+				//Warning older Eclipse API 'getAdapter() Object not IResource
+				Object o = ((IAdaptable) el).getAdapter(IResource.class);
+				return (IResource)o;
 			}
 		}
 		return null;
@@ -199,9 +201,9 @@ public class BootDevtoolsClientLaunchShortcut implements ILaunchShortcut {
 	public void launch(IEditorPart editor, String mode) {
 		try {
 			IEditorInput input = editor.getEditorInput();
-			IResource rsrc = input.getAdapter(IResource.class);
+			Object rsrc = input.getAdapter(IResource.class);
 			if (rsrc!=null) {
-				launch(rsrc, mode);
+				launch((IResource)rsrc, mode);
 			}
 		} catch (Throwable e) {
 			BootActivator.log(e);
