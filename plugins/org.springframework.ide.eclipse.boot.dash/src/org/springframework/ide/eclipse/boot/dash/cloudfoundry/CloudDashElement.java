@@ -11,11 +11,17 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
@@ -175,6 +181,60 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	}
 
+	/**
+	 * Add a set of environment variables to the existing environment variables
+	 * of an application.
+	 *
+	 * @param vars
+	 *            to add to existing variables.
+	 * @param monitor
+	 *            should be non-null. This requires update to CF so it may take
+	 *            time.
+	 * @throws Exception
+	 *             if app does not exist (e.g. model is out of synch with Cloud
+	 *             Foundry), or failure to add env vars.
+	 */
+	public void addEnvironmentVariables(final Map<String, String> toAdd, IProgressMonitor monitor) throws Exception {
+		// Nothing to add , avoid CF calls
+		if (toAdd == null || toAdd.isEmpty()) {
+			return;
+		}
+		final String opName = "Updating " + getName() + " environment variables.";
+
+		new CloudApplicationOperation(opName, (CloudFoundryBootDashModel) getParent(), getName()) {
+
+			@Override
+			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+				CloudAppInstances instances = getCachedApplication();
+				if (instances == null) {
+					instances = getCloudApplicationInstances();
+				}
+
+				if (instances == null) {
+					throw BootDashActivator.asCoreException(
+							"Unable to update environment variables. No application found in Cloud Foundry for: "
+									+ CloudDashElement.this.getName()
+									+ ". View appears to be out of synch with Cloud Foundry. Please refresh and try again.");
+				}
+
+				Map<String, Object> existingVars = getClient()
+						.getApplicationEnvironment(instances.getApplication().getMeta().getGuid());
+
+				Map<String, String> varsToUpdate = new HashMap<String, String>();
+				if (existingVars != null) {
+					for (Entry<String, Object> var : existingVars.entrySet()) {
+						varsToUpdate.put(var.getKey(), var.getValue().toString());
+					}
+				}
+
+				varsToUpdate.putAll(toAdd);
+
+				getClient().updateApplicationEnv(appName, varsToUpdate);
+				((CloudFoundryBootDashModel) getParent()).updateApplication(getCloudApplicationInstances());
+			}
+		}.run(monitor);
+	}
+
 	@Override
 	public int getActualInstances() {
 		return getCloudModel().getAppCache().getApp(getName()) != null
@@ -236,7 +296,6 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 				return false;
 			return true;
 		}
-
 
 	}
 }
