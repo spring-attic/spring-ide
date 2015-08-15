@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
@@ -63,7 +64,6 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private LocalBootDashModel context;
-
 	private PropertyStoreApi persistentProperties;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
@@ -194,6 +194,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			}
 			try {
 				LaunchUtils.terminate(launches);
+				shutdownExpose();
 			} catch (Exception e) {
 				//why does terminating process with Eclipse debug UI fail so #$%# often?
 				BootActivator.log(new Error("Termination of "+this+" failed", e));
@@ -397,8 +398,18 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 	}
 
 	public void restartAndExpose(NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {
+		stopSync();
+
 		int freePort = SocketUtil.findFreePort();
-		NGROKTunnel tunnel = ngrokClient.createTunnel("tunnel", "http", Integer.toString(freePort));
+		String tunnelName = getName();
+
+		NGROKTunnel tunnel = ngrokClient.startTunnel("http", Integer.toString(freePort));
+		NGROKLaunchTracker.add(tunnelName, ngrokClient, tunnel);
+
+		if (tunnel == null) {
+			ui.errorPopup("ngrok tunnel not started", "there was a problem starting the ngrok tunnel, try again or start a tunnel manually.");
+			return;
+		}
 
 		String tunnelURL = tunnel.getPublic_url();
 
@@ -412,7 +423,6 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
 		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
 
-		stopSync();
 		start(ILaunchManager.DEBUG_MODE, ui, extraAttributes);
 	}
 
@@ -481,6 +491,15 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			}
 		}
 		return false;
+	}
+
+	public void shutdownExpose() {
+		NGROKClient client = NGROKLaunchTracker.get(getName());
+
+		if (client != null) {
+			client.shutdown();
+			NGROKLaunchTracker.remove(getName());
+		}
 	}
 
 }

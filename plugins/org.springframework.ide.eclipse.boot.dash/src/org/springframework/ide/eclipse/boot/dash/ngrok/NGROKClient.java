@@ -11,14 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.ngrok;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.net.URLEncoder;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Request;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -26,43 +24,71 @@ import org.json.JSONObject;
  */
 public class NGROKClient {
 
+	private static int CREATE_TUNNEL_TIMEOUT_SECONDS = 6;
+
 	private String path;
-	private String url;
-	private List<Process> processes;
+
+	private NGROKProcess process;
+	private NGROKTunnel tunnel;
 
 	public NGROKClient(String path) {
 		this.path = path;
-		this.processes = new ArrayList<Process>();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
-				for (Iterator<Process> iterator = processes.iterator(); iterator.hasNext();) {
-					Process process = iterator.next();
-					process.destroy();
+				if (process != null) {
+					process.terminate();
 				}
 			}
 		}));
 	}
 
-	public boolean isRunning() {
-		try {
-			String response = Request.Get(url + "/api").execute().returnContent().asString();
-			System.out.println(response);
-			return true;
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return false;
+	public NGROKTunnel getTunnel() {
+		return tunnel;
 	}
 
-	public NGROKTunnel[] getTunnels() {
+	public NGROKTunnel startTunnel(String proto, String addr) throws Exception {
+		process = NGROKProcess.startNGROK(path, proto, addr);
+		if (process != null) {
+
+			boolean success = false;
+			int seconds = 0;
+
+			while (!success && seconds < CREATE_TUNNEL_TIMEOUT_SECONDS) {
+				NGROKTunnel[] tunnels = retrieveTunnels();
+				if (tunnels != null && tunnels.length > 0) {
+					for (int i = 0; i < tunnels.length; i++) {
+						if (tunnels[i].getAddr().endsWith(addr) && tunnels[i].getProto().equals(proto)) {
+							tunnel = tunnels[i];
+							return tunnel;
+						}
+					}
+				}
+				seconds++;
+				Thread.sleep(1000);
+			}
+		}
+
+		return null;
+	}
+
+	public void shutdown() {
+		if (tunnel != null) {
+			shutdownTunnel(tunnel);
+			tunnel = null;
+		}
+
+		if (process != null) {
+			process.terminate();
+			process = null;
+		}
+	}
+
+	private NGROKTunnel[] retrieveTunnels() {
 		NGROKTunnel[] result = null;
 		try {
-			String response = Request.Get(url + "/api/tunnels").execute().returnContent().asString();
+			String response = Request.Get(process.getApiURL() + "/api/tunnels").execute().returnContent().asString();
 
 			JSONObject jsonResponse = new JSONObject(response);
 
@@ -80,53 +106,26 @@ public class NGROKClient {
 				}
 			}
 		}
-		catch (JSONException e) {
-			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		catch (Exception e) {
+			System.out.println(e);
+			// do nothing, might be the case that the ngrok process is not yet up
 		}
 
 		return result;
 	}
 
-	public NGROKTunnel createTunnel(String name, String proto, String addr) {
-
+	private void shutdownTunnel(NGROKTunnel ngrokTunnel) {
 		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(path, proto, addr);
-
-			Process process = null;
-			try {
-				process = processBuilder.start();
-				processes.add(process);
-				url = "http://localhost:4040";
-			} catch (IOException e) {
-				e.printStackTrace();
+			String deleteURL = process.getApiURL() + "/api/tunnels/" + URLEncoder.encode(ngrokTunnel.getName(), "UTF-8");
+			HttpResponse response = Request.Delete(deleteURL).execute().returnResponse();
+			if (response.getStatusLine().getStatusCode() != 204) {
+				System.err.println("errro closing tunnel");
 			}
-
-			System.out.println("Tunnel creation initiated...");
-
-			boolean success = false;
-			while (!success) {
-				System.out.println("try and see if tunnel is there...");
-				NGROKTunnel[] tunnels = getTunnels();
-				if (tunnels != null && tunnels.length > 0) {
-					for (int i = 0; i < tunnels.length; i++) {
-						if (tunnels[i].getAddr().endsWith(addr)) {
-							System.out.println("yepp, its here: " + tunnels[0].getPublic_url());
-							return tunnels[0];
-						}
-					}
-				}
-				System.out.println("not yet there, so lets sleep for 1sec and try again...");
-				Thread.sleep(1000);
-			}
-		}
-		catch (Exception e) {
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
 	}
 
 }

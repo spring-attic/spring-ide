@@ -17,10 +17,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -34,15 +34,28 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
  */
 public class ExposeAppAction extends RunStateAction {
 
-	private Process process;
 	private NGROKInstallManager ngrokManager;
 
-	public ExposeAppAction(BootDashViewModel model, MultiSelection<BootDashElement> selection,
-			UserInteractions ui, RunState goalState, NGROKInstallManager ngrokManager) {
+	public ExposeAppAction(final BootDashViewModel model, final MultiSelection<BootDashElement> selection,
+			final UserInteractions ui, final RunState goalState, final NGROKInstallManager ngrokManager) {
 		super(model, selection, ui, goalState);
 		Assert.isLegal(goalState == RunState.RUNNING || goalState == RunState.DEBUGGING);
 
 		this.ngrokManager = ngrokManager;
+
+		model.addElementStateListener(new ElementStateListener() {
+			@Override
+			public void stateChanged(BootDashElement e) {
+				if (e instanceof BootProjectDashElement && e.getRunState().equals(RunState.INACTIVE)) {
+					try {
+						BootProjectDashElement localDashProject = (BootProjectDashElement) e;
+						localDashProject.shutdownExpose();
+					} catch (Exception ex) {
+						ui.errorPopup("error shutting down tunnel", "error shutting down tunnel");
+					}
+				}
+			}
+		});
 	}
 
 	@Override
@@ -118,9 +131,6 @@ public class ExposeAppAction extends RunStateAction {
 
 	@Override
 	public void dispose() {
-		if (process != null) {
-			process.destroy();
-		}
 		super.dispose();
 	}
 
