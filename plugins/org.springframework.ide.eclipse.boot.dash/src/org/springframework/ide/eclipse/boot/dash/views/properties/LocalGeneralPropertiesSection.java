@@ -28,7 +28,8 @@ public class LocalGeneralPropertiesSection extends AbstractBdeGeneralPropertiesS
 				new HostPropertyControl(),
 				new PortPropertyControl(),
 				new DefaultPathPropertyControl(),
-				new TagsPropertyControl()
+				new TagsPropertyControl(),
+				new ExposedPropertyControl()
 		};
 	}
 
