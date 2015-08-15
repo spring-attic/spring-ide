@@ -48,7 +48,7 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 
 	public static final String TYPE_ID = "org.springframework.ide.eclipse.boot.devtools.client.launch";
 
-	private static final long DEBUG_CONNECT_TIMEOUT = 10000;
+	private static final long DEBUG_CONNECT_TIMEOUT = 20000;
 	public static final String REMOTE_SPRING_APPLICATION = "org.springframework.boot.devtools.RemoteSpringApplication";
 	public static final String REMOTE_URL = "spring.devtools.remote.url";
 	public static final String REMOTE_SECRET = "spring.devtools.remote.secret";
@@ -137,6 +137,19 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 
 	public static void setRemoteUrl(ILaunchConfigurationWorkingCopy conf, String value) {
 		conf.setAttribute(REMOTE_URL, value);
+	}
+
+	public static void setRemoteSecret(ILaunchConfigurationWorkingCopy conf, String value) {
+		conf.setAttribute(REMOTE_SECRET, value);
+	}
+
+	public static String getRemoteSecret(ILaunchConfigurationWorkingCopy conf) {
+		try {
+			return conf.getAttribute(REMOTE_SECRET, (String)null);
+		} catch (CoreException e) {
+			BootActivator.log(e);
+		}
+		return null;
 	}
 
 	/**

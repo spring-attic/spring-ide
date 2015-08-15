@@ -70,7 +70,6 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-
 		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(
 				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()), false);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -80,7 +79,6 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		Operation<?> op = null;
-
 		if (getProject() != null) {
 			boolean shouldAutoReplaceApp = true;
 			List<BootDashElement> elements = new ArrayList<BootDashElement>();

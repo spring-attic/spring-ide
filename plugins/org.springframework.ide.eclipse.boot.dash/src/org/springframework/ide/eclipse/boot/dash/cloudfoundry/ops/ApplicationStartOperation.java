@@ -14,15 +14,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationStartOperation extends CloudApplicationOperation {
+
+//	private static final Map<String, String> RUNNING_OPTS = new HashMap<String, String>();
+//	static {
+//		RUNNING_OPTS.put("JAVA_OPTS", "");
+//	}
 
 	private final String appName;
 	private final RunState startMode;
@@ -44,9 +53,44 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		getAppUpdateListener().applicationStarting(getCachedApplication());
 
+		String debugSecret = null;
+		boolean isDebugging = startMode==RunState.DEBUGGING;
+		if (isDebugging) {
+			debugSecret = RandomStringUtils.randomAlphabetic(20);
+			updateEnvVars(debugOpts(debugSecret));
+		}
+
 		getClient().restartApplication(appName);
 
+
 		new ApplicationRunningStateTracker(appName, getClient(), model).startTracking(monitor);
+
+		if (isDebugging) {
+			DevtoolsUtil.launchDevtoolsDebugging(getProject(), getHost(), debugSecret);
+		}
+	}
+
+	private String getHost() {
+		CloudDashElement el = model.getElement(appName);
+		if (el!=null) {
+			return el.getLiveHost();
+		}
+		return null;
+	}
+
+	private IProject getProject() {
+		CloudDashElement el = model.getElement(appName);
+		if (el!=null) {
+			return el.getProject();
+		}
+		return null;
+	}
+
+	private Map<String, String> debugOpts(String debugSecret) {
+		Map<String, String> opts = new HashMap<String, String>();
+		opts.put("JAVA_OPTS", "-Dspring.devtools.remote.secret="+debugSecret
+				+" -Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n");
+		return opts;
 	}
 
 	protected void updateEnvVars(Map<String, String> toAdd) throws Exception {

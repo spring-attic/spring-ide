@@ -47,16 +47,18 @@ public abstract class WaitFor {
 			retry = e!=null && System.currentTimeMillis() < endTime;
 			if (retry) {
 				try {
-//					System.out.println("Failed: "+e.getMessage());
+					//System.out.println("Failed: "+e.getMessage());
 					Thread.sleep(DEFAULT_INTERVAL);
-//					System.out.println("Retrying");
+					//System.out.println("Retrying");
 				} catch (InterruptedException ie) {
 				}
 			}
 		} while (retry);
 		if (e!=null) {
+			//System.out.println("FAIL");
 			throw ExceptionUtil.exception(e);
 		}
+		//System.out.println("SUCCESS");
 	}
 
 	public abstract void run() throws Exception;
