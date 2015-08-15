@@ -79,7 +79,8 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		Operation<?> op = null;
-		if (getProject() != null) {
+		// Only do full upload on restart. Not on debug
+		if (getProject() != null && runingOrDebugging == RunState.RUNNING) {
 			boolean shouldAutoReplaceApp = true;
 			List<BootDashElement> elements = new ArrayList<BootDashElement>();
 			elements.add(this);
