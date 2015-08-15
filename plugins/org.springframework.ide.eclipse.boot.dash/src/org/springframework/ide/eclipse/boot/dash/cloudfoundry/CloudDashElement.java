@@ -80,7 +80,11 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 		Operation<?> op = null;
 		// Only do full upload on restart. Not on debug
-		if (getProject() != null && runingOrDebugging == RunState.RUNNING) {
+		if (getProject() != null
+// TODO: commenting out for now as restarting doesnt seem to restage. Need to re-stage for JAVA_OPTS in debugging to be set. right now that is done
+				// through uploading via full deployment
+//				&& runingOrDebugging == RunState.RUNNING
+				) {
 			boolean shouldAutoReplaceApp = true;
 			List<BootDashElement> elements = new ArrayList<BootDashElement>();
 			elements.add(this);
