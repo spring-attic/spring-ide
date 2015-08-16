@@ -122,7 +122,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private Stylers stylers;
 
-	public class MySorter extends ViewerSorter {
+	public static class MySorter extends ViewerSorter {
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			if (e1 instanceof BootDashModel && e2 instanceof BootDashModel) {
@@ -221,7 +221,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
-	public class CustomTreeViewer extends TreeViewer {
+	public static class CustomTreeViewer extends TreeViewer {
 
 		private LiveVariable<Integer> hiddenElementCount = new LiveVariable<Integer>(0);
 

@@ -17,7 +17,6 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -25,9 +24,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -188,13 +190,17 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public String inputText(String title, String message, String initialValue, IInputValidator validator) {
-		InputDialog inputDialog = new InputDialog(getShell(), title, message, initialValue, validator);
+	public String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator) {
+		SelectRemoteEurekaDialog dialog = new SelectRemoteEurekaDialog(getShell(), new BootDashTreeContentProvider());
+		dialog.setInput(model);
 
-		if (inputDialog.open() == Window.OK) {
-			return inputDialog.getValue();
-		}
-
+	    dialog.setTitle("Select Eureka instance");
+	    dialog.setMessage("Select the Eureka instance this local app should be registered with");
+	    int open = dialog.open();
+	    if (open == Window.OK) {
+	    		String result = dialog.getSelectedEurekaURL();
+	    		return result;
+	    }
 		return null;
 	}
 }

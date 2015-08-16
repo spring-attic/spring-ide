@@ -49,5 +49,5 @@ public interface UserInteractions {
 	 * @param validator
 	 * @return
 	 */
-	String inputText(String title, String message, String initialValue, IInputValidator validator);
+	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 }

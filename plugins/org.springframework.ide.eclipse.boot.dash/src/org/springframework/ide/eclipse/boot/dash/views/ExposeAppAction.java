@@ -35,10 +35,13 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 public class ExposeAppAction extends RunStateAction {
 
 	private NGROKInstallManager ngrokManager;
+	private BootDashViewModel model;
 
 	public ExposeAppAction(final BootDashViewModel model, final MultiSelection<BootDashElement> selection,
 			final UserInteractions ui, final RunState goalState, final NGROKInstallManager ngrokManager) {
 		super(model, selection, ui, goalState);
+		this.model = model;
+
 		Assert.isLegal(goalState == RunState.RUNNING || goalState == RunState.DEBUGGING);
 
 		this.ngrokManager = ngrokManager;
@@ -112,7 +115,7 @@ public class ExposeAppAction extends RunStateAction {
 	}
 
 	private String getEurekaInstance() {
-		String eurekaInstance = ui.inputText("Eureka URL", "please enter the full URL of the Eureka instance you would like to use", "", null);
+		String eurekaInstance = ui.selectRemoteEureka(model, "Eureka URL", "please enter the full URL of the Eureka instance you would like to use", "", null);
 
 		if (eurekaInstance != null) {
 			if (eurekaInstance.endsWith("/eureka") || eurekaInstance.endsWith("/eureka/")) {
