@@ -12,17 +12,24 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
  * @author Kris De Volder
@@ -89,6 +96,34 @@ public class DevtoolsUtil {
 			BootActivator.log(e);
 		}
 		return null;
+	}
+
+	public static boolean isDebuggerAttached(BootDashElement bde) {
+		if (bde.getTarget().getType()==RunTargetTypes.LOCAL) {
+			//Clients really shouldn't ask this about local apps. We don't attach devtools debugger to them
+			// (Well we can, buts is not really useful as there's much better ways to debug local apps).
+			throw new IllegalArgumentException("This operation is not implemented for LOCAL runttargets");
+		}
+		IProject project = bde.getProject();
+		if (project!=null) { // else not associated with a local project... can't really attach debugger then
+			String host = bde.getLiveHost();
+			if (host!=null) { // else app not running, can't attach debugger then
+				ILaunchConfiguration conf = findConfig(project, host);
+				return isDebugging(conf);
+			}
+		}
+		return false;
+	}
+
+	private static boolean isDebugging(ILaunchConfiguration conf) {
+		for (ILaunch launch : LaunchUtils.getLaunches(conf)) {
+			if (!launch.isTerminated()) {
+				if (ILaunchManager.RUN_MODE.equals(launch.getLaunchMode())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

@@ -128,7 +128,13 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	@Override
 	public RunState getRunState() {
-		return getCloudModel().getAppCache().getRunState(getName());
+		RunState state = getCloudModel().getAppCache().getRunState(getName());
+		if (state==RunState.RUNNING) {
+			if (DevtoolsUtil.isDebuggerAttached(this)) {
+				return RunState.DEBUGGING;
+			}
+		}
+		return state;
 	}
 
 	public CloudApplicationDeploymentProperties getDeploymentProperties() {
