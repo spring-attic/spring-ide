@@ -86,6 +86,7 @@ public class ApplicationRunningStateTracker {
 		if (runState != RunState.RUNNING) {
 			String warning = "Timed out waiting for application - " + appName
 					+ " to start. Please wait and manually refresh the target, or check if the application logs show any errors.";
+			runState = RunState.UNKNOWN;
 			model.getElementConsoleManager().writeToConsole(appName, warning, LogType.LOCALSTDERROR);
 			BootDashActivator.logWarning(warning);
 

@@ -45,6 +45,18 @@ public abstract class ApplicationUpdateListener {
 		model.updateApplication(appInstances);
 	}
 
+	public void onError(Throwable t) {
+		updateModel(RunState.UNKNOWN);
+	}
+
+	public void onOperationTermination(CloudAppInstances appInstances) {
+		if (appInstances != null) {
+			updateModel(appInstances);
+		} else {
+			updateModel(RunState.UNKNOWN);
+		}
+	}
+
 	abstract public void applicationCreated(CloudAppInstances app);
 
 	abstract public void applicationStarting(CloudAppInstances app);

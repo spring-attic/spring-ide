@@ -91,6 +91,7 @@ public class CloudAppCache {
 			IProject project = oldItem.project;
 			CloudAppInstances appInstances = oldItem.appInstances;
 			CacheItem newItem = new CacheItem(appInstances, project, runState);
+			appCache.put(newItem.appName, newItem);
 			return !newItem.equals(oldItem);
 		}
 		return false;
@@ -131,7 +132,7 @@ public class CloudAppCache {
 		IProject project = old != null ? old.project : null;
 		CacheItem newItem = new CacheItem(instances, project, runState);
 
-		appCache.put(instances.getApplication().getName(), newItem);
+		appCache.put(newItem.appName, newItem);
 
 		return !newItem.equals(old);
 	}

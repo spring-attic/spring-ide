@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
  * Runs {@link CloudApplicationOperation} in series and updates the model only
@@ -60,6 +59,7 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+		Exception error = null;
 		try {
 			// Run ops in series
 			if (resetConsole) {
@@ -68,24 +68,21 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 			for (CloudApplicationOperation op : operations) {
 				op.run(monitor);
 			}
-		} finally {
-			CloudAppInstances appInstances = null;
+		} catch (Exception e) {
+			error = e;
+		}
 
-			// Be sure to catch all errors to properly set the
-			// app state to UNKNOWN in case the app or its instances cannot be
-			// resolved, as app run state is dependent on instance state
+		if (error != null) {
+			getAppUpdateListener().onError(error);
+			throw error;
+		} else {
+			CloudAppInstances appInstances = null;
 			try {
 				appInstances = getCloudApplicationInstances();
 			} catch (Throwable e) {
 				BootDashActivator.log(e);
 			}
-
-			if (appInstances != null) {
-				getAppUpdateListener().updateModel(appInstances);
-			} else {
-				getAppUpdateListener().updateModel(RunState.UNKNOWN);
-			}
+			getAppUpdateListener().onOperationTermination(appInstances);
 		}
 	}
-
 }
