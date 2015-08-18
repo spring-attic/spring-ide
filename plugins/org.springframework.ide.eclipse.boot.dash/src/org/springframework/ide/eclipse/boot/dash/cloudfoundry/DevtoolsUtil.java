@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -24,7 +25,6 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -35,7 +35,6 @@ import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLa
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
  * @author Kris De Volder
@@ -164,6 +163,16 @@ public class DevtoolsUtil {
 		l.setAttribute(APP_NAME, cde.getName());
 	}
 
+	public static boolean isLaunchFor(ILaunch l, CloudDashElement cde) {
+		String targetId = getAttribute(l, TARGET_ID);
+		String appName = getAttribute(l, APP_NAME);
+		if (targetId!=null && appName!=null) {
+			return targetId.equals(cde.getTarget().getId())
+					&& appName.equals(cde.getName());
+		}
+		return false;
+	}
+
 	/**
 	 * Retreive corresponding CDE for a given launch.
 	 */
@@ -188,6 +197,18 @@ public class DevtoolsUtil {
 		return null;
 	}
 
+
+	private static String getAttribute(ILaunch l, String name) {
+		try {
+			ILaunchConfiguration c = l.getLaunchConfiguration();
+			if (c!=null) {
+				return c.getAttribute(name, (String)null);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return null;
+	}
 
 	private static String getAttribute(ILaunchConfiguration l, String name) {
 		try {
@@ -217,6 +238,25 @@ public class DevtoolsUtil {
 				}
 			}
 		});
+	}
+
+	public static DevtoolsDebugTargetDisconnector createDebugTargetDisconnector(CloudFoundryBootDashModel model) {
+		return new DevtoolsDebugTargetDisconnector(model);
+	}
+
+	public static void disconnectDevtoolsClientsFor(CloudDashElement e) {
+		ILaunchManager lm = getLaunchManager();
+		for (ILaunch l : lm.getLaunches()) {
+			if (!l.isTerminated() && isLaunchFor(l, e)) {
+				if (l.canTerminate()) {
+					try {
+						l.terminate();
+					} catch (DebugException de) {
+						BootActivator.log(de);
+					}
+				}
+			}
+		}
 	}
 
 

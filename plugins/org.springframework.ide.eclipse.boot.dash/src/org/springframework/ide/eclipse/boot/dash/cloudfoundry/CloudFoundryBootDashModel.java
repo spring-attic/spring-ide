@@ -70,6 +70,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	private BootDashModelConsoleManager consoleManager;
 
+	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
 		super(target);
 		RunTargetType type = target.getType();
@@ -79,6 +81,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.cloudAppCache = new CloudAppCache();
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
+		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 	}
 
 	public CloudAppCache getAppCache() {
@@ -118,6 +121,10 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	@Override
 	public void dispose() {
 		elements = null;
+		if (debugTargetDisconnector!=null) {
+			debugTargetDisconnector.dispose();
+			debugTargetDisconnector = null;
+		}
 	}
 
 	@Override
