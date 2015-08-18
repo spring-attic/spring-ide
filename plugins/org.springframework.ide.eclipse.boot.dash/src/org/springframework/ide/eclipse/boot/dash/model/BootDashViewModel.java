@@ -15,8 +15,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -33,6 +35,7 @@ public class BootDashViewModel implements Disposable {
 	private ToggleFiltersModel toggleFiltersModel;
 	private TagFilterBoxModel filterBox;
 	private LiveExpression<Filter<BootDashElement>> filter;
+	private ProcessTracker devtoolsProcessTracker;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -51,6 +54,7 @@ public class BootDashViewModel implements Disposable {
 		filterBox = new TagFilterBoxModel();
 		toggleFiltersModel = new ToggleFiltersModel();
 		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
+		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
 	}
 
 	public LiveSet<RunTarget> getRunTargets() {
@@ -60,6 +64,7 @@ public class BootDashViewModel implements Disposable {
 	@Override
 	public void dispose() {
 		models.dispose();
+		devtoolsProcessTracker.dispose();
 	}
 
 	public void addElementStateListener(ElementStateListener l) {
@@ -111,5 +116,14 @@ public class BootDashViewModel implements Disposable {
 
 	public LiveExpression<Filter<BootDashElement>> getFilter() {
 		return filter;
+	}
+
+	public BootDashModel getSectionByTargetId(String targetId) {
+		for (BootDashModel m : getSectionModels().getValue()) {
+			if (m.getRunTarget().getId().equals(targetId)) {
+				return m;
+			}
+		};
+		return null;
 	}
 }

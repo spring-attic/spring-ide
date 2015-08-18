@@ -131,7 +131,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		RunState state = getCloudModel().getAppCache().getRunState(getName());
 		if (state==RunState.RUNNING) {
 			if (DevtoolsUtil.isDebuggerAttached(this)) {
-				return RunState.DEBUGGING;
+				state = RunState.DEBUGGING;
 			}
 		}
 		return state;
@@ -265,6 +265,10 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 		private final String appName;
 		private final RunTarget runTarget;
+
+		public String toString() {
+			return appName+"@"+runTarget;
+		};
 
 		CloudElementIdentity(String appName, RunTarget runTarget) {
 			this.appName = appName;

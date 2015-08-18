@@ -23,6 +23,10 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker.ProcessListener;
 public class ProcessListenerAdapter implements ProcessListener{
 
 	@Override
+	public void debugTargetCreated(ProcessTracker tracker, IDebugTarget target) {
+	}
+
+	@Override
 	public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
 	}
 
@@ -33,5 +37,6 @@ public class ProcessListenerAdapter implements ProcessListener{
 	@Override
 	public void processCreated(ProcessTracker tracker, IProcess process) {
 	}
+
 
 }

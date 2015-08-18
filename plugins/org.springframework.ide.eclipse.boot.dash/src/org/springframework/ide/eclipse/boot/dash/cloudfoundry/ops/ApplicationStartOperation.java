@@ -66,24 +66,9 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		new ApplicationRunningStateTracker(appName, getClient(), model).startTracking(monitor);
 
 		if (isDebugging) {
-			DevtoolsUtil.launchDevtoolsDebugging(getProject(), getHost(), debugSecret);
+			CloudDashElement cde = model.getElement(appName);
+			DevtoolsUtil.launchDevtoolsDebugging(cde, debugSecret);
 		}
-	}
-
-	private String getHost() {
-		CloudDashElement el = model.getElement(appName);
-		if (el!=null) {
-			return el.getLiveHost();
-		}
-		return null;
-	}
-
-	private IProject getProject() {
-		CloudDashElement el = model.getElement(appName);
-		if (el!=null) {
-			return el.getProject();
-		}
-		return null;
 	}
 
 	private Map<String, String> debugOpts(String debugSecret) {

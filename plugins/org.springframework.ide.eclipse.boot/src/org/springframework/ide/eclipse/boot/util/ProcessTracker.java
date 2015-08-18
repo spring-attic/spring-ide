@@ -26,6 +26,7 @@ import org.eclipse.debug.core.model.IProcess;
 public class ProcessTracker {
 
 	public interface ProcessListener {
+		void debugTargetCreated(ProcessTracker tracker, IDebugTarget target);
 		void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target);
 		void processTerminated(ProcessTracker tracker, IProcess process);
 		void processCreated(ProcessTracker tracker, IProcess process);
@@ -66,6 +67,8 @@ public class ProcessTracker {
 		case CREATE:
 			if (source instanceof IProcess) {
 				processCreated((IProcess)source);
+			} else if (source instanceof IDebugTarget) {
+				debugTargetCreated((IDebugTarget)source);
 			}
 			break;
 		case TERMINATE:
@@ -78,6 +81,10 @@ public class ProcessTracker {
 		default:
 			break;
 		}
+	}
+
+	private void debugTargetCreated(IDebugTarget source) {
+		listener.debugTargetCreated(this, source);
 	}
 
 	private void debugTargetTerminated(IDebugTarget source) {
