@@ -49,7 +49,7 @@ public class BootUIImages {
 		}
 	}
 
-	private static ImageDescriptor descriptor(String key) throws MalformedURLException {
+	public static ImageDescriptor descriptor(String key) throws MalformedURLException {
 		return ImageDescriptor.createFromURL(url(key));
 	}
 
