@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -27,11 +26,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationStartOperation extends CloudApplicationOperation {
-
-//	private static final Map<String, String> RUNNING_OPTS = new HashMap<String, String>();
-//	static {
-//		RUNNING_OPTS.put("JAVA_OPTS", "");
-//	}
 
 	private final String appName;
 	private final RunState startMode;
@@ -62,8 +56,8 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		getClient().restartApplication(appName);
 
-
-		new ApplicationRunningStateTracker(appName, getClient(), model).startTracking(monitor);
+		RunState runState = new ApplicationRunningStateTracker(appName, getClient(), model).startTracking(monitor);
+		model.updateApplication(appName, runState);
 
 		if (isDebugging) {
 			CloudDashElement cde = model.getElement(appName);

@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
-	public static final long TIMEOUT = 1000 * 60 * 2;
+	public static final long TIMEOUT = 1000 * 60 * 3;
 
 	public static final long WAIT_TIME = 1000;
 
@@ -87,7 +87,7 @@ public class ApplicationRunningStateTracker {
 			String warning = "Timed out waiting for application - " + appName
 					+ " to start. Please wait and manually refresh the target, or check if the application logs show any errors.";
 			model.getElementConsoleManager().writeToConsole(appName, warning, LogType.LOCALSTDERROR);
-			BootDashActivator.logWarning(warning);
+			throw BootDashActivator.asCoreException(warning);
 
 		} else {
 			model.getElementConsoleManager().writeToConsole(appName, "Application appears to have started - " + appName,

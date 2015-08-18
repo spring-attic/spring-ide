@@ -249,5 +249,13 @@
    </processFactory>
  </extension>
    
- 
+   	 <extension point="org.eclipse.ui.console.consolePageParticipants">
+   		<consolePageParticipant
+      		id="org.springframework.ide.eclipse.boot.launch.devtools.DevtoolsClientConsolePageParticipant"
+      		class="org.springframework.ide.eclipse.boot.launch.devtools.DevtoolsClientConsolePageParticipant">
+	         <enablement>
+	            <instanceof value="org.eclipse.debug.internal.ui.views.console.ProcessConsole"/>
+	         </enablement>
+   		</consolePageParticipant>
+ 	</extension>
 </plugin>
