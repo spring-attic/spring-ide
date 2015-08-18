@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
@@ -28,6 +29,8 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		getClient().stopApplication(element.getName());
 		model.getElementConsoleManager().terminateConsole(element.getName());
-	}
 
+		CloudAppInstances appInstances = getCloudApplicationInstances();
+		getAppUpdateListener().updateModel(appInstances);
+	}
 }

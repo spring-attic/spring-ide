@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
 /**
@@ -59,7 +57,6 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		Exception error = null;
 		try {
 			// Run ops in series
 			if (resetConsole) {
@@ -69,20 +66,8 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 				op.run(monitor);
 			}
 		} catch (Exception e) {
-			error = e;
-		}
-
-		if (error != null) {
-			getAppUpdateListener().onError(error);
-			throw error;
-		} else {
-			CloudAppInstances appInstances = null;
-			try {
-				appInstances = getCloudApplicationInstances();
-			} catch (Throwable e) {
-				BootDashActivator.log(e);
-			}
-			getAppUpdateListener().onOperationTermination(appInstances);
+			getAppUpdateListener().onError(e);
+			throw e;
 		}
 	}
 }
