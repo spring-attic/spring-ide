@@ -115,21 +115,19 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				}
 
 				/*
+				 * Update ProjectAppStore
+				 */
+				projectAppStore.storeProjectToAppMapping(elements.getValue());
+
+				/*
 				 * Update BDEs
 				 */
-				List<BootDashElement> bdes = new ArrayList<BootDashElement>(appsToRefresh.size());
 				for (String app : appsToRefresh) {
 					CloudDashElement element = getElement(app);
 					if (element != null) {
 						notifyElementChanged(element);
-						bdes.add(element);
 					}
 				}
-
-				/*
-				 * Update ProjectAppStore
-				 */
-				projectAppStore.storeProjectToAppMapping(bdes);
 
 			} catch (OperationCanceledException oce) {
 				BootDashActivator.log(oce);
