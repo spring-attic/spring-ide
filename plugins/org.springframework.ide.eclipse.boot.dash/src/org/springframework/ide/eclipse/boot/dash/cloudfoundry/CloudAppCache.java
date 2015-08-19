@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,6 +181,18 @@ public class CloudAppCache {
 			return item.project;
 		}
 		return null;
+	}
+
+	public synchronized Collection<String> replaceProject(IProject oldProject, IProject newProject) {
+		List<String> apps = new ArrayList<String>();
+		for (Map.Entry<String, CacheItem> entry : appCache.entrySet()) {
+			CacheItem item = entry.getValue();
+			if (item != null && item.project == oldProject) {
+				entry.setValue(new CacheItem(item.appInstances, newProject, item.runState));
+				apps.add(entry.getKey());
+			}
+		}
+		return apps;
 	}
 
 	/*
