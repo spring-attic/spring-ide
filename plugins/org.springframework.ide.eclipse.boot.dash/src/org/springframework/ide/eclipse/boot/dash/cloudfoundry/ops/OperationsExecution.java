@@ -39,10 +39,14 @@ public class OperationsExecution {
 				} catch (Exception e) {
 					if (!(e instanceof OperationCanceledException)) {
 						if (ui != null) {
-							ui.errorPopup("Operation failure: ", e.getMessage());
-						} else {
-							BootDashActivator.log(e);
+							String message = e.getMessage() != null && e.getMessage().trim().length() > 0
+									? e.getMessage()
+									: "Unknown error of type: " + e.getClass().getName()
+											+ ". Check Error Log view for further details.";
+							ui.errorPopup("Operation failure: ", message);
+
 						}
+						BootDashActivator.log(e);
 					}
 				}
 				// Only return OK status to avoid a second error dialogue
