@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -24,6 +22,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
@@ -246,7 +247,7 @@ public class BootDashLabels implements Disposable {
 				styledLabel = new StyledString();
 				for (BootDashColumn col : cols) {
 					//Ignore RUN_STATE_ICN because its already represented in the label's icon.
-					if (col!=RUN_STATE_ICN) {
+					if (col != BootDashColumn.RUN_STATE_ICN) {
 						StyledString append = getStyledText(element, col);
 						if (hasText(append)) {
 							Styler styler = getPrefixSuffixStyler(col);
@@ -254,10 +255,15 @@ public class BootDashLabels implements Disposable {
 								// Nothing in the label so far, don't added brackets to first piece
 								styledLabel = styledLabel.append(append);
 							} else {
-								if (styler == null) {
-									styledLabel = styledLabel.append(" [").append(append).append("]");
-								} else {
-									styledLabel = styledLabel.append(" [",styler).append(append).append("]",styler);
+								if (col == BootDashColumn.DEFAULT_PATH) {
+									styledLabel = styledLabel.append(" ").append(append);
+								}
+								else {
+									if (styler == null) {
+										styledLabel = styledLabel.append(" [").append(append).append("]");
+									} else {
+										styledLabel = styledLabel.append(" [",styler).append(append).append("]",styler);
+									}
 								}
 							}
 						}
@@ -275,7 +281,7 @@ public class BootDashLabels implements Disposable {
 				RunState runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
 					int port = element.getLivePort();
-					String textLabel = port < 0 ? "unknown port" : String.valueOf(port);
+					String textLabel = port < 0 ? "unknown port" : (":" + port);
 					if (stylers == null) {
 						label = textLabel;
 					} else {
@@ -285,7 +291,12 @@ public class BootDashLabels implements Disposable {
 				break;
 			case DEFAULT_PATH:
 				String path = element.getDefaultRequestMappingPath();
-				label = path == null ? "" : path;
+				if (stylers == null) {
+					label = path == null ? "" : path;
+				}
+				else {
+					styledLabel = new StyledString(path == null ? "" : path, stylers.darkGrey());
+				}
 				break;
 			case INSTANCES:
 				int actual = element.getActualInstances();
@@ -294,6 +305,18 @@ public class BootDashLabels implements Disposable {
 					label = actual + "/" + desired;
 				} else {
 					styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+				}
+				break;
+			case EXPOSED_URL:
+				runState = element.getRunState();
+				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
+					if (element instanceof BootProjectDashElement) {
+						String projectName = element.getName();
+						NGROKClient ngrokClient = NGROKLaunchTracker.get(projectName);
+						if (ngrokClient != null) {
+							styledLabel = new StyledString("\u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue());
+						}
+					}
 				}
 				break;
 			default:

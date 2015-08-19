@@ -17,7 +17,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 public class LocalRunTarget extends AbstractRunTarget {
 
 	public static final RunTarget INSTANCE = new LocalRunTarget();
-	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH, TAGS};
+	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, PROJECT, LIVE_PORT, DEFAULT_PATH, TAGS, EXPOSED_URL};
 
 	private LocalRunTarget() {
 		super(RunTargetTypes.LOCAL, "local");

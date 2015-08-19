@@ -59,7 +59,8 @@ public class BootDashActions {
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ToggleFiltersAction toggleFiltersAction;
-	private ExposeAppAction exposeAppAction;
+	private ExposeAppAction exposeRunAppAction;
+	private ExposeAppAction exposeDebugAppAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -163,12 +164,20 @@ public class BootDashActions {
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
 
 		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), elementsSelection, ui);
-		exposeAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
-		exposeAppAction.setText("(Re)start and Expose via ngrok");
-		exposeAppAction.setToolTipText("Start or restart the process associated with the selected elements and expose it to the outside world via an ngrok tunnel");
-		exposeAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
-		exposeAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
-}
+
+		exposeRunAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
+		exposeRunAppAction.setText("(Re)start and Expose via ngrok");
+		exposeRunAppAction.setToolTipText("Start or restart the process associated with the selected elements and expose it to the outside world via an ngrok tunnel");
+		exposeRunAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
+		exposeRunAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+
+		exposeDebugAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.DEBUGGING, NGROKInstallManager.getInstance());
+		exposeDebugAppAction.setText("(Re)debug and Expose via ngrok");
+		exposeDebugAppAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode and expose it to the outside world via an ngrok tunnel");
+		exposeDebugAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
+		exposeDebugAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
+
+	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
 		Set<RunTargetType> targetTypes = model.getRunTargetTypes();
@@ -275,8 +284,12 @@ public class BootDashActions {
 		return showPropertiesViewAction;
 	}
 
-	public IAction getExposeAppAction() {
-		return exposeAppAction;
+	public IAction getExposeRunAppAction() {
+		return exposeRunAppAction;
+	}
+
+	public IAction getExposeDebugAppAction() {
+		return exposeDebugAppAction;
 	}
 
 	public void dispose() {
@@ -306,9 +319,14 @@ public class BootDashActions {
 			toggleFiltersAction = null;
 		}
 
-		if (exposeAppAction != null) {
-			exposeAppAction.dispose();
-			exposeAppAction = null;
+		if (exposeRunAppAction != null) {
+			exposeRunAppAction.dispose();
+			exposeRunAppAction = null;
+		}
+
+		if (exposeDebugAppAction != null) {
+			exposeDebugAppAction.dispose();
+			exposeDebugAppAction = null;
 		}
 	}
 

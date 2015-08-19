@@ -397,7 +397,18 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		return persistentProperties;
 	}
 
-	public void restartAndExpose(NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {
+	public void restartAndExpose(RunState runMode, NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {
+		String launchMode = null;
+		if (RunState.RUNNING.equals(runMode)) {
+			launchMode = ILaunchManager.RUN_MODE;
+		}
+		else if (RunState.DEBUGGING.equals(runMode)) {
+			launchMode = ILaunchManager.DEBUG_MODE;
+		}
+		else {
+			throw new IllegalArgumentException("Restart and expose expects RUNNING or DEBUGGING as 'goal' state");
+		}
+
 		stopSync();
 
 		int freePort = SocketUtil.findFreePort();
@@ -423,7 +434,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
 		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
 
-		start(ILaunchManager.DEBUG_MODE, ui, extraAttributes);
+		start(launchMode, ui, extraAttributes);
 	}
 
 	private void start(final String runMode, UserInteractions ui, Map<String, String> extraAttributes) {
