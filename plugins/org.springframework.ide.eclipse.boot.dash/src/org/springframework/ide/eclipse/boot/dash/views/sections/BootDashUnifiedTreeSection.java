@@ -25,6 +25,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -420,6 +421,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenConfigAction());
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());
+
+		manager.add(new Separator());
+		addVisible(manager, actions.getExposeAppAction());
+		manager.add(new Separator());
+
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
 			addVisible(manager, a);
 		}
@@ -449,7 +455,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, updatePasswordAction);
 		}
 
-		addPreferedConfigSelectionMenu(manager);
+		addPreferredConfigSelectionMenu(manager);
 
 //		manager.add
 //		addVisible(manager, new Separator());
@@ -472,7 +478,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		return true;
 	}
 
-	private void addPreferedConfigSelectionMenu(IMenuManager parent) {
+	private void addPreferredConfigSelectionMenu(IMenuManager parent) {
 		BootDashElement element = selection.getSingle();
 		if (element!=null) {
 			ILaunchConfiguration defaultConfig = element.getPreferredConfig();
