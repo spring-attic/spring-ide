@@ -57,7 +57,8 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		requests.restartApplication(appName);
 
 		RunState runState = new ApplicationRunningStateTracker(appName, requests, model).startTracking(monitor);
-		model.updateApplication(appName, runState);
+
+		model.updateApplication(getCloudApplicationInstances(), runState);
 
 		if (isDebugging) {
 			CloudDashElement cde = model.getElement(appName);
