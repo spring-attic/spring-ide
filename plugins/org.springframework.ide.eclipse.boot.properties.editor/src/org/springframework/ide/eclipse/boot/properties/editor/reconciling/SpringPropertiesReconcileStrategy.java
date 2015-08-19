@@ -36,16 +36,10 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 
 /**
- * Reconcile strategy used for spell checking.
- *
- * @since 3.3
+ * Reconcile strategy for spring appication.properties and application.yml editors.
  */
 public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
@@ -53,13 +47,13 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	/**
 	 * Spelling problem collector.
 	 */
-	private static class ProblemCollector implements IProblemCollector {
+	private class SeverityAwareProblemCollector implements IProblemCollector {
 
 		/** Annotation model. */
 		private IAnnotationModel fAnnotationModel;
 
 		/** Annotations to add. */
-		private Map fAddAnnotations;
+		private Map<SpringPropertyAnnotation, Position> fAddAnnotations;
 
 		/** Lock object for modifying the annotations. */
 		private Object fLockObject;
@@ -69,7 +63,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 		 *
 		 * @param annotationModel the annotation model
 		 */
-		public ProblemCollector(IAnnotationModel annotationModel) {
+		public SeverityAwareProblemCollector(IAnnotationModel annotationModel) {
 			Assert.isLegal(annotationModel != null);
 			fAnnotationModel= annotationModel;
 			if (fAnnotationModel instanceof ISynchronizable)
@@ -82,14 +76,18 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#accept(org.eclipse.ui.texteditor.spelling.SpellingProblem)
 		 */
 		public void accept(SpringPropertyProblem problem) {
-			fAddAnnotations.put(new SpringPropertyAnnotation(problem), new Position(problem.getOffset(), problem.getLength()));
+			ProblemSeverity severity = fSeverities.getSeverity(problem);
+			String annotationType = SpringPropertyAnnotation.getAnnotationType(severity);
+			if (annotationType!=null) {
+				fAddAnnotations.put(new SpringPropertyAnnotation(annotationType, problem), new Position(problem.getOffset(), problem.getLength()));
+			}
 		}
 
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginCollecting()
 		 */
 		public void beginCollecting() {
-			fAddAnnotations= new HashMap();
+			fAddAnnotations= new HashMap<SpringPropertyAnnotation, Position>();
 		}
 
 		/*
@@ -97,16 +95,17 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 		 */
 		public void endCollecting() {
 
-			List toRemove= new ArrayList();
+			List<Annotation> toRemove= new ArrayList<Annotation>();
 
 			synchronized (fLockObject) {
-				Iterator iter= fAnnotationModel.getAnnotationIterator();
+				@SuppressWarnings("unchecked")
+				Iterator<SpringPropertyAnnotation> iter= fAnnotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
-					Annotation annotation= (Annotation)iter.next();
+					Annotation annotation= iter.next();
 					if (SpringPropertyAnnotation.TYPES.contains(annotation.getType()))
 						toRemove.add(annotation);
 				}
-				Annotation[] annotationsToRemove= (Annotation[])toRemove.toArray(new Annotation[toRemove.size()]);
+				Annotation[] annotationsToRemove= toRemove.toArray(new Annotation[toRemove.size()]);
 
 				if (fAnnotationModel instanceof IAnnotationModelExtension)
 					((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(annotationsToRemove, fAddAnnotations);
@@ -114,8 +113,8 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 					for (int i= 0; i < annotationsToRemove.length; i++)
 						fAnnotationModel.removeAnnotation(annotationsToRemove[i]);
 					for (iter= fAddAnnotations.keySet().iterator(); iter.hasNext();) {
-						Annotation annotation= (Annotation)iter.next();
-						fAnnotationModel.addAnnotation(annotation, (Position)fAddAnnotations.get(annotation));
+						Annotation annotation= iter.next();
+						fAnnotationModel.addAnnotation(annotation, fAddAnnotations.get(annotation));
 					}
 				}
 			}
@@ -137,9 +136,11 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	/** The progress monitor. */
 	private IProgressMonitor fProgressMonitor;
 
-	private ProblemCollector fProblemCollector;
+	private SeverityAwareProblemCollector fProblemCollector;
 
 	private IReconcileEngine fEngine;
+
+	private SeverityProvider fSeverities;
 
 	/**
 	 * Creates a new comment reconcile strategy.
@@ -149,8 +150,9 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 * @param typeUtil
 	 * @param spellingService the spelling service to use
 	 */
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine) {
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, SeverityProvider severities) {
 		Assert.isNotNull(viewer);
+		fSeverities = severities;
 		fViewer= viewer;
 		fEngine = engine;
 	}
@@ -225,11 +227,11 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 *
 	 * @return the collector or <code>null</code> if none is available
 	 */
-	protected ProblemCollector createSpellingProblemCollector() {
+	protected SeverityAwareProblemCollector createSpellingProblemCollector() {
 		IAnnotationModel model= getAnnotationModel();
 		if (model == null)
 			return null;
-		return new ProblemCollector(model);
+		return new SeverityAwareProblemCollector(model);
 	}
 
 	/*

@@ -123,8 +123,8 @@
   <extension
 	      point="org.eclipse.ui.preferencePages">
 	   <page
-	         name="Annotation Processing"
-	         category="org.springsource.ide.eclipse.commons.preferencePage"
+	         name="Confguration Metadata Processing"
+	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage"
 	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage">
 	   </page>

@@ -25,15 +25,28 @@ import org.eclipse.jface.text.source.Annotation;
 @SuppressWarnings("restriction")
 public class SpringPropertyAnnotation extends Annotation /*implements IQuickFixableAnnotation*/ {
 
-	/** Annotation type for error annotations */
-	public static final String ERROR_TYPE = org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE;
-	public static final String WARNING_TYPE = org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE;
+	/** Annotation type for error and warnings*/
+	public static final String ERROR_ANNOTATION_TYPE = org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE;
+	public static final String WARNING_ANNOTATION_TYPE = org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE;
 		//Could use our own annotation type (but then we also have to declare it somehow to make it show error style marker)
 
 	public static final Set<String> TYPES = new HashSet<String>();
 	static {
-		TYPES.add(ERROR_TYPE);
-		TYPES.add(WARNING_TYPE);
+		TYPES.add(ERROR_ANNOTATION_TYPE);
+		TYPES.add(WARNING_ANNOTATION_TYPE);
+	}
+
+	public static String getAnnotationType(ProblemSeverity severity) {
+		switch (severity) {
+		case ERROR:
+			return ERROR_ANNOTATION_TYPE;
+		case WARNING:
+			return WARNING_ANNOTATION_TYPE;
+		case IGNORE:
+			return null;
+		default:
+			throw new IllegalStateException("Bug: Missing switch case!");
+		}
 	}
 
 	private SpringPropertyProblem fProblem;
@@ -41,8 +54,8 @@ public class SpringPropertyAnnotation extends Annotation /*implements IQuickFixa
 	/**
 	 * Creates a new annotation of given type.
 	 */
-	public SpringPropertyAnnotation(SpringPropertyProblem problem) {
-		super(problem.getSeverity(), false, problem.getMessage());
+	public SpringPropertyAnnotation(String annotationType, SpringPropertyProblem problem) {
+		super(annotationType, false, problem.getMessage());
 		fProblem = problem;
 	}
 
@@ -67,11 +80,6 @@ public class SpringPropertyAnnotation extends Annotation /*implements IQuickFixa
 //		// always true
 //	}
 
-	/**
-	 * Returns the spelling problem.
-	 *
-	 * @return the spelling problem
-	 */
 	public SpringPropertyProblem getSpringPropertyProblem() {
 		return fProblem;
 	}

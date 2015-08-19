@@ -19,18 +19,18 @@ public class SpringPropertyProblem {
 	private int length;
 	private int offset;
 
-	private String severity = SpringPropertyAnnotation.ERROR_TYPE;
+	private ProblemType type;
 
 	/**
 	 * Create a SpringProperty file annotation with a given severity.
 	 * The severity should be one of the XXX_TYPE constants defined in
 	 * {@link SpringPropertyAnnotation}.
 	 */
-	private SpringPropertyProblem(String severity, String msg, int offset, int length) {
+	private SpringPropertyProblem(ProblemType type, String msg, int offset, int length) {
 		this.msg = msg;
 		this.offset = offset;
 		this.length = length;
-		this.severity = severity;
+		this.type = type;
 	}
 
 	public String getMessage() {
@@ -50,15 +50,11 @@ public class SpringPropertyProblem {
 		return "@["+offset+","+length+"]: "+msg;
 	}
 
-	public String getSeverity() {
-		return severity;
+	public ProblemType getType() {
+		return type;
 	}
 
-	public static SpringPropertyProblem error(String message, int offset, int len) {
-		return new SpringPropertyProblem(SpringPropertyAnnotation.ERROR_TYPE, message, offset, len);
+	public static SpringPropertyProblem problem(ProblemType problemType, String message, int offset, int len) {
+		return new SpringPropertyProblem(problemType, message , offset, len);
 	}
-	public static SpringPropertyProblem warning(String message, int offset, int len) {
-		return new SpringPropertyProblem(SpringPropertyAnnotation.WARNING_TYPE, message, offset, len);
-	}
-
 }

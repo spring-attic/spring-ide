@@ -118,7 +118,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
 								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
 								String validPrefix = commonPrefix(similarEntry.getId(), fullName);
-								problemCollector.accept(warning(
+								problemCollector.accept(problem(ProblemType.PROP_UNKNOWN_PROPERTY,
 										"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
 										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
 							} //end: validProperty==null
@@ -179,7 +179,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 				}
 			}
 			if (errorRegion!=null) {
-				problems.accept(error(
+				problems.accept(problem(ProblemType.PROP_VALUE_TYPE_MISMATCH,
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}

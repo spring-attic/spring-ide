@@ -35,7 +35,7 @@ public abstract class SpringPropertiesReconcilerFactory {
 		}
 		try {
 			IReconcileEngine reconcileEngine = createEngine();
-			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, reconcileEngine);
+			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, reconcileEngine, new DefaultSeverityProvider());
 			strategy = ReconcilingUtil.compose(strategy, propertyChecker);
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);

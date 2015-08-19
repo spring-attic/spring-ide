@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
  * same app for any reason.
  * <p/>
  * Cloud application state should always be resolved from external sources
- *
  */
 public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> {
 

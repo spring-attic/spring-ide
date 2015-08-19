@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
@@ -52,11 +53,11 @@ public class SpringYamlReconcileEngine implements IReconcileEngine {
 		} catch (ParserException e) {
 			String msg = e.getProblem();
 			Mark mark = e.getProblemMark();
-			problemCollector.accept(SpringPropertyProblem.error(msg, mark.getIndex(), 1));
+			problemCollector.accept(SpringPropertyProblem.problem(ProblemType.YAML_SYNTAX_ERROR, msg, mark.getIndex(), 1));
 		} catch (ScannerException e) {
 			String msg = e.getProblem();
 			Mark mark = e.getProblemMark();
-			problemCollector.accept(SpringPropertyProblem.error(msg, mark.getIndex(), 1));
+			problemCollector.accept(SpringPropertyProblem.problem(ProblemType.YAML_SYNTAX_ERROR, msg, mark.getIndex(), 1));
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		} finally {
