@@ -283,7 +283,8 @@ public class ProjectClassLoaderCache {
 	public static boolean shouldFilter(String name) {
 		if ("commons-logging.properties".equals(name)) return true;
 		if (name != null && name.startsWith("META-INF/services/")) {
-			return (name.indexOf('/', 18) == -1);
+			return (name.indexOf('/', 18) == -1
+					&& !name.startsWith("org.springframework", 18));
 		}
 		return false;
 	}
