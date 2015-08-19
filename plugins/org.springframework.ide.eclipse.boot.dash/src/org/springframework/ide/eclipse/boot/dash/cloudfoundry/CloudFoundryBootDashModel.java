@@ -117,14 +117,24 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				/*
 				 * Update BDEs
 				 */
+				List<BootDashElement> bdes = new ArrayList<BootDashElement>(appsToRefresh.size());
 				for (String app : appsToRefresh) {
 					CloudDashElement element = getElement(app);
 					if (element != null) {
 						notifyElementChanged(element);
+						bdes.add(element);
 					}
 				}
+
+				/*
+				 * Update ProjectAppStore
+				 */
+				projectAppStore.storeProjectToAppMapping(bdes);
+
 			} catch (OperationCanceledException oce) {
-				// do nothing
+				BootDashActivator.log(oce);
+			} catch (Exception e) {
+				BootDashActivator.log(e);
 			}
 		}
 	};
@@ -183,7 +193,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			debugTargetDisconnector.dispose();
 			debugTargetDisconnector = null;
 		}
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener);
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 	}
 
 	@Override
