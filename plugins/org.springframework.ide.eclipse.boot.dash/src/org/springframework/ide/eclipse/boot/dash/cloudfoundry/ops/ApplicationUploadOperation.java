@@ -45,7 +45,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
-		CloudApplication app = getCloudApplication();
+		CloudApplication app = requests.getApplication(appName);
 
 		monitor.worked(3);
 		if (app == null) {
@@ -79,7 +79,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 				logAndUpdateMonitor("Uploading archive to Cloud Foundry for application: " + appName, monitor);
 
-				getClient().uploadApplication(appName, archive);
+				requests.uploadApplication(appName, archive);
 
 				monitor.worked(5);
 

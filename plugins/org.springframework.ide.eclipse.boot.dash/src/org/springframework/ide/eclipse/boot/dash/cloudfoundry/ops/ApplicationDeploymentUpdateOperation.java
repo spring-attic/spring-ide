@@ -60,7 +60,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 	protected boolean updateExistingApplicationInCloud(CloudApplicationDeploymentProperties properties,
 			IProgressMonitor monitor) throws Exception {
 
-		CloudApplication app = getCloudApplication();
+		CloudApplication app = requests.getApplication(appName);
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		boolean updated = false;
 		if (app != null) {
@@ -69,7 +69,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 					&& !properties.getEnvironmentVariables().equals(app.getEnvAsMap())) {
 				subMonitor.setTaskName("Updating " + appName + " environment variables.");
 
-				getClient().updateApplicationEnv(appName, properties.getEnvironmentVariables());
+				requests.updateApplicationEnvironment(appName, properties.getEnvironmentVariables());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -79,7 +79,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 					&& !properties.getBuildpackUrl().equals(app.getStaging().getDetectedBuildpack())) {
 				subMonitor.setTaskName("Updating " + appName + " buildpack.");
 
-				getClient().updateApplicationStaging(appName, new Staging(null, properties.getBuildpackUrl()));
+				requests.updateApplicationStaging(appName, new Staging(null, properties.getBuildpackUrl()));
 				updated = true;
 
 				subMonitor.worked(1);
@@ -88,7 +88,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 			if (properties.getServices() != null && !properties.getServices().equals(app.getServices())) {
 				subMonitor.setTaskName("Updating " + appName + " bound services.");
 
-				getClient().updateApplicationServices(appName, properties.getServices());
+				requests.updateApplicationServices(appName, properties.getServices());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -97,7 +97,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 			if (properties.getMemory() > 0 && properties.getMemory() != app.getMemory()) {
 				subMonitor.setTaskName("Updating " + appName + " memory.");
 
-				getClient().updateApplicationMemory(appName, properties.getMemory());
+				requests.updateApplicationMemory(appName, properties.getMemory());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -106,7 +106,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 			if (properties.getInstances() > 0 && properties.getInstances() != app.getInstances()) {
 				subMonitor.setTaskName("Updating " + appName + " instances.");
 
-				getClient().updateApplicationInstances(appName, properties.getInstances());
+				requests.updateApplicationInstances(appName, properties.getInstances());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -116,7 +116,7 @@ public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperat
 
 				subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
 
-				getClient().updateApplicationUris(appName, properties.getUrls());
+				requests.updateApplicationUris(appName, properties.getUrls());
 				updated = true;
 
 				subMonitor.worked(1);

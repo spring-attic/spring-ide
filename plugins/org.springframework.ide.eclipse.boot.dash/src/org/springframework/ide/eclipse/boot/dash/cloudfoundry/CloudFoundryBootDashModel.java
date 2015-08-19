@@ -378,7 +378,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
-				getClient().deleteApplication(appName);
+				requests.deleteApplication(appName);
 				Set<BootDashElement> updatedElements = new HashSet<BootDashElement>();
 
 				synchronized (CloudFoundryBootDashModel.this) {

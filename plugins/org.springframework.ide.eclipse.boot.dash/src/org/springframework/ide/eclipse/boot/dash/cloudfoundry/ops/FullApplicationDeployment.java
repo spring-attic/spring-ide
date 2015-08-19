@@ -60,7 +60,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
 
-		CloudApplication app = getCloudApplication();
+		CloudApplication app = requests.getApplication(appName);
 		monitor.worked(5);
 
 		if (app != null && !properties.shouldAutoReplace()
@@ -142,5 +142,4 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		return deploymentProperties;
 	}
-
 }

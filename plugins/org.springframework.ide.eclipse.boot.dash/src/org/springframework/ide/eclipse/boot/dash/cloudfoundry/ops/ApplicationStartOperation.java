@@ -54,9 +54,9 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 			updateEnvVars(debugOpts(debugSecret));
 		}
 
-		getClient().restartApplication(appName);
+		requests.restartApplication(appName);
 
-		RunState runState = new ApplicationRunningStateTracker(appName, getClient(), model).startTracking(monitor);
+		RunState runState = new ApplicationRunningStateTracker(appName, requests, model).startTracking(monitor);
 		model.updateApplication(appName, runState);
 
 		if (isDebugging) {
@@ -74,7 +74,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 	protected void updateEnvVars(Map<String, String> toAdd) throws Exception {
 		CloudAppInstances instances = getCachedApplication();
-		Map<String, Object> existingVars = getClient()
+		Map<String, Object> existingVars = requests
 				.getApplicationEnvironment(instances.getApplication().getMeta().getGuid());
 
 		Map<String, String> varsToUpdate = new HashMap<String, String>();
@@ -86,7 +86,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		varsToUpdate.putAll(toAdd);
 
-		getClient().updateApplicationEnv(appName, varsToUpdate);
+		requests.updateApplicationEnvironment(appName, varsToUpdate);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

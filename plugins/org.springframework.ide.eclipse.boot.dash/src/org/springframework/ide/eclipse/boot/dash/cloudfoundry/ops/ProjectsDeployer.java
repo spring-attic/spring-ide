@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -28,37 +27,29 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ProjectsDeployer extends CloudOperation {
 
-	private final CloudFoundryBootDashModel model;
 	private final Map<IProject, BootDashElement> projectsToDeploy;
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplaceApps;
 	private final RunState runOrDebug;
 
-	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, UserInteractions ui,
+	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
 			Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
-		super("Deploying projects");
-		this.model = cloudFoundryBootDashModel;
+		super("Deploying projects", model);
 		this.projectsToDeploy = projectsToDeploy;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 		this.runOrDebug = RunState.RUNNING;
 	}
 
-	@Override
-	protected CloudFoundryOperations getClient() throws Exception {
-		return this.model.getCloudTarget().getClient();
-	}
-
-	public ProjectsDeployer(CloudFoundryBootDashModel cloudFoundryBootDashModel, UserInteractions ui,
+	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
 			List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps, RunState runOrDebug) {
-		super("Deploying projects");
+		super("Deploying projects", model);
 		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
 
 		for (BootDashElement element : elementsToRedeploy) {
 			this.projectsToDeploy.put(element.getProject(), element);
 		}
 
-		this.model = cloudFoundryBootDashModel;
 		this.ui = ui;
 		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 		this.runOrDebug = runOrDebug;
