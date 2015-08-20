@@ -95,7 +95,7 @@ public class ExposeAppAction extends RunStateAction {
 										monitor.subTask("Restarting: " + el.getName());
 										try {
 											BootProjectDashElement localDashProject = (BootProjectDashElement) el;
-											localDashProject.restartAndExpose(ngrokClient, eurekaInstance, ui);
+											localDashProject.restartAndExpose(ExposeAppAction.this.goalState, ngrokClient, eurekaInstance, ui);
 										} catch (Exception e) {
 											return BootActivator.createErrorStatus(e);
 										}

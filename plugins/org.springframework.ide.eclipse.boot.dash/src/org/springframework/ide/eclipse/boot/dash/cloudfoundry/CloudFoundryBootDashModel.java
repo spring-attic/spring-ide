@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,15 +21,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
@@ -40,19 +42,13 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
-import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 public class CloudFoundryBootDashModel extends BootDashModel implements ModifiableModel {
 
@@ -72,6 +68,75 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
 
+	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
+		@Override
+		public void resourceChanged(IResourceChangeEvent event) {
+			try {
+				if (event.getDelta() == null && event.getSource() != ResourcesPlugin.getWorkspace()) {
+					return;
+				}
+				/*
+				 * Collect data on renamed and removed projects
+				 */
+				Map<IPath, IProject> renamedFrom = new HashMap<IPath, IProject>();
+				Map<IPath, IProject> renamedTo = new HashMap<IPath, IProject>();
+				List<IProject> removedProjects = new ArrayList<IProject>();
+				for (IResourceDelta delta : event.getDelta().getAffectedChildren(IResourceDelta.CHANGED | IResourceDelta.ADDED | IResourceDelta.REMOVED)) {
+					IResource resource = delta.getResource();
+					if (resource instanceof IProject) {
+						IProject project = (IProject) resource;
+						if (delta.getKind() == IResourceDelta.REMOVED) {
+							if ((delta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
+								renamedFrom.put(delta.getMovedToPath(), project);
+							} else {
+								removedProjects.add(project);
+							}
+						} else if (delta.getKind() == IResourceDelta.ADDED && (delta.getFlags() & IResourceDelta.MOVED_FROM) != 0) {
+							renamedTo.put(project.getFullPath(), project);
+						}
+
+					}
+				}
+
+				/*
+				 * Update CF app cache and collect apps that have local project updated
+				 */
+				List<String> appsToRefresh = new ArrayList<String>();
+				for (IProject project : removedProjects) {
+					appsToRefresh.addAll(cloudAppCache.replaceProject(project, null));
+				}
+				for (Map.Entry<IPath, IProject> entry : renamedFrom.entrySet()) {
+					IPath path = entry.getKey();
+					IProject oldProject = entry.getValue();
+					IProject newProject = renamedTo.get(path);
+					if (oldProject != null) {
+						appsToRefresh.addAll(cloudAppCache.replaceProject(oldProject, newProject));
+					}
+				}
+
+				/*
+				 * Update ProjectAppStore
+				 */
+				projectAppStore.storeProjectToAppMapping(elements.getValue());
+
+				/*
+				 * Update BDEs
+				 */
+				for (String app : appsToRefresh) {
+					CloudDashElement element = getElement(app);
+					if (element != null) {
+						notifyElementChanged(element);
+					}
+				}
+
+			} catch (OperationCanceledException oce) {
+				BootDashActivator.log(oce);
+			} catch (Exception e) {
+				BootDashActivator.log(e);
+			}
+		}
+	};
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
 		super(target);
 		RunTargetType type = target.getType();
@@ -82,6 +147,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 	}
 
 	public CloudAppCache getAppCache() {
@@ -125,6 +191,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			debugTargetDisconnector.dispose();
 			debugTargetDisconnector = null;
 		}
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 	}
 
 	@Override
@@ -378,7 +445,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
-				getClient().deleteApplication(appName);
+				requests.deleteApplication(appName);
 				Set<BootDashElement> updatedElements = new HashSet<BootDashElement>();
 
 				synchronized (CloudFoundryBootDashModel.this) {

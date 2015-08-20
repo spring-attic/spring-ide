@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -41,19 +40,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
  * @see AppInstancesRefreshOperation
  */
 public final class TargetApplicationsRefreshOperation extends CloudOperation {
-	/**
-	 *
-	 */
-	private final CloudFoundryBootDashModel model;
 
 	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
-		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName());
-		this.model = model;
-	}
-
-	@Override
-	protected CloudFoundryOperations getClient() throws Exception {
-		return this.model.getCloudTarget().getClient();
+		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName(), model);
 	}
 
 	@Override
@@ -64,7 +53,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 			// the
 			// two refresh operations
 
-			List<CloudApplication> apps = this.model.getCloudTarget().getClient().getApplicationsWithBasicInfo();
+			List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
 
 			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 			if (apps != null) {

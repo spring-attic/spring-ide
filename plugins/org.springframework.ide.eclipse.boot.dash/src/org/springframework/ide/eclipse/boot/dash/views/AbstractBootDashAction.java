@@ -32,7 +32,9 @@ public class AbstractBootDashAction extends Action implements Disposable {
 	public boolean isVisible() {
 		return isVisible;
 	}
+
 	public void setVisible(boolean show) {
 		this.isVisible = show;
 	}
+
 }

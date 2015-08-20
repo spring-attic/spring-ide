@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.InstanceState;
@@ -19,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
@@ -26,15 +26,15 @@ public class ApplicationRunningStateTracker {
 
 	public static final long WAIT_TIME = 1000;
 
-	private final CloudFoundryOperations client;
+	private final ClientRequests requests;
 
 	private final String appName;
 
 	private final CloudFoundryBootDashModel model;
 
-	public ApplicationRunningStateTracker(String appName, CloudFoundryOperations client,
+	public ApplicationRunningStateTracker(String appName, ClientRequests requests,
 			CloudFoundryBootDashModel model) {
-		this.client = client;
+		this.requests = requests;
 		this.appName = appName;
 		this.model = model;
 	}
@@ -72,7 +72,7 @@ public class ApplicationRunningStateTracker {
 				throw new OperationCanceledException();
 			}
 
-			ApplicationStats stats = client.getApplicationStats(appName);
+			ApplicationStats stats = requests.getApplicationStats(appName);
 			monitor.worked(1);
 			runState = getRunState(stats);
 			try {

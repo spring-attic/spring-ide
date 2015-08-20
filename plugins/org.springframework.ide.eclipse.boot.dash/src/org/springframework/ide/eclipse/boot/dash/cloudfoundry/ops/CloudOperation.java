@@ -11,21 +11,24 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
 public abstract class CloudOperation extends Operation<Void> {
 
-	public CloudOperation(String opName) {
-		super(opName);
-	}
+	protected final CloudFoundryBootDashModel model;
+	protected final ClientRequests requests;
 
-	abstract protected CloudFoundryOperations getClient() throws Exception;
+	public CloudOperation(String opName, CloudFoundryBootDashModel model) {
+		super(opName);
+		this.model = model;
+		this.requests = new ClientRequests(model);
+	}
 
 	abstract protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException;
 
@@ -60,5 +63,4 @@ public abstract class CloudOperation extends Operation<Void> {
 
 		throw e;
 	}
-
 }

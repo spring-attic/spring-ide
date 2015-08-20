@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,11 +33,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
  */
 public class AppInstancesRefreshOperation extends CloudOperation {
 
-	private final CloudFoundryBootDashModel model;
-
 	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model) {
-		super("Refreshing running state of applications in: " + model.getRunTarget().getName());
-		this.model = model;
+		super("Refreshing running state of applications in: " + model.getRunTarget().getName(), model);
 	}
 
 	@Override
@@ -53,8 +49,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 			}
 		}
 		if (!appsToLookUp.isEmpty()) {
-			Map<CloudApplication, ApplicationStats> stats = this.model.getCloudTarget().getClient()
-					.getApplicationStats(appsToLookUp);
+			Map<CloudApplication, ApplicationStats> stats = requests.getApplicationStats(appsToLookUp);
 			for (Entry<CloudApplication, ApplicationStats> entry : stats.entrySet()) {
 				CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
 				this.model.updateApplication(instances);
@@ -65,10 +60,5 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 
 	public ISchedulingRule getSchedulingRule() {
 		return new RefreshSchedulingRule(model.getRunTarget());
-	}
-
-	@Override
-	protected CloudFoundryOperations getClient() throws Exception {
-		return this.model.getCloudTarget().getClient();
 	}
 }

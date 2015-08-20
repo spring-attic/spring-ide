@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,17 +70,15 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 		try {
 
 			logAndUpdateMonitor("Creating application: " + deploymentProperties.getAppName(), monitor);
-			getClient().createApplication(deploymentProperties.getAppName(),
-					new Staging(null, deploymentProperties.getBuildpackUrl()), deploymentProperties.getMemory(),
-					deploymentProperties.getUrls(), deploymentProperties.getServices());
+			requests.createApplication(deploymentProperties);
 			monitor.worked(5);
 
 		} catch (Exception e) {
 			// If app creation failed, check if the app was created anyway
 			// and delete it to allow users to redeploy
-			CloudApplication toCleanUp = getCloudApplication();
+			CloudApplication toCleanUp = requests.getApplication(appName);
 			if (toCleanUp != null) {
-				getClient().deleteApplication(toCleanUp.getName());
+				requests.deleteApplication(toCleanUp.getName());
 			}
 			throw e;
 		}

@@ -177,7 +177,7 @@ public class BootDashView extends ViewPartWithSections implements ITabbedPropert
 		manager.add(createAddRunTargetMenuManager());
 
 		manager.add(new Separator());
-		manager.add(actions.getExposeAppAction());
+		manager.add(actions.getExposeRunAppAction());
 		manager.add(new Separator());
 
 		manager.add(actions.getToggleFiltersAction());
