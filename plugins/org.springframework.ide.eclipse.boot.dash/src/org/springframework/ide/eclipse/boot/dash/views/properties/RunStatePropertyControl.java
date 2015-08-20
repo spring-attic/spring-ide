@@ -51,27 +51,30 @@ public class RunStatePropertyControl extends AbstractBdePropertyControl {
 			BootDashElement bde = getBootDashElement();
 			runState.setText(getLabels().getStyledText(bde, BootDashColumn.RUN_STATE_ICN).getString());
 
-			if (previousRunState != bde.getRunState()) {
-				previousRunState = bde.getRunState();
-				final Image[] images = getLabels().getImageAnimation(bde, BootDashColumn.RUN_STATE_ICN);
-				if (animation != null) {
-					animation.stop();
-					animation = null;
+			if (bde == null) {
+				runState.setImage(null);
+			} else {
+				if (previousRunState != bde.getRunState()) {
+					previousRunState = bde.getRunState();
+					final Image[] images = getLabels().getImageAnimation(bde, BootDashColumn.RUN_STATE_ICN);
+					if (animation != null) {
+						animation.stop();
+						animation = null;
+					}
+					if (images == null || images.length == 0) {
+						runState.setImage(null);
+					} else if (images.length == 1) {
+						runState.setImage(images[0]);
+					} else {
+						animation = new ImageAnimation(images, ANIMATION_FRAME) {
+							@Override
+							protected void setFrame(Image image) {
+								runState.setImage(image);
+							}
+						};
+						animation.start();
+					}
 				}
-				if (images == null || images.length == 0) {
-					runState.setImage(null);
-				} else if (images.length == 1) {
-					runState.setImage(images[0]);
-				} else {
-					animation = new ImageAnimation(images, ANIMATION_FRAME) {
-						@Override
-						protected void setFrame(Image image) {
-							runState.setImage(image);
-						}
-					};
-					animation.start();
-				}
-
 			}
 		}
 	}
