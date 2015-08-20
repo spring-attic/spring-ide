@@ -22,19 +22,27 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceView
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblemQuickAssistProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
 
 @SuppressWarnings("restriction")
@@ -165,6 +173,23 @@ extends PropertiesFileSourceViewerConfiguration {
 //	public IHyperlinkPresenter getHyperlinkPresenter(ISourceViewer sourceViewer) {
 //		return super.getHyperlinkPresenter(sourceViewer);
 //	}
+
+	@Override
+	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+		QuickAssistAssistant assistant= new QuickAssistAssistant();
+		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor());
+		assistant.setRestoreCompletionProposalSize(EditorsPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
+		assistant.setInformationControlCreator(getQuickAssistAssistantInformationControlCreator());
+		return assistant;
+	}
+
+	private IInformationControlCreator getQuickAssistAssistantInformationControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new DefaultInformationControl(parent, EditorsPlugin.getAdditionalInfoAffordanceString());
+			}
+		};
+	}
 
 	protected Map<String,IAdaptable> getHyperlinkDetectorTargets(ISourceViewer sourceViewer) {
 		Map<String, IAdaptable> superTargets = super.getHyperlinkDetectorTargets(sourceViewer);

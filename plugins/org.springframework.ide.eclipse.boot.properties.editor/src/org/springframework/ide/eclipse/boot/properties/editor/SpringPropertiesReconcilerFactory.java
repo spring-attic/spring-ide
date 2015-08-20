@@ -23,9 +23,15 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.ReconcilingUt
 
 public abstract class SpringPropertiesReconcilerFactory {
 
+	/**
+	 * Forces the spell checker in properties and yaml editor to be disabled, regardless of
+	 * preferences for general text editors.
+	 */
+	private boolean DISABLE_SPELL_CHECKER = true;
+
 	public SpringPropertiesReconciler createReconciler(ISourceViewer sourceViewer) {
 		IReconcilingStrategy strategy = null;
-		if (EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
+		if (!DISABLE_SPELL_CHECKER && EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
 			IReconcilingStrategy spellcheck = new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
 				@Override
 				protected IContentType getContentType() {

@@ -61,5 +61,9 @@ public class ProblemSeverityPreferencesUtil {
 		return problemType.getDefaultSeverity();
 	}
 
+	public static void setSeverity(IPreferenceStore prefs, ProblemType problemType, ProblemSeverity severity) {
+		prefs.setValue(getPreferenceName(problemType), severity.toString());
+	}
+
 
 }

@@ -72,9 +72,6 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 				fLockObject= fAnnotationModel;
 		}
 
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#accept(org.eclipse.ui.texteditor.spelling.SpellingProblem)
-		 */
 		public void accept(SpringPropertyProblem problem) {
 			ProblemSeverity severity = fSeverities.getSeverity(problem);
 			String annotationType = SpringPropertyAnnotation.getAnnotationType(severity);
@@ -83,16 +80,10 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 			}
 		}
 
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginCollecting()
-		 */
 		public void beginCollecting() {
 			fAddAnnotations= new HashMap<SpringPropertyAnnotation, Position>();
 		}
 
-		/*
-		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endCollecting()
-		 */
 		public void endCollecting() {
 
 			List<Annotation> toRemove= new ArrayList<Annotation>();
@@ -130,10 +121,8 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	/** The text editor to operate on. */
 	private ISourceViewer fViewer;
 
-	/** The document to operate on. */
 	private IDocument fDocument;
 
-	/** The progress monitor. */
 	private IProgressMonitor fProgressMonitor;
 
 	private SeverityAwareProblemCollector fProblemCollector;
@@ -142,14 +131,6 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	private SeverityProvider fSeverities;
 
-	/**
-	 * Creates a new comment reconcile strategy.
-	 *
-	 * @param viewer the source viewer
-	 * @param engine
-	 * @param typeUtil
-	 * @param spellingService the spelling service to use
-	 */
 	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, SeverityProvider severities) {
 		Assert.isNotNull(viewer);
 		fSeverities = severities;
@@ -219,15 +200,10 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 */
 	public void setDocument(IDocument document) {
 		fDocument= document;
-		fProblemCollector= createSpellingProblemCollector();
+		fProblemCollector= createProblemCollector();
 	}
 
-	/**
-	 * Creates a new spelling problem collector.
-	 *
-	 * @return the collector or <code>null</code> if none is available
-	 */
-	protected SeverityAwareProblemCollector createSpellingProblemCollector() {
+	protected SeverityAwareProblemCollector createProblemCollector() {
 		IAnnotationModel model= getAnnotationModel();
 		if (model == null)
 			return null;

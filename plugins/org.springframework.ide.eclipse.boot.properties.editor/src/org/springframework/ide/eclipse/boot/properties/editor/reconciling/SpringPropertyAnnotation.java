@@ -15,6 +15,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jface.text.quickassist.IQuickFixableAnnotation;
 import org.eclipse.jface.text.source.Annotation;
 
 /**
@@ -23,7 +24,7 @@ import org.eclipse.jface.text.source.Annotation;
  * @since 3.3
  */
 @SuppressWarnings("restriction")
-public class SpringPropertyAnnotation extends Annotation /*implements IQuickFixableAnnotation*/ {
+public class SpringPropertyAnnotation extends Annotation implements IQuickFixableAnnotation {
 
 	/** Annotation type for error and warnings*/
 	public static final String ERROR_ANNOTATION_TYPE = org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE;
@@ -59,26 +60,26 @@ public class SpringPropertyAnnotation extends Annotation /*implements IQuickFixa
 		fProblem = problem;
 	}
 
-//	/*
-//	 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable()
-//	 */
-//	public boolean isQuickFixable() {
-//		return true;
-//	}
-//
-//	/*
-//	 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixableStateSet()
-//	 */
-//	public boolean isQuickFixableStateSet() {
-//		return true;
-//	}
-//
-//	/*
-//	 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#setQuickFixable(boolean)
-//	 */
-//	public void setQuickFixable(boolean state) {
-//		// always true
-//	}
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable()
+	 */
+	public boolean isQuickFixable() {
+		return true;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixableStateSet()
+	 */
+	public boolean isQuickFixableStateSet() {
+		return true;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#setQuickFixable(boolean)
+	 */
+	public void setQuickFixable(boolean state) {
+		// always true
+	}
 
 	public SpringPropertyProblem getSpringPropertyProblem() {
 		return fProblem;

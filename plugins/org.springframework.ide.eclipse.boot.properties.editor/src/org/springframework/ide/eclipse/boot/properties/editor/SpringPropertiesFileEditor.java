@@ -17,12 +17,15 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartition
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
 
 @SuppressWarnings("restriction")
-public class SpringPropertiesFileEditor extends PropertiesFileEditor implements Listener<SpringPropertiesIndexManager> {
-	
+public class SpringPropertiesFileEditor extends PropertiesFileEditor implements Listener<SpringPropertiesIndexManager>, IPropertyChangeListener {
+
 	/**
 	 * Content Type ID this editor is registered to open for.
 	 */
@@ -45,13 +48,15 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
 		SpringPropertiesEditorPlugin.getIndexManager().addListener(this);
+		SpringPropertiesEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
-	
-	
+
+
 	@Override
 	public void dispose() {
 		super.dispose();
 		SpringPropertiesEditorPlugin.getIndexManager().removeListener(this);
+		SpringPropertiesEditorPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}
 
 	/**
@@ -61,6 +66,15 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 	@Override
 	public void changed(SpringPropertiesIndexManager index) {
 		fSourceViewerConf.forceReconcile();
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().startsWith(ProblemSeverityPreferencesUtil.PREFERENCE_PREFIX)) {
+			if (fSourceViewerConf!=null) {
+				fSourceViewerConf.forceReconcile();
+			}
+		}
 	}
 
 }
