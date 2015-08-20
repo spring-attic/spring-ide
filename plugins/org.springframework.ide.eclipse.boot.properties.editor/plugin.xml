@@ -134,6 +134,12 @@
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage"
 	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage">
 	   </page>
+	   <page
+	         name="Spring Yaml Editor"
+	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
+	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage"
+	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage">
+	   </page>
 	   
    </extension>  
    

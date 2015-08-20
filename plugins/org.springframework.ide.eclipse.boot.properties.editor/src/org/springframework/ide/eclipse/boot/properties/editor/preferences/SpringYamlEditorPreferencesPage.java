@@ -15,10 +15,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Proble
 /**
  * @author Kris De Volder
  */
-public class SpringPropertiesEditorPreferencesPage extends AbstractPropertiesEditorPreferencesPage {
+public class SpringYamlEditorPreferencesPage extends AbstractPropertiesEditorPreferencesPage {
 
 	protected ProblemType[] getProblemTypes() {
-		return ProblemType.FOR_PROPERTIES;
+		return ProblemType.FOR_YAML;
 	}
 
 }
