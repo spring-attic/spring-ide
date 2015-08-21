@@ -18,8 +18,8 @@ import java.util.Set;
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
-import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -150,12 +150,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
 			ITextHover delegate = super.getTextHover(sourceViewer, contentType, stateMask);
 			if (delegate == null) {
-				//why doesn't YeditSourceViewer configuration provide a good default?
-				delegate = new DefaultTextHover(sourceViewer) {
-					protected boolean isIncluded(Annotation annotation) {
-						return ANNOTIONS_SHOWN_IN_TEXT.contains(annotation.getType());
-					}
-				};
+				delegate = new SpringPropertiesAnnotationHover(sourceViewer, getPreferencesStore());
 			}
 			try {
 				return new SpringPropertiesTextHover(sourceViewer, hoverProvider, delegate);
@@ -178,7 +173,6 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		};
 	}
 
-
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (fReconciler==null) {
@@ -190,10 +184,14 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		QuickAssistAssistant assistant= new QuickAssistAssistant();
-		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor());
+		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore()));
 		assistant.setRestoreCompletionProposalSize(EditorsPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
 		assistant.setInformationControlCreator(getQuickAssistAssistantInformationControlCreator());
 		return assistant;
+	}
+
+	protected IPreferenceStore getPreferencesStore() {
+		return SpringPropertiesEditorPlugin.getDefault().getPreferenceStore();
 	}
 
 	private IInformationControlCreator getQuickAssistAssistantInformationControlCreator() {

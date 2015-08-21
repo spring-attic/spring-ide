@@ -56,7 +56,7 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 	}
 
 	@Override
-	public String getHtml() {
+	protected String renderAsHtml() {
 		return getHtmlHoverText(data);
 	}
 

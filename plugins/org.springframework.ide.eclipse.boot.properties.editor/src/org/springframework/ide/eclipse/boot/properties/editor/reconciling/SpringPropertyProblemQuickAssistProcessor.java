@@ -38,9 +38,9 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 		this.preferences = preferences;
 	}
 
-	public SpringPropertyProblemQuickAssistProcessor() {
-		this(SpringPropertiesEditorPlugin.getDefault().getPreferenceStore());
-	}
+//	public SpringPropertyProblemQuickAssistProcessor() {
+//		this(SpringPropertiesEditorPlugin.getDefault().getPreferenceStore());
+//	}
 
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
 		ISourceViewer viewer= quickAssistContext.getSourceViewer();
@@ -92,7 +92,7 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 	private List<ICompletionProposal> computeProposals(IQuickAssistInvocationContext context, SpringPropertyProblem[] problems) {
 		List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
 		for (SpringPropertyProblem problem : problems) {
-			proposals.add(new IgnoreProblemTypeQuickfix(preferences, problem.getType()));
+			proposals.addAll(problem.getQuickfixes(preferences));
 		}
 		return proposals;
 	}

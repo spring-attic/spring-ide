@@ -33,12 +33,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 /**
  * Helper class to make it a little easier to create simple html page (for display in
  * {@link DefaultInformationControl} or {@link BrowserInformationControl}
- * 
+ *
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
 public class HtmlBuffer {
-	
+
 	private StringBuffer buffer = new StringBuffer();
 	private boolean epilogAdded = false; //to ensure only added once.
 	private static String fgCSSStyles;
@@ -46,7 +46,7 @@ public class HtmlBuffer {
 	public HtmlBuffer() {
 		this.buffer = new StringBuffer();
 	}
-	
+
 	/**
 	 * Append text, applies escaping to the text as needed.
 	 */
@@ -75,7 +75,7 @@ public class HtmlBuffer {
 		}
 	}
 
-	
+
 	public String toString() {
 		if (!epilogAdded && buffer.length()>0) {
 			epilogAdded = true;
@@ -86,7 +86,7 @@ public class HtmlBuffer {
 	}
 
 
-	
+
 	/**
 	 * Note: copied from org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal.getCSSStyles()
 	 * Returns the style information for displaying HTML (Javadoc) content.
@@ -130,5 +130,15 @@ public class HtmlBuffer {
 		}
 		return css;
 	}
-	
+
+	public void hline() {
+		raw("<hr>");
+	}
+
+	public void p(String string) {
+		raw("<p>");
+		text(string);
+		raw("</p>");
+	}
+
 }

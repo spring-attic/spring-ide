@@ -54,7 +54,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 		this(false, statusText);
 	}
 
-	private SpringPropertiesInformationControlCreator(boolean enriched, String statusText) {
+	public SpringPropertiesInformationControlCreator(boolean enriched, String statusText) {
 		this.enriched = enriched;
 		this.statusText = statusText;
 	}
@@ -63,7 +63,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 	public IInformationControl createInformationControl(Shell parent) {
 		if (BrowserInformationControl.isAvailable(parent)) {
 			if (!enriched) {
-				return new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, statusText) {
+				return new SpringPropertiesInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, statusText) {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return new SpringPropertiesInformationControlCreator(true, null);
@@ -71,7 +71,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 				};
 			} else {
 				ToolBarManager toolbar= new ToolBarManager(SWT.FLAT);
-				BrowserInformationControl control = new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, toolbar) {
+				BrowserInformationControl control = new SpringPropertiesInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, toolbar) {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return new SpringPropertiesInformationControlCreator(true, null);
