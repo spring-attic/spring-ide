@@ -242,16 +242,10 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 	}
 
 	public void terminateAllTargets(final ILaunch launch) {
-		IProcess[] processes = launch.getProcesses();
-		for (IProcess process : processes) {
-			if (process.canTerminate()) {
-		    	try {
-					process.terminate();
-		    	} catch (Exception e) {
-		    		BootActivator.log(e);
-		    	}
-			}
-		}
+		//Note: its better to discconect debugtargets before terminating processes
+		// because that allows a cleaner disconnect from the debugged process.
+		// (If the devtools client process is terminated its no longer possible to talk to the
+		// debugged process).
 		IDebugTarget[] debugTargets = launch.getDebugTargets();
 		for (int i = 0; i < debugTargets.length; i++) {
 		    IDebugTarget target = debugTargets[i];
@@ -262,6 +256,16 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 		    		BootActivator.log(e);
 		    	}
 		    }
+		}
+		IProcess[] processes = launch.getProcesses();
+		for (IProcess process : processes) {
+			if (process.canTerminate()) {
+		    	try {
+					process.terminate();
+		    	} catch (Exception e) {
+		    		BootActivator.log(e);
+		    	}
+			}
 		}
 	}
 

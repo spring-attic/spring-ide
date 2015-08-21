@@ -50,7 +50,7 @@ public class DevtoolsClientConsolePageParticipant implements IConsolePagePartici
 			try {
 				IProcess process = console.getProcess();
 				if (process!=null && process.canTerminate() && isDevtoolsClient(process)) {
-					process.terminate();
+					process.getLaunch().terminate();;
 				}
 			} catch (Exception e) {
 				BootActivator.log(e);
