@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesAnnotationHover;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;
@@ -148,10 +149,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
-			ITextHover delegate = super.getTextHover(sourceViewer, contentType, stateMask);
-			if (delegate == null) {
-				delegate = new SpringPropertiesAnnotationHover(sourceViewer, getPreferencesStore());
-			}
+			ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getPreferencesStore());
 			try {
 				return new SpringPropertiesTextHover(sourceViewer, hoverProvider, delegate);
 			} catch (Exception e) {

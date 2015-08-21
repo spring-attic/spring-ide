@@ -107,7 +107,7 @@ extends PropertiesFileSourceViewerConfiguration {
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		ITextHover delegate = super.getTextHover(sourceViewer, contentType, stateMask);
+		ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getPreferencesStore());
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
