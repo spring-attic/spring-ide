@@ -17,10 +17,8 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabSection;
-import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
-import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 

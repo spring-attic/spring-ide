@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.launch.livebean;
 
 import java.util.EnumSet;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;

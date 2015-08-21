@@ -22,7 +22,6 @@ package org.springframework.ide.eclipse.boot.launch.devtools;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.internal.ui.views.console.ConsoleTerminateAction;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;

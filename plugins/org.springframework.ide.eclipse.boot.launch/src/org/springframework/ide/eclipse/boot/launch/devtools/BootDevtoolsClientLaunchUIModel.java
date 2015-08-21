@@ -10,21 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.devtools;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.jdt.internal.launching.LaunchingMessages;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.IVMConnector;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.launch.ExistingBootProjectSelectionValidator;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
