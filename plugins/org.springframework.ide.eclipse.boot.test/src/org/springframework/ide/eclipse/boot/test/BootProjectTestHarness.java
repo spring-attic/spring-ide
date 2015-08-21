@@ -118,6 +118,7 @@ public class BootProjectTestHarness {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel();
+					wizard.allowUIThread(true);
 					wizard.getProjectName().setValue(projectName);
 					wizard.getArtifactId().setValue(projectName);
 					//Note: unlike most of the rest of the wizard's behavior, the 'use default location'
