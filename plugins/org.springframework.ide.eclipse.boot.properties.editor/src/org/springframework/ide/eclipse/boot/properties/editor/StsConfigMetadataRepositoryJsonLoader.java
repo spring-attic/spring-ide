@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
+import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.debug;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -35,8 +36,6 @@ import org.springframework.configurationmetadata.ConfigurationMetadataRepository
 import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
 import org.springframework.ide.eclipse.boot.util.FileUtil;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.debug;
-
 /**
  * Load a {@link ConfigMetadataRepository} from the content of an eclipse
  * projects classpath.
@@ -49,7 +48,8 @@ public class StsConfigMetadataRepositoryJsonLoader {
 	 * The default classpath location for config metadata.
 	 */
 	public static final String[] META_DATA_LOCATIONS = {
-		"META-INF/spring-configuration-metadata.json"
+		"META-INF/spring-configuration-metadata.json",
+		"META-INF/additional-spring-configuration-metadata.json"
 	};
 
 	private SimpleConfigurationMetadataRepository repository = new SimpleConfigurationMetadataRepository();
