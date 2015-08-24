@@ -41,7 +41,7 @@ import org.yaml.snakeyaml.Yaml;
 /**
  * Reads and creates manifest.yml content from a specific location relative to
  * an {@link IProject}.
- * 
+ *
  */
 public class ApplicationManifestHandler {
 
@@ -134,13 +134,29 @@ public class ApplicationManifestHandler {
 	 * @return Value of property, or null if not found, or entry for application
 	 *         in manifest does not exist.
 	 */
-	public String getApplicationProperty(Map<?, ?> app, String propertyName) {
+	public String getApplicationProperty(String appName, String propertyName, IProgressMonitor monitor) {
 		try {
-			if (app != null) {
-				return getStringValue(app, propertyName);
+			Map<?, ?> appMap = getApplicationMap(appName, monitor);
+			if (appMap != null) {
+				return getStringValue(appMap, propertyName);
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	public Map<?, ?> getApplicationMap(String appName, IProgressMonitor monitor) throws Exception {
+		Map<Object, Object> allResults = parseManifestFromFile();
+
+		List<Map<?, ?>> appMaps = getApplications(allResults);
+
+		for (Map<?, ?> appMap : appMaps) {
+
+			String existingAppName = getStringValue(appMap, NAME_PROP);
+			if (existingAppName != null && existingAppName.equals(appName)) {
+				return appMap;
+			}
 		}
 		return null;
 	}
@@ -219,13 +235,12 @@ public class ApplicationManifestHandler {
 	}
 
 	protected CloudApplicationDeploymentProperties getDeploymentProperties(Map<?, ?> appMap,
-			Map<Object, Object> allResults, SubMonitor subMonitor) throws Exception {
+			Map<Object, Object> allResults, IProgressMonitor monitor) throws Exception {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties(project);
 
 		String appName = getStringValue(appMap, NAME_PROP);
 
-		subMonitor.worked(1);
 		if (appName != null) {
 			properties.setAppName(appName);
 		} else {
@@ -235,18 +250,14 @@ public class ApplicationManifestHandler {
 		}
 
 		readMemory(appMap, allResults, properties);
-		subMonitor.worked(1);
 
 		readApplicationURL(appMap, allResults, properties);
-		subMonitor.worked(1);
 
 		readBuildpackURL(appMap, allResults, properties);
 
 		readEnvVars(appMap, allResults, properties);
-		subMonitor.worked(1);
 
 		readServices(appMap, allResults, properties);
-		subMonitor.worked(1);
 
 		readInstances(appMap, allResults, properties);
 
@@ -293,7 +304,7 @@ public class ApplicationManifestHandler {
 	/**
 	 * Creates a new manifest.yml file. If one already exists, the existing one
 	 * will not be replaced.
-	 * 
+	 *
 	 * @return true if new file created with content. False otherwise
 	 * @throws Exception
 	 *             if error occurred during file creation or serialising
@@ -583,7 +594,6 @@ public class ApplicationManifestHandler {
 			Yaml yaml = new Yaml();
 
 			try {
-
 				Object results = yaml.load(inputStream);
 
 				if (results instanceof Map<?, ?>) {

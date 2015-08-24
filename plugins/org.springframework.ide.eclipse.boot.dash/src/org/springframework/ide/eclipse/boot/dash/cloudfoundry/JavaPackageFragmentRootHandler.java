@@ -132,7 +132,8 @@ public class JavaPackageFragmentRootHandler {
 		if (type == null) {
 			type = new JavaTypeResolver(javaProject).getMainTypesFromSource(monitor);
 			if (type == null) {
-				throw BootDashActivator.asCoreException("No main type selected or found. Unable to package application.");
+				throw BootDashActivator.asCoreException(
+						"No main type found. Verify that the project can be packaged as a jar application and contains a main type in source. War packaging of projects is not yet supported.");
 			}
 		}
 		return type;

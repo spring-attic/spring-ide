@@ -83,7 +83,7 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 			super("Enter Application Deployment Properties");
 			setTitle("Enter Application Deployment Properties");
 			setDescription(
-					"Please enter deployment properties like the application name and host for: " + project.getName());
+					"Please enter deployment properties like the application name and host for the project: " + project.getName());
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 
 		}

@@ -78,9 +78,11 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 			for (BootDashElement el : existingElements) {
 				if (!properties.getAppName().equals(el.getName()) && project.equals(el.getProject())) {
 					ui.errorPopup("Project Already Linked",
-							"Project Already Linked: An application [" + el.getName() + "] linked to project [" + project
-									.getName()
-							+ "] already exists. Please delete the existing one and try deploying again.");
+							"Unable to create application [" + properties.getAppName() + "]. Another application ["
+									+ el.getName() + "] is already linked to the same project - "
+									+ project
+											.getName()
+							+ " - in the same Cloud target. Please delete the existing one and try deploying again.");
 					throw new OperationCanceledException();
 				}
 			}

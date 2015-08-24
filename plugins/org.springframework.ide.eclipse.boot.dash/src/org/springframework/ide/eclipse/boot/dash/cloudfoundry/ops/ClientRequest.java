@@ -27,9 +27,9 @@ public abstract class ClientRequest<T> {
 		try {
 			return fetchClientAndRun();
 		} catch (Exception e) {
-			// if 403, could be access token error. Refresh client and Try again
-			// once
-			if (CloudErrors.isAccessException(e)) {
+
+			// If access token error, create a new client sessio and try again
+			if (CloudErrors.isAccessTokenError(e)) {
 				model.getCloudTarget().refresh();
 				return fetchClientAndRun();
 			} else {
