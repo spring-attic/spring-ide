@@ -10,32 +10,40 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
-public class ManifestParser {
+/**
+ * Reads and creates manifest.yml content from a specific location relative to
+ * an {@link IProject}.
+ * 
+ */
+public class ApplicationManifestHandler {
 
 	public static final String APPLICATIONS_PROP = "applications";
 
@@ -73,11 +81,11 @@ public class ManifestParser {
 
 	public static final String DEFAULT_PATH = "manifest.yml";
 
-	public ManifestParser(IProject project, List<CloudDomain> domains) {
+	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains) {
 		this(project, domains, DEFAULT_PATH);
 	}
 
-	public ManifestParser(IProject project, List<CloudDomain> domains, String manifestPath) {
+	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, String manifestPath) {
 		Assert.isNotNull(project);
 
 		this.project = project;
@@ -95,27 +103,17 @@ public class ManifestParser {
 		}
 	}
 
-	protected OutputStream getOutStream() throws IOException, FileNotFoundException {
-		File file = getManifestFile();
-		if (file != null) {
-			if (file.exists()) {
-				file.delete();
-			}
-
-			if (file.createNewFile()) {
-				return new FileOutputStream(file);
-			}
-		}
-
-		return null;
-	}
-
+	/**
+	 *
+	 * @return manifest file if it exists. Null otherwise
+	 */
 	protected File getManifestFile() {
 
-		IResource resource = project.getFile(DEFAULT_PATH);
+		IResource resource = project.getFile(manifestPath);
 		if (resource != null) {
 			URI locationURI = resource.getLocationURI();
-			return new File(locationURI);
+			File file = new File(locationURI);
+			return file.exists() ? file : null;
 
 		}
 		return null;
@@ -223,8 +221,7 @@ public class ManifestParser {
 	protected CloudApplicationDeploymentProperties getDeploymentProperties(Map<?, ?> appMap,
 			Map<Object, Object> allResults, SubMonitor subMonitor) throws Exception {
 
-		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
-		properties.setProject(project);
+		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties(project);
 
 		String appName = getStringValue(appMap, NAME_PROP);
 
@@ -291,6 +288,99 @@ public class ManifestParser {
 			subMonitor.done();
 		}
 
+	}
+
+	/**
+	 * Creates a new manifest.yml file. If one already exists, the existing one
+	 * will not be replaced.
+	 * 
+	 * @return true if new file created with content. False otherwise
+	 * @throws Exception
+	 *             if error occurred during file creation or serialising
+	 *             manifest content
+	 */
+	public boolean create(IProgressMonitor monitor, CloudApplicationDeploymentProperties properties) throws Exception {
+
+		if (properties == null) {
+			return false;
+		}
+		File file = getManifestFile();
+		if (file != null) {
+			BootDashActivator.logWarning(
+					"Manifest.yml file already found at: " + manifestPath + ". New content will not be written.");
+			return false;
+		}
+
+		String appName = properties.getAppName();
+
+		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
+
+		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
+		List<Map<Object, Object>> applicationsList = null;
+		if (applicationsObj == null) {
+			applicationsList = new ArrayList<Map<Object, Object>>();
+			deploymentInfoYaml.put(APPLICATIONS_PROP, applicationsList);
+		} else if (applicationsObj instanceof List<?>) {
+			applicationsList = (List<Map<Object, Object>>) applicationsObj;
+		}
+
+		Map<Object, Object> application = new LinkedHashMap<Object, Object>();
+		applicationsList.add(application);
+
+		application.put(NAME_PROP, appName);
+
+		String memory = getMemoryAsString(properties.getMemory());
+		if (memory != null) {
+			application.put(MEMORY_PROP, memory);
+		}
+
+		List<String> urls = properties.getUrls();
+		if (urls != null && !urls.isEmpty()) {
+			// Persist only the first URL
+			String url = urls.get(0);
+
+			CloudApplicationURL cloudUrl = CloudApplicationURL.getCloudApplicationURL(url, domains);
+			String subdomain = cloudUrl.getSubdomain();
+			String domain = cloudUrl.getDomain();
+
+			if (subdomain != null) {
+				application.put(SUB_DOMAIN_PROP, subdomain);
+			}
+
+			if (domain != null) {
+				application.put(DOMAIN_PROP, domain);
+			}
+		} else {
+			// If URL is not present, remove any exiting ones
+			application.remove(SUB_DOMAIN_PROP);
+			application.remove(DOMAIN_PROP);
+		}
+
+		if (deploymentInfoYaml.isEmpty()) {
+			return false;
+		}
+
+		DumperOptions options = new DumperOptions();
+		options.setExplicitStart(true);
+		options.setCanonical(false);
+		options.setPrettyFlow(true);
+		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+		Yaml yaml = new Yaml(options);
+		String manifestValue = yaml.dump(deploymentInfoYaml);
+
+		if (manifestValue == null) {
+			throw BootDashActivator.asCoreException("Failed to generate manifesty.yml for: " + appName
+					+ " Unknown problem trying to serialise content of manifest into: " + deploymentInfoYaml);
+		}
+
+		createFile(project, manifestPath, manifestValue, monitor);
+		return true;
+	}
+
+	public void createFile(IProject project, String path, String data, IProgressMonitor monitor) throws CoreException {
+		IFile file = project.getFile(new Path(path));
+		file.create(new ByteArrayInputStream(data.getBytes()), true, monitor);
+		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 	}
 
 	protected void readEnvVars(Map<?, ?> application, Map<Object, Object> allResults,

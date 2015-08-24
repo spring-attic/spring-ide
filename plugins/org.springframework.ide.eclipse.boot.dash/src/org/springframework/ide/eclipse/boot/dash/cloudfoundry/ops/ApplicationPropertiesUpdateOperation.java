@@ -30,11 +30,11 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
  * URLs mappings without also pushing the application archive which is a slow
  * process.
  */
-public class ApplicationDeploymentUpdateOperation extends CloudApplicationOperation {
+public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 
-	public ApplicationDeploymentUpdateOperation(CloudApplicationDeploymentProperties deploymentProperties,
+	public ApplicationPropertiesUpdateOperation(CloudApplicationDeploymentProperties deploymentProperties,
 			CloudFoundryBootDashModel model) {
 		super("Updating application deployment properties - " + deploymentProperties.getAppName(), model,
 				deploymentProperties.getAppName());

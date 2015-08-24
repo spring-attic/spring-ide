@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,16 +25,16 @@ import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class FullApplicationDeployment extends CloudApplicationOperation {
 
-	private final static String APP_FOUND_TITLE = "Existing Application Found";
+	private final static String APP_FOUND_TITLE = "Replace Existing Application";
 
-	private final static String APP_FOUND_MESSAGE = "An application with the name - {0} - already exists. Continuing with the deployment will replace all of the existing application's resources with those in the selected project. Are you sure that you want to continue?";
+	private final static String APP_FOUND_MESSAGE = "Replace Existing Application: {0} - already exists. Continue replacing the existing application?";
 
 	private final IProject project;
 	private final UserInteractions ui;
@@ -76,10 +77,10 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		if (existingElements != null) {
 			for (BootDashElement el : existingElements) {
 				if (!properties.getAppName().equals(el.getName()) && project.equals(el.getProject())) {
-					ui.errorPopup("Application already exists",
-							"An application [" + el.getName() + "] linked to project [" + project
+					ui.errorPopup("Project Already Linked",
+							"Project Already Linked: An application [" + el.getName() + "] linked to project [" + project
 									.getName()
-							+ "] already exists. Only one application can be linked to the same project in the same space. Please delete the existing one and try deploying again.");
+							+ "] already exists. Please delete the existing one and try deploying again.");
 					throw new OperationCanceledException();
 				}
 			}
@@ -91,7 +92,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		CloudApplicationOperation createOp = new ApplicationCreateOperation(properties, model);
 		CloudApplicationOperation uploadOp = new ApplicationUploadOperation(properties, model);
-		CloudApplicationOperation updateOp = new ApplicationDeploymentUpdateOperation(properties, model);
+		CloudApplicationOperation updateOp = new ApplicationPropertiesUpdateOperation(properties, model);
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model, runOrDebug);
 
 		deploymentOperations.add(createOp);
@@ -111,12 +112,23 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
 
-		ManifestParser parser = new ManifestParser(project, model.getCloudTarget().getDomains(monitor));
+		List<CloudDomain> domains = model.getCloudTarget().getDomains(monitor);
 
-		List<CloudApplicationDeploymentProperties> appProperties = null;
+		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, domains);
+
+		List<CloudApplicationDeploymentProperties> appProperties = new ArrayList<CloudApplicationDeploymentProperties>();
 
 		if (parser.hasManifest()) {
 			appProperties = parser.load(monitor);
+		} else {
+			// Create one for the user
+			CloudApplicationDeploymentProperties prop = ui.promptApplicationDeploymentProperties(project, domains);
+			if (prop != null) {
+				parser.create(monitor, prop);
+				if (parser.hasManifest()) {
+					appProperties.add(prop);
+				}
+			}
 		}
 		monitor.worked(10);
 		IStatus status = Status.OK_STATUS;

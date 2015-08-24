@@ -41,11 +41,11 @@ public class CloudApplicationArchiver {
 
 	private String applicationName;
 
-	private final ManifestParser parser;
+	private final ApplicationManifestHandler parser;
 
 	private static final String TEMP_FOLDER_NAME = "springidetempFolderForJavaAppJar";
 
-	public CloudApplicationArchiver(IJavaProject javaProject, String applicationName, ManifestParser parser) {
+	public CloudApplicationArchiver(IJavaProject javaProject, String applicationName, ApplicationManifestHandler parser) {
 		this.javaProject = javaProject;
 		this.applicationName = applicationName;
 		this.parser = parser;
@@ -220,7 +220,7 @@ public class CloudApplicationArchiver {
 		// attempting to push it again without the
 		// deployment wizard
 		if (parser.hasManifest()) {
-			archivePath = parser.getApplicationProperty(null, ManifestParser.PATH_PROP);
+			archivePath = parser.getApplicationProperty(null, ApplicationManifestHandler.PATH_PROP);
 		}
 
 		File packagedFile = null;

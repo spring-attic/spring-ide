@@ -12,9 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.List;
 
+import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -33,6 +37,15 @@ public interface UserInteractions {
 	boolean confirmOperation(String title, String message);
 	String updatePassword(String userName, String targetId);
 	void openDialog(ToggleFiltersDialogModel model);
+
+	/**
+	 *
+	 * @param project that is being deployed
+	 * @param list of domains available in the Cloud target. This is used to create an application URL
+	 * @return deployment properties for the project that at the very least should contain an application name
+	 * @throws OperationCanceledException if deployment is cancelled.
+	 */
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
 
 	/**
 	 * select a file
