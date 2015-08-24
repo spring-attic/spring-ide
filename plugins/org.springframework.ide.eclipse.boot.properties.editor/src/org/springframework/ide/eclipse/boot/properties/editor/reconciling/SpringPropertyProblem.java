@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import java.util.ArrayList;
 
 /**
  * @author Kris De Volder
