@@ -24,12 +24,12 @@ public class CloudErrors {
 	 * @return true if access token error. False otherwise
 	 */
 	public static boolean isAccessTokenError(Throwable t) {
-		return isCloudError(t, "access_denied") || isCloudError(t, "Error requesting access token")
-				|| (isCloudError(t, "access") && isCloudError(t, "token"));
+		return hasError(t, "access_denied") || hasError(t, "Error requesting access token")
+				|| (hasError(t, "access") && hasError(t, "token"));
 	}
 
 	public static boolean isBadRequest(Throwable t) {
-		return isCloudError(t, "400");
+		return hasCloudError(t, "400");
 	}
 
 	/**
@@ -39,10 +39,10 @@ public class CloudErrors {
 	 * @return true if 404 error. False otherwise
 	 */
 	public static boolean isNotFoundException(Throwable t) {
-		return isCloudError(t, "404");
+		return hasCloudError(t, "404");
 	}
 
-	public static boolean isCloudError(Throwable t, String error) {
+	public static boolean hasCloudError(Throwable t, String error) {
 
 		CloudFoundryException cloudError = getCloudFoundryError(t);
 
@@ -96,13 +96,17 @@ public class CloudErrors {
 	}
 
 	protected static boolean hasCloudError(CloudFoundryException e, String pattern) {
-		String message = e.getMessage();
+		String message = e.getDescription();
 		if (message != null && message.contains(pattern)) {
 			return true;
 		} else {
-			message = e.getDescription();
-			return message != null && message.contains(pattern);
+			return hasError(e, pattern);
 		}
+	}
+
+	protected static boolean hasError(Throwable t, String pattern) {
+		String message = t.getMessage();
+		return message != null && message.contains(pattern);
 	}
 
 	protected static String getCloudErrorMessage(CloudFoundryException e) {
