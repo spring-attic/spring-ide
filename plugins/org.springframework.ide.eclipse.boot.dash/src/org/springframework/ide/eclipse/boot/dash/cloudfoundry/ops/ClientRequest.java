@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.eclipse.core.runtime.CoreException;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
@@ -26,14 +28,16 @@ public abstract class ClientRequest<T> {
 
 		try {
 			return fetchClientAndRun();
-		} catch (Exception e) {
-			// if 403, could be access token error. Refresh client and Try again
-			// once
-			if (CloudErrors.isAccessException(e)) {
+		} catch (Throwable e) {
+			// If access token error, create a new client session and try again
+			// Note: access token errors may not be Exception, thus the reason to handle Throwable instead
+			if (CloudErrors.isAccessTokenError(e)) {
 				model.getCloudTarget().refresh();
 				return fetchClientAndRun();
+			} else if (e instanceof Exception) {
+				throw (Exception) e;
 			} else {
-				throw e;
+				throw new CoreException(BootDashActivator.createErrorStatus(e));
 			}
 		}
 	}

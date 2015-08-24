@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestParser;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 
 /**
  * Operation that uploads an application's archive. The application must have an
@@ -62,7 +62,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 			if (deploymentProperties.getProject() != null) {
 
-				ManifestParser parser = new ManifestParser(deploymentProperties.getProject(),
+				ApplicationManifestHandler parser = new ApplicationManifestHandler(deploymentProperties.getProject(),
 						this.model.getCloudTarget().getDomains(monitor));
 
 				CloudApplicationArchiver archiver = new CloudApplicationArchiver(

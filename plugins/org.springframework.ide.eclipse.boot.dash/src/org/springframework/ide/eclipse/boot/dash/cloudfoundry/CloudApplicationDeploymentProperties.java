@@ -41,6 +41,14 @@ public class CloudApplicationDeploymentProperties {
 
 	public static final int DEFAULT_MEMORY = 1024;
 	public static final int DEFAULT_INSTANCES = 1;
+	
+	public CloudApplicationDeploymentProperties() {
+		this(null);
+	}
+
+	public CloudApplicationDeploymentProperties(IProject project) {
+		this.project = project;
+	}
 
 	public void setBuildpackUrl(String buildpackUrl) {
 		this.buildpackUrl = buildpackUrl;

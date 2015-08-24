@@ -12,6 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.List;
 
+import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -21,9 +24,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationDeploymentPropertiesWizard;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -202,5 +208,32 @@ public class DefaultUserInteractions implements UserInteractions {
 	    		return result;
 	    }
 		return null;
+	}
+
+	@Override
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
+			final List<CloudDomain> domains) throws OperationCanceledException {
+		final Shell shell = getShell();
+		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[1];
+
+		if (shell != null) {
+			shell.getDisplay().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					ApplicationDeploymentPropertiesWizard wizard = new ApplicationDeploymentPropertiesWizard(project,
+							domains);
+					WizardDialog dialog = new WizardDialog(getShell(), wizard);
+					if (dialog.open() == Window.OK) {
+						props[0] = wizard.getProperties();
+					}
+				}
+			});
+		}
+		if (props[0] == null) {
+			throw new OperationCanceledException();
+		}
+		return props[0];
+
 	}
 }

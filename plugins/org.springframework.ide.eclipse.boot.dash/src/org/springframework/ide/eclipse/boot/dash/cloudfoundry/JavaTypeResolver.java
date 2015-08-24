@@ -34,8 +34,6 @@ public class JavaTypeResolver {
 
 	private final IJavaProject project;
 
-
-
 	public JavaTypeResolver(IJavaProject project) {
 		this.project = project;
 	}
@@ -53,8 +51,8 @@ public class JavaTypeResolver {
 			MainMethodSearchEngine engine = new MainMethodSearchEngine();
 			int constraints = IJavaSearchScope.SOURCES;
 			constraints |= IJavaSearchScope.APPLICATION_LIBRARIES;
-			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
-					new IJavaElement[] { javaProject }, constraints);
+			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProject },
+					constraints);
 			return engine.searchMainMethods(monitor, scope, includeSubtypes);
 		}
 		return new IType[] {};
@@ -81,7 +79,7 @@ public class JavaTypeResolver {
 
 				if (typesFromSource.size() == 1) {
 					return typesFromSource.get(0);
-				} else {
+				} else if (typesFromSource.size() > 1) {
 					// Prompt user to select a main type
 
 					final IType[] selectedType = new IType[1];
@@ -94,15 +92,12 @@ public class JavaTypeResolver {
 
 							if (shell != null && !shell.isDisposed()) {
 								SelectMainTypeWizard wizard = new SelectMainTypeWizard(typesFromSource);
-								WizardDialog dialog = new WizardDialog(shell,
-										wizard);
+								WizardDialog dialog = new WizardDialog(shell, wizard);
 								if (dialog.open() == Window.OK) {
-									selectedType[0] = wizard
-											.getSelectedMainType();
+									selectedType[0] = wizard.getSelectedMainType();
 								}
 
 							} else {
-
 								selectedType[0] = typesFromSource.get(0);
 							}
 						}

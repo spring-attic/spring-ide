@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
@@ -41,26 +38,8 @@ public abstract class CloudOperation extends Operation<Void> {
 		try {
 			doCloudOp(monitor);
 		} catch (Exception e) {
-			checkError(e);
+			CloudErrors.checkAndRethrowCloudException(e);
 		}
 		return null;
-	}
-
-	protected void checkError(Exception e) throws Exception {
-
-		// Special case for CF exceptions:
-		// CF exceptions may not contain the error in the message but rather
-		// the description
-		if (e instanceof CloudFoundryException) {
-			String message = ((CloudFoundryException) e).getDescription();
-
-			if (message == null || message.trim().length() == 0) {
-				message = "Cloud operation failure of type: " + e.getClass().getName();
-			}
-			IStatus status = BootDashActivator.createErrorStatus(e, message);
-			throw new CoreException(status);
-		}
-
-		throw e;
 	}
 }

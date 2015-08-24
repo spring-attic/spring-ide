@@ -41,11 +41,12 @@ public class CloudApplicationArchiver {
 
 	private String applicationName;
 
-	private final ManifestParser parser;
+	private final ApplicationManifestHandler parser;
 
 	private static final String TEMP_FOLDER_NAME = "springidetempFolderForJavaAppJar";
 
-	public CloudApplicationArchiver(IJavaProject javaProject, String applicationName, ManifestParser parser) {
+	public CloudApplicationArchiver(IJavaProject javaProject, String applicationName,
+			ApplicationManifestHandler parser) {
 		this.javaProject = javaProject;
 		this.applicationName = applicationName;
 		this.parser = parser;
@@ -53,7 +54,7 @@ public class CloudApplicationArchiver {
 
 	public CloudZipApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
 
-		CloudZipApplicationArchive archive = getArchiveFromManifest();
+		CloudZipApplicationArchive archive = getArchiveFromManifest(monitor);
 
 		if (archive == null) {
 
@@ -66,8 +67,8 @@ public class CloudApplicationArchiver {
 			final IPackageFragmentRoot[] roots = rootResolver.getPackageFragmentRoots(monitor);
 
 			if (roots == null || roots.length == 0) {
-				throw BootDashActivator.asCoreException("No package fragment roots found in Java project: "
-						+ javaProject.getElementName() + ". Unable to proceed with packaging");
+				throw BootDashActivator.asCoreException("Unable to package project" + javaProject.getElementName()
+						+ " as a jar application. Please verify that the project is a valid Java project and contains a main type in source.");
 			}
 
 			JarPackageData jarPackageData = getJarPackageData(roots, mainType, monitor);
@@ -213,14 +214,14 @@ public class CloudApplicationArchiver {
 		return path;
 	}
 
-	public CloudZipApplicationArchive getArchiveFromManifest() throws Exception {
+	public CloudZipApplicationArchive getArchiveFromManifest(IProgressMonitor monitor) throws Exception {
 		String archivePath = null;
 		// Read the path again instead of deployment info, as a user may be
 		// correcting the path after the module was creating and simply
 		// attempting to push it again without the
 		// deployment wizard
 		if (parser.hasManifest()) {
-			archivePath = parser.getApplicationProperty(null, ManifestParser.PATH_PROP);
+			archivePath = parser.getApplicationProperty(applicationName, ApplicationManifestHandler.PATH_PROP, monitor);
 		}
 
 		File packagedFile = null;
@@ -247,7 +248,6 @@ public class CloudApplicationArchiver {
 						"No file found at: " + path + ". Unable to package the application for deployment");
 			} else {
 				return new CloudZipApplicationArchive(new ZipFile(packagedFile));
-
 			}
 		}
 		return null;
