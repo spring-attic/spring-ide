@@ -63,7 +63,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 			if (deploymentProperties.getProject() != null) {
 
 				ApplicationManifestHandler parser = new ApplicationManifestHandler(deploymentProperties.getProject(),
-						this.model.getCloudTarget().getDomains(monitor));
+						this.model.getCloudTarget().getDomains(requests, monitor));
 
 				CloudApplicationArchiver archiver = new CloudApplicationArchiver(
 						JavaCore.create(deploymentProperties.getProject()), appName, parser);

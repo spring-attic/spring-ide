@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -18,8 +17,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -31,6 +36,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -38,6 +44,7 @@ import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
@@ -51,7 +58,6 @@ import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -106,16 +112,22 @@ public class NewSpringBootWizardModel {
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String JSON_URL;
 	private final String CONTENT_TYPE;
+	private PopularityTracker popularities;
 
 	public NewSpringBootWizardModel() throws Exception {
-		this(new URLConnectionFactory(), StsProperties.getInstance(new NullProgressMonitor()));
+		this(
+				new URLConnectionFactory(),
+				StsProperties.getInstance(new NullProgressMonitor()),
+				WizardPlugin.getDefault().getPreferenceStore()
+		);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER);
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
+		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER, prefs);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType) throws Exception {
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType, IPreferenceStore prefs) throws Exception {
+		this.popularities = new PopularityTracker(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
 		this.CONTENT_TYPE = contentType;
@@ -192,8 +204,61 @@ public class NewSpringBootWizardModel {
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
 
+	/**
+	 * Retrieves the most popular dependencies based on the number of times they have
+	 * been used to create a project.
+	 *
+	 * @param howMany is an upper limit on the number of most popular items to be returned.
+	 * @return An array of the most popular dependencies. May return fewer items than requested.
+	 */
+	public List<CheckBoxModel<Dependency>> getMostPopular(int howMany) {
+		final Map<CheckBoxModel<Dependency>, Integer> useCounts = new HashMap<CheckBoxModel<Dependency>, Integer>(); //usecounts by dependency id
+
+		ArrayList<CheckBoxModel<Dependency>> allUsedBoxes = new ArrayList<CheckBoxModel<Dependency>>();
+		for (String category : dependencies.getCategories()) {
+			allUsedBoxes.addAll(dependencies.getContents(category).getCheckBoxModels());
+		}
+
+		for (Iterator<CheckBoxModel<Dependency>> iterator = allUsedBoxes.iterator(); iterator.hasNext();) {
+			CheckBoxModel<Dependency> cb = iterator.next();
+			int useCount = popularities.getUsageCount(cb.getValue());
+			System.out.println("Uses of "+cb+" = "+useCount);
+			if (useCount==0) {
+				iterator.remove(); //don't care about those options never used at all.
+			} else {
+				useCounts.put(cb, popularities.getUsageCount(cb.getValue()));
+			}
+		}
+		Collections.sort(allUsedBoxes, new Comparator<CheckBoxModel<Dependency>>() {
+			public int compare(CheckBoxModel<Dependency> o1, CheckBoxModel<Dependency> o2) {
+				return useCounts.get(o2) - useCounts.get(o1);
+			}
+		});
+
+		howMany = Math.min(allUsedBoxes.size(), howMany);
+		List<CheckBoxModel<Dependency>> result = new ArrayList<CheckBoxModel<Dependency>>();
+		for (int i = 0; i < howMany; i++) {
+			result.add(allUsedBoxes.get(i));
+		}
+		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * Shouldn't be public really. This is just to make it easier to call from unit test.
+	 */
+	public void updateUsageCounts() {
+		for (String category : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> contents = dependencies.getContents(category);
+			for (Dependency d : contents.getCurrentSelections()) {
+				popularities.incrementUsageCount(d);
+			}
+		}
+	}
+
+
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
+		updateUsageCounts();
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager().allowUIThread(allowUIThread);
@@ -450,7 +515,7 @@ public class NewSpringBootWizardModel {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
 			for (Dependency dep : cat.getChoices()) {
 				if (dependencyId.equals(dep.getId())) {
-					cat.add(dep);
+					cat.select(dep);
 					return; //dep found and added to selection
 				}
 			}

@@ -114,7 +114,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
 
-		List<CloudDomain> domains = model.getCloudTarget().getDomains(monitor);
+		List<CloudDomain> domains = model.getCloudTarget().getDomains(requests, monitor);
 
 		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, domains);
 

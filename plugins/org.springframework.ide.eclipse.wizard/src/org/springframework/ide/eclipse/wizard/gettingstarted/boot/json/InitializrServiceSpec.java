@@ -112,7 +112,6 @@ public class InitializrServiceSpec {
 		public String getVersionRange() {
 			return versionRange;
 		}
-
 	}
 
 	public static class DependencyGroup extends Nameable {

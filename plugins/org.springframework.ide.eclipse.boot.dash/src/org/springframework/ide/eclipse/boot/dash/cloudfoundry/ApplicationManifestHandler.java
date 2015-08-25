@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -497,6 +498,16 @@ public class ApplicationManifestHandler {
 		CloudApplicationURL cloudURL = null;
 		if (subdomain == null) {
 			subdomain = properties.getAppName();
+		} else {
+			// Check for random word
+			int varIndex = subdomain.indexOf('$');
+			int startIndex = subdomain.indexOf('{');
+			int endIndex = subdomain.indexOf('}');
+			int randomIndex = subdomain.indexOf("random");
+			if (varIndex >= 0 && startIndex > varIndex && randomIndex > startIndex && endIndex > randomIndex) {
+				String randomWord = RandomStringUtils.randomAlphabetic(5);
+				subdomain = subdomain.replace(subdomain.substring(varIndex, endIndex + 1), randomWord);
+			}
 		}
 
 		if (domain == null && !domains.isEmpty()) {

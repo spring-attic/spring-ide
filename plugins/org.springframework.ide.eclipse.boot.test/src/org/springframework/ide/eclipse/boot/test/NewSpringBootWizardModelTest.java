@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -28,10 +30,13 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroups;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
@@ -59,9 +64,13 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		super.setUp();
 	}
 
-	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
+	public static NewSpringBootWizardModel parseFrom(String resourcePath, IPreferenceStore store) throws Exception {
 		URL formUrl = resourceUrl(resourcePath);
-		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), "application/json");
+		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), "application/json", store);
+	}
+
+	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
+		return parseFrom(resourcePath, new MockPrefsStore());
 	}
 
 	public static URL resourceUrl(String resourcePath) {
@@ -239,18 +248,126 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		assertFalse(url.contains("bitronix"));
 	}
 
+	public void testPopularityTracking() throws Exception {
+		IPreferenceStore store = new MockPrefsStore();
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
+		assertTrue(model.getMostPopular(10).isEmpty());
+		Dependency web = getDependencyById(model, "web");
+		Dependency actuator = getDependencyById(model, "actuator");
+		Dependency thymeleaf = getDependencyById(model, "thymeleaf");
+
+		select(model.dependencies, web);
+		select(model.dependencies, thymeleaf);
+		select(model.dependencies, actuator);
+
+		model.updateUsageCounts();
+
+		PopularityTracker tracker = new PopularityTracker(store);
+		assertEquals(1, tracker.getUsageCount(web));
+		assertEquals(1, tracker.getUsageCount(thymeleaf));
+		assertEquals(1, tracker.getUsageCount(actuator));
+
+		model.updateUsageCounts();
+		assertEquals(2, tracker.getUsageCount(web));
+		assertEquals(2, tracker.getUsageCount(thymeleaf));
+		assertEquals(2, tracker.getUsageCount(actuator));
+
+		unselect(model.dependencies, actuator);
+		model.updateUsageCounts();
+
+		unselect(model.dependencies, thymeleaf);
+		model.updateUsageCounts();
+
+		assertEquals(4, tracker.getUsageCount(web));
+		assertEquals(3, tracker.getUsageCount(thymeleaf));
+		assertEquals(2, tracker.getUsageCount(actuator));
+
+		assertCheckboxes(model.getMostPopular(10),
+				web, thymeleaf, actuator);
+
+		/////////////////////////////////////////////////////////////////////////////
+		// check that model counts are limitted according to 'howMany' argument
+
+		assertCheckboxes(model.getMostPopular(3),
+				web, thymeleaf, actuator);
+		assertCheckboxes(model.getMostPopular(2),
+				web, thymeleaf);
+		assertCheckboxes(model.getMostPopular(1),
+				web);
+		assertCheckboxes(model.getMostPopular(0)
+				/*nothing*/);
+
+	}
+
+
+	public void testtPopularCheckboxSharesSelectionState() throws Exception {
+		IPreferenceStore store = new MockPrefsStore();
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
+		assertTrue(model.getMostPopular(10).isEmpty());
+		Dependency web = getDependencyById(model, "web");
+
+		PopularityTracker tracker = new PopularityTracker(store);
+		tracker.incrementUsageCount(web);
+
+		String webCat = getCategory(model.dependencies, web);
+		MultiSelectionFieldModel<Dependency> webGroup = model.dependencies.getContents(webCat);
+		List<CheckBoxModel<Dependency>> allWebBoxes = webGroup.getCheckBoxModels();
+
+		CheckBoxModel<Dependency> normalBox = getCheckboxById(allWebBoxes, web.getId());
+		CheckBoxModel<Dependency> popularBox = getCheckboxById(model.getMostPopular(10), web.getId());
+
+		assertFalse(normalBox.getSelection().getValue());
+		assertFalse(popularBox.getSelection().getValue());
+
+		normalBox.getSelection().setValue(true);
+		assertTrue(normalBox.getSelection().getValue());
+		assertTrue(popularBox.getSelection().getValue());
+
+		popularBox.getSelection().setValue(false);
+		assertFalse(normalBox.getSelection().getValue());
+		assertFalse(popularBox.getSelection().getValue());
+	}
+
+	private CheckBoxModel<Dependency> getCheckboxById(List<CheckBoxModel<Dependency>> list, String id) {
+		for (CheckBoxModel<Dependency> cb : list) {
+			if (id.equals(cb.getValue().getId())) {
+				return cb;
+			}
+		}
+		return null;
+	}
+
+	private void assertCheckboxes(List<CheckBoxModel<Dependency>> actuals, Dependency... expecteds) {
+		StringBuilder expectedIds = new StringBuilder();
+		for (Dependency e : expecteds) {
+			expectedIds.append(e.getId()+"\n");
+		}
+		StringBuilder actualIds = new StringBuilder();
+		for (CheckBoxModel<Dependency> cb : actuals) {
+			actualIds.append(cb.getValue().getId()+"\n");
+		}
+		assertEquals(expectedIds.toString(), actualIds.toString());
+	}
+
+	private void unselect(HierarchicalMultiSelectionFieldModel<Dependency> dependencies,
+			Dependency dep) {
+			String cat = getCategory(dependencies, dep);
+			MultiSelectionFieldModel<Dependency> selecteds = dependencies.getContents(cat);
+			selecteds.unselect(dep);
+	}
+
 	private void select(HierarchicalMultiSelectionFieldModel<Dependency> dependencies,
 			Dependency dep) {
 		String cat = getCategory(dependencies, dep);
-		LiveSet<Dependency> selecteds = dependencies.getContents(cat).getSelecteds();
-		selecteds.add(dep);
+		MultiSelectionFieldModel<Dependency> selecteds = dependencies.getContents(cat);
+		selecteds.select(dep);
 	}
 
 	private Set<Dependency> getSelecteds(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
 		HashSet<Dependency> selecteds = new HashSet<InitializrServiceSpec.Dependency>();
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
-			selecteds.addAll(cat.getSelecteds().getValue());
+			selecteds.addAll(cat.getCurrentSelections());
 		}
 		return selecteds;
 	}
@@ -432,8 +549,4 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			assertEquals(expectNames[i], groups.get(i).getName());
 		}
 	}
-
-
-
-
 }

@@ -57,7 +57,11 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		requests.restartApplication(appName);
 
-		RunState runState = new ApplicationRunningStateTracker(appName, requests, model).startTracking(monitor);
+		long timeout = isDebugging ? ApplicationRunningStateTracker.NO_TIMEOUT
+				: ApplicationRunningStateTracker.TIMEOUT;
+
+		RunState runState = new ApplicationRunningStateTracker(appName, requests, model, timeout)
+				.startTracking(monitor);
 
 		model.updateApplication(getCloudApplicationInstances(), runState);
 

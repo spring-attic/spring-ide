@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 
 /** Example used as reference for explaingin the meaning of the instance variables:
@@ -72,7 +71,7 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 	}
 
 	@Override
-	public String getHtml() {
+	protected String renderAsHtml() {
 		HtmlBuffer html = new HtmlBuffer();
 
 		html.raw("<b>");

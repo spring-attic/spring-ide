@@ -18,6 +18,8 @@ import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
@@ -200,6 +202,26 @@ public class ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.deleteApplication(appName);
+			}
+		}.run();
+	}
+
+	public List<CloudDomain> getDomains() throws Exception {
+		return new ClientRequest<List<CloudDomain>>(model) {
+
+			@Override
+			protected List<CloudDomain> doRun(CloudFoundryOperations client) throws Exception {
+				return client.getDomains();
+			}
+		}.run();
+	}
+
+	public List<CloudSpace> getSpaces() throws Exception {
+		return new ClientRequest<List<CloudSpace>>(model) {
+
+			@Override
+			protected List<CloudSpace> doRun(CloudFoundryOperations client) throws Exception {
+				return client.getSpaces();
 			}
 		}.run();
 	}

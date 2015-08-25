@@ -26,19 +26,19 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.DescriptionSection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
-import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
-import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 
 public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWizard {
 
@@ -143,6 +143,8 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 	public class DependencyPage extends WizardPageWithSections {
 
+		private static final int NUM_DEP_COLUMNS = 5;
+
 		protected DependencyPage() {
 			super("page2", "New Spring Starter Project", null);
 		}
@@ -160,11 +162,24 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
+			List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(2*NUM_DEP_COLUMNS);
+			if (!mostpopular.isEmpty()) {
+				sections.add(new ExpandableSection(this, "Frequently Used",
+						new CheckBoxesSection<Dependency>(this, mostpopular)
+							.columns(NUM_DEP_COLUMNS)
+				));
+			}
+
 			for (String cat : model.dependencies.getCategories()) {
+				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
+				ExpandableSection expandable;
 				sections.add(
-						new CheckBoxesSection<Dependency>(this, model.dependencies.getContents(cat))
-							.columns(5)
-					);
+					expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
+							new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
+								.columns(NUM_DEP_COLUMNS)
+					)
+				);
+				expandable.getExpansionState().setValue(false);
 			}
 
 			return sections;

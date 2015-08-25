@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
 /**
  * @author Kris De Volder
  */
@@ -56,5 +62,10 @@ public class SpringPropertyProblem {
 
 	public static SpringPropertyProblem problem(ProblemType problemType, String message, int offset, int len) {
 		return new SpringPropertyProblem(problemType, message , offset, len);
+	}
+
+	public List<ICompletionProposal> getQuickfixes(IPreferenceStore preferences) {
+		ICompletionProposal prop = new IgnoreProblemTypeQuickfix(preferences, getType());
+		return Collections.singletonList(prop);
 	}
 }

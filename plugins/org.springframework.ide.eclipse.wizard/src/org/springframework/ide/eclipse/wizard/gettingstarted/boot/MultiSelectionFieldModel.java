@@ -11,18 +11,26 @@
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 
 /**
  * Model for a UI widget that offers multiple choices. Could be represented
@@ -37,7 +45,6 @@ public class MultiSelectionFieldModel<T> {
 	private Class<T> type; //Type of data stored in the field.
 	private String name; // used to submit value to some service that handles the form
 	private String label; // Label to display in forms
-	private LiveSet<T> variable = new LiveSet<T>();
 	private LiveExpression<ValidationResult> validator;
 
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
@@ -46,11 +53,13 @@ public class MultiSelectionFieldModel<T> {
 
 	private Map<T, LiveExpression<Boolean>> enablements = null;
 
+	//selection state for each individual choice (created on an as-needed basis).
+	private Map<T, LiveVariable<Boolean>> selections = new HashMap<T, LiveVariable<Boolean>>();
+
 	public MultiSelectionFieldModel(Class<T> type, String name) {
 		this.type = type;
 		this.name  = name;
 		this.label = name;
-		this.variable = new LiveSet<T>();
 		this.validator = Validator.OK;
 	}
 
@@ -79,15 +88,20 @@ public class MultiSelectionFieldModel<T> {
 		return this;
 	}
 
-	public LiveSet<T> getSelecteds() {
-		return variable;
+	public void select(T v) {
+		getSelection(v).setValue(true);
 	}
 
-	public void add(T v) {
-		getSelecteds().add(v);
+	public synchronized LiveVariable<Boolean> getSelection(T v) {
+		LiveVariable<Boolean> existing = selections.get(v);
+		if (existing==null) {
+			selections.put(v, existing = new LiveVariable<Boolean>(false));
+		}
+		return existing;
 	}
-	public void remove(T v) {
-		getSelecteds().remove(v);
+
+	public void unselect(T v) {
+		getSelection(v).setValue(false);
 	}
 
 	/**
@@ -161,6 +175,30 @@ public class MultiSelectionFieldModel<T> {
 			}
 		}
 		return ALLWAYS_ENABLED;
+	}
+
+	public synchronized List<T> getCurrentSelections() {
+		List<T> selecteds = new ArrayList<T>();
+		for (Entry<T, LiveVariable<Boolean>> e : selections.entrySet()) {
+			if (e.getValue().getValue()) {
+				selecteds.add(e.getKey());
+			}
+		}
+		return Collections.unmodifiableList(selecteds);
+	}
+
+	/**
+	 * Converts all the current choices into CheckBoxModel objects. One checkbox to
+	 * represent each choice.
+	 */
+	public List<CheckBoxModel<T>> getCheckBoxModels() {
+		List<CheckBoxModel<T>> checkboxes = new ArrayList<CheckBoxModel<T>>(labelMap.size());
+		for (T choice : labelMap.keySet()) {
+			CheckBoxModel<T> cb;
+			checkboxes.add(cb = new CheckBoxModel<T>(getLabel(choice), choice, getSelection(choice), getEnablement(choice)));
+			cb.setTooltip(getTooltip(choice));
+		}
+		return Collections.unmodifiableList(checkboxes);
 	}
 
 }
