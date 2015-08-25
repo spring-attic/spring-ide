@@ -48,7 +48,7 @@ public class PopularityTracker {
 
 	private void incrementUsageCount(String id) {
 		String key = key(id);
-		store.setValue(key, store.getInt(key));
+		store.setValue(key, store.getInt(key)+1);
 	}
 
 

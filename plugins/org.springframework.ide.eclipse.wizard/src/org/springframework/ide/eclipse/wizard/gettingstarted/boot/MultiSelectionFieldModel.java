@@ -23,10 +23,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 
 /**
  * Model for a UI widget that offers multiple choices. Could be represented
@@ -181,6 +185,20 @@ public class MultiSelectionFieldModel<T> {
 			}
 		}
 		return Collections.unmodifiableList(selecteds);
+	}
+
+	/**
+	 * Converts all the current choices into CheckBoxModel objects. One checkbox to
+	 * represent each choice.
+	 */
+	public List<CheckBoxModel<T>> getCheckBoxModels() {
+		List<CheckBoxModel<T>> checkboxes = new ArrayList<CheckBoxModel<T>>(labelMap.size());
+		for (T choice : labelMap.keySet()) {
+			CheckBoxModel<T> cb;
+			checkboxes.add(cb = new CheckBoxModel<T>(getLabel(choice), choice, getSelection(choice), getEnablement(choice)));
+			cb.setTooltip(getTooltip(choice));
+		}
+		return Collections.unmodifiableList(checkboxes);
 	}
 
 }

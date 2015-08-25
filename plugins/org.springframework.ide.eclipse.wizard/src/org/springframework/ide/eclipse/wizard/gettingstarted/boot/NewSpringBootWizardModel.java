@@ -22,7 +22,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -42,6 +44,7 @@ import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
@@ -208,34 +211,42 @@ public class NewSpringBootWizardModel {
 	 * @param howMany is an upper limit on the number of most popular items to be returned.
 	 * @return An array of the most popular dependencies. May return fewer items than requested.
 	 */
-	public Dependency[] getMostPopular(int howMany) {
-		final Map<String, Integer> useCounts = new HashMap<String, Integer>(); //usecounts by dependency id
-		ArrayList<Dependency> deps = new ArrayList<InitializrServiceSpec.Dependency>();
+	public List<CheckBoxModel<Dependency>> getMostPopular(int howMany) {
+		final Map<CheckBoxModel<Dependency>, Integer> useCounts = new HashMap<CheckBoxModel<Dependency>, Integer>(); //usecounts by dependency id
+
+		ArrayList<CheckBoxModel<Dependency>> allUsedBoxes = new ArrayList<CheckBoxModel<Dependency>>();
 		for (String category : dependencies.getCategories()) {
-			for (Dependency d : dependencies.getContents(category).getChoices()) {
-				int used = popularities.getUsageCount(d);
-				if (used>0) {
-					useCounts.put(d.getId(), used);
-					deps.add(d);
-				}
-			}
+			allUsedBoxes.addAll(dependencies.getContents(category).getCheckBoxModels());
 		}
 
-		Collections.sort(deps, new Comparator<Dependency>() {
-			public int compare(Dependency o1, Dependency o2) {
-				return useCounts.get(o2.getId()) - useCounts.get(o1.getId());
+		for (Iterator<CheckBoxModel<Dependency>> iterator = allUsedBoxes.iterator(); iterator.hasNext();) {
+			CheckBoxModel<Dependency> cb = iterator.next();
+			int useCount = popularities.getUsageCount(cb.getValue());
+			System.out.println("Uses of "+cb+" = "+useCount);
+			if (useCount==0) {
+				iterator.remove(); //don't care about those options never used at all.
+			} else {
+				useCounts.put(cb, popularities.getUsageCount(cb.getValue()));
+			}
+		}
+		Collections.sort(allUsedBoxes, new Comparator<CheckBoxModel<Dependency>>() {
+			public int compare(CheckBoxModel<Dependency> o1, CheckBoxModel<Dependency> o2) {
+				return useCounts.get(o2) - useCounts.get(o1);
 			}
 		});
 
-		howMany = Math.min(deps.size(), howMany);
-		Dependency[] result = new Dependency[howMany];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = deps.get(i);
+		howMany = Math.min(allUsedBoxes.size(), howMany);
+		List<CheckBoxModel<Dependency>> result = new ArrayList<CheckBoxModel<Dependency>>();
+		for (int i = 0; i < howMany; i++) {
+			result.add(allUsedBoxes.get(i));
 		}
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 
-	private void updateUsageCounts(HierarchicalMultiSelectionFieldModel<Dependency> dependencies2) {
+	/**
+	 * Shouldn't be public really. This is just to make it easier to call from unit test.
+	 */
+	public void updateUsageCounts() {
 		for (String category : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> contents = dependencies.getContents(category);
 			for (Dependency d : contents.getCurrentSelections()) {
@@ -247,7 +258,7 @@ public class NewSpringBootWizardModel {
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
-		updateUsageCounts(dependencies);
+		updateUsageCounts();
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager().allowUIThread(allowUIThread);

@@ -26,6 +26,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.springframework.ide.eclipse.wizard.WizardImages;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.DescriptionSection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -161,14 +162,20 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
-//			mostpopular = model.getMostPopular(2*NUM_DEP_COLUMNS);
+			List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(2*NUM_DEP_COLUMNS);
+			if (!mostpopular.isEmpty()) {
+				sections.add(new ExpandableSection(this, "Frequently Used",
+						new CheckBoxesSection<Dependency>(this, mostpopular)
+							.columns(NUM_DEP_COLUMNS)
+				));
+			}
 
 			for (String cat : model.dependencies.getCategories()) {
 				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
 				ExpandableSection expandable;
 				sections.add(
 					expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-							new CheckBoxesSection<Dependency>(this, dependencyGroup)
+							new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
 								.columns(NUM_DEP_COLUMNS)
 					)
 				);
