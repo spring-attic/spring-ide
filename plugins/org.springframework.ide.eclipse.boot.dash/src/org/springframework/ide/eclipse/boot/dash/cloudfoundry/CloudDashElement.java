@@ -16,6 +16,7 @@ import java.util.List;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
@@ -126,7 +127,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public RunState getRunState() {
 		RunState state = getCloudModel().getAppCache().getRunState(getName());
 		if (state==RunState.RUNNING) {
-			if (DevtoolsUtil.isDebuggerAttached(this)) {
+			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
 				state = RunState.DEBUGGING;
 			}
 		}

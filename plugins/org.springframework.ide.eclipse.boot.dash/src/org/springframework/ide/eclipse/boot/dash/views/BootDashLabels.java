@@ -10,23 +10,30 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.Arrays;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
-import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
-import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
+import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
@@ -158,7 +165,7 @@ public class BootDashLabels implements Disposable {
 				return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
 			case TREE_VIEWER_MAIN:
 			case RUN_STATE_ICN:
-				return getRunStateAnimation(element.getRunState());
+				return decorateRunStateImages(element, getRunStateAnimation(element.getRunState()));
 			default:
 				return NO_IMAGES;
 			}
@@ -363,6 +370,21 @@ public class BootDashLabels implements Disposable {
 			BootDashActivator.log(e);
 		}
 		return null;
+	}
+
+	private static Image[] decorateRunStateImages(BootDashElement bde, Image[] images) {
+		Image[] decoratedImages = Arrays.copyOf(images, images.length);
+		if (bde.getTarget() != null) {
+			if (bde.getTarget().getType() == RunTargetTypes.CLOUDFOUNDRY) {
+				if (bde.getRunState() == RunState.RUNNING && DevtoolsUtil.isDevClientAttached(bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
+					ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
+					for (int i = 0; i < decoratedImages.length; i++) {
+						decoratedImages[i] = new DecorationOverlayIcon(decoratedImages[i], decorDesc, IDecoration.BOTTOM_RIGHT).createImage(decoratedImages[i].getDevice());
+					}
+				}
+			}
+		}
+		return decoratedImages;
 	}
 
 }

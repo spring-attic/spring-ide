@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -25,6 +26,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -69,12 +71,12 @@ public class DevtoolsUtil {
 		return "http://"+host;
 	}
 
-	public static ILaunch launchDevtoolsDebugging(IProject project, String host, String debugSecret, CloudDashElement cde) throws CoreException {
+	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {
 		if (host==null) {
 			throw ExceptionUtil.coreException("Can not launch devtools client: Host not specified");
 		}
 		ILaunchConfiguration conf = getOrCreateLaunchConfig(project, host, debugSecret, cde);
-		return conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor());
+		return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
 	}
 
 	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, CloudDashElement cde) throws CoreException {
@@ -125,7 +127,7 @@ public class DevtoolsUtil {
 	}
 
 
-	public static boolean isDebuggerAttached(BootDashElement bde) {
+	public static boolean isDevClientAttached(BootDashElement bde, String launchMode) {
 		if (bde.getTarget().getType()!=RunTargetTypes.CLOUDFOUNDRY) {
 			//Not yet implemented for other types of elements
 			throw new IllegalArgumentException("This operation is not implemented for "+bde.getTarget().getType());
@@ -134,27 +136,38 @@ public class DevtoolsUtil {
 		if (project!=null) { // else not associated with a local project... can't really attach debugger then
 			String host = bde.getLiveHost();
 			if (host!=null) { // else app not running, can't attach debugger then
-				return isDebugging(findLaunches(project, host));
+				return isLaunchMode(findLaunches(project, host), launchMode);
 			}
 		}
 		return false;
 	}
 
-	private static boolean isDebugging(List<ILaunch> launches) {
+	private static boolean isLaunchMode(List<ILaunch> launches, String launchMode) {
 		for (ILaunch l : launches) {
-			if (!l.isTerminated() && ILaunchManager.DEBUG_MODE.equals(l.getLaunchMode())) {
-				for (IDebugTarget p : l.getDebugTargets()) {
-					if (!p.isDisconnected() && !p.isTerminated()) {
-						return true;
+			if (!l.isTerminated()) {
+				if (ILaunchManager.DEBUG_MODE.equals(launchMode)) {
+					for (IDebugTarget p : l.getDebugTargets()) {
+						if (!p.isDisconnected() && !p.isTerminated()) {
+							return true;
+						}
 					}
+				} else if (ILaunchManager.RUN_MODE.equals(launchMode)) {
+					for (IProcess p : l.getProcesses()) {
+						if (!p.isTerminated()) {
+							return true;
+						}
+					}
+				} else {
+					// Launch mode not specified? Launch is not terminated hence just return true
+					return true;
 				}
 			}
 		}
 		return false;
 	}
 
-	public static void launchDevtoolsDebugging(CloudDashElement cde, String debugSecret) throws CoreException {
-		launchDevtoolsDebugging(cde.getProject(), cde.getLiveHost(), debugSecret, cde);
+	public static void launchDevtools(CloudDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
+		launchDevtools(cde.getProject(), cde.getLiveHost(), debugSecret, cde, mode, monitor);
 	}
 
 	public static void setElement(ILaunchConfigurationWorkingCopy l, CloudDashElement cde) {
@@ -223,14 +236,22 @@ public class DevtoolsUtil {
 		return new ProcessTracker(new ProcessListenerAdapter() {
 			@Override
 			public void debugTargetCreated(ProcessTracker tracker, IDebugTarget target) {
-				handleDebugStateChange(target);
+				handleStateChange(target.getLaunch());
 			}
 			@Override
 			public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
-				handleDebugStateChange(target);
+				handleStateChange(target.getLaunch());
 			}
-			private void handleDebugStateChange(IDebugTarget target) {
-				ILaunch l = target.getLaunch();
+
+			@Override
+			public void processTerminated(ProcessTracker tracker, IProcess process) {
+				handleStateChange(process.getLaunch());
+			}
+			@Override
+			public void processCreated(ProcessTracker tracker, IProcess process) {
+				handleStateChange(process.getLaunch());
+			}
+			private void handleStateChange(ILaunch l) {
 				CloudDashElement e = DevtoolsUtil.getElement(l, viewModel);
 				if (e!=null) {
 					BootDashModel model = e.getParent();

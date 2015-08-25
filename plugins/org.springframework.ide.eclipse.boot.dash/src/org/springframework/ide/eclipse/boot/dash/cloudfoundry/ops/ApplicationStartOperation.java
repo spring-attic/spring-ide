@@ -18,6 +18,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
@@ -62,7 +63,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		if (isDebugging) {
 			CloudDashElement cde = model.getElement(appName);
-			DevtoolsUtil.launchDevtoolsDebugging(cde, debugSecret);
+			DevtoolsUtil.launchDevtools(cde, debugSecret, ILaunchManager.DEBUG_MODE, monitor);
 		}
 	}
 

@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -27,6 +28,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash"; //$NON-NLS-1$
+
+	public static final String DT_ICON_ID = "dt-icon";
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -124,6 +127,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 			);
 		}
 		return model;
+	}
+
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
+		reg.put(DT_ICON_ID, getImageDescriptor("/icons/DT.png"));
 	}
 
 }

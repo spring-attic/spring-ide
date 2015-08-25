@@ -55,6 +55,7 @@ public class BootDashActions {
 	private RemoveRunTargetAction removeTargetAction;
 	private DeleteApplicationsAction deleteApplicationsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
+	private RestartRemoteDevClientAction restartRemoteDevClientAction;
 
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -176,6 +177,8 @@ public class BootDashActions {
 		exposeDebugAppAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode and expose it to the outside world via an ngrok tunnel");
 		exposeDebugAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
 		exposeDebugAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
+
+		restartRemoteDevClientAction = new RestartRemoteDevClientAction(model, elementsSelection, ui);
 
 	}
 
@@ -332,6 +335,10 @@ public class BootDashActions {
 
 	public IAction getToggleFiltersAction() {
 		return toggleFiltersAction;
+	}
+
+	public RestartRemoteDevClientAction getRestartRemoteDevClientAction() {
+		return restartRemoteDevClientAction;
 	}
 
 	public IAction selectDefaultConfigAction(
