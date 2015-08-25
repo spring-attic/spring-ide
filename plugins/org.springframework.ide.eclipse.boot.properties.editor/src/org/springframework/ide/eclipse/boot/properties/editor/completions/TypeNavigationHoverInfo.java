@@ -113,7 +113,7 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 			if (jes!=null) {
 				for (IJavaElement je : jes) {
 					if (je instanceof IMember) {
-						String jdoc = getHTMLContent(je, true);
+						String jdoc = getHTMLContent((IMember)je, true);
 						if (jdoc!=null) {
 							return jdoc;
 						}
