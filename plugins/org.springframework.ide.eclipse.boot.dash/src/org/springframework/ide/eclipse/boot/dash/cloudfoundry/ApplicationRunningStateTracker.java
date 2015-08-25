@@ -59,19 +59,26 @@ public class ApplicationRunningStateTracker {
 
 		long totalTime = currentTime + timeout;
 
-		int estimatedAttempts = (int) (timeout / (WAIT_TIME + roughEstimateFetchStatsms));
-		monitor.beginTask("Checking if the application is running", estimatedAttempts);
-		model.getElementConsoleManager().writeToConsole(appName, "Verifying if application is running. Please wait...",
-				LogType.LOCALSTDOUT);
 		boolean shouldTimeout = timeout > 0;
 
-		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && (!shouldTimeout
-				|| currentTime < totalTime)) {
+		int estimatedAttempts = shouldTimeout ? (int) (timeout / (WAIT_TIME + roughEstimateFetchStatsms)) : 0;
+		String checkingMessage = "Checking if the application is running";
+		if (estimatedAttempts > 0) {
+			monitor.beginTask(checkingMessage, estimatedAttempts);
+
+		} else {
+			monitor.setTaskName(checkingMessage);
+		}
+		model.getElementConsoleManager().writeToConsole(appName, checkingMessage + ". Please wait...",
+				LogType.LOCALSTDOUT);
+
+		while (runState != RunState.RUNNING && runState != RunState.FLAPPING
+				&& (!shouldTimeout || currentTime < totalTime)) {
 			int timeLeft = (int) ((totalTime - currentTime) / 1000);
 
 			// Don't log this. Only update the monitor
 			if (shouldTimeout) {
-				monitor.setTaskName("Verifying if application is running. Time left before timeout: " + timeLeft + 's');
+				monitor.setTaskName(checkingMessage + ". Time left before timeout: " + timeLeft + 's');
 			}
 
 			if (monitor.isCanceled()) {
