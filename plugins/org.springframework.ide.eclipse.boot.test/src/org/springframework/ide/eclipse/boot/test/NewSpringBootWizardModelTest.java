@@ -61,7 +61,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
 		URL formUrl = resourceUrl(resourcePath);
-		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), "application/json");
+		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), "application/json", new MockPrefsStore() );
 	}
 
 	public static URL resourceUrl(String resourcePath) {
@@ -242,15 +242,15 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	private void select(HierarchicalMultiSelectionFieldModel<Dependency> dependencies,
 			Dependency dep) {
 		String cat = getCategory(dependencies, dep);
-		LiveSet<Dependency> selecteds = dependencies.getContents(cat).getSelecteds();
-		selecteds.add(dep);
+		MultiSelectionFieldModel<Dependency> selecteds = dependencies.getContents(cat);
+		selecteds.select(dep);
 	}
 
 	private Set<Dependency> getSelecteds(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
 		HashSet<Dependency> selecteds = new HashSet<InitializrServiceSpec.Dependency>();
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
-			selecteds.addAll(cat.getSelecteds().getValue());
+			selecteds.addAll(cat.getCurrentSelections());
 		}
 		return selecteds;
 	}

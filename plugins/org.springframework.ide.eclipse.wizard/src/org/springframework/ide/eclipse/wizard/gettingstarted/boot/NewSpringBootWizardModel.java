@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +17,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,6 +34,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -51,7 +55,6 @@ import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -106,16 +109,22 @@ public class NewSpringBootWizardModel {
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String JSON_URL;
 	private final String CONTENT_TYPE;
+	private PopularityTracker popularities;
 
 	public NewSpringBootWizardModel() throws Exception {
-		this(new URLConnectionFactory(), StsProperties.getInstance(new NullProgressMonitor()));
+		this(
+				new URLConnectionFactory(),
+				StsProperties.getInstance(new NullProgressMonitor()),
+				WizardPlugin.getDefault().getPreferenceStore()
+		);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER);
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
+		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER, prefs);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType) throws Exception {
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType, IPreferenceStore prefs) throws Exception {
+		this.popularities = new PopularityTracker(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
 		this.CONTENT_TYPE = contentType;
@@ -192,8 +201,53 @@ public class NewSpringBootWizardModel {
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
 
+	/**
+	 * Retrieves the most popular dependencies based on the number of times they have
+	 * been used to create a project.
+	 *
+	 * @param howMany is an upper limit on the number of most popular items to be returned.
+	 * @return An array of the most popular dependencies. May return fewer items than requested.
+	 */
+	public Dependency[] getMostPopular(int howMany) {
+		final Map<String, Integer> useCounts = new HashMap<String, Integer>(); //usecounts by dependency id
+		ArrayList<Dependency> deps = new ArrayList<InitializrServiceSpec.Dependency>();
+		for (String category : dependencies.getCategories()) {
+			for (Dependency d : dependencies.getContents(category).getChoices()) {
+				int used = popularities.getUsageCount(d);
+				if (used>0) {
+					useCounts.put(d.getId(), used);
+					deps.add(d);
+				}
+			}
+		}
+
+		Collections.sort(deps, new Comparator<Dependency>() {
+			public int compare(Dependency o1, Dependency o2) {
+				return useCounts.get(o2.getId()) - useCounts.get(o1.getId());
+			}
+		});
+
+		howMany = Math.min(deps.size(), howMany);
+		Dependency[] result = new Dependency[howMany];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = deps.get(i);
+		}
+		return result;
+	}
+
+	private void updateUsageCounts(HierarchicalMultiSelectionFieldModel<Dependency> dependencies2) {
+		for (String category : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> contents = dependencies.getContents(category);
+			for (Dependency d : contents.getCurrentSelections()) {
+				popularities.incrementUsageCount(d);
+			}
+		}
+	}
+
+
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
+		updateUsageCounts(dependencies);
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager().allowUIThread(allowUIThread);
@@ -450,7 +504,7 @@ public class NewSpringBootWizardModel {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
 			for (Dependency dep : cat.getChoices()) {
 				if (dependencyId.equals(dep.getId())) {
-					cat.add(dep);
+					cat.select(dep);
 					return; //dep found and added to selection
 				}
 			}

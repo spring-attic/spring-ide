@@ -44,9 +44,12 @@ public class UrlMaker extends LiveExpression<String> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public UrlMaker addField(MultiSelectionFieldModel<? extends IdAble> param) {
+	public <T extends IdAble> UrlMaker addField(MultiSelectionFieldModel<T> param) {
 		multiInputs.add((MultiSelectionFieldModel<IdAble>) param);
-		dependsOn(param.getSelecteds()); //Recompute my value when the input changes.
+		for (T choice : param.getChoices()) {
+			//Recomput value when any 'checkbox' selection status changes
+			dependsOn(param.getSelection(choice));
+		}
 		return this;
 	}
 
@@ -90,7 +93,7 @@ public class UrlMaker extends LiveExpression<String> {
 
 		for (MultiSelectionFieldModel<IdAble> mf : multiInputs) {
 			String name = mf.getName();
-			for (IdAble selectedValue : mf.getSelecteds().getValues()) {
+			for (IdAble selectedValue : mf.getCurrentSelections()) {
 				//Note that it is possible for values to be selected and disabled at the same time
 				// (i.e. a checkbox can be checked and 'greyed' out at the same time)
 				//We must therefore check enablement before adding a selection to the URI.

@@ -33,13 +33,19 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 public class CheckBoxesSection<T> extends WizardPageSection {
 
 	private final MultiSelectionFieldModel<T> model;
-	private Group group;
+	private Composite composite;
 	private WizardPageSection[] subsections;
 	private int numCols;
+	private String label;
 
-	public CheckBoxesSection(IPageWithSections owner, MultiSelectionFieldModel<T> model) {
+	public CheckBoxesSection(IPageWithSections owner, MultiSelectionFieldModel<T> model, String label) {
 		super(owner);
 		this.model = model;
+		this.label = label;
+	}
+
+	public CheckBoxesSection(IPageWithSections owner, MultiSelectionFieldModel<T> model) {
+		this(owner, model, /*label*/null);
 	}
 
 	public CheckBoxesSection<T> columns(int howMany) {
@@ -80,7 +86,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				if (tooltip!=null) {
 					cb.setToolTipText(tooltip);
 				}
-				cb.setSelection(model.getSelecteds().contains(value));
+				cb.setSelection(model.getSelection(value).getValue());
 				GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
 				cb.addSelectionListener(new SelectionListener() {
 					//@Override
@@ -96,9 +102,9 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 					private void handleSelection() {
 						boolean add = cb.getSelection();
 						if (add) {
-							model.add(value);
+							model.select(value);
 						} else {
-							model.remove(value);
+							model.unselect(value);
 						}
 					}
 				});
@@ -134,11 +140,10 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 
 	@Override
 	public void createContents(Composite page) {
-		this.group = new Group(page, SWT.NONE);
-		this.group.setText(model.getLabel());
+		composite = createComposite(page);
 		GridLayout layout = createLayout();
-		group.setLayout(layout);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(group);
+		composite.setLayout(layout);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
 
 		T[] options = model.getChoices();
 
@@ -151,13 +156,23 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		if (options.length==0) {
 			//don't leave section empty it looks ugly
 			subsections[0] = new CommentSection(owner, "No choices available");
-			subsections[0].createContents(group);
+			subsections[0].createContents(composite);
 		}
 
 		for (int i = 0; i < options.length; i++) {
 			T option = options[i];
 			subsections[i] = new CheckBox(owner, option, model.getLabel(option), model.getTooltip(option), model.getEnablement(option));
-			subsections[i].createContents(group);
+			subsections[i].createContents(composite);
+		}
+	}
+
+	protected Composite createComposite(Composite page) {
+		if (this.label!=null) {
+			Group comp = new Group(page, SWT.NONE);
+			comp.setText(model.getLabel());
+			return comp;
+		} else {
+			return new Composite(page, SWT.NONE);
 		}
 	}
 
