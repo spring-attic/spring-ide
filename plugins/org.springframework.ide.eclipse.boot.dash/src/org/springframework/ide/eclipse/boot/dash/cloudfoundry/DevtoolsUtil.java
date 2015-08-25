@@ -145,19 +145,19 @@ public class DevtoolsUtil {
 	private static boolean isLaunchMode(List<ILaunch> launches, String launchMode) {
 		for (ILaunch l : launches) {
 			if (!l.isTerminated()) {
-				if (ILaunchManager.DEBUG_MODE.equals(launchMode)) {
+				if (ILaunchManager.DEBUG_MODE.equals(launchMode) && launchMode.equals(l.getLaunchMode())) {
 					for (IDebugTarget p : l.getDebugTargets()) {
 						if (!p.isDisconnected() && !p.isTerminated()) {
 							return true;
 						}
 					}
-				} else if (ILaunchManager.RUN_MODE.equals(launchMode)) {
+				} else if (ILaunchManager.RUN_MODE.equals(launchMode) && launchMode.equals(l.getLaunchMode())) {
 					for (IProcess p : l.getProcesses()) {
 						if (!p.isTerminated()) {
 							return true;
 						}
 					}
-				} else {
+				} else if (launchMode == null) {
 					// Launch mode not specified? Launch is not terminated hence just return true
 					return true;
 				}
