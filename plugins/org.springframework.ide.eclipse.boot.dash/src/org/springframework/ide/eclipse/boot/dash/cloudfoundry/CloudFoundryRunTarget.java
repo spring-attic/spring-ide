@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -138,24 +139,25 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return true;
 	}
 
-	public synchronized List<CloudDomain> getDomains(IProgressMonitor monitor) throws Exception {
+	public synchronized List<CloudDomain> getDomains(ClientRequests requests, IProgressMonitor monitor)
+			throws Exception {
 		if (domains == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 			subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
 
-			domains = getClient().getDomains();
+			domains = requests.getDomains();
 
 			subMonitor.worked(5);
 		}
 		return domains;
 	}
 
-	public synchronized List<CloudSpace> getSpaces(IProgressMonitor monitor) throws Exception {
+	public synchronized List<CloudSpace> getSpaces(ClientRequests requests, IProgressMonitor monitor) throws Exception {
 		if (spaces == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 
 			subMonitor.beginTask("Refreshing list of spaces for " + getName(), 5);
-			spaces = getClient().getSpaces();
+			spaces = requests.getSpaces();
 			subMonitor.worked(5);
 		}
 		return spaces;

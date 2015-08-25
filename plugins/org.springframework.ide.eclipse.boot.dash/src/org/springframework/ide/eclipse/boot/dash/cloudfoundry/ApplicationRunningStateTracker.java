@@ -22,7 +22,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
-	public static final long TIMEOUT = 1000 * 60 * 3;
+	public static final long TIMEOUT = 1000 * 60 * 5;
+
+	public static final long NO_TIMEOUT = -1;
 
 	public static final long WAIT_TIME = 1000;
 
@@ -32,11 +34,14 @@ public class ApplicationRunningStateTracker {
 
 	private final CloudFoundryBootDashModel model;
 
-	public ApplicationRunningStateTracker(String appName, ClientRequests requests,
-			CloudFoundryBootDashModel model) {
+	private final long timeout;
+
+	public ApplicationRunningStateTracker(String appName, ClientRequests requests, CloudFoundryBootDashModel model,
+			long timeout) {
 		this.requests = requests;
 		this.appName = appName;
 		this.model = model;
+		this.timeout = timeout;
 	}
 
 	public RunState startTracking(IProgressMonitor monitor) throws Exception, OperationCanceledException {
@@ -52,21 +57,29 @@ public class ApplicationRunningStateTracker {
 		long currentTime = System.currentTimeMillis();
 		long roughEstimateFetchStatsms = 5000;
 
-		long totalTime = currentTime + TIMEOUT;
+		long totalTime = currentTime + timeout;
 
-		int estimatedAttempts = (int) (TIMEOUT / (WAIT_TIME + roughEstimateFetchStatsms));
-		monitor.beginTask("Checking if the application is running", estimatedAttempts);
-		model.getElementConsoleManager().writeToConsole(appName,
-				"Verifying if application is running. Please wait...",
+		boolean shouldTimeout = timeout > 0;
+
+		int estimatedAttempts = shouldTimeout ? (int) (timeout / (WAIT_TIME + roughEstimateFetchStatsms)) : 0;
+		String checkingMessage = "Checking if the application is running";
+		if (estimatedAttempts > 0) {
+			monitor.beginTask(checkingMessage, estimatedAttempts);
+
+		} else {
+			monitor.setTaskName(checkingMessage);
+		}
+		model.getElementConsoleManager().writeToConsole(appName, checkingMessage + ". Please wait...",
 				LogType.LOCALSTDOUT);
 
-		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && currentTime < totalTime) {
+		while (runState != RunState.RUNNING && runState != RunState.FLAPPING
+				&& (!shouldTimeout || currentTime < totalTime)) {
 			int timeLeft = (int) ((totalTime - currentTime) / 1000);
 
 			// Don't log this. Only update the monitor
-			monitor.setTaskName(
-					"Verifying if application is running. Time left before timeout: "
-							+ timeLeft + 's');
+			if (shouldTimeout) {
+				monitor.setTaskName(checkingMessage + ". Time left before timeout: " + timeLeft + 's');
+			}
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
