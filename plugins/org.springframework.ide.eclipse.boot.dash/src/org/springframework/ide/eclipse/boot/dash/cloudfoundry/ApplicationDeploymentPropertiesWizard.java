@@ -32,6 +32,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -82,8 +83,8 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 		protected DeploymentPropertiesPage() {
 			super("Enter Application Deployment Properties");
 			setTitle("Enter Application Deployment Properties");
-			setDescription(
-					"Please enter deployment properties like the application name and host for the project: " + project.getName());
+			setDescription("Please enter deployment properties like the application name and host for the project: "
+					+ project.getName());
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 
 		}
@@ -145,6 +146,19 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				public void widgetSelected(SelectionEvent e) {
 					setUrl();
 				}
+			});
+
+			final Button saveManifest = new Button(composite, SWT.CHECK);
+			saveManifest.setText("Save to manifest file");
+			GridDataFactory.fillDefaults().span(2, SWT.DEFAULT).grab(false, false).applyTo(saveManifest);
+			saveManifest.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					properties.setWriteManifest(saveManifest.getSelection());
+					update();
+				}
+
 			});
 
 			String[] comboItems = new String[domainsAsString.keySet().size()];
@@ -239,6 +253,5 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 			status = BootDashActivator.createErrorStatus(null, error);
 		}
 		return status;
-
 	}
 }

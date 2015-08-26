@@ -23,9 +23,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -43,7 +43,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
 			boolean shouldAutoReplace, RunState runOrDebug) {
-		super("Deploying project " + project.getName(), model, project.getName());
+		super("Deploying project " + project.getName(), model, getAppName(project, model));
 
 		this.project = project;
 		this.shouldAutoReplace = shouldAutoReplace;
@@ -51,17 +51,24 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		this.runOrDebug = runOrDebug;
 	}
 
+	protected static String getAppName(IProject project, CloudFoundryBootDashModel model) {
+		// check if there is a project -> app mapping:
+		CloudApplication app = model.getAppCache().getApp(project);
+		return app != null ? app.getName() : project.getName();
+	}
+
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, monitor);
+		CloudApplication app = requests.getApplication(appName);
+
+		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, app, monitor);
 
 		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
 
 		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
 
-		CloudApplication app = requests.getApplication(appName);
 		monitor.worked(5);
 
 		if (app != null && !properties.shouldAutoReplace()
@@ -109,27 +116,29 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		model.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
-	protected CloudApplicationDeploymentProperties getDeploymentProperties(IProject project, IProgressMonitor monitor)
-			throws Exception {
+	protected CloudApplicationDeploymentProperties getDeploymentProperties(IProject project,
+			CloudApplication existingApp, IProgressMonitor monitor) throws Exception {
 
 		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
 
 		List<CloudDomain> domains = model.getCloudTarget().getDomains(requests, monitor);
 
-		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, domains);
+		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
 
 		List<CloudApplicationDeploymentProperties> appProperties = new ArrayList<CloudApplicationDeploymentProperties>();
 
-		if (parser.hasManifest()) {
-			appProperties = parser.load(monitor);
+		if (manifestHandler.hasManifest()) {
+			appProperties = manifestHandler.load(monitor);
+		} else if (existingApp != null) {
+			appProperties.add(CloudApplicationDeploymentProperties.getFor(existingApp, project));
 		} else {
-			// Create one for the user
+			// Prompt user for properties
 			CloudApplicationDeploymentProperties prop = ui.promptApplicationDeploymentProperties(project, domains);
 			if (prop != null) {
-				parser.create(monitor, prop);
-				if (parser.hasManifest()) {
-					appProperties.add(prop);
+				if (prop.writeManifest()) {
+					manifestHandler.create(monitor, prop);
 				}
+				appProperties.add(prop);
 			}
 		}
 		monitor.worked(10);
@@ -139,7 +148,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		CloudApplicationDeploymentProperties deploymentProperties = null;
 		if (appProperties == null || appProperties.isEmpty()) {
 			status = BootDashActivator.createErrorStatus(null, "No deployment properties found for " + project.getName()
-					+ ". Only projects with valid manifest.yml are currently supported. Please add a manifest.yml to your project and try again.");
+					+ ". Please ensure that your project can be packaged as an executable application or contains a manifest.yml that points to an archive file that exists.");
 		} else {
 			// Update the app name
 			deploymentProperties = appProperties.get(0);

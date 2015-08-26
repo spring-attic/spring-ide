@@ -134,15 +134,6 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return state;
 	}
 
-	public CloudApplicationDeploymentProperties getDeploymentProperties() {
-		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
-		if (app != null) {
-			return CloudApplicationDeploymentProperties.getFor(app);
-		}
-
-		return null;
-	}
-
 	@Override
 	public RunTarget getTarget() {
 		return cloudTarget;

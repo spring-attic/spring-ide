@@ -150,6 +150,17 @@ public class CloudAppCache {
 		return null;
 	}
 
+	public synchronized CloudApplication getApp(IProject project) {
+
+		for (Entry<String, CacheItem> entry : appCache.entrySet()) {
+			if (entry.getValue().project != null && entry.getValue().project.equals(project)) {
+				return entry.getValue().appInstances.getApplication();
+			}
+		}
+
+		return null;
+	}
+
 	public synchronized CloudAppInstances getAppInstances(String appName) {
 		CacheItem item = appCache.get(appName);
 		if (item != null) {

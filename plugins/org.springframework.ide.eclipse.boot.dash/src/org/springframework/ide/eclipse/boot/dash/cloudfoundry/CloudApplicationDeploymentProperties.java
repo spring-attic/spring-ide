@@ -35,16 +35,13 @@ public class CloudApplicationDeploymentProperties {
 	private int instances = DEFAULT_INSTANCES;
 	private String buildpackUrl;
 	private IProject project;
+	private boolean writeManifest = false;
 
 	private boolean shouldRestart = true;
 	private boolean shouldAutoReplace = false;
 
 	public static final int DEFAULT_MEMORY = 1024;
 	public static final int DEFAULT_INSTANCES = 1;
-	
-	public CloudApplicationDeploymentProperties() {
-		this(null);
-	}
 
 	public CloudApplicationDeploymentProperties(IProject project) {
 		this.project = project;
@@ -127,6 +124,14 @@ public class CloudApplicationDeploymentProperties {
 		return instances;
 	}
 
+	public boolean writeManifest() {
+		return writeManifest;
+	}
+
+	public void setWriteManifest(boolean writeManifest) {
+		this.writeManifest = writeManifest;
+	}
+
 	/**
 	 *
 	 * @return never null
@@ -171,8 +176,8 @@ public class CloudApplicationDeploymentProperties {
 		}
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(CloudApplication app) {
-		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
+	public static CloudApplicationDeploymentProperties getFor(CloudApplication app, IProject project) {
+		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties(project);
 		properties.setAppName(app.getName());
 		properties.setBuildpackUrl(app.getStaging() != null ? app.getStaging().getBuildpackUrl() : null);
 		properties.setEnvironmentVariables(app.getEnvAsMap());
