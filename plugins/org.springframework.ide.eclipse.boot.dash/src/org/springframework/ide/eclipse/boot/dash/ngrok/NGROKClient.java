@@ -48,6 +48,10 @@ public class NGROKClient {
 		return tunnel;
 	}
 
+	public String getURL() {
+		return process != null ? process.getApiURL() : null;
+	}
+
 	public NGROKTunnel startTunnel(String proto, String addr) throws Exception {
 		process = NGROKProcess.startNGROK(path, proto, addr);
 		if (process != null) {
