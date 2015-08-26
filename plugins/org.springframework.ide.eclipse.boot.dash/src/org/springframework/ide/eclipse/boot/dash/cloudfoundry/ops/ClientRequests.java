@@ -34,7 +34,7 @@ public class ClientRequests {
 	}
 
 	public void createApplication(final CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, deploymentProperties.getAppName(), "Creating application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
@@ -101,7 +101,7 @@ public class ClientRequests {
 
 	public void uploadApplication(final String appName, final ApplicationArchive archive) throws Exception {
 
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Uploading application archive") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.uploadApplication(appName, archive);
@@ -110,7 +110,7 @@ public class ClientRequests {
 	}
 
 	public void stopApplication(final String appName) throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Stopping application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.stopApplication(appName);
@@ -119,7 +119,7 @@ public class ClientRequests {
 	}
 
 	public void restartApplication(final String appName) throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Restarting application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.restartApplication(appName);
@@ -138,7 +138,7 @@ public class ClientRequests {
 
 	public void updateApplicationEnvironment(final String appName, final Map<String, String> varsToUpdate)
 			throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Updating application environment variables") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationEnv(appName, varsToUpdate);
@@ -147,7 +147,7 @@ public class ClientRequests {
 	}
 
 	public void updateApplicationStaging(final String appName, final Staging staging) throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Updating application buildpack") {
 
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -158,7 +158,7 @@ public class ClientRequests {
 
 	public void updateApplicationServices(final String appName, final List<String> services) throws Exception {
 
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Updating application service bindings") {
 
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -169,7 +169,7 @@ public class ClientRequests {
 
 	public void updateApplicationMemory(final String appName, final int memory) throws Exception {
 
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Updating application memory") {
 
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -180,7 +180,7 @@ public class ClientRequests {
 
 	public void updateApplicationInstances(final String appName, final int instances) throws Exception {
 
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Updating application instances") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationInstances(appName, instances);
@@ -189,7 +189,7 @@ public class ClientRequests {
 	}
 
 	public void updateApplicationUris(final String appName, final List<String> urls) throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Updating application URLs") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationUris(appName, urls);
@@ -198,7 +198,7 @@ public class ClientRequests {
 	}
 
 	public void deleteApplication(final String appName) throws Exception {
-		new BaseClientRequest(model) {
+		new BaseClientRequest(model, appName, "Deleting application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.deleteApplication(appName);
