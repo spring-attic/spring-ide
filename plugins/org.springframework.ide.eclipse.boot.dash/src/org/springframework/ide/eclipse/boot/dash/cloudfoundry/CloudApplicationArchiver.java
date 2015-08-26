@@ -229,11 +229,25 @@ public class CloudApplicationArchiver {
 			// Only support paths that point to archive files
 			IPath path = new Path(archivePath);
 			if (path.getFileExtension() != null) {
-				// Check if it is project relative first
-				IFile projectRelativeFile = javaProject.getProject().getFile(path);
 
-				if (projectRelativeFile != null && projectRelativeFile.exists()) {
-					packagedFile = projectRelativeFile.getLocation().toFile();
+				if (!path.isAbsolute()) {
+					// Check if it is project relative first
+					IFile projectRelativeFile = javaProject.getProject().getFile(path);
+					if (projectRelativeFile != null && projectRelativeFile.exists()) {
+						packagedFile = projectRelativeFile.getLocation().toFile();
+					} else {
+						// Case where file exists in file system but is not
+						// present in workspace (i.e. IProject may be out of
+						// synch with file system)
+						IPath projectPath = javaProject.getProject().getLocation();
+						if (projectPath != null) {
+							archivePath = projectPath.append(archivePath).toString();
+							File absoluteFile = new File(archivePath);
+							if (absoluteFile.exists() && absoluteFile.canRead()) {
+								packagedFile = absoluteFile;
+							}
+						}
+					}
 				} else {
 					// See if it is an absolute path
 					File absoluteFile = new File(archivePath);
