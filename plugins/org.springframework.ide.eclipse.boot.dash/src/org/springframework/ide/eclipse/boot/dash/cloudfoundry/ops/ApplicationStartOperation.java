@@ -32,6 +32,10 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 	private final RunState startMode;
 
 	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model, RunState startMode) {
+		this("Starting application: " + appName, appName, model, startMode);
+	}
+
+	public ApplicationStartOperation(String opName, String appName, CloudFoundryBootDashModel model, RunState startMode) {
 		super("Starting application: " + appName, model, appName);
 		this.appName = appName;
 		this.startMode = startMode;
@@ -68,7 +72,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		}
 	}
 
-	private Map<String, String> debugOpts(String debugSecret) {
+	protected Map<String, String> debugOpts(String debugSecret) {
 		Map<String, String> opts = new HashMap<String, String>();
 		opts.put("JAVA_OPTS", "-Dspring.devtools.remote.secret="+debugSecret
 				+" -Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n");
@@ -94,5 +98,13 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 	public ISchedulingRule getSchedulingRule() {
 		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
+	}
+
+	public String getAppName() {
+		return appName;
+	}
+
+	public RunState getStartMode() {
+		return startMode;
 	}
 }

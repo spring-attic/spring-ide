@@ -12,26 +12,20 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.net.URL;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RestartDevToolsClientOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 
 /**
  * Action for starting/restarting Remove DevTools Client application
@@ -85,24 +79,9 @@ public class RestartRemoteDevClientAction extends AbstractBootDashElementsAction
 	@Override
 	public void run() {
 		for (BootDashElement e : getSelectedElements()) {
-			if (e instanceof CloudDashElement) {
-				final CloudDashElement cde = (CloudDashElement) e;
-				Job job = new Job("Restarting Remote DevTools Client for '" + cde.getName() +"'") {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						if (DevtoolsUtil.isDevClientAttached(cde, null)) {
-							DevtoolsUtil.disconnectDevtoolsClientsFor(cde);
-						}
-						try {
-							DevtoolsUtil.launchDevtools(cde, RandomStringUtils.randomAlphabetic(20), ILaunchManager.RUN_MODE, monitor);
-						} catch (CoreException e) {
-							return e.getStatus();
-						}
-						return Status.OK_STATUS;
-					}
-
-				};
-				job.schedule();
+			if (e instanceof CloudDashElement && e.getParent() instanceof CloudFoundryBootDashModel) {
+				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getParent();
+				model.getOperationsExecution().runOpAsynch(new RestartDevToolsClientOperation(e.getName(), model, RunState.RUNNING));
 			}
 		}
 	}
