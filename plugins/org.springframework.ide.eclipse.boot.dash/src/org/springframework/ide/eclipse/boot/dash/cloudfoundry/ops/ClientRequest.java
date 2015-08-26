@@ -20,8 +20,23 @@ public abstract class ClientRequest<T> {
 
 	protected final CloudFoundryBootDashModel model;
 
+	private RequestListener listener;
+
+	public static final RequestListener DEFAULT_LISTENER = new RequestListener();
+
 	public ClientRequest(CloudFoundryBootDashModel model) {
 		this.model = model;
+	}
+
+	public void addRequestListener(RequestListener listener) {
+		this.listener = listener;
+	}
+
+	protected RequestListener getRequestListener() {
+		if (this.listener == null) {
+			this.listener = DEFAULT_LISTENER;
+		}
+		return this.listener;
 	}
 
 	public T run() throws Exception {
@@ -30,9 +45,14 @@ public abstract class ClientRequest<T> {
 			return fetchClientAndRun();
 		} catch (Throwable e) {
 			// If access token error, create a new client session and try again
-			// Note: access token errors may not be Exception, thus the reason to handle Throwable instead
+			// Note: access token errors may not be Exception, thus the reason
+			// to handle Throwable instead
+			RequestListener listener = getRequestListener();
 			if (CloudErrors.isAccessTokenError(e)) {
+				listener.onAccessToken(e);
+				listener.onLoginAttempt();
 				model.getCloudTarget().refresh();
+				listener.onLoginSucceeded();
 				return fetchClientAndRun();
 			} else if (e instanceof Exception) {
 				throw (Exception) e;
@@ -48,4 +68,20 @@ public abstract class ClientRequest<T> {
 	}
 
 	protected abstract T doRun(CloudFoundryOperations client) throws Exception;
+
+	public static class RequestListener {
+
+		protected void onAccessToken(Throwable t) {
+
+		}
+
+		protected void onLoginAttempt() {
+
+		}
+
+		protected void onLoginSucceeded() {
+
+		}
+
+	}
 }
