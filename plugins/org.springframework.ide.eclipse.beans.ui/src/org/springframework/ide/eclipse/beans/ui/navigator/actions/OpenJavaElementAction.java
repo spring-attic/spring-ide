@@ -78,7 +78,10 @@ public class OpenJavaElementAction extends AbstractNavigatorAction {
 		}
 		if (element instanceof IModelSourceLocation) {
 			IModelSourceLocation location = (IModelSourceLocation) element;
-			SpringUIUtils.openInEditor(((FileResource) ((IModelSourceLocation) element).getResource()).getRawFile(), location.getStartLine(), true);
+			FileResource fileResource = (FileResource) ((IModelSourceLocation) element).getResource();
+			if (fileResource != null) {
+				SpringUIUtils.openInEditor(fileResource.getRawFile(), location.getStartLine(), true);
+			}
 		}
 	}
 }
