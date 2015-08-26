@@ -30,15 +30,25 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 	private final String appName;
 	private final RunState startMode;
+	private final boolean withDevTools;
 
 	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model, RunState startMode) {
-		this("Starting application: " + appName, appName, model, startMode);
+		this("Starting application: " + appName, appName, model, startMode, false);
 	}
 
-	public ApplicationStartOperation(String opName, String appName, CloudFoundryBootDashModel model, RunState startMode) {
+	public ApplicationStartOperation(String appName, CloudFoundryBootDashModel model, RunState startMode, boolean withDevTools) {
+		this("Starting application: " + appName, appName, model, startMode, withDevTools);
+	}
+
+	public ApplicationStartOperation(String opName, String appName, CloudFoundryBootDashModel model, RunState startMode, boolean withDevTools) {
 		super("Starting application: " + appName, model, appName);
 		this.appName = appName;
 		this.startMode = startMode;
+		if (startMode == RunState.DEBUGGING) {
+			this.withDevTools = true;
+		} else {
+			this.withDevTools = withDevTools;
+		}
 	}
 
 	@Override
@@ -53,8 +63,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		getAppUpdateListener().applicationStarting(getCachedApplication());
 
 		String debugSecret = null;
-		boolean isDebugging = startMode==RunState.DEBUGGING;
-		if (isDebugging) {
+		if (withDevTools) {
 			debugSecret = RandomStringUtils.randomAlphabetic(20);
 			updateEnvVars(debugOpts(debugSecret));
 		}
@@ -66,16 +75,17 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 		model.updateApplication(getCloudApplicationInstances(), runState);
 
-		if (isDebugging) {
+		if (withDevTools) {
 			CloudDashElement cde = model.getElement(appName);
-			DevtoolsUtil.launchDevtools(cde, debugSecret, ILaunchManager.DEBUG_MODE, monitor);
+			DevtoolsUtil.launchDevtools(cde, debugSecret, startMode == RunState.DEBUGGING ? ILaunchManager.DEBUG_MODE : ILaunchManager.RUN_MODE , monitor);
 		}
 	}
 
 	protected Map<String, String> debugOpts(String debugSecret) {
 		Map<String, String> opts = new HashMap<String, String>();
 		opts.put("JAVA_OPTS", "-Dspring.devtools.remote.secret="+debugSecret
-				+" -Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n");
+				+" -Dspring.devtools.restart.enabled=false"
+				+ (startMode == RunState.DEBUGGING ? " -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n" : ""));
 		return opts;
 	}
 
@@ -100,11 +110,4 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
 	}
 
-	public String getAppName() {
-		return appName;
-	}
-
-	public RunState getStartMode() {
-		return startMode;
-	}
 }

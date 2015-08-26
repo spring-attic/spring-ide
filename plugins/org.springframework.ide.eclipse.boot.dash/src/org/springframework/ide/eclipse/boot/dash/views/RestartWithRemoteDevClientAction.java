@@ -19,7 +19,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RestartDevToolsClientOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.StartOnlyUpdateListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -33,16 +35,16 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  * @author Alex Boyko
  *
  */
-public class RestartRemoteDevClientAction extends AbstractBootDashElementsAction {
+public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAction {
 
 	private BootDashViewModel model;
 	private ElementStateListener stateListener;
 
-	public RestartRemoteDevClientAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public RestartWithRemoteDevClientAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
 		this.model = model;
 		this.setText("(Re)start Remote DevTools Client");
-		this.setToolTipText("Restarts the Remote DevTools Client in RUN mode.");
+		this.setToolTipText("Restarts application with the Remote DevTools Client attched.");
 		URL url = FileLocator.find(Platform.getBundle("org.springframework.ide.eclipse.boot"), new Path("resources/icons/boot-devtools-icon.png"), null);
 		if (url != null) {
 			this.setImageDescriptor(ImageDescriptor.createFromURL(url));
@@ -68,7 +70,7 @@ public class RestartRemoteDevClientAction extends AbstractBootDashElementsAction
 		if (!getSelectedElements().isEmpty()) {
 			enable = true;
 			for (BootDashElement e : getSelectedElements()) {
-				if (!(e instanceof CloudDashElement) || e.getProject() == null || e.getRunState() != RunState.RUNNING || e.getLiveHost() == null) {
+				if (!(e instanceof CloudDashElement) || e.getProject() == null || (e.getRunState() != RunState.RUNNING && e.getRunState() != RunState.INACTIVE)) {
 					enable = false;
 				}
 			}
@@ -81,7 +83,9 @@ public class RestartRemoteDevClientAction extends AbstractBootDashElementsAction
 		for (BootDashElement e : getSelectedElements()) {
 			if (e instanceof CloudDashElement && e.getParent() instanceof CloudFoundryBootDashModel) {
 				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getParent();
-				model.getOperationsExecution().runOpAsynch(new RestartDevToolsClientOperation(e.getName(), model, RunState.RUNNING));
+				ApplicationStartOperation restartOp = new ApplicationStartOperation(e.getName(), model, RunState.RUNNING, true);
+				restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(e.getName(), model));
+				model.getOperationsExecution().runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp, true));
 			}
 		}
 	}

@@ -55,7 +55,7 @@ public class BootDashActions {
 	private RemoveRunTargetAction removeTargetAction;
 	private DeleteApplicationsAction deleteApplicationsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
-	private RestartRemoteDevClientAction restartRemoteDevClientAction;
+	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -178,7 +178,7 @@ public class BootDashActions {
 		exposeDebugAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
 		exposeDebugAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 
-		restartRemoteDevClientAction = new RestartRemoteDevClientAction(model, elementsSelection, ui);
+		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(model, elementsSelection, ui);
 
 	}
 
@@ -337,8 +337,8 @@ public class BootDashActions {
 		return toggleFiltersAction;
 	}
 
-	public RestartRemoteDevClientAction getRestartRemoteDevClientAction() {
-		return restartRemoteDevClientAction;
+	public RestartWithRemoteDevClientAction getRestartWithRemoteDevClientAction() {
+		return restartWithRemoteDevClientAction;
 	}
 
 	public IAction selectDefaultConfigAction(
