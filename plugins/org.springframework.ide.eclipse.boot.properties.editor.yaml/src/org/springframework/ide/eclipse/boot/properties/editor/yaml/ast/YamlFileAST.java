@@ -16,14 +16,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.RootRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.SeqRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleKeyRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 
 /**
