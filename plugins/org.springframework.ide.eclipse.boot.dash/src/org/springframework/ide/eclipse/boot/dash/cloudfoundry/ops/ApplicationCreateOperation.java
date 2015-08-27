@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.LinkedHashSet;
+
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,6 +22,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 
 public class ApplicationCreateOperation extends CloudApplicationOperation {
 
@@ -59,9 +65,39 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
 		}
 
-		this.model.addElement(appInstances, deploymentProperties.getProject());
+		IProject project = deploymentProperties.getProject();
+		BootDashElement bde = this.model.addElement(appInstances, project);
+		if (project != null && bde != null) {
+			BootDashElement localElement = findLocalBdeForProject(project);
+			if (localElement != null) {
+				copyTags(localElement, bde);
+			}
+		}
 
 		getAppUpdateListener().applicationCreated(appInstances);
+	}
+
+	private static BootDashElement findLocalBdeForProject(IProject project) {
+		BootDashModel localModel = BootDashActivator.getDefault().getModel().getSectionByTargetId(LocalRunTarget.INSTANCE.getId());
+		if (localModel != null) {
+			for (BootDashElement bde : localModel.getElements().getValue()) {
+				if (project.equals(bde.getProject())) {
+					return bde;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static void copyTags(BootDashElement sourceBde, BootDashElement targetBde) {
+		LinkedHashSet<String> tagsToCopy = sourceBde.getTags();
+		if (tagsToCopy != null && !tagsToCopy.isEmpty()) {
+			LinkedHashSet<String> targetTags = targetBde.getTags();
+			for (String tag : tagsToCopy) {
+				targetTags.add(tag);
+			}
+			targetBde.setTags(targetTags);
+		}
 	}
 
 	protected CloudAppInstances createApplication(IProgressMonitor monitor) throws Exception {

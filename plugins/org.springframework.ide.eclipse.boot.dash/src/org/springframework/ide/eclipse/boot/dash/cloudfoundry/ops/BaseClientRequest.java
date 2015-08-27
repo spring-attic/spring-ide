@@ -58,7 +58,7 @@ public abstract class BaseClientRequest extends ClientRequest<Void> {
 
 		protected void write(String message, LogType type) {
 			try {
-				model.getElementConsoleManager().writeToConsole(appName, message, LogType.LOCALSTDERROR);
+				model.getElementConsoleManager().writeToConsole(appName, message, type);
 			} catch (Exception e) {
 				BootDashActivator.log(e);
 			}
