@@ -36,11 +36,15 @@ import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblemQuickAssistProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
@@ -58,11 +62,13 @@ extends PropertiesFileSourceViewerConfiguration {
 			return new SpringPropertiesReconcileEngine(getEngine().getIndexProvider(), getEngine().getTypeUtil());
 		}
 	};
+	private ITextEditor editor;
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
 			ITextEditor editor, String partitioning) {
 		super(colorManager, preferenceStore, editor, partitioning);
+		this.editor = editor;
 	}
 
 	@Override
@@ -107,7 +113,7 @@ extends PropertiesFileSourceViewerConfiguration {
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getPreferencesStore());
+		ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
@@ -119,6 +125,15 @@ extends PropertiesFileSourceViewerConfiguration {
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return delegate;
+	}
+
+	protected QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
+		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer,
+				new DefaultUserInteractions(getShell()));
+	}
+
+	protected Shell getShell() {
+		return editor.getSite().getShell();
 	}
 
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
@@ -177,7 +192,7 @@ extends PropertiesFileSourceViewerConfiguration {
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		QuickAssistAssistant assistant= new QuickAssistAssistant();
-		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore()));
+		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore(), new DefaultUserInteractions(getShell())));
 		assistant.setRestoreCompletionProposalSize(EditorsPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
 		assistant.setInformationControlCreator(getQuickAssistAssistantInformationControlCreator());
 		return assistant;

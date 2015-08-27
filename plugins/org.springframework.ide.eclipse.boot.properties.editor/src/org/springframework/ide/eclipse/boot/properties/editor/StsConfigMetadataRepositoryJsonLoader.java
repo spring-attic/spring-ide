@@ -44,12 +44,14 @@ import org.springframework.ide.eclipse.boot.util.FileUtil;
  */
 public class StsConfigMetadataRepositoryJsonLoader {
 
+	public static final String ADDITIONAL_SPRING_CONFIGURATION_METADATA_JSON = "META-INF/additional-spring-configuration-metadata.json";
+
 	/**
 	 * The default classpath location for config metadata.
 	 */
 	public static final String[] META_DATA_LOCATIONS = {
 		"META-INF/spring-configuration-metadata.json",
-		"META-INF/additional-spring-configuration-metadata.json"
+		ADDITIONAL_SPRING_CONFIGURATION_METADATA_JSON
 	};
 
 	private SimpleConfigurationMetadataRepository repository = new SimpleConfigurationMetadataRepository();
