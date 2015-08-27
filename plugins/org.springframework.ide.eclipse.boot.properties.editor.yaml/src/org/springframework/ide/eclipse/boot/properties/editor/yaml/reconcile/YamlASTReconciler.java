@@ -26,6 +26,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.Kind;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -34,6 +37,8 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST.getChildren;
 
 /**
  * @author Kris De Volder
@@ -124,7 +129,7 @@ public class YamlASTReconciler {
 			} else {
 				//both are null, this means there's no valid property with the current prefix
 				//whether exact or extending it with further navigation
-				unkownProperty(keyNode, subNav.getPrefix());
+				unkownProperty(keyNode, subNav.getPrefix(), entry);
 			}
 		}
 	}
@@ -238,34 +243,58 @@ public class YamlASTReconciler {
 		expectType(ProblemType.YAML_VALUE_TYPE_MISMATCH, type, scalar);
 	}
 
-	private void unkownProperty(Node node, String name) {
-		SpringPropertyProblem p = mkProblem(ProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
-		p.setPropertyName(name);
+	private void unkownProperty(Node node, String name, NodeTuple entry) {
+		SpringPropertyProblem p = problem(ProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
+		p.setPropertyName(extendForQuickfix(StringUtil.camelCaseToHyphens(name), entry.getValueNode()));
 		problems.accept(p);
 	}
 
+	private String extendForQuickfix(String name, Node node) {
+		if (node!=null) {
+			TupleValueRef child = getFirstTupleValue(getChildren(node));
+			if (child!=null) {
+				String extra = NodeUtil.asScalar(child.getKey());
+				if (extra!=null) {
+					return extendForQuickfix(name + "." + StringUtil.camelCaseToHyphens(extra),
+							child.get());
+				}
+			}
+		}
+		//couldn't extend name any further
+		return name;
+	}
+
+	private TupleValueRef getFirstTupleValue(List<NodeRef<?>> children) {
+		for (NodeRef<?> nodeRef : children) {
+			if (nodeRef.getKind()==Kind.VAL) {
+				return (TupleValueRef) nodeRef;
+			}
+		}
+		return null;
+	}
+
 	private void expectScalar(Node node) {
-		problems.accept(mkProblem(ProblemType.YAML_EXPECT_SCALAR, node, "Expecting a 'Scalar' node but got "+describe(node)));
+		problems.accept(problem(ProblemType.YAML_EXPECT_SCALAR, node, "Expecting a 'Scalar' node but got "+describe(node)));
 	}
 
 	protected void expectMapping(Node node) {
-		problems.accept(mkProblem(ProblemType.YAML_EXPECT_MAPPING, node, "Expecting a 'Mapping' node but got "+describe(node)));
+		problems.accept(problem(ProblemType.YAML_EXPECT_MAPPING, node, "Expecting a 'Mapping' node but got "+describe(node)));
 	}
 
 	private void expectBeanPropertyName(Node keyNode, Type type) {
-		problems.accept(mkProblem(ProblemType.YAML_EXPECT_BEAN_PROPERTY_NAME, keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
+		problems.accept(problem(ProblemType.YAML_EXPECT_BEAN_PROPERTY_NAME, keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
 				+ "but got "+describe(keyNode)));
 	}
 
 	private void unknownBeanProperty(Node keyNode, Type type, String name) {
-		problems.accept(mkProblem(ProblemType.YAML_INVALID_BEAN_PROPERTY, keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'"));
+		problems.accept(problem(ProblemType.YAML_INVALID_BEAN_PROPERTY, keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'"));
 	}
 
 	private void expectType(ProblemType problemType, Type type, Node node) {
-		problems.accept(mkProblem(problemType, node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node)));
+		problems.accept(problem(problemType, node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node)));
 	}
 
-	protected SpringPropertyProblem mkProblem(ProblemType type, Node node, String msg) {
+	protected SpringPropertyProblem problem(ProblemType type, Node node, String msg) {
 		int start = node.getStartMark().getIndex();
 		int end = node.getEndMark().getIndex();
 		return SpringPropertyProblem.problem(type, msg, start, end-start);

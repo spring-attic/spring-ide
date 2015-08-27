@@ -192,5 +192,9 @@ public abstract class NodeRef<Parent> {
 		public Kind getKind() {
 			return Kind.VAL;
 		}
+
+		public Node getKey() {
+			return getTuple().getKeyNode();
+		}
 	}
 }
