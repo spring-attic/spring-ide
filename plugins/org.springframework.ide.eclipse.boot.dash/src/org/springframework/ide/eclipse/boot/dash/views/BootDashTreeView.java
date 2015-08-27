@@ -171,16 +171,18 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		}
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getOpenInPackageExplorerAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
-
-		manager.add(createAddRunTargetMenuManager());
 
 		manager.add(new Separator());
 		manager.add(actions.getExposeRunAppAction());
 		manager.add(actions.getExposeDebugAppAction());
-		manager.add(new Separator());
 
+		manager.add(new Separator());
+		addAddRunTargetMenuActions(manager);
+
+		manager.add(new Separator());
 		manager.add(actions.getToggleFiltersAction());
 		// manager.add(refreshAction);
 		// manager.add(new Separator());
@@ -203,6 +205,18 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
+	}
+
+	private void addAddRunTargetMenuActions(IMenuManager manager) {
+		if (actions.getAddRunTargetActions().length==1) {
+			//Special case. Creationg a pulldown for just one item isn't very logical.
+			AddRunTargetAction action = actions.getAddRunTargetActions()[0];
+			manager.add(action);
+		} else {
+			MenuManager menu = createAddRunTargetMenuManager();
+			manager.add(menu);
+		}
+
 	}
 
 	private MenuManager createAddRunTargetMenuManager() {

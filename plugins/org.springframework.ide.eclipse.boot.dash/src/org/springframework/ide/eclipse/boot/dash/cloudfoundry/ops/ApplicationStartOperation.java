@@ -89,7 +89,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		if (startMode == RunState.DEBUGGING) {
 			javaOpts.append(" -Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n");
 		} else {
-			javaOpts.append(" -Dspring.devtools.restart.enabled=false -Dspring.devtools.livereload.enabled=true");
+			javaOpts.append(" -Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true");
 		}
 		opts.put("JAVA_OPTS", javaOpts.toString());
 		return opts;

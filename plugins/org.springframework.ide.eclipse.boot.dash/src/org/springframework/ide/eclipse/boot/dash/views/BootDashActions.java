@@ -50,6 +50,7 @@ public class BootDashActions {
 	private AbstractBootDashElementsAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
+	private OpenInPackageExplorer openInPackageExplorerAction;
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
@@ -151,6 +152,7 @@ public class BootDashActions {
 		openConfigAction = new OpenLaunchConfigAction(elementsSelection, ui);
 		openConsoleAction = new OpenConsoleAction(elementsSelection, model, ui);
 		openBrowserAction = new OpenInBrowserAction(model, elementsSelection, ui);
+		openInPackageExplorerAction = new OpenInPackageExplorer(elementsSelection, ui);
 		addTargetActions = createAddTargetActions();
 
 		deleteApplicationsAction = new DeleteApplicationsAction(elementsSelection, ui);
@@ -241,6 +243,10 @@ public class BootDashActions {
 
 	public AbstractBootDashElementsAction getOpenConsoleAction() {
 		return openConsoleAction;
+	}
+
+	public AbstractBootDashElementsAction getOpenInPackageExplorerAction() {
+		return openInPackageExplorerAction;
 	}
 
 	public OpenLaunchConfigAction getOpenConfigAction() {
