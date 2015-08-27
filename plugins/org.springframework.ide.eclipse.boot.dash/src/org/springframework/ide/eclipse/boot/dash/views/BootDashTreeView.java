@@ -171,6 +171,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		}
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getOpenInPackageExplorerAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
 
