@@ -117,7 +117,6 @@ public class MetaDataManipulator {
 		pos--;
 		Document d = getContent();
 		while (pos>=0 && Character.isWhitespace(d.getChar(pos))) {
-			System.out.println(d.get().substring(pos));
 			pos--;
 		}
 		if (pos>=0) {
