@@ -11,13 +11,13 @@
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType.PROP_UNKNOWN_PROPERTY;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType.YAML_UNKNOWN_PROPERTY;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
@@ -27,13 +27,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 public class SpringPropertyProblem {
 
 	private static final EnumSet<ProblemType> FIXABLE_UNKNOWN_PROPERTY_PROBLEM_TYPES = EnumSet.of(
-			PROP_UNKNOWN_PROPERTY
-			//TODO: YAML_UNKNOWN_PROPERTY
-			// Not done yet because its trickier. The errors/warnings are currently shown on the key
-			// that contains the first 'property key segment' where the 'index' becomes empty.
-			//But that is too high in the tree to apply quicfix based on the name right there.
-			// Instead we should have some smarts to figure out the name.
-			//Idea: find longest path prefix for all paths of nodes below the problem node.
+			PROP_UNKNOWN_PROPERTY,
+			YAML_UNKNOWN_PROPERTY
 	);
 
 	//Mandatory properties (each problem must set them)

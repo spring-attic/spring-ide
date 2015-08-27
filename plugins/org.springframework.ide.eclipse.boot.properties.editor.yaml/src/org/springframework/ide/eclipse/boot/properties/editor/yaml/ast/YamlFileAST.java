@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.T
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 
 /**
