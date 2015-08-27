@@ -83,20 +83,25 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 
 	protected Map<String, String> debugOpts(String debugSecret) {
 		Map<String, String> opts = new HashMap<String, String>();
-		opts.put("JAVA_OPTS", "-Dspring.devtools.remote.secret="+debugSecret
-				+" -Dspring.devtools.restart.enabled=false"
-				+ (startMode == RunState.DEBUGGING ? " -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n" : ""));
+		StringBuilder javaOpts = new StringBuilder();
+		javaOpts.append("-Dspring.devtools.remote.secret=");
+		javaOpts.append(debugSecret);
+		if (startMode == RunState.DEBUGGING) {
+			javaOpts.append(" -Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n");
+		} else {
+			javaOpts.append(" -Dspring.devtools.restart.enabled=false -Dspring.devtools.livereload.enabled=true");
+		}
+		opts.put("JAVA_OPTS", javaOpts.toString());
 		return opts;
 	}
 
 	protected void updateEnvVars(Map<String, String> toAdd) throws Exception {
 		CloudAppInstances instances = getCachedApplication();
-		Map<String, Object> existingVars = requests
-				.getApplicationEnvironment(instances.getApplication().getMeta().getGuid());
+		Map<String, String> existingVars = instances.getApplication().getEnvAsMap();
 
 		Map<String, String> varsToUpdate = new HashMap<String, String>();
 		if (existingVars != null) {
-			for (Entry<String, Object> var : existingVars.entrySet()) {
+			for (Entry<String, String> var : existingVars.entrySet()) {
 				varsToUpdate.put(var.getKey(), var.getValue().toString());
 			}
 		}
