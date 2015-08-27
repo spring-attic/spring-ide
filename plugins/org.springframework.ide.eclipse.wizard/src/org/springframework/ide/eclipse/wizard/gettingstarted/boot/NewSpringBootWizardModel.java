@@ -222,7 +222,6 @@ public class NewSpringBootWizardModel {
 		for (Iterator<CheckBoxModel<Dependency>> iterator = allUsedBoxes.iterator(); iterator.hasNext();) {
 			CheckBoxModel<Dependency> cb = iterator.next();
 			int useCount = popularities.getUsageCount(cb.getValue());
-			System.out.println("Uses of "+cb+" = "+useCount);
 			if (useCount==0) {
 				iterator.remove(); //don't care about those options never used at all.
 			} else {

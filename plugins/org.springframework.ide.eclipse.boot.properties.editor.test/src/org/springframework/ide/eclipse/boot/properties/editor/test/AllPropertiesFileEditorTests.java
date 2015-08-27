@@ -21,6 +21,7 @@ public class AllPropertiesFileEditorTests {
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(AllPropertiesFileEditorTests.class.getName());
 		suite.addTestSuite(StringUtilTests.class);
+		suite.addTestSuite(MetaDataManipulatorTest.class);
 		suite.addTestSuite(SpringPropertiesEditorTests.class);
 		suite.addTestSuite(TypeUtilTests.class);
 		suite.addTestSuite(FuzzyMapTests.class);

@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
 
@@ -23,11 +24,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
 public class SpringPropertyProblemHoverInfo extends HoverInfo {
 
 	private SpringPropertyProblem problem;
-	private IPreferenceStore prefs;
+	private QuickfixContext context;
 
-	public SpringPropertyProblemHoverInfo(SpringPropertyProblem problem, IPreferenceStore prefs) {
+	public SpringPropertyProblemHoverInfo(SpringPropertyProblem problem, QuickfixContext context) {
 		this.problem = problem;
-		this.prefs = prefs;
+		this.context = context;
 	}
 
 	@Override
@@ -35,9 +36,9 @@ public class SpringPropertyProblemHoverInfo extends HoverInfo {
 		HtmlBuffer html = new HtmlBuffer();
 
 		html.text(problem.getMessage());
-		problem.getQuickfixes(prefs);
+		problem.getQuickfixes(context);
 
-		renderQuickfixes(html, problem.getQuickfixes(prefs));
+		renderQuickfixes(html, problem.getQuickfixes(context));
 
 		return html.toString();
 	}

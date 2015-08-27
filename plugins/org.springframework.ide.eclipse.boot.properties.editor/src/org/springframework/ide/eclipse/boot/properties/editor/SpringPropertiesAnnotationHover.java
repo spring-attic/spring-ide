@@ -21,16 +21,17 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
 
 public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension2 {
 
 	private ISourceViewer sourceViewer;
-	private IPreferenceStore prefs;
+	private QuickfixContext context;
 
-	public SpringPropertiesAnnotationHover(ISourceViewer sourceViewer, IPreferenceStore prefs) {
+	public SpringPropertiesAnnotationHover(ISourceViewer sourceViewer, QuickfixContext context) {
 		this.sourceViewer = sourceViewer;
-		this.prefs = prefs;
+		this.context = context;
 	}
 
 	@Override
@@ -62,7 +63,7 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 		IAnnotationModel model = sourceViewer.getAnnotationModel();
 		SpringPropertyAnnotation annot = getAnnotationAt(model, hoverRegion.getOffset());
 		if (annot!=null) {
-			return new SpringPropertyProblemHoverInfo(annot.getSpringPropertyProblem(), prefs);
+			return new SpringPropertyProblemHoverInfo(annot.getSpringPropertyProblem(), context);
 		}
 		return null;
 	}

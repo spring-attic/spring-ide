@@ -118,9 +118,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
 								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
 								String validPrefix = commonPrefix(similarEntry.getId(), fullName);
-								problemCollector.accept(problem(ProblemType.PROP_UNKNOWN_PROPERTY,
-										"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
-										trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length()));
+								problemCollector.accept(problemUnkownProperty(fullName, trimmedRegion, similarEntry, validPrefix));
 							} //end: validProperty==null
 						}
 					} catch (Exception e) {
@@ -133,6 +131,15 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		} finally {
 			problemCollector.endCollecting();
 		}
+	}
+
+	protected SpringPropertyProblem problemUnkownProperty(String fullName, IRegion trimmedRegion,
+			PropertyInfo similarEntry, String validPrefix) {
+		SpringPropertyProblem p = problem(ProblemType.PROP_UNKNOWN_PROPERTY,
+				"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
+				trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length());
+		p.setPropertyName(fullName);
+		return p;
 	}
 
 	private FuzzyMap<PropertyInfo> getIndex() {

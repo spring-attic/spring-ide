@@ -23,13 +23,9 @@ public class SpringYamlEditor extends YEdit implements Listener<SpringProperties
 
 	private SpringYeditSourceViewerConfiguration sourceViewerConf;
 
-	public SpringYamlEditor() {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	protected YEditSourceViewerConfiguration createSourceViewerConfiguration() {
-		return this.sourceViewerConf = new SpringYeditSourceViewerConfiguration();
+		return this.sourceViewerConf = new SpringYeditSourceViewerConfiguration(this);
 	}
 
 	@Override

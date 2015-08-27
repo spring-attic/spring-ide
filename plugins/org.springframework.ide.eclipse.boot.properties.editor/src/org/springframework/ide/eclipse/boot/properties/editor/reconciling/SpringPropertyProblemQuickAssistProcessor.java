@@ -23,7 +23,9 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.texteditor.spelling.NoCompletionsProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 
 @SuppressWarnings("restriction")
 public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistProcessor {
@@ -33,8 +35,11 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 
 	private IPreferenceStore preferences;
 
-	public SpringPropertyProblemQuickAssistProcessor(IPreferenceStore preferences) {
+	private UserInteractions ui;
+
+	public SpringPropertyProblemQuickAssistProcessor(IPreferenceStore preferences, UserInteractions ui) {
 		this.preferences = preferences;
+		this.ui = ui;
 	}
 
 //	public SpringPropertyProblemQuickAssistProcessor() {
@@ -91,7 +96,7 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 	private List<ICompletionProposal> computeProposals(IQuickAssistInvocationContext context, SpringPropertyProblem[] problems) {
 		List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
 		for (SpringPropertyProblem problem : problems) {
-			proposals.addAll(problem.getQuickfixes(preferences));
+			proposals.addAll(problem.getQuickfixes(new DefaultQuickfixContext(preferences, context.getSourceViewer(), ui)));
 		}
 		return proposals;
 	}

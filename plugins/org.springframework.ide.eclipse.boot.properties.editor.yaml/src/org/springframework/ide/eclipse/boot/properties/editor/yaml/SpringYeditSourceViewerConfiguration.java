@@ -37,8 +37,10 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
@@ -53,7 +55,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesRe
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblemQuickAssistProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
@@ -90,6 +95,13 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 
 	public static void debug(String string) {
 		System.out.println(string);
+	}
+
+	private ITextEditor editor;
+
+	public SpringYeditSourceViewerConfiguration(ITextEditor editor) {
+		super();
+		this.editor = editor;
 	}
 
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
@@ -149,7 +161,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
-			ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getPreferencesStore());
+			ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
 			try {
 				return new SpringPropertiesTextHover(sourceViewer, hoverProvider, delegate);
 			} catch (Exception e) {
@@ -159,6 +171,14 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		} else {
 			return super.getTextHover(sourceViewer, contentType, stateMask);
 		}
+	}
+
+	protected QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
+		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
+	}
+
+	private Shell getShell() {
+		return editor.getSite().getShell();
 	}
 
 	@Override
@@ -182,7 +202,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		QuickAssistAssistant assistant= new QuickAssistAssistant();
-		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore()));
+		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore(), new DefaultUserInteractions(getShell())));
 		assistant.setRestoreCompletionProposalSize(EditorsPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
 		assistant.setInformationControlCreator(getQuickAssistAssistantInformationControlCreator());
 		return assistant;

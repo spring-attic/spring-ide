@@ -239,34 +239,36 @@ public class YamlASTReconciler {
 	}
 
 	private void unkownProperty(Node node, String name) {
-		problem(ProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
+		SpringPropertyProblem p = mkProblem(ProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
+		p.setPropertyName(name);
+		problems.accept(p);
 	}
 
 	private void expectScalar(Node node) {
-		problem(ProblemType.YAML_EXPECT_SCALAR, node, "Expecting a 'Scalar' node but got "+describe(node));
+		problems.accept(mkProblem(ProblemType.YAML_EXPECT_SCALAR, node, "Expecting a 'Scalar' node but got "+describe(node)));
 	}
 
 	protected void expectMapping(Node node) {
-		problem(ProblemType.YAML_EXPECT_MAPPING, node, "Expecting a 'Mapping' node but got "+describe(node));
+		problems.accept(mkProblem(ProblemType.YAML_EXPECT_MAPPING, node, "Expecting a 'Mapping' node but got "+describe(node)));
 	}
 
 	private void expectBeanPropertyName(Node keyNode, Type type) {
-		problem(ProblemType.YAML_EXPECT_BEAN_PROPERTY_NAME, keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
-				+ "but got "+describe(keyNode));
+		problems.accept(mkProblem(ProblemType.YAML_EXPECT_BEAN_PROPERTY_NAME, keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
+				+ "but got "+describe(keyNode)));
 	}
 
 	private void unknownBeanProperty(Node keyNode, Type type, String name) {
-		problem(ProblemType.YAML_INVALID_BEAN_PROPERTY, keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'");
+		problems.accept(mkProblem(ProblemType.YAML_INVALID_BEAN_PROPERTY, keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'"));
 	}
 
 	private void expectType(ProblemType problemType, Type type, Node node) {
-		problem(problemType, node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node));
+		problems.accept(mkProblem(problemType, node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node)));
 	}
 
-	protected void problem(ProblemType type, Node node, String msg) {
+	protected SpringPropertyProblem mkProblem(ProblemType type, Node node, String msg) {
 		int start = node.getStartMark().getIndex();
 		int end = node.getEndMark().getIndex();
-		problems.accept(SpringPropertyProblem.problem(type, msg, start, end-start));
+		return SpringPropertyProblem.problem(type, msg, start, end-start);
 	}
 
 	private String describe(Node node) {
