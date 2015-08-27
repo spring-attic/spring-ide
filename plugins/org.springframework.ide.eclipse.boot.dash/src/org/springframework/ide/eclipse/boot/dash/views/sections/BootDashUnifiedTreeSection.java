@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -418,9 +419,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		for (RunStateAction a : actions.getRunStateActions()) {
 			addVisible(manager, a);
 		}
-		addVisible(manager, actions.getOpenConfigAction());
+		addVisible(manager, actions.getOpenBrowserAction());
 		addVisible(manager, actions.getOpenConsoleAction());
+		addVisible(manager, actions.getOpenConfigAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());
+		addPreferredConfigSelectionMenu(manager);
 
 		manager.add(new Separator());
 		addVisible(manager, actions.getExposeRunAppAction());
@@ -430,6 +433,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
 			addVisible(manager, a);
 		}
+		manager.add(new Separator());
 
 		IAction removeTargetAction = actions.getRemoveRunTargetAction();
 		if (removeTargetAction != null) {
@@ -461,8 +465,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, updatePasswordAction);
 		}
 
-		addPreferredConfigSelectionMenu(manager);
-
 //		manager.add
 //		addVisible(manager, new Separator());
 //		addVisible(manager, refreshAction);
@@ -490,7 +492,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			ILaunchConfiguration defaultConfig = element.getPreferredConfig();
 			List<ILaunchConfiguration> allConfigs = element.getTarget().getLaunchConfigs(element);
 			if (!allConfigs.isEmpty()) {
-				MenuManager menu = new MenuManager("Default Config...");
+				MenuManager menu = new MenuManager("Default Config...", BootDashActivator.getImageDescriptor("icons/boot-icon.png"), null);
 				parent.add(menu);
 				for (ILaunchConfiguration conf : allConfigs) {
 					menu.add(actions.selectDefaultConfigAction(element, defaultConfig, conf));
