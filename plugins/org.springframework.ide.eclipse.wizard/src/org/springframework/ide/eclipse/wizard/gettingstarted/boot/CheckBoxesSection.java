@@ -53,9 +53,6 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			this.value = value;
 			this.selection = selection;
 			this.enablement = enablement;
-			if (label.contains("DevTools")) {
-				System.out.println("DevTools selection = "+selection);
-			}
 		}
 		public String getLabel() {
 			return label;
