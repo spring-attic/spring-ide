@@ -117,7 +117,9 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				/*
 				 * Update ProjectAppStore
 				 */
-				projectAppStore.storeProjectToAppMapping(elements.getValue());
+				if (!appsToRefresh.isEmpty()) {
+					projectAppStore.storeProjectToAppMapping(elements.getValue());
+				}
 
 				/*
 				 * Update BDEs
