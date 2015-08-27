@@ -20,4 +20,6 @@ import org.eclipse.core.resources.IContainer;
  */
 public interface UserInteractions {
 	IContainer chooseOneSourceFolder(String title, String message, IContainer[] options, IContainer preferred);
+
+	void error(String title, String message);
 }

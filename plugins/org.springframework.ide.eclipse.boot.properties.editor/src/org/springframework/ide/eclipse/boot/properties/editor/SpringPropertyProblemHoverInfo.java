@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 
 import java.util.List;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;

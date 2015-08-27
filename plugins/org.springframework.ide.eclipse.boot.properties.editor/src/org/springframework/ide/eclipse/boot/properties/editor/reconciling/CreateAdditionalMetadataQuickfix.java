@@ -123,8 +123,13 @@ public class CreateAdditionalMetadataQuickfix implements ICompletionProposal {
 
 	private void addDefaultMetadataTo(IFile file) throws Exception {
 		MetaDataManipulator metadata = new MetaDataManipulator(file);
-		metadata.addDefaultInfo(missingPropertyKey);
-		metadata.save();
+		if (!metadata.isReliable()) {
+			ui.error("Failed to add metadata!",
+					"'"+file.getFullPath()+"' does not appear to contain valid JSON!\n");
+		} else {
+			metadata.addDefaultInfo(missingPropertyKey);
+			metadata.save();
+		}
 	}
 
 	private IFile findExistingMetadataFile(IContainer[] srcRoots) {

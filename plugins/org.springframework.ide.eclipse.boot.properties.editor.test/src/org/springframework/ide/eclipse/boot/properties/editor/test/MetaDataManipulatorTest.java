@@ -57,13 +57,11 @@ public class MetaDataManipulatorTest extends TestCase {
 		md.save();
 
 		assertEquals(
-				"{\"properties\": [\n" +
-				"{\n" +
+				"{\"properties\": [{\n" +
 				"  \"description\": \"A description for 'test.property'\",\n" +
 				"  \"name\": \"test.property\",\n" +
 				"  \"type\": \"java.lang.String\"\n" +
-				"}\n" +
-				"]}",
+				"}]}",
 				//================
 				content.toString());
 
@@ -72,7 +70,45 @@ public class MetaDataManipulatorTest extends TestCase {
 
 		assertEquals(
 				"{\"properties\": [\n" +
-				"{\n" +
+				"  {\n" +
+				"    \"description\": \"A description for 'test.property'\",\n" +
+				"    \"name\": \"test.property\",\n" +
+				"    \"type\": \"java.lang.String\"\n" +
+				"  },\n" +
+				"  {\n" +
+				"    \"description\": \"A description for 'another.property'\",\n" +
+				"    \"name\": \"another.property\",\n" +
+				"    \"type\": \"java.lang.String\"\n" +
+				"  }\n" +
+				"]}",
+				//================
+				content.toString());
+
+		assertTrue(md.isReliable());
+
+	}
+
+	public void testRawContent() throws Exception {
+		MockContent content = new MockContent("garbage");
+		MetaDataManipulator md = new MetaDataManipulator(content);
+
+		md.addDefaultInfo("test.property");
+		md.save();
+
+		assertEquals(
+				"garbage{\n" +
+				"  \"description\": \"A description for 'test.property'\",\n" +
+				"  \"name\": \"test.property\",\n" +
+				"  \"type\": \"java.lang.String\"\n" +
+				"}\n",
+				//================
+				content.toString());
+
+		md.addDefaultInfo("another.property");
+		md.save();
+
+		assertEquals(
+				"garbage{\n" +
 				"  \"description\": \"A description for 'test.property'\",\n" +
 				"  \"name\": \"test.property\",\n" +
 				"  \"type\": \"java.lang.String\"\n" +
@@ -81,11 +117,79 @@ public class MetaDataManipulatorTest extends TestCase {
 				"  \"description\": \"A description for 'another.property'\",\n" +
 				"  \"name\": \"another.property\",\n" +
 				"  \"type\": \"java.lang.String\"\n" +
+				"}\n",
+				//================
+				content.toString());
+
+		assertFalse(md.isReliable());
+	}
+
+	public void testRawContent2() throws Exception {
+		MockContent content = new MockContent(
+				//almost correct content, its missing a comma
+				"{\"properties\": [\n" +
+				"  {\n" +
+				"    \"description\": \"A description for 'test.property'\",\n" +
+				"    \"name\": \"test.property\",\n" +
+				"    \"type\": \"java.lang.String\"\n" +
+				"  }\n" + //missing comma!
+				"  {\n" +
+				"    \"description\": \"A description for 'another.property'\",\n" +
+				"    \"name\": \"another.property\",\n" +
+				"    \"type\": \"java.lang.String\"\n" +
+				"  }\n" +
+				"]}"
+		);
+		MetaDataManipulator md = new MetaDataManipulator(content);
+
+		md.addDefaultInfo("foo.bar");
+		md.save();
+
+		assertEquals(
+				"{\"properties\": [\n" +
+				"  {\n" +
+				"    \"description\": \"A description for 'test.property'\",\n" +
+				"    \"name\": \"test.property\",\n" +
+				"    \"type\": \"java.lang.String\"\n" +
+				"  }\n" +
+				"  {\n" +
+				"    \"description\": \"A description for 'another.property'\",\n" +
+				"    \"name\": \"another.property\",\n" +
+				"    \"type\": \"java.lang.String\"\n" +
+				"  },\n" +
+				//TODO: The indentation is off... maybe this could be fixed
+				"{\n" +
+				"  \"description\": \"A description for 'foo.bar'\",\n" +
+				"  \"name\": \"foo.bar\",\n" +
+				"  \"type\": \"java.lang.String\"\n" +
 				"}\n" +
 				"]}",
 				//================
 				content.toString());
-		System.out.println(content.toString());
+
+		assertFalse(md.isReliable());
+	}
+
+	public void testDisallowRawContent() throws Exception {
+		MockContent content;
+		MetaDataManipulator md;
+
+		// empty files can be reliabley manipulated?
+		content = new MockContent("");
+		md = new MetaDataManipulator(content);
+
+		md.addDefaultInfo("test.property");
+		md.save();
+
+		assertEquals(
+				"{\"properties\": [{\n" +
+				"  \"description\": \"A description for 'test.property'\",\n" +
+				"  \"name\": \"test.property\",\n" +
+				"  \"type\": \"java.lang.String\"\n" +
+				"}]}",
+				//================
+				content.toString());
+
 	}
 
 }

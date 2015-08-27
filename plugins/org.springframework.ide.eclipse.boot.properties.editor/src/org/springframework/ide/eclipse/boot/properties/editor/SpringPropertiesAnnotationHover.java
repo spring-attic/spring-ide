@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import java.util.Iterator;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
@@ -24,7 +26,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
 
-public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension2 {
+public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
 	private ISourceViewer sourceViewer;
 	private QuickfixContext context;
@@ -43,7 +45,6 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 		}
 		return null;
 	}
-
 
 	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
@@ -66,6 +67,11 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 			return new SpringPropertyProblemHoverInfo(annot.getSpringPropertyProblem(), context);
 		}
 		return null;
+	}
+
+	@Override
+	public IInformationControlCreator getHoverControlCreator() {
+		return new SpringPropertiesInformationControlCreator(false, "F2 for focus");
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -97,4 +103,5 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 	private boolean isAtPosition(int offset, Position pos) {
 		return (pos != null) && (offset >= pos.getOffset() && offset <= (pos.getOffset() +  pos.getLength()));
 	}
+
 }
