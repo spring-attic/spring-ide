@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 import static org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader.ADDITIONAL_SPRING_CONFIGURATION_METADATA_JSON;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -65,8 +66,9 @@ public class CreateAdditionalMetadataQuickfix implements ICompletionProposal {
 
 	private IFile getMetadataFile(IJavaProject project) {
 		try {
-			IContainer[] srcRoots = JavaProjectUtil.getSourceFolders(project);
-			IFile file = findExistingMetadataFile(JavaProjectUtil.getSourceFolders(project));
+			boolean includeDerived = false;
+			IContainer[] srcRoots = JavaProjectUtil.getSourceFolders(project, includeDerived);
+			IFile file = findExistingMetadataFile(srcRoots);
 			if (file==null) {
 				IContainer srcRoot = chooseSourceFolder(srcRoots);
 				if (srcRoot!=null) {
@@ -102,7 +104,19 @@ public class CreateAdditionalMetadataQuickfix implements ICompletionProposal {
 		if (srcRoots.length==1) {
 			return srcRoots[0];
 		} else if (srcRoots.length>1) {
-			return ui.chooseOne("Choose a source folder", "The metadata file needs to be create. Choose which source folder to create it in.", srcRoots);
+			return ui.chooseOneSourceFolder("Create Metadata File?", "No existing metadata file found. Choose a source folder to create one.",
+					srcRoots,
+					getPreferredSourceFolder(srcRoots)
+			);
+		}
+		return null;
+	}
+
+	private IContainer getPreferredSourceFolder(IContainer[] srcRoots) {
+		for (IContainer f : srcRoots) {
+			if ("resources".equals(f.getFullPath().lastSegment())) {
+				return f;
+			}
 		}
 		return null;
 	}

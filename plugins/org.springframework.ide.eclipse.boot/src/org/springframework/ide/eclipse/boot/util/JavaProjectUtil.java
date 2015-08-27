@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -80,7 +81,7 @@ public class JavaProjectUtil {
 	public static IContainer[] getSourceFolders(IProject p) {
 		try {
 			if (p!=null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID)) {
-				return getSourceFolders(JavaCore.create(p));
+				return getSourceFolders(JavaCore.create(p), true);
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
@@ -94,7 +95,7 @@ public class JavaProjectUtil {
 	 * be a source folder. In this case the 'folder' will be an IProject instance instead of
 	 * a IFolder.
 	 */
-	public static IContainer[] getSourceFolders(IJavaProject jp) {
+	public static IContainer[] getSourceFolders(IJavaProject jp, boolean includeDerived) {
 		try {
 			ArrayList<IContainer> sourceFolders = new ArrayList<IContainer>();
 			IClasspathEntry[] cp = jp.getResolvedClasspath(true);
@@ -103,7 +104,9 @@ public class JavaProjectUtil {
 					if (cpe.getEntryKind()==IClasspathEntry.CPE_SOURCE) {
 						IContainer sf = getProjectOrFolder(cpe.getPath());
 						if (sf!=null && sf.exists()) {
-							sourceFolders.add(sf);
+							if (includeDerived || !sf.isDerived()) {
+								sourceFolders.add(sf);
+							}
 						}
 					}
 				} catch (Exception e) {
