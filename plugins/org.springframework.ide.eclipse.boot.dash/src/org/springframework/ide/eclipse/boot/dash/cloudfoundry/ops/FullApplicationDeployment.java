@@ -40,15 +40,22 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplace;
 	private final RunState runOrDebug;
+	private final boolean withDevTools;
 
 	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
-			boolean shouldAutoReplace, RunState runOrDebug) {
+			boolean shouldAutoReplace, RunState runOrDebug, boolean withDevTools) {
 		super("Deploying project " + project.getName(), model, getAppName(project, model));
 
 		this.project = project;
 		this.shouldAutoReplace = shouldAutoReplace;
 		this.ui = ui;
 		this.runOrDebug = runOrDebug;
+		this.withDevTools = withDevTools;
+	}
+
+	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
+			boolean shouldAutoReplace, RunState runOrDebug) {
+		this(project, model, ui, shouldAutoReplace, runOrDebug, false);
 	}
 
 	protected static String getAppName(IProject project, CloudFoundryBootDashModel model) {
@@ -102,7 +109,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		CloudApplicationOperation createOp = new ApplicationCreateOperation(properties, model);
 		CloudApplicationOperation uploadOp = new ApplicationUploadOperation(properties, model);
 		CloudApplicationOperation updateOp = new ApplicationPropertiesUpdateOperation(properties, model);
-		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model, runOrDebug);
+		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model, runOrDebug, withDevTools);
 
 		deploymentOperations.add(createOp);
 		deploymentOperations.add(updateOp);

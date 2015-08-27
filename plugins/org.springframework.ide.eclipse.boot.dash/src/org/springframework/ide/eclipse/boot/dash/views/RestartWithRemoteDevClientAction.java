@@ -19,9 +19,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.StartOnlyUpdateListener;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationDeployment;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -81,11 +80,14 @@ public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAc
 	@Override
 	public void run() {
 		for (BootDashElement e : getSelectedElements()) {
-			if (e instanceof CloudDashElement && e.getParent() instanceof CloudFoundryBootDashModel) {
+			if (e instanceof CloudDashElement && e.getParent() instanceof CloudFoundryBootDashModel && e.getProject() != null) {
 				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getParent();
-				ApplicationStartOperation restartOp = new ApplicationStartOperation(e.getName(), model, RunState.RUNNING, true);
-				restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(e.getName(), model));
-				model.getOperationsExecution().runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp, true));
+				CloudApplicationOperation restartOp = new FullApplicationDeployment(e.getProject(), model, ui,
+						true, RunState.RUNNING, true);
+				model.getOperationsExecution().runOpAsynch(restartOp);
+//				ApplicationStartOperation restartOp = new ApplicationStartOperation(e.getName(), model, RunState.RUNNING, true);
+//				restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(e.getName(), model));
+//				model.getOperationsExecution().runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp, true));
 			}
 		}
 	}
