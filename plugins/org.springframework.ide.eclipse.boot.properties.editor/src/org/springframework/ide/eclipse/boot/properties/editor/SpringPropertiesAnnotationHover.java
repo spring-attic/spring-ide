@@ -21,7 +21,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.QuickfixContext;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
 
 public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension2 {

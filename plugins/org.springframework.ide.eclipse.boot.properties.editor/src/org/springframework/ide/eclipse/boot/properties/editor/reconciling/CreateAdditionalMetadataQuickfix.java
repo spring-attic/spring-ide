@@ -30,6 +30,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.MetaDataManipulator;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;

@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeQuickfix;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 
 /**
  * @author Kris De Volder

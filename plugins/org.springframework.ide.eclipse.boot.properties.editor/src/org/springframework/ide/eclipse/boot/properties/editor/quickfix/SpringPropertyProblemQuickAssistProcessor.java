@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.boot.properties.editor.quickfix;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +25,8 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.texteditor.spelling.NoCompletionsProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 
 @SuppressWarnings("restriction")

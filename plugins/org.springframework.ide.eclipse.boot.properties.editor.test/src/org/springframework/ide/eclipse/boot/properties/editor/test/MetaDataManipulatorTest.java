@@ -14,7 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.MetaDataManipulator;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.MetaDataManipulator;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 import junit.framework.TestCase;

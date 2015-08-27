@@ -1,11 +1,10 @@
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.boot.properties.editor.ui;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 
 public class DefaultUserInteractions implements UserInteractions {
 

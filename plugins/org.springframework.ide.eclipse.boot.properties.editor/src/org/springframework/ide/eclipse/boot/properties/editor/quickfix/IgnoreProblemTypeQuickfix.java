@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.boot.properties.editor.quickfix;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -18,6 +18,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 
 /**
  * Quickfix proposal to change a particular problem type's severity to 'Ignore'.

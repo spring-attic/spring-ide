@@ -41,12 +41,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.DefaultQuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.DefaultUserInteractions;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblemQuickAssistProcessor;
+import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
 
 @SuppressWarnings("restriction")
