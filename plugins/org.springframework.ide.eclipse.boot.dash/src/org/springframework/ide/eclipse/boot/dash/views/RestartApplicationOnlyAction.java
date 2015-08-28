@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class RestartApplicationOnlyAction extends AbstractBootDashElementsAction {
+
 	public RestartApplicationOnlyAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
 		Assert.isNotNull(ui);

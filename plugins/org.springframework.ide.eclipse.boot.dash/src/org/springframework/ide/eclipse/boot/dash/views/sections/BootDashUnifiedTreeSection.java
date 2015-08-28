@@ -301,6 +301,12 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							UiUtil.openUrl(url);
 						}
 					}
+					else if (sectionSelection.getValue() != null) {
+						IAction openCloudAdminConsoleAction = actions.getOpenCloudAdminConsoleAction();
+						if (openCloudAdminConsoleAction != null) {
+							openCloudAdminConsoleAction.run();
+						}
+					}
 				}
 			}
 		});
@@ -464,6 +470,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		IAction updatePasswordAction = actions.getUpdatePasswordAction();
 		if (updatePasswordAction != null) {
 			addVisible(manager, updatePasswordAction);
+		}
+
+		IAction openCloudAdminConsoleAction = actions.getOpenCloudAdminConsoleAction();
+		if (openCloudAdminConsoleAction != null) {
+			addVisible(manager, openCloudAdminConsoleAction);
 		}
 
 //		manager.add
