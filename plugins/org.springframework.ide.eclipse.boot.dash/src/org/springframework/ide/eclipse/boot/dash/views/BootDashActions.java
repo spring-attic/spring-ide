@@ -57,6 +57,7 @@ public class BootDashActions {
 	private DeleteApplicationsAction deleteApplicationsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
+	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -162,6 +163,7 @@ public class BootDashActions {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
 			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
+			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
@@ -277,6 +279,10 @@ public class BootDashActions {
 
 	public IAction getRestartOnlyApplicationAction() {
 		return restartOnlyAction;
+	}
+
+	public IAction getOpenCloudAdminConsoleAction() {
+		return openCloudAdminConsoleAction;
 	}
 
 	/**

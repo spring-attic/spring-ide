@@ -115,12 +115,15 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 		if (space != null) {
 			put(ORG_PROP, space.getOrganization().getName());
+			put(ORG_GUID, space.getOrganization().getMeta().getGuid().toString());
 			put(SPACE_PROP, space.getName());
+			put(SPACE_GUID, space.getMeta().getGuid().toString());
 		} else {
 			put(ORG_PROP, null);
+			put(ORG_GUID, null);
 			put(SPACE_PROP, null);
+			put(SPACE_GUID, null);
 		}
-
 		this.space.setValue(space);
 	}
 

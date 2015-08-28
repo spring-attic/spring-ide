@@ -22,6 +22,9 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public final static String SPACE_PROP = "space";
 	public final static String SELF_SIGNED_PROP = "selfsigned";
 
+	public final static String ORG_GUID = "organization_guid";
+	public final static String SPACE_GUID = "space_guid";
+
 	public CloudFoundryTargetProperties() {
 		super(RunTargetTypes.CLOUDFOUNDRY);
 	}
@@ -39,6 +42,14 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public String getOrganizationName() {
 		return map.get(ORG_PROP);
+	}
+
+	public String getSpaceGuid() {
+		return map.get(SPACE_GUID);
+	}
+
+	public String getOrganizationGuid() {
+		return map.get(ORG_GUID);
 	}
 
 	public boolean isSelfsigned() {
