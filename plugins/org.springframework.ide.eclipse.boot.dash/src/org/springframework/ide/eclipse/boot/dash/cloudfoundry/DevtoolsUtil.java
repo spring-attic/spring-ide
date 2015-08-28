@@ -291,20 +291,6 @@ public class DevtoolsUtil {
 		}
 	}
 
-	private static String getSecretFromJvmArgs(String args) {
-		String prefix = REMOTE_SECRET_JVM_ARG;
-		int startingIdx = args.indexOf(prefix);
-		if (startingIdx >= -1) {
-			startingIdx = startingIdx + prefix.length();
-			int terminatingIdx = args.indexOf(" ", startingIdx);
-			if (terminatingIdx < 0) {
-				terminatingIdx = args.length();
-			}
-			return args.substring(startingIdx, terminatingIdx);
-		}
-		return null;
-	}
-
 	public static String getSecret(IProject project) throws CoreException {
 		String secret = project.getPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY);
 		if (secret == null) {
@@ -316,20 +302,22 @@ public class DevtoolsUtil {
 
 	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
 		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
-		if (javaOpts != null && secret.equals(getSecretFromJvmArgs(javaOpts))) {
-			int idx = javaOpts.indexOf(REMOTE_DEBUG_JVM_ARGS);
+		if (javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
 			if (runOrDebug == RunState.DEBUGGING) {
-				return idx >= 0;
+				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
 			} else {
-				return idx < 0;
+				return !javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
 			}
 		}
 		return false;
 	}
 
 	public static void setupEnvVarsForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
-		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
+		String javaOpts = clearJavaOpts(envVars.get(JAVA_OPTS_ENV_VAR));
 		StringBuilder sb = javaOpts == null ? new StringBuilder() : new StringBuilder(javaOpts);
+		if (sb.length() > 0) {
+			sb.append(' ');
+		}
 		sb.append(REMOTE_SECRET_JVM_ARG);
 		sb.append(secret);
 		if (runOrDebug == RunState.DEBUGGING) {
@@ -337,6 +325,10 @@ public class DevtoolsUtil {
 			sb.append(REMOTE_DEBUG_JVM_ARGS);
 		}
 		envVars.put(JAVA_OPTS_ENV_VAR, sb.toString());
+	}
+
+	private static String clearJavaOpts(String opts) {
+		return opts == null ? null : opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "").replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
 	}
 
 }

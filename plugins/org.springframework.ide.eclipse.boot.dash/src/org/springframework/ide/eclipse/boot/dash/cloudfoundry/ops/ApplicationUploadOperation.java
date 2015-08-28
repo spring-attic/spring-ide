@@ -57,6 +57,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		// Upload the application
 		CloudZipApplicationArchive archive = null;
 		String appName = deploymentProperties.getAppName();
+		getAppUpdateListener().applicationUpdated(getCloudApplicationInstances());
 
 		try {
 

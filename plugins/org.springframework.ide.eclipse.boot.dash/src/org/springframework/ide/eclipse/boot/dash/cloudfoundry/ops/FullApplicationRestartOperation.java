@@ -12,56 +12,59 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
- * Operation for (re) starting Remote DevTools client for CF app with associated project.
+ * Operation for (re)starting existing CF app with associated project
  *
  * @author Alex Boyko
  *
  */
-public class ApplicationStartWithRemoteClientOperation extends CloudApplicationOperation {
+public class FullApplicationRestartOperation extends CloudApplicationOperation {
 
-	final private RunState runOrDebug;
+	private final RunState runOrDebug;
 
-	public ApplicationStartWithRemoteClientOperation(String opName, CloudFoundryBootDashModel model, String appName, RunState runOrDebug) {
+	public FullApplicationRestartOperation(String opName, CloudFoundryBootDashModel model, String appName, RunState runOrDebug) {
 		super(opName, model, appName);
 		this.runOrDebug = runOrDebug;
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		List<CloudApplicationOperation> ops = new ArrayList<CloudApplicationOperation>();
-
-		CloudAppInstances instances = getCachedApplication();
-		Map<String, String> envVars = instances.getApplication().getEnvAsMap();
-
+		CloudApplication application = requests.getApplication(appName);
+		if (application == null) {
+			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "No Cloud Application found for '" + appName + "'"));
+		}
 		CloudDashElement cde = model.getElement(appName);
 		if (cde == null || cde.getProject() == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Local project not associated to CF app '" + appName + "'"));
 		}
+		IProject project = cde.getProject();
+		CloudApplicationDeploymentProperties properties = CloudApplicationDeploymentProperties.getFor(application, project);
+		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project), runOrDebug);
 
-		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()), runOrDebug)) {
-			ops.add(new FullApplicationRestartOperation("Restarting application '" + cde.getName() + "'", model, appName, runOrDebug));
-		} else if (cde.getRunState() == RunState.INACTIVE) {
-			ops.add(new ApplicationStartOperation(appName, model));
-		}
+		List<CloudApplicationOperation> ops = new ArrayList<CloudApplicationOperation>();
+		ops.add(new ApplicationUploadOperation(properties, model));
+		ops.add(new ApplicationPropertiesUpdateOperation(properties, model));
+		ops.add(new ApplicationStartOperation(properties.getAppName(), model));
 
-		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
-
-		new ApplicationOperationWithModelUpdate(getName(), model, appName, ops, false).run(monitor);
+		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(getName(), model, appName,
+				ops, true);
+		op.addApplicationUpdateListener(new FullAppDeploymentListener(appName, model));
+		op.run(monitor);
 	}
 
 }
