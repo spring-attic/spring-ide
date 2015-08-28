@@ -21,21 +21,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class FullApplicationDeployment extends CloudApplicationOperation {
-
-	private final static String APP_FOUND_TITLE = "Replace Existing Application";
-
-	private final static String APP_FOUND_MESSAGE = "Replace Existing Application: {0} - already exists. Continue replacing the existing application?";
 
 	private final IProject project;
 	private final UserInteractions ui;
@@ -70,32 +64,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
 
-		monitor.worked(5);
-
-		if (app != null && !properties.shouldAutoReplace()
-				&& !ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, appName))) {
-			throw new OperationCanceledException();
-		}
-
-		// Check if another application with the same project mapping already
-		// exists.
-		// Only ONE application with the same project mapping can exist in the
-		// same space
-		List<BootDashElement> existingElements = this.model.getElements().getValues();
-		if (existingElements != null) {
-			for (BootDashElement el : existingElements) {
-				if (!properties.getAppName().equals(el.getName()) && project.equals(el.getProject())) {
-					ui.errorPopup("Project Already Linked",
-							"Unable to create application [" + properties.getAppName() + "]. Another application ["
-									+ el.getName() + "] is already linked to the same project - "
-									+ project
-											.getName()
-							+ " - in the same Cloud target. Please delete the existing one and try deploying again.");
-					throw new OperationCanceledException();
-				}
-			}
-		}
-		monitor.worked(5);
+		monitor.worked(10);
 
 		// Compose all the different operations that form a full deployment and
 		// add them in the order that they should be executed

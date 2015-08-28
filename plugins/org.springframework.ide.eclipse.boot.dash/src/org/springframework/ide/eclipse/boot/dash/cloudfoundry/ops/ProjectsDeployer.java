@@ -20,12 +20,17 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ProjectsDeployer extends CloudOperation {
+
+	private final static String APP_FOUND_TITLE = "Replace Existing Application";
+
+	private final static String APP_FOUND_MESSAGE = "Replace Existing Application: {0} - already exists. Continue replacing the existing application?";
 
 	private final Map<IProject, BootDashElement> projectsToDeploy;
 	private final UserInteractions ui;
@@ -65,9 +70,36 @@ public class ProjectsDeployer extends CloudOperation {
 
 			List<CloudApplicationOperation> ops = new ArrayList<CloudApplicationOperation>();
 
+			IProject project = entry.getKey();
+
 			FullApplicationDeployment fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model, ui,
 					shouldAutoReplaceApps, runOrDebug);
+
 			String appName = fullDeploymentOp.appName;
+
+			if (model.getAppCache().getApp(project) != null && !shouldAutoReplaceApps
+					&& !ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, appName))) {
+				continue;
+			}
+
+			// Check if another application with the same project mapping already
+			// exists.
+			// Only ONE application with the same project mapping can exist in the
+			// same space
+			List<BootDashElement> existingElements = this.model.getElements().getValues();
+			if (existingElements != null) {
+				for (BootDashElement el : existingElements) {
+					if (!appName.equals(el.getName()) && project.equals(el.getProject())) {
+						ui.errorPopup("Project Already Linked",
+								"Unable to create application [" + appName + "]. Another application ["
+										+ el.getName() + "] is already linked to the same project - "
+										+ project
+												.getName()
+								+ " - in the same Cloud target. Please delete the existing one and try deploying again.");
+						throw new OperationCanceledException();
+					}
+				}
+			}
 			ops.add(fullDeploymentOp);
 			if (runOrDebug == RunState.DEBUGGING) {
 				ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
