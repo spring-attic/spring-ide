@@ -21,14 +21,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * Model of the contents for {@link BootDashTreeView}, provides mechanism to attach listeners to model
@@ -83,7 +84,7 @@ public class LocalBootDashModel extends BootDashModel {
 			this.runStateTracker = new ProjectRunStateTracker();
 			runStateTracker.setListener(new ProjectRunStateListener() {
 				public void stateChanged(IProject p) {
-					BootDashElement e = elementFactory.create(p);
+					BootDashElement e = elementFactory.createOrGet(p);
 					if (e!=null) {
 						notifyElementChanged(e);
 					}
@@ -96,9 +97,16 @@ public class LocalBootDashModel extends BootDashModel {
 	void updateElementsFromWorkspace() {
 		Set<BootDashElement> newElements = new HashSet<BootDashElement>();
 		for (IProject p : this.workspace.getRoot().getProjects()) {
-			BootDashElement element = elementFactory.create(p);
+			BootDashElement element = elementFactory.createOrGet(p);
 			if (element!=null) {
 				newElements.add(element);
+			}
+		}
+		for (BootDashElement oldElement : elements.getValues()) {
+			if (!newElements.contains(oldElement)) {
+				if (oldElement instanceof Disposable) {
+					((Disposable) oldElement).dispose();
+				}
 			}
 		}
 		elements.replaceAll(newElements);

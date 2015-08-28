@@ -95,7 +95,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 
 		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mock(BootDashElement.class);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 
 		state.setPreferredConfig(dashElement, conf);
@@ -147,7 +147,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 
 		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mockElement(project);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
 			.thenReturn(project);
 
@@ -203,7 +203,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 
 		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mockElement(project);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
 			.thenReturn(project);
 
@@ -263,7 +263,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 
 		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mockElement(project);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
 			.thenReturn(project);
 
@@ -320,7 +320,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 
 		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mockElement(project);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
 			.thenReturn(project);
 
@@ -378,7 +378,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 
 		IProject project = mockProject("foo", true);
 		BootDashElement dashElement = mockElement(project);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
 			.thenReturn(project);
 
@@ -433,7 +433,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 		IProject project = mockProject("foo", true);
 
 		BootDashElement dashElement = mockElement(project);
-		when(factory.create(project)).thenReturn(dashElement);
+		when(factory.createOrGet(project)).thenReturn(dashElement);
 		when(context.getWorkspace().getRoot().getProject("foo"))
 			.thenReturn(project);
 

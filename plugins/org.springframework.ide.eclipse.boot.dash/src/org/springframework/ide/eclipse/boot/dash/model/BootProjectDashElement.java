@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
@@ -52,6 +53,9 @@ import org.springframework.ide.eclipse.boot.dash.util.SpringApplicationLifecycle
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
@@ -59,18 +63,29 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
+public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements ElementStateListener, Disposable {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private LocalBootDashModel context;
 	private PropertyStoreApi persistentProperties;
+	private LiveExpression<RunState> runState;
+	private LiveExpression<Integer> livePort;
+	private LiveExpression<Integer> actuatorPort;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
 		super(context, project);
 		this.context = context;
 		this.persistentProperties = PropertyStoreFactory.createApi(
 				PropertyStoreFactory.createForScope(project, projectProperties));
+		this.runState = createRunStateExp();
+		this.livePort = createLivePortExp(runState, "local.server.port");
+		livePort.addListener(new ValueListener<Integer>() {
+			public void gotValue(LiveExpression<Integer> exp, Integer value) {
+				BootProjectDashElement.this.context.notifyElementChanged(BootProjectDashElement.this);
+			}
+		});
+		this.actuatorPort = createLivePortExp(runState, "local.management.port");
 	}
 
 	public IProject getProject() {
@@ -305,14 +320,38 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 
 	@Override
 	public int getLivePort() {
-		return getLivePort("local.server.port");
+		return livePort.getValue();
+		//return getLivePort("local.server.port");
 	}
 
 	public int getActuatorPort() {
-		return getLivePort("local.management.port");
+		return actuatorPort.getValue();
 	}
 
-	public int getLivePort(String propName) {
+	private LiveExpression<RunState> createRunStateExp() {
+		context.addElementStateListener(this);
+		LiveExpression<RunState> exp = new LiveExpression<RunState>() {
+			protected RunState compute() {
+				return getRunState();
+			}
+		};
+		return exp;
+	}
+
+	private LiveExpression<Integer> createLivePortExp(final LiveExpression<RunState> runState, final String propName) {
+		return new LiveExpression<Integer>(-1) {
+			{
+				//Doesn't really depend on runState, but should be recomputed when runState changes.
+				dependsOn(runState);
+			}
+			@Override
+			protected Integer compute() {
+				return getLivePort(propName);
+			}
+		};
+	}
+
+	private int getLivePort(String propName) {
 		ILaunchConfiguration conf = getActiveConfig();
 		if (conf!=null) {
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
@@ -511,6 +550,20 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> {
 			client.shutdown();
 			NGROKLaunchTracker.remove(getName());
 		}
+	}
+
+	@Override
+	public void stateChanged(BootDashElement e) {
+		if (this.equals(e)) {
+			if (runState!=null) {
+				runState.refresh();
+			}
+		}
+	}
+
+	@Override
+	public void dispose() {
+		this.context.removeElementStateListener(this);
 	}
 
 }

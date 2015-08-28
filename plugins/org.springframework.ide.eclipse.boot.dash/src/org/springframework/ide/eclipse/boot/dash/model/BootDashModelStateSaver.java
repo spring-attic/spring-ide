@@ -134,7 +134,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 	private BootDashElement getBootDashElement(String pname) {
 		IProject p = modelContext.getWorkspace().getRoot().getProject(pname);
 		if (p!=null && p.exists()) {
-			return factory.create(p);
+			return factory.createOrGet(p);
 		}
 		return null;
 	}
