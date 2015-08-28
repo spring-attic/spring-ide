@@ -20,6 +20,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartWithRemoteClientOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
@@ -84,11 +85,16 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 			boolean shouldAutoReplaceApp = true;
 			List<BootDashElement> elements = new ArrayList<BootDashElement>();
 			elements.add(this);
-			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), ui, elements, shouldAutoReplaceApp,
-					runingOrDebugging);
+			if (runingOrDebugging == RunState.DEBUGGING) {
+				String opName = "Restarting '" + getName() + "' in DEBUG mode";
+				op = new ApplicationStartWithRemoteClientOperation(opName, (CloudFoundryBootDashModel) getParent(), getName(), runingOrDebugging);
+			} else {
+				op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), ui, elements, shouldAutoReplaceApp,
+						runingOrDebugging);
+			}
 		} else {
 			CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getParent(), runingOrDebugging);
+					(CloudFoundryBootDashModel) getParent());
 
 			restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
@@ -101,7 +107,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getParent(), runingOrDebugging);
+				(CloudFoundryBootDashModel) getParent());
 
 		restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 

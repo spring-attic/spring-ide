@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,7 +20,6 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -56,19 +56,24 @@ public class ProjectsDeployer extends CloudOperation {
 	}
 
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-
-		SubMonitor subMonitor = SubMonitor.convert(monitor, projectsToDeploy.size() * 100);
 		for (Iterator<Entry<IProject, BootDashElement>> it = projectsToDeploy.entrySet().iterator(); it.hasNext();) {
 			Entry<IProject, BootDashElement> entry = it.next();
 
-			if (subMonitor.isCanceled()) {
+			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 
-			CloudApplicationOperation fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model, ui,
-					shouldAutoReplaceApps, runOrDebug);
+			List<CloudApplicationOperation> ops = new ArrayList<CloudApplicationOperation>();
 
-			fullDeploymentOp.run(subMonitor.newChild(100));
+			FullApplicationDeployment fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model, ui,
+					shouldAutoReplaceApps, runOrDebug);
+			String appName = fullDeploymentOp.appName;
+			ops.add(fullDeploymentOp);
+			if (runOrDebug == RunState.DEBUGGING) {
+				ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
+			}
+			model.getOperationsExecution(ui)
+					.runOpAsynch(new ApplicationOperationWithModelUpdate(getName(), model, appName, ops, false));
 		}
 	}
 }
