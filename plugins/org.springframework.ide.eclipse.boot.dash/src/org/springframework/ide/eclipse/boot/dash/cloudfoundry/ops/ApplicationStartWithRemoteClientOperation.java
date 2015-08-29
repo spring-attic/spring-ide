@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationUpdateListener.DefaultListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
@@ -56,12 +57,19 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()), runOrDebug)) {
 			ops.add(new FullApplicationRestartOperation("Restarting application '" + cde.getName() + "'", model, appName, runOrDebug));
 		} else if (cde.getRunState() == RunState.INACTIVE) {
-			ops.add(new ApplicationStartOperation(appName, model));
+			ApplicationStartOperation restartOp = new ApplicationStartOperation(appName, model);
+			restartOp.addApplicationUpdateListener(new DefaultListener(appName, model) {
+				@Override
+				public void applicationStarting(CloudAppInstances app) {
+					updateModel(app, RunState.STARTING);
+				}
+			});
+			ops.add(restartOp);
 		}
 
 		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
 
-		new ApplicationOperationWithModelUpdate(getName(), model, appName, ops, false).run(monitor);
+		new ApplicationOperationWithModelUpdate(getName(), model, appName, ops, true).run(monitor);
 	}
 
 }
