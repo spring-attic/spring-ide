@@ -12,12 +12,15 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -28,9 +31,11 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
@@ -45,6 +50,12 @@ public class DevtoolsUtil {
 
 	private static final String TARGET_ID = "boot.dash.target.id";
 	private static final String APP_NAME = "boot.dash.cloudfoundry.app-name";
+
+	private static final QualifiedName REMOTE_CLIENT_SECRET_PROPERTY = new QualifiedName(BootDashActivator.PLUGIN_ID, "spring.devtools.remote.secret");
+
+	private static final String JAVA_OPTS_ENV_VAR = "JAVA_OPTS";
+	private static final String REMOTE_SECRET_JVM_ARG = "-Dspring.devtools.remote.secret=";
+	private static final String REMOTE_DEBUG_JVM_ARGS = "-Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n";
 
 	private static ILaunchManager getLaunchManager() {
 		return DebugPlugin.getDefault().getLaunchManager();
@@ -279,4 +290,45 @@ public class DevtoolsUtil {
 			}
 		}
 	}
+
+	public static String getSecret(IProject project) throws CoreException {
+		String secret = project.getPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY);
+		if (secret == null) {
+			secret = RandomStringUtils.randomAlphabetic(20);
+			project.setPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY, secret);
+		}
+		return secret;
+	}
+
+	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
+		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
+		if (javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
+			if (runOrDebug == RunState.DEBUGGING) {
+				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
+			} else {
+				return !javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
+			}
+		}
+		return false;
+	}
+
+	public static void setupEnvVarsForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
+		String javaOpts = clearJavaOpts(envVars.get(JAVA_OPTS_ENV_VAR));
+		StringBuilder sb = javaOpts == null ? new StringBuilder() : new StringBuilder(javaOpts);
+		if (sb.length() > 0) {
+			sb.append(' ');
+		}
+		sb.append(REMOTE_SECRET_JVM_ARG);
+		sb.append(secret);
+		if (runOrDebug == RunState.DEBUGGING) {
+			sb.append(' ');
+			sb.append(REMOTE_DEBUG_JVM_ARGS);
+		}
+		envVars.put(JAVA_OPTS_ENV_VAR, sb.toString());
+	}
+
+	private static String clearJavaOpts(String opts) {
+		return opts == null ? null : opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "").replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
+	}
+
 }
