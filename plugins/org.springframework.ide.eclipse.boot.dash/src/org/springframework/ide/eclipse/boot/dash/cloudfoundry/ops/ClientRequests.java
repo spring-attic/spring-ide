@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
@@ -123,15 +122,6 @@ public class ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.restartApplication(appName);
-			}
-		}.run();
-	}
-
-	public Map<String, Object> getApplicationEnvironment(final UUID guid) throws Exception {
-		return new ClientRequest<Map<String, Object>>(model) {
-			@Override
-			protected Map<String, Object> doRun(CloudFoundryOperations client) throws Exception {
-				return client.getApplicationEnvironment(guid);
 			}
 		}.run();
 	}
