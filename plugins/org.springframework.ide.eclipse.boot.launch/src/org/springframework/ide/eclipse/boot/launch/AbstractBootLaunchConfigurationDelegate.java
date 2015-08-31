@@ -37,7 +37,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 
 	private static final String M2E_CLASSPATH_PROVIDER = "org.eclipse.m2e.launchconfig.classpathProvider";
 	private static final String M2E_SOURCEPATH_PROVIDER = "org.eclipse.m2e.launchconfig.sourcepathProvider";
-	private static final String JAVA_LAUNCH_CONFIG_TYPE_ID = IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
+	public static final String JAVA_LAUNCH_CONFIG_TYPE_ID = IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
 	public static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
 	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
 
