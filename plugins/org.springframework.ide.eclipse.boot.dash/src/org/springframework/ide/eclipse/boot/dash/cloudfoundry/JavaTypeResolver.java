@@ -14,16 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.debug.ui.launcher.MainMethodSearchEngine;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
 /**
  *
@@ -42,24 +39,12 @@ public class JavaTypeResolver {
 		return project;
 	}
 
-	public IType[] getMainTypes(IProgressMonitor monitor) {
-		IJavaProject javaProject = getJavaProject();
-
-		if (javaProject != null) {
-			// Returns main method types
-			boolean includeSubtypes = true;
-			MainMethodSearchEngine engine = new MainMethodSearchEngine();
-			int constraints = IJavaSearchScope.SOURCES;
-			constraints |= IJavaSearchScope.APPLICATION_LIBRARIES;
-			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProject },
-					constraints);
-			return engine.searchMainMethods(monitor, scope, includeSubtypes);
-		}
-		return new IType[] {};
+	public IType[] getMainTypes(IProgressMonitor monitor) throws Exception {
+		return MainTypeFinder.guessMainTypes(getJavaProject(), monitor);
 
 	}
 
-	public IType getMainTypesFromSource(IProgressMonitor monitor) {
+	public IType getMainTypesFromSource(IProgressMonitor monitor) throws Exception {
 		if (project != null) {
 			IType[] types = getMainTypes(monitor);
 			// Enable when dependency to

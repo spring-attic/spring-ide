@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -40,22 +41,15 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 	private final UserInteractions ui;
 	private final boolean shouldAutoReplace;
 	private final RunState runOrDebug;
-	private final boolean withDevTools;
 
 	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
-			boolean shouldAutoReplace, RunState runOrDebug, boolean withDevTools) {
+			boolean shouldAutoReplace, RunState runOrDebug) {
 		super("Deploying project " + project.getName(), model, getAppName(project, model));
 
 		this.project = project;
 		this.shouldAutoReplace = shouldAutoReplace;
 		this.ui = ui;
 		this.runOrDebug = runOrDebug;
-		this.withDevTools = withDevTools;
-	}
-
-	public FullApplicationDeployment(IProject project, CloudFoundryBootDashModel model, UserInteractions ui,
-			boolean shouldAutoReplace, RunState runOrDebug) {
-		this(project, model, ui, shouldAutoReplace, runOrDebug, false);
 	}
 
 	protected static String getAppName(IProject project, CloudFoundryBootDashModel model) {
@@ -109,7 +103,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		CloudApplicationOperation createOp = new ApplicationCreateOperation(properties, model);
 		CloudApplicationOperation uploadOp = new ApplicationUploadOperation(properties, model);
 		CloudApplicationOperation updateOp = new ApplicationPropertiesUpdateOperation(properties, model);
-		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model, runOrDebug, withDevTools);
+		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model);
 
 		deploymentOperations.add(createOp);
 		deploymentOperations.add(updateOp);
@@ -168,6 +162,11 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		if (!status.isOK()) {
 			throw new CoreException(status);
+		}
+
+		// Update JAVA_OPTS env variable with Remote DevTools Client secret
+		if (project != null) {
+			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project), runOrDebug);
 		}
 
 		return deploymentProperties;

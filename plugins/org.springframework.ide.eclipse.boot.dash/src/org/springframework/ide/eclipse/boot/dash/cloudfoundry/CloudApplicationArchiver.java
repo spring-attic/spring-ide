@@ -62,14 +62,14 @@ public class CloudApplicationArchiver {
 
 			JavaPackageFragmentRootHandler rootResolver = getPackageFragmentRootHandler(javaProject, monitor);
 
-			IType mainType = rootResolver.getMainType(monitor);
-
 			final IPackageFragmentRoot[] roots = rootResolver.getPackageFragmentRoots(monitor);
 
 			if (roots == null || roots.length == 0) {
 				throw BootDashActivator.asCoreException("Unable to package project" + javaProject.getElementName()
 						+ " as a jar application. Please verify that the project is a valid Java project and contains a main type in source.");
 			}
+
+			IType mainType = rootResolver.getMainType(monitor);
 
 			JarPackageData jarPackageData = getJarPackageData(roots, mainType, monitor);
 

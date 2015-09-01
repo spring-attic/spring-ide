@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2015 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ *      Pivotal Softare, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.hyperlinks;
 
@@ -145,32 +145,33 @@ public class AutowireHyperlinkDetector extends JavaElementHyperlinkDetector {
 		}
 
 		String[] beanNames = beanNamesWrapper[0];
-		for (final String beanName : beanNames) {
-			IBean bean = autowireDependencyProvider.getBean(beanName);
-			final IResource resource = bean.getElementResource();
-			final int line = bean.getElementStartLine();
-			if (resource instanceof IFile) {
-				AutowireBeanHyperlink newHyperlink = new AutowireBeanHyperlink((IFile) resource, line, beanName);
-				boolean found = false;
+		if (beanNames != null) {
+			for (final String beanName : beanNames) {
+				IBean bean = autowireDependencyProvider.getBean(beanName);
+				final IResource resource = bean.getElementResource();
+				final int line = bean.getElementStartLine();
+				if (resource instanceof IFile) {
+					AutowireBeanHyperlink newHyperlink = new AutowireBeanHyperlink((IFile) resource, line, beanName);
+					boolean found = false;
 
-				for (AutowireBeanHyperlink hyperlink : hyperlinks) {
-					if (resource.equals(hyperlink.getFile()) && line == hyperlink.getLine()) {
-						if (!beanName.equals(hyperlink.getBeanName())) {
-							hyperlink.setShowFileName(true);
-							hyperlinks.add(newHyperlink);
-							newHyperlink.setShowFileName(true);
-							break;
+					for (AutowireBeanHyperlink hyperlink : hyperlinks) {
+						if (resource.equals(hyperlink.getFile()) && line == hyperlink.getLine()) {
+							if (!beanName.equals(hyperlink.getBeanName())) {
+								hyperlink.setShowFileName(true);
+								hyperlinks.add(newHyperlink);
+								newHyperlink.setShowFileName(true);
+								break;
+							}
+							found = true;
 						}
-						found = true;
 					}
-				}
 
-				if (!found) {
-					hyperlinks.add(newHyperlink);
+					if (!found) {
+						hyperlinks.add(newHyperlink);
+					}
 				}
 			}
 		}
-
 	}
 
 	private IType getParentType(IJavaElement element) {

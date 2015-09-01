@@ -20,14 +20,14 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartWithRemoteClientOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.StartOnlyUpdateListener;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -81,14 +81,15 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		// through uploading via full deployment
 		// && runingOrDebugging == RunState.RUNNING
 		) {
-			boolean shouldAutoReplaceApp = true;
-			List<BootDashElement> elements = new ArrayList<BootDashElement>();
-			elements.add(this);
-			op = new ProjectsDeployer((CloudFoundryBootDashModel) getParent(), ui, elements, shouldAutoReplaceApp,
-					runingOrDebugging);
+			String opName = "Starting application '" + getName() +"' in " + (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+			if (runingOrDebugging == RunState.DEBUGGING) {
+				op = new ApplicationStartWithRemoteClientOperation(opName, cloudModel, getName(), runingOrDebugging);
+			} else {
+				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging);
+			}
 		} else {
 			CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getParent(), runingOrDebugging);
+					(CloudFoundryBootDashModel) getParent());
 
 			restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
@@ -101,7 +102,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getParent(), runingOrDebugging);
+				(CloudFoundryBootDashModel) getParent());
 
 		restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 

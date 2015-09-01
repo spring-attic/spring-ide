@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -25,6 +27,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchDelegate;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,8 +37,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 /**
  * Resolves all the package fragment roots and main type for a give Java
@@ -54,67 +60,105 @@ public class JavaPackageFragmentRootHandler {
 	}
 
 	public IPackageFragmentRoot[] getPackageFragmentRoots(IProgressMonitor monitor) throws Exception {
-		IType type = getMainType(monitor);
 
 		IPath[] classpathEntries = null;
 		ILaunchConfiguration configuration = null;
 		try {
-			configuration = createConfiguration(type);
-			classpathEntries = getRuntimeClasspaths(configuration);
+			if (BootPropertyTester.isBootProject(javaProject.getProject())) {
+				configuration = BootLaunchConfigurationDelegate.createConf(javaProject);
+				Set<String> modes = new HashSet<String>();
+				modes.add(ILaunchManager.RUN_MODE);
+
+				ILaunchDelegate[] delegates = configuration.getType().getDelegates(modes);
+				if (delegates != null && delegates.length > 0) {
+
+					JavaLaunchDelegate javaDelegate = null;
+
+					for (ILaunchDelegate del : delegates) {
+						if (BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID.equals(del.getId())
+								&& del.getDelegate() instanceof JavaLaunchDelegate) {
+
+							javaDelegate = (JavaLaunchDelegate) del.getDelegate();
+							break;
+						}
+					}
+
+					if (javaDelegate != null) {
+						String[] pathValues = javaDelegate.getClasspath(configuration);
+						if (pathValues != null) {
+							classpathEntries = new IPath[pathValues.length];
+							for (int i = 0; i < pathValues.length && i < classpathEntries.length; i++) {
+								classpathEntries[i] = new Path(pathValues[i]);
+							}
+						}
+					}
+				}
+
+			} else {
+				throw BootDashActivator.asCoreException("The project : " + javaProject.getProject().getName()
+						+ " does not appear to be a Spring Boot project. Only Spring Boot projects can be deployed through the Boot Dashboard.");
+			}
+
 		} finally {
 			if (configuration != null) {
 				configuration.delete();
 			}
 		}
 
-		List<IPackageFragmentRoot> pckRoots = new ArrayList<IPackageFragmentRoot>();
+		if (classpathEntries != null && classpathEntries.length > 0) {
+			List<IPackageFragmentRoot> pckRoots = new ArrayList<IPackageFragmentRoot>();
 
-		// Since the java project may have other required projects, fetch the
-		// ordered
-		// list of required projects that will be used to search for package
-		// fragment roots
-		// corresponding to the resolved class paths. The order of the java
-		// projects to search in should
-		// start with the most immediate list of required projects of the java
-		// project.
-		List<IJavaProject> javaProjectsToSearch = getOrderedJavaProjects(javaProject);
+			// Since the java project may have other required projects, fetch
+			// the
+			// ordered
+			// list of required projects that will be used to search for package
+			// fragment roots
+			// corresponding to the resolved class paths. The order of the java
+			// projects to search in should
+			// start with the most immediate list of required projects of the
+			// java
+			// project.
+			List<IJavaProject> javaProjectsToSearch = getOrderedJavaProjects(javaProject);
 
-		// Find package fragment roots corresponding to the path entries.
-		// Search through all java projects, not just the immediate java project
-		// for the application that is being pushed to CF.
-		for (IPath path : classpathEntries) {
+			// Find package fragment roots corresponding to the path entries.
+			// Search through all java projects, not just the immediate java
+			// project
+			// for the application that is being pushed to CF.
+			for (IPath path : classpathEntries) {
 
-			for (IJavaProject javaProject : javaProjectsToSearch) {
+				for (IJavaProject javaProject : javaProjectsToSearch) {
 
-				IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
+					IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
 
-				if (roots != null) {
-					List<IPackageFragmentRoot> foundRoots = new ArrayList<IPackageFragmentRoot>();
+					if (roots != null) {
+						List<IPackageFragmentRoot> foundRoots = new ArrayList<IPackageFragmentRoot>();
 
-					for (IPackageFragmentRoot packageFragmentRoot : roots) {
-						// Note that a class path entry may correspond to a
-						// Java project's target directory.
-						// Different fragment roots may use the same target
-						// directory, so relationship between fragment roots
-						// to a class path entry may be many-to-one.
+						for (IPackageFragmentRoot packageFragmentRoot : roots) {
+							// Note that a class path entry may correspond to a
+							// Java project's target directory.
+							// Different fragment roots may use the same target
+							// directory, so relationship between fragment roots
+							// to a class path entry may be many-to-one.
 
-						if (isRootAtEntry(packageFragmentRoot, path)) {
-							foundRoots.add(packageFragmentRoot);
+							if (isRootAtEntry(packageFragmentRoot, path)) {
+								foundRoots.add(packageFragmentRoot);
+							}
+						}
+
+						// Stop after the first successful search
+						if (!foundRoots.isEmpty()) {
+							pckRoots.addAll(foundRoots);
+							break;
 						}
 					}
-
-					// Stop after the first successful search
-					if (!foundRoots.isEmpty()) {
-						pckRoots.addAll(foundRoots);
-						break;
-					}
 				}
+
 			}
 
+			return pckRoots.toArray(new IPackageFragmentRoot[pckRoots.size()]);
+		} else {
+			return null;
 		}
-
-		return pckRoots.toArray(new IPackageFragmentRoot[pckRoots.size()]);
-
 	}
 
 	/**
@@ -221,7 +265,7 @@ public class JavaPackageFragmentRootHandler {
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
 				type.getJavaProject().getElementName());
 		workingCopy.setMappedResources(new IResource[] { type.getUnderlyingResource() });
-		return workingCopy.doSave();
+		return workingCopy;
 	}
 
 	protected IPath[] getRuntimeClasspaths(ILaunchConfiguration configuration) throws Exception {

@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -243,6 +244,12 @@ public class BootDashLabels implements Disposable {
 					}
 				} else {
 					styledLabel = getJavaLabels().getStyledText(jp);
+
+					boolean devtools = BootPropertyTester.hasDevtools(element.getProject());
+					if (devtools) {
+						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.darkGreen());
+						styledLabel.append(devtoolsDecoration);
+					}
 				}
 				break;
 			case HOST:
@@ -278,8 +285,15 @@ public class BootDashLabels implements Disposable {
 				}
 				break;
 			case APP:
-				String app = element.getName();
-				label = app == null ? UNKNOWN_LABEL : app;
+				styledLabel = new StyledString();
+
+				if (element.getName() != null) {
+					styledLabel.append(element.getName());
+				}
+				else {
+					styledLabel.append(UNKNOWN_LABEL);
+				}
+
 				break;
 			case RUN_STATE_ICN:
 				label = element.getRunState().toString();

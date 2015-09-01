@@ -19,8 +19,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationDeployment;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartWithRemoteClientOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -69,7 +68,7 @@ public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAc
 		if (!getSelectedElements().isEmpty()) {
 			enable = true;
 			for (BootDashElement e : getSelectedElements()) {
-				if (!(e instanceof CloudDashElement) || e.getProject() == null || (e.getRunState() != RunState.RUNNING && e.getRunState() != RunState.INACTIVE)) {
+				if (!(e instanceof CloudDashElement) || e.getProject() == null) {
 					enable = false;
 				}
 			}
@@ -82,12 +81,8 @@ public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAc
 		for (BootDashElement e : getSelectedElements()) {
 			if (e instanceof CloudDashElement && e.getParent() instanceof CloudFoundryBootDashModel && e.getProject() != null) {
 				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getParent();
-				CloudApplicationOperation restartOp = new FullApplicationDeployment(e.getProject(), model, ui,
-						true, RunState.RUNNING, true);
-				model.getOperationsExecution().runOpAsynch(restartOp);
-//				ApplicationStartOperation restartOp = new ApplicationStartOperation(e.getName(), model, RunState.RUNNING, true);
-//				restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(e.getName(), model));
-//				model.getOperationsExecution().runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp, true));
+				String opName = "Restart Remote DevTools Client for application '" + e.getName() + "'";
+				model.getOperationsExecution().runOpAsynch(new ApplicationStartWithRemoteClientOperation(opName, model, e.getName(), RunState.RUNNING));
 			}
 		}
 	}
