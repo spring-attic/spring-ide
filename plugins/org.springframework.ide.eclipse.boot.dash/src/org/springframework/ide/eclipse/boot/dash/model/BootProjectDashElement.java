@@ -94,7 +94,13 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 
 	@Override
 	public RunState getRunState() {
-		return runStateTracker().getState(getProject());
+		ProjectRunStateTracker tracker = runStateTracker();
+		// Tracker, may be null sometimes during initialization (when restoring persisted state,
+		//  elements are created before model is fully intialized)
+		if (tracker!=null) {
+			return tracker.getState(getProject());
+		}
+		return RunState.UNKNOWN;
 	}
 
 	private ProjectRunStateTracker runStateTracker() {
