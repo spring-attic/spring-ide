@@ -219,7 +219,6 @@ public class MetaDataManipulator {
 		obj.put("name", propertyName);
 		obj.put("type", String.class.getName());
 		obj.put("description", "A description for '"+propertyName+"'");
-		obj.put("defaultValue", (Object)null);
 		return obj;
 	}
 

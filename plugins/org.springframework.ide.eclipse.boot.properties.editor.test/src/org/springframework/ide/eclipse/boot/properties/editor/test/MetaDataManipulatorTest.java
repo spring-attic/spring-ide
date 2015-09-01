@@ -58,9 +58,9 @@ public class MetaDataManipulatorTest extends TestCase {
 
 		assertEquals(
 				"{\"properties\": [{\n" +
-				"  \"description\": \"A description for 'test.property'\",\n" +
 				"  \"name\": \"test.property\",\n" +
-				"  \"type\": \"java.lang.String\"\n" +
+				"  \"type\": \"java.lang.String\",\n" +
+				"  \"description\": \"A description for 'test.property'\"\n" +
 				"}]}",
 				//================
 				content.toString());
@@ -71,14 +71,14 @@ public class MetaDataManipulatorTest extends TestCase {
 		assertEquals(
 				"{\"properties\": [\n" +
 				"  {\n" +
-				"    \"description\": \"A description for 'test.property'\",\n" +
 				"    \"name\": \"test.property\",\n" +
-				"    \"type\": \"java.lang.String\"\n" +
+				"    \"type\": \"java.lang.String\",\n" +
+				"    \"description\": \"A description for 'test.property'\"\n" +
 				"  },\n" +
 				"  {\n" +
-				"    \"description\": \"A description for 'another.property'\",\n" +
 				"    \"name\": \"another.property\",\n" +
-				"    \"type\": \"java.lang.String\"\n" +
+				"    \"type\": \"java.lang.String\",\n" +
+				"    \"description\": \"A description for 'another.property'\"\n" +
 				"  }\n" +
 				"]}",
 				//================
@@ -97,9 +97,9 @@ public class MetaDataManipulatorTest extends TestCase {
 
 		assertEquals(
 				"garbage{\n" +
-				"  \"description\": \"A description for 'test.property'\",\n" +
 				"  \"name\": \"test.property\",\n" +
-				"  \"type\": \"java.lang.String\"\n" +
+				"  \"type\": \"java.lang.String\",\n" +
+				"  \"description\": \"A description for 'test.property'\"\n" +
 				"}\n",
 				//================
 				content.toString());
@@ -109,14 +109,14 @@ public class MetaDataManipulatorTest extends TestCase {
 
 		assertEquals(
 				"garbage{\n" +
-				"  \"description\": \"A description for 'test.property'\",\n" +
 				"  \"name\": \"test.property\",\n" +
-				"  \"type\": \"java.lang.String\"\n" +
+				"  \"type\": \"java.lang.String\",\n" +
+				"  \"description\": \"A description for 'test.property'\"\n" +
 				"},\n" +
 				"{\n" +
-				"  \"description\": \"A description for 'another.property'\",\n" +
 				"  \"name\": \"another.property\",\n" +
-				"  \"type\": \"java.lang.String\"\n" +
+				"  \"type\": \"java.lang.String\",\n" +
+				"  \"description\": \"A description for 'another.property'\"\n" +
 				"}\n",
 				//================
 				content.toString());
@@ -129,14 +129,14 @@ public class MetaDataManipulatorTest extends TestCase {
 				//almost correct content, its missing a comma
 				"{\"properties\": [\n" +
 				"  {\n" +
-				"    \"description\": \"A description for 'test.property'\",\n" +
 				"    \"name\": \"test.property\",\n" +
-				"    \"type\": \"java.lang.String\"\n" +
+				"    \"type\": \"java.lang.String\",\n" +
+				"    \"description\": \"A description for 'test.property'\"\n" +
 				"  }\n" + //missing comma!
 				"  {\n" +
-				"    \"description\": \"A description for 'another.property'\",\n" +
 				"    \"name\": \"another.property\",\n" +
-				"    \"type\": \"java.lang.String\"\n" +
+				"    \"type\": \"java.lang.String\",\n" +
+				"    \"description\": \"A description for 'another.property'\"\n" +
 				"  }\n" +
 				"]}"
 		);
@@ -148,20 +148,20 @@ public class MetaDataManipulatorTest extends TestCase {
 		assertEquals(
 				"{\"properties\": [\n" +
 				"  {\n" +
-				"    \"description\": \"A description for 'test.property'\",\n" +
 				"    \"name\": \"test.property\",\n" +
-				"    \"type\": \"java.lang.String\"\n" +
+				"    \"type\": \"java.lang.String\",\n" +
+				"    \"description\": \"A description for 'test.property'\"\n" +
 				"  }\n" +
 				"  {\n" +
-				"    \"description\": \"A description for 'another.property'\",\n" +
 				"    \"name\": \"another.property\",\n" +
-				"    \"type\": \"java.lang.String\"\n" +
+				"    \"type\": \"java.lang.String\",\n" +
+				"    \"description\": \"A description for 'another.property'\"\n" +
 				"  },\n" +
 				//TODO: The indentation is off... maybe this could be fixed
 				"{\n" +
-				"  \"description\": \"A description for 'foo.bar'\",\n" +
 				"  \"name\": \"foo.bar\",\n" +
-				"  \"type\": \"java.lang.String\"\n" +
+				"  \"type\": \"java.lang.String\",\n" +
+				"  \"description\": \"A description for 'foo.bar'\"\n" +
 				"}\n" +
 				"]}",
 				//================
@@ -183,13 +183,12 @@ public class MetaDataManipulatorTest extends TestCase {
 
 		assertEquals(
 				"{\"properties\": [{\n" +
-				"  \"description\": \"A description for 'test.property'\",\n" +
 				"  \"name\": \"test.property\",\n" +
-				"  \"type\": \"java.lang.String\"\n" +
+				"  \"type\": \"java.lang.String\",\n" +
+				"  \"description\": \"A description for 'test.property'\"\n" +
 				"}]}",
 				//================
 				content.toString());
-
 	}
 
 }
