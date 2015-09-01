@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2013 Spring IDE Developers
+ * Copyright (c) 2009, 2015 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Resource;
 import javax.inject.Provider;
 
 import org.eclipse.core.resources.IMarker;
@@ -64,7 +65,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -287,17 +287,20 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 	public void preloadClasses() {
 		try {
 			factoryBeanClass = ClassUtils.loadClass(FactoryBean.class.getName());
-		} catch (ClassNotFoundException e) {
+		} catch (Throwable e) {
+			// Ignore here as this can easily happen if project class path is not complete
 		}
 
 		try {
 			objectFactoryClass = ClassUtils.loadClass(ObjectFactory.class.getName());
-		} catch (ClassNotFoundException e) {
+		} catch (Throwable e) {
+			// Ignore here as this can easily happen if project class path is not complete
 		}
 
 		try {
 			providerClass = ClassUtils.loadClass(Provider.class.getName());
-		} catch (ClassNotFoundException e) {
+		} catch (Throwable e) {
+			// Ignore here as this can easily happen if project class path is not complete
 		}
 	}
 
@@ -346,6 +349,13 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			return getBeansForType(requiredType);
 		}
 		catch (ClassNotFoundException e) {
+			// Ignore here as this can easily happen if project class path is not complete
+		}
+		catch (NoClassDefFoundError e) {
+			// Ignore here as this can easily happen if project class path is not complete
+		}
+		catch (Throwable e) {
+			BeansCorePlugin.log(e);
 		}
 		return new String[0];
 	}
@@ -371,6 +381,13 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 					}
 				}
 				catch (ClassNotFoundException e) {
+					// Ignore here as this can easily happen if project class path is not complete
+				}
+				catch (NoClassDefFoundError e) {
+					// Ignore here as this can easily happen if project class path is not complete
+				}
+				catch (Throwable e) {
+					BeansCorePlugin.log(e);
 				}
 			}
 		}
@@ -383,11 +400,14 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 			if (factoryMethod != null && requiredType.isAssignableFrom(factoryMethod.getReturnType())) {
 				return true;
 			}
-		} catch (Exception e) {
-			SpringCore.log(e);
-		} catch (Error e) {
-			SpringCore.log(e);
 		}
+		catch (NoClassDefFoundError e) {
+			// Ignore here as this can easily happen if project class path is not complete
+		}
+		catch (Throwable e) {
+			BeansCorePlugin.log(e);
+		}
+
 		return false;
 	}
 
@@ -683,7 +703,6 @@ public class AutowireDependencyProvider implements IAutowireDependencyResolver {
 
 	@SuppressWarnings("serial")
 	private static class AutowireResolutionException extends RuntimeException {
-
 	}
 
 	private class AutowireProblemReporter implements IInjectionMetadataProviderProblemReporter {
