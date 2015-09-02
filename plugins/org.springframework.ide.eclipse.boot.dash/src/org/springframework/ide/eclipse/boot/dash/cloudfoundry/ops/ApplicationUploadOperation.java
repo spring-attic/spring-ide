@@ -11,14 +11,18 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 
 /**
@@ -63,17 +67,12 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 			if (deploymentProperties.getProject() != null) {
 
-				ApplicationManifestHandler parser = new ApplicationManifestHandler(deploymentProperties.getProject(),
-						this.model.getCloudTarget().getDomains(requests, monitor));
-
-				CloudApplicationArchiver archiver = new CloudApplicationArchiver(
-						JavaCore.create(deploymentProperties.getProject()), appName, parser);
-
-				logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
-
-				archive = archiver.getApplicationArchive(monitor);
-				monitor.worked(2);
-
+				ICloudApplicationArchiver archiver = getArchiver(monitor);
+				if (archiver!=null) {
+					logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
+					archive = archiver.getApplicationArchive(new NullProgressMonitor());
+					monitor.worked(2);
+				}
 			}
 
 			if (archive != null) {
@@ -101,6 +100,34 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 				archive.close();
 			}
 		}
+	}
+
+	protected ICloudApplicationArchiver getArchiver(IProgressMonitor mon) {
+		try {
+			for (CloudApplicationArchiverStrategy s : getArchiverStrategies(mon)) {
+				ICloudApplicationArchiver a = s.getArchiver();
+				if (a!=null) {
+					return a;
+				}
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor monitor) throws Exception {
+		IProject project = deploymentProperties.getProject();
+		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
+				this.model.getCloudTarget().getDomains(requests, monitor));
+
+		ICloudApplicationArchiver legacyArchiver = new CloudApplicationArchiver(
+				JavaCore.create(deploymentProperties.getProject()), appName, parser);
+
+
+		return new CloudApplicationArchiverStrategy[] {
+				CloudApplicationArchiverStrategies.justReturn(legacyArchiver)
+		};
 	}
 
 }

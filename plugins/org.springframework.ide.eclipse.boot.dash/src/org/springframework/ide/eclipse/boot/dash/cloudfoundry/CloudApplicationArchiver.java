@@ -35,7 +35,7 @@ import org.springframework.boot.loader.tools.LibraryScope;
 import org.springframework.boot.loader.tools.Repackager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
-public class CloudApplicationArchiver {
+public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 
 	private IJavaProject javaProject;
 
@@ -53,9 +53,7 @@ public class CloudApplicationArchiver {
 	}
 
 	public CloudZipApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
-
 		CloudZipApplicationArchive archive = getArchiveFromManifest(monitor);
-
 		if (archive == null) {
 
 			File packagedFile = null;
@@ -211,6 +209,7 @@ public class CloudApplicationArchiver {
 
 		String path = new Path(targetFile.getAbsolutePath()).toString();
 
+		System.out.println("getTempJarPath => "+path);
 		return path;
 	}
 
