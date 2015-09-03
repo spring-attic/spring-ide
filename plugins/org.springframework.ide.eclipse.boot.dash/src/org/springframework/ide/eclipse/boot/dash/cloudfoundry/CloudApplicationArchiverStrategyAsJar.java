@@ -83,9 +83,9 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		 * Convert a collectio of Eclipse IContainer to List of java.io.File. Containers that
 		 * don't correspond to stuff on disk are silently ignored.
 		 */
-		private Set<File> toFileSet(List<IContainer> folders) {
+		private Set<File> toFileSet(Set<IContainer> containers) {
 			Set<File> files = new HashSet<File>();
-			for (IContainer folder : folders) {
+			for (IContainer folder : containers) {
 				IPath loc = folder.getLocation();
 				if (loc!=null) {
 					File file = loc.toFile();

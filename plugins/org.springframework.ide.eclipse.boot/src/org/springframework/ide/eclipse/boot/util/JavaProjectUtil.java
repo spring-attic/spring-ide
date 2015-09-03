@@ -12,10 +12,10 @@ package org.springframework.ide.eclipse.boot.util;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -129,12 +129,12 @@ public class JavaProjectUtil {
 		return null;
 	}
 
-	public static List<IContainer> getOutputFolders(IJavaProject jp) {
+	public static Set<IContainer> getOutputFolders(IJavaProject jp) {
 		IContainer defaultOutput = getDefaultOutputFolder(jp);
 		if (defaultOutput!=null) {
-			return Collections.singletonList(getDefaultOutputFolder(jp));
+			return Collections.singleton(getDefaultOutputFolder(jp));
 		} else {
-			return Collections.emptyList();
+			return Collections.emptySet();
 		}
 		//TODO: other output folders (i.e indivudla source folders can specifiy separate output folders)
 	}
