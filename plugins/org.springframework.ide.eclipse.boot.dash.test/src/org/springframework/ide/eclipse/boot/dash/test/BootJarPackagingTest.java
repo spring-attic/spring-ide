@@ -68,6 +68,7 @@ public class BootJarPackagingTest extends StsTestCase {
 		LaunchResult result = java.runJar(jarFile);
 		assertContains("Hello World!", result.out);
 		assertEquals(0, result.terminationCode);
+		Mockito.verifyZeroInteractions(ui);
 	}
 
 	private File packageAsJar(IProject project, UserInteractions ui) throws Exception {
