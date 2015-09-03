@@ -74,7 +74,8 @@ public class BootJarPackagingTest extends StsTestCase {
 	}
 
 	public void testProjectDependency() throws Exception {
-		createPredefinedProject("demo-lib");
+		IProject depProject = createPredefinedProject("demo-lib");
+		StsTestUtil.assertNoErrors(depProject);
 		UserInteractions ui = Mockito.mock(UserInteractions.class);
 		BootProjectTestHarness harness = getHarness();
 
