@@ -56,8 +56,8 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 		this.parser = parser;
 	}
 
-	public CloudZipApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
-		CloudZipApplicationArchive archive = getArchiveFromManifest(monitor);
+	public File getApplicationArchive(IProgressMonitor monitor) throws Exception {
+		File archive = getArchiveFromManifest(monitor);
 		if (archive == null) {
 
 			File packagedFile = null;
@@ -100,7 +100,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 
 			bootRepackage(roots, packagedFile);
 
-			archive = new CloudZipApplicationArchive(new ZipFile(packagedFile));
+			archive = packagedFile;
 		}
 
 		return archive;
@@ -217,7 +217,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 		return path;
 	}
 
-	public CloudZipApplicationArchive getArchiveFromManifest(IProgressMonitor monitor) throws Exception {
+	public File getArchiveFromManifest(IProgressMonitor monitor) throws Exception {
 		String archivePath = null;
 		// Read the path again instead of deployment info, as a user may be
 		// correcting the path after the module was creating and simply
@@ -264,7 +264,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 				throw BootDashActivator.asCoreException(
 						"No file found at: " + path + ". Unable to package the application for deployment");
 			} else {
-				return new CloudZipApplicationArchive(new ZipFile(packagedFile));
+				return packagedFile;
 			}
 		}
 		return null;

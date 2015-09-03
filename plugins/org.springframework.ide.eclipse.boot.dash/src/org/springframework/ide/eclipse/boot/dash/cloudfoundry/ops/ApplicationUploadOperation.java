@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.zip.ZipFile;
+
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,7 +75,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 				ICloudApplicationArchiver archiver = getArchiver(monitor);
 				if (archiver!=null) {
 					logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
-					archive = archiver.getApplicationArchive(new NullProgressMonitor());
+					archive = new CloudZipApplicationArchive(new ZipFile(archiver.getApplicationArchive(new NullProgressMonitor())));
 					monitor.worked(2);
 				}
 			}

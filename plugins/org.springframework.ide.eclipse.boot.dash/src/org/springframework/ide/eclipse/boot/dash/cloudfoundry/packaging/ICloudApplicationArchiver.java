@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
 
 public interface ICloudApplicationArchiver {
 
-	CloudZipApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception;
+	File getApplicationArchive(IProgressMonitor monitor) throws Exception;
 
 }

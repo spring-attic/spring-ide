@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 
 import java.io.File;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -21,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
 
 /**
  * Archiver strategy that consults manifest.yml file for an entry pointing to an existing archive.
@@ -44,7 +42,7 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 		final String archivePath = getArchivePath(mon);
 		if (archivePath!=null) {
 			return new ICloudApplicationArchiver() {
-				public CloudZipApplicationArchive getApplicationArchive(IProgressMonitor monitor) throws Exception {
+				public File getApplicationArchive(IProgressMonitor monitor) throws Exception {
 					return getArchive(archivePath);
 				}
 			};
@@ -61,7 +59,7 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 		return null;
 	}
 
-	private CloudZipApplicationArchive getArchive(String archivePath) throws Exception {
+	private File getArchive(String archivePath) throws Exception {
 		Assert.isNotNull(archivePath);
 		File packagedFile = null;
 		// Only support paths that point to archive files
@@ -99,7 +97,7 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 			throw BootDashActivator.asCoreException(
 					"No file found at: " + path + ". Unable to package the application for deployment");
 		} else {
-			return new CloudZipApplicationArchive(new ZipFile(packagedFile));
+			return packagedFile;
 		}
 	}
 

@@ -144,7 +144,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		}
 
 		@Override
-		public CloudZipApplicationArchive getApplicationArchive(IProgressMonitor mon) throws Exception {
+		public File getApplicationArchive(IProgressMonitor mon) throws Exception {
 			SplitClasspath classpath = getRuntimeClasspath();
 			File tempFolder = FileUtil.getTempFolder(TEMP_FOLDER_NAME);
 			File baseJar = new File(tempFolder, jp.getElementName()+".original.jar");
@@ -152,7 +152,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 
 			createBaseJar(classpath.projectContents, baseJar);
 			repackage(baseJar, classpath.dependencies, repackagedJar);
-			return new CloudZipApplicationArchive(new ZipFile(repackagedJar));
+			return repackagedJar;
 		}
 
 		private void createBaseJar(List<File> projectContents, File baseJar) throws FileNotFoundException, IOException {
