@@ -112,6 +112,16 @@ public class BootProjectTestHarness {
 		};
 	}
 
+	public IProject createBootWebProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
+		return createBootProject(projectName, merge(extraConfs, withStarters("web")));
+	}
+
+	private WizardConfigurer[] merge(WizardConfigurer[] confs, WizardConfigurer... moreConfs) {
+		WizardConfigurer[] merged = new WizardConfigurer[confs.length + moreConfs.length];
+		System.arraycopy(confs, 0, merged, 0, confs.length);
+		System.arraycopy(moreConfs, 0, merged, confs.length, moreConfs.length);
+		return merged;
+	}
 
 	public IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
 		final Job job = new Job("Create boot project '"+projectName+"'") {
@@ -161,7 +171,4 @@ public class BootProjectTestHarness {
 			throw ExceptionUtil.coreException(result);
 		}
 	}
-
-
-
 }

@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
+import org.springframework.ide.eclipse.boot.test.util.LaunchUtil.LaunchResult;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
@@ -47,18 +47,6 @@ public class BootLaunchTestCase extends StsTestCase {
 	public static void assertOk(LaunchResult result) {
 		assertEquals(0, result.terminationCode);
 	}
-
-	public static void createEmptyFile(IProject project, String path)
-			throws CoreException {
-				IFile file = project.getFile(new Path(path));
-				file.create(new StringInputStream(""), true, new NullProgressMonitor());
-			}
-
-	public static void createFile(IProject project, String path, String data)
-			throws CoreException {
-				IFile file = project.getFile(new Path(path));
-				file.create(new StringInputStream(data), true, new NullProgressMonitor());
-			}
 
 	@Override
 	protected String getBundleName() {

@@ -38,7 +38,7 @@ public class DevToolsStarterTests extends TestCase {
 
 	public void testAddAndRemoveDevTools() throws Exception {
 		final ISpringBootProject project = SpringBootCore.create(
-				projects.createBootProject("dev-starters-tester", bootVersionAtLeast("1.3.0")));
+				projects.createBootWebProject("dev-starters-tester", bootVersionAtLeast("1.3.0")));
 		StsTestUtil.setAutoBuilding(true);
 		List<SpringBootStarter> knownStarters = project.getKnownStarters();
 		assertStarter(knownStarters, "devtools");

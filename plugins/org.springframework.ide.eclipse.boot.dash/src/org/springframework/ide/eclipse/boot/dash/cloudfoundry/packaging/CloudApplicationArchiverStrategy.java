@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;

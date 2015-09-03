@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +34,11 @@ import org.springframework.boot.loader.tools.LibraryCallback;
 import org.springframework.boot.loader.tools.LibraryScope;
 import org.springframework.boot.loader.tools.Repackager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JavaPackageFragmentRootHandler;
 
 public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 

@@ -8,7 +8,7 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch.test.util;
+package org.springframework.ide.eclipse.boot.test.util;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;

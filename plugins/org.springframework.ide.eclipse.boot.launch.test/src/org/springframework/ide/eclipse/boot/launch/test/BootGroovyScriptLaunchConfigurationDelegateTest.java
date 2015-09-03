@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.core.cli.BootGroovyScriptLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
-import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil;
-import org.springframework.ide.eclipse.boot.launch.test.util.LaunchUtil.LaunchResult;
+import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.test.util.LaunchUtil.LaunchResult;
 
 /**
  * @author Kris De Volder

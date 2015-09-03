@@ -17,8 +17,10 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.tests.util,
  org.springframework.ide.eclipse.core,
  org.hamcrest.library,
- org.eclipse.ui.ide
+ org.eclipse.ui.ide,
+ org.eclipse.debug.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.
-Export-Package: org.springframework.ide.eclipse.boot.test
+Export-Package: org.springframework.ide.eclipse.boot.test,
+ org.springframework.ide.eclipse.boot.test.util
