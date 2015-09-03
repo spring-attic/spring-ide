@@ -295,7 +295,7 @@ public class AutoProcessor {
 				return matchesVersion("[1.1.0, 1.2.0)", rooVersion);
 			}
 			if (filename.startsWith("org.springframework.roo.shell.eclipse-1.2.0")) {
-				return matchesVersion("1.2.0", rooVersion);
+				return matchesVersion("[1.2.0, 1.4.0)", rooVersion);
 			}
 			if (filename.startsWith("org.springframework.roo.shell.eclipse-2.0.0")) {
 				return matchesVersion("2.0.0", rooVersion);
