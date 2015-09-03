@@ -20,6 +20,7 @@ import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -85,6 +86,13 @@ public class CloudFoundryUiUtil {
 	}
 
 	public static Shell getShell() {
-		return PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
+		final Shell[] shell = new Shell[1];
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				shell[0] = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
+			}
+		});
+		return shell[0];
 	}
 }
