@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
 
 /**
  * Archiver strategy that consults manifest.yml file for an entry pointing to an existing archive.

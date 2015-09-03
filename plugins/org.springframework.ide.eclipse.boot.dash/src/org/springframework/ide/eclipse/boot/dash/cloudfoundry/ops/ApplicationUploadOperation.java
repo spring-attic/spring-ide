@@ -21,9 +21,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;

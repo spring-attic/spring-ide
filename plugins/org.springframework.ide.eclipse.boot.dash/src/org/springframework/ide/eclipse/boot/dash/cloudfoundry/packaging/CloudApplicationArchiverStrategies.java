@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 

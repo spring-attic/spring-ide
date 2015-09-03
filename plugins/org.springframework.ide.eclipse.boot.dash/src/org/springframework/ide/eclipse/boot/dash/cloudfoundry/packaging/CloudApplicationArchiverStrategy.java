@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
 
 /**
  * Instances of this interface is responsible for initializing and instance of {@link ICloudApplicationArchiver}.
