@@ -50,7 +50,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 	/**
 	 * Classpath entries spilt into two lists, one that correspond to the current project's output folders
 	 * and all the others (which correspond to the project's dependencies). The dependencies could be
-	 * jars or output folders for other projects in th workspace.
+	 * jars or output folders for other projects in the workspace.
 	 */
 	private static class SplitClasspath {
 		private List<File> projectContents = new ArrayList<File>(2); //one or two is typical
@@ -80,7 +80,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		}
 
 		/**
-		 * Convert a collectio of Eclipse IContainer to List of java.io.File. Containers that
+		 * Convert a collection of Eclipse IContainer to List of java.io.File. Containers that
 		 * don't correspond to stuff on disk are silently ignored.
 		 */
 		private Set<File> toFileSet(Set<IContainer> containers) {
@@ -216,12 +216,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 				}
 			};
 		}
-
-
-
 	}
-
-
 
 	private IProject project;
 	private UserInteractions ui;
@@ -265,6 +260,10 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 				if (candidates.length==1) {
 					return candidates[0];
 				} else {
+					//TODO: should persist main type so we don't ask again next time.
+					// however we persist this, user must be able to change it.
+					// Prolly we should create a launchconf to store info like this and
+					// create UI for user to modify it.
 					return ui.chooseMainType(candidates, "Choose a main type", "Deploying a standalone boot-app requires "
 							+ "that the main type is identified. We found several candidates, please choose one." );
 				}
@@ -274,53 +273,5 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		}
 		return null;
 	}
-
-//	private CloudZipApplicationArchive getArchive(IJavaProject jp, IType type, IProgressMonitor monitor) {
-//		File[] classpath = getRuntimeClasspath(jp);
-//		BootLaunchConfigurationDelegate.createConf(type)
-//		File baseJar = createBaseJar(monitor);
-//		File libraries =
-//		return repackage(baseJar, )
-//
-//		JavaPackageFragmentRootHandler rootResolver = getPackageFragmentRootHandler(getJavaProject(), monitor);
-//
-//		final IPackageFragmentRoot[] roots = rootResolver.getPackageFragmentRoots(monitor);
-//
-//		if (roots == null || roots.length == 0) {
-//			throw BootDashActivator.asCoreException("Unable to package project" + javaProject.getElementName()
-//					+ " as a jar application. Please verify that the project is a valid Java project and contains a main type in source.");
-//		}
-//
-//		IType mainType = rootResolver.getMainType(monitor);
-//
-//		JarPackageData jarPackageData = getJarPackageData(roots, mainType, monitor);
-//
-//		// generate a manifest file. Note that manifest files
-//		// are only generated in the temporary jar meant for
-//		// deployment.
-//		// The associated Java project is no modified.
-//		jarPackageData.setGenerateManifest(true);
-//
-//		// This ensures that folders in output folders appear at root
-//		// level
-//		// Example: src/main/resources, which is in the project's
-//		// classpath, contains non-Java templates folder and
-//		// has output folder target/classes. If not exporting output
-//		// folder,
-//		// templates will be packaged in the jar using this path:
-//		// resources/templates
-//		// This may cause problems with the application's dependencies
-//		// if they are looking for just /templates at top level of the
-//		// jar
-//		// If exporting output folders, templates folder will be
-//		// packaged at top level in the jar.
-//		jarPackageData.setExportOutputFolders(true);
-//
-//		packagedFile = packageApplication(jarPackageData, monitor);
-//
-//		bootRepackage(roots, packagedFile);
-//
-//		return new CloudZipApplicationArchive(new ZipFile(packagedFile));
-//	}
 
 }
