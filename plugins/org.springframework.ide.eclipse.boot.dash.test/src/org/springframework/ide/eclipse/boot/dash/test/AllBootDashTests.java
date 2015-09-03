@@ -17,6 +17,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	JarNameGeneratorTest.class,
 	BootJarPackagingTest.class,
 	BootDashModelStateSaverTest.class,
 	BootDashModelTest.class,
