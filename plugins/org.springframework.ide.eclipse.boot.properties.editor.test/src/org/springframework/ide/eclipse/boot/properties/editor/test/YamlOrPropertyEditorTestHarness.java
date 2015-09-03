@@ -89,12 +89,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 				index.add(new PropertyInfo(item));
 			}
 
-	public void assertContains(String needle, String haystack) {
-		if (haystack==null || !haystack.contains(needle)) {
-			fail("Not found: "+needle+"\n in \n"+haystack);
-		}
-	}
-
 	public void useProject(IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
 		this.index = new SpringPropertyIndex(jp);

@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.core,
  org.hamcrest.library,
  org.eclipse.ui.ide,
- org.eclipse.debug.core
+ org.eclipse.debug.core,
+ org.eclipse.jdt.launching
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

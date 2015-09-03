@@ -30,29 +30,6 @@ import org.eclipse.debug.core.model.IStreamsProxy;
  */
 public class LaunchUtil {
 
-	public static class LaunchResult {
-
-		public final int terminationCode;
-		public final String out;
-		public final String err;
-
-		private LaunchResult(int terminationCode, String out, String err) {
-			super();
-			this.terminationCode = terminationCode;
-			this.out = out;
-			this.err = err;
-		}
-		@Override
-		public String toString() {
-			StringBuilder buf = new StringBuilder();
-			buf.append("---- Sys.out ---\n");
-			buf.append(out);
-			buf.append("---- Sys.err ---\n");
-			buf.append(err);
-			return buf.toString();
-		}
-	}
-
 	public static LaunchResult synchLaunch(ILaunchConfiguration launchConf) throws CoreException {
 		ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
 		IProcess process = findProcess(l);

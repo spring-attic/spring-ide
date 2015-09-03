@@ -136,7 +136,6 @@ public class BootProjectTestHarness {
 					//  wrong, really, but that's how it is, so we have to explictly set the project
 					//  location in the model.
 					wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
-					wizard.addDependency("web");
 					for (WizardConfigurer extraConf : extraConfs) {
 						extraConf.apply(wizard);
 					}

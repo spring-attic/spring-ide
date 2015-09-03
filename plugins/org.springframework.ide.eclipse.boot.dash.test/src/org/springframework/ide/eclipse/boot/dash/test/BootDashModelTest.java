@@ -90,7 +90,7 @@ public class BootDashModelTest {
 	}
 
 	private IProject createBootProject(String projectName, WizardConfigurer... extraConfs) throws Exception {
-		return projects.createBootProject(projectName, extraConfs);
+		return projects.createBootWebProject(projectName, extraConfs);
 	}
 
 	/**

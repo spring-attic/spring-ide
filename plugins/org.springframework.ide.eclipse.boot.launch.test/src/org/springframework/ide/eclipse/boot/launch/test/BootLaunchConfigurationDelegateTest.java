@@ -23,8 +23,8 @@ import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
+import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
-import org.springframework.ide.eclipse.boot.test.util.LaunchUtil.LaunchResult;
 
 /**
  * @author Kris De Volder

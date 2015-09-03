@@ -36,8 +36,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
+import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
-import org.springframework.ide.eclipse.boot.test.util.LaunchUtil.LaunchResult;
 
 /**
  * @author Kris De Volder

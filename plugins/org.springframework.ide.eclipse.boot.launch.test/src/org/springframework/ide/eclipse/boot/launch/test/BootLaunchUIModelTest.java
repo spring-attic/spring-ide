@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.boot.launch.MainTypeNameLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.ProfileLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
-import org.springframework.ide.eclipse.boot.test.util.LaunchUtil.LaunchResult;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;

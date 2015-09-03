@@ -5,6 +5,8 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	public static final String BUNDLE_ID = "org.springframework.ide.eclipse.boot.dash.test";
+
 	private static BundleContext context;
 
 	static BundleContext getContext() {

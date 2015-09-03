@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.test.util.LaunchUtil.LaunchResult;
+import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
@@ -69,12 +69,6 @@ public class BootLaunchTestCase extends StsTestCase {
 		ValidationResult value = validator.getValue();
 		assertEquals(IStatus.ERROR, value.status);
 		assertContains(snippet, value.msg);
-	}
-
-	public void assertContains(String needle, String haystack) {
-		if (haystack==null || !haystack.contains(needle)) {
-			fail("Not found: "+needle+"\n in \n"+haystack);
-		}
 	}
 
 	public void assertOk(LiveExpression<ValidationResult> validator) {
