@@ -120,12 +120,15 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		private IType mainType;
 		private ILaunchConfiguration conf;
 		private BootLaunchConfigurationDelegate delegate;
+		private JarNameGenerator jarNames;
+		private File _tempFolder;
 
 		Archiver(IJavaProject jp, IType mainType) throws CoreException {
 			this.jp = jp;
 			this.mainType = mainType;
 			this.conf = BootLaunchConfigurationDelegate.createWorkingCopy(mainType);
 			this.delegate = new BootLaunchConfigurationDelegate();
+			this.jarNames = new JarNameGenerator();
 		}
 
 		private SplitClasspath getRuntimeClasspath() throws CoreException {
@@ -146,13 +149,21 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		@Override
 		public File getApplicationArchive(IProgressMonitor mon) throws Exception {
 			SplitClasspath classpath = getRuntimeClasspath();
-			File tempFolder = FileUtil.getTempFolder(TEMP_FOLDER_NAME);
+			File tempFolder = getTempFolder();
 			File baseJar = new File(tempFolder, jp.getElementName()+".original.jar");
 			File repackagedJar = new File(tempFolder, jp.getElementName()+".repackaged.jar");
 
 			createBaseJar(classpath.projectContents, baseJar);
 			repackage(baseJar, classpath.dependencies, repackagedJar);
 			return repackagedJar;
+		}
+
+		private File getTempFolder() throws IOException {
+			if (_tempFolder==null) {
+				_tempFolder = FileUtil.getTempFolder(TEMP_FOLDER_NAME);
+			}
+			// TODO Auto-generated method stub
+			return _tempFolder;
 		}
 
 		private void createBaseJar(List<File> projectContents, File baseJar) throws FileNotFoundException, IOException {
@@ -207,10 +218,17 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 				public void doWithLibraries(LibraryCallback callback) throws IOException {
 					for (File dep : dependencies) {
 						if (dep.isFile()) {
-							callback.library(new Library(dep, LibraryScope.COMPILE));
+							callback.library(new Library(jarNames.createName(dep), dep, LibraryScope.COMPILE, false));
 						} else if (dep.isDirectory()) {
-							//TODO: should jar up this thing, and add it like it was a library.
-							throw new IllegalStateException("Packaging of non-jar dependencies not implemented");
+							String jarName = jarNames.createName(dep);
+							File jarFile = new File(getTempFolder(), jarName);
+							JarWriter jarWriter = new JarWriter(jarFile);
+							try {
+								writeFolder(jarWriter, dep);
+							} finally {
+								jarWriter.close();
+							}
+							callback.library(new Library(jarName, jarFile, LibraryScope.COMPILE, false));
 						}
 					}
 				}
