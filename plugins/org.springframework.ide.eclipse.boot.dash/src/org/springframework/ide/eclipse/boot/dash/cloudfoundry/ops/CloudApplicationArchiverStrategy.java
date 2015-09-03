@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
 
 /**
@@ -22,6 +23,6 @@ public interface CloudApplicationArchiverStrategy {
 	 * A strategy may or may not always be applicable in a given situation. In that case it may return null when
 	 * asked to produce a ICloudApplicationArchiver.
 	 */
-	ICloudApplicationArchiver getArchiver();
+	ICloudApplicationArchiver getArchiver(IProgressMonitor mon);
 
 }

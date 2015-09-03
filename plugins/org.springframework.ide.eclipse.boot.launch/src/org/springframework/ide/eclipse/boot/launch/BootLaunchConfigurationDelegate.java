@@ -256,6 +256,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	}
 
 	public static ILaunchConfiguration createConf(IType type) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy(type);
+		return wc.doSave();
+	}
+
+	public static ILaunchConfigurationWorkingCopy createWorkingCopy(IType type) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc = null;
 		ILaunchConfigurationType configType = getConfType();
 		IProject project = type.getJavaProject().getProject();
@@ -266,7 +271,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				projectName+" - "+shortTypeName));
 		BootLaunchConfigurationDelegate.setDefaults(wc, project, typeName);
 		wc.setMappedResources(new IResource[] {type.getUnderlyingResource()});
-		return wc.doSave();
+		return wc;
 	}
 
 	public static ILaunchConfiguration createConf(IJavaProject project) throws CoreException {

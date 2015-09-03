@@ -15,15 +15,17 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ICloudApplicationArchiver;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 
 /**
  * Operation that uploads an application's archive. The application must have an
@@ -105,7 +107,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 	protected ICloudApplicationArchiver getArchiver(IProgressMonitor mon) {
 		try {
 			for (CloudApplicationArchiverStrategy s : getArchiverStrategies(mon)) {
-				ICloudApplicationArchiver a = s.getArchiver();
+				ICloudApplicationArchiver a = s.getArchiver(mon);
 				if (a!=null) {
 					return a;
 				}
@@ -116,18 +118,44 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		return null;
 	}
 
-	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor monitor) throws Exception {
+	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor mon) throws Exception {
 		IProject project = deploymentProperties.getProject();
+
 		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
-				this.model.getCloudTarget().getDomains(requests, monitor));
-
-		ICloudApplicationArchiver legacyArchiver = new CloudApplicationArchiver(
-				JavaCore.create(deploymentProperties.getProject()), appName, parser);
-
+				this.model.getCloudTarget().getDomains(requests, mon));
 
 		return new CloudApplicationArchiverStrategy[] {
-				CloudApplicationArchiverStrategies.justReturn(legacyArchiver)
+				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),
+				CloudApplicationArchiverStrategies.packageAsJar(project, getUI())
 		};
+
+
 	}
+
+	private UserInteractions getUI() {
+		//TODO: this should be injected istead of created here
+		UIContext context = new UIContext() {
+			public Shell getShell() {
+				return null;
+			}
+		};
+		return new DefaultUserInteractions(context);
+	}
+
+
+
+// Use the 'Legacy' archiver
+//	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor monitor) throws Exception {
+//		IProject project = deploymentProperties.getProject();
+//		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
+//				this.model.getCloudTarget().getDomains(requests, monitor));
+//		ICloudApplicationArchiver legacyArchiver = new CloudApplicationArchiver(
+//				JavaCore.create(deploymentProperties.getProject()), appName, parser);
+//
+//
+//		return new CloudApplicationArchiverStrategy[] {
+//				CloudApplicationArchiverStrategies.justReturn(legacyArchiver)
+//		};
+//	}
 
 }

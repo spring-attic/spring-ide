@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -125,6 +125,32 @@ public class JavaProjectUtil {
 			return ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
 		} else if (path.segmentCount()==1) {
 			return ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
+		}
+		return null;
+	}
+
+	public static List<IContainer> getOutputFolders(IJavaProject jp) {
+		IContainer defaultOutput = getDefaultOutputFolder(jp);
+		if (defaultOutput!=null) {
+			return Collections.singletonList(getDefaultOutputFolder(jp));
+		} else {
+			return Collections.emptyList();
+		}
+		//TODO: other output folders (i.e indivudla source folders can specifiy separate output folders)
+	}
+
+	public static IContainer getDefaultOutputFolder(IJavaProject jp) {
+		try {
+			IPath loc = jp.getOutputLocation();
+			String pname = loc.segment(0);
+			if (loc.segmentCount()==1) {
+				//project is its own output folder. Discouraged... but possible
+				return ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
+			} else {
+				return ResourcesPlugin.getWorkspace().getRoot().getProject(pname).getFolder(loc.removeFirstSegments(1));
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
 		return null;
 	}

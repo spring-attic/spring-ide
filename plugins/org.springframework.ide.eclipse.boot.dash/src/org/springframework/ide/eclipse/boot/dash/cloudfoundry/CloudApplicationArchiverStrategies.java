@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationArchiverStrategy;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 
 /**
  * Some utilities for creating {@link CloudApplicationArchiverStrategy} instances.
@@ -19,13 +23,21 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicati
  */
 public class CloudApplicationArchiverStrategies {
 
-	public static CloudApplicationArchiverStrategy justReturn(final ICloudApplicationArchiver legacyArchiver) {
+	public static CloudApplicationArchiverStrategy justReturn(final ICloudApplicationArchiver archiver) {
 		return new CloudApplicationArchiverStrategy() {
 			@Override
-			public ICloudApplicationArchiver getArchiver() {
-				return legacyArchiver;
+			public ICloudApplicationArchiver getArchiver(IProgressMonitor mon) {
+				return archiver;
 			}
 		};
+	}
+
+	public static CloudApplicationArchiverStrategy fromManifest(IProject project, String appName, ApplicationManifestHandler parser) {
+		return new CloudApplicationArchiverStrategyFromManifest(project, appName, parser);
+	}
+
+	public static CloudApplicationArchiverStrategy packageAsJar(IProject project, UserInteractions ui) {
+		return new CloudApplicationArchiverStrategyAsJar(project, ui);
 	}
 
 }
