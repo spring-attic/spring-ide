@@ -10,67 +10,80 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.process;
 
-import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.IProcessFactory;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.RuntimeProcess;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 
 public class BootProcessFactory implements IProcessFactory {
 
-	/**
-	 * Method only available on Java 8.
-	 */
-	public static Method destroyForcibly;
-	static {
-		try {
-			destroyForcibly = Process.class.getMethod("destroyForcibly");
-		} catch (Exception e) {
-			destroyForcibly = null;
-		}
-	}
-
 	@Override
-	public IProcess newProcess(ILaunch launch, Process process, String label,
-			Map<String, String> attributes) {
+	public IProcess newProcess(ILaunch launch, final Process process, String label, Map<String, String> attributes) {
 
-		if (destroyForcibly!=null) {
+		final int jmxPort = getJMXPort(launch);
+		final long timeout = getNiceTerminationTimeout(launch);
+		if (jmxPort>0) {
 			return new RuntimeProcess(launch, process, label, attributes) {
+
+				SpringApplicationLifeCycleClientManager client = new SpringApplicationLifeCycleClientManager(jmxPort);
+
 				@Override
 				public void terminate() throws DebugException {
-					Process sysproc = getSystemProcess();
-					if (sysproc!=null) {
-						//Superclass 'terminate' method is unreliable so...
-						try {
-							super.terminate();
-						} catch (DebugException de) {
-							try {
-								//Failed so be more aggressive
-								destroyForcibly.invoke(sysproc);
-								boolean done = false;
-								while (!done) {
-									try {
-										sysproc.waitFor();
-										done = true;
-									} catch (InterruptedException ie) {
-										//ignore
-									}
-								}
-							} catch (Exception e) {
-								//Something unexpected went wrong trying to call 'sysproc.destroyForcibly' or 'sysproc.waitFor'
-								throw de;
-							}
-						}
+					if (!terminateNicely()) {
+						//Let eclipse try it more aggressively.
+						super.terminate();
 					}
+				}
+
+				private boolean terminateNicely() {
+					if (isTerminated()) {
+						return true;
+					}
+					try {
+						client.getLifeCycleClient().stop();
+						//Wait for a bit, but not forever until process dies.
+						RetryUtil.retry(100, timeout, new Callable<Void>() {
+							public Void call() throws Exception {
+								process.exitValue(); //throws if process not ready
+								return null;
+							}
+						});
+						return true;
+					} catch (Exception e) {
+						BootActivator.log(e);
+					}
+					return false;
 				}
 			};
 		} else {
-			//Not Java 8 so can't use the destroyForcibly to force process termination,
+			//Use eclipse 'regular' runtime process
 			return new RuntimeProcess(launch, process, label, attributes);
 		}
+	}
+
+	private long getNiceTerminationTimeout(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		if (conf!=null) {
+			return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(conf);
+		}
+		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+	}
+
+	private int getJMXPort(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		if (conf!=null && BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
+			return BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
+		}
+		return -1;
 	}
 
 }

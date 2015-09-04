@@ -55,6 +55,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 		private Button lifeCycleCheckbox;
 		private Text portWidget;
 		private EnableJmxFeaturesModel model;
+		private Text terminationTimeoutWidget;
 
 		public UI(IPageWithSections owner, EnableJmxFeaturesModel model) {
 			super(owner);
@@ -74,15 +75,21 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 			Label label = new Label(row, SWT.NONE);
 			label.setText("JMX Port:");
 			portWidget = new Text(row, SWT.BORDER);
-			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 6), SWT.DEFAULT)
+			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 7), SWT.DEFAULT)
 				.applyTo(portWidget);
 
 			lifeCycleCheckbox = new Button(row, SWT.CHECK);
-			lifeCycleCheckbox.setText("Enable Life Cycle Tracking.");
+			lifeCycleCheckbox.setText("Enable Life Cycle Management.");
 			lifeCycleCheckbox.setToolTipText(computeTooltipText(
-					"Allows Boot Dashboard View to track 'STARTING' state of Boot Apps (require Boot 1.3.0). " +
+					"Requires Boot 1.3.0. Allows Boot Dashboard View to track 'STARTING' state of Boot Apps; allows STS to ask Boot Apps to shutdown nicely. " +
 					"Adds these vm args: \n",
 					Feature.LIFE_CYCLE));
+			label = new Label(row, SWT.NONE);
+			label.setText("Termination timeout (ms):");
+			terminationTimeoutWidget = new Text(row, SWT.BORDER);
+			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(terminationTimeoutWidget, 7), SWT.DEFAULT)
+				.applyTo(terminationTimeoutWidget);
+			terminationTimeoutWidget.setToolTipText("How long STS should wait, after asking Boot App nicely to stop, before attemptting to kill a the process more forcibly.");
 
 			model.anyFeatureEnabled.addListener(new ValueListener<Boolean>() {
 				public void gotValue(LiveExpression<Boolean> exp, Boolean enable) {
@@ -90,25 +97,36 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 					portWidget.setEnabled(enable);
 				}
 			});
+			model.lifeCycleEnabled.addListener(new ValueListener<Boolean>() {
+				@Override
+				public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+					terminationTimeoutWidget.setEnabled(value);
+				}
+			});
 
 			connectCheckbox(model.liveBeanEnabled, liveBeanCheckbox);
 			connectCheckbox(model.lifeCycleEnabled, lifeCycleCheckbox);
 
-			model.port.addListener(new ValueListener<String>() {
+			connextTextWidget(model.port, portWidget);
+			connextTextWidget(model.terminationTimeout, terminationTimeoutWidget);
+		}
+
+
+		private static void connextTextWidget(final LiveVariable<String> model, final Text widget) {
+			model.addListener(new ValueListener<String>() {
 				public void gotValue(LiveExpression<String> exp, String value) {
-					String oldValue = portWidget.getText();
+					String oldValue = widget.getText();
 					if (!oldValue.equals(value)) {
-						portWidget.setText(value);
+						widget.setText(value);
 					}
 				}
 			});
-			portWidget.addModifyListener(new ModifyListener() {
+			widget.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
-					model.port.setValue(portWidget.getText());
+					model.setValue(widget.getText());
 				}
 			});
 		}
-
 
 		private String computeTooltipText(String baseMsg, Feature feature) {
 			return baseMsg +

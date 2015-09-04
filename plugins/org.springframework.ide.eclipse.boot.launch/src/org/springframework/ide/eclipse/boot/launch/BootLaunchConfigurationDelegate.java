@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
 /**
@@ -59,6 +60,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final boolean DEFAULT_ENABLE_LIFE_CYCLE = true;
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
+	private static final String TERMINATION_TIMEOUT = "spring.boot.lifecycle.termination.timeout";
+	public static final long DEFAULT_TERMINATION_TIMEOUT = 15000; // 15 seconds
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
@@ -183,11 +186,38 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
+		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
 		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
 		}
 	}
+
+	public static void setTerminationTimeout(ILaunchConfigurationWorkingCopy wc, String value) {
+		wc.setAttribute(TERMINATION_TIMEOUT, ""+value);
+	}
+
+	public static String getTerminationTimeout(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(TERMINATION_TIMEOUT, ""+DEFAULT_TERMINATION_TIMEOUT);
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return ""+DEFAULT_TERMINATION_TIMEOUT;
+		}
+	}
+
+	public static long getTerminationTimeoutAsLong(ILaunchConfiguration conf) {
+		String v = getTerminationTimeout(conf);
+		if (StringUtil.hasText(v)) {
+			try {
+				return Long.parseLong(v);
+			} catch (Exception e) {
+				BootActivator.log(e);
+			}
+		}
+		return DEFAULT_TERMINATION_TIMEOUT;
+	}
+
 
 	private static void setVMArgs(ILaunchConfigurationWorkingCopy wc, String vmArgs) {
 		wc.setAttribute(ATTR_VM_ARGUMENTS, vmArgs);
@@ -295,4 +325,5 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		return -1;
 	}
+
 }

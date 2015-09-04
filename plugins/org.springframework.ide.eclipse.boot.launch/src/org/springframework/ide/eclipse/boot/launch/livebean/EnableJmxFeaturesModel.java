@@ -35,16 +35,21 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 	private static final int MAX_PORT = 65536;
 
+
 	public final String portFieldName = "JMX Port";
+	public final String timeOutFieldName = "Termination timeout";
 
 	public final LiveVariable<Boolean> liveBeanEnabled;
 	public final LiveVariable<Boolean> lifeCycleEnabled;
 	public final LiveExpression<Boolean> anyFeatureEnabled;
 
 	public final LiveVariable<String> port;
+	public final LiveVariable<String> terminationTimeout;
+
 	private final Validator validator;
 
 	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
+
 
 	@SuppressWarnings("unchecked")
 	public EnableJmxFeaturesModel() {
@@ -53,14 +58,17 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 		this.anyFeatureEnabled = new OrExpression(liveBeanEnabled, lifeCycleEnabled);
 
 		this.port = new LiveVariable<String>("");
+		this.terminationTimeout = new LiveVariable<String>("");
 		liveBeanEnabled.addListener(makeDirty());
 		lifeCycleEnabled.addListener(makeDirty());
 		port.addListener(makeDirty());
+		terminationTimeout.addListener(makeDirty());
 
 		this.validator = new Validator() {
 			{
 				dependsOn(anyFeatureEnabled);
 				dependsOn(port);
+				dependsOn(terminationTimeout);
 			}
 
 			@Override
@@ -80,6 +88,20 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 						}
 					} catch (NumberFormatException e) {
 						return error(portFieldName+" can't be parsed as an Integer");
+					}
+				}
+				if (lifeCycleEnabled.getValue()) {
+					String timeoutStr = terminationTimeout.getValue();
+					if (!hasText(timeoutStr)) {
+						return error(timeOutFieldName+" must be specified");
+					}
+					try {
+						long timeout = Long.parseLong(timeoutStr);
+						if (!(timeout > 0)) {
+							return error(timeOutFieldName+" must be positive");
+						}
+					} catch (NumberFormatException e) {
+						return error(timeOutFieldName+" can't be parsed as an Integer");
 					}
 				}
 				return ValidationResult.OK;
@@ -106,6 +128,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 		liveBeanEnabled.setValue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(conf));
 		lifeCycleEnabled.setValue(BootLaunchConfigurationDelegate.getEnableLifeCycle(conf));
 		port.setValue(BootLaunchConfigurationDelegate.getJMXPort(conf));
+		terminationTimeout.setValue(""+BootLaunchConfigurationDelegate.getTerminationTimeout(conf));
 		getDirtyState().setValue(false);
 	}
 
@@ -114,6 +137,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 		setEnableLiveBeanSupport(conf, liveBeanEnabled.getValue());
 		setEnableLifeCycle(conf, lifeCycleEnabled.getValue());
 		setJMXPort(conf, StringUtil.trim(port.getValue()));
+		setTerminationTimeout(conf, StringUtil.trim(terminationTimeout.getValue()));
 		getDirtyState().setValue(false);
 	}
 
@@ -122,6 +146,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 		setEnableLiveBeanSupport(conf, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(conf, DEFAULT_ENABLE_LIFE_CYCLE);
 		setJMXPort(conf, ""+JmxBeanSupport.randomPort());
+		setTerminationTimeout(conf, ""+DEFAULT_TERMINATION_TIMEOUT);
 	}
 
 	@Override
