@@ -19,8 +19,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -28,6 +31,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationDeploymentPropertiesWizard;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
@@ -234,6 +238,29 @@ public class DefaultUserInteractions implements UserInteractions {
 			throw new OperationCanceledException();
 		}
 		return props[0];
+	}
 
+	@Override
+	public boolean confirmWithToggle(final String propertyKey, final String title, final String message, final String toggleMessage) {
+		final IPreferenceStore store = getPreferencesStore();
+		boolean toggleState = store.getBoolean(propertyKey);
+		if (toggleState) {
+			return true;
+		}
+		final boolean[] dialog = new boolean[2];
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialogWithToggle result = MessageDialogWithToggle.openOkCancelConfirm(getShell(), title , message, toggleMessage, false, null, null);
+				dialog[0] = result.getReturnCode()==IDialogConstants.OK_ID;
+				dialog[1] = result.getToggleState();
+			}
+		});
+		store.setValue(propertyKey, dialog[0] && dialog[1]);
+		return dialog[0];
+	}
+
+	protected IPreferenceStore getPreferencesStore() {
+		return BootDashActivator.getDefault().getPreferenceStore();
 	}
 }

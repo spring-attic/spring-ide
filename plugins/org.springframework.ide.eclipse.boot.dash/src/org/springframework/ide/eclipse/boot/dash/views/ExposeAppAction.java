@@ -70,44 +70,50 @@ public class ExposeAppAction extends RunStateAction {
 	protected Job createJob() {
 		final Collection<BootDashElement> selecteds = getSelectedElements();
 		if (!selecteds.isEmpty()) {
-			String ngrokInstall = this.ngrokManager.getDefaultInstall();
-			if (ngrokInstall == null) {
-				ngrokInstall = ui.chooseFile("ngrok installation", null);
-				if (ngrokInstall != null) {
-					this.ngrokManager.addInstall(ngrokInstall);
-					this.ngrokManager.setDefaultInstall(ngrokInstall);
-					this.ngrokManager.save();
+			boolean riskAccepted = ui.confirmWithToggle("ngrok.tunnel.warning.state", "Really Expose local service on public internet?",
+					"The ngrok tunnel uses a third-party server to pass all data between your local app and its clients over a public internet connection.\n\n" +
+					"Do you really want to do this?",
+					null);
+			if (riskAccepted) {
+				String ngrokInstall = this.ngrokManager.getDefaultInstall();
+				if (ngrokInstall == null) {
+					ngrokInstall = ui.chooseFile("ngrok installation", null);
+					if (ngrokInstall != null) {
+						this.ngrokManager.addInstall(ngrokInstall);
+						this.ngrokManager.setDefaultInstall(ngrokInstall);
+						this.ngrokManager.save();
+					}
 				}
-			}
 
-			if (ngrokInstall != null) {
-				final NGROKClient ngrokClient = new NGROKClient(ngrokInstall);
+				if (ngrokInstall != null) {
+					final NGROKClient ngrokClient = new NGROKClient(ngrokInstall);
 
-				final String eurekaInstance = getEurekaInstance();
-				if (eurekaInstance != null) {
-					return new Job("Restarting and Exposing " + selecteds.size() + " Dash Elements") {
-						@Override
-						public IStatus run(IProgressMonitor monitor) {
-							monitor.beginTask("Restart and Expose Boot Dash Elements", selecteds.size());
-							try {
-								for (BootDashElement el : selecteds) {
-									if (el instanceof BootProjectDashElement) {
-										monitor.subTask("Restarting: " + el.getName());
-										try {
-											BootProjectDashElement localDashProject = (BootProjectDashElement) el;
-											localDashProject.restartAndExpose(ExposeAppAction.this.goalState, ngrokClient, eurekaInstance, ui);
-										} catch (Exception e) {
-											return BootActivator.createErrorStatus(e);
+					final String eurekaInstance = getEurekaInstance();
+					if (eurekaInstance != null) {
+						return new Job("Restarting and Exposing " + selecteds.size() + " Dash Elements") {
+							@Override
+							public IStatus run(IProgressMonitor monitor) {
+								monitor.beginTask("Restart and Expose Boot Dash Elements", selecteds.size());
+								try {
+									for (BootDashElement el : selecteds) {
+										if (el instanceof BootProjectDashElement) {
+											monitor.subTask("Restarting: " + el.getName());
+											try {
+												BootProjectDashElement localDashProject = (BootProjectDashElement) el;
+												localDashProject.restartAndExpose(ExposeAppAction.this.goalState, ngrokClient, eurekaInstance, ui);
+											} catch (Exception e) {
+												return BootActivator.createErrorStatus(e);
+											}
 										}
+										monitor.worked(1);
 									}
-									monitor.worked(1);
+									return Status.OK_STATUS;
+								} finally {
+									monitor.done();
 								}
-								return Status.OK_STATUS;
-							} finally {
-								monitor.done();
 							}
-						}
-					};
+						};
+					}
 				}
 			}
 		}

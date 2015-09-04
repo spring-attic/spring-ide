@@ -63,4 +63,14 @@ public interface UserInteractions {
 	 * @return
 	 */
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
+
+	/**
+	 * Ask the user to confirm or cancel an operation, with a toggle option.
+	 *
+	 *  @param propertyKey a preference name that will be used to remember the state of the 'toggle' option.
+	 *  @param title Title for the dialog
+	 *  @param message Detailed message
+	 *  @param toggleMessage Message for the 'togle switch'.
+	 */
+	boolean confirmWithToggle(String propertyKey, String title, String message, String toggleMessage);
 }
