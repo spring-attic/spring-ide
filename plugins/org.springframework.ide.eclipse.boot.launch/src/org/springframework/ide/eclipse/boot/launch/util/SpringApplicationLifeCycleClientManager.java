@@ -8,12 +8,12 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.util;
+package org.springframework.ide.eclipse.boot.launch.util;
 
 import javax.management.remote.JMXConnector;
 
 /**
- * Creates and manages an instance SpringApplicationLifeCycleClientManager.
+ * Creates and manages an instance of {@link SpringApplicationLifecycleClient}.
  *
  * @author Kris De Volder
  */
@@ -63,11 +63,6 @@ public class SpringApplicationLifeCycleClientManager {
 			disposeClient();
 		}
 		return null;
-	}
-
-	public int getPort() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 }
