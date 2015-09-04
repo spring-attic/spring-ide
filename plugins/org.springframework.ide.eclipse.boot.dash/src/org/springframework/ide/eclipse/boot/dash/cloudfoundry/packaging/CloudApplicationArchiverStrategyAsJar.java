@@ -44,6 +44,13 @@ import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFin
 public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationArchiverStrategy {
 
 	private static final String TEMP_FOLDER_NAME = "springidetempFolderForJavaAppJar";
+	private static final boolean DEBUG = false;
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 	/**
 	 * Classpath entries spilt into two lists, one that correspond to the current project's output folders
@@ -195,10 +202,6 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 			} else {
 				debug("Huh?");
 			}
-		}
-
-		private void debug(String string) {
-			System.out.println(string);
 		}
 
 		private String pathJoin(String relativePath, String name) {
