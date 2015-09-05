@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.process;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -22,19 +23,28 @@ import org.eclipse.debug.core.model.RuntimeProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
+import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 
 public class BootProcessFactory implements IProcessFactory {
 
+	private static final boolean DEBUG = false;
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 	@Override
-	public IProcess newProcess(ILaunch launch, final Process process, String label, Map<String, String> attributes) {
+	public IProcess newProcess(ILaunch launch, final Process process, final String label, Map<String, String> attributes) {
 
 		final int jmxPort = getJMXPort(launch);
 		final long timeout = getNiceTerminationTimeout(launch);
 		if (jmxPort>0) {
 			return new RuntimeProcess(launch, process, label, attributes) {
 
-				SpringApplicationLifeCycleClientManager client = new SpringApplicationLifeCycleClientManager(jmxPort);
+				SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(jmxPort);
 
 				@Override
 				public void terminate() throws DebugException {
@@ -49,20 +59,38 @@ public class BootProcessFactory implements IProcessFactory {
 						return true;
 					}
 					try {
-						client.getLifeCycleClient().stop();
+						debug("Trying to terminate nicely: "+label);
+						SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
+						if (client!=null) {
+							debug("Asking JMX client to 'stop'");
+							client.stop();
+							debug("Asking JMX client to 'stop' -> SUCCESS");
+						} else {
+							//This case happens if process is already being terminated in another way.
+							// This happens for debug processes where debug target kills vm before
+							// asking process to terminate.
+							debug("PROBLEM? Couldn't get JMX client");
+							throw new IOException("Couldn't get JMX client.");
+						}
 						//Wait for a bit, but not forever until process dies.
 						RetryUtil.retry(100, timeout, new Callable<Void>() {
 							public Void call() throws Exception {
+								debug("process exited?");
 								process.exitValue(); //throws if process not ready
+								debug("process exited? -> YES");
 								return null;
 							}
 						});
+						debug("SUCCESS terminate nicely: "+label);
 						return true;
 					} catch (Exception e) {
 						BootActivator.log(e);
+					} finally {
+						clientMgr.disposeClient();
 					}
 					return false;
 				}
+
 			};
 		} else {
 			//Use eclipse 'regular' runtime process

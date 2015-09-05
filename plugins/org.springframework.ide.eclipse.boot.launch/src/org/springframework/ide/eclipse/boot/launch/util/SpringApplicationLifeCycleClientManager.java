@@ -58,6 +58,7 @@ public class SpringApplicationLifeCycleClientManager {
 			}
 			return client;
 		} catch (Exception e) {
+			//e.printStackTrace();
 			//Someting went wrong creating client (most likely process we are trying to connect
 			// doesn't exist yet or has been terminated.
 			disposeClient();
