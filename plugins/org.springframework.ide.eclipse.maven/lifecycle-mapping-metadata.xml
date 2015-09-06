@@ -18,24 +18,7 @@
 				</configurator>
 			</action>
 		</pluginExecution>
-		
-		<pluginExecution>
-			<pluginExecutionFilter>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<versionRange>[2.0,)</versionRange>
-				<goals>
-					<goal>compile</goal>
-					<goal>testCompile</goal>
-				</goals>
-			</pluginExecutionFilter>
-			<action>
-				<configurator>
-					<id>org.springframework.ide.eclipse.maven.internal.core.JREProjectConfigurator</id>
-				</configurator>
-			</action>
-		</pluginExecution>
-		
+
 		<pluginExecution>
 			<pluginExecutionFilter>
 				<groupId>org.datanucleus</groupId>
