@@ -61,7 +61,7 @@ public class FullApplicationRestartOperation extends CloudApplicationOperation {
 		ops.add(new ApplicationPropertiesUpdateOperation(properties, model));
 		ops.add(new ApplicationStartOperation(properties.getAppName(), model));
 
-		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(getName(), model, appName,
+		CloudApplicationOperation op = new CompositeApplicationOperation(getName(), model, appName,
 				ops, true);
 		op.addApplicationUpdateListener(new FullAppDeploymentListener(appName, model));
 		op.run(monitor);

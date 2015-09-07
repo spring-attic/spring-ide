@@ -18,7 +18,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationWithModelUpdate;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartWithRemoteClientOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -64,7 +64,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(
+		CloudApplicationOperation op = new CompositeApplicationOperation(
 				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()), false);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
@@ -93,7 +93,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 			restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
-			op = new ApplicationOperationWithModelUpdate(restartOp, true);
+			op = new CompositeApplicationOperation(restartOp, true);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -106,7 +106,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 		restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
 
-		cloudModel.getOperationsExecution(ui).runOpAsynch(new ApplicationOperationWithModelUpdate(restartOp, true));
+		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(restartOp, true));
 	}
 
 	@Override

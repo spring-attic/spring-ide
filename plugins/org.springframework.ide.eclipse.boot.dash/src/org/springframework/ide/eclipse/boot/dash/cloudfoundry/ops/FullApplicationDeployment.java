@@ -110,7 +110,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		deploymentOperations.add(uploadOp);
 		deploymentOperations.add(restartOp);
 
-		CloudApplicationOperation op = new ApplicationOperationWithModelUpdate(getName(), model, appName,
+		CloudApplicationOperation op = new CompositeApplicationOperation(getName(), model, appName,
 				deploymentOperations, true);
 		op.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 

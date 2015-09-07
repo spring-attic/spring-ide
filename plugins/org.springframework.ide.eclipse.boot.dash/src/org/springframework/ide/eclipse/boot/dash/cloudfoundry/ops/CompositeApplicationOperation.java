@@ -13,33 +13,29 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
 /**
- * Runs {@link CloudApplicationOperation} in series and updates the model only
- * after all operations are complete.
- *
- * <p/>
- * The ops themselves may individually update the model if they chose too, but
- * at the very least, the model is updated after all of the ops are run or if
- * there is any error while performing the ops in series
+ * Runs {@link CloudApplicationOperation} in series
  */
-public class ApplicationOperationWithModelUpdate extends CloudApplicationOperation {
+public class CompositeApplicationOperation extends CloudApplicationOperation {
 
 	private List<CloudApplicationOperation> operations;
 
 	private boolean resetConsole;
 
-	public ApplicationOperationWithModelUpdate(String opName, CloudFoundryBootDashModel model, String appName,
+	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
 			List<CloudApplicationOperation> operations, boolean resetConsole) {
 		super(opName, model, appName);
 		this.operations = operations;
 		this.resetConsole = resetConsole;
 	}
 
-	public ApplicationOperationWithModelUpdate(CloudApplicationOperation enclosedOp, boolean resetConsole) {
+	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp, boolean resetConsole) {
 		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName);
 
 		this.operations = new ArrayList<CloudApplicationOperation>();
@@ -65,9 +61,11 @@ public class ApplicationOperationWithModelUpdate extends CloudApplicationOperati
 			for (CloudApplicationOperation op : operations) {
 				op.run(monitor);
 			}
-		} catch (Exception e) {
-			getAppUpdateListener().onError(e);
-			throw e;
+		} catch (Throwable t) {
+			if (!(t instanceof OperationCanceledException)) {
+				getAppUpdateListener().onError(t);
+			}
+			throw t instanceof Exception ? (Exception) t : new CoreException(BootDashActivator.createErrorStatus(t));
 		}
 	}
 }

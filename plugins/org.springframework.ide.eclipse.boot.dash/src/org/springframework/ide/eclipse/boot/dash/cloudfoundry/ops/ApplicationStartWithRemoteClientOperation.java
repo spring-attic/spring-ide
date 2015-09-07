@@ -69,7 +69,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 
 		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
 
-		new ApplicationOperationWithModelUpdate(getName(), model, appName, ops, true).run(monitor);
+		new CompositeApplicationOperation(getName(), model, appName, ops, true).run(monitor);
 	}
 
 }
