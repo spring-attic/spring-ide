@@ -48,8 +48,6 @@ public class UpdatePasswordDialog extends MessageDialog {
 
 	private String password;
 
-	private String verifyPassword;
-
 	private String targetId;
 
 	private Label description;
@@ -77,8 +75,8 @@ public class UpdatePasswordDialog extends MessageDialog {
 		// Set a minimum width such that the wrapped text does not enlarge the
 		// dialogue with extra space
 		GridDataFactory.fillDefaults().hint(400, SWT.DEFAULT).applyTo(description);
-		description.setText("Update password in " + targetId
-				+ ". The password must match your existing target credentials. This only updates the password locally.");
+		description.setText("The password must match your existing target credentials in " + targetId
+				+ ". This only updates the password locally.");
 
 		Composite composite = new Composite(area, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
@@ -98,35 +96,14 @@ public class UpdatePasswordDialog extends MessageDialog {
 			}
 		});
 
-		Label verifyPasswordLabel = new Label(composite, SWT.NONE);
-		verifyPasswordLabel.setText("Verify Password:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(verifyPasswordLabel);
-
-		final Text verifyPasswordText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(verifyPasswordText);
-		verifyPasswordText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				verifyPassword = verifyPasswordText.getText();
-				update();
-			}
-		});
-
 		return area;
 	}
 
 	private void update() {
-		getButton(OK).setEnabled(
-				password != null && password.length() > 0 && verifyPassword != null && verifyPassword.length() > 0);
+		getButton(OK).setEnabled(password != null && password.length() > 0);
 
 		if (password == null || password.length() == 0) {
 			description.setText("Please enter a password.");
-			getButton(OK).setEnabled(false);
-		} else if (verifyPassword == null || verifyPassword.length() == 0) {
-			description.setText("Please enter the password again to verify.");
-			getButton(OK).setEnabled(false);
-		} else if (!password.equals(verifyPassword)) {
-			description.setText("Passwords do not match. Please make sure they are the same.");
 			getButton(OK).setEnabled(false);
 		} else {
 			description.setText("Please press 'OK' to update the password.");
