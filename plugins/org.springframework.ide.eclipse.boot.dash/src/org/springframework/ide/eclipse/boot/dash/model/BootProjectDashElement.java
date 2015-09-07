@@ -454,12 +454,16 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			throw new IllegalArgumentException("Restart and expose expects RUNNING or DEBUGGING as 'goal' state");
 		}
 
+		int port = getLivePort();
 		stopSync();
 
-		int freePort = SocketUtil.findFreePort();
+		if (port <= 0) {
+			port = SocketUtil.findFreePort();
+		}
+
 		String tunnelName = getName();
 
-		NGROKTunnel tunnel = ngrokClient.startTunnel("http", Integer.toString(freePort));
+		NGROKTunnel tunnel = ngrokClient.startTunnel("http", Integer.toString(port));
 		NGROKLaunchTracker.add(tunnelName, ngrokClient, tunnel);
 
 		if (tunnel == null) {
@@ -474,7 +478,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		}
 
 		Map<String, String> extraAttributes = new HashMap<String, String>();
-		extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(freePort));
+		extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(port));
 		extraAttributes.put("spring.boot.prop.eureka.instance.hostname", "1" + tunnelURL);
 		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
 		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
