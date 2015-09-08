@@ -18,12 +18,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -36,11 +39,12 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
 	private static final String M2E_CLASSPATH_PROVIDER = "org.eclipse.m2e.launchconfig.classpathProvider";
-	private static final String M2E_SOURCEPATH_PROVIDER = "org.eclipse.m2e.launchconfig.sourcepathProvider";
+	protected static final String M2E_SOURCEPATH_PROVIDER = "org.eclipse.m2e.launchconfig.sourcepathProvider";
 	public static final String JAVA_LAUNCH_CONFIG_TYPE_ID = IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
 	public static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
 	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
 
+	private static final String BOOT_MAVEN_SOURCE_PATH_PROVIDER = "org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider";
 
 	/**
 	 * Spring boot properties are stored as launch confiuration properties with
@@ -290,7 +294,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	 * Enable maven classpath provider if applicable to this conf.
 	 * Addresses https://issuetracker.springsource.com/browse/STS-4085
 	 */
-	private static void enableMavenClasspathProvider(ILaunchConfigurationWorkingCopy conf) {
+	static void enableMavenClasspathProvider(ILaunchConfigurationWorkingCopy conf) {
 		try {
 			if (conf.getType().getIdentifier().equals(JAVA_LAUNCH_CONFIG_TYPE_ID)) {
 				//Take care not to add this a 'real' Boot launch config or it will cause m2e to throw exceptions
@@ -330,7 +334,28 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		return DebugPlugin.getDefault().getLaunchManager();
 	}
 
+	@Override
+	public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor monitor)
+			throws CoreException {
+		IProject project = BootLaunchConfigurationDelegate.getProject(conf);
+		if (project.hasNature(SpringBootCore.M2E_NATURE)) {
+			conf = setAttribute(conf, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
+		}
+		super.launch(conf, mode, launch, monitor);
+	}
 
+	private ILaunchConfiguration setAttribute(ILaunchConfiguration conf, String a, String v) {
+		try {
+			if (!Objects.equals(v, conf.getAttribute(a, (String)null))) {
+				ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+				wc.setAttribute(a, v);
+				conf = wc.doSave();
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return conf;
+	}
 
 
 }

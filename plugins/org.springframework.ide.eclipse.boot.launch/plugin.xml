@@ -163,6 +163,13 @@
         id="org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationTabGroup">
     </launchConfigurationTabGroup>
 </extension>
+
+   <extension point="org.eclipse.jdt.launching.classpathProviders">
+      <classpathProvider 
+          id="org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider"
+          class="org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider"/>
+   </extension>
+
  
 <!-- TODO: ui for editing Spring Groovy CLI launch configs
  <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
