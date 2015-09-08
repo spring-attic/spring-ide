@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ResolveableFuture;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -214,7 +215,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 				});
 			}
 			try {
-				LaunchUtils.terminate(launches);
+				BootLaunchUtils.terminate(launches);
 				shutdownExpose();
 			} catch (Exception e) {
 				//why does terminating process with Eclipse debug UI fail so #$%# often?
