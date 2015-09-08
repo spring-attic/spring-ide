@@ -99,7 +99,7 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 	}
 
 	private ILaunchConfigurationWorkingCopy createWorkingCopy() throws CoreException {
-		return createWorkingCopy(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID);
+		return createWorkingCopy(BootLaunchConfigurationDelegate.TYPE_ID);
 	}
 
 	public void testProjectInitializeFrom() throws Exception {

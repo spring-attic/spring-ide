@@ -82,7 +82,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 
 	private ILaunchConfigurationWorkingCopy createWorkingCopy() throws CoreException {
-		return createWorkingCopy(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID);
+		return createWorkingCopy(BootLaunchConfigurationDelegate.TYPE_ID);
 	}
 
 	private void doGetAndSetProps(ILaunchConfigurationWorkingCopy wc, PropVal... props) {

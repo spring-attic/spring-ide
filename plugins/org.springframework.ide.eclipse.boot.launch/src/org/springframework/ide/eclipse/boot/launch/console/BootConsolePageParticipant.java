@@ -17,7 +17,7 @@
  *  Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  ***********************************************************************************/
-package org.springframework.ide.eclipse.boot.launch.devtools;
+package org.springframework.ide.eclipse.boot.launch.console;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -34,6 +34,9 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
@@ -42,15 +45,15 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class DevtoolsClientConsolePageParticipant implements IConsolePageParticipant {
+public class BootConsolePageParticipant implements IConsolePageParticipant {
 
-	private class TerminateClientAction extends Action {
+	private class TerminateProcessAction extends Action {
 		@Override
 		public void run() {
 			try {
 				IProcess process = console.getProcess();
-				if (process!=null && process.canTerminate() && isDevtoolsClient(process)) {
-					process.getLaunch().terminate();;
+				if (process!=null && process.canTerminate()) {
+					BootLaunchUtils.terminate(process.getLaunch());
 				}
 			} catch (Exception e) {
 				BootActivator.log(e);
@@ -60,7 +63,7 @@ public class DevtoolsClientConsolePageParticipant implements IConsolePagePartici
 
 	private ProcessConsole console;
 	private ProcessTracker processTracker;
-	private TerminateClientAction terminateAction;
+	private TerminateProcessAction terminateAction;
 
 	public void activated() {
 		// ignore
@@ -88,8 +91,8 @@ public class DevtoolsClientConsolePageParticipant implements IConsolePagePartici
 		//  ProcessConsolePageParticipant (which creates the action we are replacing
 		//When testing this that was always the case... but it may not be guaranteed.
 
-		if (isInteresting(this.console)) {
-			terminateAction = new TerminateClientAction();
+		if (isDevtoolsClient(this.console) || isBootApp(this.console)) {
+			terminateAction = new TerminateProcessAction();
 			try {
 				terminateAction.setImageDescriptor(BootUIImages.descriptor("icons/stop.gif"));
 				terminateAction.setDisabledImageDescriptor(BootUIImages.descriptor("icons/stop_disabled.gif"));
@@ -119,6 +122,10 @@ public class DevtoolsClientConsolePageParticipant implements IConsolePagePartici
 		}
 	}
 
+	private boolean isDevtoolsClient(ProcessConsole console) {
+		return isLaunchType(console, BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
+	}
+
 	private IProcess getConsoleProcess() {
 		if (console!=null) {
 			return console.getProcess();
@@ -126,9 +133,8 @@ public class DevtoolsClientConsolePageParticipant implements IConsolePagePartici
 		return null;
 	}
 
-	private boolean isInteresting(ProcessConsole console) {
-		IProcess process = console.getProcess();
-		return isDevtoolsClient(process);
+	private boolean isBootApp(ProcessConsole console) {
+		return isLaunchType(console, BootLaunchConfigurationDelegate.TYPE_ID);
 	}
 
 	private IContributionItem findReplacementItem(IToolBarManager toolbar) {
@@ -145,14 +151,18 @@ public class DevtoolsClientConsolePageParticipant implements IConsolePagePartici
 		return null;
 	}
 
-	private static boolean isDevtoolsClient(IProcess process) {
+	private static boolean isLaunchType(ProcessConsole console, String typeId) {
+		return isLaunchType(console.getProcess(), typeId);
+	}
+
+	private static boolean isLaunchType(IProcess process, String launchTypeId) {
 		try {
 			if (process!=null) {
 				ILaunch launch = process.getLaunch();
 				if (launch!=null) {
 					ILaunchConfiguration conf = launch.getLaunchConfiguration();
 					if (conf!=null) {
-						return BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID.equals(conf.getType().getIdentifier());
+						return launchTypeId.equals(conf.getType().getIdentifier());
 					}
 				}
 			}

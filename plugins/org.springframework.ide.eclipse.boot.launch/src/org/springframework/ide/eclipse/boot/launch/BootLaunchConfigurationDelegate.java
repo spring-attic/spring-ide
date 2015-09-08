@@ -46,7 +46,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	//private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	public static final String LAUNCH_CONFIG_TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
+	public static final String TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
 
 	public static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
@@ -169,7 +169,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	 * associated with a given project.
 	 */
 	public static List<ILaunchConfiguration> getLaunchConfigs(IProject p) {
-		return getLaunchConfigs(p, LAUNCH_CONFIG_TYPE_ID);
+		return getLaunchConfigs(p, TYPE_ID);
 	}
 
 	/**
@@ -282,7 +282,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	}
 
 	public static ILaunchConfigurationType getConfType() {
-		return getLaunchMan().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE_ID);
+		return getLaunchMan().getLaunchConfigurationType(TYPE_ID);
 	}
 
 	public static ILaunchConfiguration createConf(IType type) throws CoreException {

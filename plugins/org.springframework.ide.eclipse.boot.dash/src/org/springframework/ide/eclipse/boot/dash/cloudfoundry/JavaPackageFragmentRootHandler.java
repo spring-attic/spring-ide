@@ -75,7 +75,7 @@ public class JavaPackageFragmentRootHandler {
 					JavaLaunchDelegate javaDelegate = null;
 
 					for (ILaunchDelegate del : delegates) {
-						if (BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID.equals(del.getId())
+						if (BootLaunchConfigurationDelegate.TYPE_ID.equals(del.getId())
 								&& del.getDelegate() instanceof JavaLaunchDelegate) {
 
 							javaDelegate = (JavaLaunchDelegate) del.getDelegate();

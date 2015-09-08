@@ -44,7 +44,7 @@ public class BootLaunchShortcut extends JavaApplicationLaunchShortcut {
 	/**
 	 * Launch configuration id of the configs created by this shortcut.
 	 */
-	public static final String LAUNCH_CONFIG_TYPE_ID = BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID;
+	public static final String LAUNCH_CONFIG_TYPE_ID = BootLaunchConfigurationDelegate.TYPE_ID;
 
 	@Override
 	public IType[] findTypes(Object[] elements, IRunnableContext context)

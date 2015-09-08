@@ -41,10 +41,10 @@ public class BootLaunchUtils {
 	 * when this method returns.
 	 */
 	public static void terminate(ILaunch l) {
+		ILaunchConfiguration conf = l.getLaunchConfiguration();
 		try {
-			ILaunchConfiguration conf = l.getLaunchConfiguration();
 			if (conf!=null
-					&& conf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID)
+					&& conf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID)
 					&& BootLaunchConfigurationDelegate.canUseLifeCycle(conf)
 			) {
 				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
@@ -53,13 +53,14 @@ public class BootLaunchUtils {
 				try {
 					if (client!=null) {
 						client.stop();
+						return;
 					}
 				} finally {
 					clientMgr.disposeClient();
 				}
+				l.terminate();
 			}
 			//Fallback to default implementation
-			l.terminate();
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}

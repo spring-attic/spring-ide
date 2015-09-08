@@ -66,7 +66,7 @@ public class JmxBeanSupport {
 	}
 
 	public static final String JMX_PORT_PROP = "com.sun.management.jmxremote.port";
-	public static final String LAUNCH_CONFIG_TYPE_ID = BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID;
+	public static final String LAUNCH_CONFIG_TYPE_ID = BootLaunchConfigurationDelegate.TYPE_ID;
 	public static int randomPort() {
 		return (int) (5000 + Math.random()*60000);
 	}

@@ -103,7 +103,7 @@ public class ProjectRunStateTracker extends ProcessListenerAdapter {
 			ILaunchConfiguration conf = l.getLaunchConfiguration();
 			if (conf!=null) {
 					String type = conf.getType().getIdentifier();
-				return BootLaunchConfigurationDelegate.LAUNCH_CONFIG_TYPE_ID.equals(type);
+				return BootLaunchConfigurationDelegate.TYPE_ID.equals(type);
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
