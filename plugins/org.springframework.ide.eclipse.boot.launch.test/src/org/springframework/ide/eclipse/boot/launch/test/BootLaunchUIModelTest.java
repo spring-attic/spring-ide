@@ -380,10 +380,12 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		LiveVariable<Boolean> liveBean = eJmxModel.liveBeanEnabled;
 		LiveVariable<Boolean> lifeCycle = eJmxModel.lifeCycleEnabled;
 		LiveVariable<String> port = eJmxModel.port;
+		LiveVariable<String> timeout = eJmxModel.terminationTimeout;
 		LiveExpression<ValidationResult> validator = eJmxModel.getValidator();
 
 		liveBean.setValue(true);
 		lifeCycle.setValue(true);
+		timeout.setValue("5000");
 		port.setValue("8888");
 		assertOk(validator);
 
@@ -410,16 +412,34 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertOk(validator); // tolerate spaces
 
 		port.setValue(null); //
-		assertError("must be specified", validator);
+		assertError("JMX Port must be specified", validator);
 
 		port.setValue("   "); //
-		assertError("must be specified", validator);
+		assertError("JMX Port must be specified", validator);
 
 		port.setValue("");
-		assertError("must be specified", validator);
+		assertError("JMX Port must be specified", validator);
 
 		port.setValue("8888");
 		assertOk(validator);
+
+		timeout.setValue(null);
+		assertError("Termination timeout must be specified", validator);
+
+		timeout.setValue("");
+		assertError("Termination timeout must be specified", validator);
+
+		timeout.setValue("    ");
+		assertError("Termination timeout must be specified", validator);
+
+		timeout.setValue("   8888   "); // tolerate spaces
+		assertOk(validator);
+
+		timeout.setValue(" -555");
+		assertError("Termination timeout must be positive", validator);
+
+		timeout.setValue("abc");
+		assertError("Termination timeout can't be parsed as an Integer", validator);
 	}
 
 	public void testJmxSetDefaults() throws Exception {

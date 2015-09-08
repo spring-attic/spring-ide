@@ -95,6 +95,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 					if (!hasText(timeoutStr)) {
 						return error(timeOutFieldName+" must be specified");
 					}
+					timeoutStr = timeoutStr.trim();
 					try {
 						long timeout = Long.parseLong(timeoutStr);
 						if (!(timeout > 0)) {
