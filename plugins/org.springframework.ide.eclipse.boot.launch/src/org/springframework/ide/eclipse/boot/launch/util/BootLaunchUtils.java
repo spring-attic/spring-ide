@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.launch.util;
 
 import java.util.List;
 
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -53,14 +54,14 @@ public class BootLaunchUtils {
 				try {
 					if (client!=null) {
 						client.stop();
-						return;
+						return; //Success (well, at least we asked the app to terminate)
 					}
 				} finally {
 					clientMgr.disposeClient();
 				}
-				l.terminate();
 			}
-			//Fallback to default implementation
+			// Fallback to default implementation if client not available.
+			l.terminate();
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
