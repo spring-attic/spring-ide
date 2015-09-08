@@ -32,7 +32,8 @@ public class MetaDataManipulatorTest extends TestCase {
 
 		@Override
 		public String toString() {
-			return content;
+			//So tests don't fail on Windoze
+			return content.replace("\r\n", "\n");
 		}
 
 		@Override
@@ -46,7 +47,6 @@ public class MetaDataManipulatorTest extends TestCase {
 			IOUtil.pipe(inputStream, bytes);
 			content = bytes.toString(encoding);
 		}
-
 	}
 
 	public void testAddOneElementFromEmpty() throws Exception {
