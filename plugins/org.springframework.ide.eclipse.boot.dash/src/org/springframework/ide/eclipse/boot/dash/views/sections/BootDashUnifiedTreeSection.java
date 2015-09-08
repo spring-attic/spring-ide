@@ -570,6 +570,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			@Override
 			public void dragOver(DropTargetEvent event) {
 				checkDropable(event);
+				event.feedback = DND.FEEDBACK_SELECT | DND.FEEDBACK_SCROLL;
 			}
 
 			@Override
