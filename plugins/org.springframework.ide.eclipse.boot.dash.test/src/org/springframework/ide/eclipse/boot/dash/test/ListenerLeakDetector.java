@@ -116,7 +116,7 @@ public class ListenerLeakDetector implements TestRule {
 		Set<Object> endingListeners = getListeners();
 		for (Object l : endingListeners) {
 			if (!startingListeners.contains(l)) {
-				throw new AssertionFailedError("Leaked listener: "+l);
+				throw new AssertionFailedError("Leaked listener: "+l+" of class "+l.getClass().getName());
 			}
 		}
 	}
