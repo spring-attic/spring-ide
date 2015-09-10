@@ -23,38 +23,40 @@ import java.util.LinkedHashSet;
 import org.eclipse.core.resources.IProject;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.test.BootProjectDashElementTest.TestElement;
 
 /**
- * Light-weight mockito-based tests for tags. 
- * 
+ * Light-weight mockito-based tests for tags.
+ *
  * @author Alex Boyko
  *
  */
 public class BootDashElementTagsTests extends Mocks {
-	
+
 	private static TestElement createElement(String name, String[] tags) {
+		BootDashElementFactory factory = mock(BootDashElementFactory.class);
 		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(name, true);
-		TestElement element = spy(new TestElement(project, model, projectProperties));
+		TestElement element = spy(new TestElement(project, model, projectProperties, factory));
 		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
 		return element;
 	}
-	
+
 	@Test
 	public void testTagParsing_1() throws Exception {
 		assertArrayEquals(new String[] {"xd", "spring"}, TagUtils.parseTags("xd,spring"));
 	}
-	
+
 	@Test
 	public void testTagParsing_2() throws Exception {
 		assertArrayEquals(new String[0], TagUtils.parseTags(""));
 	}
-	
+
 	@Test
 	public void testTagParsing_3() throws Exception {
 		assertArrayEquals(new String[0], TagUtils.parseTags("  , ,,  , \t, ,    ,,,\n\t, "));
@@ -69,7 +71,7 @@ public class BootDashElementTagsTests extends Mocks {
 	public void testTagParsing_5() throws Exception {
 		assertArrayEquals(new String[] {"spring", "spring"}, TagUtils.parseTags("spring  ,\t  spring ,"));
 	}
-	
+
 	@Test
 	public void testTagParsing_6() throws Exception {
 		assertArrayEquals(new String[] {"spring"}, TagUtils.parseTags(", ,,, spring"));
@@ -78,8 +80,8 @@ public class BootDashElementTagsTests extends Mocks {
 	@Test
 	public void defaultValues_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
-		
-		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring", "xd"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring source", "xd"})));
@@ -92,8 +94,8 @@ public class BootDashElementTagsTests extends Mocks {
 	public void empty_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("");
-		
-		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -106,8 +108,8 @@ public class BootDashElementTagsTests extends Mocks {
 	public void basicSearchTerm_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("spring");
-		
-		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -115,13 +117,13 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
-	
+
 	@Test
 	public void basicSearchTermWithWhiteSpace_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("  \t  , ,,, spring \t  \n  ");
-		
-		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -129,13 +131,13 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
-	
+
 	@Test
 	public void basicSearchTag_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("spring,");
-		
-		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -143,13 +145,13 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
-	
+
 	@Test
 	public void basicSearchTagWithWhiteSpace_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("  \t  , ,,, spring \t ,  \n  ");
-		
-		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -162,8 +164,8 @@ public class BootDashElementTagsTests extends Mocks {
 	public void multipleSearchTags_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("spring,xd,");
-		
-		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -171,13 +173,13 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
-	
+
 	@Test
 	public void multipleSearchTagsWithWhiteSpace_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("  \t  , ,,, spring \n\t, ,   ,,,, ,  \t \n, xd \n \t ,   \t\n, ,,,,    ,  ,");
-		
-		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spring source"})));
@@ -190,8 +192,8 @@ public class BootDashElementTagsTests extends Mocks {
 	public void combineSearchTagsAndTerm_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("xd,spring");
-		
-		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring", "xd"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring source", "xd"})));
@@ -204,8 +206,8 @@ public class BootDashElementTagsTests extends Mocks {
 	public void combineSearchTagsAndTermWithWhiteSpace_FilterTest() throws Exception {
 		TagFilterBoxModel filterBoxModel = new TagFilterBoxModel();
 		filterBoxModel.getText().setValue("  \t  , ,,, xd \n\t, ,   ,,,, ,  \t \n, spring");
-		
-		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));		
+
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring", "xd"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
 		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring source", "xd"})));

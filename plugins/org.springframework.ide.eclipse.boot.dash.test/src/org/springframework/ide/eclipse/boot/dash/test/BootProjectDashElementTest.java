@@ -36,7 +36,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -58,8 +60,8 @@ public class BootProjectDashElementTest extends Mocks {
 
 	public static class TestElement extends BootProjectDashElement {
 
-		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
-			super(project, context, projectProperties);
+		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootDashElementFactory factory) {
+			super(project, context, projectProperties, factory);
 		}
 
 		@Override
@@ -75,8 +77,9 @@ public class BootProjectDashElementTest extends Mocks {
 	private static final IType[] NO_TYPES = {};
 
 	public static TestElement createElement(LocalBootDashModel model, IJavaProject javaProject, RunTarget runTarget, IScopedPropertyStore<IProject> projectProperties) {
+		BootDashElementFactory factory = mock(BootDashElementFactory.class);
 		IProject project = javaProject.getProject();
-		TestElement element = spy(new TestElement(project, model, projectProperties));
+		TestElement element = spy(new TestElement(project, model, projectProperties, factory));
 		when(element.getTarget()).thenReturn(runTarget);
 		doReturn(javaProject).when(element).getJavaProject();
 		return element;

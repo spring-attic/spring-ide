@@ -73,8 +73,9 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	private LiveExpression<RunState> runState;
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
+	private BootDashElementFactory factory;
 
-	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties) {
+	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootDashElementFactory factory) {
 		super(context, project);
 		this.context = context;
 		this.persistentProperties = PropertyStoreFactory.createApi(
@@ -87,6 +88,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			}
 		});
 		this.actuatorPort = createLivePortExp(runState, "local.management.port");
+		this.factory = factory;
 	}
 
 	public IProject getProject() {
@@ -575,6 +577,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	@Override
 	public void dispose() {
 		this.context.removeElementStateListener(this);
+		factory.disposed(this);
 	}
 
 }

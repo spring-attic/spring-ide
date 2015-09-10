@@ -48,7 +48,7 @@ public class BootDashElementFactory {
 		if (BootPropertyTester.isBootProject(p)) {
 			BootProjectDashElement el = cache.get(p);
 			if (el==null) {
-				cache.put(p, el = new BootProjectDashElement(p, model, projectProperties));
+				cache.put(p, el = new BootProjectDashElement(p, model, projectProperties, this));
 			}
 			return el;
 		}
@@ -57,6 +57,13 @@ public class BootDashElementFactory {
 
 	public void dispose() {
 		cache = null;
+	}
+
+	public void disposed(BootProjectDashElement e) {
+		Map<IProject, BootProjectDashElement> c = cache;
+		if (c!=null) {
+			c.remove(e.getProject());
+		}
 	}
 
 }
