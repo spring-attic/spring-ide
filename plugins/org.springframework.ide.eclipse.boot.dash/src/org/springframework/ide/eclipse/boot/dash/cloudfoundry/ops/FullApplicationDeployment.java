@@ -63,9 +63,9 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		CloudApplication app = requests.getApplication(appName);
 
-		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, app, monitor);
+		List<CloudDomain> domains = model.getCloudTarget().getDomains(requests, monitor);
 
-		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
+		CloudApplicationDeploymentProperties properties = getDeploymentProperties(project, app, domains, monitor);
 
 		monitor.beginTask("Checking deployment properties and existing application", 10);
 		// Check if the application exists
@@ -97,34 +97,18 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		}
 		monitor.worked(5);
 
-		// Compose all the different operations that form a full deployment and
-		// add them in the order that they should be executed
-
-		CloudApplicationOperation createOp = new ApplicationCreateOperation(properties, model);
-		CloudApplicationOperation uploadOp = new ApplicationUploadOperation(properties, model);
-		CloudApplicationOperation updateOp = new ApplicationPropertiesUpdateOperation(properties, model);
-		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model);
-
-		deploymentOperations.add(createOp);
-		deploymentOperations.add(updateOp);
-		deploymentOperations.add(uploadOp);
-		deploymentOperations.add(restartOp);
-
-		CloudApplicationOperation op = new CompositeApplicationOperation(getName(), model, appName,
-				deploymentOperations, true);
-		op.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
+		CloudApplicationOperation op = new DeploymentOperationFactory(model, properties, project, domains)
+				.getDeploymentOperation();
 
 		model.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
 	protected CloudApplicationDeploymentProperties getDeploymentProperties(IProject project,
-			CloudApplication existingApp, IProgressMonitor monitor) throws Exception {
-
-		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
-
-		List<CloudDomain> domains = model.getCloudTarget().getDomains(requests, monitor);
+			CloudApplication existingApp, List<CloudDomain> domains, IProgressMonitor monitor) throws Exception {
 
 		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
+
+		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
 
 		List<CloudApplicationDeploymentProperties> appProperties = new ArrayList<CloudApplicationDeploymentProperties>();
 
@@ -166,7 +150,8 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 
 		// Update JAVA_OPTS env variable with Remote DevTools Client secret
 		if (project != null) {
-			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project), runOrDebug);
+			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(),
+					DevtoolsUtil.getSecret(project), runOrDebug);
 		}
 
 		return deploymentProperties;
