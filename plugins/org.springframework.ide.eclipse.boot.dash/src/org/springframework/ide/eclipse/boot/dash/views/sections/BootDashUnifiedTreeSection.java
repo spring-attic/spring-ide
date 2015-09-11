@@ -477,6 +477,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, openCloudAdminConsoleAction);
 		}
 
+		IAction reconnectConsole = actions.getReconnectCloudConsole();
+		if (reconnectConsole != null) {
+			addVisible(manager, reconnectConsole);
+		}
+
 //		manager.add
 //		addVisible(manager, new Separator());
 //		addVisible(manager, refreshAction);
