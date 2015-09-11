@@ -10,34 +10,33 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
- * Listener to be used only when running a start operation atomically and not
- * part of list of dependent ops (for example, should not be used as part of a
- * deployment operation that also includes application creation and upload)
- *
+ * Fires events and checks if an operation should be terminated while the
+ * operation is running
  */
-public class StartOnlyUpdateListener extends ApplicationUpdateListener {
+public abstract class ApplicationOperationEventHandler {
 
-	public StartOnlyUpdateListener(String appName, CloudFoundryBootDashModel model) {
-		super(appName, model);
+	protected final CloudFoundryBootDashModel model;
+
+	public ApplicationOperationEventHandler(CloudFoundryBootDashModel model) {
+		this.model = model;
 	}
 
-	@Override
-	public void applicationCreated(CloudAppInstances appInstances) {
-		// Ignore. Not applicable
+	public void onError(String appName, Throwable t) {
+		model.updateApplication(appName, RunState.UNKNOWN);
 	}
 
-	@Override
-	public void applicationStarting(CloudAppInstances appInstances) {
-		updateModel(appInstances, RunState.STARTING);
-	}
+	abstract public void checkTerminate(CloudAppInstances appInstances) throws OperationCanceledException;
 
-	@Override
-	public void applicationUpdated(CloudAppInstances appInstances) {
-		// Ignore for now
+	public void fireEvent(ApplicationOperationEvent event, boolean checkTerminate) throws OperationCanceledException {
+		event.fire();
+		if (checkTerminate) {
+			checkTerminate(event.getAppInstances());
+		}
 	}
 }

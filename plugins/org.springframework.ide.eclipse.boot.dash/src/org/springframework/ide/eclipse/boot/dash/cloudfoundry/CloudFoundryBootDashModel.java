@@ -99,7 +99,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				}
 
 				/*
-				 * Update CF app cache and collect apps that have local project updated
+				 * Update CF app cache and collect apps that have local project
+				 * updated
 				 */
 				List<String> appsToRefresh = new ArrayList<String>();
 				for (IProject project : removedProjects) {
@@ -398,6 +399,14 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 	}
 
+	/**
+	 *
+	 * @param appInstance
+	 *            must not be null
+	 * @param runState
+	 *            run state to set for the app. if null, the run state will be
+	 *            derived from the application instances
+	 */
 	public void updateApplication(CloudAppInstances appInstance, RunState runState) {
 		RunState updatedRunState = runState != null ? runState
 				: ApplicationRunningStateTracker.getRunState(appInstance);
@@ -485,6 +494,10 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				elements.replaceAll(updatedElements);
 			}
 		};
+
+		// Allow deletions to occur concurrently with any other application
+		// operation
+		operation.setSchedulingRule(null);
 		getOperationsExecution(ui).runOpAsynch(operation);
 
 	}

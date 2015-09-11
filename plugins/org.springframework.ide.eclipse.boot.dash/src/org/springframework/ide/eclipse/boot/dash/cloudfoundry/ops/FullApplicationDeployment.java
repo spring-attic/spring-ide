@@ -97,7 +97,7 @@ public class FullApplicationDeployment extends CloudApplicationOperation {
 		}
 		monitor.worked(5);
 
-		CloudApplicationOperation op = new DeploymentOperationFactory(model, properties, project, domains)
+		CloudApplicationOperation op = new DeploymentOperationFactory(model, properties, project, domains, ui)
 				.getDeploymentOperation();
 
 		model.getOperationsExecution(ui).runOpAsynch(op);
