@@ -126,7 +126,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 			appConsole.setAttribute(APP_CONSOLE_ID, getConsoleId(targetProperties, appName));
 
 			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { appConsole });
-			
+
 			checkIfLoggregatorStreamingIsPresent(appConsole, appName);
 		}
 
@@ -196,6 +196,15 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	@Override
 	public void showConsole(String appName) throws Exception {
 		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), appName);
+		consoleManager.showConsoleView(console);
+	}
+
+	@Override
+	public void reconnect(BootDashElement element) throws Exception {
+		String appName = element.getName();
+		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), appName);
+		console.clearConnection();
+		checkIfLoggregatorStreamingIsPresent(console, appName);
 		consoleManager.showConsoleView(console);
 	}
 }

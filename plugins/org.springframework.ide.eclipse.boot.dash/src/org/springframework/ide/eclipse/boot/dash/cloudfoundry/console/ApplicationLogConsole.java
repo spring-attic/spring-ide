@@ -111,6 +111,10 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 		manager.removeConsoles(new IConsole[] { this });
 	}
 
+	public synchronized void clearConnection() {
+		setLoggregatorToken(null);
+	}
+
 	protected synchronized IOConsoleOutputStream getStream(final LogType logType) {
 
 		IOConsoleOutputStream stream = activeStreams.get(logType);

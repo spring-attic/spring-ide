@@ -110,4 +110,9 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 	public void showConsole(String appName) throws Exception {
 		// Not supported
 	}
+
+	@Override
+	public void reconnect(BootDashElement element) throws Exception {
+		// Not supported
+	}
 }

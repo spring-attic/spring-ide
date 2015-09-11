@@ -92,6 +92,8 @@ public abstract class BootDashModelConsoleManager {
 
 	public abstract void terminateConsole(String appName) throws Exception;
 
+	public abstract void reconnect(BootDashElement element) throws Exception;
+
 	protected String asBootDashLog(String message) {
 		Date date = new Date(System.currentTimeMillis());
 		String dateVal = DateFormat.getDateTimeInstance().format(date);

@@ -62,8 +62,7 @@ public class ReconnectCloudConsoleAction extends AbstractBootDashElementsAction 
 				BootDashModel model = element.getParent();
 				try {
 					if (model.getElementConsoleManager() != null) {
-						model.getElementConsoleManager().terminateConsole(element.getName());
-						model.getElementConsoleManager().showConsole(element);
+						model.getElementConsoleManager().reconnect(element);
 					}
 				} catch (Exception e) {
 					ui.errorPopup("Reconnect Console Failure", e.getMessage());
