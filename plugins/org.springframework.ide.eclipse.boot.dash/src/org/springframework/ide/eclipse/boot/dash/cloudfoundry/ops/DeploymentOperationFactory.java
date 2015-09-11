@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
@@ -37,8 +36,9 @@ public class DeploymentOperationFactory {
 	public CloudApplicationOperation getDeploymentOperationExistingApp() {
 		List<CloudApplicationOperation> uploadAndRestartOps = uploadUpdateRestartOps();
 
-		CloudApplicationOperation op = new CompositeApplicationOperation("Re-deploying and re-starting project: " + project.getName(),
-				model, properties.getAppName(), uploadAndRestartOps, true);
+		CloudApplicationOperation op = new CompositeApplicationOperation(
+				"Re-deploying and re-starting project: " + project.getName(), model, properties.getAppName(),
+				uploadAndRestartOps, true);
 		op.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 		return op;
 	}
@@ -52,8 +52,9 @@ public class DeploymentOperationFactory {
 		List<CloudApplicationOperation> uploadAndRestartOps = uploadUpdateRestartOps();
 		deploymentOperations.addAll(uploadAndRestartOps);
 
-		CloudApplicationOperation op = new CompositeApplicationOperation("Deploying and starting project: " + project.getName(),
-				model, properties.getAppName(), deploymentOperations, true);
+		CloudApplicationOperation op = new CompositeApplicationOperation(
+				"Deploying and starting project: " + project.getName(), model, properties.getAppName(),
+				deploymentOperations, true);
 		op.addApplicationUpdateListener(new FullAppDeploymentListener(properties.getAppName(), model));
 		return op;
 	}
@@ -63,15 +64,8 @@ public class DeploymentOperationFactory {
 		CloudApplicationOperation uploadOp = new ApplicationUploadOperation(properties, model);
 		deploymentOperations.add(uploadOp);
 
-		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
-
-		// For now only update the app properties if there is a manifest as of
-		// RC3, this is
-		// the only way to specify changes to an app through boot dash
-		if (manifestHandler.hasManifest()) {
-			CloudApplicationOperation updateOp = new ApplicationPropertiesUpdateOperation(properties, model);
-			deploymentOperations.add(updateOp);
-		}
+		CloudApplicationOperation updateOp = new ApplicationPropertiesUpdateOperation(properties, model);
+		deploymentOperations.add(updateOp);
 
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(properties.getAppName(), model);
 		deploymentOperations.add(restartOp);
