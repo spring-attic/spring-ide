@@ -138,8 +138,11 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 			return;
 		}
 		if (logConsole.getLoggregatorToken() == null) {
+
+			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 			try {
 				CloudFoundryOperations client = runTarget.getClient();
+				Thread.currentThread().setContextClassLoader(client.getClass().getClassLoader());
 
 				// Must verify that the application exists before attaching
 				// loggregator listener
@@ -156,6 +159,8 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 			} catch (Exception e) {
 				logConsole.writeApplicationLog("Failed to stream contents from Cloud Foundry due to: " + e.getMessage(),
 						LogType.LOCALSTDERROR);
+			} finally {
+				Thread.currentThread().setContextClassLoader(contextClassLoader);
 			}
 		}
 	}
