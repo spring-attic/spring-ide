@@ -59,12 +59,8 @@ public class BootLaunchUtils {
 				try {
 					if (client!=null) {
 						client.stop();
-						try {
-							whenTerminated(l).get(BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(l), TimeUnit.MILLISECONDS);
-							return; //Success
-						} catch (TimeoutException e) {
-							//ignore... allows fallback below to kick in
-						}
+						whenTerminated(l).get(BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(l), TimeUnit.MILLISECONDS);
+						return; //Success
 					}
 				} catch (Exception e) {
 					//Nice termination failed. We'll log exception and allow fallback to kick in.
