@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.launch.process;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -50,8 +51,26 @@ public class BootProcessFactory implements IProcessFactory {
 				public void terminate() throws DebugException {
 					if (!terminateNicely()) {
 						//Let eclipse try it more aggressively.
-						super.terminate();
+						try {
+							super.terminate();
+						} catch (DebugException e) {
+							//Try even harder to destroy the process
+							if (!destroyForcibly()) {
+								throw e;
+							}
+						}
 					}
+				}
+
+				private boolean destroyForcibly() {
+					try {
+						Method m = Process.class.getDeclaredMethod("destroyForcibly");
+						m.invoke(process);
+						return true;
+					} catch (Exception e) {
+						//ignore... probably means we are not running on Java 8 VM and so we can't use 'destroyForcibly'.
+					}
+					return false;
 				}
 
 				private boolean terminateNicely() {
@@ -99,11 +118,7 @@ public class BootProcessFactory implements IProcessFactory {
 	}
 
 	private long getNiceTerminationTimeout(ILaunch launch) {
-		ILaunchConfiguration conf = launch.getLaunchConfiguration();
-		if (conf!=null) {
-			return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(conf);
-		}
-		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+		return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(launch);
 	}
 
 	private int getJMXPort(ILaunch launch) {

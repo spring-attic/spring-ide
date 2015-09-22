@@ -326,4 +326,12 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return -1;
 	}
 
+	public static long getTerminationTimeoutAsLong(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		if (conf!=null) {
+			return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(conf);
+		}
+		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+	}
+
 }
