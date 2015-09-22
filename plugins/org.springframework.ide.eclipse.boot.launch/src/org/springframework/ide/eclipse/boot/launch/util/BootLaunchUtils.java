@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.util;
 
+import static org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils.whenTerminated;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
@@ -20,8 +21,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-
-import static org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils.*;
 
 /**
  * @author Kris De Volder
