@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.UUID;
+
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.InstanceState;
@@ -19,6 +21,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationEventHandler;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
@@ -34,12 +37,25 @@ public class ApplicationRunningStateTracker {
 
 	private final long timeout;
 
-	public ApplicationRunningStateTracker(String appName, ClientRequests requests, CloudFoundryBootDashModel model,
-			long timeout) {
+	private final ApplicationOperationEventHandler eventHandler;
+
+	public ApplicationRunningStateTracker(CloudDashElement element, ClientRequests requests,
+			CloudFoundryBootDashModel model, ApplicationOperationEventHandler eventHandler) {
 		this.requests = requests;
-		this.appName = appName;
+		this.appName = element.getName();
 		this.model = model;
-		this.timeout = timeout;
+		this.timeout = TIMEOUT;
+		this.eventHandler = eventHandler;
+	}
+
+	protected void checkTerminate(IProgressMonitor monitor, CloudAppInstances appInstances)
+			throws OperationCanceledException {
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		if (eventHandler != null) {
+			eventHandler.checkTerminate(appInstances);
+		}
 	}
 
 	public RunState startTracking(IProgressMonitor monitor) throws Exception, OperationCanceledException {
@@ -59,30 +75,45 @@ public class ApplicationRunningStateTracker {
 		String checkingMessage = "Checking if the application is running";
 
 		int estimatedAttempts = (int) (timeout / (WAIT_TIME + roughEstimateFetchStatsms));
-		
+
 		monitor.beginTask(checkingMessage, estimatedAttempts);
-		
+
 		model.getElementConsoleManager().writeToConsole(appName, checkingMessage + ". Please wait...",
 				LogType.LOCALSTDOUT);
 
-		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && currentTime < totalTime) {
+		CloudAppInstances appInstances = requests.getExistingApplicationInstances(appName);
+
+		if (appInstances == null) {
+			throw new OperationCanceledException();
+		}
+
+		// Get the guid, as it is more efficient for lookup
+		UUID appGuid = appInstances.getApplication().getMeta().getGuid();
+
+		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && runState != RunState.CRASHED
+				&& currentTime < totalTime) {
 			int timeLeft = (int) ((totalTime - currentTime) / 1000);
 
 			// Don't log this. Only update the monitor
 			monitor.setTaskName(checkingMessage + ". Time left before timeout: " + timeLeft + 's');
 
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
+			checkTerminate(monitor, appInstances);
 
-			ApplicationStats stats = requests.getApplicationStats(appName);
 			monitor.worked(1);
-			runState = getRunState(stats);
+
+			runState = getRunState(appInstances);
 			try {
 				Thread.sleep(WAIT_TIME);
 			} catch (InterruptedException e) {
 
 			}
+
+			appInstances = requests.getExistingAppInstances(appGuid);
+			// App no longer exists
+			if (appInstances == null) {
+				throw new OperationCanceledException();
+			}
+
 			currentTime = System.currentTimeMillis();
 		}
 
@@ -130,15 +161,18 @@ public class ApplicationRunningStateTracker {
 	public static RunState getRunState(CloudAppInstances instances) {
 
 		RunState runState = RunState.UNKNOWN;
-		ApplicationStats stats = instances.getStats();
-		CloudApplication app = instances.getApplication();
-		// if app desired state is "Stopped", return inactive
-		if ((stats == null || stats.getRecords() == null || stats.getRecords().isEmpty())
-				&& app.getState() == CloudApplication.AppState.STOPPED) {
-			runState = RunState.INACTIVE;
-		} else {
-			runState = getRunState(stats);
+		if (instances != null) {
+			ApplicationStats stats = instances.getStats();
+			CloudApplication app = instances.getApplication();
+			// if app desired state is "Stopped", return inactive
+			if ((stats == null || stats.getRecords() == null || stats.getRecords().isEmpty())
+					&& app.getState() == CloudApplication.AppState.STOPPED) {
+				runState = RunState.INACTIVE;
+			} else {
+				runState = getRunState(stats);
+			}
 		}
+
 		return runState;
 	}
 

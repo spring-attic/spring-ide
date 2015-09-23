@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
@@ -20,6 +21,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -212,6 +214,57 @@ public class ClientRequests {
 			@Override
 			protected List<CloudSpace> doRun(CloudFoundryOperations client) throws Exception {
 				return client.getSpaces();
+			}
+		}.run();
+	}
+
+	/**
+	 *
+	 * @param guid
+	 * @return app instances for the specified app guid, or null if the app does
+	 *         not exist
+	 * @throws Exception
+	 */
+	public CloudAppInstances getExistingAppInstances(final UUID guid) throws Exception {
+
+		return new ClientRequest<CloudAppInstances>(model) {
+			@Override
+			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
+				try {
+					CloudApplication app = client.getApplication(guid);
+					ApplicationStats stats = client.getApplicationStats(app);
+					return new CloudAppInstances(app, stats);
+				} catch (Exception e) {
+					// Stats may not be available if the app is stopped or no
+					// longer available
+					if (CloudErrors.isBadRequest(e) || CloudErrors.isNotFoundException(e)) {
+						return null;
+					} else {
+						throw e;
+					}
+				}
+			}
+		}.run();
+	}
+
+	public CloudAppInstances getExistingApplicationInstances(final String appName) throws Exception {
+
+		return new ClientRequest<CloudAppInstances>(model) {
+			@Override
+			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
+				try {
+					CloudApplication app = client.getApplication(appName);
+					ApplicationStats stats = client.getApplicationStats(app);
+					return new CloudAppInstances(app, stats);
+				} catch (Exception e) {
+					// Stats may not be available if the app is stopped or no
+					// longer available
+					if (CloudErrors.isBadRequest(e) || CloudErrors.isNotFoundException(e)) {
+						return null;
+					} else {
+						throw e;
+					}
+				}
 			}
 		}.run();
 	}

@@ -53,7 +53,10 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 		}
 
 		if (updateExistingApplicationInCloud(deploymentProperties, monitor)) {
-			getAppUpdateListener().applicationUpdated(getCloudApplicationInstances());
+			boolean checkTermination = true;
+			this.eventHandler.fireEvent(
+					eventFactory.updateRunState(requests.getExistingApplicationInstances(appName), getDashElement(), null),
+					checkTermination);
 		}
 	}
 

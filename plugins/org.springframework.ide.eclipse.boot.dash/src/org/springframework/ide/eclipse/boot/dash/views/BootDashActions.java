@@ -114,7 +114,8 @@ public class BootDashActions {
 		RunStateAction stopAction = new RunStateAction(model, elementsSelection, ui, RunState.INACTIVE) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
-				return s == RunState.DEBUGGING || s == RunState.RUNNING;
+				// Enable stop button so CF apps can be stopped when "STARTING"
+				return s != RunState.INACTIVE;
 			}
 
 			@Override

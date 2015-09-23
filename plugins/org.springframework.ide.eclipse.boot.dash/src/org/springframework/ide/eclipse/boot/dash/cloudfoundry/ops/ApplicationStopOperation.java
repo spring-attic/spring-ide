@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -29,8 +31,14 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		requests.stopApplication(element.getName());
 		model.getElementConsoleManager().terminateConsole(element.getName());
+		CloudAppInstances updatedInstances = requests.getExistingApplicationInstances(element.getName());
 
-		CloudAppInstances appInstances = getCloudApplicationInstances();
-		getAppUpdateListener().updateModel(appInstances);
+		boolean checkTermination = false;
+		this.eventHandler.fireEvent(eventFactory.updateRunState(updatedInstances, getDashElement(),
+				ApplicationRunningStateTracker.getRunState(updatedInstances)), checkTermination);
+	}
+
+	public ISchedulingRule getSchedulingRule() {
+		return new StopApplicationSchedulingRule(model.getRunTarget(), appName);
 	}
 }
