@@ -38,7 +38,6 @@ public class CloudApplicationDeploymentProperties {
 	private boolean writeManifest = false;
 
 	private boolean shouldRestart = true;
-	private boolean shouldAutoReplace = false;
 
 	public static final int DEFAULT_MEMORY = 1024;
 	public static final int DEFAULT_INSTANCES = 1;
@@ -94,14 +93,6 @@ public class CloudApplicationDeploymentProperties {
 
 	public boolean shouldRestart() {
 		return this.shouldRestart;
-	}
-
-	public void setShoudAutoReplace(boolean shouldAutoReplace) {
-		this.shouldAutoReplace = shouldAutoReplace;
-	}
-
-	public boolean shouldAutoReplace() {
-		return this.shouldAutoReplace;
 	}
 
 	public IProject getProject() {

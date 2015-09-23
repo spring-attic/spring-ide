@@ -78,8 +78,8 @@ public class FullApplicationRestartOperation extends CloudApplicationOperation {
 		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project),
 				runOrDebug);
 
-		CloudApplicationOperation op = new DeploymentOperationFactory(model, properties, project, domains, ui)
-				.getDeploymentOperationExistingApp();
+		CloudApplicationOperation op = new DeploymentOperationFactory(model, project, ui)
+				.getRestartAndDeploy(properties);
 
 		op.run(monitor);
 	}

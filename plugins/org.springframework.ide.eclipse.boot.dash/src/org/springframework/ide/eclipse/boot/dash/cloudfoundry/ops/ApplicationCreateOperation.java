@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -62,21 +61,12 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			throw new CoreException(status);
 		}
 
-		// See if the application already exists
-		logAndUpdateMonitor("Verifying that the application exists: " + appName, monitor);
-
-		CloudApplication app = requests.getApplication(appName);
-		CloudAppInstances appInstances = null;
-		if (app != null) {
-			appInstances = requests.getExistingAppInstances(app.getMeta().getGuid());
-		} else {
-			appInstances = createApplication(monitor);
-		}
+		CloudAppInstances appInstances = createApplication(monitor);
 
 		monitor.worked(5);
 
 		if (appInstances == null) {
-			throw BootDashActivator.asCoreException("Failed to create or resolve a Cloud application for : "
+			throw BootDashActivator.asCoreException("Failed to create a Cloud application for : "
 					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
 		}
 
@@ -128,7 +118,8 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			monitor.worked(5);
 
 		} catch (Exception e) {
-			// If app creation failed, check if the app was created anyway
+			// Clean-up: If app creation failed, check if the app was created
+			// anyway
 			// and delete it to allow users to redeploy
 			CloudApplication toCleanUp = requests.getApplication(deploymentProperties.getAppName());
 			if (toCleanUp != null) {
@@ -137,23 +128,13 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			throw e;
 		}
 		// Fetch the created Cloud Application
-		try {
-			logAndUpdateMonitor(
-					"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
-					monitor);
-			CloudAppInstances instances = requests.getExistingApplicationInstances(deploymentProperties.getAppName());
-			monitor.worked(5);
+		logAndUpdateMonitor(
+				"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
+				monitor);
+		CloudAppInstances instances = requests.getExistingApplicationInstances(deploymentProperties.getAppName());
+		monitor.worked(5);
 
-			return instances;
-		} catch (Exception e) {
-			if (CloudErrors.isNotFoundException(e)) {
-				IStatus status = BootDashActivator.createErrorStatus(e,
-						"Application not found in Cloud Foundry target when verifying that it exists. The application may have been deleted externally. "
-								+ e.getMessage());
-				throw new CoreException(status);
-			}
-			throw e;
-		}
+		return instances;
 	}
 
 }

@@ -267,12 +267,9 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
 			throws Exception {
 
-		// When deploying or mapping app to project, always prompt user if they
-		// want to replace the existing app
-		boolean shouldAutoReplaceApp = false;
 
 		getOperationsExecution(ui).runOpAsynch(
-				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, shouldAutoReplaceApp));
+				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy));
 
 	}
 
