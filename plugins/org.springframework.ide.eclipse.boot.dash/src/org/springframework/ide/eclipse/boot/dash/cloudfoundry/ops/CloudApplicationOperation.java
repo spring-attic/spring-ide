@@ -10,75 +10,59 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 
 /**
- * A cloud operation that is performed on a Cloud application.
+ * A cloud operation that is performed on a Cloud application (for example,
+ * creating, starting, or stopping an application)
  *
  */
 public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected String appName;
-
-
-	private ApplicationUpdateListener applicationUpdateListener;
+	private ISchedulingRule schedulingRule;
+	protected ApplicationOperationEventHandler eventHandler;
+	protected ApplicationOperationEventFactory eventFactory;
 
 	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
+		this(opName, model, appName, new StartingOperationHandler(model));
+	}
+
+	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
+			ApplicationOperationEventHandler eventHandler) {
 		super(opName, model);
-		applicationUpdateListener = new ApplicationUpdateListener.DefaultListener(appName, model);
+		this.eventHandler = eventHandler;
+		this.eventFactory = new ApplicationOperationEventFactory(model);
 		this.appName = appName;
+		setSchedulingRule(new StartApplicationSchedulingRule(model.getRunTarget(), appName));
 	}
 
-	protected CloudAppInstances getCloudApplicationInstances() throws Exception {
-		CloudApplication app = requests.getApplication(appName);
-		if (app != null) {
-			ApplicationStats stats = requests.getApplicationStats(app);
-			return new CloudAppInstances(app, stats);
-		}
-		return null;
+	protected CloudDashElement getDashElement() {
+		return model.getElement(appName);
 	}
 
-	protected CloudAppInstances getCachedApplication() {
+	protected CloudAppInstances getCachedApplicationInstances() {
 		return model.getAppCache().getAppInstances(appName);
 	}
 
-	public void addApplicationUpdateListener(ApplicationUpdateListener appUpdateListener) {
-		if (appUpdateListener != null) {
-			this.applicationUpdateListener = appUpdateListener;
+	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
+		if (eventHandler != null) {
+			this.eventHandler = eventHandler;
 		}
-	}
-
-	/**
-	 * @return listener that updates the application state when notified. Should
-	 *         not be null.
-	 */
-	protected ApplicationUpdateListener getAppUpdateListener() {
-		return applicationUpdateListener;
-	}
-
-
-
-	protected Exception getApplicationException(Exception e) {
-		if (CloudErrors.isNotFoundException(e)) {
-			IStatus status = BootDashActivator.createErrorStatus(e,
-					"Application not found in Cloud Foundry target when verifying that it exists: " + e.getMessage());
-			return new CoreException(status);
-		}
-		return e;
 	}
 
 	public ISchedulingRule getSchedulingRule() {
-		return new CloudApplicationSchedulingRule(model.getRunTarget(), appName);
+		return this.schedulingRule;
+	}
+
+	public void setSchedulingRule(ISchedulingRule schedulingRule) {
+		this.schedulingRule = schedulingRule;
 	}
 
 	protected void resetAndShowConsole() {

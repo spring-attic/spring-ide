@@ -12,24 +12,20 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.zip.ZipFile;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 
 /**
  * Operation that uploads an application's archive. The application must have an
@@ -39,15 +35,29 @@ import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.U
 public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
+	private final UserInteractions ui;
+	private final RunState preferedRunState;
 
 	public ApplicationUploadOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model) {
+			CloudFoundryBootDashModel model, UserInteractions ui, RunState preferedRunState) {
 		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
+		this.ui = ui;
+		this.preferedRunState = preferedRunState;
+	}
+
+	public ApplicationUploadOperation(CloudApplicationDeploymentProperties deploymentProperties,
+			CloudFoundryBootDashModel model, UserInteractions ui) {
+		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
+		this.deploymentProperties = deploymentProperties;
+		this.ui = ui;
+		this.preferedRunState = null;
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+
+		CloudAppInstances appInstances = requests.getExistingApplicationInstances(appName);
 
 		monitor.beginTask("Generating application archiving and uploading to Cloud Foundry", 10);
 		// Must perform this check otherwise if the app does not exist
@@ -55,28 +65,30 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
-		CloudApplication app = requests.getApplication(appName);
 
 		monitor.worked(3);
-		if (app == null) {
+		if (appInstances == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "
 							+ deploymentProperties.getAppName());
 		}
 
+		boolean checkTermination = true;
+		this.eventHandler.fireEvent(eventFactory.updateRunState(appInstances, getDashElement(), preferedRunState),
+				checkTermination);
+
 		// Upload the application
 		CloudZipApplicationArchive archive = null;
 		String appName = deploymentProperties.getAppName();
-		getAppUpdateListener().applicationUpdated(getCloudApplicationInstances());
 
 		try {
 
 			if (deploymentProperties.getProject() != null) {
 
 				ICloudApplicationArchiver archiver = getArchiver(monitor);
-				if (archiver!=null) {
+				if (archiver != null) {
 					logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
-					archive = new CloudZipApplicationArchive(new ZipFile(archiver.getApplicationArchive(new NullProgressMonitor())));
+					archive = new CloudZipApplicationArchive(new ZipFile(archiver.getApplicationArchive(monitor)));
 					monitor.worked(2);
 				}
 			}
@@ -93,7 +105,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 			} else {
 				throw BootDashActivator.asCoreException("Failed to generate application archive for " + appName
-						+ ". Make sure the project is accessible and it can be archived for deployment, or it points to an archive in a manifest.yml file.");
+						+ ". Make sure that the project has a main type, or has an accessible archive file in manifest.yml.");
 
 			}
 		} finally {
@@ -112,7 +124,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		try {
 			for (CloudApplicationArchiverStrategy s : getArchiverStrategies(mon)) {
 				ICloudApplicationArchiver a = s.getArchiver(mon);
-				if (a!=null) {
+				if (a != null) {
 					return a;
 				}
 			}
@@ -130,36 +142,24 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),
-				CloudApplicationArchiverStrategies.packageAsJar(project, getUI())
-		};
-
+				CloudApplicationArchiverStrategies.packageAsJar(project, ui) };
 
 	}
 
-	private UserInteractions getUI() {
-		//TODO: this should be injected istead of created here
-		UIContext context = new UIContext() {
-			public Shell getShell() {
-				return CloudFoundryUiUtil.getShell();
-			}
-		};
-		return new DefaultUserInteractions(context);
-	}
-
-
-
-// Use the 'Legacy' archiver
-//	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor monitor) throws Exception {
-//		IProject project = deploymentProperties.getProject();
-//		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
-//				this.model.getCloudTarget().getDomains(requests, monitor));
-//		ICloudApplicationArchiver legacyArchiver = new CloudApplicationArchiver(
-//				JavaCore.create(deploymentProperties.getProject()), appName, parser);
-//
-//
-//		return new CloudApplicationArchiverStrategy[] {
-//				CloudApplicationArchiverStrategies.justReturn(legacyArchiver)
-//		};
-//	}
+	// Use the 'Legacy' archiver
+	// protected CloudApplicationArchiverStrategy[]
+	// getArchiverStrategies(IProgressMonitor monitor) throws Exception {
+	// IProject project = deploymentProperties.getProject();
+	// ApplicationManifestHandler parser = new
+	// ApplicationManifestHandler(project,
+	// this.model.getCloudTarget().getDomains(requests, monitor));
+	// ICloudApplicationArchiver legacyArchiver = new CloudApplicationArchiver(
+	// JavaCore.create(deploymentProperties.getProject()), appName, parser);
+	//
+	//
+	// return new CloudApplicationArchiverStrategy[] {
+	// CloudApplicationArchiverStrategies.justReturn(legacyArchiver)
+	// };
+	// }
 
 }

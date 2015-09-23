@@ -26,28 +26,25 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 
 	private List<CloudApplicationOperation> operations;
 
-	private boolean resetConsole;
-
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<CloudApplicationOperation> operations, boolean resetConsole) {
+			List<CloudApplicationOperation> operations) {
 		super(opName, model, appName);
 		this.operations = operations;
-		this.resetConsole = resetConsole;
 	}
 
-	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp, boolean resetConsole) {
+	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
 		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName);
 
 		this.operations = new ArrayList<CloudApplicationOperation>();
 		this.operations.add(enclosedOp);
-		this.resetConsole = resetConsole;
+		setSchedulingRule(enclosedOp.getSchedulingRule());
 	}
 
 	@Override
-	public void addApplicationUpdateListener(ApplicationUpdateListener appUpdateNotifier) {
-		super.addApplicationUpdateListener(appUpdateNotifier);
+	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
+		super.addOperationEventHandler(eventHandler);
 		for (CloudApplicationOperation op : operations) {
-			op.addApplicationUpdateListener(appUpdateNotifier);
+			op.addOperationEventHandler(eventHandler);
 		}
 	}
 
@@ -55,15 +52,15 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		try {
 			// Run ops in series
-			if (resetConsole) {
-				resetAndShowConsole();
-			}
+			resetAndShowConsole();
+
 			for (CloudApplicationOperation op : operations) {
 				op.run(monitor);
 			}
+
 		} catch (Throwable t) {
 			if (!(t instanceof OperationCanceledException)) {
-				getAppUpdateListener().onError(t);
+				eventHandler.onError(appName, t);
 			}
 			throw t instanceof Exception ? (Exception) t : new CoreException(BootDashActivator.createErrorStatus(t));
 		}

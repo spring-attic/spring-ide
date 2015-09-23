@@ -25,15 +25,26 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationCreateOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
+	private final RunState preferedRunState;
 
+	/**
+	 *
+	 * @param deploymentProperties
+	 * @param model
+	 * @param preferedRunState
+	 *            the state that the app should be in when the op is run. For
+	 *            example "STARTING". This overrides the actual runstate in CF
+	 */
 	public ApplicationCreateOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model) {
+			CloudFoundryBootDashModel model, RunState preferedRunState) {
 		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
+		this.preferedRunState = preferedRunState;
 	}
 
 	@Override
@@ -50,18 +61,12 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			throw new CoreException(status);
 		}
 
-		// See if the application already exists
-		logAndUpdateMonitor("Verifying that the application exists: " + appName, monitor);
-
-		CloudAppInstances appInstances = getCloudApplicationInstances();
-		if (appInstances == null) {
-			appInstances = createApplication(monitor);
-		}
+		CloudAppInstances appInstances = createApplication(monitor);
 
 		monitor.worked(5);
 
 		if (appInstances == null) {
-			throw BootDashActivator.asCoreException("Failed to create or resolve a Cloud application for : "
+			throw BootDashActivator.asCoreException("Failed to create a Cloud application for : "
 					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
 		}
 
@@ -74,11 +79,14 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			}
 		}
 
-		getAppUpdateListener().applicationCreated(appInstances);
+		boolean checkTermination = true;
+		this.eventHandler.fireEvent(eventFactory.updateRunState(appInstances, getDashElement(), preferedRunState),
+				checkTermination);
 	}
 
 	private static BootDashElement findLocalBdeForProject(IProject project) {
-		BootDashModel localModel = BootDashActivator.getDefault().getModel().getSectionByTargetId(LocalRunTarget.INSTANCE.getId());
+		BootDashModel localModel = BootDashActivator.getDefault().getModel()
+				.getSectionByTargetId(LocalRunTarget.INSTANCE.getId());
 		if (localModel != null) {
 			for (BootDashElement bde : localModel.getElements().getValue()) {
 				if (project.equals(bde.getProject())) {
@@ -110,26 +118,23 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			monitor.worked(5);
 
 		} catch (Exception e) {
-			// If app creation failed, check if the app was created anyway
+			// Clean-up: If app creation failed, check if the app was created
+			// anyway
 			// and delete it to allow users to redeploy
-			CloudApplication toCleanUp = requests.getApplication(appName);
+			CloudApplication toCleanUp = requests.getApplication(deploymentProperties.getAppName());
 			if (toCleanUp != null) {
 				requests.deleteApplication(toCleanUp.getName());
 			}
 			throw e;
 		}
 		// Fetch the created Cloud Application
-		try {
-			logAndUpdateMonitor(
-					"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
-					monitor);
-			CloudAppInstances instances = getCloudApplicationInstances();
-			monitor.worked(5);
+		logAndUpdateMonitor(
+				"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
+				monitor);
+		CloudAppInstances instances = requests.getExistingApplicationInstances(deploymentProperties.getAppName());
+		monitor.worked(5);
 
-			return instances;
-		} catch (Exception e) {
-			throw getApplicationException(e);
-		}
+		return instances;
 	}
 
 }

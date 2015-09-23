@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.StartOnlyUpdateListener;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -66,7 +65,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
 		CloudApplicationOperation op = new CompositeApplicationOperation(
-				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()), false);
+				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()));
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
@@ -82,22 +81,23 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		// through uploading via full deployment
 		// && runingOrDebugging == RunState.RUNNING
 		) {
-			String opName = "Starting application '" + getName() +"' in " + (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+			String opName = "Starting application '" + getName() + "' in "
+					+ (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
 			if (runingOrDebugging == RunState.DEBUGGING) {
-				op = new CompositeApplicationOperation(opName, cloudModel, getName(), Arrays.asList(new CloudApplicationOperation[] {
-						new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging),
-						new RemoteDevClientStartOperation(cloudModel, getName(), runingOrDebugging)
-				}), true);
+				op = new CompositeApplicationOperation(opName, cloudModel, getName(),
+						Arrays.asList(new CloudApplicationOperation[] {
+								new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging,
+										ui),
+								new RemoteDevClientStartOperation(cloudModel, getName(), runingOrDebugging) }));
 			} else {
-				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging);
+				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, ui);
 			}
 		} else {
+			// Set the initial run state as Starting
 			CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getParent());
+					(CloudFoundryBootDashModel) getParent(), RunState.STARTING);
 
-			restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
-
-			op = new CompositeApplicationOperation(restartOp, true);
+			op = new CompositeApplicationOperation(restartOp);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -106,11 +106,9 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getParent());
+				(CloudFoundryBootDashModel) getParent(), RunState.STARTING);
 
-		restartOp.addApplicationUpdateListener(new StartOnlyUpdateListener(getName(), getCloudModel()));
-
-		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(restartOp, true));
+		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(restartOp));
 	}
 
 	@Override
@@ -131,7 +129,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	@Override
 	public RunState getRunState() {
 		RunState state = getCloudModel().getAppCache().getRunState(getName());
-		if (state==RunState.RUNNING) {
+		if (state == RunState.RUNNING) {
 			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
 				state = RunState.DEBUGGING;
 			}
@@ -206,7 +204,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		private final RunTarget runTarget;
 
 		public String toString() {
-			return appName+"@"+runTarget;
+			return appName + "@" + runTarget;
 		};
 
 		CloudElementIdentity(String appName, RunTarget runTarget) {

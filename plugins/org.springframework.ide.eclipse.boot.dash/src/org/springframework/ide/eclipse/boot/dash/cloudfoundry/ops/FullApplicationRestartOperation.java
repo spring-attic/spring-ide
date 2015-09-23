@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * Operation for (re)starting existing CF app with associated project
@@ -37,11 +38,13 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 public class FullApplicationRestartOperation extends CloudApplicationOperation {
 
 	private final RunState runOrDebug;
+	final private UserInteractions ui;
 
 	public FullApplicationRestartOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			RunState runOrDebug) {
+			RunState runOrDebug, UserInteractions ui) {
 		super(opName, model, appName);
 		this.runOrDebug = runOrDebug;
+		this.ui = ui;
 	}
 
 	@Override
@@ -75,8 +78,8 @@ public class FullApplicationRestartOperation extends CloudApplicationOperation {
 		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project),
 				runOrDebug);
 
-		CloudApplicationOperation op = new DeploymentOperationFactory(model, properties, project, domains)
-				.getDeploymentOperationExistingApp();
+		CloudApplicationOperation op = new DeploymentOperationFactory(model, project, ui)
+				.getRestartAndDeploy(properties);
 
 		op.run(monitor);
 	}

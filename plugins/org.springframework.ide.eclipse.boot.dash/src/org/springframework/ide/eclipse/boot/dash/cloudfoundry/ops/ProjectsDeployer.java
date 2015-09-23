@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -29,15 +28,13 @@ public class ProjectsDeployer extends CloudOperation {
 
 	private final Map<IProject, BootDashElement> projectsToDeploy;
 	private final UserInteractions ui;
-	private final boolean shouldAutoReplaceApps;
 	private final RunState runOrDebug;
 
 	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
-			Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
+			Map<IProject, BootDashElement> projectsToDeploy) {
 		super("Deploying projects", model);
 		this.projectsToDeploy = projectsToDeploy;
 		this.ui = ui;
-		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 		this.runOrDebug = RunState.RUNNING;
 	}
 
@@ -51,24 +48,22 @@ public class ProjectsDeployer extends CloudOperation {
 		}
 
 		this.ui = ui;
-		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 		this.runOrDebug = runOrDebug;
 	}
 
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor, projectsToDeploy.size() * 100);
 		for (Iterator<Entry<IProject, BootDashElement>> it = projectsToDeploy.entrySet().iterator(); it.hasNext();) {
 			Entry<IProject, BootDashElement> entry = it.next();
 
-			if (subMonitor.isCanceled()) {
+			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 
-			CloudApplicationOperation fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model, ui,
-					shouldAutoReplaceApps, runOrDebug);
+			CloudApplicationOperation op = new DeploymentOperationFactory(model, entry.getKey(), ui)
+					.getCreateAndDeploy(runOrDebug, monitor);
 
-			fullDeploymentOp.run(subMonitor.newChild(100));
+			op.run(monitor);
 		}
 	}
 }
