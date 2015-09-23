@@ -22,11 +22,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
-import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.maven.AbstractSpringProjectConfigurator;
-import org.springsource.ide.eclipse.gradle.core.GradleCore;
 
 /**
  * M2E project configuration which enables JDT APT processor if the project has
