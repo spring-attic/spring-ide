@@ -35,8 +35,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.AsyncLiveExpression;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -330,7 +330,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 
 	@Override
 	public int getLivePort() {
-		return getLivePort("local.server.port");
+		return livePort.getValue();
 	}
 
 	public int getActuatorPort() {
@@ -348,7 +348,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	}
 
 	private LiveExpression<Integer> createLivePortExp(final LiveExpression<RunState> runState, final String propName) {
-		return new LiveExpression<Integer>(-1) {
+		return new AsyncLiveExpression<Integer>(-1) {
 			{
 				//Doesn't really depend on runState, but should be recomputed when runState changes.
 				dependsOn(runState);
