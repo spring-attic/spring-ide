@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -48,6 +49,7 @@ public class LocalBootDashModel extends BootDashModel {
 	private BootDashModelConsoleManager consoleManager;
 
 	private BootDashModelStateSaver modelState;
+	private DevtoolsPortRefresher devtoolsPortRefresher;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -73,6 +75,7 @@ public class LocalBootDashModel extends BootDashModel {
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
+		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, elementFactory);
 	}
 
 	void init() {
@@ -128,6 +131,7 @@ public class LocalBootDashModel extends BootDashModel {
 			elementFactory.dispose();
 			classpathListenerManager.dispose();
 			runStateTracker.dispose();
+			devtoolsPortRefresher.dispose();
 		}
 	}
 

@@ -31,8 +31,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -51,13 +55,14 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
 
 /**
  * @author Kris De Volder
@@ -184,12 +189,67 @@ public class BootDashModelTest {
 		}
 	}
 
+	@Test public void testDevtoolsPortRefreshedOnRestart() throws Exception {
+		//Test that the local bootdash element 'liveport' is updated when boot devtools
+		// does an in-place restart of the app, changing the port that it runs on.
+		String projectName = "some-project-with-devtools";
+		createBootProject(projectName, bootVersionAtLeast("1.3.0"),  //1.3.0 required for lifecycle & devtools support
+				withStarters("devtools")
+		);
+
+		final BootDashElement element = getElement(projectName);
+		try {
+			waitForState(element, RunState.INACTIVE);
+			element.restart(RunState.RUNNING, ui);
+			waitForState(element, RunState.STARTING);
+			waitForState(element, RunState.RUNNING);
+
+			int defaultPort = 8080;
+			int changedPort = 8765;
+
+			assertEquals(defaultPort, element.getLivePort());
+
+			IFile props = element.getProject().getFile(new Path("src/main/resources/application.properties"));
+			setContents(props, "server.port="+changedPort);
+			StsTestUtil.assertNoErrors(element.getProject());
+			   //builds the project... should trigger devtools to 'refresh'.
+
+			waitForPort(element, changedPort);
+
+			//Now try that this also works in debug mode...
+			element.restart(RunState.DEBUGGING, ui);
+			waitForState(element, RunState.STARTING);
+			waitForState(element, RunState.DEBUGGING);
+
+			assertEquals(changedPort, element.getLivePort());
+			setContents(props, "server.port="+defaultPort);
+			StsTestUtil.assertNoErrors(element.getProject());
+			   //builds the project... should trigger devtools to 'refresh'.
+			waitForPort(element, defaultPort);
+
+		} finally {
+			element.stopAsync(ui);
+			waitForState(element, RunState.INACTIVE);
+		}
+	}
+
+	protected void waitForPort(final BootDashElement element, final int expectedPort) throws Exception {
+		new ACondition("Wait for port to change") {
+			@Override
+			public boolean test() throws Exception {
+				assertEquals(expectedPort, element.getLivePort());
+				return true;
+			}
+		}.waitFor(5000); //Devtools should restart really fast
+	}
+
 	@Test public void testStartingStateObservable() throws Exception {
 		//Test that, for boot project that supports it, the 'starting' state
 		// is observable in the model.
 		String projectName = "some-project";
-		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
-
+		createBootProject(projectName,
+				bootVersionAtLeast("1.3.0") //1.3.0 required for lifecycle support
+		);
 		BootDashElement element = getElement(projectName);
 		try {
 			waitForState(element, RunState.INACTIVE);
@@ -206,7 +266,6 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
-
 
 	private void doRestartTest(String projectName, RunState fromState, RunState toState) throws Exception {
 		BootDashElement element = getElement(projectName);
@@ -395,6 +454,11 @@ public class BootDashModelTest {
 
 	@Before
 	public void setup() throws Exception {
+		//As part of its normal operation, devtools will throw some uncaucht exceptions.
+		// We don't want our tests to be disrupted when running the process in debug mode... so disable
+		// suspending on such exceptions:
+		suspendOnUncaughtException(false);
+
 		StsTestUtil.deleteAllProjects();
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
@@ -404,6 +468,13 @@ public class BootDashModelTest {
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);
+
+	}
+
+	public static void suspendOnUncaughtException(boolean enable) {
+		String suspendOption = "org.eclipse.jdt.debug.ui.javaDebug.SuspendOnUncaughtExceptions";
+		IEclipsePreferences debugPrefs = InstanceScope.INSTANCE.getNode("org.eclipse.jdt.debug.ui");
+		debugPrefs.putBoolean(suspendOption, enable);
 	}
 
 	@After

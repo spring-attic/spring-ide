@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
@@ -329,8 +330,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 
 	@Override
 	public int getLivePort() {
-		return livePort.getValue();
-		//return getLivePort("local.server.port");
+		return getLivePort("local.server.port");
 	}
 
 	public int getActuatorPort() {
@@ -578,6 +578,18 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	public void dispose() {
 		this.context.removeElementStateListener(this);
 		factory.disposed(this);
+	}
+
+	public void refreshLivePorts() {
+		refresh(livePort, actuatorPort);
+	}
+
+	private void refresh(LiveExpression<?>... exps) {
+		for (LiveExpression<?> e : exps) {
+			if (e!=null) {
+				e.refresh();
+			}
+		}
 	}
 
 }
