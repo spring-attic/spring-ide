@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -38,6 +39,8 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
+
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 /**
  * @author Kris De Volder
@@ -124,6 +127,24 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		assertElements(getProperties(conf)
 				/*empty*/
 		);
+	}
+
+	public void testConfigurationDeletedWhenProjectDeleted() throws Exception {
+		IJavaProject project = JavaCore.create(createLaunchReadyProject(PROJECT));
+		IType mainType = project.findType(MAIN_TYPE);
+		final ILaunchConfiguration conf = shortcut.createConfiguration(mainType);
+
+		assertTrue(conf.exists());
+
+		project.getProject().delete(true, true, new NullProgressMonitor());
+		//The delete fo launch conf happens in response to project delete, but
+		// its in a job so we don't know exactly when it will be done... so...
+		new ACondition() {
+			public boolean test() throws Exception {
+				assertFalse(conf.exists());
+				return true;
+			}
+		}.waitFor(5000);
 	}
 
 	public void testLaunch() throws Exception {
