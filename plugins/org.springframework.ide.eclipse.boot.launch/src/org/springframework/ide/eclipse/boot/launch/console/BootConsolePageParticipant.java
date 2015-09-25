@@ -19,6 +19,10 @@
  ***********************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.console;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
@@ -40,6 +44,7 @@ import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * @author Kris De Volder
@@ -51,9 +56,20 @@ public class BootConsolePageParticipant implements IConsolePageParticipant {
 		@Override
 		public void run() {
 			try {
-				IProcess process = console.getProcess();
+				final IProcess process = console.getProcess();
 				if (process!=null && process.canTerminate()) {
-					BootLaunchUtils.terminate(process.getLaunch());
+					Job job = new Job("Terminate process") {
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								BootLaunchUtils.terminate(process.getLaunch());
+								return Status.OK_STATUS;
+							} catch (Exception e) {
+								return ExceptionUtil.status(e);
+							}
+						}
+
+					};
+					job.schedule();
 				}
 			} catch (Exception e) {
 				BootActivator.log(e);
