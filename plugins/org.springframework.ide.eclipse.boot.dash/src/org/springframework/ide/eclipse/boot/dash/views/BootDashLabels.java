@@ -28,9 +28,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
@@ -180,7 +180,7 @@ public class BootDashLabels implements Disposable {
 			if (element.getRunTarget() != null) {
 				//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
 				// colorfully.
-				if (element.getState() == State.LOADING) {
+				if (element.getState() == RefreshState.LOADING) {
 					return new StyledString("Loading... - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY)).append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
 				} else {
 					return new StyledString(element.getRunTarget().getName(), stylers.bold());

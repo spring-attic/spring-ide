@@ -13,17 +13,14 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public abstract class BootDashModel {
 
-	public enum State {
-		READY,
-		LOADING
-	}
-
 	private RunTarget target;
 
-	private State state = State.READY;
+	private LiveVariable<RefreshState> state = new LiveVariable<RefreshState>(RefreshState.READY, this);
 
 	public BootDashModel(RunTarget target) {
 		super();
@@ -35,8 +32,6 @@ public abstract class BootDashModel {
 	}
 
 	ListenerList elementStateListeners = new ListenerList();
-
-	private ListenerList modelStateListeners = new ListenerList();
 
 	public void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
@@ -64,17 +59,12 @@ public abstract class BootDashModel {
 	 * Returns the state of the model
 	 * @return
 	 */
-	public synchronized State getState() {
-		return state;
+	public RefreshState getState() {
+		return state.getValue();
 	}
 
-	protected final synchronized void setState(State newState) {
-		if (state != newState) {
-			state = newState;
-			for (Object l : modelStateListeners.getListeners()) {
-				((ModelStateListener) l).stateChanged(this);
-			}
-		}
+	protected final void setState(RefreshState newState) {
+		state.setValue(newState);
 	}
 
 	public void addElementStateListener(ElementStateListener l) {
@@ -83,14 +73,6 @@ public abstract class BootDashModel {
 
 	public void removeElementStateListener(ElementStateListener l) {
 		elementStateListeners.remove(l);
-	}
-
-	public void addModelStateListener(ModelStateListener l) {
-		modelStateListeners.add(l);
-	}
-
-	public void removeModelStateListener(ModelStateListener l) {
-		modelStateListeners.remove(l);
 	}
 
 	public interface ElementStateListener {
@@ -103,11 +85,12 @@ public abstract class BootDashModel {
 		void stateChanged(BootDashElement e);
 	}
 
-	public interface ModelStateListener {
-		/**
-		 * Called when the model state has changed
-		 */
-		void stateChanged(BootDashModel model);
+	public void addModelStateListener(ValueListener<RefreshState> l) {
+		state.addListener(l);
+	}
+
+	public void removeModelStateListener(ValueListener<RefreshState> l) {
+		state.removeListener(l);
 	}
 
 }

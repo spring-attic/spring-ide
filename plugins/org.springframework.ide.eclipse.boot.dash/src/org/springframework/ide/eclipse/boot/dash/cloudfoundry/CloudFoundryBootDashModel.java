@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -174,16 +175,16 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 
 		try {
-			setState(State.LOADING);
+			setState(RefreshState.LOADING);
 			Operation<Void> op = new TargetApplicationsRefreshOperation(this);
 			getOperationsExecution().runOpAsynch(op);
 		} catch (Exception e) {
-			setState(State.READY);
+			setState(RefreshState.READY);
 			BootDashActivator.log(e);
 		}
 	}
 
-	public void internalSetState(State newState) {
+	public void internalSetState(RefreshState newState) {
 		setState(newState);
 	}
 
