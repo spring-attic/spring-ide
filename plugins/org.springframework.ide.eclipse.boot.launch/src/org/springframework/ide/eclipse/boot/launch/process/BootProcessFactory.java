@@ -42,41 +42,42 @@ public class BootProcessFactory implements IProcessFactory {
 
 		final int jmxPort = getJMXPort(launch);
 		final long timeout = getNiceTerminationTimeout(launch);
-		if (jmxPort>0) {
-			return new RuntimeProcess(launch, process, label, attributes) {
+		return new RuntimeProcess(launch, process, label, attributes) {
 
-				SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(jmxPort);
+			SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(jmxPort);
 
-				@Override
-				public void terminate() throws DebugException {
-					if (!terminateNicely()) {
-						//Let eclipse try it more aggressively.
-						try {
-							super.terminate();
-						} catch (DebugException e) {
-							//Try even harder to destroy the process
-							if (!destroyForcibly()) {
-								throw e;
-							}
+			@Override
+			public void terminate() throws DebugException {
+				if (!terminateNicely()) {
+					//Let eclipse try it more aggressively.
+					try {
+						super.terminate();
+					} catch (DebugException e) {
+						//Try even harder to destroy the process
+						if (!destroyForcibly()) {
+							throw e;
 						}
 					}
 				}
+			}
 
-				private boolean destroyForcibly() {
-					try {
-						Method m = Process.class.getDeclaredMethod("destroyForcibly");
-						m.invoke(process);
-						return true;
-					} catch (Exception e) {
-						//ignore... probably means we are not running on Java 8 VM and so we can't use 'destroyForcibly'.
-					}
-					return false;
+			private boolean destroyForcibly() {
+				try {
+					Method m = Process.class.getDeclaredMethod("destroyForcibly");
+					m.invoke(process);
+					return true;
+				} catch (Exception e) {
+					BootActivator.log(e);
+					//ignore... probably means we are not running on Java 8 VM and so we can't use 'destroyForcibly'.
 				}
+				return false;
+			}
 
-				private boolean terminateNicely() {
-					if (isTerminated()) {
-						return true;
-					}
+			private boolean terminateNicely() {
+				if (isTerminated()) {
+					return true;
+				}
+				if (jmxPort>0) {
 					try {
 						debug("Trying to terminate nicely: "+label);
 						SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
@@ -107,14 +108,11 @@ public class BootProcessFactory implements IProcessFactory {
 					} finally {
 						clientMgr.disposeClient();
 					}
-					return false;
 				}
+				return false;
+			}
 
-			};
-		} else {
-			//Use eclipse 'regular' runtime process
-			return new RuntimeProcess(launch, process, label, attributes);
-		}
+		};
 	}
 
 	private long getNiceTerminationTimeout(ILaunch launch) {
