@@ -159,17 +159,21 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
-		if (element != null) {
-			switch (column) {
-			case PROJECT:
-				IJavaProject jp = element.getJavaProject();
-				return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
-			case TREE_VIEWER_MAIN:
-			case RUN_STATE_ICN:
-				return decorateRunStateImages(element, getRunStateAnimation(element.getRunState()));
-			default:
-				return NO_IMAGES;
+		try {
+			if (element != null) {
+				switch (column) {
+				case PROJECT:
+					IJavaProject jp = element.getJavaProject();
+					return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
+				case TREE_VIEWER_MAIN:
+				case RUN_STATE_ICN:
+					return decorateRunStateImages(element);
+				default:
+					return NO_IMAGES;
+				}
 			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
 		}
 		return NO_IMAGES;
 	}
@@ -386,15 +390,13 @@ public class BootDashLabels implements Disposable {
 		return null;
 	}
 
-	private static Image[] decorateRunStateImages(BootDashElement bde, Image[] images) {
-		Image[] decoratedImages = Arrays.copyOf(images, images.length);
+	private Image[] decorateRunStateImages(BootDashElement bde) throws Exception {
+		Image[] decoratedImages = getRunStateAnimation(bde.getRunState());
 		if (bde.getTarget() != null) {
 			if (bde.getTarget().getType() == RunTargetTypes.CLOUDFOUNDRY) {
 				if (bde.getRunState() == RunState.RUNNING && DevtoolsUtil.isDevClientAttached(bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
 					ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
-					for (int i = 0; i < decoratedImages.length; i++) {
-						decoratedImages[i] = new DecorationOverlayIcon(decoratedImages[i], decorDesc, IDecoration.BOTTOM_RIGHT).createImage(decoratedImages[i].getDevice());
-					}
+					decoratedImages = runStateImages.getDecoratedImages(bde.getRunState(), decorDesc, IDecoration.BOTTOM_RIGHT);
 				}
 			}
 		}
