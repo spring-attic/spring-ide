@@ -18,6 +18,7 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
@@ -87,9 +88,13 @@ public class DevtoolsPortRefresher implements Disposable, ProcessListener {
 				ILaunchConfiguration conf = launch.getLaunchConfiguration();
 				if (conf!=null && conf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID)) {
 					IProject p = BootLaunchConfigurationDelegate.getProject(conf);
-					BootDashElement e = elementFactory.createOrGet(p);
-					if (e instanceof BootProjectDashElement) { // this test should always succeed but check it anyway
-						return (BootProjectDashElement) e;
+					if (p!=null && BootPropertyTester.hasDevtools(p)) {
+						BootDashElement e = elementFactory.createOrGet(p);
+						if (BootPropertyTester.hasDevtools(p)) {
+							if (e instanceof BootProjectDashElement) { // this test should always succeed but check it anyway
+								return (BootProjectDashElement) e;
+							}
+						}
 					}
 				}
 			}
