@@ -56,7 +56,10 @@ public class DevtoolsPortRefresher implements Disposable, ProcessListener {
 
 	@Override
 	public void debugTargetCreated(ProcessTracker tracker, IDebugTarget target) {
-		processCreated(tracker, target.getProcess());
+		IProcess process = target.getProcess();
+		if (process!=null) { // may be null. E.g. for CF debug targets there's no local process attached to debug target.
+			processCreated(tracker, process);
+		}
 	}
 
 	@Override
