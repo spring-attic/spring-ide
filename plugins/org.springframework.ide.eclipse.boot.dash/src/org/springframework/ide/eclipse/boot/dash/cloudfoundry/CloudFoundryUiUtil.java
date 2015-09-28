@@ -67,14 +67,20 @@ public class CloudFoundryUiUtil {
 
 	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
 		checkPassword(targetProperties.getPassword(), targetProperties.getUsername());
+		boolean disableConnectionPool = true;
 		return targetProperties.getSpaceName() != null
 				? new CloudFoundryClient(
 						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
-						targetProperties.getSpaceName(), targetProperties.isSelfsigned())
+						new URL(targetProperties.getUrl()),
+						targetProperties.getOrganizationName(),
+						targetProperties.getSpaceName(),
+						targetProperties.isSelfsigned(),
+						disableConnectionPool)
 				: new CloudFoundryClient(
 						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()), targetProperties.isSelfsigned());
+						new URL(targetProperties.getUrl()),
+						targetProperties.isSelfsigned(),
+						disableConnectionPool);
 
 	}
 
