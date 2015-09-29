@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+
 /**
  * Represents the different states a 'refreshable' element may be in.
  *
@@ -22,6 +24,10 @@ public abstract class RefreshState {
 	public static RefreshState error(String msg) {
 		return new ErrorState(msg);
 	}
+	public static RefreshState error(Exception e) {
+		return error(ExceptionUtil.getMessage(e));
+	}
+
 	public abstract boolean isError();
 
 	////////////////////////// implementation //////////////////////////////////////
@@ -93,4 +99,5 @@ public abstract class RefreshState {
 		}
 
 	}
+
 }

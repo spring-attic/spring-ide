@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
@@ -29,8 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
@@ -64,11 +64,12 @@ public class BootDashLabels implements Disposable {
 	private AppearanceAwareLabelProvider javaLabels = null;
 	private RunStateImages runStateImages = null;
 
+
 	/**
 	 * TODO replace 'runStateImages' and this registry with a single registry
 	 * for working with both animatons & simple images.
 	 */
-	private ImageDescriptorRegistry images;
+	private ImageDecorator images = new ImageDecorator();
 
 	private Stylers stylers;
 
@@ -144,14 +145,23 @@ public class BootDashLabels implements Disposable {
 	// methods instead.
 
 	public Image[] getImageAnimation(BootDashModel element, BootDashColumn column) {
-		return toAnimation(element.getRunTarget().getType().getIcon());
+		ImageDescriptor icon = element.getRunTarget().getType().getIcon();
+		ImageDescriptor decoration = getDecoration(element);
+		return toAnimation(icon, decoration);
 	}
 
-	private Image[] toAnimation(ImageDescriptor icon) {
-		if (images==null) {
-			images = new ImageDescriptorRegistry();
+	private ImageDescriptor getDecoration(BootDashModel element) {
+		RefreshState s = element.getState();
+		if (s==RefreshState.LOADING) {
+			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
+		} else if (s.isError()) {
+			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
 		}
-		Image img = images.get(icon);
+		return null;
+	}
+
+	private Image[] toAnimation(ImageDescriptor icon, ImageDescriptor decoration) {
+		Image img = images.get(icon, decoration);
 		if (img!=null) {
 			return new Image[]{img};
 		}
