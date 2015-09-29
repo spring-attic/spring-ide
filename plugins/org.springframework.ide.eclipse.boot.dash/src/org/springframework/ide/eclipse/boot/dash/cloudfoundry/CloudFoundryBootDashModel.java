@@ -175,17 +175,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 
 		try {
-			setState(RefreshState.LOADING);
 			Operation<Void> op = new TargetApplicationsRefreshOperation(this);
 			getOperationsExecution().runOpAsynch(op);
 		} catch (Exception e) {
-			setState(RefreshState.READY);
+			setState(RefreshState.error(e));
 			BootDashActivator.log(e);
 		}
-	}
-
-	public void internalSetState(RefreshState newState) {
-		setState(newState);
 	}
 
 	@Override

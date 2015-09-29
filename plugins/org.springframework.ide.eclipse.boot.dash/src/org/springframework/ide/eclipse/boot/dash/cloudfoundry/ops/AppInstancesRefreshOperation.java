@@ -55,7 +55,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				this.model.updateApplication(instances);
 			}
 		}
-		model.internalSetState(RefreshState.READY);
+		model.setState(RefreshState.READY);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

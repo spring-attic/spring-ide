@@ -63,7 +63,7 @@ public abstract class BootDashModel {
 		return state.getValue();
 	}
 
-	protected final void setState(RefreshState newState) {
+	public final void setState(RefreshState newState) {
 		state.setValue(newState);
 	}
 

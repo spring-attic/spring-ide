@@ -28,6 +28,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -260,6 +261,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 		stylers = new Stylers(tv.getTree().getFont());
 		tv.setLabelProvider(new BootDashTreeLabelProvider(stylers, tv));
+
+		ColumnViewerToolTipSupport.enableFor(tv);
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getTree());
 

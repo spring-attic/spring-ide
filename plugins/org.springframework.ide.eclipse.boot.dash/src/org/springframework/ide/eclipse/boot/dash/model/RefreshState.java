@@ -29,6 +29,7 @@ public abstract class RefreshState {
 	}
 
 	public abstract boolean isError();
+	public abstract String getErrorMessage();
 
 	////////////////////////// implementation //////////////////////////////////////
 
@@ -43,6 +44,11 @@ public abstract class RefreshState {
 		@Override
 		public boolean isError() {
 			return false;
+		}
+
+		@Override
+		public String getErrorMessage() {
+			return null;
 		}
 
 		@Override
@@ -96,6 +102,11 @@ public abstract class RefreshState {
 			} else if (!msg.equals(other.msg))
 				return false;
 			return true;
+		}
+
+		@Override
+		public String getErrorMessage() {
+			return msg;
 		}
 
 	}

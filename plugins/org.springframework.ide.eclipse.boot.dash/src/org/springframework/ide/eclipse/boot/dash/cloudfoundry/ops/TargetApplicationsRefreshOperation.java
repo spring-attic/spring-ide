@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 
 /**
  * This performs a "two-tier" refresh as fetching list of
@@ -47,6 +48,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+		model.setState(RefreshState.LOADING);
 		try {
 
 			// 1. Fetch basic list of applications. Should be the "faster" of
@@ -82,8 +84,9 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
 			// 2. Launch the slower app stats/instances refresh operation.
 			this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
-
+			model.setState(RefreshState.READY);
 		} catch (Exception e) {
+			model.setState(RefreshState.error(e));
 			BootDashActivator.log(e);
 		}
 	}
