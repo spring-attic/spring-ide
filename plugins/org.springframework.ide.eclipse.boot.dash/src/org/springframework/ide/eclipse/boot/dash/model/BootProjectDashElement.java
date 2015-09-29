@@ -52,8 +52,8 @@ import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.async.ResolvableFuture;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.ResolveableFuture;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -207,7 +207,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 
 	private void stop(boolean sync) throws Exception {
 		debug("Stopping: "+this+" "+(sync?"...":""));
-		final ResolveableFuture<Void> done = sync?new ResolveableFuture<Void>():null;
+		final ResolvableFuture<Void> done = sync?new ResolvableFuture<Void>():null;
 		try {
 			List<ILaunch> launches = LaunchUtil.getLaunches(getProject());
 			if (sync) {
