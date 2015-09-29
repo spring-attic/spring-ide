@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -68,6 +70,8 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements ElementStateListener, Disposable {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
 	private LocalBootDashModel context;
 	private PropertyStoreApi persistentProperties;
@@ -348,7 +352,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	}
 
 	private LiveExpression<Integer> createLivePortExp(final LiveExpression<RunState> runState, final String propName) {
-		return new AsyncLiveExpression<Integer>(-1) {
+		return new AsyncLiveExpression<Integer>(-1, "Refreshing port info ("+propName+") for "+getName()) {
 			{
 				//Doesn't really depend on runState, but should be recomputed when runState changes.
 				dependsOn(runState);
@@ -362,7 +366,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 
 	private int getLivePort(String propName) {
 		ILaunchConfiguration conf = getActiveConfig();
-		if (conf!=null) {
+		if (conf!=null && READY_STATES.contains(getRunState())) {
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
 				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
 				if (jmxPort>0) {
