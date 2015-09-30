@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
@@ -27,6 +28,12 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
 public class CloudFoundryUiUtil {
+
+	/*
+	 * System property. Set to "true" if connection pool is to be used. "false"
+	 * otherwise or omit as a system property
+	 */
+	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
 
 	public static OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties,
 			IRunnableContext context) throws Exception {
@@ -67,20 +74,23 @@ public class CloudFoundryUiUtil {
 
 	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
 		checkPassword(targetProperties.getPassword(), targetProperties.getUsername());
-		boolean disableConnectionPool = true;
+
+		Properties properties = System.getProperties();
+		// By default disable connection pool (i.e. flag is set to true) unless
+		// a property exists that sets
+		// USING connection pool to "true" (so, i.e., disable connection pool is
+		// false)
+		boolean disableConnectionPool = properties == null || !properties.containsKey(BOOT_DASH_CONNECTION_POOL)
+				|| !"true".equals(properties.getProperty(BOOT_DASH_CONNECTION_POOL));
+
 		return targetProperties.getSpaceName() != null
 				? new CloudFoundryClient(
 						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()),
-						targetProperties.getOrganizationName(),
-						targetProperties.getSpaceName(),
-						targetProperties.isSelfsigned(),
-						disableConnectionPool)
+						new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
+						targetProperties.getSpaceName(), targetProperties.isSelfsigned(), disableConnectionPool)
 				: new CloudFoundryClient(
 						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()),
-						targetProperties.isSelfsigned(),
-						disableConnectionPool);
+						new URL(targetProperties.getUrl()), targetProperties.isSelfsigned(), disableConnectionPool);
 
 	}
 
