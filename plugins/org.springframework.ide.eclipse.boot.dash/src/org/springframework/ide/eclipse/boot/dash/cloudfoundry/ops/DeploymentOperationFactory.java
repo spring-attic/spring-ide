@@ -34,7 +34,7 @@ public class DeploymentOperationFactory {
 
 	private final static String APP_FOUND_TITLE = "Replace Existing Application";
 
-	private final static String APP_FOUND_MESSAGE = "Replace Existing Application: {0} - already exists. Continue replacing the existing application?";
+	private final static String APP_FOUND_MESSAGE = "Replacing existing application - {0} - with project: {1}. Continue replacing the existing application?";
 
 	private final CloudFoundryBootDashModel model;
 	private final IProject project;
@@ -72,8 +72,8 @@ public class DeploymentOperationFactory {
 		// (i.e. it points to another existing app)
 		existingApp = requests.getApplication(properties.getAppName());
 
-		if (existingApp != null
-				&& !ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, properties.getAppName()))) {
+		if (existingApp != null && !ui.confirmOperation(APP_FOUND_TITLE,
+				NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(), properties.getProject().getName()))) {
 			throw new OperationCanceledException();
 		}
 

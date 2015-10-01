@@ -269,7 +269,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	}
 
-	public BootDashElement addElement(CloudAppInstances appInstances, IProject project) throws Exception {
+	public BootDashElement addElement(CloudAppInstances appInstances, IProject project, RunState preferedRunState) throws Exception {
 		BootDashElement addedElement = null;
 		Set<BootDashElement> updated = new HashSet<BootDashElement>();
 		boolean changed = false;
@@ -293,8 +293,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			// Update the cache BEFORE updating the model, since the model
 			// elements are handles to the cache
-			changed = getAppCache().replace(appInstances, project,
-					ApplicationRunningStateTracker.getRunState(appInstances));
+			changed = getAppCache().replace(appInstances, project, preferedRunState);
 
 			projectAppStore.storeProjectToAppMapping(updated);
 		}

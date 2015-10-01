@@ -94,7 +94,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 			preferedRunState = ApplicationRunningStateTracker.getRunState(existingInstances);
 		}
 
-		BootDashElement bde = this.model.addElement(existingInstances, project);
+		BootDashElement bde = this.model.addElement(existingInstances, project, preferedRunState);
 		if (project != null && bde != null) {
 			BootDashElement localElement = findLocalBdeForProject(project);
 			if (localElement != null) {

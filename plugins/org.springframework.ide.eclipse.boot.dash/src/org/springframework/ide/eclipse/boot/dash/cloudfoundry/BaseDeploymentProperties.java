@@ -19,7 +19,7 @@ public class BaseDeploymentProperties {
 	/*
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
-	private final List<String> urls = new ArrayList<String>();
+	private List<String> urls = new ArrayList<String>();
 
 	private String appName;
 
@@ -38,15 +38,16 @@ public class BaseDeploymentProperties {
 	}
 
 	/**
+	 * Returns a copy of the list of URLs for the application
 	 *
 	 * @return never null
 	 */
 	public List<String> getUrls() {
-		return urls;
+		return new ArrayList<String>(this.urls);
 	}
 
 	public void setUrls(List<String> urls) {
-		this.urls.clear();
+		this.urls = new ArrayList<String>();
 		if (urls != null) {
 			this.urls.addAll(urls);
 		}
