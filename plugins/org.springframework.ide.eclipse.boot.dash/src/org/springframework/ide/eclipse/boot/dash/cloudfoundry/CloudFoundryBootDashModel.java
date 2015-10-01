@@ -394,12 +394,14 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	/**
 	 *
 	 * @param appInstance
-	 *            must not be null
 	 * @param runState
 	 *            run state to set for the app. if null, the run state will be
 	 *            derived from the application instances
 	 */
 	public void updateApplication(CloudAppInstances appInstance, RunState runState) {
+		if (appInstance == null) {
+			return;
+		}
 		RunState updatedRunState = runState != null ? runState
 				: ApplicationRunningStateTracker.getRunState(appInstance);
 		CloudDashElement element = getElement(appInstance.getApplication().getName());
