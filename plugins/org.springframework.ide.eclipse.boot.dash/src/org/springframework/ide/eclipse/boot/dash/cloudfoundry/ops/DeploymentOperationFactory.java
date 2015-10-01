@@ -34,7 +34,7 @@ public class DeploymentOperationFactory {
 
 	private final static String APP_FOUND_TITLE = "Replace Existing Application";
 
-	private final static String APP_FOUND_MESSAGE = "Replacing existing application - {0} - with project: {1}. Continue replacing the existing application?";
+	private final static String APP_FOUND_MESSAGE = "Replace the existing application - {0} - with project: {1}?";
 
 	private final CloudFoundryBootDashModel model;
 	private final IProject project;
