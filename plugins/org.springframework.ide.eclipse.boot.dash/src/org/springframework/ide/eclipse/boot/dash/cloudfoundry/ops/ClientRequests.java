@@ -230,42 +230,55 @@ public class ClientRequests {
 		return new ClientRequest<CloudAppInstances>(model) {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
+				CloudApplication app = null;
 				try {
-					CloudApplication app = client.getApplication(guid);
-					ApplicationStats stats = client.getApplicationStats(app);
-					return new CloudAppInstances(app, stats);
+					app = client.getApplication(guid);
 				} catch (Exception e) {
-					// Stats may not be available if the app is stopped or no
-					// longer available
-					if (CloudErrors.isBadRequest(e) || CloudErrors.isNotFoundException(e)) {
-						return null;
-					} else {
+					if (!CloudErrors.isNotFoundException(e)) {
 						throw e;
 					}
 				}
+				return getAppInstances(app, client);
 			}
 		}.run();
 	}
 
-	public CloudAppInstances getExistingApplicationInstances(final String appName) throws Exception {
+	public CloudAppInstances getExistingAppInstances(final String appName) throws Exception {
 
 		return new ClientRequest<CloudAppInstances>(model) {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
+				CloudApplication app = null;
 				try {
-					CloudApplication app = client.getApplication(appName);
-					ApplicationStats stats = client.getApplicationStats(app);
-					return new CloudAppInstances(app, stats);
+					app = client.getApplication(appName);
 				} catch (Exception e) {
-					// Stats may not be available if the app is stopped or no
-					// longer available
-					if (CloudErrors.isBadRequest(e) || CloudErrors.isNotFoundException(e)) {
-						return null;
-					} else {
+					if (!CloudErrors.isNotFoundException(e)) {
 						throw e;
 					}
 				}
+				return getAppInstances(app, client);
+
 			}
 		}.run();
+	}
+
+	private CloudAppInstances getAppInstances(CloudApplication app, CloudFoundryOperations client) throws Exception {
+		if (app != null) {
+			ApplicationStats stats = null;
+
+			try {
+				stats = client.getApplicationStats(app);
+			} catch (Exception e) {
+				// Stats may not be available if the app is stopped or
+				// no
+				// longer available
+				if (!CloudErrors.isBadRequest(e) && !CloudErrors.isNotFoundException(e)) {
+					throw e;
+				}
+			}
+			return new CloudAppInstances(app, stats);
+		} else {
+			return null;
+		}
 	}
 }

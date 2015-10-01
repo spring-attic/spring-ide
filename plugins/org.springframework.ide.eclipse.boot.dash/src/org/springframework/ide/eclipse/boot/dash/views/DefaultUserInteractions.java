@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationDeploymentPropertiesWizard;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.UserDefinedDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -215,10 +215,10 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
+	public UserDefinedDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
 			final List<CloudDomain> domains) throws OperationCanceledException {
 		final Shell shell = getShell();
-		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[1];
+		final UserDefinedDeploymentProperties[] props = new UserDefinedDeploymentProperties[1];
 
 		if (shell != null) {
 			shell.getDisplay().syncExec(new Runnable() {

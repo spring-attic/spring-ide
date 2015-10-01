@@ -81,7 +81,7 @@ public class ApplicationRunningStateTracker {
 		model.getElementConsoleManager().writeToConsole(appName, checkingMessage + ". Please wait...",
 				LogType.LOCALSTDOUT);
 
-		CloudAppInstances appInstances = requests.getExistingApplicationInstances(appName);
+		CloudAppInstances appInstances = requests.getExistingAppInstances(appName);
 
 		if (appInstances == null) {
 			throw new OperationCanceledException();

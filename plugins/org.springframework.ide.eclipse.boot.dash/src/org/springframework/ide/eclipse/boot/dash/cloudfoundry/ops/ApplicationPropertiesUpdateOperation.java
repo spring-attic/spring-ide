@@ -55,7 +55,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 		if (updateExistingApplicationInCloud(deploymentProperties, monitor)) {
 			boolean checkTermination = true;
 			this.eventHandler.fireEvent(
-					eventFactory.updateRunState(requests.getExistingApplicationInstances(appName), getDashElement(), null),
+					eventFactory.updateRunState(requests.getExistingAppInstances(appName), getDashElement(), null),
 					checkTermination);
 		}
 	}
@@ -66,6 +66,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 		CloudApplication app = requests.getApplication(appName);
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		boolean updated = false;
+
 		if (app != null) {
 			String appName = properties.getAppName();
 			if (properties.getEnvironmentVariables() != null

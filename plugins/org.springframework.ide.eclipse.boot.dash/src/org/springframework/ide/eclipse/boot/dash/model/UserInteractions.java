@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.UserDefinedDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -43,9 +43,9 @@ public interface UserInteractions {
 	 * @param project that is being deployed
 	 * @param list of domains available in the Cloud target. This is used to create an application URL
 	 * @return deployment properties for the project that at the very least should contain an application name
-	 * @throws OperationCanceledException if deployment is cancelled.
+	 * @throws OperationCanceledException if deployment is canceled.
 	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
+	UserDefinedDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
 
 	/**
 	 * select a file

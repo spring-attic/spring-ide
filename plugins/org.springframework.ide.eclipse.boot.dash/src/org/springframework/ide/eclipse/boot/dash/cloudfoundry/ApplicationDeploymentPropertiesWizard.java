@@ -43,7 +43,7 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 	private final IProject project;
 	private final Map<String, CloudDomain> domainsAsString = new LinkedHashMap<String, CloudDomain>();
-	private CloudApplicationDeploymentProperties properties;
+	private UserDefinedDeploymentProperties properties;
 	private CloudApplicationURL url = null;
 
 	public ApplicationDeploymentPropertiesWizard(IProject project, List<CloudDomain> domains) {
@@ -54,12 +54,11 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				domainsAsString.put(dom.getName(), dom);
 			}
 		}
-		properties = new CloudApplicationDeploymentProperties(project);
+		properties = new UserDefinedDeploymentProperties(project);
 
 		// set some default values
 		properties.setAppName(project.getName());
-		properties.setInstances(1);
-		properties.setMemory(1024);
+
 		if (url != null) {
 			properties.setUrls(Arrays.asList(new String[] { url.getUrl() }));
 		}
@@ -70,7 +69,7 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 		addPage(new DeploymentPropertiesPage());
 	}
 
-	public CloudApplicationDeploymentProperties getProperties() {
+	public UserDefinedDeploymentProperties getProperties() {
 		return properties;
 	}
 

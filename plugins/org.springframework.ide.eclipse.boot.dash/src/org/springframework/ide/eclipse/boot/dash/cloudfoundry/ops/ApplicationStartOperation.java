@@ -40,7 +40,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		CloudAppInstances appInstances = requests.getExistingApplicationInstances(appName);
+		CloudAppInstances appInstances = requests.getExistingAppInstances(appName);
 		if (appInstances == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to start the application. Application does not exist anymore in Cloud Foundry: " + appName);

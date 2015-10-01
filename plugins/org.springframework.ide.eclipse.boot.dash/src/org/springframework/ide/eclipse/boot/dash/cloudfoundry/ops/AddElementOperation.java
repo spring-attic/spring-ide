@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -27,23 +28,35 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
-public class ApplicationCreateOperation extends CloudApplicationOperation {
+/**
+ * Adds an element to the Cloud Foundry boot dash model for a give
+ * {@link CloudApplication}. If the {@link CloudApplication} does not exist, it
+ * will create the application first before adding the element to the model
+ *
+ */
+public class AddElementOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
-	private final RunState preferedRunState;
+	private RunState preferedRunState;
+	private CloudApplication existingApplication;
 
 	/**
 	 *
 	 * @param deploymentProperties
 	 * @param model
+	 *            model where Cloud Foundry element should be added
+	 * @param existingApplication
+	 *            Cloud Application if app alreay exists in CF, otherwise null.
 	 * @param preferedRunState
-	 *            the state that the app should be in when the op is run. For
-	 *            example "STARTING". This overrides the actual runstate in CF
+	 *            the state that the app should be in when the element is created. For
+	 *            example "STARTING". This overrides the actual runstate of the app in CF, if the app already
+	 *            exists
 	 */
-	public ApplicationCreateOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, RunState preferedRunState) {
+	public AddElementOperation(CloudApplicationDeploymentProperties deploymentProperties,
+			CloudFoundryBootDashModel model, CloudApplication existingApplication, RunState preferedRunState) {
 		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
+		this.existingApplication = existingApplication;
 		this.preferedRunState = preferedRunState;
 	}
 
@@ -61,27 +74,33 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 			throw new CoreException(status);
 		}
 
-		CloudAppInstances appInstances = createApplication(monitor);
+		CloudAppInstances existingInstances = null;
+		if (existingApplication == null) {
+			existingInstances = createApplication(monitor);
+		} else {
+			existingInstances = requests.getExistingAppInstances(existingApplication.getMeta().getGuid());
+		}
 
 		monitor.worked(5);
 
-		if (appInstances == null) {
+		if (existingInstances == null) {
 			throw BootDashActivator.asCoreException("Failed to create a Cloud application for : "
 					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
 		}
 
 		IProject project = deploymentProperties.getProject();
-		BootDashElement bde = this.model.addElement(appInstances, project);
+
+		if (preferedRunState == null) {
+			preferedRunState = ApplicationRunningStateTracker.getRunState(existingInstances);
+		}
+
+		BootDashElement bde = this.model.addElement(existingInstances, project);
 		if (project != null && bde != null) {
 			BootDashElement localElement = findLocalBdeForProject(project);
 			if (localElement != null) {
 				copyTags(localElement, bde);
 			}
 		}
-
-		boolean checkTermination = true;
-		this.eventHandler.fireEvent(eventFactory.updateRunState(appInstances, getDashElement(), preferedRunState),
-				checkTermination);
 	}
 
 	private static BootDashElement findLocalBdeForProject(IProject project) {
@@ -131,7 +150,7 @@ public class ApplicationCreateOperation extends CloudApplicationOperation {
 		logAndUpdateMonitor(
 				"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
 				monitor);
-		CloudAppInstances instances = requests.getExistingApplicationInstances(deploymentProperties.getAppName());
+		CloudAppInstances instances = requests.getExistingAppInstances(deploymentProperties.getAppName());
 		monitor.worked(5);
 
 		return instances;

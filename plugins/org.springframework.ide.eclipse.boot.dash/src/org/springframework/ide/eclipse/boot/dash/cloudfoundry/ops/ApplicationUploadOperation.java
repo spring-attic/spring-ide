@@ -57,16 +57,16 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		CloudAppInstances appInstances = requests.getExistingApplicationInstances(appName);
-
 		monitor.beginTask("Generating application archiving and uploading to Cloud Foundry", 10);
 		// Must perform this check otherwise if the app does not exist
 		// and an upload is attempted, CF backend or client may throw an
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
+		CloudAppInstances appInstances = requests.getExistingAppInstances(appName);
 
 		monitor.worked(3);
+
 		if (appInstances == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "

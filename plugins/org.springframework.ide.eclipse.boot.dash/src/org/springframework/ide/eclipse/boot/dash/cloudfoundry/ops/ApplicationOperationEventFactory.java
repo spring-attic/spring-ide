@@ -38,7 +38,8 @@ public class ApplicationOperationEventFactory {
 	 * @return
 	 *
 	 */
-	public ApplicationOperationEvent updateRunState(CloudAppInstances appInstances, CloudDashElement element, RunState runState) {
+	public ApplicationOperationEvent updateRunState(CloudAppInstances appInstances, CloudDashElement element,
+			RunState runState) {
 		// If no runstate specified retain the existing runstate in the element
 		if (runState == null) {
 			runState = element != null ? element.getRunState() : null;

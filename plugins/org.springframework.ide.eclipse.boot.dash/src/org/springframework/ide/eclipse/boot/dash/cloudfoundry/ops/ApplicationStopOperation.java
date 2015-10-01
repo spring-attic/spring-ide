@@ -31,7 +31,7 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		requests.stopApplication(element.getName());
 		model.getElementConsoleManager().terminateConsole(element.getName());
-		CloudAppInstances updatedInstances = requests.getExistingApplicationInstances(element.getName());
+		CloudAppInstances updatedInstances = requests.getExistingAppInstances(element.getName());
 
 		boolean checkTermination = false;
 		this.eventHandler.fireEvent(eventFactory.updateRunState(updatedInstances, getDashElement(),
