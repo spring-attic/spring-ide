@@ -84,4 +84,10 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 			BootDashActivator.log(e);
 		}
 	}
+
+	@Override
+	String getOpErrorPrefix() {
+		return "Error: " + appName + " in '" + model.getRunTarget().getName() + "'";
+	}
+
 }

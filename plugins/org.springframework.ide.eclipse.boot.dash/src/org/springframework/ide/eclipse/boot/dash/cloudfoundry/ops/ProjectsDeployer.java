@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -60,10 +61,23 @@ public class ProjectsDeployer extends CloudOperation {
 				throw new OperationCanceledException();
 			}
 
-			CloudApplicationOperation op = new DeploymentOperationFactory(model, entry.getKey(), ui)
-					.getCreateAndDeploy(runOrDebug, monitor);
+			try {
+				CloudApplicationOperation op = new DeploymentOperationFactory(model, entry.getKey(), ui)
+						.getCreateAndDeploy(runOrDebug, monitor);
 
-			op.run(monitor);
+				model.getOperationsExecution(ui).runOpAsynch(op);
+			} catch (Exception e) {
+				if (!(e instanceof OperationCanceledException)) {
+					if (ui != null) {
+						String message = e.getMessage() != null && e.getMessage().trim().length() > 0 ? e.getMessage()
+								: "Error type: " + e.getClass().getName()
+										+ ". Check Error Log view for further details.";
+						ui.errorPopup("Operation Failure", message);
+
+					}
+					BootDashActivator.log(e);
+				}
+			}
 		}
 	}
 }

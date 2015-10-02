@@ -38,8 +38,12 @@ public abstract class CloudOperation extends Operation<Void> {
 		try {
 			doCloudOp(monitor);
 		} catch (Exception e) {
-			CloudErrors.checkAndRethrowCloudException(e);
+			CloudErrors.checkAndRethrowCloudException(e, getOpErrorPrefix());
 		}
 		return null;
+	}
+
+	String getOpErrorPrefix() {
+		return "Error in target: " + model.getRunTarget().getName();
 	}
 }

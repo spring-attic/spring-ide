@@ -40,9 +40,9 @@ public class OperationsExecution {
 						if (ui != null) {
 							String message = e.getMessage() != null && e.getMessage().trim().length() > 0
 									? e.getMessage()
-									: "Unknown error of type: " + e.getClass().getName()
+									: "Error type: " + e.getClass().getName()
 											+ ". Check Error Log view for further details.";
-							ui.errorPopup("Operation failure: ", message);
+							ui.errorPopup("Operation Failure", message);
 
 						}
 						BootDashActivator.log(e);

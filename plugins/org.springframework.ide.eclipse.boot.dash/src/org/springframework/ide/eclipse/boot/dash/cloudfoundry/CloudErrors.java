@@ -77,7 +77,7 @@ public class CloudErrors {
 		return false;
 	}
 
-	public static void checkAndRethrowCloudException(Exception e) throws Exception {
+	public static void checkAndRethrowCloudException(Exception e, String errorPrefix) throws Exception {
 		// Special case for CF exceptions:
 		// CF exceptions may not contain the error in the message but rather
 		// the description
@@ -87,6 +87,9 @@ public class CloudErrors {
 				message = "Another URL is required: the host is already taken by another existing application. Please change the URL, and restart or redeploy the application.";
 			} else {
 				message = getCloudErrorMessage((CloudFoundryException) e);
+			}
+			if (errorPrefix != null) {
+				message = errorPrefix + ": " + message;
 			}
 			IStatus status = BootDashActivator.createErrorStatus(e, message);
 			throw new CoreException(status);
