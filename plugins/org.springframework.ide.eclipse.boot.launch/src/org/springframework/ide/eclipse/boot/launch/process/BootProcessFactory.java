@@ -104,7 +104,8 @@ public class BootProcessFactory implements IProcessFactory {
 						debug("SUCCESS terminate nicely: "+label);
 						return true;
 					} catch (Exception e) {
-						BootActivator.log(e);
+						//ignore... nice termination failed.
+						//BootActivator.log(e);
 					} finally {
 						clientMgr.disposeClient();
 					}

@@ -62,13 +62,13 @@ public class BootLaunchUtils {
 						return; //Success
 					}
 				} catch (Exception e) {
-					//Nice termination failed. We'll log exception and allow fallback to kick in.
-					BootActivator.log(e);
+					//Nice termination failed. We'll ignore the exception and allow fallback to kick in.
+					//BootActivator.log(e);
 				} finally {
 					clientMgr.disposeClient();
 				}
 			}
-			// Fallback to default implementation if client not available.
+			// Fallback to default implementation if 'nice termination' not available.
 			l.terminate();
 //		} catch (Exception e) {
 //			BootActivator.log(e);
