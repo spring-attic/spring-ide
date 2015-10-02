@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -47,7 +46,6 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
-import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -213,7 +211,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		debug("Stopping: "+this+" "+(sync?"...":""));
 		final ResolvableFuture<Void> done = sync?new ResolvableFuture<Void>():null;
 		try {
-			List<ILaunch> launches = LaunchUtil.getLaunches(getProject());
+			List<ILaunch> launches = BootLaunchUtils.getBootLaunches(getProject());
 			if (sync) {
 				LaunchUtils.whenTerminated(launches, new Runnable() {
 					public void run() {

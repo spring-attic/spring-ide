@@ -12,15 +12,22 @@ package org.springframework.ide.eclipse.boot.launch.util;
 
 import static org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils.whenTerminated;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
  * @author Kris De Volder
@@ -73,6 +80,43 @@ public class BootLaunchUtils {
 //		} catch (Exception e) {
 //			BootActivator.log(e);
 //		}
+	}
+
+
+	public static List<ILaunch> getBootLaunches(IProject project) {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		ILaunch[] allLaunches = lm.getLaunches();
+		if (allLaunches!=null && allLaunches.length>0) {
+			List<ILaunch> launches = new ArrayList<ILaunch>();
+			for (ILaunch launch : allLaunches) {
+				if (isBootLaunch(launch) && project.equals(getProject(launch))) {
+					launches.add(launch);
+				}
+			}
+			return launches;
+		}
+		return Collections.emptyList();
+	}
+
+	public static IProject getProject(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		if (conf!=null) {
+			return BootLaunchConfigurationDelegate.getProject(conf);
+		}
+		return null;
+	}
+
+	public static boolean isBootLaunch(ILaunch l) {
+		try {
+			ILaunchConfiguration conf = l.getLaunchConfiguration();
+			if (conf!=null) {
+					String type = conf.getType().getIdentifier();
+				return BootLaunchConfigurationDelegate.TYPE_ID.equals(type);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return false;
 	}
 
 }

@@ -27,6 +27,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -89,7 +90,7 @@ public class ProjectRunStateTracker extends ProcessListenerAdapter {
 		Map<IProject, RunState> states = new HashMap<IProject, RunState>();
 		for (ILaunch l : launchManager().getLaunches()) {
 			if (!l.isTerminated() && isInteresting(l)) {
-				IProject p = LaunchUtil.getProject(l);
+				IProject p = BootLaunchUtils.getProject(l);
 				RunState s1 = getState(states, p);
 				RunState s2 = getActiveState(l);
 				states.put(p, s1.merge(s2));
@@ -99,16 +100,7 @@ public class ProjectRunStateTracker extends ProcessListenerAdapter {
 	}
 
 	private boolean isInteresting(ILaunch l) {
-		try {
-			ILaunchConfiguration conf = l.getLaunchConfiguration();
-			if (conf!=null) {
-					String type = conf.getType().getIdentifier();
-				return BootLaunchConfigurationDelegate.TYPE_ID.equals(type);
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return false;
+		return BootLaunchUtils.isBootLaunch(l);
 	}
 
 	/**

@@ -20,16 +20,9 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 
 public class LaunchUtil {
-
-	public static IProject getProject(ILaunch launch) {
-		ILaunchConfiguration conf = launch.getLaunchConfiguration();
-		if (conf!=null) {
-			return BootLaunchConfigurationDelegate.getProject(conf);
-		}
-		return null;
-	}
 
 	public static boolean isDebugging(ILaunch launch) {
 		return ILaunchManager.DEBUG_MODE.equals(launch.getLaunchMode());
@@ -40,7 +33,7 @@ public class LaunchUtil {
 		if (allLaunches!=null && allLaunches.length>0) {
 			List<ILaunch> launches = new ArrayList<ILaunch>();
 			for (ILaunch launch : allLaunches) {
-				if (project.equals(getProject(launch))) {
+				if (project.equals(BootLaunchUtils.getProject(launch))) {
 					launches.add(launch);
 				}
 			}
