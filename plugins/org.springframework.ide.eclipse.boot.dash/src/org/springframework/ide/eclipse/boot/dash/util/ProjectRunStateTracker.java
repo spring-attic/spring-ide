@@ -98,7 +98,7 @@ public class ProjectRunStateTracker extends ProcessListenerAdapter {
 		return states;
 	}
 
-	private boolean isInteresting(ILaunch l) {
+	protected boolean isInteresting(ILaunch l) {
 		try {
 			ILaunchConfiguration conf = l.getLaunchConfiguration();
 			if (conf!=null) {

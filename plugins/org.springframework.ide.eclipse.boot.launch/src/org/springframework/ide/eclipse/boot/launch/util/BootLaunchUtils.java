@@ -12,13 +12,20 @@ package org.springframework.ide.eclipse.boot.launch.util;
 
 import static org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils.whenTerminated;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
@@ -73,6 +80,31 @@ public class BootLaunchUtils {
 //		} catch (Exception e) {
 //			BootActivator.log(e);
 //		}
+	}
+
+	/**
+	 * Get Boot launch configs associated with a given project.
+	 */
+	public static List<ILaunchConfiguration> getLaunchConfigs(IProject project) {
+		try {
+			if (project!=null) {
+				ILaunchManager mgr = DebugPlugin.getDefault().getLaunchManager();
+				ILaunchConfigurationType type = mgr.getLaunchConfigurationType(BootLaunchConfigurationDelegate.TYPE_ID);
+				ILaunchConfiguration[] allConfs = mgr.getLaunchConfigurations(type);
+				if (allConfs!=null && allConfs.length>0) {
+					ArrayList<ILaunchConfiguration> confs = new ArrayList<>(allConfs.length);
+					for (ILaunchConfiguration c : allConfs) {
+						if (project.equals(BootLaunchConfigurationDelegate.getProject(c))) {
+							confs.add(c);
+						}
+					}
+					return confs;
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return Collections.emptyList();
 	}
 
 }

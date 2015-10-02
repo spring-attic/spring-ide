@@ -16,8 +16,10 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
@@ -25,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.Pro
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
@@ -84,7 +87,26 @@ public class LocalBootDashModel extends BootDashModel {
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
-			this.runStateTracker = new ProjectRunStateTracker();
+			this.runStateTracker = new ProjectRunStateTracker() {
+				@Override
+				protected boolean isInteresting(ILaunch l) {
+					try {
+						ILaunchConfiguration conf = l.getLaunchConfiguration();
+						if (conf!=null) {
+							IProject p = BootLaunchConfigurationDelegate.getProject(conf);
+							if (p!=null) {
+								BootDashElement pe = elementFactory.createOrGet(p);
+								if (pe!=null) {
+									return conf.equals(pe.getActiveConfig());
+								}
+							}
+						}
+					} catch (Exception e) {
+						BootActivator.log(e);
+					}
+					return false;
+				}
+			};
 			runStateTracker.setListener(new ProjectRunStateListener() {
 				public void stateChanged(IProject p) {
 					BootDashElement e = elementFactory.createOrGet(p);

@@ -49,5 +49,17 @@ public class LaunchUtil {
 		return Collections.emptyList();
 	}
 
-
+	public static List<ILaunch> getLaunches(ILaunchConfiguration conf) {
+		ILaunch[] allLaunches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
+		if (allLaunches!=null && allLaunches.length>0) {
+			List<ILaunch> launches = new ArrayList<ILaunch>();
+			for (ILaunch launch : allLaunches) {
+				if (conf.equals(launch.getLaunchConfiguration())) {
+					launches.add(launch);
+				}
+			}
+			return launches;
+		}
+		return Collections.emptyList();
+	}
 }

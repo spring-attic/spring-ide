@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,7 +26,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -162,6 +162,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	}
 
 	protected void launch(final String runMode, final ILaunchConfiguration conf) {
+		setPreferredConfig(conf);
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				DebugUITools.launch(conf, runMode);
@@ -213,7 +214,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		debug("Stopping: "+this+" "+(sync?"...":""));
 		final ResolvableFuture<Void> done = sync?new ResolvableFuture<Void>():null;
 		try {
-			List<ILaunch> launches = LaunchUtil.getLaunches(getProject());
+			List<ILaunch> launches = getLaunches();
 			if (sync) {
 				LaunchUtils.whenTerminated(launches, new Runnable() {
 					public void run() {
@@ -238,6 +239,14 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			done.get(6, TimeUnit.SECONDS);
 			debug("Stopping: "+this+" "+"DONE");
 		}
+	}
+
+	private List<ILaunch> getLaunches() {
+		ILaunchConfiguration conf = getActiveConfig();
+		if (conf!=null) {
+			return LaunchUtil.getLaunches(conf);
+		}
+		return Collections.emptyList();
 	}
 
 	public static void debug(String string) {
