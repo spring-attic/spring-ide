@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 
 @SuppressWarnings("restriction")
 public class LocalElementConsoleManager extends BootDashModelConsoleManager {
@@ -72,7 +73,7 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 
 		IConsole[] activeConsoles = manager.getConsoles();
 		if (activeConsoles != null) {
-			List<ILaunch> launches = LaunchUtil.getLaunches(element.getProject());
+			List<ILaunch> launches = BootLaunchUtils.getBootLaunches(element.getProject());
 
 			for (ILaunch launch : launches) {
 
