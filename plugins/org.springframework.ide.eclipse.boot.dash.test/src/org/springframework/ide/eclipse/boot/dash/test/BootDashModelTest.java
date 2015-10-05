@@ -57,6 +57,7 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -500,7 +501,7 @@ public class BootDashModelTest {
 	 * than one active launch, or no active launch this returns null.
 	 */
 	public ILaunch getActiveLaunch(BootDashElement element) {
-		List<ILaunch> ls = LaunchUtil.getLaunches(element.getProject());
+		List<ILaunch> ls = BootLaunchUtils.getBootLaunches(element.getProject());
 		ILaunch activeLaunch = null;
 		for (ILaunch l : ls) {
 			if (!l.isTerminated()) {
