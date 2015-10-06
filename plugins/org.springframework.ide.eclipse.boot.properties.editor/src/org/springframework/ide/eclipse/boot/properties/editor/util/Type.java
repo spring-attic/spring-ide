@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -93,6 +94,8 @@ public class Type {
 			String[] args = Signature.getTypeArguments(typeSig);
 			if (shouldResolve) {
 				erasure = tryToResolve(qualifiedName(pkg, nam), context);
+			} else {
+				erasure = qualifiedName(pkg, nam);
 			}
 			if (ArrayUtils.hasElements(params)) {
 				//TODO: handle this case
@@ -106,8 +109,23 @@ public class Type {
 			} else {
 				return new Type(erasure, null);
 			}
+		} else if (kind==Signature.ARRAY_TYPE_SIGNATURE) {
+			Type elementType = fromSignature(Signature.getElementType(typeSig), context);
+			if (elementType!=null) {
+				int arrayCount = Signature.getArrayCount(typeSig);
+				return elementType.asArray(arrayCount);
+			}
 		}
 		return null;
+	}
+
+	public Type asArray(int arrayCount) {
+		Assert.isLegal(arrayCount>0);
+		StringBuilder arrayErasure = new StringBuilder(erasure);
+		for (int i = 0; i < arrayCount; i++) {
+			arrayErasure.append("[]");
+		}
+		return new Type(arrayErasure.toString(), params);
 	}
 
 	private static String qualifiedName(String pkg, String nam) {

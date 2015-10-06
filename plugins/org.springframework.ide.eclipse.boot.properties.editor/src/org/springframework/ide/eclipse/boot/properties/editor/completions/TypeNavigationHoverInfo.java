@@ -79,10 +79,8 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 		html.raw("</b>");
 		html.raw("<br>");
 
-		String typeStr = type.toString();
-		if (typeStr==null) {
-			typeStr = Object.class.getName();
-		}
+		String typeStr = type==null ?  Object.class.getName() : type.toString();
+
 		html.raw("<a href=\"");
 		html.url("type/"+type);
 		html.raw("\">");

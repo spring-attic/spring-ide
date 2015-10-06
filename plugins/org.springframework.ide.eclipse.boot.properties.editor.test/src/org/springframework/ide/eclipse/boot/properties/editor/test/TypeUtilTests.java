@@ -102,4 +102,17 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 		assertEquals(TypeParser.parse(expectedType), actualType);
 	}
 
+	public void testTypeFromSignature() throws Exception {
+		IProject p = createPredefinedProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+
+		assertType("java.lang.String", Type.fromSignature("QString;", jp.findType("demo.ColorData")));
+		assertType("java.lang.String", Type.fromSignature("Ljava.lang.String;", jp.findType("demo.ColorData")));
+
+		assertType("java.lang.String[]", Type.fromSignature("[Ljava.lang.String;", jp.findType("demo.ColorData")));
+		assertType("java.lang.String[]", Type.fromSignature("[QString;", jp.findType("demo.ColorData")));
+	}
+
+
 }

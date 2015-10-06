@@ -112,6 +112,11 @@ public class InitializrServiceSpec {
 		public String getVersionRange() {
 			return versionRange;
 		}
+
+		@Override
+		public String toString() {
+			return "Dep("+id+","+description+","+versionRange+")";
+		}
 	}
 
 	public static class DependencyGroup extends Nameable {

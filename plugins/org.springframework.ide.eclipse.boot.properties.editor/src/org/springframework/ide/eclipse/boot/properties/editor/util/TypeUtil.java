@@ -337,8 +337,11 @@ public class TypeUtil {
 	}
 
 	public boolean isAtomic(Type type) {
-		String typeName = type.getErasure();
-		return ATOMIC_TYPES.contains(typeName) || isEnum(type);
+		if (type!=null) {
+			String typeName = type.getErasure();
+			return ATOMIC_TYPES.contains(typeName) || isEnum(type);
+		}
+		return false;
 	}
 
 	/**
@@ -356,19 +359,21 @@ public class TypeUtil {
 	}
 
 	public static boolean isList(Type type) {
-		String erasure = type.getErasure();
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
 		//However, use reflection here is okay assuming types we care about
 		//are part of JRE standard libraries. Using eclipse 'type hirearchy' would
 		//also potentialy be very slow.
-		try {
-			Class<?> erasureClass = Class.forName(erasure);
-			return List.class.isAssignableFrom(erasureClass);
-		} catch (Exception e) {
-			//type not resolveable assume its not 'array like'
-			return false;
+		if (type!=null) {
+			String erasure = type.getErasure();
+			try {
+				Class<?> erasureClass = Class.forName(erasure);
+				return List.class.isAssignableFrom(erasureClass);
+			} catch (Exception e) {
+				//type not resolveable assume its not 'array like'
+			}
 		}
+		return false;
 	}
 
 	/**
@@ -379,7 +384,7 @@ public class TypeUtil {
 	}
 
 	public static boolean isArray(Type type) {
-		return type.getErasure().endsWith("[]");
+		return type!=null && type.getErasure().endsWith("[]");
 	}
 
 	public static boolean isMap(Type type) {
@@ -388,14 +393,16 @@ public class TypeUtil {
 		//However, use reflection here is okay assuming types we care about
 		//are part of JRE standard libraries. Using eclipse 'type hirearchy' would
 		//also potentialy be very slow.
-		String erasure = type.getErasure();
-		try {
-			Class<?> erasureClass = Class.forName(erasure);
-			return Map.class.isAssignableFrom(erasureClass);
-		} catch (Exception e) {
-			//type not resolveable
-			return false;
+		if (type!=null) {
+			String erasure = type.getErasure();
+			try {
+				Class<?> erasureClass = Class.forName(erasure);
+				return Map.class.isAssignableFrom(erasureClass);
+			} catch (Exception e) {
+				//type not resolveable
+			}
 		}
+		return false;
 	}
 
 	/**
@@ -531,7 +538,7 @@ public class TypeUtil {
 				List<IMethod> setters = getSetterMethods(eclipseType);
 				//TODO: setters inherited from super classes?
 				//TODO: the code below is too simplistic. More complex cases allow for non-atomic property types
-				//   to be defined by having only a setter (e.g. when the type is a pre-initialized collection, array or bean).
+				//   to be defined by having only a getter (e.g. when the type is a pre-initialized collection, array or bean).
 				if (setters!=null && !setters.isEmpty()) {
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(setters.size());
 					for (IMethod m : setters) {

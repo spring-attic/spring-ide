@@ -11,9 +11,14 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 
 /**
  * @author Kris De Volder
@@ -2028,7 +2033,78 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	// TODO: allow relaxed property names in reconciling
+	@Override
+	protected void tearDown() throws Exception {
+	}
+
+	public void test_STS4231() throws Exception {
+		//Should the 'predefined' project need to be recreated... use the commented code below:
+//		BootProjectTestHarness projectHarness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+//		IProject project = projectHarness.createBootProject("sts-4231",
+//				bootVersionAtLeast("1.3.0"),
+//				withStarters("web", "cloud-config-server")
+//		);
+
+		//For more robust test use predefined project which is not so much a moving target:
+		IProject project = createPredefinedProject("sts-4231");
+		useProject(project);
+
+		assertCompletionsDisplayString(
+				"info:\n" +
+				"  component: Config Server\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    name: configserver\n" +
+				"  jmx:\n" +
+				"    default-domain: cloud.config.server\n" +
+				"  cloud:\n" +
+				"    config:\n" +
+				"      server:\n" +
+				"        git:\n" +
+				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
+				"          repos:\n" +
+				"            my-repo:\n" +
+				"              <*>\n",
+				// ==>
+				"name : String",
+				"pattern : String[]"
+		);
+
+		assertCompletion(
+				"info:\n" +
+				"  component: Config Server\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    name: configserver\n" +
+				"  jmx:\n" +
+				"    default-domain: cloud.config.server\n" +
+				"  cloud:\n" +
+				"    config:\n" +
+				"      server:\n" +
+				"        git:\n" +
+				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
+				"          repos:\n" +
+				"            my-repo:\n" +
+				"              p<*>\n",
+				// ==>
+				"info:\n" +
+				"  component: Config Server\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    name: configserver\n" +
+				"  jmx:\n" +
+				"    default-domain: cloud.config.server\n" +
+				"  cloud:\n" +
+				"    config:\n" +
+				"      server:\n" +
+				"        git:\n" +
+				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
+				"          repos:\n" +
+				"            my-repo:\n" +
+				"              pattern: <*>\n"
+		);
+
+	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////
 
