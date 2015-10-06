@@ -13,10 +13,8 @@ package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.Disposable;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
@@ -28,19 +26,16 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
  *
  * @author Kris De Volder
  */
-public class PreferencesBasedSeverityProvider implements SeverityProvider, IPropertyChangeListener {
+public class PreferencesBasedSeverityProvider implements SeverityProvider {
 
-	private IPreferenceStore prefs;
+	private IPreferenceStore projectPrefs;
+	private IPreferenceStore workspacePrefs;
 
 	private Map<ProblemType, ProblemSeverity> cache = null;
 
-	public PreferencesBasedSeverityProvider(IPreferenceStore prefs) {
-		this.prefs = prefs;
-		this.prefs.addPropertyChangeListener(this);
-	}
-
-	public PreferencesBasedSeverityProvider() {
-		this(SpringPropertiesEditorPlugin.getDefault().getPreferenceStore());
+	public PreferencesBasedSeverityProvider(IPreferenceStore projectPrefs, IPreferenceStore workspacePrefs) {
+		this.projectPrefs = projectPrefs;
+		this.workspacePrefs = workspacePrefs;
 	}
 
 	@Override
@@ -54,20 +49,28 @@ public class PreferencesBasedSeverityProvider implements SeverityProvider, IProp
 		}
 		ProblemSeverity existing = cache.get(problemType);
 		if (existing==null) {
-			cache.put(problemType, existing = ProblemSeverityPreferencesUtil.getSeverity(prefs, problemType));
+			cache.put(problemType, existing = ProblemSeverityPreferencesUtil.getSeverity(getPrefs(), problemType));
 		}
 		return existing;
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().startsWith(ProblemSeverityPreferencesUtil.PREFERENCE_PREFIX)) {
-			clearCache();
+	protected IPreferenceStore getPrefs() {
+		if (useProjectPreferences()) {
+			return projectPrefs;
+		} else {
+			return workspacePrefs;
 		}
 	}
 
-	private synchronized void clearCache() {
-		cache = null;
+	private boolean useProjectPreferences() {
+		if (projectPrefs!=null) {
+			return ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs);
+		}
+		return false;
 	}
 
+	@Override
+	public synchronized void startReconciling() {
+		cache = null;
+	}
 }

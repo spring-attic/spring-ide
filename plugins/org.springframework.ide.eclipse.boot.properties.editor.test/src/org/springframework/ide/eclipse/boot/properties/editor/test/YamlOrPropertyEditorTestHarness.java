@@ -24,11 +24,13 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.ide.eclipse.boot.properties.editor.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
@@ -50,6 +52,11 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 	protected DocumentContextFinder documentContextFinder = new DocumentContextFinder() {
 		public IJavaProject getJavaProject(IDocument doc) {
 			return javaProject;
+		}
+
+		@Override
+		public SeverityProvider getSeverityProvider(IDocument doc) {
+			return new DefaultSeverityProvider();
 		}
 	};
 

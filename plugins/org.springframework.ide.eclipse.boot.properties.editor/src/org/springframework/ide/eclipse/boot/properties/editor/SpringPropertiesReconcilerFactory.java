@@ -18,6 +18,7 @@ import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferencesBasedSeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ReconcilingUtil;
 
@@ -29,7 +30,7 @@ public abstract class SpringPropertiesReconcilerFactory {
 	 */
 	private boolean DISABLE_SPELL_CHECKER = true;
 
-	public SpringPropertiesReconciler createReconciler(ISourceViewer sourceViewer) {
+	public SpringPropertiesReconciler createReconciler(ISourceViewer sourceViewer, DocumentContextFinder documentContextFinder) {
 		IReconcilingStrategy strategy = null;
 		if (!DISABLE_SPELL_CHECKER && EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
 			IReconcilingStrategy spellcheck = new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
@@ -42,7 +43,7 @@ public abstract class SpringPropertiesReconcilerFactory {
 		}
 		try {
 			IReconcileEngine reconcileEngine = createEngine();
-			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, reconcileEngine, new PreferencesBasedSeverityProvider());
+			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, reconcileEngine, documentContextFinder);
 			strategy = ReconcilingUtil.compose(strategy, propertyChecker);
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);

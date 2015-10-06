@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 public class ProblemSeverityPreferencesUtil {
 
 	public static final String PREFERENCE_PREFIX = "spring.properties.editor.problem.";
+	public static final String ENABLE_PROJECT_PREFERENCES = PREFERENCE_PREFIX+"project.prefs.enabled";
 
 	/**
 	 * Ensures that default preference  values for all problem types are entered into the
@@ -65,5 +66,8 @@ public class ProblemSeverityPreferencesUtil {
 		prefs.setValue(getPreferenceName(problemType), severity.toString());
 	}
 
+	public static boolean projectPreferencesEnabled(IPreferenceStore projectPrefs) {
+		return projectPrefs.getBoolean(ENABLE_PROJECT_PREFERENCES);
+	}
 
 }

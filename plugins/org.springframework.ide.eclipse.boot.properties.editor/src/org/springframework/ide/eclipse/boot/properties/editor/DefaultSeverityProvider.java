@@ -27,4 +27,8 @@ public class DefaultSeverityProvider implements SeverityProvider {
 		return problem.getType().getDefaultSeverity();
 	}
 
+	@Override
+	public void startReconciling() {
+	}
+
 }

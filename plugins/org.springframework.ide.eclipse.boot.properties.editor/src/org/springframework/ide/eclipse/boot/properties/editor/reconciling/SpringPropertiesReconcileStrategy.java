@@ -36,6 +36,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 
 /**
@@ -131,9 +132,11 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	private SeverityProvider fSeverities;
 
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, SeverityProvider severities) {
+	private DocumentContextFinder fDocumentContextFinder;
+
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, DocumentContextFinder documentContextFinder) {
 		Assert.isNotNull(viewer);
-		fSeverities = severities;
+		fDocumentContextFinder = documentContextFinder;
 		fViewer= viewer;
 		fEngine = engine;
 	}
@@ -171,6 +174,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 			return;
 		//Note: This isn't an 'incremental' reconciler. It always checks the whole document. The dirty
 		// region is ignored.
+		fSeverities.startReconciling();
 		fEngine.reconcile(fDocument, fProblemCollector, fProgressMonitor);
 	}
 
@@ -200,6 +204,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 */
 	public void setDocument(IDocument document) {
 		fDocument= document;
+		fSeverities = fDocumentContextFinder.getSeverityProvider(fDocument);
 		fProblemCollector= createProblemCollector();
 	}
 

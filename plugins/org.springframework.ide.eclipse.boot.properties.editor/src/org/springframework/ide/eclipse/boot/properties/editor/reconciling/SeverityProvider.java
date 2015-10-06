@@ -19,5 +19,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 public interface SeverityProvider {
 
 	ProblemSeverity getSeverity(SpringPropertyProblem problem);
+	void startReconciling();
 
 }

@@ -193,7 +193,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (fReconciler==null) {
-			fReconciler = fReconcilerFactory.createReconciler(sourceViewer);
+			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder);
 		}
 		return fReconciler;
 	}
