@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.setPackage;
+
 public class BootJarPackagingTest extends StsTestCase {
 
 	private JavaUtils java = new JavaUtils();
@@ -48,7 +50,9 @@ public class BootJarPackagingTest extends StsTestCase {
 	public void testSimple() throws Exception {
 		UserInteractions ui = Mockito.mock(UserInteractions.class);
 		BootProjectTestHarness harness = getHarness();
-		IProject project = harness.createBootProject("simple-boot");
+		IProject project = harness.createBootProject("simple-boot",
+				setPackage("demo")
+		);
 		createFile(project, "src/main/java/demo/Greeter.java",
 				"package demo;\n" +
 				"\n" +
@@ -79,7 +83,9 @@ public class BootJarPackagingTest extends StsTestCase {
 		UserInteractions ui = Mockito.mock(UserInteractions.class);
 		BootProjectTestHarness harness = getHarness();
 
-		IProject project = harness.createBootProject("simple-boot");
+		IProject project = harness.createBootProject("simple-boot",
+				setPackage("demo")
+		);
 		fileReplace(project, "pom.xml",
 				"</dependencies>",
 				"	<dependency>\n" +

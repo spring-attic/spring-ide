@@ -2097,7 +2097,8 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
 				"          repos:\n" +
 				"            my-repo:\n" +
-				"              pattern: <*>\n"
+				"              pattern:\n" +
+				"                - <*>\n"
 		);
 
 	}

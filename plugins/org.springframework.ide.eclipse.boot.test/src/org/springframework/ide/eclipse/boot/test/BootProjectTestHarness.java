@@ -67,6 +67,14 @@ public class BootProjectTestHarness {
 		return WizardConfigurer.NULL;
 	}
 
+	public static WizardConfigurer setPackage(final String pkgName) {
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				wizard.getStringInput("packageName").setValue(pkgName);
+			}
+		};
+	}
+
 	/**
 	 * @return A wizard configurer that ensures the selected 'boot version' is at least
 	 * a given version of boot.
