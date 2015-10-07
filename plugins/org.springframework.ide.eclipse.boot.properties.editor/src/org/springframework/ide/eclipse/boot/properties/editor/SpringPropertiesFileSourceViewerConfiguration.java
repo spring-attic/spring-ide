@@ -54,7 +54,7 @@ public class SpringPropertiesFileSourceViewerConfiguration
 extends PropertiesFileSourceViewerConfiguration {
 
 	private static final String DIALOG_SETTINGS_KEY = PropertiesFileSourceViewerConfiguration.class.getName();
-	private static final DocumentContextFinder documentContextFinder = DocumentContextFinder.DEFAULT;
+	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.PROPS_DEFAULT;
 	private SpringPropertiesCompletionEngine engine;
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {

@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Disposable;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
@@ -28,14 +28,16 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
  */
 public class PreferencesBasedSeverityProvider implements SeverityProvider {
 
+	private EditorType editorType;
 	private IPreferenceStore projectPrefs;
 	private IPreferenceStore workspacePrefs;
 
 	private Map<ProblemType, ProblemSeverity> cache = null;
 
-	public PreferencesBasedSeverityProvider(IPreferenceStore projectPrefs, IPreferenceStore workspacePrefs) {
+	public PreferencesBasedSeverityProvider(IPreferenceStore projectPrefs, IPreferenceStore workspacePrefs, EditorType editorType) {
 		this.projectPrefs = projectPrefs;
 		this.workspacePrefs = workspacePrefs;
+		this.editorType = editorType;
 	}
 
 	@Override
@@ -64,7 +66,7 @@ public class PreferencesBasedSeverityProvider implements SeverityProvider {
 
 	private boolean useProjectPreferences() {
 		if (projectPrefs!=null) {
-			return ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs);
+			return ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs, editorType);
 		}
 		return false;
 	}

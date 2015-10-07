@@ -41,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
+import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinders;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
@@ -74,7 +75,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 
 	private static final String DIALOG_SETTINGS_KEY = SpringYeditSourceViewerConfiguration.class.getName();
 
-	private static final DocumentContextFinder documentContextFinder = DocumentContextFinder.DEFAULT;
+	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.YAML_DEFAULT;
 	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
 	static {
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");

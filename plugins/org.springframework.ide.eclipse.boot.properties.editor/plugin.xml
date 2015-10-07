@@ -142,6 +142,40 @@
 	   </page>
 	   
    </extension>  
+
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorProjectPropertyPage"
+            name="Spring Properties Editor"
+            class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage"
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.core.springnature">
+         </filter>
+         <keywordReference
+               id="org.springframework.ide.eclipse.ui.keywords">
+         </keywordReference>
+      </page>
+      <page
+            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorProjectPropertyPage"
+            name="Spring Yaml Editor"
+            class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage"
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.core.springnature">
+         </filter>
+         <keywordReference
+               id="org.springframework.ide.eclipse.ui.keywords">
+         </keywordReference>
+      </page>
+   </extension>
    
 <extension
          point="org.eclipse.core.runtime.preferences">

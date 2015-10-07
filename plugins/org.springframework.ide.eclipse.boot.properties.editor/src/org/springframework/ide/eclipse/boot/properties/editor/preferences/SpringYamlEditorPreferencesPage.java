@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 
 /**
@@ -19,6 +20,11 @@ public class SpringYamlEditorPreferencesPage extends AbstractPropertiesEditorPre
 
 	protected ProblemType[] getProblemTypes() {
 		return ProblemType.FOR_YAML;
+	}
+
+	@Override
+	protected String getEnableProjectPreferencesKey() {
+		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
 	}
 
 }

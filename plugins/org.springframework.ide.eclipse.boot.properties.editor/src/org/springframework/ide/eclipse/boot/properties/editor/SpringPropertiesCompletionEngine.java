@@ -128,7 +128,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
 			}
 		};
-		setDocumentContextFinder(DocumentContextFinder.DEFAULT);
+		setDocumentContextFinder(DocumentContextFinders.PROPS_DEFAULT);
 		this.typeUtil = new TypeUtil(jp);
 
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
