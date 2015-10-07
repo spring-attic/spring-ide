@@ -2033,10 +2033,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-	}
-
 	public void test_STS4231() throws Exception {
 		//Should the 'predefined' project need to be recreated... use the commented code below:
 //		BootProjectTestHarness projectHarness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
