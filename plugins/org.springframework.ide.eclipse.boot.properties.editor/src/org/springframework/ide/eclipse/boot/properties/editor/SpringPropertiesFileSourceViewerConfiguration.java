@@ -51,7 +51,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDete
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
-extends PropertiesFileSourceViewerConfiguration {
+extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 
 	private static final String DIALOG_SETTINGS_KEY = PropertiesFileSourceViewerConfiguration.class.getName();
 	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.PROPS_DEFAULT;
@@ -166,7 +166,7 @@ extends PropertiesFileSourceViewerConfiguration {
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (fReconciler==null) {
-			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder);
+			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
 		}
 		return fReconciler;
 	}

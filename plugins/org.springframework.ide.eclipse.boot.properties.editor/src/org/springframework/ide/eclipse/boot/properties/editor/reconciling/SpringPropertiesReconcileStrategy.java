@@ -18,11 +18,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -36,13 +41,19 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
+import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 
 /**
  * Reconcile strategy for spring appication.properties and application.yml editors.
  */
-public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
+public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension, IPropertyChangeListener {
 
 
 	/**
@@ -134,11 +145,16 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	private DocumentContextFinder fDocumentContextFinder;
 
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, DocumentContextFinder documentContextFinder) {
+	private IPreferenceStore fProjectPreferences;
+
+	private IReconcileTrigger fReconcileTrigger;
+
+	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, DocumentContextFinder documentContextFinder, IReconcileTrigger reconcileTrigger) {
 		Assert.isNotNull(viewer);
 		fDocumentContextFinder = documentContextFinder;
 		fViewer= viewer;
 		fEngine = engine;
+		fReconcileTrigger = reconcileTrigger;
 	}
 
 	/*
@@ -206,6 +222,24 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 		fDocument= document;
 		fSeverities = fDocumentContextFinder.getSeverityProvider(fDocument);
 		fProblemCollector= createProblemCollector();
+		if (fProjectPreferences!=null) {
+			fProjectPreferences.removePropertyChangeListener(this);
+		}
+		IProject project = getProject();
+		if (project!=null) {
+			fProjectPreferences = new ScopedPreferenceStore(new ProjectScope(project), SpringPropertiesEditorPlugin.PLUGIN_ID);
+			fProjectPreferences.addPropertyChangeListener(this);
+		}
+	}
+
+	private IProject getProject() {
+		if (fDocument!=null) {
+			IJavaProject jp = fDocumentContextFinder.getJavaProject(fDocument);
+			if (jp!=null) {
+				return jp.getProject();
+			}
+		}
+		return null;
 	}
 
 	protected SeverityAwareProblemCollector createProblemCollector() {
@@ -230,6 +264,13 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 	 */
 	protected IAnnotationModel getAnnotationModel() {
 		return fViewer.getAnnotationModel();
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().startsWith(ProblemSeverityPreferencesUtil.PREFERENCE_PREFIX)) {
+			fReconcileTrigger.forceReconcile();
+		}
 	}
 
 }

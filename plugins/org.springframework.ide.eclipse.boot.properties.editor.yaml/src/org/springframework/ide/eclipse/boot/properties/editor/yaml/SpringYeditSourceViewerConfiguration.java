@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesAnnotationHover;
@@ -71,7 +72,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.yaml.snakeyaml.Yaml;
 
 @SuppressWarnings("restriction")
-public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration {
+public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration implements IReconcileTrigger {
 
 	private static final String DIALOG_SETTINGS_KEY = SpringYeditSourceViewerConfiguration.class.getName();
 
@@ -194,7 +195,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (fReconciler==null) {
-			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder);
+			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
 		}
 		return fReconciler;
 	}

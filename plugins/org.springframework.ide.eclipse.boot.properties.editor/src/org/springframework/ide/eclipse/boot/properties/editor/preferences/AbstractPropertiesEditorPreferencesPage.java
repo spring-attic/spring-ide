@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -101,9 +102,12 @@ public abstract class AbstractPropertiesEditorPreferencesPage extends FieldEdito
 	private Control createProjectPageContent(Composite parent) {
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayout(new GridLayout());
+
 		CheckboxWidget enablePreferencesCheckbox = new CheckboxWidget(page, enablePreferences);
 		enablePreferencesCheckbox.setText("Enable project-specific settings");
-		final Control preferencesControl = super.createContents(parent);
+
+		final Control preferencesControl = super.createContents(page);
+
 		enablePreferences.addListener(new UIValueListener<Boolean>() {
 			private ControlEnableState fBlockEnableState;
 
