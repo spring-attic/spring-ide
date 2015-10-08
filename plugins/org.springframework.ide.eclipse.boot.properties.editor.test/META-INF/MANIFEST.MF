@@ -21,6 +21,8 @@ Require-Bundle: org.eclipse.ui,
  org.yaml.snakeyaml,
  org.springframework.ide.eclipse.boot.properties.editor.yaml,
  org.springframework.ide.eclipse.boot.test,
- org.mockito
+ org.mockito,
+ org.hamcrest,
+ org.hamcrest.library
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
