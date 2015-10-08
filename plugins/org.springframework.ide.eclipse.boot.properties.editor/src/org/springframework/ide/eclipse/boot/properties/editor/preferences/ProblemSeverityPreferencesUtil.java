@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 
+import java.io.IOException;
+
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -23,10 +26,6 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  * @author Kris De Volder
  */
 public class ProblemSeverityPreferencesUtil {
-
-	public static enum EditorType {
-		PROPS, YAML
-	}
 
 	public static final String PREFERENCE_PREFIX = "spring.properties.editor.problem.";
 
@@ -75,6 +74,20 @@ public class ProblemSeverityPreferencesUtil {
 
 	public static boolean projectPreferencesEnabled(IPreferenceStore projectPrefs, EditorType et) {
 		return projectPrefs.getBoolean(ENABLE_PROJECT_PREFERENCES(et));
+	}
+
+	public static void enableProjectPrefs(IPreferenceStore projectPrefs, EditorType et, boolean enable) {
+		projectPrefs.setValue(ENABLE_PROJECT_PREFERENCES(et), enable);
+	}
+
+	public static void save(IPreferenceStore preferences) {
+		if (preferences.needsSaving() && preferences instanceof IPersistentPreferenceStore) {
+			try {
+				((IPersistentPreferenceStore) preferences).save();
+			} catch (IOException e) {
+				BootActivator.log(e);
+			}
+		}
 	}
 
 }

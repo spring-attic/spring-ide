@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferencesBasedSeverityProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 
@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 public class DocumentContextFinders {
 
 	public static final DocumentContextFinder YAML_DEFAULT = defaultFor(EditorType.YAML);
-	public static final  DocumentContextFinder PROPS_DEFAULT = defaultFor(EditorType.PROPS);
+	public static final  DocumentContextFinder PROPS_DEFAULT = defaultFor(EditorType.PROP);
 
 	private static final DocumentContextFinder defaultFor(final EditorType editorType) {
 		return new DocumentContextFinder() {

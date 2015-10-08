@@ -11,13 +11,16 @@
 package org.springframework.ide.eclipse.boot.properties.editor.quickfix;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 
@@ -29,18 +32,18 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
  */
 public class DefaultQuickfixContext implements QuickfixContext {
 
-	private IPreferenceStore preferences;
+	private IPreferenceStore workspacePreferences;
 	private ISourceViewer sourceViever;
 	private UserInteractions ui;
 
-	public DefaultQuickfixContext(IPreferenceStore pluginPreferences, ISourceViewer sourceViewer, UserInteractions ui) {
-		this.preferences = pluginPreferences;
+	public DefaultQuickfixContext(IPreferenceStore workspacePreferences, ISourceViewer sourceViewer, UserInteractions ui) {
+		this.workspacePreferences = workspacePreferences;
 		this.sourceViever = sourceViewer;
 		this.ui = ui;
 	}
 
 	public IPreferenceStore getPreferences() {
-		return preferences;
+		return workspacePreferences;
 	}
 
 	public IProject getProject() {
@@ -67,6 +70,20 @@ public class DefaultQuickfixContext implements QuickfixContext {
 	@Override
 	public UserInteractions getUI() {
 		return ui;
+	}
+
+	@Override
+	public IPreferenceStore getWorkspacePreferences() {
+		return workspacePreferences;
+	}
+
+	@Override
+	public IPreferenceStore getProjectPreferences() {
+		IProject project = getProject();
+		if (project!=null) {
+			return new ScopedPreferenceStore(new ProjectScope(project), SpringPropertiesEditorPlugin.PLUGIN_ID);
+		}
+		return null;
 	}
 
 }

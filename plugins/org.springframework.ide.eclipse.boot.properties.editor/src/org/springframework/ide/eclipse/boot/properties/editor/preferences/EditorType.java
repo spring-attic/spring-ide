@@ -10,20 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+public enum EditorType {
+	PROP, YAML;
 
-/**
- * @author Kris De Volder
- */
-public class SpringYamlEditorPreferencesPage extends AbstractPropertiesEditorPreferencesPage {
-
-	protected ProblemType[] getProblemTypes() {
-		return ProblemType.FOR_YAML;
+	public String getProblemTypePrefix() {
+		return this.toString()+"_";
 	}
-
-	@Override
-	protected String getEnableProjectPreferencesKey() {
-		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
-	}
-
 }

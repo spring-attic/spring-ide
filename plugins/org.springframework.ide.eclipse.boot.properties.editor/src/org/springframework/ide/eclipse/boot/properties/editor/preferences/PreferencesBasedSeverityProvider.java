@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;

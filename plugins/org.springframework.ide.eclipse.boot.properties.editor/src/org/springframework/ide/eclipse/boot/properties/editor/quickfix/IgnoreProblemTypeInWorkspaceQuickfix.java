@@ -22,17 +22,18 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Proble
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
 
 /**
- * Quickfix proposal to change a particular problem type's severity to 'Ignore'.
+ * Quickfix proposal to change a particular problem type's severity to 'Ignore' in the
+ * workspace.
  *
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class IgnoreProblemTypeQuickfix implements ICompletionProposal {
+public class IgnoreProblemTypeInWorkspaceQuickfix implements ICompletionProposal {
 
 	private ProblemType problemType;
 	private IPreferenceStore preferences;
 
-	public IgnoreProblemTypeQuickfix(IPreferenceStore preferences, ProblemType type) {
+	public IgnoreProblemTypeInWorkspaceQuickfix(IPreferenceStore preferences, ProblemType type) {
 		this.preferences = preferences;
 		this.problemType = type;
 	}
@@ -40,6 +41,7 @@ public class IgnoreProblemTypeQuickfix implements ICompletionProposal {
 	@Override
 	public void apply(IDocument document) {
 		ProblemSeverityPreferencesUtil.setSeverity(preferences, problemType, ProblemSeverity.IGNORE);
+		ProblemSeverityPreferencesUtil.save(preferences);
 	}
 
 	@Override
@@ -49,12 +51,12 @@ public class IgnoreProblemTypeQuickfix implements ICompletionProposal {
 
 	@Override
 	public String getAdditionalProposalInfo() {
-		return "Sets problem severity preference for problems of type '"+problemType.getLabel()+"' to 'Ignore'. ";
+		return "Globally sets problem severity preference for problems of type '"+problemType.getLabel()+"' to 'Ignore'. ";
 	}
 
 	@Override
 	public String getDisplayString() {
-		return "Ignore all '"+problemType.getLabel()+"' problems";
+		return "Ignore '"+ problemType.getLabel()+"' in workspace.";
 	}
 
 	@Override

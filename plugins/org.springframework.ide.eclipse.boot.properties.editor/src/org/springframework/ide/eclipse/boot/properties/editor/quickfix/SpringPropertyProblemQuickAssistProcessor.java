@@ -23,7 +23,6 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.texteditor.spelling.NoCompletionsProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;

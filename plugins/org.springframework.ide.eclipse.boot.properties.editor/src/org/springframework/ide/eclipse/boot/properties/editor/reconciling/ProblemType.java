@@ -15,6 +15,8 @@ import static org.springframework.ide.eclipse.boot.properties.editor.reconciling
 
 import java.util.ArrayList;
 
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
+
 /**
  * @author Kris De Volder
  */
@@ -66,11 +68,15 @@ public enum ProblemType {
 		return defaultSeverity;
 	}
 
-	public static final ProblemType[] FOR_YAML = withPrefix("YAML_");
-	public static final ProblemType[] FOR_PROPERTIES = withPrefix("PROP_");
+	public static final ProblemType[] FOR_YAML = FOR(EditorType.YAML);
+	public static final ProblemType[] FOR_PROPERTIES = FOR(EditorType.PROP);
 
 	public static ProblemType[] forProperties() {
 		return withPrefix("PROP_");
+	}
+
+	public static ProblemType[] FOR(EditorType et) {
+		return withPrefix(et.getProblemTypePrefix());
 	}
 
 	private static ProblemType[] withPrefix(String prefix) {
@@ -98,5 +104,16 @@ public enum ProblemType {
 	private String createDefaultLabel() {
 		String label = this.toString().substring(5).toLowerCase().replace('_', ' ');
 		return Character.toUpperCase(label.charAt(0)) + label.substring(1);
+	}
+
+	public EditorType getEditorType() {
+		String string = this.toString();
+		for (EditorType et : EditorType.values()) {
+			String prefix = et.getProblemTypePrefix();
+			if (string.startsWith(prefix)) {
+				return et;
+			}
+		}
+		throw new IllegalStateException("Bug: unknown editor type for "+this);
 	}
 }

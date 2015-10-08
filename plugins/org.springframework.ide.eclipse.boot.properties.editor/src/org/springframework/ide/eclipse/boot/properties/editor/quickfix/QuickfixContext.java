@@ -23,7 +23,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteraction
  */
 public interface QuickfixContext {
 	IProject getProject();
-	IPreferenceStore getPreferences();
+	IPreferenceStore getWorkspacePreferences();
+	IPreferenceStore getProjectPreferences();
 	IJavaProject getJavaProject();
 	UserInteractions getUI();
 }

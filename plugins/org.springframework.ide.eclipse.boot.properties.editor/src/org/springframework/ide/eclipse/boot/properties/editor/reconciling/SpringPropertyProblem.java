@@ -18,9 +18,14 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.apache.maven.building.Problem;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeQuickfix;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 
 /**
@@ -88,7 +93,16 @@ public class SpringPropertyProblem {
 				proposals.add(new CreateAdditionalMetadataQuickfix(project, missingProperty, context.getUI()));
 			}
 		}
-		proposals.add(new IgnoreProblemTypeQuickfix(context.getPreferences(), getType()));
+		IPreferenceStore projectPrefs = context.getProjectPreferences();
+		ProblemType problemType = getType();
+		EditorType editorType = problemType.getEditorType();
+
+		proposals.add(new IgnoreProblemTypeInProjectQuickfix(context, problemType));
+		if (!ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs, editorType)) {
+			//Workspace wide settings are only effective projectPrefs are still disabled. If project prefs
+			// are already enabled then setting global pref will have no effect!
+			proposals.add(new IgnoreProblemTypeInWorkspaceQuickfix(context.getWorkspacePreferences(), getType()));
+		}
 		return Collections.unmodifiableList(proposals);
 	}
 
