@@ -160,7 +160,7 @@ public class CreateAdditionalMetadataQuickfix implements ICompletionProposal {
 
 	@Override
 	public String getDisplayString() {
-		return "Create metadata for '"+missingPropertyKey+"'";
+		return "Create metadata for '"+missingPropertyKey+"'.";
 	}
 
 	@Override

@@ -20,6 +20,7 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot,
  org.yaml.snakeyaml,
  org.springframework.ide.eclipse.boot.properties.editor.yaml,
- org.springframework.ide.eclipse.boot.test
+ org.springframework.ide.eclipse.boot.test,
+ org.mockito
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

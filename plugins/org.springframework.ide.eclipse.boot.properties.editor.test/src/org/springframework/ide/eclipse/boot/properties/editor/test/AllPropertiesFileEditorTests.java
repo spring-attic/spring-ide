@@ -20,6 +20,9 @@ public class AllPropertiesFileEditorTests {
 
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(AllPropertiesFileEditorTests.class.getName());
+		suite.addTestSuite(QuickfixCreationTests.class);
+		suite.addTestSuite(IgnoreProblemTypeInWorkspaceQuickfixTests.class);
+		suite.addTestSuite(IgnoreProblemTypeInProjectQuickfixTests.class);
 		suite.addTestSuite(StringUtilTests.class);
 		suite.addTestSuite(MetaDataManipulatorTest.class);
 		suite.addTestSuite(SpringPropertiesEditorTests.class);
