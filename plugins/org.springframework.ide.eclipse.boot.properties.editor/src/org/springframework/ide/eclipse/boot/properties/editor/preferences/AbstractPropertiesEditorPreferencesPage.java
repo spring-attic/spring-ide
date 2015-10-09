@@ -153,7 +153,7 @@ public abstract class AbstractPropertiesEditorPreferencesPage extends FieldEdito
 
 	@Override
 	public void setElement(IAdaptable element) {
-		project = element.getAdapter(IProject.class);
+		project = (IProject)element.getAdapter(IProject.class);
 		if (project!=null) {
 			setPreferenceStore(new ScopedPreferenceStore(new ProjectScope(project), SpringPropertiesEditorPlugin.PLUGIN_ID));
 			enablePreferences.setValue(getPreferenceStore().getBoolean(getEnableProjectPreferencesKey()));
