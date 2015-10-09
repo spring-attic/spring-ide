@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
 
 public abstract class CloudOperation extends Operation<Void> {
 

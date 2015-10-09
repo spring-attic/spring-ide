@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OperationsExecution {

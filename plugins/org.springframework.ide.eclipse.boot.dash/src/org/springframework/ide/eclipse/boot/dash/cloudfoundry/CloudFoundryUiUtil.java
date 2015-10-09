@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
 public class CloudFoundryUiUtil {
 

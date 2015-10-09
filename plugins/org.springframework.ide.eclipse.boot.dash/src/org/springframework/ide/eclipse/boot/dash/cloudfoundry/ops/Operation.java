@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 
 public abstract class Operation<T> implements Nameable {
 

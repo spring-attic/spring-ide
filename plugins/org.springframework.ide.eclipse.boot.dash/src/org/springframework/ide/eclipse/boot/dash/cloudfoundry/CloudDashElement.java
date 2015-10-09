@@ -24,11 +24,11 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationSto
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
