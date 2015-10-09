@@ -45,11 +45,6 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	}
 
 	@Override
-	public void log(Exception e) {
-		BootDashActivator.log(e);
-	}
-
-	@Override
 	public IScopedPropertyStore<IProject> getProjectProperties() {
 		return projectProperties;
 	}

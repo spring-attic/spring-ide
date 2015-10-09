@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -77,25 +78,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 
 	@Override
 	public SecuredCredentialsStore getSecuredCredentialsStore() {
-		// TODO: need to Mock
-		return new SecuredCredentialsStore() {
-
-			@Override
-			public void remove(String runTargetId) {
-
-			}
-
-			@Override
-			public String getPassword(String runTargetId) {
-				return null;
-			}
-
-			@Override
-			public void setPassword(String password, String runTargetId) {
-
-			}
-
-		};
+		return new MockSecuredCredentialStore();
 	}
 
 }

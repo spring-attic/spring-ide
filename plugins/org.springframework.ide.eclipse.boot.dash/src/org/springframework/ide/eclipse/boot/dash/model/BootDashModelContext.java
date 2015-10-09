@@ -23,8 +23,6 @@ public interface BootDashModelContext {
 
 	ILaunchManager getLaunchManager();
 
-	void log(Exception e);
-
 	IPath getStateLocation();
 
 	IScopedPropertyStore<IProject> getProjectProperties();

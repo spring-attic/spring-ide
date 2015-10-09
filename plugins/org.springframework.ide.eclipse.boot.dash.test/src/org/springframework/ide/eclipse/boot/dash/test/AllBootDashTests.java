@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	BootDashViewModelTest.class,
 	JarNameGeneratorTest.class,
 	BootJarPackagingTest.class,
 	BootDashModelStateSaverTest.class,

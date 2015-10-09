@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
@@ -115,7 +116,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 				}
 			}
 		} catch (Exception e) {
-			modelContext.log(e);
+			BootActivator.log(e);
 		}
 	}
 
@@ -126,7 +127,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 				return conf;
 			}
 		} catch (CoreException e) {
-			modelContext.log(e);
+			BootActivator.log(e);
 		}
 		return null;
 	}

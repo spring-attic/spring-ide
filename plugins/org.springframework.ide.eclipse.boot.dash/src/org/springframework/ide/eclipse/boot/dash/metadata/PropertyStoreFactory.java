@@ -15,6 +15,7 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
@@ -43,7 +44,7 @@ public class PropertyStoreFactory {
 	}
 
 	public static SecuredCredentialsStore createSecuredCredentialsStore() {
-		return new SecuredCredentialsStore();
+		return new DefaultSecuredCredentialsStore();
 	}
 
 	public static <S> IPropertyStore createForScope(final S scope, final IScopedPropertyStore<S> scopedStore) {
