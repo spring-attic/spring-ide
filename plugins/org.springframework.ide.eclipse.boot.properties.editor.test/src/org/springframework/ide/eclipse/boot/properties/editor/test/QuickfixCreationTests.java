@@ -67,12 +67,6 @@ public class QuickfixCreationTests extends TestCase {
 		QuickfixContext context = mockQuickFixContext("foo", workspacePrefs, projectPrefs, ui);
 		List<ICompletionProposal> fixes = problem.getQuickfixes(context);
 
-		System.out.println("=== fixes : ");
-		for (ICompletionProposal fix : fixes) {
-			System.out.println(fix.getDisplayString());
-		}
-		System.out.println("-------------------");
-
 		String label = problemType.getLabel();
 		assertLabels(fixes,
 				"Ignore '"+label+"' in project.",
@@ -90,12 +84,6 @@ public class QuickfixCreationTests extends TestCase {
 		UserInteractions ui = mock(UserInteractions.class);
 		QuickfixContext context = mockQuickFixContext("foo", workspacePrefs, projectPrefs, ui);
 		List<ICompletionProposal> fixes = problem.getQuickfixes(context);
-
-		System.out.println("=== fixes : ");
-		for (ICompletionProposal fix : fixes) {
-			System.out.println(fix.getDisplayString());
-		}
-		System.out.println("-------------------");
 
 		assertLabels(fixes,
 				"Create metadata for 'yada.yada'.",
