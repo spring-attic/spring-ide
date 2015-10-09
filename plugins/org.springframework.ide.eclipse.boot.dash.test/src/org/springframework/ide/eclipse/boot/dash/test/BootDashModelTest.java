@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.supportsLifeCycleManagement;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
@@ -42,6 +43,9 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,6 +58,7 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -64,6 +69,9 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
+
+import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.*;
 
 /**
  * @author Kris De Volder
@@ -337,10 +345,27 @@ public class BootDashModelTest {
 
 	@Test public void testRequestMappings() throws Exception {
 		String projectName = "actuated-project";
-		createBootProject(projectName,
+		IProject project = createBootProject(projectName,
 				bootVersionAtLeast("1.3.0"), //required for us to be able to determine the actuator port
-				withStarters("actuator")     //required to actually *have* an actuator
+				withStarters("web", "actuator")     //required to actually *have* an actuator
 		);
+		createFile(project, "src/main/java/com/example/HelloController.java",
+				"package com.example;\n" +
+				"\n" +
+				"import org.springframework.web.bind.annotation.RequestMapping;\n" +
+				"import org.springframework.web.bind.annotation.RestController;\n" +
+				"\n" +
+				"@RestController\n" +
+				"public class HelloController {\n" +
+				"\n" +
+				"	@RequestMapping(\"/hello\")\n" +
+				"	public String hello() {\n" +
+				"		return \"Hello, World!\";\n" +
+				"	}\n" +
+				"\n" +
+				"}\n"
+		);
+		StsTestUtil.assertNoErrors(project);
 		BootDashElement element = getElement(projectName);
 		try {
 			waitForState(element, RunState.INACTIVE);
@@ -359,12 +384,30 @@ public class BootDashModelTest {
 			}
 			System.out.println("<<< Found RequestMappings");
 
+			RequestMapping rm;
 			//Case 2 examples (path extracted from 'pseudo' json in the key)
-			assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
-			assertRequestMappingWithPath(mappings, "/mappings"); //Since we are using this, it should be there.
+			rm = assertRequestMappingWithPath(mappings, "/hello"); //We defined it so should be there
+			assertEquals("com.example.HelloController", rm.getFullyQualifiedClassName());
+			assertEquals("hello", rm.getMethodName());
+			assertEquals("com.example.HelloController", rm.getType().getFullyQualifiedName());
+
+			IMethod method = rm.getMethod();
+			assertEquals(rm.getType(), method.getDeclaringType());
+			assertEquals("hello", method.getElementName());
+
+			assertTrue(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
+			assertFalse(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/mappings"); //Since we are using this, it should be there.
+			assertNotNull(rm.getMethod());
+			assertNotNull(rm.getType());
+			assertFalse(rm.isUserDefined());
 
 			//Case 1 example (path represented directly in the json key).
-			assertRequestMappingWithPath(mappings, "/**/favicon.ico");
+			rm = assertRequestMappingWithPath(mappings, "/**/favicon.ico");
+			assertFalse(rm.isUserDefined());
 
 		} finally {
 			element.stopAsync(ui);
@@ -431,21 +474,6 @@ public class BootDashModelTest {
 
 	private void assertProjectProperty(IProject project, String prop, String value) {
 		assertEquals(value, context.getProjectProperties().get(project, prop));
-	}
-
-	private void assertRequestMappingWithPath(List<RequestMapping> mappings, String string) {
-		StringBuilder builder = new StringBuilder();
-		for (RequestMapping m : mappings) {
-			builder.append(m.getPath()+"\n");
-			if (m.getPath().equals(string)) {
-				return;
-			}
-		}
-		fail(
-				"Expected path not found: "+string+"\n" +
-				"Found:\n" +
-				builder
-		);
 	}
 
 	@Rule

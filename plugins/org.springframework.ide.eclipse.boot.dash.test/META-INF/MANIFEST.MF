@@ -26,6 +26,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.boot,
  org.eclipse.core.expressions,
  org.springsource.ide.eclipse.commons.receptor.client,
- org.springframework.ide.eclipse.boot.test
+ org.springframework.ide.eclipse.boot.test,
+ org.springframework.web
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
