@@ -438,9 +438,14 @@ public class BootDashModelTest {
 		BootDashElement element = getElement(projectName);
 		IProject project = element.getProject();
 
-		assertArrayEquals(new String[]{}, element.getTags().toArray(new String[0]));
+		if (tagsToSet==null || tagsToSet.length==0) {
+			element.setTags(new LinkedHashSet<String>(Arrays.asList("foo", "bar")));
+			assertFalse(element.getTags().isEmpty());
+		} else {
+			assertArrayEquals(new String[]{}, element.getTags().toArray(new String[0]));
+		}
 
-		element.setTags(new LinkedHashSet<String>(Arrays.asList(tagsToSet)));
+		element.setTags(linkedHashSet(tagsToSet));
 		waitForJobsToComplete();
 		assertArrayEquals(expectedTags, element.getTags().toArray(new String[0]));
 
@@ -449,6 +454,13 @@ public class BootDashModelTest {
 		project.open(null);
 		element = getElement(projectName);
 		assertArrayEquals(expectedTags, element.getTags().toArray(new String[0]));
+	}
+
+	private LinkedHashSet<String> linkedHashSet(String[] tagsToSet) {
+		if (tagsToSet!=null) {
+			return new LinkedHashSet<String>(Arrays.asList(tagsToSet));
+		}
+		return null;
 	}
 
 	@Test
@@ -465,6 +477,17 @@ public class BootDashModelTest {
 	public void setTagsWithWhiteSpaceCharsForProject() throws Exception {
 		testSettingTags(new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"}, new String[] {"#xd", "\tspring", "xd ko ko", "spring!!-@", "@@@ - spring"});
 	}
+
+	@Test
+	public void setNoTags() throws Exception {
+		testSettingTags(new String[0], new String[0]);
+	}
+
+	@Test
+	public void setNullTags() throws Exception {
+		testSettingTags(null, new String[0]);
+	}
+
 
 	/**************************************************************************************
 	 * TAGS Tests END
