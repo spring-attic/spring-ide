@@ -35,7 +35,7 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 	protected int getSortingOrder() {
 		if (sortingOrder==0) {
 			int idx = 1;
-			for (RunTargetType t : getAllTypesInSortingOrder()) {
+			for (RunTargetType t : RunTargetTypes.ALL) {
 				if (t==this) {
 					sortingOrder = idx;
 					break;

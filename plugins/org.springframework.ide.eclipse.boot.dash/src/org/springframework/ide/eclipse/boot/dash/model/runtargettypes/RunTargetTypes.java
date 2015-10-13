@@ -19,6 +19,12 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class RunTargetTypes {
 
+	//TODO: Get rid of thet contstants in this class.
+	// The existence of this class and all the references littered around the
+	// code pointing to its constants makes it rather hard in some cases to
+	// mock things out for unit testing.
+	//
+
 	public static final RunTargetType LOCAL = new AbstractRunTargetType("Local") {
 
 		@Override

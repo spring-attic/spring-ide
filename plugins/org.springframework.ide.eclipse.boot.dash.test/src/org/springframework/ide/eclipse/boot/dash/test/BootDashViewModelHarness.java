@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class BootDashViewModelHarness {
@@ -102,6 +104,10 @@ public class BootDashViewModelHarness {
 			}
 		}
 		return Collections.unmodifiableList(models);
+	}
+
+	public void dispose() {
+		model.dispose();
 	}
 
 
