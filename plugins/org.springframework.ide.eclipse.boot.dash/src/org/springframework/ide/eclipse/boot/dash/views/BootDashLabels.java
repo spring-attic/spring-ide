@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,6 +22,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -32,12 +30,10 @@ import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
@@ -402,12 +398,10 @@ public class BootDashLabels implements Disposable {
 
 	private Image[] decorateRunStateImages(BootDashElement bde) throws Exception {
 		Image[] decoratedImages = getRunStateAnimation(bde.getRunState());
-		if (bde.getTarget() != null) {
-			if (bde.getTarget().getType() == RunTargetTypes.CLOUDFOUNDRY) {
-				if (bde.getRunState() == RunState.RUNNING && DevtoolsUtil.isDevClientAttached(bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
-					ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
-					decoratedImages = runStateImages.getDecoratedImages(bde.getRunState(), decorDesc, IDecoration.BOTTOM_RIGHT);
-				}
+		if (bde.getTarget() != null && bde instanceof CloudDashElement && bde.getRunState() == RunState.RUNNING) {
+			if (DevtoolsUtil.isDevClientAttached((CloudDashElement)bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
+				ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
+				decoratedImages = runStateImages.getDecoratedImages(bde.getRunState(), decorDesc, IDecoration.BOTTOM_RIGHT);
 			}
 		}
 		return decoratedImages;

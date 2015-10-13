@@ -32,11 +32,9 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -138,14 +136,10 @@ public class DevtoolsUtil {
 	}
 
 
-	public static boolean isDevClientAttached(BootDashElement bde, String launchMode) {
-		if (bde.getTarget().getType()!=RunTargetTypes.CLOUDFOUNDRY) {
-			//Not yet implemented for other types of elements
-			throw new IllegalArgumentException("This operation is not implemented for "+bde.getTarget().getType());
-		}
-		IProject project = bde.getProject();
+	public static boolean isDevClientAttached(CloudDashElement cde, String launchMode) {
+		IProject project = cde.getProject();
 		if (project!=null) { // else not associated with a local project... can't really attach debugger then
-			String host = bde.getLiveHost();
+			String host = cde.getLiveHost();
 			if (host!=null) { // else app not running, can't attach debugger then
 				return isLaunchMode(findLaunches(project, host), launchMode);
 			}
