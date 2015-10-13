@@ -25,6 +25,8 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentials
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 
 public class TestBootDashModelContext implements BootDashModelContext {
 

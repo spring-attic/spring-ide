@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelStateSaver;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 
 /**
  * @author Kris De Volder

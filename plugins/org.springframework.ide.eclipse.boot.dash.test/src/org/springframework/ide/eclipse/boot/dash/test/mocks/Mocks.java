@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test;
+package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

@@ -32,10 +32,10 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		return "RunTargetType("+getName()+")";
 	}
 
-	private int getSortingOrder() {
+	protected int getSortingOrder() {
 		if (sortingOrder==0) {
 			int idx = 1;
-			for (RunTargetType t : RunTargetTypes.ALL) {
+			for (RunTargetType t : getAllTypesInSortingOrder()) {
 				if (t==this) {
 					sortingOrder = idx;
 					break;
@@ -48,6 +48,10 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 					+ "It should be added to 'RunTargetTypes.ALL' ?");
 		}
 		return sortingOrder;
+	}
+
+	protected RunTargetType[] getAllTypesInSortingOrder() {
+		return RunTargetTypes.ALL;
 	}
 
 	@Override

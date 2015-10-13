@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.boot.dash.test;
+package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.util.HashMap;
 import java.util.Map;
