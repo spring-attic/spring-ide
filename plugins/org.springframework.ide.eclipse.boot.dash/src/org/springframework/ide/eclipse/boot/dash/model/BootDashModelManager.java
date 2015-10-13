@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -64,7 +65,9 @@ public class BootDashModelManager implements Disposable {
 				Map<String, RunTarget> currentTargetsPerId = new LinkedHashMap<String, RunTarget>();
 				if (actualRunTargets != null) {
 					for (RunTarget runTarget : actualRunTargets) {
-						currentTargetsPerId.put(runTarget.getId(), runTarget);
+						String id = runTarget.getId();
+						Assert.isNotNull(id);
+						currentTargetsPerId.put(id, runTarget);
 					}
 				}
 
