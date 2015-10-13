@@ -31,5 +31,7 @@ public interface BootDashModelContext {
 
 	SecuredCredentialsStore getSecuredCredentialsStore();
 
+	void log(Exception e);
+
 
 }

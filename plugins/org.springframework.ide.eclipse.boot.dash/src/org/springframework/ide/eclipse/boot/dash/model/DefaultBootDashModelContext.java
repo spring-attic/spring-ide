@@ -59,4 +59,9 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 		return securedStore;
 	}
 
+	@Override
+	public void log(Exception e) {
+		BootDashActivator.log(e);
+	}
+
 }

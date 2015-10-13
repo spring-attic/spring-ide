@@ -116,7 +116,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			modelContext.log(e);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 				return conf;
 			}
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			modelContext.log(e);
 		}
 		return null;
 	}

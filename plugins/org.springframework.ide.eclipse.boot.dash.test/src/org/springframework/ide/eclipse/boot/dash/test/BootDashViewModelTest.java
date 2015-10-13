@@ -10,51 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
 public class BootDashViewModelTest {
 
-//	public class MockContext implements BootDashModelContext {
-//
-//		private IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-//
-//		@Override
-//		public IWorkspace getWorkspace() {
-//			return ResourcesPlugin.getWorkspace();
-//		}
-//
-//		@Override
-//		public ILaunchManager getLaunchManager() {
-//			return DebugPlugin.getDefault().getLaunchManager();
-//		}
-//
-//		@Override
-//		public IPath getStateLocation() {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-//
-//		@Override
-//		public IScopedPropertyStore<IProject> getProjectProperties() {
-//			return projectProperties;
-//		}
-//
-//		@Override
-//		public IScopedPropertyStore<RunTargetType> getRunTargetProperties() {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-//
-//		@Override
-//		public SecuredCredentialsStore getSecuredCredentialsStore() {
-//			// TODO Auto-generated method stub
-//			return null;
-//		}
-//
-//	}
-//
-//	@Test
-//	public void testCreate() throws Exception {
-//		BootDashModelContext context = new MockContext();
-//		BootDashViewModel dash = new BootDashViewModel(context, runTargetTypes)
-//	}
+
+	@Before
+	public void setup() throws Exception {
+		StsTestUtil.cleanUpProjects();
+	}
+
+	@Test
+	public void testCreate() throws Exception {
+		BootDashViewModelHarness harness = new BootDashViewModelHarness(RunTargetTypes.LOCAL);
+		BootDashModel localModel = harness.getRunTargetModel(RunTargetTypes.LOCAL);
+		assertNotNull(localModel);
+	}
 
 }
