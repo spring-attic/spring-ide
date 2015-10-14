@@ -41,7 +41,7 @@ public abstract class AbstractRunTarget implements RunTarget {
 
 	@Override
 	public String toString() {
-		return "RunTarget("+id+")";
+		return "RunTarget("+getType().getName()+", "+id+")";
 	}
 
 	@Override

@@ -35,8 +35,10 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
@@ -45,6 +47,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunTarget;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -445,4 +449,38 @@ public class BootDashViewModelTest {
 		return bdm;
 	}
 
+
+	@Test
+	public void testRestoreSingleRunTarget() throws Exception {
+		RunTargetType targetType = new MockRunTargetType("MOCK");
+		String targetId = "foo";
+
+		harness = new BootDashViewModelHarness(
+				RunTargetTypes.LOCAL,
+				targetType
+		);
+
+		TargetProperties props = new TargetProperties(targetType, targetId);
+		props.put("describe", "This is foo");
+		RunTarget savedTarget = targetType.createRunTarget(props);
+		harness.model.getRunTargets().add(savedTarget);
+		BootDashModelContext oldContext = harness.context;
+
+		harness.dispose();
+
+		harness = new BootDashViewModelHarness(oldContext,
+				RunTargetTypes.LOCAL,
+				targetType
+		);
+
+		MockRunTarget restoredTarget = (MockRunTarget)harness.getRunTarget(targetType);
+
+		//Not a stric requirement, but it would be a little strange of the restored
+		// target was the exact same object as the saved target (the test may be broken
+		// or some state in the model is not cleaned up when it is disposed)
+		assertTrue(restoredTarget !=  savedTarget);
+
+		assertEquals(savedTarget, restoredTarget);
+		assertEquals("This is foo", restoredTarget.get("describe"));
+	}
 }

@@ -36,12 +36,16 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class BootDashViewModelHarness {
 
-	public final  MockContext context;
+	public final BootDashModelContext context;
 	public final BootDashViewModel model;
 
-	public BootDashViewModelHarness(RunTargetType... types) throws Exception {
-		this.context = new MockContext();
+	public BootDashViewModelHarness(BootDashModelContext context, RunTargetType... types) throws Exception {
+		this.context = context;
 		this.model = new BootDashViewModel(context, types);
+	}
+
+	public BootDashViewModelHarness(RunTargetType... types) throws Exception {
+		this(new MockContext(), types);
 	}
 
 	public static class MockContext implements BootDashModelContext {
@@ -113,6 +117,22 @@ public class BootDashViewModelHarness {
 
 	public List<RunTarget> getRunTargets() {
 		return model.getRunTargets().getValues();
+	}
+
+	public RunTarget getRunTarget(RunTargetType targetType) {
+		List<RunTarget> targets = getRunTargets(targetType);
+		Assert.assertEquals(1, targets.size());
+		return targets.get(0);
+	}
+
+	private List<RunTarget> getRunTargets(RunTargetType targetType) {
+		ArrayList<RunTarget> list = new ArrayList<RunTarget>();
+		for (RunTarget runTarget : model.getRunTargets().getValues()) {
+			if (runTarget.getType().equals(targetType)) {
+				list.add(runTarget);
+			}
+		}
+		return list;
 	}
 
 
