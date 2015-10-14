@@ -85,21 +85,6 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 		return false;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj==null || this.getClass()!=obj.getClass()) {
-			return false;
-		}
-		MockRunTarget other = (MockRunTarget) obj;
-		return this.getType().equals(other.getType()) &&
-				this.getId().equals(other.getId());
-	}
-
-	@Override
-	public int hashCode() {
-		return getType().hashCode() * 17 + properties.hashCode();
-	}
-
 	public String get(String prop) {
 		return properties.get(prop);
 	}
