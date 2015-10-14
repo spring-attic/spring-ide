@@ -14,7 +14,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.List;
@@ -22,12 +22,16 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockBootDashModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -114,13 +118,84 @@ public class BootDashViewModelTest {
 		assertEquals(1, harness.getRunTargetModels(RunTargetTypes.LOCAL).size());
 	}
 
-//	@Test
-//	public void testElementStateListener() throws Exception {
-//		targetType =
-//		harness = new BootDashViewModelHarness(
-//				RunTargetTypes.LOCAL,
-//				new MockRunTargetType("MOCK")
-//		);
-//	}
+	@Test
+	public void testElementStateListenerAddedAfterModel() throws Exception {
+		RunTargetType targetType = mock(RunTargetType.class);
+		RunTarget target = mock(RunTarget.class);
+		harness = new BootDashViewModelHarness(
+				RunTargetTypes.LOCAL,
+				targetType
+		);
+		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
+		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+
+		when(target.getId()).thenReturn("target_id");
+		when(target.getType()).thenReturn(targetType);
+		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+
+		//////Add target///////
+
+		harness.model.getRunTargets().add(target);
+
+		//Make sure the model got added as expected
+		List<BootDashModel> models = harness.getRunTargetModels(targetType);
+		assertEquals(1, models.size());
+
+		BootDashElement element = mock(BootDashElement.class);
+		bdm.getElements().add(element);
+
+		/////Add listener////////
+
+		ElementStateListener listener = mock(ElementStateListener.class);
+		harness.model.addElementStateListener(listener);
+
+		////Fire event///////////
+
+		bdm.notifyElementChanged(element);
+
+		/////Verify listener
+
+		verify(listener).stateChanged(element);
+	}
+
+	@Test
+	public void testElementStateListenerAddedBeforeModel() throws Exception {
+		RunTargetType targetType = mock(RunTargetType.class);
+		RunTarget target = mock(RunTarget.class);
+		harness = new BootDashViewModelHarness(
+				RunTargetTypes.LOCAL,
+				targetType
+		);
+		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
+		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+
+		when(target.getId()).thenReturn("target_id");
+		when(target.getType()).thenReturn(targetType);
+		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+
+		/////Add listener////////
+
+		ElementStateListener listener = mock(ElementStateListener.class);
+		harness.model.addElementStateListener(listener);
+
+		//////Add target///////
+
+		harness.model.getRunTargets().add(target);
+
+		//Make sure the model got added as expected
+		List<BootDashModel> models = harness.getRunTargetModels(targetType);
+		assertEquals(1, models.size());
+
+		BootDashElement element = mock(BootDashElement.class);
+		bdm.getElements().add(element);
+
+		////Fire event///////////
+
+		bdm.notifyElementChanged(element);
+
+		/////Verify listener
+
+		verify(listener).stateChanged(element);
+	}
 
 }

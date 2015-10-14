@@ -49,7 +49,8 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.model.requestmappings,
  org.springframework.ide.eclipse.boot.dash.model.runtargettypes,
  org.springframework.ide.eclipse.boot.dash.ngrok,
- org.springframework.ide.eclipse.boot.dash.util
+ org.springframework.ide.eclipse.boot.dash.util,
+ org.springframework.ide.eclipse.boot.dash.views
 Import-Package: org.springframework.core,
  org.springframework.web.client,
  org.yaml.snakeyaml
