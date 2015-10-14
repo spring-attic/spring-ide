@@ -41,7 +41,7 @@ public class ToggleFiltersModel {
 		private final String label;
 		private final Filter<BootDashElement> filter;
 
-		private FilterChoice(String label, Filter<BootDashElement> filter) {
+		public FilterChoice(String label, Filter<BootDashElement> filter) {
 			this.label = label;
 			this.filter = filter;
 		}

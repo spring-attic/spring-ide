@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
@@ -108,6 +109,10 @@ public class BootDashViewModelHarness {
 
 	public void dispose() {
 		model.dispose();
+	}
+
+	public List<RunTarget> getRunTargets() {
+		return model.getRunTargets().getValues();
 	}
 
 
