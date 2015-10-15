@@ -14,13 +14,18 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.util.OrderBasedComparator;
 
 public class BootModelComparator implements Comparator<BootDashModel> {
 
-	private final List<RunTargetType> runTargetTypes;
+	private Comparator<RunTargetType> typeComparator;
+
+	public BootModelComparator(Comparator<RunTargetType> typeComparator) {
+		this.typeComparator = typeComparator;
+	}
 
 	public BootModelComparator(List<RunTargetType> runTargetTypes) {
-		this.runTargetTypes = runTargetTypes;
+		this(new OrderBasedComparator(runTargetTypes.toArray(new RunTargetType[runTargetTypes.size()])));
 	}
 
 	public int compare(BootDashModel model1, BootDashModel model2) {
@@ -28,29 +33,10 @@ public class BootModelComparator implements Comparator<BootDashModel> {
 		RunTargetType rtType1 = model1.getRunTarget().getType();
 		RunTargetType rtType2 = model2.getRunTarget().getType();
 
-		int runTargetTypeIndex1 = 0;
-		int runTargetTypeIndex2 = 0;
-
-		for (int i = 0; i < runTargetTypes.size(); i++) {
-			RunTargetType fromList = runTargetTypes.get(i);
-			if (rtType1.equals(fromList)) {
-				runTargetTypeIndex1 = i;
-			}
-			// Note handle case where BOTH models have the same run target
-			// type. Therefore even if model1 run target type is found, also
-			// check
-			// if model2 type matches
-			// the current existing run target type in the list of run
-			// target types
-			if (rtType2.equals(fromList)) {
-				runTargetTypeIndex2 = i;
-			}
+		int result = typeComparator.compare(rtType1, rtType2);
+		if (result==0) {
+			result = model1.getRunTarget().getId().compareTo(model2.getRunTarget().getId());
 		}
-
-		if (runTargetTypeIndex1 == runTargetTypeIndex2) {
-			return model1.getRunTarget().compareTo(model2.getRunTarget());
-		} else {
-			return runTargetTypeIndex1 - runTargetTypeIndex2;
-		}
+		return result;
 	}
 }
