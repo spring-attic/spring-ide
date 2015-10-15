@@ -25,7 +25,8 @@ public class BootModelComparator implements Comparator<BootDashModel> {
 	}
 
 	public BootModelComparator(List<RunTargetType> runTargetTypes) {
-		this(new OrderBasedComparator(runTargetTypes.toArray(new RunTargetType[runTargetTypes.size()])));
+		this(new OrderBasedComparator<RunTargetType>(
+				runTargetTypes.toArray(new RunTargetType[runTargetTypes.size()])));
 	}
 
 	public int compare(BootDashModel model1, BootDashModel model2) {

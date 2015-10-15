@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
 
 
@@ -28,7 +26,11 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 	BootProjectDashElementTest.class,
 	BootDashElementTagsTests.class,
 	JLRMethodParserTest.class,
-	ActuatorClientTest.class
+	ActuatorClientTest.class,
+
+	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
+	// (the test should also move then!)
+	OrderBasedComparatorTest.class
 })
 public class AllBootDashTests {
 

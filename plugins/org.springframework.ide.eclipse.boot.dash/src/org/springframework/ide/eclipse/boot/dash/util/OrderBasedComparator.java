@@ -25,7 +25,7 @@ public class OrderBasedComparator<T> implements Comparator<T> {
 
 	private T[] sortedElements;
 
-	public OrderBasedComparator(T[] sortedElements) {
+	public OrderBasedComparator(T... sortedElements) {
 		this.sortedElements = sortedElements;
 	}
 
