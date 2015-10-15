@@ -33,7 +33,7 @@ public class BootModelComparator implements Comparator<BootDashModel> {
 
 		for (int i = 0; i < runTargetTypes.size(); i++) {
 			RunTargetType fromList = runTargetTypes.get(i);
-			if (rtType1.getName().equals(fromList.getName())) {
+			if (rtType1.equals(fromList)) {
 				runTargetTypeIndex1 = i;
 			}
 			// Note handle case where BOTH models have the same run target
@@ -42,7 +42,7 @@ public class BootModelComparator implements Comparator<BootDashModel> {
 			// if model2 type matches
 			// the current existing run target type in the list of run
 			// target types
-			if (rtType2.getName().equals(fromList.getName())) {
+			if (rtType2.equals(fromList)) {
 				runTargetTypeIndex2 = i;
 			}
 		}
