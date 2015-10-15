@@ -87,10 +87,6 @@ public abstract class AbstractRunTarget implements RunTarget {
 
 	@Override
 	public int compareTo(RunTarget other) {
-		int typeComp = other.getType().compareTo(this.getType());
-		if (typeComp!=0) {
-			return typeComp;
-		}
 		return this.getId().compareTo(other.getId());
 	}
 

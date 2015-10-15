@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.lattice.LatticeRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
@@ -53,14 +52,5 @@ public class RunTargetTypes {
 		};
 	};
 
-	public static final RunTargetType CLOUDFOUNDRY = new CloudFoundryRunTargetType();
-
 	public static final RunTargetType LATTICE = new LatticeRunTargetType();
-
-	public static final RunTargetType[] ALL = {
-			LOCAL,
-			CLOUDFOUNDRY,
-			LATTICE
-	};
-
 }

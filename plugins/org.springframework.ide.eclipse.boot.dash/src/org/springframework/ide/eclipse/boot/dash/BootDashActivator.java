@@ -17,6 +17,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -122,7 +124,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		if (model==null) {
 			model = new BootDashViewModel(new DefaultBootDashModelContext(),
 					RunTargetTypes.LOCAL,
-					RunTargetTypes.CLOUDFOUNDRY
+					new CloudFoundryRunTargetType(new CloudFoundryClientFactory())
 					// RunTargetTypes.LATTICE
 			);
 		}

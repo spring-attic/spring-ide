@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
@@ -25,12 +25,12 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public final static String ORG_GUID = "organization_guid";
 	public final static String SPACE_GUID = "space_guid";
 
-	public CloudFoundryTargetProperties() {
-		super(RunTargetTypes.CLOUDFOUNDRY);
+	public CloudFoundryTargetProperties(RunTargetType runTargetType) {
+		super(runTargetType);
 	}
 
-	public CloudFoundryTargetProperties(TargetProperties targetProperties) {
-		super(targetProperties.getAllProperties(), RunTargetTypes.CLOUDFOUNDRY);
+	public CloudFoundryTargetProperties(TargetProperties targetProperties, RunTargetType runTargetType) {
+		super(targetProperties.getAllProperties(), runTargetType);
 		if (get(RUN_TARGET_ID) == null) {
 			put(RUN_TARGET_ID, getId(this));
 		}

@@ -10,96 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import java.net.URL;
-import java.util.List;
-import java.util.Properties;
-
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
 public class CloudFoundryUiUtil {
 
-	/*
-	 * System property. Set to "true" if connection pool is to be used. "false"
-	 * otherwise or omit as a system property
-	 */
-	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
 
-	public static OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties,
-			IRunnableContext context) throws Exception {
-
-		OrgsAndSpaces spaces = null;
-
-		Operation<List<CloudSpace>> op = new Operation<List<CloudSpace>>(
-				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
-			protected List<CloudSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				return getClient(targetProperties).getSpaces();
-			}
-		};
-
-		List<CloudSpace> actualSpaces = op.run(context, true);
-		if (actualSpaces != null && !actualSpaces.isEmpty()) {
-			spaces = new OrgsAndSpaces(actualSpaces);
-		}
-
-		return spaces;
-	}
-
-	/**
-	 * Get the client for an existing {@link CloudFoundryRunTarget}. Note that
-	 * this may require the password to be set for that runtarget.
-	 *
-	 * @param runTarget
-	 * @return client if connection was successful.
-	 * @throws Exception
-	 *             if there was an error connecting, including if password is
-	 *             not set or invalid.
-	 */
-	public static CloudFoundryOperations getClient(CloudFoundryRunTarget runTarget) throws Exception {
-
-		CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) runTarget.getTargetProperties();
-
-		return getClient(targetProperties);
-	}
-
-	public static CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
-		checkPassword(targetProperties.getPassword(), targetProperties.getUsername());
-
-		Properties properties = System.getProperties();
-		// By default disable connection pool (i.e. flag is set to true) unless
-		// a property exists that sets
-		// USING connection pool to "true" (so, i.e., disable connection pool is
-		// false)
-		boolean disableConnectionPool = properties == null || !properties.containsKey(BOOT_DASH_CONNECTION_POOL)
-				|| !"true".equals(properties.getProperty(BOOT_DASH_CONNECTION_POOL));
-
-		return targetProperties.getSpaceName() != null
-				? new CloudFoundryClient(
-						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
-						targetProperties.getSpaceName(), targetProperties.isSelfsigned(), disableConnectionPool)
-				: new CloudFoundryClient(
-						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()), targetProperties.isSelfsigned(), disableConnectionPool);
-
-	}
-
-	public static void checkPassword(String password, String id) throws Exception {
-		if (password == null) {
-			throw BootDashActivator.asCoreException("No password stored or set for: " + id
-					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
-		}
-	}
 
 	public static Shell getShell() {
 		final Shell[] shell = new Shell[1];

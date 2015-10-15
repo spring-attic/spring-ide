@@ -22,7 +22,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
  *
  * @author Kris De Volder
  */
-public interface RunTargetType extends Nameable, Comparable<RunTargetType> {
+public interface RunTargetType extends Nameable {
 
 	/**
 	 * @return Whether it is possible to create instances of this type. Not all
@@ -44,8 +44,6 @@ public interface RunTargetType extends Nameable, Comparable<RunTargetType> {
 	 * type cannot be instantiated.
 	 */
 	RunTarget createRunTarget(TargetProperties properties);
-
-	int compareTo(RunTargetType type);
 
 	ImageDescriptor getIcon();
 

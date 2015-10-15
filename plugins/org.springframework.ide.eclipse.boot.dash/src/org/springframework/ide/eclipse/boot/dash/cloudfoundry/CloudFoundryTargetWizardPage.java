@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -57,16 +58,19 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private boolean canFinish = false;
 
-	private CloudFoundryTargetWizardModel wizardModel = new CloudFoundryTargetWizardModel();
+	private CloudFoundryTargetWizardModel wizardModel;
 
 	private EnableSpaceControlListener enableSpaceControlListener = null;
 
 	private SetSpaceValListener setSpaceValListener = null;
-	private LiveSet<RunTarget> targets;
+	private LiveSet<RunTarget> existingTargets;
+	private CloudFoundryClientFactory clientFactory;
 
-	public CloudFoundryTargetWizardPage(LiveSet<RunTarget> targets) {
+	public CloudFoundryTargetWizardPage(LiveSet<RunTarget> existingTargets, RunTargetType type, CloudFoundryClientFactory clientFactory) {
 		super("Add a Cloud Foundry Target");
-		this.targets = targets;
+		this.existingTargets = existingTargets;
+		this.wizardModel =  new CloudFoundryTargetWizardModel(type);
+		this.clientFactory = clientFactory;
 		setTitle("Add a Cloud Foundry Target");
 		setDescription("Enter credentials and a Cloud Foundry target URL.");
 
@@ -160,14 +164,14 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				// can be cancelled in the wizard's progress bar)
 				OrgsAndSpaces spaces = null;
 				try {
-					spaces = CloudFoundryUiUtil.getCloudSpaces(wizardModel, getWizard().getContainer());
+					spaces = clientFactory.getCloudSpaces(wizardModel, getWizard().getContainer());
 				} catch (Exception e) {
 					setErrorMessage(e.getMessage());
 					refreshWizardUI();
 					return;
 				}
 				if (spaces != null) {
-					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(targets, spaces, wizardModel);
+					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(existingTargets, spaces, wizardModel);
 					WizardDialog dialog = new WizardDialog(getShell(), spacesWizard);
 					dialog.open();
 				} else {

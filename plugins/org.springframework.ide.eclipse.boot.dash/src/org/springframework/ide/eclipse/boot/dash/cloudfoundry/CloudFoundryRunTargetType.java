@@ -28,13 +28,16 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
-	public CloudFoundryRunTargetType() {
+	private CloudFoundryClientFactory clientFactory;
+
+	public CloudFoundryRunTargetType(CloudFoundryClientFactory clientFactory) {
 		super("Cloud Foundry");
+		this.clientFactory = clientFactory;
 	}
 
 	@Override
 	public void openTargetCreationUi(LiveSet<RunTarget> targets) {
-		RunTargetWizard wizard = new RunTargetWizard(targets);
+		RunTargetWizard wizard = new RunTargetWizard(targets, this, clientFactory);
 		Shell shell = CloudFoundryUiUtil.getShell();
 		if (shell != null) {
 			WizardDialog dialog = new WizardDialog(shell, wizard);
@@ -55,8 +58,8 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	@Override
 	public RunTarget createRunTarget(TargetProperties props) {
 		return props instanceof CloudFoundryTargetProperties
-				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props)
-				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props));
+				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
+				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this), this, clientFactory);
 	}
 
 	@Override

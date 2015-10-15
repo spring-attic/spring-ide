@@ -124,13 +124,18 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private Stylers stylers;
 
-	public static class MySorter extends ViewerSorter {
+	public static class BootModelViewerSorter extends ViewerSorter {
+
+		private final BootDashViewModel viewModel;
+
+		public BootModelViewerSorter(BootDashViewModel viewModel) {
+			this.viewModel = viewModel;
+		}
+
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			if (e1 instanceof BootDashModel && e2 instanceof BootDashModel) {
-				BootDashModel m1 = (BootDashModel) e1;
-				BootDashModel m2 = (BootDashModel) e2;
-				return m1.getRunTarget().compareTo(m2.getRunTarget());
+				return this.viewModel.getModelComparator().compare((BootDashModel) e1, (BootDashModel) e2);
 			}
 			return super.compare(viewer, e1, e2);
 		}
@@ -255,7 +260,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		tv = new CustomTreeViewer(page, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 
 		tv.setContentProvider(new BootDashTreeContentProvider());
-		tv.setSorter(new MySorter());
+		tv.setSorter(new BootModelViewerSorter(this.model));
 		tv.setInput(model);
 		tv.getTree().setLinesVisible(true);
 

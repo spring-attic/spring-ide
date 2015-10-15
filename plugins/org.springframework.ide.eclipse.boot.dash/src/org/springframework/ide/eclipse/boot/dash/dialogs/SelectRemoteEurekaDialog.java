@@ -42,7 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeLabelProvider;
-import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection.MySorter;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection.BootModelViewerSorter;
 
 /**
  * @author Martin Lippert
@@ -74,7 +74,7 @@ public class SelectRemoteEurekaDialog extends SelectionStatusDialog {
         selectRemoteButton.setSelection(true);
 
     		tv = new TreeViewer(composite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-    		tv.setSorter(new MySorter());
+    		tv.setSorter(new BootModelViewerSorter(this.model));
     		tv.getTree().setLinesVisible(true);
     		stylers = new Stylers(tv.getTree().getFont());
     		tv.setLabelProvider(new BootDashTreeLabelProvider(stylers, tv));

@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
@@ -54,11 +54,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private List<CloudSpace> spaces;
 
 	private CloudFoundryOperations cachedClient;
+	private CloudFoundryClientFactory clientFactory;
 
-	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties) {
-		super(RunTargetTypes.CLOUDFOUNDRY, CloudFoundryTargetProperties.getId(targetProperties),
+	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
+		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
+		this.clientFactory = clientFactory;
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
@@ -88,7 +90,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	protected CloudFoundryOperations createClient() throws Exception {
-		return CloudFoundryUiUtil.getClient(this);
+		return clientFactory.getClient(this);
 	}
 
 	@Override

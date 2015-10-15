@@ -15,7 +15,7 @@ import java.net.URL;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -43,7 +43,9 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	private Validator spacesValidator = new SpacesValidator();
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
-	public CloudFoundryTargetWizardModel() {
+
+	public CloudFoundryTargetWizardModel(RunTargetType runTargetType) {
+		super(runTargetType);
 		// The credentials validator should be notified any time there are
 		// changes
 		// to url, username, password and selfsigned setting.
@@ -192,6 +194,6 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 	public RunTarget finish() {
 		put(TargetProperties.RUN_TARGET_ID, CloudFoundryTargetProperties.getId(this));
-		return RunTargetTypes.CLOUDFOUNDRY.createRunTarget(this);
+		return getRunTargetType().createRunTarget(this);
 	}
 }
