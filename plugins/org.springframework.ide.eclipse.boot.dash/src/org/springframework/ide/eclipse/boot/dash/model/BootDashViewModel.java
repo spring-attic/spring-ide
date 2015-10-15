@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class BootDashViewModel implements Disposable {
 	private LiveExpression<Filter<BootDashElement>> filter;
 	private ProcessTracker devtoolsProcessTracker;
 	private List<RunTargetType> orderedRunTargetTypes;
-	private BootModelComparator modelComparator;
+	private Comparator<BootDashModel> modelComparator;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -132,7 +133,7 @@ public class BootDashViewModel implements Disposable {
 		return null;
 	}
 
-	public BootModelComparator getModelComparator() {
+	public Comparator<BootDashModel> getModelComparator() {
 		return this.modelComparator;
 	}
 }

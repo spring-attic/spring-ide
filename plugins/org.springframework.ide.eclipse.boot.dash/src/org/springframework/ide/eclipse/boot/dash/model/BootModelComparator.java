@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
-public class BootModelComparator {
+public class BootModelComparator implements Comparator<BootDashModel> {
 
 	private final List<RunTargetType> runTargetTypes;
 
