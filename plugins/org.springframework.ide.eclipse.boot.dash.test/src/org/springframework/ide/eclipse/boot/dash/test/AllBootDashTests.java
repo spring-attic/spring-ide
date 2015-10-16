@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
 
 
@@ -27,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 	BootDashElementTagsTests.class,
 	JLRMethodParserTest.class,
 	ActuatorClientTest.class,
+	ToggleFiltersModelTest.class,
 
 	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
 	// (the test should also move then!)

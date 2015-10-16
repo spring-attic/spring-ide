@@ -18,6 +18,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class MockRunTargetType extends AbstractRunTargetType {
 
+	private boolean requiresCredentials;
+
 	public MockRunTargetType(String name) {
 		super(name);
 	}
@@ -33,12 +35,16 @@ public class MockRunTargetType extends AbstractRunTargetType {
 
 	@Override
 	public RunTarget createRunTarget(TargetProperties properties) {
-		return new MockRunTarget(this, properties);
+		return new MockRunTarget(this, properties, requiresCredentials);
 	}
 
 	@Override
 	public ImageDescriptor getIcon() {
 		return null;
+	}
+
+	public void setRequiresCredentials(boolean requires) {
+		this.requiresCredentials = requires;
 	}
 
 }

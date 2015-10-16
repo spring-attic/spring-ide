@@ -100,6 +100,10 @@ public class TargetProperties {
 		return map.get(PASSWORD_PROP);
 	}
 
+	public void setPassword(String password) {
+		map.put(PASSWORD_PROP, password);
+	}
+
 	public String getUrl() {
 		return map.get(URL_PROP);
 	}

@@ -37,10 +37,16 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 public class MockRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private TargetProperties properties;
+	private boolean requiresCredentials;
 
 	public MockRunTarget(RunTargetType type, TargetProperties properties) {
+		this(type, properties, false);
+	}
+
+	public MockRunTarget(RunTargetType type, TargetProperties properties, boolean requiresCredentials) {
 		super(type, properties.getRunTargetId());
 		this.properties = properties;
+		this.requiresCredentials = requiresCredentials;
 	}
 
 	private final BootDashColumn[] defaultColumns = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
@@ -100,7 +106,7 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 
 	@Override
 	public boolean requiresCredentials() {
-		return false;
+		return requiresCredentials;
 	}
 
 }

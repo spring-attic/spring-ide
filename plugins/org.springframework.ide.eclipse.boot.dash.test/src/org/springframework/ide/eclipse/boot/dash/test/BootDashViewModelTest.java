@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -38,9 +40,11 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Filter;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
+import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -466,12 +470,7 @@ public class BootDashViewModelTest {
 		harness.model.getRunTargets().add(savedTarget);
 		BootDashModelContext oldContext = harness.context;
 
-		harness.dispose();
-
-		harness = new BootDashViewModelHarness(oldContext,
-				RunTargetTypes.LOCAL,
-				targetType
-		);
+		harness.reload();
 
 		MockRunTarget restoredTarget = (MockRunTarget)harness.getRunTarget(targetType);
 
@@ -482,5 +481,100 @@ public class BootDashViewModelTest {
 
 		assertEquals(savedTarget, restoredTarget);
 		assertEquals("This is foo", restoredTarget.get("describe"));
+	}
+
+	@Test
+	public void testModelComparator() throws Exception {
+		//View model is expected to provide a comparator that is based on
+		// the list of target-types it is initialized with. It should sort
+		//models based on type first then runtarget id second.
+
+		RunTargetType fooType = new MockRunTargetType("foo-type");
+		RunTargetType barType = new MockRunTargetType("bar-type");
+
+		harness = new BootDashViewModelHarness(
+				RunTargetTypes.LOCAL,
+				fooType,
+				barType
+		);
+
+		Comparator<BootDashModel> comparator = harness.model.getModelComparator();
+
+		BootDashModel[] sortedModels = {
+			//These are arranged in the order we expect them to be when
+			// sorted properly
+
+			harness.getRunTargetModel(RunTargetTypes.LOCAL), //first!
+
+			//foo comes before bar (not alphabetic but based on BDVM construction)
+			sortableModel(fooType, "different"), //ids are alphabetic within each type
+			sortableModel(fooType, "other"),
+			sortableModel(fooType, "something"),
+
+			sortableModel(barType, "different"),
+			sortableModel(barType, "other"),
+			sortableModel(barType, "something")
+		};
+
+		//Create a array with same elements in the wrong order...
+		int len = sortedModels.length;
+		BootDashModel[] reverseModels = new BootDashModel[len];
+		for (int i = 0; i < reverseModels.length; i++) {
+			reverseModels[i] = sortedModels[len - i - 1];
+		}
+
+		assertFalse(reverseModels[0].equals(sortedModels[0])); //Sanity check
+
+		Arrays.sort(reverseModels, comparator);
+
+		assertArrayEquals(sortedModels, reverseModels);
+	}
+
+	/**
+	 * Create mock BootDashModel that is sufficiently fleshed-out to
+	 * allow sorting using the comparator provided by BootDashViewModel
+	 */
+	private BootDashModel sortableModel(RunTargetType type, String id) {
+		BootDashModel model = mock(BootDashModel.class);
+		RunTarget target = mock(RunTarget.class);
+
+		when(target.getType()).thenReturn(type);
+		when(model.getRunTarget()).thenReturn(target);
+		when(target.getId()).thenReturn(id);
+
+		return model;
+	}
+
+	@Test
+	public void testUpdatePropertiesInStore() throws Exception {
+		MockRunTargetType targetType = new MockRunTargetType("mock-type");
+		targetType.setRequiresCredentials(true);
+		TargetProperties properties = new TargetProperties(targetType, "target-id");
+		properties.setPassword("secret");
+
+		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
+		harness = new BootDashViewModelHarness(targetType);
+		harness.model.getRunTargets().add(target);
+
+		harness.model.updatePropertiesInStore(target);
+
+		SecuredCredentialsStore secureStore = harness.context.getSecuredCredentialsStore();
+
+		//This test needs to have knowledge what keys the passwords are store under.
+		// That seems undesirable.
+		String key = "mock-type:target-id";
+		assertEquals("secret", secureStore.getPassword(key));
+
+		/////////////////////////////////////////
+		// also check that when runtargets are restored from the store the password prop is properly
+		// restored
+
+		harness.reload();
+
+		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
+		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
+												// expected the restored target is a brand new object
+		assertEquals("secret", restoredTarget.getTargetProperties().getPassword());
+
 	}
 }

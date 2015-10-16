@@ -57,7 +57,7 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 
 							// Load the password from secure storage
 							String password = credentialsStore
-									.getPassword(runTargetPropMap.get(TargetProperties.RUN_TARGET_ID));
+									.getPassword(secureStoreScopeKey(type.getName(), runTargetPropMap.get(TargetProperties.RUN_TARGET_ID)));
 							targProps.put(TargetProperties.PASSWORD_PROP, password);
 
 							RunTarget target = type.createRunTarget(targProps);
@@ -127,8 +127,19 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 		// Only support changing passwords for now as its the only thing that
 		// requires secure storage. Other target properties should be immutable
 		if (targProps.getPassword() != null && targProps.getRunTargetId() != null) {
-			credentialsStore.setPassword(targProps.getPassword(), targProps.getRunTargetId());
+			credentialsStore.setPassword(targProps.getPassword(), secureStoreScopeKey(targProps));
 		}
 	}
+
+	private String secureStoreScopeKey(TargetProperties targProps) {
+		return secureStoreScopeKey(targProps.getRunTargetType().getName(), targProps.getRunTargetId());
+	}
+
+	private String secureStoreScopeKey(String targetTypeName, String targetId) {
+		return targetTypeName+":"+targetId;
+	}
+
+
+
 
 }

@@ -48,7 +48,7 @@ public class ToggleFiltersModel {
 
 		@Override
 		public String toString() {
-			return "FilterChoice("+label+")";
+			return "FilterChoice("+getLabel()+")";
 		}
 
 		@Override

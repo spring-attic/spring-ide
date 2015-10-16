@@ -37,10 +37,21 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 public class BootDashViewModelHarness {
 
 	public final BootDashModelContext context;
-	public final BootDashViewModel model;
+	public BootDashViewModel model;
+	private RunTargetType[] types;
 
 	public BootDashViewModelHarness(BootDashModelContext context, RunTargetType... types) throws Exception {
+		this.types = types;
 		this.context = context;
+		this.model = new BootDashViewModel(context, types);
+	}
+
+	/**
+	 * Dipose model and reinitialze it reusing the same stores (for testing functionality
+	 * around persisting stuff)
+	 */
+	public void reload() {
+		dispose();
 		this.model = new BootDashViewModel(context, types);
 	}
 
@@ -134,6 +145,5 @@ public class BootDashViewModelHarness {
 		}
 		return list;
 	}
-
 
 }
