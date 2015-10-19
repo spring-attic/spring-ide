@@ -113,6 +113,7 @@ public class NewSpringBootWizardModel {
 	private final String JSON_URL;
 	private final String CONTENT_TYPE;
 	private PopularityTracker popularities;
+	private PreferredSelections preferredSelections;
 
 	public NewSpringBootWizardModel() throws Exception {
 		this(
@@ -128,6 +129,7 @@ public class NewSpringBootWizardModel {
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
+		this.preferredSelections = new PreferredSelections(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
 		this.CONTENT_TYPE = contentType;
@@ -159,6 +161,8 @@ public class NewSpringBootWizardModel {
 		});
 
 		addBuildTypeValidator();
+
+		preferredSelections.restore(this);
 	}
 
 	/**
@@ -184,7 +188,7 @@ public class NewSpringBootWizardModel {
 
 	@SuppressWarnings("unchecked")
 	public final FieldArrayModel<String> stringInputs = new FieldArrayModel<String>(
-			//The fields need to be discovered by parsing web form.
+			//The fields need to be discovered by parsing json from rest endpoint.
 	);
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
@@ -258,6 +262,7 @@ public class NewSpringBootWizardModel {
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
 		updateUsageCounts();
+		preferredSelections.save(this);
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager().allowUIThread(allowUIThread);

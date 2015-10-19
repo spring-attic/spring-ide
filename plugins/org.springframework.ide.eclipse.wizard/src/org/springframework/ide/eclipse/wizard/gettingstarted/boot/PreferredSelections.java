@@ -1,0 +1,106 @@
+/*******************************************************************************
+ * Copyright (c) 2012 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Pivotal Software, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.springframework.ide.eclipse.core.StringUtils;
+import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
+
+/**
+ * Component that keeps track of some of the 'New Spring Starter Project' wizard
+ * selections upon finishing the wizard,
+ * so that we may pre-select those options again, the next time the wizard
+ * is opened.
+ *
+ * @author Kris De Volder
+ */
+public class PreferredSelections {
+
+	private String PREFIX = PreferredSelections.class.getName()+".";
+
+	private IPreferenceStore store;
+
+	public PreferredSelections(IPreferenceStore store) {
+		Assert.isNotNull(store);
+		this.store = store;
+	}
+
+	protected String key(String id) {
+		String key = PREFIX+id;
+		return key;
+	}
+
+	public void save(NewSpringBootWizardModel wizard) {
+		System.out.println(">>> Saving...");
+		for (FieldModel<String> input : wizard.stringInputs) {
+			if (isInteresting(input)) {
+				System.out.println(input.getName()+" = "+input.getValue());
+				put(input.getName(), input.getValue());
+			}
+		}
+
+		for (RadioGroup input : wizard.getRadioGroups().getGroups()) {
+			if (isInteresting(input)) {
+				put(input.getName(), input.getValue().getValue());
+			}
+		}
+	}
+
+	protected boolean isInteresting(RadioGroup input) {
+//		System.out.println("Radio: "+input);
+		return true;
+	}
+
+	protected boolean isInteresting(FieldModel<String> input) {
+//		String name = input.getName();
+		return true;
+	}
+
+
+	public void restore(NewSpringBootWizardModel wizard) {
+		System.out.println(">>> Restoring...");
+		for (FieldModel<String> input : wizard.stringInputs) {
+			if (isInteresting(input)) {
+				String v = get(input.getName(), input.getValue());
+				System.out.println(input.getName()+" = "+v);
+				input.setValue(v);
+			}
+		}
+		for (RadioGroup input : wizard.getRadioGroups().getGroups()) {
+			if (isInteresting(input)) {
+				String choiceId = get(input.getName(), null);
+				RadioInfo info = input.getRadio(choiceId);
+				if (choiceId!=null) {
+					input.getVariable().setValue(info);
+				}
+			}
+		}
+	}
+
+	private void put(String id, String value) {
+		String key = key(id);
+		System.out.println(key+" = "+ value);
+		store.setValue(key, value);
+	}
+
+	private String get(String name, String dflt) {
+		String key = key(name);
+		String v = store.getString(key);
+		if (StringUtils.hasText(v)) {
+			System.out.println(key+" = "+ v);
+			return v;
+		}
+		System.out.println(key+" = DEFAULT");
+		return dflt;
+	}
+
+}
