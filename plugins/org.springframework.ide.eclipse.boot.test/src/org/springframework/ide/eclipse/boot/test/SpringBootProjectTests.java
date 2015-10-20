@@ -57,7 +57,7 @@ public class SpringBootProjectTests extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		if (projectName==null) {
-			NewSpringBootWizardModel wizard = new NewSpringBootWizardModel();
+			NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
 			wizard.allowUIThread(true);
 			projectName = wizard.getProjectName().getValue();
 			wizard.performFinish(new NullProgressMonitor());
