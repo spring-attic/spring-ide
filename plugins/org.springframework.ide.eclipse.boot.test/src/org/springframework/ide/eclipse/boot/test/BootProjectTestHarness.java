@@ -135,7 +135,7 @@ public class BootProjectTestHarness {
 		final Job job = new Job("Create boot project '"+projectName+"'") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel();
+					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
 					wizard.allowUIThread(true);
 					wizard.getProjectName().setValue(projectName);
 					wizard.getArtifactId().setValue(projectName);

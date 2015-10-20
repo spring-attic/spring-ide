@@ -115,6 +115,14 @@ public class NewSpringBootWizardModel {
 	private PopularityTracker popularities;
 	private PreferredSelections preferredSelections;
 
+	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
+		this(
+				new URLConnectionFactory(),
+				StsProperties.getInstance(new NullProgressMonitor()),
+				prefs
+		);
+	}
+
 	public NewSpringBootWizardModel() throws Exception {
 		this(
 				new URLConnectionFactory(),
