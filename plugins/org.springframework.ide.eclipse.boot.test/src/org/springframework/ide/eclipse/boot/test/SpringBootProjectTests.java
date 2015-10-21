@@ -45,7 +45,7 @@ public class SpringBootProjectTests extends TestCase {
 	 * The version number in here should be the version of spring boot used by projects created
 	 * via the spring intializer app.
 	 */
-	private static final String BOOT_STARTER_VERSION = "1.2.6.RELEASE";
+	private static final String BOOT_STARTER_VERSION = "1.2.7.RELEASE";
 
 	private static final long MAVEN_POM_REFRESH_TIMEOUT = 3*60*1000;
 
