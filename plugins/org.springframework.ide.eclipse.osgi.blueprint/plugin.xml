@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.springframework.ide.eclipse.beans.core.namespaces">
+      <namespace
+            namespaceHandler="org.springframework.ide.eclipse.osgi.blueprint.BlueprintNamespaceHandler"
+            uri="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+      </namespace>
+   </extension>
+
+</plugin>
