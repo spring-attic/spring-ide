@@ -20,16 +20,16 @@ public class CloudErrors {
 	/**
 	 * check if access token error
 	 *
-	 * @param t
+	 * @param e
 	 * @return true if access token error. False otherwise
 	 */
-	public static boolean isAccessTokenError(Throwable t) {
-		return hasError(t, "access_denied") || hasError(t, "Error requesting access token")
-				|| (hasError(t, "access") && hasError(t, "token"));
+	public static boolean isAccessTokenError(Exception e) {
+		return hasCloudError(e, "access_denied") || hasCloudError(e, "Error requesting access token")
+				|| (hasCloudError(e, "access") && hasCloudError(e, "token"));
 	}
 
-	public static boolean isBadRequest(Throwable t) {
-		return hasCloudError(t, "400");
+	public static boolean isBadRequest(Exception e) {
+		return hasCloudError(e, "400");
 	}
 
 	/**
@@ -38,19 +38,29 @@ public class CloudErrors {
 	 * @param t
 	 * @return true if 404 error. False otherwise
 	 */
-	public static boolean isNotFoundException(Throwable t) {
-		return hasCloudError(t, "404");
+	public static boolean isNotFoundException(Exception e) {
+		return hasCloudError(e, "404");
 	}
 
-	public static boolean hasCloudError(Throwable t, String error) {
+	/**
+	 * check 503 service error.
+	 *
+	 * @param t
+	 * @return true if 404 error. False otherwise
+	 */
+	public static boolean is503Error(Exception e) {
+		return hasCloudError(e, "503");
+	}
 
-		CloudFoundryException cloudError = getCloudFoundryError(t);
+	public static boolean hasCloudError(Exception e, String error) {
+
+		CloudFoundryException cloudError = getCloudFoundryError(e);
 
 		if (cloudError != null) {
 			return hasCloudError(cloudError, error);
+		} else {
+			return hasError(e, error);
 		}
-
-		return false;
 	}
 
 	protected static CloudFoundryException getCloudFoundryError(Throwable t) {
@@ -86,7 +96,7 @@ public class CloudErrors {
 			if (isHostTaken(e)) {
 				message = "Another URL is required: the host is already taken by another existing application. Please change the URL, and restart or redeploy the application.";
 			} else {
-				message = getCloudErrorMessage((CloudFoundryException) e);
+				message = resolveCloudError((CloudFoundryException) e);
 			}
 			if (errorPrefix != null) {
 				message = errorPrefix + ": " + message;
@@ -102,13 +112,12 @@ public class CloudErrors {
 		String message = e.getDescription();
 		if (message != null && message.contains(pattern)) {
 			return true;
-		} else {
-			return hasError(e, pattern);
 		}
+		return hasError(e, pattern);
 	}
 
-	protected static boolean hasError(Throwable t, String pattern) {
-		String message = t.getMessage();
+	protected static boolean hasError(Exception exception, String pattern) {
+		String message = exception.getMessage();
 		return message != null && message.contains(pattern);
 	}
 
@@ -117,7 +126,11 @@ public class CloudErrors {
 		if (message == null || message.trim().length() == 0) {
 			message = e.getMessage();
 		}
+		return message;
+	}
 
+	protected static String resolveCloudError(CloudFoundryException e) {
+		String message = getCloudErrorMessage(e);
 		if (message == null || message.trim().length() == 0) {
 			message = "Cloud operation failure of type: " + e.getClass().getName();
 		}
