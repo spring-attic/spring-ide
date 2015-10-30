@@ -99,7 +99,7 @@ public class BootPropertyTester extends PropertyTester {
 				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
 				//Look for a 'spring-boot' jar entry
 				for (IClasspathEntry e : classpath) {
-					if (isBootJar(e)) {
+					if (isBootJar(e) || isBootProject(e)) {
 						return true;
 					}
 				}
@@ -124,6 +124,14 @@ public class BootPropertyTester extends PropertyTester {
 		return result;
 	}
 
+	public static boolean isBootProject(IClasspathEntry e) {
+		if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
+			IPath path = e.getPath();
+			String name = path.lastSegment();
+			return name.startsWith("spring-boot");
+		}
+		return false;
+	}
 
 	public static boolean isBootJar(IClasspathEntry e) {
 		if (e.getEntryKind()==IClasspathEntry.CPE_LIBRARY) {
