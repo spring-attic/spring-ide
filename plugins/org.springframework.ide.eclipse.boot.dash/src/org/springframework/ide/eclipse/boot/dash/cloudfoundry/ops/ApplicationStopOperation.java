@@ -15,27 +15,47 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
 public class ApplicationStopOperation extends CloudApplicationOperation {
 
-	private CloudDashElement element;
+	private boolean updateElementRunState = true;
 
-	public ApplicationStopOperation(CloudDashElement element, CloudFoundryBootDashModel model) {
-		super("Stopping application", model, element.getName());
-		this.element = element;
+	/**
+	 * Note some stop operations are part of a larger composite operation that
+	 * has a preferred runState (e.g. STARTING) that does not reflect the actual
+	 * run state of the app in CF. For example, as part of a large restart
+	 * operation, an app may be first stopped before restarted. However, in
+	 * these cases the app run state in the model should not be updated as to
+	 * not stomp the preferred state of the app.
+	 *
+	 * @param appName
+	 * @param model
+	 * @param updateElementRunState
+	 *            true if element run state in model should be updated. False
+	 *            otherwise.
+	 */
+	public ApplicationStopOperation(String appName, CloudFoundryBootDashModel model, boolean updateElementRunState) {
+		super("Stopping application", model, appName);
+		this.updateElementRunState = updateElementRunState;
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		requests.stopApplication(element.getName());
-		model.getElementConsoleManager().terminateConsole(element.getName());
-		CloudAppInstances updatedInstances = requests.getExistingAppInstances(element.getName());
+		requests.stopApplication(this.appName);
 
-		boolean checkTermination = false;
-		this.eventHandler.fireEvent(eventFactory.updateRunState(updatedInstances, getDashElement(),
-				ApplicationRunningStateTracker.getRunState(updatedInstances)), checkTermination);
+		// If the element run state in the model needs to be updated (i.e. the
+		// "view" needs to show the app to be stopped)
+		if (updateElementRunState) {
+			model.getElementConsoleManager().terminateConsole(this.appName);
+
+			CloudAppInstances updatedInstances = requests.getExistingAppInstances(this.appName);
+
+			boolean checkTermination = false;
+			this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(),
+					ApplicationRunningStateTracker.getRunState(updatedInstances)), checkTermination);
+		}
+
 	}
 
 	public ISchedulingRule getSchedulingRule() {

@@ -24,7 +24,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicatio
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
@@ -36,22 +35,12 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 	private final UserInteractions ui;
-	private final RunState preferedRunState;
-
-	public ApplicationUploadOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, UserInteractions ui, RunState preferedRunState) {
-		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
-		this.deploymentProperties = deploymentProperties;
-		this.ui = ui;
-		this.preferedRunState = preferedRunState;
-	}
 
 	public ApplicationUploadOperation(CloudApplicationDeploymentProperties deploymentProperties,
 			CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
 		this.ui = ui;
-		this.preferedRunState = null;
 	}
 
 	@Override
@@ -72,10 +61,6 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "
 							+ deploymentProperties.getAppName());
 		}
-
-		boolean checkTermination = true;
-		this.eventHandler.fireEvent(eventFactory.updateRunState(appInstances, getDashElement(), preferedRunState),
-				checkTermination);
 
 		// Upload the application
 		CloudZipApplicationArchive archive = null;

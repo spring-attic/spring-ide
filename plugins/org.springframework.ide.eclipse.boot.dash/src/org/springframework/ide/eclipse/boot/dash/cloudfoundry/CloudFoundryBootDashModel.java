@@ -382,13 +382,24 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		return new OperationsExecution(null);
 	}
 
-	public void updateApplication(String appName, RunState runState) {
-		CloudDashElement element = getElement(appName);
-		if (element != null && element.getRunState() != runState) {
-			getAppCache().updateCache(appName, runState);
+	public void updateElementRunState(CloudDashElement element, RunState runState) {
 
-			notifyElementChanged(element);
+		if (element != null && element.getRunState() != runState) {
+			if (runState == null) {
+				runState = RunState.UNKNOWN;
+			}
+
+			boolean notifyChanged = getAppCache().updateCache(element.getName(), runState);
+			if (notifyChanged) {
+				notifyElementChanged(element);
+			}
 		}
+	}
+
+	public void updateApplication(String appName, RunState runState) {
+
+		CloudDashElement element = getElement(appName);
+		updateElementRunState(element, runState);
 	}
 
 	/**
