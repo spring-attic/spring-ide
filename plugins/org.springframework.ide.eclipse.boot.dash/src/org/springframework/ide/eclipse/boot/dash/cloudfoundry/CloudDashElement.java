@@ -64,8 +64,17 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-		CloudApplicationOperation op = new CompositeApplicationOperation(
-				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()));
+		// Note some stop operations are part of a composite operation that has
+		// a preferred runState (e.g. STARTING)
+		// For example, as part of a large restart operation, an app may be
+		// first stopped. However, in these cases
+		// the app run state in the model should not be updated.
+		// But when directly stopped through element API, ensure that the app
+		// run state IS indeed updated to show that
+		// it is stopped
+		boolean updateElementRunStateInModel = true;
+		CloudApplicationOperation op = new CompositeApplicationOperation(new ApplicationStopOperation(this.getName(),
+				(CloudFoundryBootDashModel) getParent(), updateElementRunStateInModel));
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
@@ -88,7 +97,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 						Arrays.asList(new CloudApplicationOperation[] {
 								new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging,
 										ui),
-								new RemoteDevClientStartOperation(cloudModel, getName(), runingOrDebugging) }));
+								new RemoteDevClientStartOperation(cloudModel, getName(), runingOrDebugging) }), RunState.STARTING);
 			} else {
 				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, ui);
 			}

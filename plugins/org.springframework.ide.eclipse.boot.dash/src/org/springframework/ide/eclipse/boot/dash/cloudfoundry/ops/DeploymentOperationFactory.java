@@ -49,11 +49,11 @@ public class DeploymentOperationFactory {
 	}
 
 	public CloudApplicationOperation getRestartAndDeploy(CloudApplicationDeploymentProperties properties) {
-		List<CloudApplicationOperation> uploadAndRestartOps = getUploadUpdateRestartOps(properties, RunState.STARTING);
+		List<CloudApplicationOperation> uploadAndRestartOps = getUploadUpdateRestartOps(properties);
 
 		CloudApplicationOperation op = new CompositeApplicationOperation(
 				"Re-deploying and re-starting project: " + project.getName(), model, properties.getAppName(),
-				uploadAndRestartOps);
+				uploadAndRestartOps, RunState.STARTING);
 		return op;
 	}
 
@@ -77,13 +77,13 @@ public class DeploymentOperationFactory {
 			throw new OperationCanceledException();
 		}
 
-		RunState desiredRunState = RunState.STARTING;
+		RunState initialRunstate = RunState.STARTING;
 
 		CloudApplicationOperation addElementOp = new AddElementOperation(properties, model, existingApp,
-				desiredRunState);
+				initialRunstate);
 		deploymentOperations.add(addElementOp);
 
-		List<CloudApplicationOperation> uploadAndRestartOps = getUploadUpdateRestartOps(properties, null);
+		List<CloudApplicationOperation> uploadAndRestartOps = getUploadUpdateRestartOps(properties);
 		deploymentOperations.addAll(uploadAndRestartOps);
 
 		CloudApplicationOperation op = new CompositeApplicationOperation(
@@ -94,24 +94,27 @@ public class DeploymentOperationFactory {
 
 	/**
 	 *
-	 * @param preferredRunState
-	 *            Optional: state at which the application should be when the
-	 *            upload and restart operation is run. If null, the existing
-	 *            runstate of the app will be retained.
 	 * @return non-null list of ops that perform upload, update and restart
 	 */
-	protected List<CloudApplicationOperation> getUploadUpdateRestartOps(CloudApplicationDeploymentProperties properties,
-			RunState preferredRunState) {
+	protected List<CloudApplicationOperation> getUploadUpdateRestartOps(
+			CloudApplicationDeploymentProperties properties) {
 		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
 		// set the preferred runstate in the first op that gets executed. Not
 		// necessary to add it to any of the following ops
 		// as the app will remain in the preferred run state unless any one of
 		// the ops, or any other op running in parallel, changes the state to
 		// something else
-		deploymentOperations.add(new ApplicationUploadOperation(properties, model, ui, preferredRunState));
 
+		// Stop application first to avoid issues when updating or restarting
+		// the app in case
+		// the app is in a "failed" state in CF. This is a work around to handle
+		// 503 errors that
+		// may result when the underlying client indirectly fetches app instance
+		// stats that may not
+		// be available (and thus throw 503)
+		deploymentOperations.add(new ApplicationStopOperation(properties.getAppName(), model, false));
 		deploymentOperations.add(new ApplicationPropertiesUpdateOperation(properties, model));
-
+		deploymentOperations.add(new ApplicationUploadOperation(properties, model, ui));
 		deploymentOperations.add(new ApplicationStartOperation(properties.getAppName(), model));
 
 		return deploymentOperations;

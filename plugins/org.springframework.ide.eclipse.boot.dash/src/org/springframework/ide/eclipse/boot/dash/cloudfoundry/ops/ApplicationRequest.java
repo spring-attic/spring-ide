@@ -13,9 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
-public abstract class ApplicationInstanceRequest<T> extends ClientRequest<T> {
+public abstract class ApplicationRequest<T> extends ClientRequest<T> {
 
-	public ApplicationInstanceRequest(CloudFoundryBootDashModel model, String appName) {
+	public ApplicationRequest(CloudFoundryBootDashModel model, String appName) {
 		super(model, appName, "Getting application " + appName);
 		addRequestListener(new ApplicationInstanceErrorListener(this));
 	}

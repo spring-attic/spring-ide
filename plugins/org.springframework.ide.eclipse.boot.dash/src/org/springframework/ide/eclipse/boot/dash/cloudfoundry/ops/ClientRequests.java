@@ -48,7 +48,7 @@ public class ClientRequests {
 
 	public CloudApplication getApplication(final String appName) throws Exception {
 
-		return new ApplicationInstanceRequest<CloudApplication>(model, appName) {
+		return new ApplicationRequest<CloudApplication>(model, appName) {
 			@Override
 			protected CloudApplication doRun(CloudFoundryOperations client) throws Exception {
 				try {
@@ -78,7 +78,7 @@ public class ClientRequests {
 
 	public CloudApplication getApplication(final UUID appUUID) throws Exception {
 
-		return new ApplicationInstanceRequest<CloudApplication>(model, appUUID.toString()) {
+		return new ApplicationRequest<CloudApplication>(model, appUUID.toString()) {
 			@Override
 			protected CloudApplication doRun(CloudFoundryOperations client) throws Exception {
 				try {
@@ -107,7 +107,7 @@ public class ClientRequests {
 	}
 
 	public ApplicationStats getApplicationStats(final String appName) throws Exception {
-		return new ApplicationInstanceRequest<ApplicationStats>(model, appName) {
+		return new ApplicationRequest<ApplicationStats>(model, appName) {
 			@Override
 			protected ApplicationStats doRun(CloudFoundryOperations client) throws Exception {
 				return client.getApplicationStats(appName);
@@ -167,10 +167,11 @@ public class ClientRequests {
 	}
 
 	public void stopApplication(final String appName) throws Exception {
-		new BasicRequest(model, appName, "Stopping application") {
+		new ApplicationRequest<Void>(model, appName) {
 			@Override
-			protected void runRequest(CloudFoundryOperations client) throws Exception {
+			protected Void doRun(CloudFoundryOperations client) throws Exception {
 				client.stopApplication(appName);
+				return null;
 			}
 		}.run();
 	}

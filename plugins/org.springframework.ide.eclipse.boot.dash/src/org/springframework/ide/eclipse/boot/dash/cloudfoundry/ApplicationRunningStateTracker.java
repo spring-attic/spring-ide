@@ -25,7 +25,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOpe
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
-	public static final long TIMEOUT = 1000 * 60 * 5;
+	// Give time for Diego-enabled apps with health check that may take a while to start
+	// Users can always manually stop the app if it is taking too long to check the run state of the app
+	public static final long TIMEOUT = 1000 * 60 * 10;
 
 	public static final long WAIT_TIME = 1000;
 

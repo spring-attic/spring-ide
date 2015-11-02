@@ -38,13 +38,28 @@ public class ApplicationOperationEventFactory {
 	 * @return
 	 *
 	 */
-	public ApplicationOperationEvent updateRunState(CloudAppInstances appInstances, CloudDashElement element,
+	public ApplicationOperationEvent getUpdateRunStateEvent(CloudAppInstances appInstances, CloudDashElement element,
 			RunState runState) {
 		// If no runstate specified retain the existing runstate in the element
 		if (runState == null) {
 			runState = element != null ? element.getRunState() : null;
 		}
 		return new UpdateRunStateEvent(appInstances, model, runState);
+	}
+
+	public ApplicationOperationEvent getUpdateRunStateEvent(CloudDashElement element, RunState runState) {
+		// Dont fire anything if the element is not specified
+		if (element != null) {
+			// If no runstate specified retain the existing runstate in the
+			// element
+
+			if (runState == null) {
+				runState = element.getRunState();
+			}
+			return new UpdateElementRunStateEvent(element, model, runState);
+		}
+		return null;
+
 	}
 
 	class UpdateRunStateEvent implements ApplicationOperationEvent {
@@ -69,6 +84,32 @@ public class ApplicationOperationEventFactory {
 		@Override
 		public CloudAppInstances getAppInstances() {
 			return this.appInstances;
+		}
+
+	}
+
+	class UpdateElementRunStateEvent implements ApplicationOperationEvent {
+
+		protected final CloudDashElement element;
+
+		protected final CloudFoundryBootDashModel model;
+
+		protected final RunState runState;
+
+		UpdateElementRunStateEvent(CloudDashElement element, CloudFoundryBootDashModel model, RunState runState) {
+			this.element = element;
+			this.model = model;
+			this.runState = runState;
+		}
+
+		@Override
+		public void fire() {
+			model.updateElementRunState(element, runState);
+		}
+
+		@Override
+		public CloudAppInstances getAppInstances() {
+			return element != null ? model.getAppCache().getAppInstances(element.getName()) : null;
 		}
 
 	}
