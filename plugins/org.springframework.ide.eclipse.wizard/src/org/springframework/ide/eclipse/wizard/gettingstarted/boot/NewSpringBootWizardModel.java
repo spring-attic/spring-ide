@@ -18,7 +18,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -59,6 +58,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.Down
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
+import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
@@ -69,6 +69,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectLoc
 import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectNameValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
  * A ZipUrlImportWizard is a simple wizard in which one can paste a url
@@ -215,6 +216,8 @@ public class NewSpringBootWizardModel {
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
+
+	private DependencyFilterBox filterBox = new DependencyFilterBox();
 
 	/**
 	 * Retrieves the most popular dependencies based on the number of times they have
@@ -515,6 +518,14 @@ public class NewSpringBootWizardModel {
 			}
 		}
 		return null;
+	}
+
+	public LiveVariable<String> getDependencyFilterBoxText() {
+		return filterBox.getText();
+	}
+
+	public LiveExpression<Filter<CheckBoxModel<Dependency>>> getDependencyFilter() {
+		return filterBox.getFilter();
 	}
 
 	/**
