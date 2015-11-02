@@ -334,7 +334,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	public void testDependencySearchBox() throws Exception {
 		// The trickies bit of implementing the search box is, unfortunately, making the
 		// SWT gui widgetry apply the filter and hide / show corresponding ui elements.
-		// This unfortunately not tested here. This test only verifies that the filter's
+		// This unfortunately not tested here. This test only verifies the filter's
 		// matching logic.
 
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
