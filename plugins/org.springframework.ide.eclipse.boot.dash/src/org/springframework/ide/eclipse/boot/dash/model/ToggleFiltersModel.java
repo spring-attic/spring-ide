@@ -14,6 +14,8 @@ import org.eclipse.core.resources.IProject;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 /**
  * The 'toggle filters' are fixed set of view filters that can be toggled on/off by the user.
