@@ -27,6 +27,7 @@ public class DependencyFilterBox extends FilterBoxModel<CheckBoxModel<Dependency
 			return new Filter<CheckBoxModel<Dependency>>() {
 				public boolean accept(CheckBoxModel<Dependency> cb) {
 					return isTrue(cb.getSelection())
+						|| matches(text, cb.getLabel())
 						|| matches(text, cb.getValue());
 				}
 			};
@@ -34,9 +35,9 @@ public class DependencyFilterBox extends FilterBoxModel<CheckBoxModel<Dependency
 		return Filters.acceptAll();
 	}
 
-	protected boolean matches(String pattern, Dependency value) {
-		return matches(pattern, value.getName())
-			|| matches(pattern, value.getDescription());
+	protected boolean matches(String pattern, Dependency dep) {
+		return matches(pattern, dep.getName())
+			|| matches(pattern, dep.getDescription());
 	}
 
 	protected boolean matches(String pattern, String text) {

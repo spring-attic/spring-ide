@@ -31,6 +31,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
@@ -48,6 +49,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 /**
  * Tests whether NewSpringBootWizardModel adequately parses initializer form data.
@@ -300,7 +303,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 
-	public void testtPopularCheckboxSharesSelectionState() throws Exception {
+	public void testPopularCheckboxSharesSelectionState() throws Exception {
 		IPreferenceStore store = new MockPrefsStore();
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
 		assertTrue(model.getMostPopular(10).isEmpty());
@@ -326,6 +329,72 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		popularBox.getSelection().setValue(false);
 		assertFalse(normalBox.getSelection().getValue());
 		assertFalse(popularBox.getSelection().getValue());
+	}
+
+	public void testDependencySearchBox() throws Exception {
+		// The trickies bit of implementing the search box is, unfortunately, making the
+		// SWT gui widgetry apply the filter and hide / show corresponding ui elements.
+		// This unfortunately not tested here. This test only verifies that the filter's
+		// matching logic.
+
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+
+		LiveVariable<String> searchBox = model.getDependencyFilterBoxText();
+		LiveExpression<Filter<CheckBoxModel<Dependency>>> filter = model.getDependencyFilter();
+
+		assertEquals("", searchBox.getValue());
+		assertEquals(Filters.acceptAll(),filter.getValue());
+
+		assertFilterAccepts(model, true, "web", "web", "Web", "Full stack yada yada");
+		assertFilterAccepts(model, true, "WeB", "web", "Web", "Full stack yada yada");
+		assertFilterAccepts(model, false, "ZZZZZZZZZZ", "web", "Web", "Full stack yada yada");
+
+		assertFilterAccepts(model, true, "foo", "something", "label FoO label", "desc");
+		assertFilterAccepts(model, true, "foo", "something", "label", "desc FOO desc");
+		assertFilterAccepts(model, false, "foo", "foo", "label", "desc");
+
+	}
+
+	private CheckBoxModel<Dependency> getCheckboxById(NewSpringBootWizardModel model, String id) {
+		CheckBoxModel<Dependency> found = null;
+		for (String cat : model.dependencies.getCategories()) {
+			for (CheckBoxModel<Dependency> cb : model.dependencies.getContents(cat).getCheckBoxModels()) {
+				if (cb.getValue().getId().equals(id)) {
+					Assert.assertNull(found);
+					found = cb;
+				}
+			}
+		}
+		return found;
+	}
+
+	private void assertFilterAccepts(NewSpringBootWizardModel model, boolean expect, String pattern,
+			String id, String label, String desc) {
+		LiveVariable<String> searchBox = model.getDependencyFilterBoxText();
+		searchBox.setValue(pattern);
+		Filter<CheckBoxModel<Dependency>> filter = model.getDependencyFilter().getValue();
+
+		LiveVariable<Boolean> selection = new LiveVariable<Boolean>(false);
+		LiveVariable<Boolean> enablement = new LiveVariable<Boolean>(true);
+
+		Dependency dep = new Dependency();
+		dep.setId(id);
+		dep.setName(null);
+		dep.setDescription(desc);
+		CheckBoxModel<Dependency> cb = new CheckBoxModel<Dependency>(label, dep, selection, enablement);
+
+		assertEquals(expect, filter.accept(cb));
+
+		// No matter what, filter should allways accept checbox that has already been selected:
+		selection.setValue(true);
+		assertEquals(true, filter.accept(cb));
+
+		// Check that enablement is ignored by filter (i.e. setting enablement false does not change
+		// whether filter accepts the cb
+		enablement.setValue(true);
+		assertEquals(true, filter.accept(cb));
+		selection.setValue(false);
+		assertEquals(expect, filter.accept(cb));
 	}
 
 	private CheckBoxModel<Dependency> getCheckboxById(List<CheckBoxModel<Dependency>> list, String id) {
