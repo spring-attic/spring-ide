@@ -22,7 +22,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -232,7 +231,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 
 		for (int i = 0; i < model.size(); i++) {
-			subsections[i] = new CheckBox(owner, model.get(i));
+			subsections[i] = new CheckBox<T>(owner, model.get(i));
 			subsections[i].createContents(composite);
 		}
 	}
