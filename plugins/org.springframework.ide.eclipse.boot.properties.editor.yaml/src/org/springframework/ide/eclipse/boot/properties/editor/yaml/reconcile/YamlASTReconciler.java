@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil.asScalar;
 
+import java.security.KeyStore.Entry;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileA
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
@@ -171,7 +173,15 @@ public class YamlASTReconciler {
 			}
 			if (valueType!=null) {
 				for (NodeTuple entry : mapping.getValue()) {
-					reconcile(entry.getValueNode(), valueType);
+					Node value = entry.getValueNode();
+					Type nestedValueType = valueType;
+					if (value.getNodeId()==NodeId.mapping) {
+						if (TypeUtil.isObject(valueType) || TypeUtil.isString(keyType)) {
+							//See https://issuetracker.springsource.com/browse/STS-4254
+							nestedValueType = type;
+						}
+					}
+					reconcile(entry.getValueNode(), nestedValueType);
 				}
 			}
 		} else {

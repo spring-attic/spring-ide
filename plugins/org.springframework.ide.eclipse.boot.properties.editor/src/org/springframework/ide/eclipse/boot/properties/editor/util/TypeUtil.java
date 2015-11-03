@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
@@ -216,6 +217,11 @@ public class TypeUtil {
 			// assigning anything to it is an error.
 			return new EnumValueParser(niceTypeName(type), enumValues);
 		}
+		if (isMap(type)) {
+			//Trying to parse map types from scalars is not possible. Thus we
+			// provide a parser that allows throws
+			return new AlwaysFailingParser(niceTypeName(type));
+		}
 		return null;
 	}
 
@@ -337,8 +343,12 @@ public class TypeUtil {
 		return !isAtomic(type);
 	}
 
+	public static boolean isObject(Type type) {
+		return type!=null && OBJECT_TYPE_NAME.equals(type.getErasure());
+	}
+
 	public static boolean isString(Type type) {
-		return STRING_TYPE_NAME.equals(type.getErasure());
+		return type!=null && STRING_TYPE_NAME.equals(type.getErasure());
 	}
 
 	public boolean isAtomic(Type type) {
@@ -654,10 +664,6 @@ public class TypeUtil {
 			return m;
 		}
 		return null;
-	}
-
-	public static boolean isObject(Type type) {
-		return OBJECT_TYPE_NAME.equals(type.getErasure());
 	}
 
 }

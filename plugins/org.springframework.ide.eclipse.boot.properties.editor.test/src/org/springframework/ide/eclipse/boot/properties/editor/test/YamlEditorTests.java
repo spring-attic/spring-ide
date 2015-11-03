@@ -2107,6 +2107,13 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		MockEditor editor;
 		data("info", "java.util.Map<java.lang.String,java.lang.Object>", null, "Info for the actuator's info endpoint.");
 
+		editor = new MockEditor(
+				"info: not-a-map\n"
+		);
+		assertProblems(editor,
+				"not-a-map|Expecting a 'Map<String, Object>'"
+		);
+
 		editor= new MockEditor(
 				"info:\n" +
 				"  build: \n" +
@@ -2134,7 +2141,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		assertProblems(editor,
 				"booger|Unknown property"
 		);
-
 	}
 
 	public void test_STS_4254_MapStringStringReconciling() throws Exception {
@@ -2147,7 +2153,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    artifact: foo-bar\n"
 		);
 		assertProblems(editor
-				/*nothing*/
+				/*no problems*/
 		);
 
 		editor= new MockEditor(
@@ -2157,7 +2163,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"      nested: foo-bar\n"
 		);
 		assertProblems(editor
-				/*nothing*/
+				/*no problems*/
 		);
 
 		editor= new MockEditor(
@@ -2175,12 +2181,6 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		MockEditor editor;
 		data("info", "java.util.Map<java.lang.String,java.lang.Integer>", null, "Info for the actuator's info endpoint.");
 
-		//This is a bit different because...
-		// a) when value is 'Object' it means 'anything goes', including nested maps.
-		// b) Map<String,String> is a special case and it flattens nested maps
-		// c) Map<String,Integer> is just interpreted as it is, menaing the values have to be int and the nesting is not
-		//                         dealt with by flattening
-
 		editor= new MockEditor(
 				"info:\n" +
 				"  build: \n" +
@@ -2192,8 +2192,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 		editor= new MockEditor(
 				"info:\n" +
-				"  build: \n" +
-				"    123\n"
+				"  build: 123\n"
 		);
 		assertProblems(editor
 				/*no problems*/
@@ -2201,11 +2200,35 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 		editor= new MockEditor(
 				"info:\n" +
-				"  something: \n" +
-				"    nested: 123\n"
+				"  build: \n" +
+				"    number: 123\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    artifact: abc\n"
 		);
 		assertProblems(editor,
-				"nested: 123|Expecting a 'int'"
+				"abc|Expecting a 'int'"
+		);
+
+		//A more complex example for good measure
+		editor= new MockEditor(
+				"info:\n" +
+				"  some: \n" +
+				"    nested: foo\n" +
+				"    and: bar\n" +
+				"  or: 444\n" +
+				"  also: bad\n"
+		);
+		assertProblems(editor,
+				"foo|Expecting a 'int'",
+				"bar|Expecting a 'int'",
+				"bad|Expecting a 'int'"
 		);
 
 	}
