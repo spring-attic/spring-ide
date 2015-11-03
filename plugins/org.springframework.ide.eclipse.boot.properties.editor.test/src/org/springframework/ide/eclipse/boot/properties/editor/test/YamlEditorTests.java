@@ -2103,6 +2103,114 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	}
 
+	public void test_STS_4254_MapStringObjectReconciling() throws Exception {
+		MockEditor editor;
+		data("info", "java.util.Map<java.lang.String,java.lang.Object>", null, "Info for the actuator's info endpoint.");
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    artifact: foo-bar\n"
+		);
+		assertProblems(editor
+				/*nothing*/
+		);
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  more: \n" +
+				"    deeply:\n" +
+				"      nested: foo-bar\n"
+		);
+		assertProblems(editor
+				/*nothing*/
+		);
+
+		editor= new MockEditor(
+				"booger: Bad\n" +
+				"info:\n" +
+				"  akey: avalue\n"
+		);
+		assertProblems(editor,
+				"booger|Unknown property"
+		);
+
+	}
+
+	public void test_STS_4254_MapStringStringReconciling() throws Exception {
+		MockEditor editor;
+		data("info", "java.util.Map<java.lang.String,java.lang.String>", null, "Info for the actuator's info endpoint.");
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    artifact: foo-bar\n"
+		);
+		assertProblems(editor
+				/*nothing*/
+		);
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  more: \n" +
+				"    deeply:\n" +
+				"      nested: foo-bar\n"
+		);
+		assertProblems(editor
+				/*nothing*/
+		);
+
+		editor= new MockEditor(
+				"booger: Bad\n" +
+				"info:\n" +
+				"  akey: avalue\n"
+		);
+		assertProblems(editor,
+				"booger|Unknown property"
+		);
+
+	}
+
+	public void test_STS_4254_MapStringIntegerReconciling() throws Exception {
+		MockEditor editor;
+		data("info", "java.util.Map<java.lang.String,java.lang.Integer>", null, "Info for the actuator's info endpoint.");
+
+		//This is a bit different because...
+		// a) when value is 'Object' it means 'anything goes', including nested maps.
+		// b) Map<String,String> is a special case and it flattens nested maps
+		// c) Map<String,Integer> is just interpreted as it is, menaing the values have to be int and the nesting is not
+		//                         dealt with by flattening
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    foo-bar\n"
+		);
+		assertProblems(editor,
+				"foo-bar|Expecting a 'int'"
+		);
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    123\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		editor= new MockEditor(
+				"info:\n" +
+				"  something: \n" +
+				"    nested: 123\n"
+		);
+		assertProblems(editor,
+				"nested: 123|Expecting a 'int'"
+		);
+
+	}
+
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {

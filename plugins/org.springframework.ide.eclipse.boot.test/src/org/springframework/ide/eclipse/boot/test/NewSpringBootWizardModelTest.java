@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -20,15 +18,12 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
@@ -47,10 +42,11 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+
+import junit.framework.TestCase;
 
 /**
  * Tests whether NewSpringBootWizardModel adequately parses initializer form data.

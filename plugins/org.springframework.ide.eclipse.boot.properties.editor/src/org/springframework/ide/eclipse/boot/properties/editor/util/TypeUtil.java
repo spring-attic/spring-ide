@@ -65,6 +65,7 @@ public class TypeUtil {
 
 	}
 
+	private static final Object OBJECT_TYPE_NAME = Object.class.getName();
 	private static final String STRING_TYPE_NAME = String.class.getName();
 	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
 
@@ -336,6 +337,10 @@ public class TypeUtil {
 		return !isAtomic(type);
 	}
 
+	public static boolean isString(Type type) {
+		return STRING_TYPE_NAME.equals(type.getErasure());
+	}
+
 	public boolean isAtomic(Type type) {
 		if (type!=null) {
 			String typeName = type.getErasure();
@@ -443,7 +448,7 @@ public class TypeUtil {
 	}
 
 	public static Type getKeyType(Type mapOrArrayType) {
-		if (isBracketable(mapOrArrayType)) {
+		if (isSequencable(mapOrArrayType)) {
 			return INTEGER_TYPE;
 		} else {
 			//assumed to be a map
@@ -649,6 +654,10 @@ public class TypeUtil {
 			return m;
 		}
 		return null;
+	}
+
+	public static boolean isObject(Type type) {
+		return OBJECT_TYPE_NAME.equals(type.getErasure());
 	}
 
 }
