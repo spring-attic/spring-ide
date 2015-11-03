@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal Software, Inc.
+ * Copyright (c) 2014, 2015 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
+package org.springframework.ide.eclipse.gradle;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.gradle.tooling.model.ExternalDependency;
@@ -22,7 +22,7 @@ import org.springsource.ide.eclipse.gradle.core.api.IProjectConfigurator;
  * Configures Spring project for Gradle integration
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 public class SpringProjectConfigurator implements IProjectConfigurator {
 
