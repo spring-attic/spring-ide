@@ -12,24 +12,30 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
+/**
+ * Import stratgety used in place of a Strategy that could not be instantiated, presumably because
+ * the required Eclipse plugins are not installed.
+ *
+ * @author Kris De Volder
+ */
 public class NullImportStrategy extends ImportStrategy {
 
-	private String buildType;
+	private String name;
 	private String notInstalledMessage;
 
-	public NullImportStrategy(String buildType, String notInstalledMessage) {
-		this.buildType = buildType;
+	public NullImportStrategy(String name, String notInstalledMessage) {
+		this.name = name;
 		this.notInstalledMessage = notInstalledMessage;
 	}
 
 	@Override
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
-		throw new Error("Can not import using '"+buildType+"' because "+notInstalledMessage);
+		throw new Error("Can not import using '"+name+"' because "+notInstalledMessage);
 	}
 
 	@Override
 	public boolean isSupported() {
 		return false;
 	}
-	
+
 }

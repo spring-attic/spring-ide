@@ -10,9 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.NullImportStrategy;
 
@@ -49,17 +55,16 @@ public enum BuildType {
 	 * be imported with the corresponding ImportStrategy.
 	 */
 	private Path buildScriptPath;
-	private String klass; //Class name for import strategy. May not be able to classload if requisite tooling isn't installed.
-	private String notInstalledMessage; //Message tailored to the particular tooling that is needed for an
-	private ImportStrategy importStrategy;
+	private List<ImportStrategyFactory> strategies = new ArrayList<ImportStrategyFactory>();
 	private String displayName;
 
 	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
 		if (buildScriptPath!=null) {
 			this.buildScriptPath = new Path(buildScriptPath);
 		}
-		this.klass = importStrategyClass;
-		this.notInstalledMessage = notInstalledMessage;
+		this.strategies.add(new ImportStrategyFactory(this,
+				importStrategyClass, notInstalledMessage, "Default"
+		));
 	}
 
 	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage, String displayName) {
@@ -72,18 +77,12 @@ public enum BuildType {
 		return buildScriptPath;
 	}
 
-	public ImportStrategy getImportStrategy() {
-		if (this.importStrategy==null) {
-			try {
-				this.importStrategy = (ImportStrategy) Class.forName(klass).newInstance();
-			} catch (Throwable e) {
-				//THe most likely cause of this error is that optional dependencies needed to support
-				// this import strategy are not installed.
-				WizardPlugin.log(e);
-				this.importStrategy = new NullImportStrategy(name(), notInstalledMessage);
-			}
+	public List<ImportStrategy> getImportStrategies() {
+		ArrayList<ImportStrategy> instances = new ArrayList<ImportStrategy>(strategies.size());
+		for (ImportStrategyFactory f : strategies) {
+			instances.add(f.get());
 		}
-		return this.importStrategy;
+		return Collections.unmodifiableList(instances);
 	}
 
 	public String displayName() {
@@ -99,8 +98,16 @@ public enum BuildType {
 	 */
 	public static final BuildType DEFAULT = MAVEN;
 
-	public String getNotInstalledMessage() {
-		return notInstalledMessage;
+	/**
+	 * This will return the first import strategy. This method is deprecated, it is provided only
+	 * to avoid completely breaking code that assumes only a single strategy per build-type is available.
+	 * <p>
+	 * Code using this method will work, but will only be able to use one of the import strategies.
+	 * It should be rewritten to support multiple strategies (i.e. use getImportStrategies() method.
+	 */
+	@Deprecated
+	public ImportStrategy getImportStrategy() {
+		return getImportStrategies().get(0);
 	}
 
 }

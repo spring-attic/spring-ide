@@ -184,9 +184,10 @@ public class NewSpringBootWizardModel {
 				@Override
 				protected ValidationResult compute() {
 					BuildType bt = getBuildType();
-					if (!bt.getImportStrategy().isSupported()) {
+					ImportStrategy s = bt.getImportStrategy();
+					if (!s.isSupported()) {
 						//This means some required STS component like m2e or gradle tooling is not installed
-						return ValidationResult.error(bt.getNotInstalledMessage());
+						return ValidationResult.error(s.getNotInstalledMessage());
 					}
 					return ValidationResult.OK;
 				}

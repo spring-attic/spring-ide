@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
@@ -37,12 +38,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
  * @author Kris De Volder
  */
 public class GeneralProjectStrategy extends ImportStrategy {
-
-	public GeneralProjectStrategy() {
-		//Ensure this strategy can only be instantiated if m2e is installed.
-		//If this fails a default 'NullStrategy' instance will be created instead.
-		Assert.isNotNull(Platform.getBundle("org.eclipse.m2e.core"), "M2E is not installed");
-	}
 
 	static class GeneralProjectImport implements IRunnableWithProgress {
 
@@ -57,7 +52,7 @@ public class GeneralProjectStrategy extends ImportStrategy {
 		}
 
 		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
-			mon.beginTask("Create maven project "+projectName, 2);
+			mon.beginTask("Create General Project '"+projectName+"'", 2);
 			try {
 				//1: copy/isntantiate codeset data
 				codeset.createAt(location);
@@ -113,11 +108,11 @@ public class GeneralProjectStrategy extends ImportStrategy {
 					}
 				}
 				mon.worked(1);
-		
+
 				//2
 				IProject project = ws.getRoot().getProject(projectName);
 				project.create(projectDescription, new SubProgressMonitor(mon, 1));
-		
+
 				//3
 				project.open(new SubProgressMonitor(mon, 1));
 			} finally {

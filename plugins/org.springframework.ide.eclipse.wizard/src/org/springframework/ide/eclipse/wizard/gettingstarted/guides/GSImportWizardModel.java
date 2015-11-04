@@ -207,7 +207,7 @@ public class GSImportWizardModel {
 									ImportStrategy importStrategy = bt.getImportStrategy();
 									if (!importStrategy.isSupported()) {
 										//This means some required STS component like m2e or gradle tooling is not installed
-										return ValidationResult.error(bt.getNotInstalledMessage());
+										return ValidationResult.error(importStrategy.getNotInstalledMessage());
 									}
 								}
 							}

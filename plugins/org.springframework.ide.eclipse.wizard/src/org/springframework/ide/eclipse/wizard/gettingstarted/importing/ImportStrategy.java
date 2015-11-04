@@ -25,4 +25,11 @@ public abstract class ImportStrategy {
 		return true;
 	}
 
+	/**
+	 * Subclasses should override to provide more precise message
+	 */
+	public String getNotInstalledMessage() {
+		return "Can't use this, something it requires is not installed";
+	}
+
 }
