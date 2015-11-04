@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.gradle;singleton:=true
 Bundle-Version: 3.7.2.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.gradle.Activator
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true
