@@ -16,11 +16,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.NullImportStrategy;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategyHolder;
 
 public enum BuildType {
 	MAVEN("pom.xml",
@@ -55,15 +53,15 @@ public enum BuildType {
 	 * be imported with the corresponding ImportStrategy.
 	 */
 	private Path buildScriptPath;
-	private List<ImportStrategyFactory> strategies = new ArrayList<ImportStrategyFactory>();
+	private List<ImportStrategyHolder> strategies = new ArrayList<ImportStrategyHolder>();
 	private String displayName;
 
 	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
 		if (buildScriptPath!=null) {
 			this.buildScriptPath = new Path(buildScriptPath);
 		}
-		this.strategies.add(new ImportStrategyFactory(this,
-				importStrategyClass, notInstalledMessage, "Default"
+		this.strategies.add(new ImportStrategyHolder(this,
+				ImportStrategies.forClass(importStrategyClass), notInstalledMessage, "Default"
 		));
 	}
 
@@ -79,7 +77,7 @@ public enum BuildType {
 
 	public List<ImportStrategy> getImportStrategies() {
 		ArrayList<ImportStrategy> instances = new ArrayList<ImportStrategy>(strategies.size());
-		for (ImportStrategyFactory f : strategies) {
+		for (ImportStrategyHolder f : strategies) {
 			instances.add(f.get());
 		}
 		return Collections.unmodifiableList(instances);

@@ -1,22 +1,38 @@
-package org.springframework.ide.eclipse.wizard.gettingstarted.content;
+/*******************************************************************************
+ * Copyright (c) 2013, 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * 	Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.NullImportStrategy;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 
-public class ImportStrategyFactory {
+/**
+ * This is wrapper around a {@link ImportStrategyFactory}. It is repsonsible for creating
+ * a single instance from the factory, and providing a fallback for when calling the
+ * factory fails.
+ *
+ * @author Kris De Volder
+ */
+public class ImportStrategyHolder {
 
 	private BuildType buildType;
-	private String klass; //Class name for import strategy. May not be able to classload if requisite tooling isn't installed.
+	private ImportStrategyFactory factory;
 	private String notInstalledMessage; //Message tailored to the particular tooling that is needed for an
-	private String name; //Short name that can be used to identify strategy to the user (this is only used when more than one
-						// strategy is available for a single build-type.
+	private String name; //Short name that can be used to identify strategy to the user (this is useful when more than one
+						// strategy is available for a single build-type).
 
 	private ImportStrategy instance = null;
 
-	public ImportStrategyFactory(BuildType buildType, String klass, String notInstalledMessage, String name) {
+	public ImportStrategyHolder(BuildType buildType, ImportStrategyFactory factory, String notInstalledMessage, String name) {
 		this.buildType = buildType;
-		this.klass = klass;
+		this.factory = factory;
 		this.notInstalledMessage = notInstalledMessage;
 		this.name = name;
 	}
@@ -34,7 +50,7 @@ public class ImportStrategyFactory {
 	public ImportStrategy get() {
 		if (instance == null) {
 			try {
-				this.instance = (ImportStrategy) Class.forName(klass).newInstance();
+				this.instance = factory.create(buildType, notInstalledMessage, displayName());
 			} catch (Throwable e) {
 				//THe most likely cause of this error is that optional dependencies needed to support
 				// this import strategy are not installed.
