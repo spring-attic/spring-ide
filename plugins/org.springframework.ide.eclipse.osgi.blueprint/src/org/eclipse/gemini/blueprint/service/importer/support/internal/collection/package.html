@@ -1,0 +1,18 @@
+<html>
+<body>
+
+Gemini Blueprint service collections.
+<br>
+This package provides dynamic collections which allow iterating while
+the underlying content is being modified. These collections are best
+used through iterators. In fact, the implementation provide
+<strong>consistent</strong>
+iterators: it is guaranteed that {@link Iterator#next()} will obey the
+result of the previously called {@link Iterator#hasNext()} even though
+the collection content has been modified.
+<p />The end-user implementations are thread-safe.
+<p />Note that these collections are not meant to be generic or for
+usage outside the framework - they are adapters for the OSGi
+environment.
+</body>
+</html>
