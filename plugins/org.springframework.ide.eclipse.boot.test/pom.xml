@@ -33,6 +33,11 @@
 						<extraRequirements>
 							<requirement>
 								<type>eclipse-feature</type>
+								<id>org.springsource.ide.eclipse.gradle.feature</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-feature</type>
 								<id>org.springframework.ide.eclipse.feature</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
