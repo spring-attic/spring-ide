@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2015 Pivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ *      Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
@@ -15,14 +15,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 
 /**
  * A CodeSet represents a bunch of content that can somehow be imported into
@@ -40,6 +45,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
  */
 public abstract class CodeSet {
 
+	private static final boolean IS_WINDOWS = OsUtils.isWindows();
+
 	/**
 	 * Represents an Entry in a CodeSet. API similar to ZipEntry but paths may be remapped
 	 * as they are relative to the root of the code set not the Zip (or other source of data)
@@ -51,6 +58,14 @@ public abstract class CodeSet {
 		public abstract boolean isDirectory();
 
 		public abstract InputStream getData() throws IOException;
+
+		/**
+		 * If a given implementation of CodeSetEntry has the means to determine
+		 * permission flags, then it can override this method.
+		 */
+		public Integer getUnixMode() {
+			return null;
+		}
 
 	}
 
@@ -162,6 +177,12 @@ public abstract class CodeSet {
 					target.mkdirs();
 				} else {
 					IOUtil.pipe(e.getData(), target);
+					if (!IS_WINDOWS) {
+						Integer mode = e.getUnixMode();
+						if (mode!=null) {
+							Files.setPosixFilePermissions(target.toPath(),  OsUtils.posixFilePermissions(mode));
+						}
+					}
 				}
 				return null;
 			}
