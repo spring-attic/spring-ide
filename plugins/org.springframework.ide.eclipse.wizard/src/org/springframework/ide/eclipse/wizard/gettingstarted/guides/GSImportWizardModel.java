@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.GSContent;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GettingStartedContent;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GettingStartedGuide;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -173,26 +174,26 @@ public class GSImportWizardModel {
 	};
 
 	/**
-	 * The build type chosen by user
+	 * The import strategt chosen by user
 	 */
-	private final LiveVariable<BuildType> buildType = new LiveVariable<BuildType>(BuildType.DEFAULT);
+	private final LiveVariable<ImportStrategy> importStrategy = new LiveVariable<ImportStrategy>(BuildType.DEFAULT.getDefaultStrategy());
 
 	private final LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "No GS content selected");
 	private final LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
-	private final LiveExpression<ValidationResult> buildTypeValidator = new Validator() {
+	private final LiveExpression<ValidationResult> importStrategyValidator = new Validator() {
 		@Override
 		protected ValidationResult compute() {
 			GSContent g = guide.getValue();
-			BuildType bt = buildType.getValue();
-			return validateBuildType(g, bt);
+			ImportStrategy bt = importStrategy.getValue();
+			return validateImportStrategy(g, bt);
 		}
 	};
 
-	private ValidationResult validateBuildType(GSContent g, BuildType bt) {
+	private ValidationResult validateImportStrategy(GSContent g, ImportStrategy importStrategy) {
 		try {
 			if (g!=null) {
 				try {
-					if (bt==null) {
+					if (importStrategy==null) {
 						return ValidationResult.error("No build type selected");
 					} else {
 						List<String> codesetNames = codesets.getValues();
@@ -200,11 +201,10 @@ public class GSImportWizardModel {
 							for (String csname : codesetNames) {
 								CodeSet cs = g.getCodeSet(csname);
 								if (cs!=null) {
-									ValidationResult result = cs.validateBuildType(bt);
+									ValidationResult result = cs.validateImportStrategy(importStrategy);
 									if (!result.isOk()) {
 										return result.withMessage("CodeSet '"+csname+"': "+result.msg);
 									}
-									ImportStrategy importStrategy = bt.getImportStrategy();
 									if (!importStrategy.isSupported()) {
 										//This means some required STS component like m2e or gradle tooling is not installed
 										return ValidationResult.error(importStrategy.getNotInstalledMessage());
@@ -252,12 +252,12 @@ public class GSImportWizardModel {
 					//Yes, we depend on the value of buildType but shouldn't respond to changes on it.
 					// We do not want to autoselect a buildType when a user selects one. That would be
 					// mighty annoying.
-					BuildType bt = buildType.getValue();
-					if (!validateBuildType(g, bt).isOk()) {
-						for (BuildType other : BuildType.values()) {
-							if (other!=bt) {
-								if (validateBuildType(g,other).isOk()) {
-									buildType.setValue(other);
+					ImportStrategy is = importStrategy.getValue();
+					if (!validateImportStrategy(g, is).isOk()) {
+						for (ImportStrategy other : ImportStrategies.all()) {
+							if (other!=is) {
+								if (validateImportStrategy(g,other).isOk()) {
+									importStrategy.setValue(other);
 								}
 							}
 						}
@@ -314,10 +314,10 @@ public class GSImportWizardModel {
 	private final LiveVariable<Boolean> enableOpenHomePage = new LiveVariable<Boolean>(true);
 
 	{
-		buildTypeValidator.dependsOn(guide);
-		buildTypeValidator.dependsOn(isDownloaded);
-		buildTypeValidator.dependsOn(buildType);
-		buildTypeValidator.dependsOn(codesets);
+		importStrategyValidator.dependsOn(guide);
+		importStrategyValidator.dependsOn(isDownloaded);
+		importStrategyValidator.dependsOn(importStrategy);
+		importStrategyValidator.dependsOn(codesets);
 
 		isDownloaded.dependsOn(guide);
 		downloadStatus.dependsOn(guide);
@@ -380,7 +380,7 @@ public class GSImportWizardModel {
 		//The import will be carried out with whatever the currently selected values are
 		// in all the input fields / variables / widgets.
 		GSContent g = guide.getValue();
-		BuildType bt = buildType.getValue();
+		ImportStrategy is = importStrategy.getValue();
 		Set<String> codesetNames = codesets.getValue();
 
 		mon.beginTask("Import guide content", codesetNames.size()+1);
@@ -395,7 +395,7 @@ public class GSImportWizardModel {
 					//  a guide).
 					mon.worked(1);
 				} else {
-					IRunnableWithProgress oper = bt.getImportStrategy().createOperation(ImportUtils.importConfig(
+					IRunnableWithProgress oper = is.createOperation(ImportUtils.importConfig(
 							g,
 							cs
 					));
@@ -433,8 +433,8 @@ public class GSImportWizardModel {
 //		return guide.getValue();
 //	}
 
-	public SelectionModel<BuildType> getBuildTypeModel() {
-		return new SelectionModel<BuildType>(buildType, buildTypeValidator);
+	public SelectionModel<ImportStrategy> getImportStrategyModel() {
+		return new SelectionModel<ImportStrategy>(importStrategy, importStrategyValidator);
 	}
 
 	public SelectionModel<GSContent> getGSContentSelectionModel() {

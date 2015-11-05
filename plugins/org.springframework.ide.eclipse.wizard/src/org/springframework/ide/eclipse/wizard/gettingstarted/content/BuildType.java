@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
@@ -28,8 +29,7 @@ public enum BuildType {
 	GRADLE("build.gradle"),
 	GENERAL(null,
 			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
-			"NA",
-			"General"
+			"NA"
 	);
 
 	private static final ContributedImportStrategies contributions = new ContributedImportStrategies();
@@ -44,6 +44,7 @@ public enum BuildType {
 	private Path buildScriptPath;
 	private List<ImportStrategyHolder> strategies = new ArrayList<ImportStrategyHolder>();
 	private String displayName;
+	private boolean hasDefaultStrategy = false;
 
 	private BuildType(String buildScriptPath) {
 		if (buildScriptPath!=null) {
@@ -53,14 +54,12 @@ public enum BuildType {
 
 	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
 		this(buildScriptPath);
-		this.strategies.add(new ImportStrategyHolder(this,
-				ImportStrategies.forClass(importStrategyClass), notInstalledMessage, "Default"
+		hasDefaultStrategy = true;
+		addStrategy(new ImportStrategyHolder(this,
+				ImportStrategies.forClass(importStrategyClass),
+				notInstalledMessage,
+				"Default"
 		));
-	}
-
-	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage, String displayName) {
-		this(buildScriptPath, importStrategyClass, notInstalledMessage);
-		this.displayName = displayName;
 	}
 
 
@@ -90,20 +89,25 @@ public enum BuildType {
 	 */
 	public static final BuildType DEFAULT = MAVEN;
 
-	/**
-	 * This will return the first import strategy. This method is deprecated, it is provided only
-	 * to avoid completely breaking code that assumes only a single strategy per build-type is available.
-	 * <p>
-	 * Code using this method will work, but will only be able to use one of the import strategies.
-	 * It should be rewritten to support multiple strategies (i.e. use getImportStrategies() method.
-	 */
-	@Deprecated
-	public ImportStrategy getImportStrategy() {
-		return getImportStrategies().get(0);
-	}
+//	/**
+//	 * This will return the first import strategy. This method is deprecated, it is provided only
+//	 * to avoid completely breaking code that assumes only a single strategy per build-type is available.
+//	 * <p>
+//	 * Code using this method will work, but will only be able to use one of the import strategies.
+//	 * It should be rewritten to support multiple strategies (i.e. use getImportStrategies() method.
+//	 */
+//	@Deprecated
+//	public ImportStrategy getImportStrategy() {
+//		return getImportStrategies().get(0);
+//	}
 
 	public void addStrategy(ImportStrategyHolder strategyHolder) {
 		strategies.add(strategyHolder);
+	}
+
+	public ImportStrategy getDefaultStrategy() {
+		Assert.isLegal(hasDefaultStrategy);
+		return getImportStrategies().get(0);
 	}
 
 }

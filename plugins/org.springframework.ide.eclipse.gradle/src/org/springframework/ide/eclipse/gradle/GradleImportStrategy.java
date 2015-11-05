@@ -41,15 +41,17 @@ import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
  */
 public class GradleImportStrategy extends ImportStrategy {
 
-	public static class Factory implements ImportStrategyFactory {
-		@Override
-		public ImportStrategy create(BuildType buildType, String notInstalledMessage, String name) throws Exception {
-			Assert.isLegal(buildType==BuildType.GRADLE);
-			return new GradleImportStrategy();
-		}
-
+	public GradleImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
+		super(buildType, name, notInstalledMessage);
 	}
 
+	public static class Factory implements ImportStrategyFactory {
+		@Override
+		public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
+			Assert.isLegal(buildType==BuildType.GRADLE);
+			return new GradleImportStrategy(buildType, name, notInstalledMessage);
+		}
+	}
 
 	private static SampleProject asSample(final String projectName, final CodeSet codeset) {
 		return new SampleProject() {

@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 
+import com.google.common.collect.Iterables;
+
 public class ImportStrategies {
 
 	/**
@@ -23,12 +25,22 @@ public class ImportStrategies {
 	public static ImportStrategyFactory forClass(final String className) {
 		return new ImportStrategyFactory() {
 			@Override
-			public ImportStrategy create(BuildType buildType, String notInstalledMessage, String name) throws Exception {
+			public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
 				@SuppressWarnings("unchecked")
 				Class<? extends ImportStrategy> klass =  (Class<? extends ImportStrategy>) Class.forName(className);
 				return klass.newInstance();
 			}
 		};
+	}
+
+	public static Iterable<ImportStrategy> all() {
+		@SuppressWarnings("unchecked")
+		Iterable<ImportStrategy>[] perBuildType = new Iterable[BuildType.values().length];
+		int i = 0;
+		for (BuildType bt : BuildType.values()) {
+			perBuildType[i++] = bt.getImportStrategies();
+		}
+		return Iterables.concat(perBuildType);
 	}
 
 }

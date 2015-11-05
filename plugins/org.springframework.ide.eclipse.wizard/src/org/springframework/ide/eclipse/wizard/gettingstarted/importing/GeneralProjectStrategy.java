@@ -39,6 +39,10 @@ import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
  */
 public class GeneralProjectStrategy extends ImportStrategy {
 
+	public GeneralProjectStrategy(BuildType buildType, String name, String notInstalledMessage) {
+		super(buildType, name, notInstalledMessage);
+	}
+
 	static class GeneralProjectImport implements IRunnableWithProgress {
 
 		private final String projectName;

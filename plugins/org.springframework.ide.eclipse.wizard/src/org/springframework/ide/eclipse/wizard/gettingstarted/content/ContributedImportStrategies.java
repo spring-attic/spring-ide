@@ -80,9 +80,9 @@ public class ContributedImportStrategies {
 		//In other words, this makes sure that getFactory is 'safe' and won't throw exceptions.
 		return new ImportStrategyFactory() {
 			@Override
-			public ImportStrategy create(BuildType buildType, String notInstalledMessage, String name) throws Exception {
+			public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
 				ImportStrategyFactory factory = (ImportStrategyFactory) element.createExecutableExtension("class");
-				return factory.create(buildType, notInstalledMessage, name);
+				return factory.create(buildType, name, notInstalledMessage);
 			}
 		};
 	}

@@ -82,7 +82,7 @@ public class GSImportWizard extends Wizard implements IImportWizard, INewWizard 
 			contentChooser.setCategory(focusItem);
 			sections.add(new ValidatorSection(this, model.downloadStatus));
 			sections.add(new DescriptionSection(this, model.description));
-			sections.add(new BuildTypeRadiosSection(this, model.getBuildTypeModel()));
+			sections.add(new ImportStrategiesRadiosSection(this, model.getImportStrategyModel()));
 			sections.add(new CodeSetCheckBoxesSection(this, model.validCodesetNames, model.getCodeSetModel()));
 			sections.add(new OpenUrlSection(GSImportWizard.this, this, "Home Page", model.homePage, model.getEnableOpenHomePage()));
 			return sections;

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet.CodeSetEntry;
 import org.springframework.ide.eclipse.wizard.gettingstarted.github.Repo;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
@@ -152,20 +153,18 @@ public class TutorialGuide extends GithubRepoContent {
 	}
 
 	/**
-	 * Creates a validator that checks whether a given build type is supported by a project. This only
-	 * consider project content, not whether requisite build tooling is installed.
-	 * <p>
+	 * Creates a validator that checks whether a given build type is supported by a project.
 	 * This validator needs access to the content. Thus it forces the content to be downloaded.
 	 * Content is downloaded in a background job so as not to block the UI thread in which
 	 * this method is typically called to provide validation logic for a wizard.
 	 * If this method does get called from the UIThread may throw a {@link UIThreadDownloadDisallowed}
 	 * exception unless the required content is already cached locally. It is up to the client
-	 * to dealt with this situation (e.g. by triggering a background download and showing a
+	 * to deal with this situation (e.g. by triggering a background download and showing a
 	 * temporary info message until download is complete.
 	 */
-	public ValidationResult validateBuildType(BuildType bt) throws UIThreadDownloadDisallowed {
+	public ValidationResult validateImportStrategy(ImportStrategy is) throws UIThreadDownloadDisallowed {
 		for (CodeSet cs : getCodeSets()) {
-			ValidationResult result = cs.validateBuildType(bt);
+			ValidationResult result = cs.validateImportStrategy(is);
 			if (!result.isOk()) {
 				return result;
 			}

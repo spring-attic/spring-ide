@@ -20,6 +20,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
@@ -189,15 +190,15 @@ public abstract class CodeSet {
 		});
 	}
 
-	public ValidationResult validateBuildType(BuildType buildType) throws UIThreadDownloadDisallowed {
+	public ValidationResult validateImportStrategy(ImportStrategy importStrategy) throws UIThreadDownloadDisallowed {
 		List<BuildType> validBuildTypes = getBuildTypes();
-		if (validBuildTypes.contains(buildType)) {
+		if (validBuildTypes.contains(importStrategy)) {
 			return ValidationResult.OK;
 		}
 		//Not valid formulate a nice explanation
-		IPath expectedScript = buildType.getBuildScript();
+		IPath expectedScript = importStrategy.getBuildScript();
 		if (expectedScript!=null) {
-			return ValidationResult.error("Can't use '"+buildType.displayName()+"': There is no '"+expectedScript+"'");
+			return ValidationResult.error("Can't use '"+importStrategy.displayName()+"': There is no '"+expectedScript+"'");
 		} else {
 			StringBuilder message = new StringBuilder("Should be imported as ");
 			boolean first = true;

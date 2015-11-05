@@ -16,5 +16,5 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
  * @author Kris De Volder
  */
 public interface ImportStrategyFactory {
-	ImportStrategy create(BuildType buildType, String notInstalledMessage, String name) throws Exception;
+	ImportStrategy create(BuildType buildType,String name,  String notInstalledMessage) throws Exception;
 }
