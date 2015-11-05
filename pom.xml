@@ -189,6 +189,7 @@
 		
 		<!-- gradle -->
 		<module>plugins/org.springframework.ide.eclipse.gradle</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship</module>
 
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
