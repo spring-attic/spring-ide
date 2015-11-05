@@ -1,26 +1,30 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2014 GoPivotal, Inc.
+ *  Copyright (c) 2013-2015 Pivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
+package org.springframework.ide.eclipse.gradle;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategyFactory;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.GradleProject;
@@ -33,17 +37,19 @@ import org.springsource.ide.eclipse.gradle.core.wizards.GradleImportOperation;
  * Importer strategy implementation for importing CodeSets into the workspace and set them
  * up to use Gradle Tooling.
  *
- * TODO: Gradle support should be in a separate 'plugin' that contributes the import strategy
- * as an extension point. So that we can make Gradle support optional.
- *
  * @author Kris De Volder
  */
-public class GradleStrategy extends ImportStrategy {
+public class GradleImportStrategy extends ImportStrategy {
 
-	public GradleStrategy() throws ClassNotFoundException {
-		//ensure instantation of this Strategy fails if Gradle tooling is not installed.
-		Class.forName("org.springsource.ide.eclipse.gradle.core.wizards.NewGradleProjectOperation");
+	public static class Factory implements ImportStrategyFactory {
+		@Override
+		public ImportStrategy create(BuildType buildType, String notInstalledMessage, String name) throws Exception {
+			Assert.isLegal(buildType==BuildType.GRADLE);
+			return new GradleImportStrategy();
+		}
+
 	}
+
 
 	private static SampleProject asSample(final String projectName, final CodeSet codeset) {
 		return new SampleProject() {
@@ -67,40 +73,6 @@ public class GradleStrategy extends ImportStrategy {
 			}
 		};
 	}
-
-
-//	/**
-//	 * Implements the import by means of 'NewGradleProjectOperation'
-//	 */
-//	private static class GradleCodeSetImport implements IRunnableWithProgress {
-//
-//		private final NewGradleProjectOperation op;
-//
-//		public GradleCodeSetImport(ImportConfiguration conf) {
-//			this.op = new NewGradleProjectOperation();
-//
-//			//Get the present values from the ImportConfiguration.
-//			String location = conf.getLocation();
-//			final String projectName = conf.getProjectName();
-//			final CodeSet codeset = conf.getCodeSet();
-//
-//			//Use these values to populate the
-//			op.setProjectNameField(constant(projectName));
-//			op.setLocationField(constant(location));
-//			op.setSampleProjectField(constant(asSample(projectName, codeset)));
-//		}
-//
-//
-//		//@Override
-//		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
-//			try {
-//				op.perform(mon);
-//			} catch (CoreException e) {
-//				throw new InvocationTargetException(e);
-//			}
-//		}
-//
-//	}
 
 	/**
 	 * Alternate implementation that uses GradleImportOperation. This is able customise a

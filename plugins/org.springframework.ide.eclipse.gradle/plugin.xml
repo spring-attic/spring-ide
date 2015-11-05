@@ -21,4 +21,13 @@
              name="Spring">
        </configurator>
     </extension>
+    <extension
+          point="org.springframework.ide.eclipse.wizard.import.strategy">
+       <import-strategy
+             buildType="GRADLE"
+             class="org.springframework.ide.eclipse.gradle.GradleImportStrategy$Factory"
+             notInstalledMessage="STS Gradle Tooling is not installed. You can install it from the STS Dashboard."
+             name="STS">
+       </import-strategy>
+    </extension>
 </plugin>

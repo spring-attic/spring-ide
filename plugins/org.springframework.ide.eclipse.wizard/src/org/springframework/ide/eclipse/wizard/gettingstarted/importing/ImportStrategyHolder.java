@@ -37,25 +37,15 @@ public class ImportStrategyHolder {
 		this.name = name;
 	}
 
-	public String displayName() {
-		if (buildType.getImportStrategies().size()>1) {
-			//Name needs disambiguation
-			return buildType.displayName() + " ("+name+")";
-		} else {
-			//Just the buildtype name is enough
-			return buildType.displayName();
-		}
-	}
-
 	public ImportStrategy get() {
 		if (instance == null) {
 			try {
-				this.instance = factory.create(buildType, notInstalledMessage, displayName());
+				this.instance = factory.create(buildType, notInstalledMessage, name);
 			} catch (Throwable e) {
 				//THe most likely cause of this error is that optional dependencies needed to support
 				// this import strategy are not installed.
 				WizardPlugin.log(e);
-				this.instance = new NullImportStrategy(displayName(), notInstalledMessage);
+				this.instance = new NullImportStrategy(buildType, name, notInstalledMessage);
 			}
 		}
 		return instance;

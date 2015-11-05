@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 
 /**
  * Import stratgety used in place of a Strategy that could not be instantiated, presumably because
@@ -22,20 +23,34 @@ public class NullImportStrategy extends ImportStrategy {
 
 	private String name;
 	private String notInstalledMessage;
+	private BuildType buildType;
 
-	public NullImportStrategy(String name, String notInstalledMessage) {
+	public NullImportStrategy(BuildType bt, String name, String notInstalledMessage) {
+		this.buildType = bt;
 		this.name = name;
 		this.notInstalledMessage = notInstalledMessage;
 	}
 
 	@Override
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
-		throw new Error("Can not import using '"+name+"' because "+notInstalledMessage);
+		throw new Error(getNotInstalledMessage());
 	}
 
 	@Override
 	public boolean isSupported() {
 		return false;
+	}
+
+	@Override
+	public String getNotInstalledMessage() {
+		return "Can not import using "+displayName()+" because "+notInstalledMessage;
+	}
+
+	private String displayName() {
+		if (buildType.getImportStrategies().size()>1) {
+			return buildType.displayName() + " ("+name+")";
+		}
+		return buildType.displayName();
 	}
 
 }

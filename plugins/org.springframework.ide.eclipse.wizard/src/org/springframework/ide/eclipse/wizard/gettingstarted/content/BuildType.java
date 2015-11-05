@@ -25,25 +25,14 @@ public enum BuildType {
 	      "org.springframework.ide.eclipse.wizard.gettingstarted.importing.MavenStrategy",
 	      "Can not use Maven: M2E (Eclipse Maven Tooling) is not installed"
 	),
-	GRADLE("build.gradle",
-			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GradleStrategy",
-			"Can not use Gradle: STS Gradle Tooling is not installed. You can install it from the STS Dashboard."
-	),
-//	GROOVY_CLI("app.groovy",
-//			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
-//			"NA", //This message doesn't matter because
-//															  // project imports as 'resources' so no
-//															  // particular tooling is needed.
-//			"Spring CLI"
-//	),
+	GRADLE("build.gradle"),
 	GENERAL(null,
 			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
 			"NA",
 			"General"
 	);
 
-//	MAVEN("pom.xml", new NullImportStrategy("Maven"));
-//	ECLIPSE(".project", ImportStrategy.ECLIPSE);
+	private static final ContributedImportStrategies contributions = new ContributedImportStrategies();
 
 	/**
 	 * Location of the 'build script' relative to codeset (project) root.
@@ -56,10 +45,14 @@ public enum BuildType {
 	private List<ImportStrategyHolder> strategies = new ArrayList<ImportStrategyHolder>();
 	private String displayName;
 
-	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
+	private BuildType(String buildScriptPath) {
 		if (buildScriptPath!=null) {
 			this.buildScriptPath = new Path(buildScriptPath);
 		}
+	}
+
+	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
+		this(buildScriptPath);
 		this.strategies.add(new ImportStrategyHolder(this,
 				ImportStrategies.forClass(importStrategyClass), notInstalledMessage, "Default"
 		));
@@ -76,6 +69,7 @@ public enum BuildType {
 	}
 
 	public List<ImportStrategy> getImportStrategies() {
+		contributions.initialize();
 		ArrayList<ImportStrategy> instances = new ArrayList<ImportStrategy>(strategies.size());
 		for (ImportStrategyHolder f : strategies) {
 			instances.add(f.get());
@@ -106,6 +100,10 @@ public enum BuildType {
 	@Deprecated
 	public ImportStrategy getImportStrategy() {
 		return getImportStrategies().get(0);
+	}
+
+	public void addStrategy(ImportStrategyHolder strategyHolder) {
+		strategies.add(strategyHolder);
 	}
 
 }

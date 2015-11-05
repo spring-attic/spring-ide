@@ -71,10 +71,19 @@
                </appInfo>
             </annotation>
          </attribute>
-         <attribute name="new_attribute" type="string">
+         <attribute name="notInstalledMessage" type="string">
             <annotation>
                <documentation>
-                  
+                  Message to show to the user when the strategy can not be instantiated, presumably because some required plugins are not installed.
+
+Typically this message should provide a hint to the user on what they need to install to be able to use the strategy.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  A name for the strategy. This is meant to distinguish strategies to the user when more than one strategy exists for the same build type.
                </documentation>
             </annotation>
          </attribute>
