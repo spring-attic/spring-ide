@@ -77,7 +77,7 @@ Import-Package: org.eclipse.core.commands.common,
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.springframework.ide.eclipse.webflow.ui,
  org.springframework.ide.eclipse.webflow.ui.namespaces,
  org.springframework.ide.eclipse.webflow.ui.navigator.actions,

@@ -39,4 +39,4 @@ Import-Package: org.eclipse.ajdt.core,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
  org.springframework.util;version="[4.0.0,4.3.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

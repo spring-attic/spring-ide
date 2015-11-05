@@ -50,7 +50,7 @@ Export-Package:
  org.springframework.ide.eclipse.data.internal.validation;x-internal:=true,
  org.springframework.ide.eclipse.data.jdt.core,
  org.springframework.ide.eclipse.data.metadata.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Import-Package: org.apache.commons.logging,
  org.eclipse.core.runtime,

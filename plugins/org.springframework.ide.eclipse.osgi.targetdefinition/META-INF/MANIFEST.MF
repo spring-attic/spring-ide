@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui,
 Import-Package: org.eclipse.core.runtime,
  org.osgi.framework,
  org.springframework.util
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.osgi.targetdefinition
 Bundle-ActivationPolicy: lazy

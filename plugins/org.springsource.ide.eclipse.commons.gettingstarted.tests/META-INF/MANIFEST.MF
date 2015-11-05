@@ -32,5 +32,5 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.io;bundle-version="2.0.1",
  org.springsource.ide.eclipse.commons.livexp,
  org.springsource.ide.eclipse.commons.frameworks.core;bundle-version="3.5.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

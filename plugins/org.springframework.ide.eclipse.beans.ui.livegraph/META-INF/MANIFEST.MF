@@ -21,7 +21,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jst.ws,
  org.eclipse.wst.common.modulecore
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Spring IDE Developers
 Bundle-ClassPath: .
 Export-Package: org.springframework.ide.eclipse.beans.ui.livegraph,

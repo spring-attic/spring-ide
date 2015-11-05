@@ -12,13 +12,7 @@
 	<artifactId>org.springframework.ide.eclipse.boot.dash</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	
-	<properties>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
-		<encoding>UTF-8</encoding>
-	</properties>
-	
-    <build>
+	<build>
 		<plugins>
 
 			<plugin>
