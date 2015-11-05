@@ -53,7 +53,7 @@ Export-Package: org.springframework.ide.eclipse.webflow.core,
  org.springframework.ide.eclipse.webflow.core.internal.model.project,
  org.springframework.ide.eclipse.webflow.core.internal.model.validation,
  org.springframework.ide.eclipse.webflow.core.model
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/spring-binding-1.0.3.jar,
  .

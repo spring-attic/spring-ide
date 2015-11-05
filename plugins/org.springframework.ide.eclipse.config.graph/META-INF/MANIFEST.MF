@@ -23,7 +23,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.core,
  org.springsource.ide.eclipse.commons.core,
  org.springframework.ide.eclipse.config.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.config.graph,
  org.springframework.ide.eclipse.config.graph.actions,

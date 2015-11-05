@@ -36,7 +36,7 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.ui,
  org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
  org.apache.httpcomponents.httpcore
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/commons-logging-1.2.jar,

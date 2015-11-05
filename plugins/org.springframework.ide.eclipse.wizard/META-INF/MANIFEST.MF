@@ -42,7 +42,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.browser;bundle-version="[3.5.0,4.0.0)";resolution:=optional,
  org.json;bundle-version="1.0.0",
  org.springframework.ide.eclipse.quickfix
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,
  lib/jettison-1.0-RC2.jar,
