@@ -10,6 +10,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		DevToolsStarterTests.class,
 
 		NewSpringBootWizardModelTest.class,
+		NewSpringBootWizardTest.class,
 		SpringBootValidationTest.class
 })
 public class AllSpringBootTests {

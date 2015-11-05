@@ -15,9 +15,9 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -134,9 +134,9 @@ public class ZipFileCodeSet extends CodeSet {
 		T result = null;
 		ZipFile zip = new ZipFile(zipDownload.getFile());
 		try {
-			Enumeration<? extends ZipEntry> iter = zip.entries();
+			Enumeration<ZipArchiveEntry> iter = zip.getEntries();
 			while (iter.hasMoreElements() && result==null) {
-				ZipEntry el = iter.nextElement();
+				ZipArchiveEntry el = iter.nextElement();
 				Path zipPath = new Path(el.getName());
 				if (root.isPrefixOf(zipPath)) {
 					String key = zipPath.removeFirstSegments(root.segmentCount()).toString();
@@ -168,7 +168,7 @@ public class ZipFileCodeSet extends CodeSet {
 		ZipFile zip = new ZipFile(zipDownload.getFile());
 		try {
 			String entryName = root.append(path).toString();
-			ZipEntry entry = zip.getEntry(entryName);
+			ZipArchiveEntry entry = zip.getEntry(entryName);
 			return processor.doit(entry==null?null:csEntry(zip, entry));
 		} finally {
 			try {
@@ -181,7 +181,7 @@ public class ZipFileCodeSet extends CodeSet {
 	/**
 	 * Create a CodeSetEntry that wraps a ZipEntry
 	 */
-	private CodeSetEntry csEntry(final ZipFile zip, final ZipEntry e) {
+	private CodeSetEntry csEntry(final ZipFile zip, final ZipArchiveEntry e) {
 		IPath zipPath = new Path(e.getName()); //path relative to zip file
 		Assert.isTrue(root.isPrefixOf(zipPath));
 		final IPath csPath = zipPath.removeFirstSegments(root.segmentCount());
@@ -199,6 +199,11 @@ public class ZipFileCodeSet extends CodeSet {
 			@Override
 			public boolean isDirectory() {
 				return e.isDirectory();
+			}
+
+			@Override
+			public Integer getUnixMode() {
+				return e.getUnixMode();
 			}
 
 			@Override
