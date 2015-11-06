@@ -15,10 +15,14 @@ import java.io.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
+
 import junit.framework.TestCase;
+
 
 public class NewSpringBootWizardTest extends TestCase {
 
@@ -40,6 +44,14 @@ public class NewSpringBootWizardTest extends TestCase {
 		IFile mavenWrapper = project.getFile("mvnw");
 		assertTrue(mavenWrapper.exists());
 		assertExecutable(mavenWrapper);
+	}
+
+	public void testBuildshipProjectCreation() throws Exception {
+		IProject project = harness.createBootProject("simple-buildship",
+				withImportStrategy("GRADLE-Buildship")
+		);
+		assertTrue(project.hasNature(org.eclipse.buildship.core.configuration.GradleProjectNature.ID));
+		assertTrue(project.hasNature(SpringCore.NATURE_ID));
 	}
 
 	private void assertExecutable(IFile eclipseFile) {

@@ -46,4 +46,13 @@ public class ImportStrategies {
 		return Iterables.concat(perBuildType);
 	}
 
+	public static ImportStrategy withId(String id) {
+		for (ImportStrategy s : all()) {
+			if (s.getId().equals(id)) {
+				return s;
+			}
+		}
+		return null;
+	}
+
 }

@@ -321,6 +321,18 @@ public class NewSpringBootWizardModel {
 	}
 
 	/**
+	 * Convenience method so that test code can easily select an import strategy.
+	 * This will throw an exception if the given importstragey is not present
+	 * in this wizardmodel.
+	 */
+	public void setImportStrategy(ImportStrategy is) {
+		RadioGroup typeRadios = getRadioGroups().getGroup("type");
+		RadioInfo radio = typeRadios.getRadio(is.getId());
+		Assert.isLegal(radio!=null);
+		typeRadios.setValue(radio);
+	}
+
+	/**
 	 * Gets the currently selected BuildType.
 	 */
 	public BuildType getBuildType() {
@@ -555,5 +567,6 @@ public class NewSpringBootWizardModel {
 		}
 		throw new IllegalArgumentException("No such dependency: "+dependencyId);
 	}
+
 
 }

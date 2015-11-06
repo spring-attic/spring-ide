@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.buildship;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 
 import org.eclipse.buildship.core.projectimport.ProjectImportConfiguration;
 import org.eclipse.buildship.core.util.gradle.GradleDistributionWrapper;
@@ -21,9 +22,9 @@ import org.eclipse.buildship.core.workspace.SynchronizeGradleProjectJob;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
@@ -57,29 +58,10 @@ public class BuildshipImportStrategy extends ImportStrategy {
 
 	}
 
-//
-//		private void addPringNature(GradleProject[] projects, ErrorHandler eh, IProgressMonitor mon) {
-//			mon.beginTask("Add spring natures", projects.length);
-//			try {
-//				for (GradleProject gp : projects) {
-//					IProject p = gp.getProject();
-//					//Should really not be be null if it was actually imported... but...
-//					if (p!=null) {
-//						try {
-//							NatureUtils.ensure(p, new SubProgressMonitor(mon, 1), SpringCoreUtils.NATURE_ID);
-//						} catch (CoreException e) {
-//							eh.handleError(e);
-//						}
-//					}
-//				}
-//			} finally {
-//				mon.done();
-//			}
-
 	private IProject getProject(File projectLoc) {
 		for (IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 			if (p.isAccessible()) {
-				IPath l = p.getRawLocation();
+				IPath l = getLocation(p);
 				if (l!=null) {
 					File f = l.toFile();
 					if (projectLoc.equals(f)) {
@@ -87,6 +69,20 @@ public class BuildshipImportStrategy extends ImportStrategy {
 					}
 				}
 			}
+		}
+		return null;
+	}
+
+	private IPath getLocation(IProject p) {
+		//In eclipse... nothing is ever simple. No, you can not just ask a project for its location...
+		URI uri = p.getRawLocationURI();
+		if (uri==null) {
+			//This means project description doesn't specify location, which means project is in the
+			// default location
+			IPath wsloc = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+			return wsloc.append(p.getName());
+		} else if (uri.getScheme().equals("file")) {
+			return new Path(uri.getPath());
 		}
 		return null;
 	}
