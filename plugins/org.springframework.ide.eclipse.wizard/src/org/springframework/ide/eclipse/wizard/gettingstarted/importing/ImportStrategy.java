@@ -44,6 +44,10 @@ public abstract class ImportStrategy {
 		return "Can not import using "+displayName()+" because "+notInstalledMessage;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	public String displayName() {
 		if (buildType.getImportStrategies().size()>1) {
 			return buildType.displayName() + " ("+name+")";
@@ -65,6 +69,14 @@ public abstract class ImportStrategy {
 			return buildType + "-"+name;
 		}
 		return buildType.toString();
+	}
+
+	public String getId() {
+		String id = buildType.toString();
+		if (buildType.getImportStrategies().size()>1) {
+			id += "-" + name;
+		}
+		return id;
 	}
 
 }

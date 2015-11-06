@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -88,7 +89,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioGroup packagingTypes = model.getRadioGroups().getGroup("packaging");
 		assertNotNull(packagingTypes);
 		assertGroupValues(packagingTypes, "jar", "war");
-		assertEquals("jar", packagingTypes.getDefault().getValue());
+		assertEquals("jar", packagingTypes.getDefaultValue().getValue());
 	}
 
 	public void testJavaVersionRadios() throws Exception {
@@ -96,12 +97,10 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioGroup group = model.getRadioGroups().getGroup("javaVersion");
 		assertNotNull(group);
 		assertGroupValues(group, "1.6", "1.7", "1.8");
-		assertEquals("1.8", group.getDefault().getValue());
+		assertEquals("1.8", group.getDefaultValue().getValue());
 	}
 
 	public void testBuildTypeRadios() throws Exception {
-		String mavenId = "maven-project";
-		String gradleId = "gradle-project";
 		String jsonFile = INITIALIZR_JSON;
 		NewSpringBootWizardModel model = parseFrom(jsonFile);
 		String starterZipUrl = resourceUrl(jsonFile).toURI().resolve("/starter.zip").toString();
@@ -109,23 +108,24 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, mavenId, gradleId);
-		assertEquals(mavenId, group.getDefault().getValue());
+		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship");
+		assertEquals("MAVEN", group.getDefaultValue().getValue());
 
-		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		group.getSelection().selection.setValue(group.getRadio("MAVEN"));
 		assertEquals(BuildType.MAVEN, model.getBuildType());
 		assertEquals(starterZipUrl, model.baseUrl.getValue());
 
-		group.getSelection().selection.setValue(group.getRadio(gradleId));
-		assertEquals(BuildType.GRADLE, model.getBuildType());
-		assertEquals(starterZipUrl, model.baseUrl.getValue());
+		for (ImportStrategy gradleStrategy : BuildType.GRADLE.getImportStrategies()) {
+			group.getSelection().selection.setValue(group.getRadio(gradleStrategy.getId()));
+			assertEquals(BuildType.GRADLE, model.getBuildType());
+			assertEquals(gradleStrategy, model.getImportStrategy());
+			assertEquals(starterZipUrl, model.baseUrl.getValue());
+		}
 	}
 
 	public void testBuildTypeRadiosVariant() throws Exception {
 		//Hypothetical variant where the json "types" lists different actions for maven and gradle zip
 
-		String mavenId = "maven-project";
-		String gradleId = "gradle-project";
 		String jsonFile = "initializr-variant.json";
 
 		String mavenZipUrl = resourceUrl(jsonFile).toURI().resolve("/maven.zip").toString();
@@ -135,15 +135,18 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, gradleId, mavenId);
-		assertEquals(mavenId, group.getDefault().getValue());
+		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship");
+		assertEquals("MAVEN", group.getDefaultValue().getValue());
 		assertEquals(mavenZipUrl, model.baseUrl.getValue());
 
-		group.getSelection().selection.setValue(group.getRadio(gradleId));
-		assertEquals(BuildType.GRADLE, model.getBuildType());
-		assertEquals(gradleZipUrl, model.baseUrl.getValue());
+		for (ImportStrategy gradleStrat : BuildType.GRADLE.getImportStrategies()) {
+			group.getSelection().selection.setValue(group.getRadio(gradleStrat.getId()));
+			assertEquals(BuildType.GRADLE, model.getBuildType());
+			assertEquals(gradleStrat, model.getImportStrategy());
+			assertEquals(gradleZipUrl, model.baseUrl.getValue());
+		}
 
-		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		group.getSelection().selection.setValue(group.getRadio("MAVEN"));
 		assertEquals(BuildType.MAVEN, model.getBuildType());
 		assertEquals(mavenZipUrl, model.baseUrl.getValue());
 	}
@@ -537,10 +540,36 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 		RadioGroup packaging = model.getRadioGroups().getGroup("packaging");
 		LiveVariable<RadioInfo> selection = packaging.getSelection().selection;
+
 		assertEquals("jar", selection.getValue().getValue());
 		String urlParam = getUrlParam(model.downloadUrl.getValue(), "packaging");
 		assertEquals("jar", urlParam);
+
 		selection.setValue(packaging.getRadio("war"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "packaging");
+		assertEquals("war", urlParam);
+	}
+
+	/**
+	 * Test that radio params for 'type' properly use the typenames from start.spring.io spec
+	 * and not the ids used internally to distinguish between grade+buildship versus gradle+sts
+	 */
+	public void testTypeRadioQueryParams() throws Exception {
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		RadioGroup type = model.getRadioGroups().getGroup("type");
+		LiveVariable<RadioInfo> selection = type.getSelection().selection;
+
+		assertEquals("MAVEN", selection.getValue().getValue());
+		String urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("maven-project", urlParam);
+
+		selection.setValue(type.getRadio("GRADLE-STS"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("gradle-project", urlParam);
+
+		selection.setValue(type.getRadio("GRADLE-Buildship"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("gradle-project", urlParam);
 	}
 
 	public static Map<String, List<String>> getQueryParams(String url) throws Exception {

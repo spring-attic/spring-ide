@@ -322,9 +322,9 @@ public class NewSpringBootWizardModel {
 	 * Gets the currently selected BuildType.
 	 */
 	public BuildType getBuildType() {
-		TypeRadioInfo selected = getSelectedTypeRadio();
-		if (selected!=null) {
-			return KNOWN_TYPES.get(selected.getValue());
+		ImportStrategy is = getImportStrategy();
+		if (is!=null) {
+			return is.getBuildType();
 		}
 		return null;
 	}
@@ -373,7 +373,7 @@ public class NewSpringBootWizardModel {
 				BuildType bt = KNOWN_TYPES.get(type.getId());
 				if (bt!=null) {
 					for (ImportStrategy is : bt.getImportStrategies()) {
-						TypeRadioInfo radio = new TypeRadioInfo(groupName, type.getId(), type.isDefault(), type.getAction(), is);
+						TypeRadioInfo radio = new TypeRadioInfo(groupName, type, is);
 						radio.setLabel(is.displayName());
 						group.add(radio);
 					}
