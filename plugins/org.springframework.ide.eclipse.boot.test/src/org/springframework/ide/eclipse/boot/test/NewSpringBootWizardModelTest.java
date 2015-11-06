@@ -354,6 +354,21 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	}
 
+	public void testRestoreFromOldBuildtypePreference() throws Exception {
+		//We here test a weak requirement that the wizard model 'handles' it okay when
+		// the preference saved in the workspace is from before the buildship refactoring.
+		//The requirements are:
+		// - it doesn't crash
+		// - it just chooses the maven build type / strategy by default. We do not
+		//   attempt to map the old type-ids to the new ones.
+		MockPrefsStore prefs = new MockPrefsStore();
+		prefs.putValue("org.springframework.ide.eclipse.wizard.gettingstarted.boot.PreferredSelections.type", "gradle-project");
+
+		NewSpringBootWizardModel wizard = parseFrom(INITIALIZR_JSON, prefs);
+		assertEquals(BuildType.MAVEN, wizard.getBuildType());
+		assertEquals(BuildType.MAVEN.getDefaultStrategy(), wizard.getImportStrategy());
+	}
+
 	private CheckBoxModel<Dependency> getCheckboxById(NewSpringBootWizardModel model, String id) {
 		CheckBoxModel<Dependency> found = null;
 		for (String cat : model.dependencies.getCategories()) {

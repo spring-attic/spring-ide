@@ -73,7 +73,7 @@ public class PreferredSelections {
 			if (isInteresting(input)) {
 				String choiceId = get(input.getName(), null);
 				RadioInfo info = input.getRadio(choiceId);
-				if (choiceId!=null) {
+				if (info!=null) {
 					input.getVariable().setValue(info);
 				}
 			}
