@@ -152,26 +152,6 @@ public class TutorialGuide extends GithubRepoContent {
 		return this.repo;
 	}
 
-	/**
-	 * Creates a validator that checks whether a given build type is supported by a project.
-	 * This validator needs access to the content. Thus it forces the content to be downloaded.
-	 * Content is downloaded in a background job so as not to block the UI thread in which
-	 * this method is typically called to provide validation logic for a wizard.
-	 * If this method does get called from the UIThread may throw a {@link UIThreadDownloadDisallowed}
-	 * exception unless the required content is already cached locally. It is up to the client
-	 * to deal with this situation (e.g. by triggering a background download and showing a
-	 * temporary info message until download is complete.
-	 */
-	public ValidationResult validateImportStrategy(ImportStrategy is) throws UIThreadDownloadDisallowed {
-		for (CodeSet cs : getCodeSets()) {
-			ValidationResult result = cs.validateImportStrategy(is);
-			if (!result.isOk()) {
-				return result;
-			}
-		}
-		return ValidationResult.OK;
-	}
-
 	private String beatify(String name) {
 		if (name.startsWith("tut-")) {
 			name = name.substring(4);

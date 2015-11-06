@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
+import java.lang.reflect.Constructor;
+
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 
 import com.google.common.collect.Iterables;
@@ -28,7 +30,8 @@ public class ImportStrategies {
 			public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
 				@SuppressWarnings("unchecked")
 				Class<? extends ImportStrategy> klass =  (Class<? extends ImportStrategy>) Class.forName(className);
-				return klass.newInstance();
+				Constructor<? extends ImportStrategy> cons = klass.getConstructor(BuildType.class, String.class, String.class);
+				return cons.newInstance(buildType, name, notInstalledMessage);
 			}
 		};
 	}

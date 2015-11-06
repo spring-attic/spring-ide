@@ -55,4 +55,16 @@ public abstract class ImportStrategy {
 		return buildType.getBuildScript();
 	}
 
+	public BuildType getBuildType() {
+		return buildType;
+	}
+
+	@Override
+	public String toString() {
+		if (buildType.getImportStrategies().size()>1) {
+			return buildType + "-"+name;
+		}
+		return buildType.toString();
+	}
+
 }

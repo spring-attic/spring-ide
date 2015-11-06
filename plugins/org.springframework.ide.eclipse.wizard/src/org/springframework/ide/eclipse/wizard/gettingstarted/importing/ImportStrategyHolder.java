@@ -40,7 +40,7 @@ public class ImportStrategyHolder {
 	public ImportStrategy get() {
 		if (instance == null) {
 			try {
-				this.instance = factory.create(buildType, notInstalledMessage, name);
+				this.instance = factory.create(buildType, name, notInstalledMessage);
 			} catch (Throwable e) {
 				//THe most likely cause of this error is that optional dependencies needed to support
 				// this import strategy are not installed.

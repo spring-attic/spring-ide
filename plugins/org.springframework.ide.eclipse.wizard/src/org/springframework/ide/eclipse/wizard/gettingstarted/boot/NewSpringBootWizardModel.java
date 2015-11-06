@@ -374,7 +374,7 @@ public class NewSpringBootWizardModel {
 				if (bt!=null) {
 					for (ImportStrategy is : bt.getImportStrategies()) {
 						TypeRadioInfo radio = new TypeRadioInfo(groupName, type.getId(), type.isDefault(), type.getAction(), is);
-						radio.setLabel(type.getName());
+						radio.setLabel(is.displayName());
 						group.add(radio);
 					}
 				}

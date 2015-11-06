@@ -201,7 +201,7 @@ public class GSImportWizardModel {
 							for (String csname : codesetNames) {
 								CodeSet cs = g.getCodeSet(csname);
 								if (cs!=null) {
-									ValidationResult result = cs.validateImportStrategy(importStrategy);
+									ValidationResult result = cs.validateBuildType(importStrategy.getBuildType());
 									if (!result.isOk()) {
 										return result.withMessage("CodeSet '"+csname+"': "+result.msg);
 									}
