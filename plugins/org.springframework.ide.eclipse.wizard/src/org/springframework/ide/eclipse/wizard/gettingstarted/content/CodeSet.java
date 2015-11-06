@@ -63,8 +63,8 @@ public abstract class CodeSet {
 		 * If a given implementation of CodeSetEntry has the means to determine
 		 * permission flags, then it can override this method.
 		 */
-		public Integer getUnixMode() {
-			return null;
+		public int getUnixMode() {
+			return 0;
 		}
 
 	}
@@ -178,8 +178,8 @@ public abstract class CodeSet {
 				} else {
 					IOUtil.pipe(e.getData(), target);
 					if (!IS_WINDOWS) {
-						Integer mode = e.getUnixMode();
-						if (mode!=null) {
+						int mode = e.getUnixMode();
+						if (mode>0) {
 							Files.setPosixFilePermissions(target.toPath(),  OsUtils.posixFilePermissions(mode));
 						}
 					}

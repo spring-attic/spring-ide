@@ -202,7 +202,7 @@ public class ZipFileCodeSet extends CodeSet {
 			}
 
 			@Override
-			public Integer getUnixMode() {
+			public int getUnixMode() {
 				return e.getUnixMode();
 			}
 
