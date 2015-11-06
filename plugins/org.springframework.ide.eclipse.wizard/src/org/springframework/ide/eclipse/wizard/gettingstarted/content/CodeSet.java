@@ -190,15 +190,15 @@ public abstract class CodeSet {
 		});
 	}
 
-	public ValidationResult validateImportStrategy(ImportStrategy importStrategy) throws UIThreadDownloadDisallowed {
+	public ValidationResult validateBuildType(BuildType buildType) throws UIThreadDownloadDisallowed {
 		List<BuildType> validBuildTypes = getBuildTypes();
-		if (validBuildTypes.contains(importStrategy)) {
+		if (validBuildTypes.contains(buildType)) {
 			return ValidationResult.OK;
 		}
 		//Not valid formulate a nice explanation
-		IPath expectedScript = importStrategy.getBuildScript();
+		IPath expectedScript = buildType.getBuildScript();
 		if (expectedScript!=null) {
-			return ValidationResult.error("Can't use '"+importStrategy.displayName()+"': There is no '"+expectedScript+"'");
+			return ValidationResult.error("Can't use '"+buildType.displayName()+"': There is no '"+expectedScript+"'");
 		} else {
 			StringBuilder message = new StringBuilder("Should be imported as ");
 			boolean first = true;
