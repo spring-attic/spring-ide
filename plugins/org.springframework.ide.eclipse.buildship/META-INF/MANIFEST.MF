@@ -17,5 +17,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.apache.commons.io,
  org.eclipse.buildship.core;resolution:=optional,
- org.eclipse.buildship.ui;resolution:=optional,
  com.gradleware.tooling.model;resolution:=optional
