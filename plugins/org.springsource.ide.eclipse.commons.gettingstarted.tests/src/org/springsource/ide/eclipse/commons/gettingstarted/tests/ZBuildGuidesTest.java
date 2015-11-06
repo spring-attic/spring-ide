@@ -135,12 +135,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 					if (zipLooksOk(g)) {
 						//Avoid running build tests for zips that look like they have 'missing parts'
 						for (CodeSet cs : g.getCodeSets()) {
-							List<BuildType> buildTypes = cs.getBuildTypes();
-							for (ImportStrategy is : ImportStrategies.all()) {
-								//Don't run tests for things we haven't yet implemented support for.
-								if (is.isSupported()) {
-									GuidesTestCase test = new ZBuildGuidesTest(g, cs, is);
-									suite.addTest(test);
+							for (BuildType bt : cs.getBuildTypes()) {
+								for (ImportStrategy is : bt.getImportStrategies()) {
+									//Don't run tests for things we haven't yet implemented support for.
+									if (is.isSupported()) {
+										GuidesTestCase test = new ZBuildGuidesTest(g, cs, is);
+										suite.addTest(test);
+									}
 								}
 							}
 						}

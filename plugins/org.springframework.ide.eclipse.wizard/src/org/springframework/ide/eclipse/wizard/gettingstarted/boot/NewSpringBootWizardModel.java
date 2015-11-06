@@ -70,6 +70,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
+import com.google.common.base.Optional;
+
 /**
  * A ZipUrlImportWizard is a simple wizard in which one can paste a url
  * pointing to a zip file. The zip file is supposed to contain a maven (or gradle)
