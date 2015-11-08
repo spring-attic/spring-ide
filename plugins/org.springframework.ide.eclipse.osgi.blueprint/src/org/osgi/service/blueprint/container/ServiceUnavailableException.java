@@ -26,17 +26,19 @@ import org.osgi.framework.ServiceException;
  * @version $Revision: 7556 $
  */
 public class ServiceUnavailableException extends ServiceException {
-	private static final long	serialVersionUID	= 1L;
+	private static final long serialVersionUID = 1L;
 	/**
 	 * The filter string associated with the exception.
 	 */
-	private final String		filter;
+	private final String filter;
 
 	/**
 	 * Creates a Service Unavailable Exception with the specified message.
 	 * 
-	 * @param message The associated message.
-	 * @param filter The filter used for the service lookup.
+	 * @param message
+	 *            The associated message.
+	 * @param filter
+	 *            The filter used for the service lookup.
 	 */
 	public ServiceUnavailableException(String message, String filter) {
 		super(message, UNREGISTERED);
@@ -47,12 +49,14 @@ public class ServiceUnavailableException extends ServiceException {
 	 * Creates a Service Unavailable Exception with the specified message and
 	 * exception cause.
 	 * 
-	 * @param message The associated message.
-	 * @param filter The filter used for the service lookup.
-	 * @param cause The cause of this exception.
+	 * @param message
+	 *            The associated message.
+	 * @param filter
+	 *            The filter used for the service lookup.
+	 * @param cause
+	 *            The cause of this exception.
 	 */
-	public ServiceUnavailableException(String message, String filter,
-			Throwable cause) {
+	public ServiceUnavailableException(String message, String filter, Throwable cause) {
 		super(message, UNREGISTERED, cause);
 		this.filter = filter;
 	}

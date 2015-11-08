@@ -27,10 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintDefaultsDefinition;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.ParsingUtils;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.support.InstanceEqualityRuntimeBeanReference;
-import org.eclipse.gemini.blueprint.blueprint.reflect.internal.support.OrderedManagedProperties;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -51,6 +47,8 @@ import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.support.InstanceEqualityRuntimeBeanReference;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.support.OrderedManagedProperties;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -60,13 +58,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Stateful class that handles the parsing details of a &lt;component&gt; elements. Borrows heavily from
- * {@link BeanDefinitionParserDelegate}.
+ * Stateful class that handles the parsing details of a &lt;component&gt;
+ * elements. Borrows heavily from {@link BeanDefinitionParserDelegate}.
  * 
  * <b>Note</b>: Due to its stateful nature, this class is not thread safe.
  * 
- * <b>Note</b>: Since the namespace is important when parsing elements and since mixed elements, from both rfc124 and
- * Spring can coexist in the same file, reusing the {@link BeanDefinitionParserDelegate delegate} isn't entirely
+ * <b>Note</b>: Since the namespace is important when parsing elements and since
+ * mixed elements, from both rfc124 and Spring can coexist in the same file,
+ * reusing the {@link BeanDefinitionParserDelegate delegate} isn't entirely
  * possible since the two state needs to be kept in synch.
  * 
  * @author Costin Leau
@@ -102,7 +101,8 @@ public class BlueprintParser {
 	}
 
 	/**
-	 * Constructs a new <code>ComponentParser</code> instance. Used by certain reusable static methods.
+	 * Constructs a new <code>ComponentParser</code> instance. Used by certain
+	 * reusable static methods.
 	 * 
 	 * @param parserContext
 	 */
@@ -137,8 +137,9 @@ public class BlueprintParser {
 	}
 
 	/**
-	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code> if there were errors during
-	 * parse. Errors are reported to the {@link org.springframework.beans.factory.parsing.ProblemReporter}.
+	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return
+	 * <code>null</code> if there were errors during parse. Errors are reported
+	 * to the {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
 	private BeanDefinitionHolder parseComponentDefinitionElement(Element ele, BeanDefinition containingBean) {
 
@@ -148,8 +149,8 @@ public class BlueprintParser {
 
 		List<String> aliases = new ArrayList<String>(4);
 		if (StringUtils.hasLength(nameAttr)) {
-			String[] nameArr =
-					StringUtils.tokenizeToStringArray(nameAttr, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr,
+					BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
@@ -158,8 +159,8 @@ public class BlueprintParser {
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
 			beanName = (String) aliases.remove(0);
 			if (log.isDebugEnabled()) {
-				log.debug("No XML 'id' specified - using '" + beanName + "' as bean name and " + aliases
-						+ " as aliases");
+				log.debug(
+						"No XML 'id' specified - using '" + beanName + "' as bean name and " + aliases + " as aliases");
 			}
 		}
 
@@ -179,18 +180,19 @@ public class BlueprintParser {
 			if (!StringUtils.hasText(beanName)) {
 				try {
 					if (containingBean != null) {
-						beanName =
-								ParsingUtils.generateBlueprintBeanName(beanDefinition, parserContext.getRegistry(),
-										true);
+						beanName = ParsingUtils.generateBlueprintBeanName(beanDefinition, parserContext.getRegistry(),
+								true);
 					} else {
-						beanName =
-								ParsingUtils.generateBlueprintBeanName(beanDefinition, parserContext.getRegistry(),
-										false);
+						beanName = ParsingUtils.generateBlueprintBeanName(beanDefinition, parserContext.getRegistry(),
+								false);
 						// TODO: should we support 2.0 behaviour (see below):
-						// 
-						// Register an alias for the plain bean class name, if still possible,
-						// if the generator returned the class name plus a suffix.
-						// This is expected for Spring 1.2/2.0 backwards compatibility.
+						//
+						// Register an alias for the plain bean class name, if
+						// still possible,
+						// if the generator returned the class name plus a
+						// suffix.
+						// This is expected for Spring 1.2/2.0 backwards
+						// compatibility.
 					}
 					if (log.isDebugEnabled()) {
 						log.debug("Neither XML 'id' nor 'name' specified - " + "using generated bean name [" + beanName
@@ -208,8 +210,9 @@ public class BlueprintParser {
 	}
 
 	/**
-	 * Parse the bean definition itself, without regard to name or aliases. May return <code>null</code> if problems
-	 * occurred during the parse of the bean definition.
+	 * Parse the bean definition itself, without regard to name or aliases. May
+	 * return <code>null</code> if problems occurred during the parse of the
+	 * bean definition.
 	 */
 	private AbstractBeanDefinition parseBeanDefinitionElement(Element ele, String beanName,
 			BeanDefinition containingBean) {
@@ -222,9 +225,8 @@ public class BlueprintParser {
 		}
 
 		try {
-			AbstractBeanDefinition beanDefinition =
-					BeanDefinitionReaderUtils.createBeanDefinition(null, className, parserContext.getReaderContext()
-							.getBeanClassLoader());
+			AbstractBeanDefinition beanDefinition = BeanDefinitionReaderUtils.createBeanDefinition(null, className,
+					parserContext.getReaderContext().getBeanClassLoader());
 
 			// some early validation
 			String activation = ele.getAttribute(LAZY_INIT_ATTR);
@@ -249,8 +251,8 @@ public class BlueprintParser {
 			}
 
 			// parse description
-			beanDefinition.setDescription(DomUtils.getChildElementValueByTagName(ele,
-					BeanDefinitionParserDelegate.DESCRIPTION_ELEMENT));
+			beanDefinition.setDescription(
+					DomUtils.getChildElementValueByTagName(ele, BeanDefinitionParserDelegate.DESCRIPTION_ELEMENT));
 
 			parseConstructorArgElements(ele, beanDefinition);
 			parsePropertyElements(ele, beanDefinition);
@@ -272,9 +274,10 @@ public class BlueprintParser {
 		return null;
 	}
 
-	private AbstractBeanDefinition parseAttributes(Element ele, String beanName, AbstractBeanDefinition beanDefinition) {
-		AbstractBeanDefinition bd =
-				parserContext.getDelegate().parseBeanDefinitionAttributes(ele, beanName, null, beanDefinition);
+	private AbstractBeanDefinition parseAttributes(Element ele, String beanName,
+			AbstractBeanDefinition beanDefinition) {
+		AbstractBeanDefinition bd = parserContext.getDelegate().parseBeanDefinitionAttributes(ele, beanName, null,
+				beanDefinition);
 
 		// handle lazy flag (initialize)
 		String lazyInit = ele.getAttribute(LAZY_INIT_ATTR);
@@ -305,7 +308,8 @@ public class BlueprintParser {
 	}
 
 	/**
-	 * Validate that the specified bean name and aliases have not been used already.
+	 * Validate that the specified bean name and aliases have not been used
+	 * already.
 	 */
 	private boolean checkNameUniqueness(String beanName, Collection<String> aliases, Collection<String> usedNames) {
 		String foundName = null;
@@ -406,7 +410,8 @@ public class BlueprintParser {
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && DomUtils.nodeNameEquals(node, BeanDefinitionParserDelegate.PROPERTY_ELEMENT)) {
+			if (node instanceof Element
+					&& DomUtils.nodeNameEquals(node, BeanDefinitionParserDelegate.PROPERTY_ELEMENT)) {
 				parsePropertyElement((Element) node, beanDefinition);
 			}
 		}
@@ -434,9 +439,8 @@ public class BlueprintParser {
 	}
 
 	private Object parsePropertyValue(Element ele, BeanDefinition bd, String propertyName) {
-		String elementName =
-				(propertyName != null) ? "<property> element for property '" + propertyName + "'"
-						: "<constructor-arg> element";
+		String elementName = (propertyName != null) ? "<property> element for property '" + propertyName + "'"
+				: "<constructor-arg> element";
 
 		// Should only have one child element: ref, value, list, etc.
 		NodeList nl = ele.getChildNodes();
@@ -470,8 +474,8 @@ public class BlueprintParser {
 			ref.setSource(parserContext.extractSource(ele));
 			return ref;
 		} else if (hasValueAttribute) {
-			TypedStringValue valueHolder =
-					new TypedStringValue(ele.getAttribute(BeanDefinitionParserDelegate.VALUE_ATTRIBUTE));
+			TypedStringValue valueHolder = new TypedStringValue(
+					ele.getAttribute(BeanDefinitionParserDelegate.VALUE_ATTRIBUTE));
 			valueHolder.setSource(parserContext.extractSource(ele));
 			return valueHolder;
 		} else if (subElement != null) {
@@ -496,15 +500,19 @@ public class BlueprintParser {
 	}
 
 	/**
-	 * Parse a value, ref or collection sub-element of a property or constructor-arg element. This method is called from
-	 * several places to handle reusable elements such as idref, ref, null, value and so on.
+	 * Parse a value, ref or collection sub-element of a property or
+	 * constructor-arg element. This method is called from several places to
+	 * handle reusable elements such as idref, ref, null, value and so on.
 	 * 
-	 * In fact, this method is the main reason why the BeanDefinitionParserDelegate is not used in full since the
-	 * element namespace becomes important as mixed rfc124/bean content can coexist.
+	 * In fact, this method is the main reason why the
+	 * BeanDefinitionParserDelegate is not used in full since the element
+	 * namespace becomes important as mixed rfc124/bean content can coexist.
 	 * 
-	 * @param ele subelement of property element; we don't know which yet
-	 * @param defaultValueType the default type (class name) for any <code>&lt;value&gt;</code> tag that might be
-	 * created
+	 * @param ele
+	 *            subelement of property element; we don't know which yet
+	 * @param defaultValueType
+	 *            the default type (class name) for any
+	 *            <code>&lt;value&gt;</code> tag that might be created
 	 */
 	private Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType) {
 		// skip other namespace
@@ -519,7 +527,7 @@ public class BlueprintParser {
 			return parserContext.getDelegate().parseCustomElement(ele);
 		}
 
-		// 
+		//
 		else {
 			if (DomUtils.nodeNameEquals(ele, BEAN)) {
 				BeanDefinitionHolder bdHolder = parseComponentDefinitionElement(ele, bd);
@@ -536,7 +544,8 @@ public class BlueprintParser {
 			} else if (DomUtils.nodeNameEquals(ele, BeanDefinitionParserDelegate.VALUE_ELEMENT)) {
 				return parseValueElement(ele, defaultValueType);
 			} else if (DomUtils.nodeNameEquals(ele, BeanDefinitionParserDelegate.NULL_ELEMENT)) {
-				// It's a distinguished null value. Let's wrap it in a TypedStringValue
+				// It's a distinguished null value. Let's wrap it in a
+				// TypedStringValue
 				// object in order to preserve the source location.
 				TypedStringValue nullHolder = new TypedStringValue(null);
 				nullHolder.setSource(parserContext.extractSource(ele));
@@ -594,8 +603,10 @@ public class BlueprintParser {
 	/**
 	 * Return a typed String value Object for the given value element.
 	 * 
-	 * @param ele element
-	 * @param defaultTypeName type class name
+	 * @param ele
+	 *            element
+	 * @param defaultTypeName
+	 *            type class name
 	 * @return typed String value Object
 	 */
 	private Object parseValueElement(Element ele, String defaultTypeName) {
@@ -698,8 +709,8 @@ public class BlueprintParser {
 		String defaultKeyType = mapEle.getAttribute(BeanDefinitionParserDelegate.KEY_TYPE_ATTRIBUTE);
 		String defaultValueType = mapEle.getAttribute(BeanDefinitionParserDelegate.VALUE_TYPE_ATTRIBUTE);
 
-		List<Element> entryEles =
-				DomUtils.getChildElementsByTagName(mapEle, BeanDefinitionParserDelegate.ENTRY_ELEMENT);
+		List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle,
+				BeanDefinitionParserDelegate.ENTRY_ELEMENT);
 		ManagedMap<Object, Object> map = new ManagedMap<Object, Object>(entryEles.size());
 		map.setSource(extractSource(mapEle));
 		map.setKeyTypeName(defaultKeyType);
@@ -737,14 +748,14 @@ public class BlueprintParser {
 			Object key = null;
 			boolean hasKeyAttribute = entryEle.hasAttribute(BeanDefinitionParserDelegate.KEY_ATTRIBUTE);
 			boolean hasKeyRefAttribute = entryEle.hasAttribute(BeanDefinitionParserDelegate.KEY_REF_ATTRIBUTE);
-			if ((hasKeyAttribute && hasKeyRefAttribute) || ((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
+			if ((hasKeyAttribute && hasKeyRefAttribute)
+					|| ((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
 				error("<entry> element is only allowed to contain either "
 						+ "a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
-				key =
-						buildTypedStringValueForMap(entryEle.getAttribute(BeanDefinitionParserDelegate.KEY_ATTRIBUTE),
-								defaultKeyType, entryEle);
+				key = buildTypedStringValueForMap(entryEle.getAttribute(BeanDefinitionParserDelegate.KEY_ATTRIBUTE),
+						defaultKeyType, entryEle);
 			} else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(BeanDefinitionParserDelegate.KEY_REF_ATTRIBUTE);
 				if (!StringUtils.hasText(refName)) {
@@ -763,16 +774,14 @@ public class BlueprintParser {
 			Object value = null;
 			boolean hasValueAttribute = entryEle.hasAttribute(BeanDefinitionParserDelegate.VALUE_ATTRIBUTE);
 			boolean hasValueRefAttribute = entryEle.hasAttribute(BeanDefinitionParserDelegate.VALUE_REF_ATTRIBUTE);
-			if ((hasValueAttribute && hasValueRefAttribute) || ((hasValueAttribute || hasValueRefAttribute))
-					&& valueEle != null) {
+			if ((hasValueAttribute && hasValueRefAttribute)
+					|| ((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
 				error("<entry> element is only allowed to contain either "
 						+ "'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
-				value =
-						buildTypedStringValueForMap(
-								entryEle.getAttribute(BeanDefinitionParserDelegate.VALUE_ATTRIBUTE), defaultValueType,
-								entryEle);
+				value = buildTypedStringValueForMap(entryEle.getAttribute(BeanDefinitionParserDelegate.VALUE_ATTRIBUTE),
+						defaultValueType, entryEle);
 			} else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(BeanDefinitionParserDelegate.VALUE_REF_ATTRIBUTE);
 				if (!StringUtils.hasText(refName)) {
@@ -802,9 +811,10 @@ public class BlueprintParser {
 		props.setSource(extractSource(propsEle));
 		props.setMergeEnabled(parseMergeAttribute(propsEle));
 
-		List propEles = DomUtils.getChildElementsByTagName(propsEle, BeanDefinitionParserDelegate.PROP_ELEMENT);
-		for (Iterator it = propEles.iterator(); it.hasNext();) {
-			Element propEle = (Element) it.next();
+		List<Element> propEles = DomUtils.getChildElementsByTagName(propsEle,
+				BeanDefinitionParserDelegate.PROP_ELEMENT);
+		for (Iterator<Element> it = propEles.iterator(); it.hasNext();) {
+			Element propEle = it.next();
 			String key = propEle.getAttribute(BeanDefinitionParserDelegate.KEY_ATTRIBUTE);
 			// Trim the text value to avoid unwanted whitespace
 			// caused by typical XML formatting.

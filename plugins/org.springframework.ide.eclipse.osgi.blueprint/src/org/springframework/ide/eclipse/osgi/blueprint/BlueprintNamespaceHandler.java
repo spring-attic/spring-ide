@@ -15,12 +15,11 @@
 
 package org.springframework.ide.eclipse.osgi.blueprint;
 
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintCollectionBeanDefinitionParser;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintReferenceBeanDefinitionParser;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintServiceDefinitionParser;
-import org.eclipse.gemini.blueprint.service.importer.support.CollectionType;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintReferenceBeanDefinitionParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintReferenceListBeanDefinitionParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintServiceDefinitionParser;
 
 /**
  * Spring-based namespace handler for the blueprint/RFC-124 core namespace.
@@ -43,19 +42,7 @@ public class BlueprintNamespaceHandler extends NamespaceHandlerSupport {
 				new BlueprintReferenceBeanDefinitionParser());
 
 		registerBeanDefinitionParser(BlueprintBeanDefinitionParser.REFERENCE_LIST,
-				new BlueprintCollectionBeanDefinitionParser() {
-
-					protected CollectionType collectionType() {
-						return CollectionType.LIST;
-					}
-				});
-		registerBeanDefinitionParser(BlueprintBeanDefinitionParser.REFERENCE_SET,
-				new BlueprintCollectionBeanDefinitionParser() {
-
-					protected CollectionType collectionType() {
-						return CollectionType.SET;
-					}
-				});
+				new BlueprintReferenceListBeanDefinitionParser());
 
 		registerBeanDefinitionParser(BlueprintBeanDefinitionParser.SERVICE, new BlueprintServiceDefinitionParser());
 	}

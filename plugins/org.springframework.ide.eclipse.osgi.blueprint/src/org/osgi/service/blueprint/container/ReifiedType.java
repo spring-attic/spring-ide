@@ -44,16 +44,17 @@ package org.osgi.service.blueprint.container;
  * @version $Revision: 7564 $
  */
 public class ReifiedType {
-	private final static ReifiedType	OBJECT	= new ReifiedType(Object.class);
+	private final static ReifiedType OBJECT = new ReifiedType(Object.class);
 
-	private final Class					clazz;
+	private final Class clazz;
 
 	/**
 	 * Create a Reified Type for a raw Java class without any generic type
 	 * parameters. Subclasses can provide the optional generic type parameter
 	 * information. Without subclassing, this instance has no type parameters.
 	 * 
-	 * @param clazz The raw class of the Reified Type.
+	 * @param clazz
+	 *            The raw class of the Reified Type.
 	 */
 	public ReifiedType(Class clazz) {
 		this.clazz = clazz;
@@ -103,7 +104,8 @@ public class ReifiedType {
 	 * This method should be overridden by a subclass that provides access to
 	 * the generic type parameter information for Java 5 and later.
 	 * 
-	 * @param i The zero-based index of the requested type parameter.
+	 * @param i
+	 *            The zero-based index of the requested type parameter.
 	 * @return The <code>ReifiedType</code> for the generic type parameter at
 	 *         the specified index.
 	 */

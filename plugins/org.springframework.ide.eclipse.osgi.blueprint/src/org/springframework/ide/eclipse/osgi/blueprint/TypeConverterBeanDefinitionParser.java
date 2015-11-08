@@ -18,8 +18,7 @@ package org.springframework.ide.eclipse.osgi.blueprint;
 import java.beans.PropertyEditor;
 import java.util.List;
 
-import org.eclipse.gemini.blueprint.blueprint.config.internal.ParsingUtils;
-import org.eclipse.gemini.blueprint.blueprint.container.BlueprintConverterConfigurer;
+import org.osgi.service.blueprint.container.Converter;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -31,16 +30,19 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.ParsingUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
  * Parser handling Blueprint &lt;type-converters&gt; elements.
  * 
- * Transforms the {@link Converter converters} into {@link PropertyEditor} through a dedicated
- * {@link PropertyEditorRegistrar registrar} that gets registers through a {@link CustomEditorConfigurer}.
+ * Transforms the {@link Converter converters} into {@link PropertyEditor}
+ * through a dedicated {@link PropertyEditorRegistrar registrar} that gets
+ * registers through a {@link CustomEditorConfigurer}.
  * 
- * Note that no beans are actually instantiated, the parser generating just the definitions.
+ * Note that no beans are actually instantiated, the parser generating just the
+ * definitions.
  * 
  * @author Costin Leau
  * @author Arnaud Mergey
@@ -54,12 +56,11 @@ class TypeConverterBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
-		BeanDefinitionBuilder registrarDefinitionBuilder =
-				BeanDefinitionBuilder.genericBeanDefinition(BlueprintConverterConfigurer.class);
+		BeanDefinitionBuilder registrarDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition();
 
 		List<Element> components = DomUtils.getChildElementsByTagName(element, BlueprintParser.BEAN);
-		List<Element> componentRefs =
-				DomUtils.getChildElementsByTagName(element, BeanDefinitionParserDelegate.REF_ELEMENT);
+		List<Element> componentRefs = DomUtils.getChildElementsByTagName(element,
+				BeanDefinitionParserDelegate.REF_ELEMENT);
 
 		ManagedList<Object> converterList = new ManagedList<Object>(componentRefs.size() + components.size());
 

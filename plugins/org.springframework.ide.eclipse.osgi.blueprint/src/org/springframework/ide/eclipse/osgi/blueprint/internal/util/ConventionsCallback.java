@@ -9,45 +9,32 @@
  * You may elect to redistribute this code under either of these licenses. 
  * 
  * Contributors:
- *   VMware Inc.		   - initial API and implementation
- *   Spring IDE Developers
+ *   VMware Inc.
  *****************************************************************************/
 
 package org.springframework.ide.eclipse.osgi.blueprint.internal.util;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
-import org.springframework.util.StringUtils;
+import org.springframework.core.Conventions;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
 /**
- * Standard attribute callback. Deals with ID, DEPENDS-ON and LAZY-INIT
- * attribute.
+ * Callback relying on 'Spring' conventions. Normally this is the last callback
+ * in the stack trying to convert the property name and then setting it on the
+ * builder.
+ * 
+ * @see Conventions#attributeNameToPropertyName(String)
+ * @see BeanDefinitionBuilder#addPropertyValue(String, Object)
  * 
  * @author Costin Leau
- * @author Arnaud Mergey
- * 
- * @since 3.7.2
  */
-public class StandardAttributeCallback implements AttributeCallback {
+public class ConventionsCallback implements AttributeCallback {
 
 	public boolean process(Element parent, Attr attribute, BeanDefinitionBuilder builder) {
 		String name = attribute.getLocalName();
-
-		if (BeanDefinitionParserDelegate.ID_ATTRIBUTE.equals(name)) {
-			return false;
-		}
-
-		if (BeanDefinitionParserDelegate.DEPENDS_ON_ATTRIBUTE.equals(name)) {
-			builder.getBeanDefinition().setDependsOn((StringUtils.tokenizeToStringArray(attribute.getValue(),
-					BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS)));
-			return false;
-		}
-		if (BeanDefinitionParserDelegate.LAZY_INIT_ATTRIBUTE.equals(name)) {
-			builder.setLazyInit(Boolean.valueOf(attribute.getValue()));
-			return false;
-		}
+		String propertyName = Conventions.attributeNameToPropertyName(name);
+		builder.addPropertyValue(propertyName, attribute.getValue());
 		return true;
 	}
 }

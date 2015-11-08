@@ -9,46 +9,45 @@
  * You may elect to redistribute this code under either of these licenses. 
  * 
  * Contributors:
- *   VMware Inc.		   - initial API and implementation
- *   Spring IDE Developers 
+ *   VMware Inc.
+ *   Spring IDE Developers
  *****************************************************************************/
 
-package org.springframework.ide.eclipse.osgi.blueprint.internal.util;
+package org.springframework.ide.eclipse.osgi.blueprint.internal;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TautoExportModes;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.Tavailability;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.util.AttributeCallback;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
 /**
- * &lt;service&gt; attribute callback.
+ * RFC124/Blueprint specific attributes that need to be converted to Spring DM.
  * 
  * @author Costin Leau
  * @author Arnaud Mergey
  * 
  * @since 3.7.2
  */
-public class ServiceAttributeCallback implements AttributeCallback {
+public class BlueprintReferenceAttributeCallback implements AttributeCallback {
 
-	private static final String AUTOEXPORT = "auto-export";
-	private static final String AUTOEXPORT_PROP = "autoExport";
-	private static final String INTERFACE = "interface";
-	private static final String INTERFACES_PROP = "interfaces";
-	private static final String REF = "ref";
+	private static final String AVAILABILITY = "availability";
 
-	public boolean process(Element parent, Attr attribute, BeanDefinitionBuilder bldr) {
+	private static final String SERVICE_BEAN_NAME_PROP = "serviceBeanName";
+
+	private static final String COMPONENT_NAME = "component-name";
+
+	public boolean process(Element parent, Attr attribute, BeanDefinitionBuilder builder) {
 		String name = attribute.getLocalName();
+		String value = attribute.getValue();
 
-		if (INTERFACE.equals(name)) {
-			bldr.addPropertyValue(INTERFACES_PROP, attribute.getValue());
-			return false;
-		} else if (REF.equals(name)) {
+		if (AVAILABILITY.equals(name)) {
+			builder.addPropertyValue(AVAILABILITY, Tavailability.valueOf(value));
 			return false;
 		}
 
-		else if (AUTOEXPORT.equals(name)) {
-
-			bldr.addPropertyValue(AUTOEXPORT_PROP, Enum.valueOf(TautoExportModes.class, attribute.getValue()));
+		else if (COMPONENT_NAME.equals(name)) {
+			builder.addPropertyValue(SERVICE_BEAN_NAME_PROP, value);
 			return false;
 		}
 

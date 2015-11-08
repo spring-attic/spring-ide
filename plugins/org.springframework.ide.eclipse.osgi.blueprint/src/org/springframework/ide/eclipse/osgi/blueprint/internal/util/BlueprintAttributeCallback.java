@@ -9,46 +9,34 @@
  * You may elect to redistribute this code under either of these licenses. 
  * 
  * Contributors:
- *   VMware Inc.		   - initial API and implementation
- *   Spring IDE Developers 
+ *   VMware Inc.
  *****************************************************************************/
 
 package org.springframework.ide.eclipse.osgi.blueprint.internal.util;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TautoExportModes;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
 /**
- * &lt;service&gt; attribute callback.
- * 
  * @author Costin Leau
- * @author Arnaud Mergey
- * 
- * @since 3.7.2
  */
-public class ServiceAttributeCallback implements AttributeCallback {
+public class BlueprintAttributeCallback implements AttributeCallback {
 
-	private static final String AUTOEXPORT = "auto-export";
-	private static final String AUTOEXPORT_PROP = "autoExport";
-	private static final String INTERFACE = "interface";
-	private static final String INTERFACES_PROP = "interfaces";
-	private static final String REF = "ref";
+	private static final String ACTIVATION_ATTR = "activation";
+	private static final String LAZY_ACTIVATION = "lazy";
 
-	public boolean process(Element parent, Attr attribute, BeanDefinitionBuilder bldr) {
+	public boolean process(Element parent, Attr attribute, BeanDefinitionBuilder builder) {
 		String name = attribute.getLocalName();
+		String value = attribute.getValue();
 
-		if (INTERFACE.equals(name)) {
-			bldr.addPropertyValue(INTERFACES_PROP, attribute.getValue());
-			return false;
-		} else if (REF.equals(name)) {
-			return false;
-		}
-
-		else if (AUTOEXPORT.equals(name)) {
-
-			bldr.addPropertyValue(AUTOEXPORT_PROP, Enum.valueOf(TautoExportModes.class, attribute.getValue()));
+		if (ACTIVATION_ATTR.equals(name) && StringUtils.hasText(value)) {
+			if (LAZY_ACTIVATION.equalsIgnoreCase(value)) {
+				builder.setLazyInit(true);
+			} else {
+				builder.setLazyInit(false);
+			}
 			return false;
 		}
 

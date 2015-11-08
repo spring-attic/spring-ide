@@ -9,43 +9,37 @@
  * You may elect to redistribute this code under either of these licenses. 
  * 
  * Contributors:
- *   VMware Inc.		   - initial API and implementation
- *   Spring IDE Developers
+ *   VMware Inc.
  *****************************************************************************/
 
 package org.springframework.ide.eclipse.osgi.blueprint.internal.util;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
-import org.springframework.util.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
 /**
- * Standard attribute callback. Deals with ID, DEPENDS-ON and LAZY-INIT
- * attribute.
+ * Convention callback that transforms "&lt;property-name&gt;-ref" attributes
+ * into a bean definition that sets the give &lt;property-name&gt; to a bean
+ * reference pointing to the attribute value.
+ * 
+ * <p/>
+ * Thus attribute "comparator-ref='bla'" will have property 'comparator'
+ * pointing to bean named 'bla'.
+ * 
+ * @see BeanDefinitionBuilder#addPropertyReference(String, String)
  * 
  * @author Costin Leau
- * @author Arnaud Mergey
- * 
- * @since 3.7.2
  */
-public class StandardAttributeCallback implements AttributeCallback {
+public class PropertyRefAttributeCallback implements AttributeCallback {
+
+	private static final String PROPERTY_REF = "-ref";
 
 	public boolean process(Element parent, Attr attribute, BeanDefinitionBuilder builder) {
 		String name = attribute.getLocalName();
-
-		if (BeanDefinitionParserDelegate.ID_ATTRIBUTE.equals(name)) {
-			return false;
-		}
-
-		if (BeanDefinitionParserDelegate.DEPENDS_ON_ATTRIBUTE.equals(name)) {
-			builder.getBeanDefinition().setDependsOn((StringUtils.tokenizeToStringArray(attribute.getValue(),
-					BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS)));
-			return false;
-		}
-		if (BeanDefinitionParserDelegate.LAZY_INIT_ATTRIBUTE.equals(name)) {
-			builder.setLazyInit(Boolean.valueOf(attribute.getValue()));
+		if (name.endsWith(PROPERTY_REF)) {
+			String propertyName = name.substring(0, name.length() - PROPERTY_REF.length());
+			builder.addPropertyReference(propertyName, attribute.getValue());
 			return false;
 		}
 		return true;

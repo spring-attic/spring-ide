@@ -15,25 +15,24 @@
 
 package org.springframework.ide.eclipse.osgi.blueprint;
 
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintCollectionBeanDefinitionParser;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintReferenceBeanDefinitionParser;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.BlueprintServiceDefinitionParser;
-import org.eclipse.gemini.blueprint.blueprint.config.internal.ParsingUtils;
-import org.eclipse.gemini.blueprint.service.importer.support.CollectionType;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintReferenceBeanDefinitionParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintReferenceListBeanDefinitionParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintServiceDefinitionParser;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.ParsingUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Namespace parser handling the root &lt;components&gt; element from RFC124 (the equivalent of Spring's &lt;beans&gt;
- * element).
+ * Namespace parser handling the root &lt;components&gt; element from RFC124
+ * (the equivalent of Spring's &lt;beans&gt; element).
  * 
  * @author Costin Leau
  * 
@@ -48,7 +47,6 @@ class BlueprintBeanDefinitionParser implements BeanDefinitionParser {
 	static final String REFERENCE = "reference";
 	static final String SERVICE = "service";
 	static final String REFERENCE_LIST = "reference-list";
-	static final String REFERENCE_SET = "reference-set";
 
 	public BeanDefinition parse(Element componentsRootElement, ParserContext parserContext) {
 		// re-initialize defaults
@@ -81,8 +79,8 @@ class BlueprintBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the top elements belonging to the RFC 124 namespace. Namely these are &lt;component&gt;,
-	 * &lt;description&gt; and &lt;type-converters&gt;
+	 * Parses the top elements belonging to the RFC 124 namespace. Namely these
+	 * are &lt;component&gt;, &lt;description&gt; and &lt;type-converters&gt;
 	 * 
 	 * @param ele
 	 * @param parserContext
@@ -99,8 +97,6 @@ class BlueprintBeanDefinitionParser implements BeanDefinitionParser {
 			parseServiceElement(ele, parserContext);
 		} else if (DomUtils.nodeNameEquals(ele, REFERENCE_LIST)) {
 			parseListElement(ele, parserContext);
-		} else if (DomUtils.nodeNameEquals(ele, REFERENCE_SET)) {
-			parseSetElement(ele, parserContext);
 		} else if (DomUtils.nodeNameEquals(ele, TypeConverterBeanDefinitionParser.TYPE_CONVERTERS)) {
 			parseConvertersElement(ele, parserContext);
 		} else {
@@ -141,25 +137,7 @@ class BlueprintBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void parseListElement(Element ele, ParserContext parserContext) {
-		BeanDefinitionParser parser = new BlueprintCollectionBeanDefinitionParser() {
-
-			@Override
-			protected CollectionType collectionType() {
-				return CollectionType.LIST;
-			}
-		};
-		parser.parse(ele, parserContext);
-	}
-
-	private void parseSetElement(Element ele, ParserContext parserContext) {
-		BeanDefinitionParser parser = new BlueprintCollectionBeanDefinitionParser() {
-
-			@Override
-			protected CollectionType collectionType() {
-				return CollectionType.SET;
-			}
-		};
-
+		BeanDefinitionParser parser = new BlueprintReferenceListBeanDefinitionParser();
 		parser.parse(ele, parserContext);
 	}
 }
