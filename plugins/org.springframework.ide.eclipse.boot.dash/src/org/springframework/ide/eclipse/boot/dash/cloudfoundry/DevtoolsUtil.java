@@ -53,7 +53,7 @@ public class DevtoolsUtil {
 
 	private static final String JAVA_OPTS_ENV_VAR = "JAVA_OPTS";
 	private static final String REMOTE_SECRET_JVM_ARG = "-Dspring.devtools.remote.secret=";
-	private static final String REMOTE_DEBUG_JVM_ARGS = "-Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n";
+//	private static final String REMOTE_DEBUG_JVM_ARGS = "-Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n";
 
 	private static ILaunchManager getLaunchManager() {
 		return DebugPlugin.getDefault().getLaunchManager();
@@ -297,11 +297,11 @@ public class DevtoolsUtil {
 	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
 		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
 		if (javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
-			if (runOrDebug == RunState.DEBUGGING) {
-				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
-			} else {
-				return !javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
-			}
+//			if (runOrDebug == RunState.DEBUGGING) {
+//				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
+//			} else {
+//				return !javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
+//			}
 		}
 		return false;
 	}
@@ -314,15 +314,19 @@ public class DevtoolsUtil {
 		}
 		sb.append(REMOTE_SECRET_JVM_ARG);
 		sb.append(secret);
-		if (runOrDebug == RunState.DEBUGGING) {
-			sb.append(' ');
-			sb.append(REMOTE_DEBUG_JVM_ARGS);
-		}
+//		if (runOrDebug == RunState.DEBUGGING) {
+//			sb.append(' ');
+//			sb.append(REMOTE_DEBUG_JVM_ARGS);
+//		}
 		envVars.put(JAVA_OPTS_ENV_VAR, sb.toString());
 	}
 
 	private static String clearJavaOpts(String opts) {
-		return opts == null ? null : opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "").replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
+		if (opts!=null) {
+//			opts = opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "");
+			opts = opts.replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
+		}
+		return opts;
 	}
 
 }
