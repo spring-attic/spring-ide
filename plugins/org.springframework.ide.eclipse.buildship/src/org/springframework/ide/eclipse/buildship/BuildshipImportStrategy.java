@@ -39,11 +39,15 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * Importer strategy implementation for importing CodeSets into the workspace and set them
- * up to use Gradle Tooling.
+ * up to use Buildship Gradle Tooling.
  *
  * @author Kris De Volder
  */
 public class BuildshipImportStrategy extends ImportStrategy {
+
+	//TODO: the way progress is reported with the sub-job / join is not very nice (a double progress popup appears)
+	// Perhaps this so post has the answer to doing it a better way:
+	//   http://stackoverflow.com/questions/14530200/eclipse-jobs-api-how-to-track-progress-for-job-scheduled-by-another-job
 
 	public BuildshipImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
 		super(buildType, name, notInstalledMessage);
