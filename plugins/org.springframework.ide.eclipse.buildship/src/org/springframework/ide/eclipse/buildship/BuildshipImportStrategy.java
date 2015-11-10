@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
@@ -106,7 +107,12 @@ public class BuildshipImportStrategy extends ImportStrategy {
 							conf.toFixedAttributes(), ImmutableList.<String>of(),
 							AsyncHandler.NO_OP);
 					job.schedule();
-					job.join(0, new SubProgressMonitor(mon, 9));
+
+					// This doesn't work in e44 (api not available until e45):
+					// job.join(0, new SubProgressMonitor(mon, 9));
+					// The below works, but makes more assumptions on the internal workings of SynchronizeGradleProjectJob
+					// Namely: how it implements Job.belongsTo to make itself belong to program family equal to its class name.
+					Job.getJobManager().join(SynchronizeGradleProjectJob.class.getName(), new SubProgressMonitor(mon, 9));
 
 					IProject p = getProject(loc);
 					if (p!=null) {
