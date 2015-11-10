@@ -74,6 +74,14 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 		}
 	}
 
+	protected void log(String message) {
+		try {
+			model.getElementConsoleManager().writeToConsole(appName, message, LogType.LOCALSTDOUT);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 	protected void logAndUpdateMonitor(String message, IProgressMonitor monitor) {
 		if (monitor != null) {
 			monitor.setTaskName(message);

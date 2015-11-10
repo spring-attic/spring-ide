@@ -11,21 +11,22 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -58,7 +59,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
-	protected CloudFoundryBootDashModel getCloudModel() {
+	public CloudFoundryBootDashModel getCloudModel() {
 		return (CloudFoundryBootDashModel) getParent();
 	}
 
@@ -82,7 +83,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		Operation<?> op = null;
-		// Only do full upload on restart. Not on debug
+		// TODO: Only do full upload on restart. Not on debug
 		if (getProject() != null
 		// TODO: commenting out for now as restarting doesnt seem to restage.
 		// Need to re-stage for JAVA_OPTS in debugging to be set. right now that
@@ -92,24 +93,34 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		) {
 			String opName = "Starting application '" + getName() + "' in "
 					+ (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+			DebugSupport debugSupport = getDebugSupport();
 			if (runingOrDebugging == RunState.DEBUGGING) {
-				op = new CompositeApplicationOperation(opName, cloudModel, getName(),
-						Arrays.asList(new CloudApplicationOperation[] {
-								new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging,
-										ui),
-								new RemoteDevClientStartOperation(cloudModel, getName(), runingOrDebugging) }), RunState.STARTING);
+				if (debugSupport.isSupported()) {
+					op = debugSupport.createOperation(opName, ui);
+				} else {
+					String title = "Debugging is not supported for '"+this.getName()+"'";
+					String msg = debugSupport.getNotSupportedMessage();
+					if (msg==null) {
+						msg = title;
+					}
+					ui.errorPopup(title, msg);
+				}
 			} else {
-				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, ui);
+				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, debugSupport, ui);
 			}
 		} else {
 			// Set the initial run state as Starting
-			CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
+			op = new ApplicationStartOperation(getName(),
 					(CloudFoundryBootDashModel) getParent(), RunState.STARTING);
-
-			op = new CompositeApplicationOperation(restartOp);
+//			op = new CompositeApplicationOperation(restartOp);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
+	}
+
+	public DebugSupport getDebugSupport() {
+		//In the future we may need to choose what strategy to instantiate here.
+		return new SshDebugSupport(this);
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
@@ -147,7 +158,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	@Override
-	public RunTarget getTarget() {
+	public CloudFoundryRunTarget getTarget() {
 		return cloudTarget;
 	}
 
@@ -200,6 +211,14 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public int getDesiredInstances() {
 		return getCloudModel().getAppCache().getApp(getName()) != null
 				? getCloudModel().getAppCache().getApp(getName()).getInstances() : 0;
+	}
+
+	public UUID getAppGuid() {
+		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
+		if (app!=null) {
+			return app.getMeta().getGuid();
+		}
+		return null;
 	}
 
 	@Override

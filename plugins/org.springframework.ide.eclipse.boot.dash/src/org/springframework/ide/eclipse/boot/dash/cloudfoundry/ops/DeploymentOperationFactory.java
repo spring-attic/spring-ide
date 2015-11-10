@@ -194,7 +194,7 @@ public class DeploymentOperationFactory {
 		// Update JAVA_OPTS env variable with Remote DevTools Client secret
 		if (project != null) {
 			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(),
-					DevtoolsUtil.getSecret(project), runOrDebug);
+					DevtoolsUtil.getSecret(project));
 		}
 
 		return deploymentProperties;

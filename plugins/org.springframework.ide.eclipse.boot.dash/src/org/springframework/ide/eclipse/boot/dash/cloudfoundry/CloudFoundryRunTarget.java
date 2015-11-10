@@ -26,7 +26,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,6 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.ssh.SshClientSupport;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
@@ -164,4 +167,24 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 		return spaces;
 	}
+
+	public boolean isPWS() {
+		return "https://api.run.pivotal.io".equals(getUrl());
+	}
+
+	private String getUrl() {
+		String url = targetProperties.getUrl();
+		while (url.endsWith("/")) {
+			url = url.substring(0, url.length()-1);
+		}
+		return url;
+	}
+
+	public SshClientSupport getSshClientSupport() throws Exception {
+		CloudFoundryOperations client = getClient();
+		CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
+		HttpProxyConfiguration proxyConf = null; //TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
+		return SshClientSupport.create(client, creds, proxyConf, targetProperties.isSelfsigned());
+	}
+
 }

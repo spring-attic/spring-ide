@@ -78,11 +78,12 @@ public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAc
 
 	@Override
 	public void run() {
-		for (BootDashElement e : getSelectedElements()) {
-			if (e instanceof CloudDashElement && e.getParent() instanceof CloudFoundryBootDashModel && e.getProject() != null) {
+		for (BootDashElement _e : getSelectedElements()) {
+			if (_e instanceof CloudDashElement && _e.getParent() instanceof CloudFoundryBootDashModel && _e.getProject() != null) {
+				CloudDashElement e = (CloudDashElement) _e;
 				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getParent();
 				String opName = "Restart Remote DevTools Client for application '" + e.getName() + "'";
-				model.getOperationsExecution().runOpAsynch(new ApplicationStartWithRemoteClientOperation(opName, model, e.getName(), RunState.RUNNING, ui));
+				model.getOperationsExecution().runOpAsynch(new ApplicationStartWithRemoteClientOperation(opName, model, e.getName(), RunState.RUNNING, e.getDebugSupport(), ui));
 			}
 		}
 	}

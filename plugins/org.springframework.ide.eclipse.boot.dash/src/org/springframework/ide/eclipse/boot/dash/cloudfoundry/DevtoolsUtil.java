@@ -34,7 +34,6 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -294,7 +293,7 @@ public class DevtoolsUtil {
 		return secret;
 	}
 
-	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
+	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret) {
 		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
 		if (javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
 //			if (runOrDebug == RunState.DEBUGGING) {
@@ -306,7 +305,7 @@ public class DevtoolsUtil {
 		return false;
 	}
 
-	public static void setupEnvVarsForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
+	public static void setupEnvVarsForRemoteClient(Map<String, String> envVars, String secret) {
 		String javaOpts = clearJavaOpts(envVars.get(JAVA_OPTS_ENV_VAR));
 		StringBuilder sb = javaOpts == null ? new StringBuilder() : new StringBuilder(javaOpts);
 		if (sb.length() > 0) {
