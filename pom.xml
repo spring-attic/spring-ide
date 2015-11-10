@@ -430,6 +430,11 @@
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
 				</repository>
 				<repository>
+		  			<id>buildship</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/1.0/</url>
+				</repository>
+				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
