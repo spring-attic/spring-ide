@@ -126,6 +126,16 @@ public class BootDashViewModel implements Disposable {
 		return filter;
 	}
 
+	public RunTarget getRunTargetById(String targetId) {
+		for (BootDashModel m : getSectionModels().getValue()) {
+			RunTarget target = m.getRunTarget();
+			if (target.getId().equals(targetId)) {
+				return target;
+			}
+		};
+		return null;
+	}
+
 	public BootDashModel getSectionByTargetId(String targetId) {
 		for (BootDashModel m : getSectionModels().getValue()) {
 			if (m.getRunTarget().getId().equals(targetId)) {
@@ -138,4 +148,5 @@ public class BootDashViewModel implements Disposable {
 	public Comparator<BootDashModel> getModelComparator() {
 		return this.modelComparator;
 	}
+
 }

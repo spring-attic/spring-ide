@@ -62,7 +62,6 @@ public class DevtoolsUtil {
 		return getLaunchManager().getLaunchConfigurationType(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
 	}
 
-
 	private static ILaunchConfigurationWorkingCopy createConfiguration(IProject project, String host) throws CoreException {
 		ILaunchConfigurationType configType = getConfigurationType();
 		String projectName = project.getName();

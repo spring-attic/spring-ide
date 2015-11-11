@@ -23,7 +23,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicatio
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
+/**
+ * Uses ssh tunnelling on Diego to support debugging of app running on CF.
+ *
+ * @author Kris De Volder
+ */
 public class SshDebugSupport extends DebugSupport {
 
 	private static final int REMOTE_DEBUG_PORT = 47822;
@@ -81,7 +87,12 @@ public class SshDebugSupport extends DebugSupport {
 
 	@Override
 	public void clearEnvVars(Map<String, String> env) {
-		env.put(JAVA_OPTS, clearJavaOpts(env.get(JAVA_OPTS)));
+		String jopts = clearJavaOpts(env.get(JAVA_OPTS));
+		if (StringUtil.hasText(jopts)) {
+			env.put(JAVA_OPTS, clearJavaOpts(env.get(JAVA_OPTS)));
+		} else {
+			env.remove(JAVA_OPTS);
+		}
 	}
 
 	public int getRemotePort() {

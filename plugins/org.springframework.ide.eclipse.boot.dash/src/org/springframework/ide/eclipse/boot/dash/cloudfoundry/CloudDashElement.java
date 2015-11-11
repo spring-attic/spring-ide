@@ -18,7 +18,9 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
@@ -30,11 +32,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -43,7 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> {
+public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -276,4 +280,17 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		}
 
 	}
+
+	public void log(String message) {
+		log(message, LogType.LOCALSTDOUT);
+	}
+
+	public void log(String message, LogType logType) {
+		try {
+			getCloudModel().getElementConsoleManager().writeToConsole(this, message, logType);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 }
