@@ -30,7 +30,6 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintParser;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.ParsingUtils;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.support.BlueprintConverterConfigurer;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;

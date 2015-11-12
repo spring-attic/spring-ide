@@ -32,7 +32,6 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -42,7 +41,6 @@ import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.Tavailabilit
 import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.Treference;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TreferenceListener;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.util.AttributeCallback;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.util.BeanReferenceFactoryBean;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.util.ParserUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -273,15 +271,7 @@ public class BlueprintReferenceBeanDefinitionParser extends AbstractBeanDefiniti
 	}
 
 	private AbstractBeanDefinition createBeanReferenceDefinition(String beanName, BeanDefinition actualDef) {
-		GenericBeanDefinition def = new GenericBeanDefinition();
-		def.setBeanClass(BeanReferenceFactoryBean.class);
-		def.setOriginatingBeanDefinition(actualDef);
-		def.setDependsOn(new String[] { beanName });
-		def.setSynthetic(true);
-		MutablePropertyValues mpv = new MutablePropertyValues();
-		mpv.addPropertyValue("targetBeanName", beanName);
-		def.setPropertyValues(mpv);
-		return def;
+		return (AbstractBeanDefinition) actualDef;
 	}
 
 	/**
