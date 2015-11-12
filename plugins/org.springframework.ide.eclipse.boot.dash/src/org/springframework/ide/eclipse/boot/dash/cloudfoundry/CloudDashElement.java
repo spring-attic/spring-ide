@@ -124,7 +124,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	public DebugSupport getDebugSupport() {
 		//In the future we may need to choose between multiple strategies here.
-		return getViewModel().getDebugSupport();
+		return getViewModel().getCfDebugSupport();
 	}
 
 	public BootDashViewModel getViewModel() {

@@ -159,7 +159,11 @@ public class BootDashViewModel implements Disposable {
 		return this.modelComparator;
 	}
 
-	public DebugSupport getDebugSupport() {
+	public DebugSupport getCfDebugSupport() {
+		//TODO: DebugSupport is specific to CF, so why is it provided here in the viewModel that encompasses all
+		//types of elements?
+		//Right now there seems to be no better place for it, but maybe it really belong in the
+		// CF RunTargetType.
 		return cfDebugStrategies.getStrategy();
 	}
 
