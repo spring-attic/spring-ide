@@ -31,6 +31,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintParser;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.ParsingUtils;
+import org.springframework.ide.eclipse.osgi.blueprint.internal.support.BlueprintConverterConfigurer;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -57,6 +58,7 @@ class TypeConverterBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
 		BeanDefinitionBuilder registrarDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition();
+		registrarDefinitionBuilder.getRawBeanDefinition().setBeanClass(BlueprintConverterConfigurer.class);
 
 		List<Element> components = DomUtils.getChildElementsByTagName(element, BlueprintParser.BEAN);
 		List<Element> componentRefs = DomUtils.getChildElementsByTagName(element,
@@ -66,32 +68,41 @@ class TypeConverterBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		// add components
 		for (Element component : components) {
-			converterList.add(BlueprintParser.parsePropertySubElement(parserContext, component,
-					registrarDefinitionBuilder.getBeanDefinition()));
+			Object object = BlueprintParser.parsePropertySubElement(parserContext, component,
+					registrarDefinitionBuilder.getBeanDefinition());
+			checkConverter(object, parserContext, component);
+			converterList.add(object);
 		}
 		// followed by bean references
 		for (Element componentRef : componentRefs) {
-			converterList.add(BlueprintParser.parsePropertySubElement(parserContext, componentRef,
-					registrarDefinitionBuilder.getBeanDefinition()));
+			Object converter = BlueprintParser.parsePropertySubElement(parserContext, componentRef,
+					registrarDefinitionBuilder.getBeanDefinition());
+
+			checkConverter(converter, parserContext, componentRef);
+			converterList.add(converter);
 		}
+
 		// add the list to the registrar definition
-		registrarDefinitionBuilder.addConstructorArgValue(converterList);
-		registrarDefinitionBuilder.setRole(BeanDefinition.ROLE_SUPPORT);
+		registrarDefinitionBuilder.addPropertyValue("converters", converterList);
+		registrarDefinitionBuilder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		registrarDefinitionBuilder.getRawBeanDefinition().setSynthetic(true);
 
 		// build the CustomEditorConfigurer
 		return registrarDefinitionBuilder.getBeanDefinition();
 	}
 
+	private void checkConverter(Object object, ParserContext parserContext, Element element) {
+		// FIXME check if converter implement converter interface
+	}
+
 	@Override
-	protected boolean shouldGenerateId() {
+	protected boolean shouldGenerateIdAsFallback() {
 		return true;
 	}
 
 	@Override
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext)
 			throws BeanDefinitionStoreException {
-		return ParsingUtils.resolveId(element, definition, parserContext, shouldGenerateId(),
-				shouldGenerateIdAsFallback());
+		return TYPE_CONVERTERS;
 	}
 }

@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintServiceD
 
 /**
  * Spring-based namespace handler for the blueprint/RFC-124 core namespace.
+ * This implementation is intended to use in Spring IDE only, it only parse definitions.
  * 
  * @author Costin Leau
  * @author Arnaud Mergey

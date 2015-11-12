@@ -124,8 +124,9 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 
 		// determine nested/referred beans
 		Object target = null;
-		if (element.hasAttribute(REF))
+		if (element.hasAttribute(REF)) {
 			target = new RuntimeBeanReference(element.getAttribute(REF));
+		}
 
 		// element is considered parent
 		NodeList nl = element.getChildNodes();
