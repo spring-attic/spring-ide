@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -141,8 +142,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 	};
 
-	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context) {
-		super(target);
+	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
+		super(target, parent);
 		RunTargetType type = target.getType();
 		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);

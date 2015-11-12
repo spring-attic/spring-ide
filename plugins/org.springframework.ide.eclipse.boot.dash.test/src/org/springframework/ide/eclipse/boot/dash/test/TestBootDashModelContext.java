@@ -21,12 +21,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class TestBootDashModelContext implements BootDashModelContext {
 

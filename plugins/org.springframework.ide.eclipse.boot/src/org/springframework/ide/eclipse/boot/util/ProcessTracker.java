@@ -19,11 +19,12 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * @author Kris De Volder
  */
-public class ProcessTracker {
+public class ProcessTracker implements Disposable {
 
 	public interface ProcessListener {
 		void debugTargetCreated(ProcessTracker tracker, IDebugTarget target);

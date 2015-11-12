@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -107,8 +108,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
-		return new CloudFoundryBootDashModel(this, context);
+	public BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
+		return new CloudFoundryBootDashModel(this, context, parent);
 	}
 
 	@Override

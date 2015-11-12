@@ -41,10 +41,13 @@ public class BootDashModelManager implements Disposable {
 	private RunTargetChangeListener targetListener;
 	private ListenerList elementStateListeners = new ListenerList();
 	private ElementStateListener upstreamElementStateListener;
-	private BootDashModelContext context;
 
-	public BootDashModelManager(BootDashModelContext context, LiveExpression<Set<RunTarget>> targets) {
+	private BootDashModelContext context;
+	private BootDashViewModel viewModel;
+
+	public BootDashModelManager(BootDashModelContext context, BootDashViewModel viewModel, LiveExpression<Set<RunTarget>> targets) {
 		this.context = context;
+		this.viewModel = viewModel;
 		this.targets = targets;
 	}
 
@@ -80,7 +83,7 @@ public class BootDashModelManager implements Disposable {
 
 				for (Entry<String, RunTarget> entry : currentTargetsPerId.entrySet()) {
 					if (modelsPerTargetId.get(entry.getKey()) == null) {
-						BootDashModel model = entry.getValue().createElementsTabelModel(context);
+						BootDashModel model = entry.getValue().createElementsTabelModel(context, viewModel);
 						if (model != null) {
 							modelsPerTargetId.put(entry.getKey(), model);
 							hasChanged = true;

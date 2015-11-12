@@ -64,8 +64,8 @@ public class LocalBootDashModel extends BootDashModel {
 		}
 	}
 
-	public LocalBootDashModel(BootDashModelContext context) {
-		super(RunTargets.LOCAL);
+	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
+		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
 		this.elementFactory = new BootDashElementFactory(this, context.getProjectProperties());
 		this.consoleManager = new LocalElementConsoleManager();

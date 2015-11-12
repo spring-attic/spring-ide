@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
@@ -41,6 +44,7 @@ public class BootDashViewModel implements Disposable {
 	private ProcessTracker devtoolsProcessTracker;
 	private List<RunTargetType> orderedRunTargetTypes;
 	private Comparator<BootDashModel> modelComparator;
+	private DebugStrategyManager cfDebugStrategies;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -48,7 +52,7 @@ public class BootDashViewModel implements Disposable {
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
 		runTargets = new LiveSet<RunTarget>(new LinkedHashSet<RunTarget>());
-		models = new BootDashModelManager(context, runTargets);
+		models = new BootDashModelManager(context, this, runTargets);
 
 		manager = new RunTargetPropertiesManager(context, runTargetTypes);
 		List<RunTarget> existingtargets = manager.getStoredTargets();
@@ -63,6 +67,11 @@ public class BootDashViewModel implements Disposable {
 		toggleFiltersModel = new ToggleFiltersModel();
 		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
 		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
+		cfDebugStrategies = createCfDebugStrategies();
+	}
+
+	protected DebugStrategyManager createCfDebugStrategies() {
+		return new DebugStrategyManager(SshDebugSupport.INSTANCE, this);
 	}
 
 	public LiveSet<RunTarget> getRunTargets() {
@@ -73,6 +82,7 @@ public class BootDashViewModel implements Disposable {
 	public void dispose() {
 		models.dispose();
 		devtoolsProcessTracker.dispose();
+		cfDebugStrategies.dispose();
 	}
 
 	public void addElementStateListener(ElementStateListener l) {
@@ -148,5 +158,10 @@ public class BootDashViewModel implements Disposable {
 	public Comparator<BootDashModel> getModelComparator() {
 		return this.modelComparator;
 	}
+
+	public DebugSupport getDebugSupport() {
+		return cfDebugStrategies.getStrategy();
+	}
+
 
 }

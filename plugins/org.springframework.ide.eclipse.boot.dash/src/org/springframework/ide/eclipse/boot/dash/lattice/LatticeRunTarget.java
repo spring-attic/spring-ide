@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -86,8 +87,8 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 	}
 
 	@Override
-	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
-		return new LatticeBootDashModel(this, context);
+	public BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
+		return new LatticeBootDashModel(this, context, parent);
 	}
 
 	public String getHost() {
@@ -117,7 +118,7 @@ public class LatticeRunTarget extends AbstractRunTarget implements RunTargetWith
 	public boolean canDeployAppsFrom() {
 		return true;
 	}
-	
+
 	@Override
 	public void refresh() throws Exception {
 		// Ignore for lattice for now

@@ -115,7 +115,7 @@ public class BootDashViewModelTest {
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createElementsTabelModel(harness.context)).thenReturn(bootDashModel);
+		when(target.createElementsTabelModel(harness.context, harness.model)).thenReturn(bootDashModel);
 
 		when(targetType.canInstantiate()).thenReturn(true);
 		when(targetType.createRunTarget(any(TargetProperties.class))).thenReturn(target);
@@ -150,11 +150,11 @@ public class BootDashViewModelTest {
 				targetType
 		);
 		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
-		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+		when(target.createElementsTabelModel(harness.context, harness.model)).thenReturn(bdm);
 
 		//////Add target///////
 
@@ -200,11 +200,11 @@ public class BootDashViewModelTest {
 				targetType
 		);
 		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
-		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+		when(target.createElementsTabelModel(harness.context, harness.model)).thenReturn(bdm);
 
 		/////Add listener////////
 
@@ -250,12 +250,12 @@ public class BootDashViewModelTest {
 				RunTargetTypes.LOCAL,
 				targetType
 		);
-		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getName()).thenReturn("target_name");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+		when(target.createElementsTabelModel(harness.context, harness.model)).thenReturn(bdm);
 
 		//////Add target///////
 		harness.model.getRunTargets().add(target);
@@ -289,12 +289,12 @@ public class BootDashViewModelTest {
 				RunTargetTypes.LOCAL,
 				targetType
 		);
-		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getName()).thenReturn("target_name");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+		when(target.createElementsTabelModel(harness.context, harness.model)).thenReturn(bdm);
 
 		//////Add target///////
 		harness.model.getRunTargets().add(target);
@@ -331,12 +331,12 @@ public class BootDashViewModelTest {
 				RunTargetTypes.LOCAL,
 				targetType
 		);
-		BootDashModel bdm = new MockBootDashModel(target, harness.context);
+		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getName()).thenReturn("target_name");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createElementsTabelModel(harness.context)).thenReturn(bdm);
+		when(target.createElementsTabelModel(harness.context, harness.model)).thenReturn(bdm);
 
 		when(otherTarget.getId()).thenReturn("other_id");
 

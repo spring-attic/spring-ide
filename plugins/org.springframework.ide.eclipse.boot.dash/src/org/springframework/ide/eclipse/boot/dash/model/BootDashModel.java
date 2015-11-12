@@ -18,13 +18,15 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public abstract class BootDashModel {
 
+	private BootDashViewModel parent;
 	private RunTarget target;
 
 	private LiveVariable<RefreshState> state = new LiveVariable<RefreshState>(RefreshState.READY, this);
 
-	public BootDashModel(RunTarget target) {
+	public BootDashModel(RunTarget target, BootDashViewModel parent) {
 		super();
 		this.target = target;
+		this.parent = parent;
 	}
 
 	public RunTarget getRunTarget() {
@@ -91,6 +93,10 @@ public abstract class BootDashModel {
 
 	public void removeModelStateListener(ValueListener<RefreshState> l) {
 		state.removeListener(l);
+	}
+
+	public BootDashViewModel getViewModel() {
+		return parent;
 	}
 
 }

@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
@@ -31,7 +30,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  */
 public class ImageDecorator implements Disposable {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
 	/**
 	 * Keeps track of undecorated images.

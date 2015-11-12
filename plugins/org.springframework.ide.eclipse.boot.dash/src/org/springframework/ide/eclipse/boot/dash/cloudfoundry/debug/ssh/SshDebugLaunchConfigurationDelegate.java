@@ -64,8 +64,12 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	public static final String INSTANCE_IDX = "ssh.debug.app.instance";
 
 	private static BootDashViewModel getContext() {
-		//TODO: it may be necessary to allow injecting this, for example via setting a threadlocal, to make code
-		// more amenable to unit testing
+		//TODO: it may be necessary to allow injecting this, for example via setting a threadlocal,
+		// to make code more amenable to unit testing.
+		//This method is here because LaunchConf delegates are created by eclipse debug framework and
+		// so we can't easily inject a context object into it.
+		//The only method that should be calling this is 'launch'. Everything else should be doing
+		// the proper thing and pass in the model as parameter somehow.
 		return BootDashActivator.getDefault().getModel();
 	}
 
@@ -73,14 +77,15 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor mon)
 			throws CoreException {
 		Assert.isTrue(ILaunchManager.DEBUG_MODE.equals(mode));
-		mon.beginTask("Establish SSH Debug Connection to "+getAppName(conf)+" on "+getRunTarget(conf), 4);
+		BootDashViewModel context = getContext();
+		mon.beginTask("Establish SSH Debug Connection to "+getAppName(conf)+" on "+getRunTarget(conf, context), 4);
 		try {
-			CloudFoundryRunTarget target = getRunTarget(conf);
-			SshDebugSupport debugSupport = getDebugSupport(conf);
+			CloudFoundryRunTarget target = getRunTarget(conf, context);
+			SshDebugSupport debugSupport = getDebugSupport(conf, context);
 
-			CloudDashElement app = getApp(conf);
+			CloudDashElement app = getApp(conf, context);
 
-			if (app!=null && target!=null && debugSupport.isSupported()) {
+			if (app!=null && target!=null && debugSupport.isSupported(app)) {
 				//1: determine SSH tunnel parameters
 				app.log("Fetching SSH tunnel parameters...");
 				SshClientSupport sshInfo = target.getSshClientSupport();
@@ -101,8 +106,9 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 				SshTunnel tunnel = new SshTunnel(sshHost, sshUser, sshCode, remotePort, app);
 
 				//3: connect debugger stuff
-				app.log("Connecting debugger...");
+				app.log("Launching remote debug connector...");
 				launchRemote(tunnel, conf, launch, new SubProgressMonitor(mon, 1));
+				app.log("Launching remote debug connector... DONE");
 			}
 		} catch (Exception e) {
 			throw ExceptionUtil.coreException(e);
@@ -111,8 +117,8 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		}
 	}
 
-	private SshDebugSupport getDebugSupport(ILaunchConfiguration conf) {
-		CloudDashElement app = getApp(conf);
+	private SshDebugSupport getDebugSupport(ILaunchConfiguration conf, BootDashViewModel context) {
+		CloudDashElement app = getApp(conf, context);
 		if (app!=null) {
 			DebugSupport ds = app.getDebugSupport();
 			if (ds instanceof DebugSupport) {
@@ -127,10 +133,9 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		return getString(conf, APP_NAME);
 	}
 
-	public static CloudDashElement getApp(ILaunchConfiguration conf) {
+	public static CloudDashElement getApp(ILaunchConfiguration conf, BootDashViewModel context) {
 		String appName = getAppName(conf);
 		if (appName!=null) {
-			BootDashViewModel context = getContext();
 			BootDashModel section = context.getSectionByTargetId(getRunTargetId(conf));
 			if (section instanceof CloudFoundryBootDashModel) {
 				CloudFoundryBootDashModel cfmodel = (CloudFoundryBootDashModel) section;
@@ -171,11 +176,11 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		return null;
 	}
 
-	public static CloudFoundryRunTarget getRunTarget(ILaunchConfiguration conf) {
+	public static CloudFoundryRunTarget getRunTarget(ILaunchConfiguration conf, BootDashViewModel context) {
 		try {
 			String id = conf.getAttribute(RUN_TARGET, (String)null);
 			if (id!=null) {
-				RunTarget target = getContext().getRunTargetById(id);
+				RunTarget target = context.getRunTargetById(id);
 				if (target instanceof CloudFoundryRunTarget) {
 					return (CloudFoundryRunTarget) target;
 				}
@@ -317,7 +322,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	}
 
 	private static ILaunchConfigurationWorkingCopy createConfiguration(IProject project, CloudFoundryRunTarget target, String appName) throws CoreException {
-		ILaunchConfigurationType configType = getConfigurationType();
+		ILaunchConfigurationType configType = getLaunchType();
 		ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, getLaunchMan().generateLaunchConfigurationName("ssh-tunnel["+appName+"]"));
 		BootLaunchConfigurationDelegate.setProject(wc, project);
 		setRunTarget(wc, target);
@@ -326,15 +331,24 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		return wc;
 	}
 
+	public static ILaunchConfiguration findConfig(CloudDashElement app) {
+		IProject project = app.getProject();
+		String appName = app.getName();
+		CloudFoundryRunTarget target = app.getTarget();
+		return findConfig(project, target, appName);
+	}
+
 	private static ILaunchConfiguration findConfig(IProject project, CloudFoundryRunTarget target, String appName) {
 		try {
-			for (ILaunchConfiguration c : getLaunchMan().getLaunchConfigurations(getConfigurationType())) {
-				if (
-						project.equals(BootLaunchConfigurationDelegate.getProject(c)) &&
-						target.getId().equals(getRunTargetId(c)) &&
-						appName.equals(getAppName(c))
-				) {
-					return c;
+			if (project!=null) {
+				for (ILaunchConfiguration c : getLaunchMan().getLaunchConfigurations(getLaunchType())) {
+					if (
+							project.equals(BootLaunchConfigurationDelegate.getProject(c)) &&
+							target.getId().equals(getRunTargetId(c)) &&
+							appName.equals(getAppName(c))
+							) {
+						return c;
+					}
 				}
 			}
 		} catch (CoreException e) {
@@ -343,8 +357,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		return null;
 	}
 
-
-	private static ILaunchConfigurationType getConfigurationType() {
+	public static ILaunchConfigurationType getLaunchType() {
 		return getLaunchMan().getLaunchConfigurationType(TYPE_ID);
 	}
 

@@ -58,6 +58,8 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
@@ -503,6 +505,7 @@ public class BootDashModelTest {
 	public TestRule listenerLeakDetector = new ListenerLeakDetector();
 
 	private UserInteractions ui;
+	private BootDashViewModelHarness harness;
 
 	@Before
 	public void setup() throws Exception {
@@ -516,7 +519,8 @@ public class BootDashModelTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.model = new LocalBootDashModel(context);
+		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
+		this.model = new LocalBootDashModel(harness.context, harness.model);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);

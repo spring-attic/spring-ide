@@ -61,7 +61,7 @@ public interface RunTarget extends IdAble, Nameable {
 	 * Factory method to create the model for the 'elements tabel' of this run
 	 * target.
 	 */
-	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context);
+	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent);
 
 	/**
 	 *

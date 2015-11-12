@@ -99,11 +99,11 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 					+ (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
 			DebugSupport debugSupport = getDebugSupport();
 			if (runingOrDebugging == RunState.DEBUGGING) {
-				if (debugSupport.isSupported()) {
-					op = debugSupport.createOperation(opName, ui);
+				if (debugSupport.isSupported(this)) {
+					op = debugSupport.createOperation(this, opName, ui);
 				} else {
 					String title = "Debugging is not supported for '"+this.getName()+"'";
-					String msg = debugSupport.getNotSupportedMessage();
+					String msg = debugSupport.getNotSupportedMessage(this);
 					if (msg==null) {
 						msg = title;
 					}
@@ -123,8 +123,12 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	public DebugSupport getDebugSupport() {
-		//In the future we may need to choose what strategy to instantiate here.
-		return new SshDebugSupport(this);
+		//In the future we may need to choose between multiple strategies here.
+		return getViewModel().getDebugSupport();
+	}
+
+	public BootDashViewModel getViewModel() {
+		return getParent().getViewModel();
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
@@ -153,8 +157,11 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	@Override
 	public RunState getRunState() {
 		RunState state = getCloudModel().getAppCache().getRunState(getName());
+
 		if (state == RunState.RUNNING) {
-			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
+			DebugSupport debugSupport = getDebugSupport();
+			if (debugSupport.isDebuggerAttached(this)) {
+//			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
 				state = RunState.DEBUGGING;
 			}
 		}
