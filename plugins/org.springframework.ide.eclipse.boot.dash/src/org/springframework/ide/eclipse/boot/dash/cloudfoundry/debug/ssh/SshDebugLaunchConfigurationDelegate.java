@@ -48,8 +48,8 @@ import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springframework.util.Assert;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.ssh.SshClientSupport;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.ssh.SshHost;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 

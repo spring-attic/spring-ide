@@ -12,10 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.ssh.SshHost;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
