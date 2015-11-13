@@ -520,7 +520,7 @@ public class BootDashModelTest {
 				DebugPlugin.getDefault().getLaunchManager()
 		);
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
-		this.model = new LocalBootDashModel(harness.context, harness.model);
+		this.model = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);
@@ -548,7 +548,7 @@ public class BootDashModelTest {
 			conf.delete();
 		}
 
-		this.model.dispose();
+		this.harness.dispose();
 	}
 
 	/**
