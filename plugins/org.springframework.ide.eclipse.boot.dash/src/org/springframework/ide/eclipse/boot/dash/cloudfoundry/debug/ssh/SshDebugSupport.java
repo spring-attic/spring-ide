@@ -111,8 +111,10 @@ public class SshDebugSupport extends DebugSupport {
 	private static String clearJavaOpts(String opts) {
 		if (opts!=null) {
 			opts = opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "");
+			return opts;
+		} else {
+			return "";
 		}
-		return "";
 	}
 
 
