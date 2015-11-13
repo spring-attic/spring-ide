@@ -294,7 +294,7 @@ public class DevtoolsUtil {
 
 	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret) {
 		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
-		if (javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
+		if (javaOpts!=null && javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
 //			if (runOrDebug == RunState.DEBUGGING) {
 //				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
 //			} else {
