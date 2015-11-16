@@ -150,6 +150,12 @@ public class BootDashModelTest {
 		waitModelElements(projectName);
 
 		ElementStateListener listener = mock(ElementStateListener.class);
+		ElementStateListener debugListener;
+		model.addElementStateListener(debugListener = new ElementStateListener() {
+			public void stateChanged(BootDashElement e) {
+				System.out.println(e.getName()+" state became: "+e.getRunState());
+			}
+		});
 		model.addElementStateListener(listener);
 		System.out.println("Element state listener ADDED");
 		BootDashElement element = getElement(projectName);
@@ -158,6 +164,7 @@ public class BootDashModelTest {
 
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
+		model.removeElementStateListener(debugListener);
 		System.out.println("Element state listener REMOVED");
 
 		listener = mock(ElementStateListener.class);
