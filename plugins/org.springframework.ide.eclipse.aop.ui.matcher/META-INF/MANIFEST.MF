@@ -48,5 +48,5 @@ Export-Package: org.springframework.ide.eclipse.aop.ui.matcher,
  org.springframework.ide.eclipse.aop.ui.matcher.actions,
  org.springframework.ide.eclipse.aop.ui.matcher.internal
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

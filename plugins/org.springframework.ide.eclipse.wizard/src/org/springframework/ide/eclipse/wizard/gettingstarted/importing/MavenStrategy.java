@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.maven.MavenCorePlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 
 /**
@@ -29,9 +30,8 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
  */
 public class MavenStrategy extends ImportStrategy {
 
-	public MavenStrategy() {
-		//Ensure this strategy can only be instantiated if m2e is installed.
-		//If this fails a default 'NullStrategy' instance will be created instead.
+	public MavenStrategy(BuildType buildType, String name, String notInstalledMessage) {
+		super(buildType, name, notInstalledMessage);
 		Assert.isNotNull(Platform.getBundle("org.eclipse.m2e.core"), "M2E is not installed");
 	}
 
@@ -85,7 +85,4 @@ public class MavenStrategy extends ImportStrategy {
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
 		return new MavenCodeSetImport(conf);
 	}
-
-
-
 }

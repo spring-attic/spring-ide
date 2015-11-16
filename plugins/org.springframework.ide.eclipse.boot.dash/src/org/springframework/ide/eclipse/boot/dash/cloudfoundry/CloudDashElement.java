@@ -11,29 +11,34 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -42,7 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> {
+public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -58,14 +63,23 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
-	protected CloudFoundryBootDashModel getCloudModel() {
+	public CloudFoundryBootDashModel getCloudModel() {
 		return (CloudFoundryBootDashModel) getParent();
 	}
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-		CloudApplicationOperation op = new CompositeApplicationOperation(
-				new ApplicationStopOperation(this, (CloudFoundryBootDashModel) getParent()));
+		// Note some stop operations are part of a composite operation that has
+		// a preferred runState (e.g. STARTING)
+		// For example, as part of a large restart operation, an app may be
+		// first stopped. However, in these cases
+		// the app run state in the model should not be updated.
+		// But when directly stopped through element API, ensure that the app
+		// run state IS indeed updated to show that
+		// it is stopped
+		boolean updateElementRunStateInModel = true;
+		CloudApplicationOperation op = new CompositeApplicationOperation(new ApplicationStopOperation(this.getName(),
+				(CloudFoundryBootDashModel) getParent(), updateElementRunStateInModel));
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
@@ -73,7 +87,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		Operation<?> op = null;
-		// Only do full upload on restart. Not on debug
+		// TODO: Only do full upload on restart. Not on debug
 		if (getProject() != null
 		// TODO: commenting out for now as restarting doesnt seem to restage.
 		// Need to re-stage for JAVA_OPTS in debugging to be set. right now that
@@ -83,24 +97,38 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		) {
 			String opName = "Starting application '" + getName() + "' in "
 					+ (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+			DebugSupport debugSupport = getDebugSupport();
 			if (runingOrDebugging == RunState.DEBUGGING) {
-				op = new CompositeApplicationOperation(opName, cloudModel, getName(),
-						Arrays.asList(new CloudApplicationOperation[] {
-								new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging,
-										ui),
-								new RemoteDevClientStartOperation(cloudModel, getName(), runingOrDebugging) }));
+				if (debugSupport.isSupported(this)) {
+					op = debugSupport.createOperation(this, opName, ui);
+				} else {
+					String title = "Debugging is not supported for '"+this.getName()+"'";
+					String msg = debugSupport.getNotSupportedMessage(this);
+					if (msg==null) {
+						msg = title;
+					}
+					ui.errorPopup(title, msg);
+				}
 			} else {
-				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, ui);
+				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, debugSupport, ui);
 			}
 		} else {
 			// Set the initial run state as Starting
-			CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
+			op = new ApplicationStartOperation(getName(),
 					(CloudFoundryBootDashModel) getParent(), RunState.STARTING);
-
-			op = new CompositeApplicationOperation(restartOp);
+//			op = new CompositeApplicationOperation(restartOp);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
+	}
+
+	public DebugSupport getDebugSupport() {
+		//In the future we may need to choose between multiple strategies here.
+		return getViewModel().getCfDebugSupport();
+	}
+
+	public BootDashViewModel getViewModel() {
+		return getParent().getViewModel();
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
@@ -129,8 +157,11 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	@Override
 	public RunState getRunState() {
 		RunState state = getCloudModel().getAppCache().getRunState(getName());
+
 		if (state == RunState.RUNNING) {
-			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
+			DebugSupport debugSupport = getDebugSupport();
+			if (debugSupport.isDebuggerAttached(this)) {
+//			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
 				state = RunState.DEBUGGING;
 			}
 		}
@@ -138,7 +169,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	@Override
-	public RunTarget getTarget() {
+	public CloudFoundryRunTarget getTarget() {
 		return cloudTarget;
 	}
 
@@ -191,6 +222,14 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	public int getDesiredInstances() {
 		return getCloudModel().getAppCache().getApp(getName()) != null
 				? getCloudModel().getAppCache().getApp(getName()).getInstances() : 0;
+	}
+
+	public UUID getAppGuid() {
+		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
+		if (app!=null) {
+			return app.getMeta().getGuid();
+		}
+		return null;
 	}
 
 	@Override
@@ -248,4 +287,17 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		}
 
 	}
+
+	public void log(String message) {
+		log(message, LogType.LOCALSTDOUT);
+	}
+
+	public void log(String message, LogType logType) {
+		try {
+			getCloudModel().getElementConsoleManager().writeToConsole(this, message, logType);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 }

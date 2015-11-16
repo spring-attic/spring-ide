@@ -28,6 +28,8 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -51,6 +53,16 @@ public class BootProjectTestHarness {
 
 		WizardConfigurer NULL = new WizardConfigurer(){
 			public void apply(NewSpringBootWizardModel wizard) {/*do nothing*/}
+		};
+	}
+
+	public static WizardConfigurer withImportStrategy(final String id) {
+		final ImportStrategy is = ImportStrategies.withId(id);
+		Assert.isNotNull(is);
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				wizard.setImportStrategy(is);
+			}
 		};
 	}
 
@@ -154,7 +166,7 @@ public class BootProjectTestHarness {
 				}
 			}
 		};
-		job.setRule(workspace.getRuleFactory().buildRule());
+		//job.setRule(workspace.getRuleFactory().buildRule());
 		job.schedule();
 
 		new ACondition() {

@@ -23,7 +23,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.configurator,
  org.springframework.ide.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

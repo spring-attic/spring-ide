@@ -79,8 +79,8 @@
 		<test.skip>${maven.test.skip}</test.skip>
 		<maven.test.error.ignore>false</maven.test.error.ignore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 		<encoding>UTF-8</encoding>
 		<test.vmargs>${test.osvmargs}</test.vmargs>
 		<test.osvmargs></test.osvmargs>
@@ -186,6 +186,10 @@
 		<module>plugins/org.springframework.ide.eclipse.roo.core</module>
 		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature</module>
+		
+		<!-- gradle -->
+		<module>plugins/org.springframework.ide.eclipse.gradle</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship</module>
 
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
@@ -424,6 +428,11 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
+				</repository>
+				<repository>
+		  			<id>buildship</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/1.0/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>

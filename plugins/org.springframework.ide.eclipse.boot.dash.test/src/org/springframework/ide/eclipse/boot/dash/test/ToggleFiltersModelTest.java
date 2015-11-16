@@ -18,9 +18,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import static org.mockito.Mockito.*;
 

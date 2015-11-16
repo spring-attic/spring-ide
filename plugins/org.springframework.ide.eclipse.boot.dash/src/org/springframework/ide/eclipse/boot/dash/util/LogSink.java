@@ -8,17 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
+package org.springframework.ide.eclipse.boot.dash.util;
 
 /**
- * General interface for filtering elements.
- * 
- * @author Alex Boyko
+ * An instance reprsents some place where one can send log messages.
  *
- * @param <T>
+ * @author Kris De Volder
  */
-public interface Filter<T> {
-	
-	boolean accept(T t);
-
+public interface LogSink {
+	void log(String msg);
 }

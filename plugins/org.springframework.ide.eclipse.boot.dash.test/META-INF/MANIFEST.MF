@@ -28,6 +28,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springsource.ide.eclipse.commons.receptor.client,
  org.springframework.ide.eclipse.boot.test,
  org.springframework.web
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jface.resource

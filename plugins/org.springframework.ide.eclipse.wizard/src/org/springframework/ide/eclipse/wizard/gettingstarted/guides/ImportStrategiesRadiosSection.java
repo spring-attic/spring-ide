@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.guides;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -17,7 +20,8 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -30,18 +34,18 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 /**
- * Group of radio buttons that allows selection a BuildType
+ * Group of radio buttons that allows selection a ImportStrategy
  */
-public class BuildTypeRadiosSection extends GroupSection {
+public class ImportStrategiesRadiosSection extends GroupSection {
 
-	private static class BuildTypeChoice extends WizardPageSection {
+	private static class Choice extends WizardPageSection {
 
-		private final BuildType type;
-		private final LiveVariable<BuildType> selection;
+		private final ImportStrategy strategy;
+		private final LiveVariable<ImportStrategy> selection;
 
-		public BuildTypeChoice(IPageWithSections owner, BuildType buildType, LiveVariable<BuildType> selection) {
+		public Choice(IPageWithSections owner, ImportStrategy buildType, LiveVariable<ImportStrategy> selection) {
 			super(owner);
-			this.type = buildType;
+			this.strategy = buildType;
 			this.selection = selection;
 		}
 
@@ -56,12 +60,12 @@ public class BuildTypeRadiosSection extends GroupSection {
 		@Override
 		public void createContents(Composite page) {
 			final Button button = new Button(page, SWT.RADIO);
-			button.setText(type.displayName());
+			button.setText(strategy.displayName());
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(button);
-			selection.addListener(new UIValueListener<BuildType>() {
+			selection.addListener(new UIValueListener<ImportStrategy>() {
 				@Override
-				protected void uiGotValue(LiveExpression<BuildType> exp, BuildType value) {
-					button.setSelection(value==type);
+				protected void uiGotValue(LiveExpression<ImportStrategy> exp, ImportStrategy value) {
+					button.setSelection(value==strategy);
 				}
 			});
 			button.addSelectionListener(new SelectionListener() {
@@ -69,14 +73,14 @@ public class BuildTypeRadiosSection extends GroupSection {
 				//@Override
 				public void widgetSelected(SelectionEvent e) {
 					if (button.getSelection()) {
-						selection.setValue(type);
+						selection.setValue(strategy);
 					}
 				}
 
 				//@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					if (button.getSelection()) {
-						selection.setValue(type);
+						selection.setValue(strategy);
 					}
 				}
 			});
@@ -84,25 +88,24 @@ public class BuildTypeRadiosSection extends GroupSection {
 
 	}
 
-	private final SelectionModel<BuildType> selection;
+	private final SelectionModel<ImportStrategy> selection;
 
 	@Override
 	protected GridLayout createLayout() {
 		return new GridLayout(3, true);
 	}
 
-	public BuildTypeRadiosSection(WizardPageWithSections owner, SelectionModel<BuildType> selection) {
+	public ImportStrategiesRadiosSection(WizardPageWithSections owner, SelectionModel<ImportStrategy> selection) {
 		super(owner, "Build Type", createSections(owner, selection));
 		this.selection = selection;
 	}
 
-	private static WizardPageSection[] createSections(WizardPageWithSections owner, SelectionModel<BuildType> selection) {
-		BuildType[] types = BuildType.values();
-		WizardPageSection[] section = new WizardPageSection[types.length];
-		for (int i = 0; i < section.length; i++) {
-			section[i] = new BuildTypeChoice(owner, types[i], selection.selection);
+	private static WizardPageSection[] createSections(WizardPageWithSections owner, SelectionModel<ImportStrategy> selection) {
+		List<WizardPageSection> section = new ArrayList<>();
+		for (ImportStrategy strat : ImportStrategies.all()) {
+			section.add(new Choice(owner, strat, selection.selection));
 		}
-		return section;
+		return section.toArray(new WizardPageSection[section.size()]);
 	}
 
 	@Override

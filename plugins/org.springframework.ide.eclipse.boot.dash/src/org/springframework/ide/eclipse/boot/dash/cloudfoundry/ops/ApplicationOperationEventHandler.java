@@ -34,6 +34,9 @@ public abstract class ApplicationOperationEventHandler {
 	abstract public void checkTerminate(CloudAppInstances appInstances) throws OperationCanceledException;
 
 	public void fireEvent(ApplicationOperationEvent event, boolean checkTerminate) throws OperationCanceledException {
+		if (event == null) {
+			return;
+		}
 		event.fire();
 		if (checkTerminate) {
 			checkTerminate(event.getAppInstances());

@@ -18,18 +18,27 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
- * Runs {@link CloudApplicationOperation} in series
+ * Runs a list of {@link CloudApplicationOperation} in series
  */
 public class CompositeApplicationOperation extends CloudApplicationOperation {
 
 	private List<CloudApplicationOperation> operations;
 
+	private RunState preferredInitialRunState;
+
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<CloudApplicationOperation> operations) {
+			List<CloudApplicationOperation> operations, RunState preferredInitialRunState) {
 		super(opName, model, appName);
 		this.operations = operations;
+		this.preferredInitialRunState = preferredInitialRunState;
+	}
+
+	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
+			List<CloudApplicationOperation> operations) {
+		this(opName, model, appName, operations, null);
 	}
 
 	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
@@ -51,6 +60,18 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		try {
+
+			// Can only update the run state if the element exists. It's
+			// possible the operation is performing
+			// steps where element doesn't yet exist (e.g an operation is
+			// creating it)
+			if (preferredInitialRunState != null && getDashElement() != null) {
+				boolean checkTermination = true;
+				this.eventHandler.fireEvent(
+						eventFactory.getUpdateRunStateEvent(getDashElement(), preferredInitialRunState),
+						checkTermination);
+			}
+
 			// Run ops in series
 			resetAndShowConsole();
 

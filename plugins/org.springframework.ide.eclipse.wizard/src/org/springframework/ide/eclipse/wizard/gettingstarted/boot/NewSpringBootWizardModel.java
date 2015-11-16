@@ -18,7 +18,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -69,6 +68,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectLoc
 import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectNameValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+
+import com.google.common.base.Optional;
 
 /**
  * A ZipUrlImportWizard is a simple wizard in which one can paste a url
@@ -183,10 +185,12 @@ public class NewSpringBootWizardModel {
 			buildTypeGroup.validator(new Validator() {
 				@Override
 				protected ValidationResult compute() {
-					BuildType bt = getBuildType();
-					if (!bt.getImportStrategy().isSupported()) {
+					ImportStrategy s = getImportStrategy();
+					if (s==null) {
+						return ValidationResult.error("No 'type' selected");
+					} else if (!s.isSupported()) {
 						//This means some required STS component like m2e or gradle tooling is not installed
-						return ValidationResult.error(bt.getNotInstalledMessage());
+						return ValidationResult.error(s.getNotInstalledMessage());
 					}
 					return ValidationResult.OK;
 				}
@@ -215,6 +219,8 @@ public class NewSpringBootWizardModel {
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
+
+	private DependencyFilterBox filterBox = new DependencyFilterBox();
 
 	/**
 	 * Retrieves the most popular dependencies based on the number of times they have
@@ -279,7 +285,11 @@ public class NewSpringBootWizardModel {
 			String projectNameValue = projectName.getValue();
 			CodeSet cs = CodeSet.fromZip(projectNameValue, zip, new Path("/"));
 
-			IRunnableWithProgress oper = getImportStrategy().createOperation(ImportUtils.importConfig(
+			ImportStrategy strat = getImportStrategy();
+			if (strat==null) {
+				strat = BuildType.GENERAL.getDefaultStrategy();
+			}
+			IRunnableWithProgress oper = strat.createOperation(ImportUtils.importConfig(
 					new Path(location.getValue()),
 					projectNameValue,
 					cs
@@ -301,32 +311,44 @@ public class NewSpringBootWizardModel {
 
 	/**
 	 * Get currently selected import strategy.
-	 * Never returns null (some default is returned in any case).
 	 */
 	public ImportStrategy getImportStrategy() {
-		return getBuildType().getImportStrategy();
+		TypeRadioInfo selected = getSelectedTypeRadio();
+		if (selected!=null) {
+			return selected.getImportStrategy();
+		}
+		return null;
+	}
+
+	/**
+	 * Convenience method so that test code can easily select an import strategy.
+	 * This will throw an exception if the given importstragey is not present
+	 * in this wizardmodel.
+	 */
+	public void setImportStrategy(ImportStrategy is) {
+		RadioGroup typeRadios = getRadioGroups().getGroup("type");
+		RadioInfo radio = typeRadios.getRadio(is.getId());
+		Assert.isLegal(radio!=null);
+		typeRadios.setValue(radio);
 	}
 
 	/**
 	 * Gets the currently selected BuildType.
-	 * Never returns null (some default is returned in any case).
 	 */
 	public BuildType getBuildType() {
+		ImportStrategy is = getImportStrategy();
+		if (is!=null) {
+			return is.getBuildType();
+		}
+		return null;
+	}
+
+	private TypeRadioInfo getSelectedTypeRadio() {
 		RadioGroup buildTypeRadios = getRadioGroups().getGroup("type");
 		if (buildTypeRadios!=null) {
-			RadioInfo selected = buildTypeRadios.getSelection().selection.getValue();
-			if (selected!=null) {
-				BuildType bt = KNOWN_TYPES.get(selected.getValue());
-				if (bt!=null) {
-					return bt;
-				} else {
-					//Uknown build type, import it as a general project which is better than nothing
-					return BuildType.GENERAL;
-				}
-			}
+			return (TypeRadioInfo) buildTypeRadios.getSelection().selection.getValue();
 		}
-		//Old initialzr app doesn't have button to specify build type... it is always maven
-		return BuildType.MAVEN;
+		return null;
 	}
 
 	private void addToWorkingSets(IProject project, IProgressMonitor monitor) {
@@ -362,10 +384,13 @@ public class NewSpringBootWizardModel {
 			RadioGroup group = radioGroups.ensureGroup(groupName);
 			group.label("Type:");
 			for (Type type : serviceSpec.getTypeOptions(groupName)) {
-				if (KNOWN_TYPES.containsKey(type.getId())) {
-					TypeRadioInfo radio = new TypeRadioInfo(groupName, type.getId(), type.isDefault(), type.getAction());
-					radio.setLabel(type.getName());
-					group.add(radio);
+				BuildType bt = KNOWN_TYPES.get(type.getId());
+				if (bt!=null) {
+					for (ImportStrategy is : bt.getImportStrategies()) {
+						TypeRadioInfo radio = new TypeRadioInfo(groupName, type, is);
+						radio.setLabel(is.displayName());
+						group.add(radio);
+					}
 				}
 			}
 			//When a type is selected the 'baseUrl' should be update according to its action.
@@ -517,6 +542,14 @@ public class NewSpringBootWizardModel {
 		return null;
 	}
 
+	public LiveVariable<String> getDependencyFilterBoxText() {
+		return filterBox.getText();
+	}
+
+	public LiveExpression<Filter<CheckBoxModel<Dependency>>> getDependencyFilter() {
+		return filterBox.getFilter();
+	}
+
 	/**
 	 * Convenience method for easier scripting of the wizard model (used in testing). Not used
 	 * by the UI itself. If the dependencyId isn't found in the wizard model then an IllegalArgumentException
@@ -534,5 +567,6 @@ public class NewSpringBootWizardModel {
 		}
 		throw new IllegalArgumentException("No such dependency: "+dependencyId);
 	}
+
 
 }

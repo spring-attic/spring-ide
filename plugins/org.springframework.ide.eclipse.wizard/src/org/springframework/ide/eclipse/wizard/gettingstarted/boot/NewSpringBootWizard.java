@@ -31,6 +31,8 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.Initializ
 import org.springframework.ide.eclipse.wizard.gettingstarted.guides.DescriptionSection;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
@@ -39,6 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWizard {
 
@@ -143,10 +146,22 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 	public class DependencyPage extends WizardPageWithSections {
 
-		private static final int NUM_DEP_COLUMNS = 5;
+		private static final int NUM_DEP_COLUMNS = 4;
 
 		protected DependencyPage() {
 			super("page2", "New Spring Starter Project", null);
+		}
+
+		private void applyFilter(Filter<CheckBoxModel<Dependency>> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
+			boolean visChanged = checkboxes.applyFilter(filter);
+
+			boolean hasVisible = checkboxes.hasVisible();
+			expandable.setVisible(hasVisible);
+			if (hasVisible && visChanged) {
+				//Reveal if visibility changed
+				expandable.getExpansionState().setValue(true);
+				this.reflow();
+			}
 		}
 
 		@Override
@@ -162,7 +177,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
-			List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(2*NUM_DEP_COLUMNS);
+			List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(3*NUM_DEP_COLUMNS);
 			if (!mostpopular.isEmpty()) {
 				sections.add(new ExpandableSection(this, "Frequently Used",
 						new CheckBoxesSection<Dependency>(this, mostpopular)
@@ -170,16 +185,34 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				));
 			}
 
+			sections.add(new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
+				@Override
+				protected String getSearchHint() {
+					return "Type to search dependencies";
+				}
+			});
+
 			for (String cat : model.dependencies.getCategories()) {
 				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-				ExpandableSection expandable;
+				final ExpandableSection expandable;
+				final CheckBoxesSection<Dependency> checkboxes;
 				sections.add(
 					expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-							new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
+							checkboxes = new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
 								.columns(NUM_DEP_COLUMNS)
 					)
 				);
 				expandable.getExpansionState().setValue(false);
+				model.getDependencyFilter().addListener(new UIValueListener<Filter<CheckBoxModel<Dependency>>>() {
+					@Override
+					protected void uiGotValue(
+							LiveExpression<Filter<CheckBoxModel<Dependency>>> exp,
+							Filter<CheckBoxModel<Dependency>> value
+					) {
+						applyFilter(value, expandable, checkboxes);
+					}
+
+				});
 			}
 
 			return sections;

@@ -17,12 +17,17 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 /**
  * @author Kris De Volder
@@ -39,6 +44,7 @@ public class BootDashViewModel implements Disposable {
 	private ProcessTracker devtoolsProcessTracker;
 	private List<RunTargetType> orderedRunTargetTypes;
 	private Comparator<BootDashModel> modelComparator;
+	private DebugStrategyManager cfDebugStrategies;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -46,7 +52,7 @@ public class BootDashViewModel implements Disposable {
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
 		runTargets = new LiveSet<RunTarget>(new LinkedHashSet<RunTarget>());
-		models = new BootDashModelManager(context, runTargets);
+		models = new BootDashModelManager(context, this, runTargets);
 
 		manager = new RunTargetPropertiesManager(context, runTargetTypes);
 		List<RunTarget> existingtargets = manager.getStoredTargets();
@@ -61,6 +67,11 @@ public class BootDashViewModel implements Disposable {
 		toggleFiltersModel = new ToggleFiltersModel();
 		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
 		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
+		cfDebugStrategies = createCfDebugStrategies();
+	}
+
+	protected DebugStrategyManager createCfDebugStrategies() {
+		return new DebugStrategyManager(SshDebugSupport.INSTANCE, this);
 	}
 
 	public LiveSet<RunTarget> getRunTargets() {
@@ -71,6 +82,7 @@ public class BootDashViewModel implements Disposable {
 	public void dispose() {
 		models.dispose();
 		devtoolsProcessTracker.dispose();
+		cfDebugStrategies.dispose();
 	}
 
 	public void addElementStateListener(ElementStateListener l) {
@@ -124,6 +136,16 @@ public class BootDashViewModel implements Disposable {
 		return filter;
 	}
 
+	public RunTarget getRunTargetById(String targetId) {
+		for (BootDashModel m : getSectionModels().getValue()) {
+			RunTarget target = m.getRunTarget();
+			if (target.getId().equals(targetId)) {
+				return target;
+			}
+		};
+		return null;
+	}
+
 	public BootDashModel getSectionByTargetId(String targetId) {
 		for (BootDashModel m : getSectionModels().getValue()) {
 			if (m.getRunTarget().getId().equals(targetId)) {
@@ -136,4 +158,14 @@ public class BootDashViewModel implements Disposable {
 	public Comparator<BootDashModel> getModelComparator() {
 		return this.modelComparator;
 	}
+
+	public DebugSupport getCfDebugSupport() {
+		//TODO: DebugSupport is specific to CF, so why is it provided here in the viewModel that encompasses all
+		//types of elements?
+		//Right now there seems to be no better place for it, but maybe it really belong in the
+		// CF RunTargetType.
+		return cfDebugStrategies.getStrategy();
+	}
+
+
 }

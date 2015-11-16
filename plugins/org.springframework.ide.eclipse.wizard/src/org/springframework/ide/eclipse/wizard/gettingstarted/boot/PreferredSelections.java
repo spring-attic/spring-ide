@@ -40,10 +40,8 @@ public class PreferredSelections {
 	}
 
 	public void save(NewSpringBootWizardModel wizard) {
-		System.out.println(">>> Saving...");
 		for (FieldModel<String> input : wizard.stringInputs) {
 			if (isInteresting(input)) {
-				System.out.println(input.getName()+" = "+input.getValue());
 				put(input.getName(), input.getValue());
 			}
 		}
@@ -56,22 +54,18 @@ public class PreferredSelections {
 	}
 
 	protected boolean isInteresting(RadioGroup input) {
-//		System.out.println("Radio: "+input);
 		return true;
 	}
 
 	protected boolean isInteresting(FieldModel<String> input) {
-//		String name = input.getName();
 		return true;
 	}
 
 
 	public void restore(NewSpringBootWizardModel wizard) {
-		System.out.println(">>> Restoring...");
 		for (FieldModel<String> input : wizard.stringInputs) {
 			if (isInteresting(input)) {
 				String v = get(input.getName(), input.getValue());
-				System.out.println(input.getName()+" = "+v);
 				input.setValue(v);
 			}
 		}
@@ -79,7 +73,7 @@ public class PreferredSelections {
 			if (isInteresting(input)) {
 				String choiceId = get(input.getName(), null);
 				RadioInfo info = input.getRadio(choiceId);
-				if (choiceId!=null) {
+				if (info!=null) {
 					input.getVariable().setValue(info);
 				}
 			}
@@ -88,7 +82,6 @@ public class PreferredSelections {
 
 	private void put(String id, String value) {
 		String key = key(id);
-		System.out.println(key+" = "+ value);
 		store.setValue(key, value);
 	}
 
@@ -96,10 +89,8 @@ public class PreferredSelections {
 		String key = key(name);
 		String v = store.getString(key);
 		if (StringUtils.hasText(v)) {
-			System.out.println(key+" = "+ v);
 			return v;
 		}
-		System.out.println(key+" = DEFAULT");
 		return dflt;
 	}
 

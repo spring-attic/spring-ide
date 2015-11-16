@@ -23,6 +23,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.ReferenceApp;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
@@ -33,27 +34,27 @@ import static org.springframework.ide.eclipse.wizard.gettingstarted.importing.Im
 /**
  * A BuildSample test checks that a particular sample project builds properly
  * when it gets imported into STS.
- * 
+ *
  * This test class is intended to be instantiated with data about a particular
  * sample project. It provides a static suite method that fetches the samples
  * and creates one test for each sample.
- * 
+ *
  * @author Kris De Volder
  */
 public class BuildReferenceAppTest extends TestCase {
 
 	private static final int SECOND = 1000;
 	private static final int MINUTE = 60*SECOND;
-	
+
 	////// Data defining the sample under test ////
 	private ReferenceApp item;
-	private BuildType buildtype;
+	private ImportStrategy importStrategy;
 	///////////////////////////////////////////////
 
-	public BuildReferenceAppTest(ReferenceApp item, BuildType buildtype) {
-		super(item.getName()+"-"+buildtype.name());
+	public BuildReferenceAppTest(ReferenceApp item, ImportStrategy importStrategy) {
+		super(item.getName()+"-"+importStrategy.displayName());
 		this.item = item;
-		this.buildtype = buildtype;
+		this.importStrategy = importStrategy;
 	}
 
 	@Override
@@ -62,12 +63,12 @@ public class BuildReferenceAppTest extends TestCase {
 		try {
 			System.out.println("=== reference app build test ===");
 			System.out.println("name   : "+item.getName());
-			System.out.println("type    : "+buildtype);
+			System.out.println("type    : "+importStrategy);
 			System.out.println();
-			
+
 			String projectName = item.getName();
 			CodeSet codeset = item.getCodeSet();
-			IRunnableWithProgress importOp = buildtype.getImportStrategy().createOperation(importConfig(
+			IRunnableWithProgress importOp = importStrategy.createOperation(importConfig(
 					/*location*/
 					Platform.getLocation().append(projectName),
 					/*name*/
@@ -75,9 +76,9 @@ public class BuildReferenceAppTest extends TestCase {
 					/*codeset*/
 					codeset
 			));
-			
+
 			importOp.run(new NullProgressMonitor());
-	
+
 			//TODO: we are not checking if there are extra projects beyond the expected one.
 			IProject project = StsTestUtil.getProject(projectName);
 			assertNoErrors(project);
@@ -86,7 +87,7 @@ public class BuildReferenceAppTest extends TestCase {
 			throw ExceptionUtil.getDeepestCause(e);
 		}
 	}
-	
+
 	public static Test suite() throws Exception {
 		TestSuite suite = new TestSuite(BuildReferenceAppTest.class.getName());
 		ReferenceApp[] items = ReferenceAppsTests.getReferenceApps();
@@ -94,10 +95,12 @@ public class BuildReferenceAppTest extends TestCase {
 		for (ReferenceApp item : items) {
 			List<BuildType> buildTypes = item.getBuildTypes();
 			for (BuildType bt : buildTypes) {
-				suite.addTest(new BuildReferenceAppTest(item, bt));
+				for (ImportStrategy s : bt.getImportStrategies()) {
+					suite.addTest(new BuildReferenceAppTest(item, s));
+				}
 			}
 		}
-		
+
 		return suite;
 	}
 

@@ -269,5 +269,4 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 		}
 	}
 
-
 }

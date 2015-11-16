@@ -29,11 +29,11 @@ public class AnotationProcessingPreferencesPage extends FieldEditorPreferencePag
 	@Override
 	protected void createFieldEditors() {
 		BooleanFieldEditor fEnableM2EAptSupport = new BooleanFieldEditor(AUTO_CONFIGURE_APT_M2E_PREF, "Auto configure JDT APT for maven projects", getFieldEditorParent());
-		setTooltip(fEnableM2EAptSupport, 
+		setTooltip(fEnableM2EAptSupport,
 				"Automatically enable and configure JDT APT for m2e projects that have spring-boot-configuration-processor on their classpath");
 		addField(fEnableM2EAptSupport);
-		BooleanFieldEditor fEnableGradleAptSupport = new BooleanFieldEditor(AUTO_CONFIGURE_APT_GRADLE_PREF, "Auto configure JDT APT for gradle projects", getFieldEditorParent());
-		setTooltip(fEnableGradleAptSupport, 
+		BooleanFieldEditor fEnableGradleAptSupport = new BooleanFieldEditor(AUTO_CONFIGURE_APT_GRADLE_PREF, "Auto configure JDT APT for gradle projects (only works with STS tooling, not Buildship)", getFieldEditorParent());
+		setTooltip(fEnableGradleAptSupport,
 				"Automatically enable and configure JDT APT for Gradle projects that have spring-boot-configuration-processor on their classpath");
 		addField(fEnableGradleAptSupport);
 	}

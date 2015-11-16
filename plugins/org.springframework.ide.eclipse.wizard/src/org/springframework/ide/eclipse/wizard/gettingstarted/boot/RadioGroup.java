@@ -19,7 +19,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 public class RadioGroup extends FieldModel<RadioInfo> {
 
 	private List<RadioInfo> radios = new ArrayList<RadioInfo>();
-	private RadioInfo defaultRadio;
 
 	public RadioGroup(String name) {
 		super(RadioInfo.class, name, null);
@@ -28,17 +27,14 @@ public class RadioGroup extends FieldModel<RadioInfo> {
 	public void add(RadioInfo radioInfo) {
 		this.radios.add(radioInfo);
 		if (radioInfo.isCheckedInitially()) {
-			defaultRadio = radioInfo;
+			setDefaultValue(radioInfo);
 			getVariable().setValue(radioInfo);
 		}
 	}
 
+
 	public RadioInfo[] getRadios() {
 		return radios.toArray(new RadioInfo[radios.size()]);
-	}
-
-	public RadioInfo getDefault() {
-		return defaultRadio;
 	}
 
 	@Override

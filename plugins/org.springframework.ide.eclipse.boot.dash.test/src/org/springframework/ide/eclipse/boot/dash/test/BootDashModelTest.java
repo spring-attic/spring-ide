@@ -21,9 +21,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.core.BootPropertyTester.supportsLifeCycleManagement;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,9 +46,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaCore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,12 +55,10 @@ import org.junit.rules.TestRule;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts;
-import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -67,11 +66,6 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
-
-import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.*;
 
 /**
  * @author Kris De Volder
@@ -156,6 +150,12 @@ public class BootDashModelTest {
 		waitModelElements(projectName);
 
 		ElementStateListener listener = mock(ElementStateListener.class);
+		ElementStateListener debugListener;
+		model.addElementStateListener(debugListener = new ElementStateListener() {
+			public void stateChanged(BootDashElement e) {
+				System.out.println(e.getName()+" state became: "+e.getRunState());
+			}
+		});
 		model.addElementStateListener(listener);
 		System.out.println("Element state listener ADDED");
 		BootDashElement element = getElement(projectName);
@@ -164,6 +164,7 @@ public class BootDashModelTest {
 
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
+		model.removeElementStateListener(debugListener);
 		System.out.println("Element state listener REMOVED");
 
 		listener = mock(ElementStateListener.class);
@@ -400,7 +401,7 @@ public class BootDashModelTest {
 			rm = assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
 			assertFalse(rm.isUserDefined());
 
-			rm = assertRequestMappingWithPath(mappings, "/mappings"); //Since we are using this, it should be there.
+			rm = assertRequestMappingWithPath(mappings, "/mappings || /mappings.json"); //Since we are using this, it should be there.
 			assertNotNull(rm.getMethod());
 			assertNotNull(rm.getType());
 			assertFalse(rm.isUserDefined());
@@ -503,6 +504,7 @@ public class BootDashModelTest {
 	public TestRule listenerLeakDetector = new ListenerLeakDetector();
 
 	private UserInteractions ui;
+	private BootDashViewModelHarness harness;
 
 	@Before
 	public void setup() throws Exception {
@@ -516,7 +518,8 @@ public class BootDashModelTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.model = new LocalBootDashModel(context);
+		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
+		this.model = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		StsTestUtil.setAutoBuilding(false);
 		this.ui = mock(UserInteractions.class);
@@ -544,7 +547,7 @@ public class BootDashModelTest {
 			conf.delete();
 		}
 
-		this.model.dispose();
+		this.harness.dispose();
 	}
 
 	/**

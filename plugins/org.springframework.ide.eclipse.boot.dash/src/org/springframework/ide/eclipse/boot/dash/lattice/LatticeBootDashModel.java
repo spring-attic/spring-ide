@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
@@ -50,8 +51,8 @@ public class LatticeBootDashModel extends BootDashModel {
 	private Job refreshJob;
 	private IPropertyStore store;
 
-	public LatticeBootDashModel(LatticeRunTarget target, BootDashModelContext context) {
-		super(target);
+	public LatticeBootDashModel(LatticeRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
+		super(target, parent);
 		this.store = PropertyStoreFactory.createForScope(target.getType(), context.getRunTargetProperties());
 		this.ltcTarget = target;
 		this.context = context;

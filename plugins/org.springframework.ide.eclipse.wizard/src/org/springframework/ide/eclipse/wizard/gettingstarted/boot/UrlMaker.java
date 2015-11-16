@@ -84,7 +84,7 @@ public class UrlMaker extends LiveExpression<String> {
 		for (FieldModel<RadioInfo> f : radioInputs) {
 			RadioInfo radio = f.getValue();
 			if (radio!=null) {
-				String paramValue = radio.getValue();
+				String paramValue = radio.getUrlParamValue();
 				if (paramValue!=null) {
 					builder.addParameter(f.getName(), paramValue);
 				}

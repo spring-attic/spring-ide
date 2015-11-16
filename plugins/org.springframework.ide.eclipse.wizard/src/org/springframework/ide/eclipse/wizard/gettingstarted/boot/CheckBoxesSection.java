@@ -17,6 +17,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +30,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
  * A section that shows a series of checkboxes in rows and columns.
@@ -104,6 +106,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 
 		private Button cb;
 		private CheckBoxModel<T> model;
+		private LiveVariable<Boolean> isVisible = new LiveVariable<Boolean>(true);
 
 		public CheckBox(IPageWithSections owner, CheckBoxModel<T> model) {
 			super(owner);
@@ -157,6 +160,15 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 						}
 					});
 				}
+				isVisible.addListener(new ValueListener<Boolean>() {
+					public void gotValue(LiveExpression<Boolean> exp, Boolean reveal) {
+						if (reveal!=null && cb !=null && !cb.isDisposed()) {
+							cb.setVisible(reveal);
+							GridData data = (GridData) cb.getLayoutData();
+							data.exclude = !reveal;
+						}
+					}
+				});
 			}
 		}
 
@@ -166,6 +178,26 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				cb.dispose();
 				cb = null;
 			}
+		}
+
+		/**
+		 * Apply filter and return whether this widget's visibility has changed as a result.
+		 * @return Whether visibility of this widget changed.
+		 */
+		public boolean applyFilter(Filter<CheckBoxModel<T>> filter) {
+			boolean wasVisible = isVisible.getValue();
+			isVisible.setValue(filter.accept(model));
+			boolean changed = wasVisible != isVisible.getValue();
+			return changed;
+		}
+
+		public boolean isVisible() {
+			return isVisible.getValue();
+		}
+
+		@Override
+		public String toString() {
+			return "CheckBox("+model.getLabel()+")";
 		}
 	}
 
@@ -199,7 +231,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 
 		for (int i = 0; i < model.size(); i++) {
-			subsections[i] = new CheckBox(owner, model.get(i));
+			subsections[i] = new CheckBox<T>(owner, model.get(i));
 			subsections[i].createContents(composite);
 		}
 	}
@@ -212,6 +244,39 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		} else {
 			return new Composite(page, SWT.NONE);
 		}
+	}
+
+	public boolean applyFilter(Filter<CheckBoxModel<T>> filter) {
+		if (subsections!=null) {
+			boolean visibilityChanged = false;
+			for (WizardPageSection subsection : subsections) {
+				if (subsection instanceof CheckBox) {
+					@SuppressWarnings("unchecked")
+					CheckBox<T> cb = (CheckBox<T>) subsection;
+					visibilityChanged |= cb.applyFilter(filter);
+				}
+			}
+			if (visibilityChanged) {
+				composite.layout(true);
+			}
+			return visibilityChanged;
+		}
+		return false;
+	}
+
+	public boolean hasVisible() {
+		if (subsections!=null) {
+			for (WizardPageSection s : subsections) {
+				if (s instanceof CheckBox) {
+					@SuppressWarnings("unchecked")
+					CheckBox<T> cb = ((CheckBox<T>) s);
+					if (cb.isVisible()) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 }

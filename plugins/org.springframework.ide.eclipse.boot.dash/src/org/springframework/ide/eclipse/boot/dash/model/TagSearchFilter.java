@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.regex.Pattern;
 
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+
 /**
  * The filter for searching for tags.
  *

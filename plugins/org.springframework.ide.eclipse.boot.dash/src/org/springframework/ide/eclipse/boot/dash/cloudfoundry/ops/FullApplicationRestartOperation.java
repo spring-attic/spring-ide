@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDe
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -37,13 +38,15 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  */
 public class FullApplicationRestartOperation extends CloudApplicationOperation {
 
-	private final RunState runOrDebug;
 	final private UserInteractions ui;
+	private DebugSupport debugSupport;
+	private boolean isDebugging;
 
 	public FullApplicationRestartOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			RunState runOrDebug, UserInteractions ui) {
+			RunState runOrDebug, DebugSupport debugSupport, UserInteractions ui) {
 		super(opName, model, appName);
-		this.runOrDebug = runOrDebug;
+		this.debugSupport = debugSupport;
+		this.isDebugging = runOrDebug==RunState.DEBUGGING;
 		this.ui = ui;
 	}
 
@@ -75,8 +78,14 @@ public class FullApplicationRestartOperation extends CloudApplicationOperation {
 			properties = CloudApplicationDeploymentProperties.getFor(application, project);
 		}
 
-		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project),
-				runOrDebug);
+		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project));
+		if (debugSupport!=null) {
+			if (isDebugging) {
+				debugSupport.setupEnvVars(properties.getEnvironmentVariables());
+			} else {
+				debugSupport.clearEnvVars(properties.getEnvironmentVariables());
+			}
+		}
 
 		CloudApplicationOperation op = new DeploymentOperationFactory(model, project, ui)
 				.getRestartAndDeploy(properties);

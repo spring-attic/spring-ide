@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -20,7 +18,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,9 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
@@ -43,11 +39,15 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+
+import junit.framework.TestCase;
 
 /**
  * Tests whether NewSpringBootWizardModel adequately parses initializer form data.
@@ -89,7 +89,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioGroup packagingTypes = model.getRadioGroups().getGroup("packaging");
 		assertNotNull(packagingTypes);
 		assertGroupValues(packagingTypes, "jar", "war");
-		assertEquals("jar", packagingTypes.getDefault().getValue());
+		assertEquals("jar", packagingTypes.getDefaultValue().getValue());
 	}
 
 	public void testJavaVersionRadios() throws Exception {
@@ -97,12 +97,10 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		RadioGroup group = model.getRadioGroups().getGroup("javaVersion");
 		assertNotNull(group);
 		assertGroupValues(group, "1.6", "1.7", "1.8");
-		assertEquals("1.8", group.getDefault().getValue());
+		assertEquals("1.8", group.getDefaultValue().getValue());
 	}
 
 	public void testBuildTypeRadios() throws Exception {
-		String mavenId = "maven-project";
-		String gradleId = "gradle-project";
 		String jsonFile = INITIALIZR_JSON;
 		NewSpringBootWizardModel model = parseFrom(jsonFile);
 		String starterZipUrl = resourceUrl(jsonFile).toURI().resolve("/starter.zip").toString();
@@ -110,23 +108,24 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, mavenId, gradleId);
-		assertEquals(mavenId, group.getDefault().getValue());
+		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship");
+		assertEquals("MAVEN", group.getDefaultValue().getValue());
 
-		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		group.getSelection().selection.setValue(group.getRadio("MAVEN"));
 		assertEquals(BuildType.MAVEN, model.getBuildType());
 		assertEquals(starterZipUrl, model.baseUrl.getValue());
 
-		group.getSelection().selection.setValue(group.getRadio(gradleId));
-		assertEquals(BuildType.GRADLE, model.getBuildType());
-		assertEquals(starterZipUrl, model.baseUrl.getValue());
+		for (ImportStrategy gradleStrategy : BuildType.GRADLE.getImportStrategies()) {
+			group.getSelection().selection.setValue(group.getRadio(gradleStrategy.getId()));
+			assertEquals(BuildType.GRADLE, model.getBuildType());
+			assertEquals(gradleStrategy, model.getImportStrategy());
+			assertEquals(starterZipUrl, model.baseUrl.getValue());
+		}
 	}
 
 	public void testBuildTypeRadiosVariant() throws Exception {
 		//Hypothetical variant where the json "types" lists different actions for maven and gradle zip
 
-		String mavenId = "maven-project";
-		String gradleId = "gradle-project";
 		String jsonFile = "initializr-variant.json";
 
 		String mavenZipUrl = resourceUrl(jsonFile).toURI().resolve("/maven.zip").toString();
@@ -136,15 +135,18 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, gradleId, mavenId);
-		assertEquals(mavenId, group.getDefault().getValue());
+		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship");
+		assertEquals("MAVEN", group.getDefaultValue().getValue());
 		assertEquals(mavenZipUrl, model.baseUrl.getValue());
 
-		group.getSelection().selection.setValue(group.getRadio(gradleId));
-		assertEquals(BuildType.GRADLE, model.getBuildType());
-		assertEquals(gradleZipUrl, model.baseUrl.getValue());
+		for (ImportStrategy gradleStrat : BuildType.GRADLE.getImportStrategies()) {
+			group.getSelection().selection.setValue(group.getRadio(gradleStrat.getId()));
+			assertEquals(BuildType.GRADLE, model.getBuildType());
+			assertEquals(gradleStrat, model.getImportStrategy());
+			assertEquals(gradleZipUrl, model.baseUrl.getValue());
+		}
 
-		group.getSelection().selection.setValue(group.getRadio(mavenId));
+		group.getSelection().selection.setValue(group.getRadio("MAVEN"));
 		assertEquals(BuildType.MAVEN, model.getBuildType());
 		assertEquals(mavenZipUrl, model.baseUrl.getValue());
 	}
@@ -300,7 +302,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 
-	public void testtPopularCheckboxSharesSelectionState() throws Exception {
+	public void testPopularCheckboxSharesSelectionState() throws Exception {
 		IPreferenceStore store = new MockPrefsStore();
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
 		assertTrue(model.getMostPopular(10).isEmpty());
@@ -326,6 +328,87 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		popularBox.getSelection().setValue(false);
 		assertFalse(normalBox.getSelection().getValue());
 		assertFalse(popularBox.getSelection().getValue());
+	}
+
+	public void testDependencySearchBox() throws Exception {
+		// The trickies bit of implementing the search box is, unfortunately, making the
+		// SWT gui widgetry apply the filter and hide / show corresponding ui elements.
+		// This unfortunately not tested here. This test only verifies the filter's
+		// matching logic.
+
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+
+		LiveVariable<String> searchBox = model.getDependencyFilterBoxText();
+		LiveExpression<Filter<CheckBoxModel<Dependency>>> filter = model.getDependencyFilter();
+
+		assertEquals("", searchBox.getValue());
+		assertEquals(Filters.acceptAll(),filter.getValue());
+
+		assertFilterAccepts(model, true, "web", "web", "Web", "Full stack yada yada");
+		assertFilterAccepts(model, true, "WeB", "web", "Web", "Full stack yada yada");
+		assertFilterAccepts(model, false, "ZZZZZZZZZZ", "web", "Web", "Full stack yada yada");
+
+		assertFilterAccepts(model, true, "foo", "something", "label FoO label", "desc");
+		assertFilterAccepts(model, true, "foo", "something", "label", "desc FOO desc");
+		assertFilterAccepts(model, false, "foo", "foo", "label", "desc");
+
+	}
+
+	public void testRestoreFromOldBuildtypePreference() throws Exception {
+		//We here test a weak requirement that the wizard model 'handles' it okay when
+		// the preference saved in the workspace is from before the buildship refactoring.
+		//The requirements are:
+		// - it doesn't crash
+		// - it just chooses the maven build type / strategy by default. We do not
+		//   attempt to map the old type-ids to the new ones.
+		MockPrefsStore prefs = new MockPrefsStore();
+		prefs.putValue("org.springframework.ide.eclipse.wizard.gettingstarted.boot.PreferredSelections.type", "gradle-project");
+
+		NewSpringBootWizardModel wizard = parseFrom(INITIALIZR_JSON, prefs);
+		assertEquals(BuildType.MAVEN, wizard.getBuildType());
+		assertEquals(BuildType.MAVEN.getDefaultStrategy(), wizard.getImportStrategy());
+	}
+
+	private CheckBoxModel<Dependency> getCheckboxById(NewSpringBootWizardModel model, String id) {
+		CheckBoxModel<Dependency> found = null;
+		for (String cat : model.dependencies.getCategories()) {
+			for (CheckBoxModel<Dependency> cb : model.dependencies.getContents(cat).getCheckBoxModels()) {
+				if (cb.getValue().getId().equals(id)) {
+					Assert.assertNull(found);
+					found = cb;
+				}
+			}
+		}
+		return found;
+	}
+
+	private void assertFilterAccepts(NewSpringBootWizardModel model, boolean expect, String pattern,
+			String id, String label, String desc) {
+		LiveVariable<String> searchBox = model.getDependencyFilterBoxText();
+		searchBox.setValue(pattern);
+		Filter<CheckBoxModel<Dependency>> filter = model.getDependencyFilter().getValue();
+
+		LiveVariable<Boolean> selection = new LiveVariable<Boolean>(false);
+		LiveVariable<Boolean> enablement = new LiveVariable<Boolean>(true);
+
+		Dependency dep = new Dependency();
+		dep.setId(id);
+		dep.setName(null);
+		dep.setDescription(desc);
+		CheckBoxModel<Dependency> cb = new CheckBoxModel<Dependency>(label, dep, selection, enablement);
+
+		assertEquals(expect, filter.accept(cb));
+
+		// No matter what, filter should allways accept checbox that has already been selected:
+		selection.setValue(true);
+		assertEquals(true, filter.accept(cb));
+
+		// Check that enablement is ignored by filter (i.e. setting enablement false does not change
+		// whether filter accepts the cb
+		enablement.setValue(true);
+		assertEquals(true, filter.accept(cb));
+		selection.setValue(false);
+		assertEquals(expect, filter.accept(cb));
 	}
 
 	private CheckBoxModel<Dependency> getCheckboxById(List<CheckBoxModel<Dependency>> list, String id) {
@@ -472,10 +555,36 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 		RadioGroup packaging = model.getRadioGroups().getGroup("packaging");
 		LiveVariable<RadioInfo> selection = packaging.getSelection().selection;
+
 		assertEquals("jar", selection.getValue().getValue());
 		String urlParam = getUrlParam(model.downloadUrl.getValue(), "packaging");
 		assertEquals("jar", urlParam);
+
 		selection.setValue(packaging.getRadio("war"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "packaging");
+		assertEquals("war", urlParam);
+	}
+
+	/**
+	 * Test that radio params for 'type' properly use the typenames from start.spring.io spec
+	 * and not the ids used internally to distinguish between grade+buildship versus gradle+sts
+	 */
+	public void testTypeRadioQueryParams() throws Exception {
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		RadioGroup type = model.getRadioGroups().getGroup("type");
+		LiveVariable<RadioInfo> selection = type.getSelection().selection;
+
+		assertEquals("MAVEN", selection.getValue().getValue());
+		String urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("maven-project", urlParam);
+
+		selection.setValue(type.getRadio("GRADLE-STS"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("gradle-project", urlParam);
+
+		selection.setValue(type.getRadio("GRADLE-Buildship"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("gradle-project", urlParam);
 	}
 
 	public static Map<String, List<String>> getQueryParams(String url) throws Exception {

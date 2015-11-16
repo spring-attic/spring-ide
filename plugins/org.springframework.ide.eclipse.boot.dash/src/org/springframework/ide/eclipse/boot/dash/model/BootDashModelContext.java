@@ -19,6 +19,16 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 
 public interface BootDashModelContext {
 
+	//TODO: many places where this being passed around it is accompanited by a BootDashViewModel.
+	// These two parameters passed together represent the real 'BootDashModelContext'.
+	//So the proper thing to do is:
+	//
+	//  - rename this interface to BootDashViewModelContext (it represents the context of the viewmodel not of the indivual sections within
+	//  - create a new class or interface called BootDashModelContext which contains
+	//      - a BootDashModelContext
+	//      - a BootDashViewModel
+	//  - where both of these types occur together, replace with a reference to the new BootDashViewModelContext
+
 	IWorkspace getWorkspace();
 
 	ILaunchManager getLaunchManager();

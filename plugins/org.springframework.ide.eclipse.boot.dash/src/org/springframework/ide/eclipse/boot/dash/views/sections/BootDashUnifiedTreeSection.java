@@ -69,7 +69,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -89,6 +88,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 import com.google.common.collect.ImmutableSet;

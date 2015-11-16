@@ -29,7 +29,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.core,
  org.springsource.ide.eclipse.commons.ui,
  org.springsource.ide.eclipse.commons.livexp
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/json-20140107.jar

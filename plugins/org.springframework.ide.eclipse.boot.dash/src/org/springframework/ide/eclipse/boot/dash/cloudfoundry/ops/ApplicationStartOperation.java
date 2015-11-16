@@ -50,7 +50,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		UUID appGuid = appInstances.getApplication().getMeta().getGuid();
 
 		boolean checkTermination = true;
-		this.eventHandler.fireEvent(eventFactory.updateRunState(appInstances, getDashElement(), preferredState),
+		this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(appInstances, getDashElement(), preferredState),
 				checkTermination);
 
 		// Use the cached Cloud app instead of fetching a new one to avoid
@@ -66,7 +66,7 @@ public class ApplicationStartOperation extends CloudApplicationOperation {
 		CloudAppInstances updatedInstances = requests.getExistingAppInstances(appGuid);
 
 		checkTermination = false;
-		this.eventHandler.fireEvent(eventFactory.updateRunState(updatedInstances, getDashElement(), runState),
+		this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(), runState),
 				checkTermination);
 	}
 

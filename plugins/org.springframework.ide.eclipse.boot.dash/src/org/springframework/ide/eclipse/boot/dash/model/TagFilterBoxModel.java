@@ -11,6 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 /**
  * @author Kris De Volder

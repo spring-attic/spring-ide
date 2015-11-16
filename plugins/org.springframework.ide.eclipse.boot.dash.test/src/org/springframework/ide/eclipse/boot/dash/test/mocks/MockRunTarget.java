@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -72,8 +73,8 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 	}
 
 	@Override
-	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
-		return new MockBootDashModel(this, context);
+	public BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel viewModel) {
+		return new MockBootDashModel(this, context, viewModel);
 	}
 
 	@Override

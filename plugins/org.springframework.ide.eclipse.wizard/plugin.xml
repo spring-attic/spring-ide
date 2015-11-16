@@ -13,6 +13,7 @@
  *******************************************************************************/
  -->
 <plugin>
+   <extension-point id="org.springframework.ide.eclipse.wizard.import.strategy" name="org.springframework.ide.eclipse.wizard.import.strategy" schema="schema/org.springframework.ide.eclipse.wizard.import.strategy.exsd"/>
 	<!--extension point="org.eclipse.ui.newWizards">
 		<wizard
 			id="org.springframework.ide.eclipse.beans.ui.wizards.newBeanDefinition"
@@ -284,13 +285,4 @@
           </argument>
        </provider>
     </extension>
-    <extension
-          point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
-       <configurator
-             class="org.springframework.ide.eclipse.wizard.gettingstarted.importing.SpringProjectConfigurator"
-             id="org.springframework.ide.eclipse.springproject"
-             name="Spring">
-       </configurator>
-    </extension>
-      
 </plugin>

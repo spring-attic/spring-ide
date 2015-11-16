@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -37,13 +38,15 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 public class ApplicationStartWithRemoteClientOperation extends CloudApplicationOperation {
 
 	final private RunState runOrDebug;
+	final private DebugSupport debugSupport;
 	final private UserInteractions ui;
 
 	public ApplicationStartWithRemoteClientOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			RunState runOrDebug, UserInteractions ui) {
+			RunState runOrDebug, DebugSupport debugSupport, UserInteractions ui) {
 		super(opName, model, appName);
 		this.runOrDebug = runOrDebug;
 		this.ui = ui;
+		this.debugSupport = debugSupport;
 	}
 
 	@Override
@@ -59,9 +62,9 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 					"Local project not associated to CF app '" + appName + "'"));
 		}
 
-		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()), runOrDebug)) {
+		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
 			ops.add(new FullApplicationRestartOperation("Restarting application '" + cde.getName() + "'", model,
-					appName, runOrDebug, ui));
+					appName, runOrDebug, debugSupport, ui));
 		} else if (cde.getRunState() == RunState.INACTIVE) {
 			ApplicationStartOperation restartOp = new ApplicationStartOperation(appName, model, RunState.STARTING);
 			ops.add(restartOp);
