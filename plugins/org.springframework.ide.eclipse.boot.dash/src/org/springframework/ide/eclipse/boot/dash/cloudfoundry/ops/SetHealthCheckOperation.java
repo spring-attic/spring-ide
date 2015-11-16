@@ -37,6 +37,10 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 		this.confirmChange = confirmChange;
 	}
 
+	public SetHealthCheckOperation(CloudDashElement app, String hcType) {
+		this(app, hcType, null, false);
+	}
+
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		monitor.beginTask(getName(), 2);

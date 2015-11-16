@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
  * Caches {@link CloudApplication} and associated information, like the project
@@ -38,7 +39,21 @@ public class CloudAppCache {
 
 	private final Map<String, CacheItem> appCache = new HashMap<String, CacheItem>();
 
+	//TODO: when we use v2 client this info is probably integerated with the rest of the appCache.
+	// Then this should be removed.
+	private Map<String, String> healthChecks = new HashMap<>();
+
+
 	public CloudAppCache() {
+	}
+
+
+	public synchronized String getHealthCheck(CloudDashElement e) {
+		return healthChecks.get(e.getName());
+	}
+
+	public synchronized void setHealthCheck(CloudDashElement e, String healthCheck) {
+		healthChecks.put(e.getName(), healthCheck);
 	}
 
 	/**
@@ -273,4 +288,5 @@ public class CloudAppCache {
 			return true;
 		}
 	}
+
 }
