@@ -33,7 +33,7 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthChec
  * project.
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 public class ApplicationStartWithRemoteClientOperation extends CloudApplicationOperation {
 
@@ -64,7 +64,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 					"Local project not associated to CF app '" + appName + "'"));
 		}
 
-		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE));
+		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /*confirmChange*/true));
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
 			ops.add(new FullApplicationRestartOperation("Restarting application '" + cde.getName() + "'", model,
 					appName, runOrDebug, debugSupport, ui));

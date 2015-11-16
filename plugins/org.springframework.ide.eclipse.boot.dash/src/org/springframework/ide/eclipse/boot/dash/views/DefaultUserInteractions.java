@@ -241,6 +241,31 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
+	public boolean yesNoWithToggle(final String propertyKey, final String title, final String message, final String toggleMessage) {
+		final String ANSWER = propertyKey+".answer";
+		final String TOGGLE = propertyKey+".toggle";
+		final IPreferenceStore store = getPreferencesStore();
+		store.setDefault(ANSWER, true);
+		boolean toggleState = store.getBoolean(TOGGLE);
+		boolean answer = store.getBoolean(ANSWER);
+		if (toggleState) {
+			return answer;
+		}
+		final boolean[] dialog = new boolean[2];
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialogWithToggle result = MessageDialogWithToggle.openYesNoQuestion(getShell(), title , message, toggleMessage, false, null, null);
+				dialog[0] = result.getReturnCode()==IDialogConstants.YES_ID;
+				dialog[1] = result.getToggleState();
+			}
+		});
+		store.setValue(TOGGLE, dialog[1]);
+		store.setValue(ANSWER, dialog[0]);
+		return dialog[0];
+	}
+
+	@Override
 	public boolean confirmWithToggle(final String propertyKey, final String title, final String message, final String toggleMessage) {
 		final IPreferenceStore store = getPreferencesStore();
 		boolean toggleState = store.getBoolean(propertyKey);

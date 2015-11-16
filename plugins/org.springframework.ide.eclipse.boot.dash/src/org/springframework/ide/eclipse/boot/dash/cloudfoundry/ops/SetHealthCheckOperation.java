@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
@@ -24,11 +25,16 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 
 	private String hcType;
 	private CloudDashElement app;
+	private UserInteractions ui;
+	private boolean confirmChange;
+	private static final String CONFIRM_CHANGE_KEY = SetHealthCheckOperation.class.getName()+".confirm";
 
-	public SetHealthCheckOperation(CloudDashElement app, String hcType) {
+	public SetHealthCheckOperation(CloudDashElement app, String hcType, UserInteractions ui, boolean confirmChange) {
 		super("set-health-check "+app.getName()+" "+hcType, app.getCloudModel(), app.getName());
 		this.app = app;
 		this.hcType = hcType;
+		this.ui = ui;
+		this.confirmChange = confirmChange;
 	}
 
 	@Override
@@ -44,7 +50,17 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 			monitor.worked(1);
 			if (current!=null) {
 				if (!current.equals(hcType)) {
-					hc.setHealthCheck(guid, hcType);
+					boolean confirmed = true;
+					if (confirmChange) {
+						confirmed = ui.yesNoWithToggle(CONFIRM_CHANGE_KEY, "Set health check for '"+app+"' to '"+hcType+"'?",
+								"Health check is currently set to '"+current+"'. This may interfere with Spring Boot Devtools "+
+								"reload functionality. Do you want to set it to '"+hcType+"'?",
+								"Remember my decision"
+						);
+					}
+					if (confirmed) {
+						hc.setHealthCheck(guid, hcType);
+					}
 					monitor.worked(1);
 				}
 			}

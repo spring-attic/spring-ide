@@ -73,4 +73,15 @@ public interface UserInteractions {
 	 *  @param toggleMessage Message for the 'togle switch'.
 	 */
 	boolean confirmWithToggle(String propertyKey, String title, String message, String toggleMessage);
+
+
+	/**
+	 * Ask the user to answer 'yes' or 'no' to a question with a 'toggle' to optionally remember the answer.
+	 *
+	 *  @param propertyKey a preference name that will be used to remember the state of the 'toggle' and 'answer'.
+	 *  @param title Title for the dialog
+	 *  @param message Detailed message
+	 *  @param toggleMessage Message for the 'togle switch'.
+	 */
+	boolean yesNoWithToggle(String propertyKey, String title, String message, String toggleMessage);
 }
