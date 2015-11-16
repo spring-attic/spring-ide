@@ -22,11 +22,11 @@ import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
  * Operation for (re) starting Remote DevTools client for CF app with associated
@@ -40,13 +40,15 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 	final private RunState runOrDebug;
 	final private DebugSupport debugSupport;
 	final private UserInteractions ui;
+	private CloudDashElement app;
 
-	public ApplicationStartWithRemoteClientOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			RunState runOrDebug, DebugSupport debugSupport, UserInteractions ui) {
-		super(opName, model, appName);
+	public ApplicationStartWithRemoteClientOperation(String opName, CloudDashElement app,
+			RunState runOrDebug, UserInteractions ui) {
+		super(opName, app.getCloudModel(), app.getName());
+		this.app = app;
 		this.runOrDebug = runOrDebug;
 		this.ui = ui;
-		this.debugSupport = debugSupport;
+		this.debugSupport = app.getDebugSupport();
 	}
 
 	@Override
@@ -62,6 +64,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 					"Local project not associated to CF app '" + appName + "'"));
 		}
 
+		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE));
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
 			ops.add(new FullApplicationRestartOperation("Restarting application '" + cde.getName() + "'", model,
 					appName, runOrDebug, debugSupport, ui));

@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
@@ -179,6 +180,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			url = url.substring(0, url.length()-1);
 		}
 		return url;
+	}
+
+	public HealthCheckSupport getHealthCheckSupport() throws Exception {
+		CloudFoundryOperations client = getClient();
+		CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
+		HttpProxyConfiguration proxyConf = null; //TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
+		return HealthCheckSupport.create(client, creds, proxyConf, targetProperties.isSelfsigned());
 	}
 
 	public SshClientSupport getSshClientSupport() throws Exception {
