@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.core;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
 public class BootPropertyTester extends PropertyTester {
@@ -88,7 +91,6 @@ public class BootPropertyTester extends PropertyTester {
 		return false;
 	}
 
-
 	public static boolean isBootProject(IProject project) {
 		if (project==null || ! project.isAccessible()) {
 			return false;
@@ -97,10 +99,12 @@ public class BootPropertyTester extends PropertyTester {
 			if (project.hasNature(JavaCore.NATURE_ID)) {
 				IJavaProject jp = JavaCore.create(project);
 				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-				//Look for a 'spring-boot' jar entry
+				//Look for a 'spring-boot' jar or project entry
 				for (IClasspathEntry e : classpath) {
 					if (isBootJar(e) || isBootProject(e)) {
-						return true;
+						if (!isCoreBootProject(project)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -109,6 +113,25 @@ public class BootPropertyTester extends PropertyTester {
 		}
 		return false;
 	}
+
+	private static boolean isCoreBootProject(IProject project) {
+		try {
+			if (project.hasNature(SpringBootCore.M2E_NATURE)) {
+				//TODO: here we should use a configureable regexp
+				return project.getName().startsWith("spring-boot");
+//				MavenSpringBootProject bmp = new MavenSpringBootProject(project);
+//				MavenProject maven = bmp.getMavenProject();
+//				if (maven!=null) {
+//					String gid = maven.getGroupId();
+//					return gid.equals("");
+//				}
+			}
+		} catch (Exception e) {
+			//Project isn't what we expect. So ignore and fail the test.
+		}
+		return false;
+	}
+
 
 	/**
 	 * @return whether given resource is either Spring Boot IProject or nested inside one.
