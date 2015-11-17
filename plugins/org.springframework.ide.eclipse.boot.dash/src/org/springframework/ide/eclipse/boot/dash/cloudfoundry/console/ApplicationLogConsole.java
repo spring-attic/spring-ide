@@ -80,12 +80,11 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 			IOConsoleOutputStream stream = getStream(type);
 
 			try {
-				if (stream != null) {
+				if (stream != null && !stream.isClosed()) {
 					message = format(message);
 					stream.write(message);
 					return true;
 				}
-
 			} catch (IOException e) {
 				BootDashActivator.log(e);
 			}
