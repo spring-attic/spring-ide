@@ -18,7 +18,6 @@ import java.util.Map;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.ApplicationLog;
-import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
