@@ -28,6 +28,7 @@ import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -99,10 +100,12 @@ public class MavenSpringBootProject extends SpringBootProject {
 	@Override
 	public List<SpringBootStarter> getKnownStarters() throws CoreException {
 		MavenProject mp = getMavenProject();
-		DependencyManagement depMan = mp.getDependencyManagement();
-		if (depMan != null) {
-			List<Dependency> deps = depMan.getDependencies();
-			return getStarters(deps);
+		if (mp!=null) {
+			DependencyManagement depMan = mp.getDependencyManagement();
+			if (depMan != null) {
+				List<Dependency> deps = depMan.getDependencies();
+				return getStarters(deps);
+			}
 		}
 		return NO_STARTERS;
 	}
@@ -110,8 +113,10 @@ public class MavenSpringBootProject extends SpringBootProject {
 	private MavenProject getMavenProject() throws CoreException {
 		IMavenProjectRegistry pr = MavenPlugin.getMavenProjectRegistry();
 		IMavenProjectFacade mpf = pr.getProject(project);
-		MavenProject mp = mpf.getMavenProject(new NullProgressMonitor());
-		return mp;
+		if (mpf!=null) {
+			return mpf.getMavenProject(new NullProgressMonitor());
+		}
+		return null;
 	}
 
 	private IFile getPomFile() {
@@ -120,7 +125,11 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	@Override
 	public List<SpringBootStarter> getBootStarters() throws CoreException {
-		return getStarters(getMavenProject().getDependencies());
+		MavenProject mp = getMavenProject();
+		if (mp!=null) {
+			return getStarters(mp.getDependencies());
+		}
+		return Collections.emptyList();
 	}
 
 	private List<SpringBootStarter> getStarters(List<Dependency> deps) {
@@ -172,14 +181,17 @@ public class MavenSpringBootProject extends SpringBootProject {
 	 */
 	private String getManagedVersion(MavenCoordinates dep) {
 		try {
-			DependencyManagement managedDeps = getMavenProject().getDependencyManagement();
-			if (managedDeps!=null) {
-				List<Dependency> deps = managedDeps.getDependencies();
-				if (deps!=null && !deps.isEmpty()) {
-					for (Dependency d : deps) {
-						if ("jar".equals(d.getType())) {
-							if (dep.getArtifactId().equals(d.getArtifactId()) && dep.getGroupId().equals(d.getGroupId())) {
-								return d.getVersion();
+			MavenProject mp = getMavenProject();
+			if (mp!=null) {
+				DependencyManagement managedDeps = mp.getDependencyManagement();
+				if (managedDeps!=null) {
+					List<Dependency> deps = managedDeps.getDependencies();
+					if (deps!=null && !deps.isEmpty()) {
+						for (Dependency d : deps) {
+							if ("jar".equals(d.getType())) {
+								if (dep.getArtifactId().equals(d.getArtifactId()) && dep.getGroupId().equals(d.getGroupId())) {
+									return d.getVersion();
+								}
 							}
 						}
 					}
@@ -300,11 +312,14 @@ public class MavenSpringBootProject extends SpringBootProject {
 	@Override
 	public String getBootVersion() {
 		try {
-			return getBootVersion(getMavenProject().getDependencies());
+			MavenProject mp = getMavenProject();
+			if (mp!=null) {
+				return getBootVersion(mp.getDependencies());
+			}
 		} catch (Exception e) {
 			BootActivator.log(e);
-			return SpringBootCore.getDefaultBootVersion();
 		}
+		return SpringBootCore.getDefaultBootVersion();
 	}
 
 	private String getBootVersion(List<Dependency> dependencies) {
