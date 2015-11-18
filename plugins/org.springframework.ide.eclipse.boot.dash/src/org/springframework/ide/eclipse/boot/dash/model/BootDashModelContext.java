@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public interface BootDashModelContext {
 
@@ -43,5 +46,13 @@ public interface BootDashModelContext {
 
 	void log(Exception e);
 
-
+	/**
+	 *!!!!Warning!!!!<p>
+	 * This is 'injected' but in fact the injected filter is only used for
+	 * triggering refreshes. It is not actually used to filter projects.
+	 * Projects are filtered indirectly via static method BootPropertyTester.isBootProject.
+	 * that means that injecting a different filter than the one used by that method
+	 * will not work as expected.
+	 */
+	LiveExpression<Pattern> getBootProjectExclusion();
 }

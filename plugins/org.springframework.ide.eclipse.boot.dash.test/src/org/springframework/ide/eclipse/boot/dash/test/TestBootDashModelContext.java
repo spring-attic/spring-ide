@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
@@ -19,12 +20,15 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class TestBootDashModelContext implements BootDashModelContext {
@@ -34,6 +38,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private IWorkspace workspace;
 	private IScopedPropertyStore<IProject> projectProperties;
 	private IScopedPropertyStore<RunTargetType> runTargetProperties;
+	private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
@@ -81,6 +86,11 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	@Override
 	public SecuredCredentialsStore getSecuredCredentialsStore() {
 		return new MockSecuredCredentialStore();
+	}
+
+	@Override
+	public LiveExpression<Pattern> getBootProjectExclusion() {
+		return bootProjectExclusion;
 	}
 
 }

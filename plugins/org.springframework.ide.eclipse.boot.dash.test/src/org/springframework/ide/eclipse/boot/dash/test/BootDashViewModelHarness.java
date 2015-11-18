@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.Assert;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -32,6 +34,8 @@ import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class BootDashViewModelHarness {
@@ -65,6 +69,7 @@ public class BootDashViewModelHarness {
 		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockPropertyStore<RunTargetType>();
 		private SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
 		private File stateLocation;
+		private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
 
 		public MockContext() throws Exception {
 			stateLocation = StsTestUtil.createTempDirectory();
@@ -104,6 +109,10 @@ public class BootDashViewModelHarness {
 		public void log(Exception e) {
 		}
 
+		@Override
+		public LiveExpression<Pattern> getBootProjectExclusion() {
+			return bootProjectExclusion;
+		}
 	}
 
 	public BootDashModel getRunTargetModel(RunTargetType type) {
