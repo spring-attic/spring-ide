@@ -53,7 +53,7 @@ import org.springframework.ide.eclipse.wizard.template.infrastructure.Template;
  * Creates a new spring project based on either a template, or a simple project that is either Java-based or Maven.
  * <p/>
  * The different types of projects that this wizard handles is provided by a Wizard section via a wizard section factory.
- * 
+ *
  *
  */
 public class NewSpringProjectWizard extends NewElementWizard implements INewWizard {
@@ -67,7 +67,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	private IProject project;
 
 	public NewSpringProjectWizard() {
-		setWindowTitle("New Spring Project");
+		setWindowTitle("New Spring Legacy Project");
 		setDefaultPageImageDescriptor(WizardImages.TEMPLATE_WIZARD_ICON);
 		setForcePreviousAndNextButtons(true);
 		setNeedsProgressMonitor(true);
@@ -110,7 +110,7 @@ public class NewSpringProjectWizard extends NewElementWizard implements INewWiza
 	}
 
 	/**
-	 * 
+	 *
 	 * @param page current page
 	 * @return true if the template section contributes more pages to the wizard
 	 * given a current page. False otherwise

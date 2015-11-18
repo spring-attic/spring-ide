@@ -66,7 +66,7 @@
           hasPages="true"
           icon="icons/full/etool16/new_template_project_obj.png"
           id="com.springsource.sts.wizard.template"
-          name="Spring Project"
+          name="Spring Legacy Project"
           preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
           project="true">
     </wizard>
