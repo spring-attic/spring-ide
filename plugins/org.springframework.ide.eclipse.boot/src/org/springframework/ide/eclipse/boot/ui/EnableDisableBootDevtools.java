@@ -149,9 +149,17 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 				return SpringBootCore.create(project);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			if (!isExpected(e)) {
+				BootActivator.log(e);
+			}
 		}
 		return null;
+	}
+
+	private boolean isExpected(Exception e) {
+		//See https://issuetracker.springsource.com/browse/STS-4263
+		String msg = ExceptionUtil.getMessage(e);
+		return msg!=null && msg.contains("only implemented for m2e");
 	}
 
 	@Override

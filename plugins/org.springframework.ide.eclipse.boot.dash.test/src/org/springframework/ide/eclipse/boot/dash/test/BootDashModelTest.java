@@ -150,12 +150,6 @@ public class BootDashModelTest {
 		waitModelElements(projectName);
 
 		ElementStateListener listener = mock(ElementStateListener.class);
-		ElementStateListener debugListener;
-		model.addElementStateListener(debugListener = new ElementStateListener() {
-			public void stateChanged(BootDashElement e) {
-				System.out.println(e.getName()+" state became: "+e.getRunState());
-			}
-		});
 		model.addElementStateListener(listener);
 		System.out.println("Element state listener ADDED");
 		BootDashElement element = getElement(projectName);
@@ -164,7 +158,6 @@ public class BootDashModelTest {
 
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
-		model.removeElementStateListener(debugListener);
 		System.out.println("Element state listener REMOVED");
 
 		listener = mock(ElementStateListener.class);
@@ -173,13 +166,10 @@ public class BootDashModelTest {
 		element.stopAsync(ui);
 		waitForState(element, RunState.INACTIVE);
 
-		//The expected behavior will change when boot 1.3.0 is the default so guard against
-		// that already:
-		int expectedReadyStateChanges =supportsLifeCycleManagement(element.getProject())
-			?2  // INACTIVE -> STARTING -> RUNNING
-			:1; // INACTIVE -> RUNNING
-		verify(oldListener, times(expectedReadyStateChanges)).stateChanged(element);
-		verify(listener,    times(1)).stateChanged(element); //running  -> inactive
+		//3 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set)
+		verify(oldListener, times(3)).stateChanged(element);
+		//2 changes: RUNNING -> INACTIVE, liveport(unset)
+		verify(listener, times(2)).stateChanged(element);
 	}
 
 	@Test public void testRestartRunningProcessTest() throws Exception {

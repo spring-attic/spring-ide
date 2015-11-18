@@ -17,12 +17,10 @@ import java.util.UUID;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
@@ -223,6 +221,11 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return getCloudModel().getAppCache().getApp(getName()) != null
 				? getCloudModel().getAppCache().getApp(getName()).getInstances() : 0;
 	}
+
+	public String getHealthCheck() {
+		return getCloudModel().getAppCache().getHealthCheck(this);
+	}
+
 
 	public UUID getAppGuid() {
 		CloudApplication app = getCloudModel().getAppCache().getApp(getName());

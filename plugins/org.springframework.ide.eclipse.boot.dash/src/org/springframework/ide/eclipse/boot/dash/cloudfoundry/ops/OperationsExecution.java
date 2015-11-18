@@ -57,7 +57,7 @@ public class OperationsExecution {
 			};
 
 			ISchedulingRule rule = op.getSchedulingRule();
-			if (op != null) {
+			if (rule != null) {
 				job.setRule(rule);
 			}
 

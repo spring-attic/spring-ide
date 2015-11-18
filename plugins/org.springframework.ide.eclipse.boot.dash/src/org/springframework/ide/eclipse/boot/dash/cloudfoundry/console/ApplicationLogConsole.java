@@ -18,7 +18,6 @@ import java.util.Map;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.ApplicationLog;
-import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -80,12 +79,11 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 			IOConsoleOutputStream stream = getStream(type);
 
 			try {
-				if (stream != null) {
+				if (stream != null && !stream.isClosed()) {
 					message = format(message);
 					stream.write(message);
 					return true;
 				}
-
 			} catch (IOException e) {
 				BootDashActivator.log(e);
 			}
