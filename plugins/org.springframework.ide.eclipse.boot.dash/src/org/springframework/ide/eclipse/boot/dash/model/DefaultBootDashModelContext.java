@@ -10,16 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class DefaultBootDashModelContext implements BootDashModelContext {
 
@@ -62,6 +66,11 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public void log(Exception e) {
 		BootDashActivator.log(e);
+	}
+
+	@Override
+	public LiveExpression<Pattern> getBootProjectExclusion() {
+		return BootPreferences.getInstance().getProjectExclusionExp();
 	}
 
 }

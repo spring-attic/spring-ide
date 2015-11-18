@@ -1,44 +1,35 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013-2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     GoPivotal, Inc. - initial API and implementation
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
+/**
+ * @author Kris De Volder
+ */
 public class BootPropertyTester extends PropertyTester {
 
 	private static final Pattern JAR_VERSION_REGEXP = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-
-	private static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
-
 
 	public BootPropertyTester() {
 		// TODO Auto-generated constructor stub
@@ -100,9 +91,9 @@ public class BootPropertyTester extends PropertyTester {
 				IJavaProject jp = JavaCore.create(project);
 				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
 				//Look for a 'spring-boot' jar or project entry
-				for (IClasspathEntry e : classpath) {
-					if (isBootJar(e) || isBootProject(e)) {
-						if (!isCoreBootProject(project)) {
+				if (!isExcludedProject(project)) {
+					for (IClasspathEntry e : classpath) {
+						if (isBootJar(e) || isBootProject(e)) {
 							return true;
 						}
 					}
@@ -114,24 +105,10 @@ public class BootPropertyTester extends PropertyTester {
 		return false;
 	}
 
-	private static boolean isCoreBootProject(IProject project) {
-		try {
-			if (project.hasNature(SpringBootCore.M2E_NATURE)) {
-				//TODO: here we should use a configureable regexp
-				return project.getName().startsWith("spring-boot");
-//				MavenSpringBootProject bmp = new MavenSpringBootProject(project);
-//				MavenProject maven = bmp.getMavenProject();
-//				if (maven!=null) {
-//					String gid = maven.getGroupId();
-//					return gid.equals("");
-//				}
-			}
-		} catch (Exception e) {
-			//Project isn't what we expect. So ignore and fail the test.
-		}
-		return false;
+	private static boolean isExcludedProject(IProject project) {
+		Pattern exclusion = BootPreferences.getInstance().getProjectExclusion();
+		return exclusion.matcher(project.getName()).matches();
 	}
-
 
 	/**
 	 * @return whether given resource is either Spring Boot IProject or nested inside one.

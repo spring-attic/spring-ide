@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISavedState;
@@ -29,7 +30,9 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathL
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
@@ -50,6 +53,8 @@ public class LocalBootDashModel extends BootDashModel {
 
 	private BootDashModelStateSaver modelState;
 	private DevtoolsPortRefresher devtoolsPortRefresher;
+	private LiveExpression<Pattern> projectExclusion;
+	private ValueListener<Pattern> projectExclusionListener;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -76,6 +81,7 @@ public class LocalBootDashModel extends BootDashModel {
 			BootDashActivator.log(e);
 		}
 		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, elementFactory);
+		this.projectExclusion = context.getBootProjectExclusion();
 	}
 
 	void init() {
@@ -91,6 +97,11 @@ public class LocalBootDashModel extends BootDashModel {
 					if (e!=null) {
 						notifyElementChanged(e);
 					}
+				}
+			});
+			projectExclusion.addListener(projectExclusionListener = new ValueListener<Pattern>() {
+				public void gotValue(LiveExpression<Pattern> exp, Pattern value) {
+					updateElementsFromWorkspace();
 				}
 			});
 			updateElementsFromWorkspace();
@@ -132,6 +143,9 @@ public class LocalBootDashModel extends BootDashModel {
 			classpathListenerManager.dispose();
 			runStateTracker.dispose();
 			devtoolsPortRefresher.dispose();
+			if (projectExclusionListener!=null) {
+				projectExclusion.removeListener(projectExclusionListener);
+			}
 		}
 	}
 
