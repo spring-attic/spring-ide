@@ -124,19 +124,19 @@
 	      point="org.eclipse.ui.preferencePages">
 	   <page
 	         name="Confguration Metadata Processing"
-	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
+	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage"
 	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage">
 	   </page>
 	   <page
-	         name="Spring Properties Editor"
-	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
+	         name="Properties Editor"
+	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage"
 	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage">
 	   </page>
 	   <page
-	         name="Spring Yaml Editor"
-	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
+	         name="Yaml Editor"
+	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage"
 	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage">
 	   </page>
