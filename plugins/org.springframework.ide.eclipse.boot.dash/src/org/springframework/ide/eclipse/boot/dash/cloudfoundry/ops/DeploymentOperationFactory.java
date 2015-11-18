@@ -14,19 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.UserDefinedDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -61,14 +54,13 @@ public class DeploymentOperationFactory {
 			throws Exception {
 		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
 
-		List<CloudDomain> domains = model.getCloudTarget().getDomains(requests, monitor);
 
 		// First see if an app exists with the given project name
 		CloudApplication existingApp = requests.getApplication(getAppName(project));
-		CloudApplicationDeploymentProperties properties = resolveDeploymentProperties(existingApp, domains, runOrDebug,
+		CloudApplicationDeploymentProperties properties = model.getDeploymentProperties(existingApp, project, runOrDebug, ui, requests,
 				monitor);
 
-		// Get the existing app again in case deployment properties changed
+		// Get the existing app again in case deployment properties changed and a different app name is now present in the properties
 		// (i.e. it points to another existing app)
 		existingApp = requests.getApplication(properties.getAppName());
 
@@ -118,86 +110,6 @@ public class DeploymentOperationFactory {
 		deploymentOperations.add(new ApplicationStartOperation(properties.getAppName(), model));
 
 		return deploymentOperations;
-	}
-
-	/**
-	 *
-	 * @param existingApp
-	 *            optional. If it does not exist, pass null.
-	 * @param domains
-	 *            in the Cloud target
-	 * @param runOrDebug
-	 * @param monitor
-	 * @return non-null deployment properties for the application.
-	 * @throws Exception
-	 *             if error occurred while resolving the deployment properties
-	 * @throws OperationCanceledException
-	 *             if user canceled operation while resolving deployment
-	 *             properties
-	 */
-	protected CloudApplicationDeploymentProperties resolveDeploymentProperties(CloudApplication existingApp,
-			List<CloudDomain> domains, RunState runOrDebug, IProgressMonitor monitor) throws Exception {
-
-		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
-
-		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
-
-		CloudApplicationDeploymentProperties deploymentProperties = null;
-
-		if (manifestHandler.hasManifest()) {
-			List<CloudApplicationDeploymentProperties> appProperties = manifestHandler.load(monitor);
-			if (appProperties == null || appProperties.isEmpty()) {
-				throw BootDashActivator.asCoreException("No deployment properties found for " + project.getName()
-						+ ". Please ensure that your project can be packaged as an executable application or contains a manifest.yml that points to an archive file that exists.");
-			} else {
-				deploymentProperties = appProperties.get(0);
-			}
-		} else if (existingApp != null) {
-			deploymentProperties = CloudApplicationDeploymentProperties.getFor(existingApp, project);
-		} else {
-			// Prompt user for properties
-			UserDefinedDeploymentProperties userDefinedProps = ui.promptApplicationDeploymentProperties(project,
-					domains);
-			if (userDefinedProps != null) {
-				deploymentProperties = userDefinedProps.asCloudAppDeploymentProperties();
-				if (userDefinedProps.writeManifest()) {
-					manifestHandler.create(monitor, deploymentProperties);
-				}
-			} else {
-				// if no deployment properties specified, cancel
-				throw new OperationCanceledException();
-			}
-
-			// Get the app AGAIN in case the app name was changed in the UI
-			// (e.g. a user wants to "link" the project to another
-			// existing application with a different name)
-			existingApp = requests.getApplication(userDefinedProps.getAppName());
-			if (existingApp != null) {
-
-				CloudApplicationDeploymentProperties existingProps = CloudApplicationDeploymentProperties
-						.getFor(existingApp, project);
-
-				deploymentProperties = userDefinedProps.mergeInto(existingProps);
-			}
-		}
-
-		monitor.worked(10);
-
-		// For now just support one application deployment from a manifest.yml
-		IStatus status = deploymentProperties.validate();
-		monitor.worked(10);
-
-		if (!status.isOK()) {
-			throw new CoreException(status);
-		}
-
-		// Update JAVA_OPTS env variable with Remote DevTools Client secret
-		if (project != null) {
-			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(),
-					DevtoolsUtil.getSecret(project));
-		}
-
-		return deploymentProperties;
 	}
 
 	protected String getAppName(IProject project) {

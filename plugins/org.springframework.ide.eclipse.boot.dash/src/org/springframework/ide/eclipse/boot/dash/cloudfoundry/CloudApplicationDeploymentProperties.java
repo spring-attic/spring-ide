@@ -38,7 +38,7 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 	/*
 	 * Additional properties
 	 */
-	private String buildpackUrl;
+	private String buildpack;
 
 	private boolean shouldRestart = true;
 
@@ -46,8 +46,8 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 		super(project);
 	}
 
-	public void setBuildpackUrl(String buildpackUrl) {
-		this.buildpackUrl = buildpackUrl;
+	public void setBuildpack(String buildpack) {
+		this.buildpack = buildpack;
 	}
 
 	public void setServices(List<String> services) {
@@ -80,8 +80,8 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 		return this.shouldRestart;
 	}
 
-	public String getBuildpackUrl() {
-		return buildpackUrl;
+	public String getBuildpack() {
+		return buildpack;
 	}
 
 	public int getMemory() {
@@ -129,7 +129,7 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 	public static CloudApplicationDeploymentProperties getFor(CloudApplication app, IProject project) {
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties(project);
 		properties.setAppName(app.getName());
-		properties.setBuildpackUrl(app.getStaging() != null ? app.getStaging().getBuildpackUrl() : null);
+		properties.setBuildpack(app.getStaging() != null ? app.getStaging().getBuildpackUrl() : null);
 		properties.setEnvironmentVariables(app.getEnvAsMap());
 		properties.setInstances(app.getInstances());
 		properties.setMemory(app.getMemory());

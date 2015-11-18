@@ -20,19 +20,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
@@ -45,8 +50,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -516,5 +521,96 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	@Override
 	public BootDashModelConsoleManager getElementConsoleManager() {
 		return this.consoleManager;
+	}
+
+	/**
+	 *
+	 * @param existingApp
+	 *            optional. If it does not exist, pass null.
+	 * @param domains
+	 *            in the Cloud target
+	 * @param runOrDebug
+	 * @param monitor
+	 * @return non-null deployment properties for the application.
+	 * @throws Exception
+	 *             if error occurred while resolving the deployment properties
+	 * @throws OperationCanceledException
+	 *             if user canceled operation while resolving deployment
+	 *             properties
+	 */
+	public CloudApplicationDeploymentProperties getDeploymentProperties(CloudApplication existingApp, IProject project, RunState runOrDebug, UserInteractions ui, ClientRequests requests, IProgressMonitor monitor) throws Exception {
+
+		List<CloudDomain> domains = getCloudTarget().getDomains(requests, monitor);
+
+		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
+
+		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
+
+		CloudApplicationDeploymentProperties deploymentProperties = null;
+        // Three cases to handle:
+		// 1. Get deployment properties from manifest.yml
+		if (manifestHandler.hasManifest()) {
+			List<CloudApplicationDeploymentProperties> appProperties = manifestHandler.load(monitor);
+			if (appProperties == null || appProperties.isEmpty()) {
+				throw BootDashActivator.asCoreException("manifest.yml file detected for the project " + project.getName() + ", but failed to parse any deployment information. Please verify that the manifest.yml file is correct.");
+			} else {
+				deploymentProperties = appProperties.get(0);
+			}
+		}
+		// 2. App exists, therefore use whatever is already set in CF for the app
+		else if (existingApp != null) {
+			deploymentProperties = CloudApplicationDeploymentProperties.getFor(existingApp, project);
+		}
+		// 3. In this case, app does not exist and there is no manifest.yml, so prompt user for properties
+        else {
+			UserDefinedDeploymentProperties userDefinedProps = ui.promptApplicationDeploymentProperties(project,
+					domains);
+			if (userDefinedProps != null) {
+				deploymentProperties = userDefinedProps.asCloudAppDeploymentProperties();
+				if (userDefinedProps.writeManifest()) {
+					manifestHandler.create(monitor, deploymentProperties);
+				}
+			} else {
+				// if no deployment properties specified, cancel
+				throw new OperationCanceledException();
+			}
+
+			// Get the app AGAIN in case the app name was changed in the UI
+			// (e.g. a user wants to "link" the project to another
+			// existing application with a different name)
+			existingApp = requests.getApplication(userDefinedProps.getAppName());
+			if (existingApp != null) {
+
+				CloudApplicationDeploymentProperties existingProps = CloudApplicationDeploymentProperties
+						.getFor(existingApp, project);
+
+				deploymentProperties = userDefinedProps.mergeInto(existingProps);
+			}
+		}
+
+		// Set any default buildpack that may be defined for the target, if the buildpack is not set already
+		if (deploymentProperties.getBuildpack() == null) {
+			String buildpack = getCloudTarget().getBuildpack(project);
+			if (buildpack != null) {
+				deploymentProperties.setBuildpack(buildpack);
+			}
+		}
+
+		monitor.worked(10);
+
+		IStatus status = deploymentProperties.validate();
+		monitor.worked(10);
+
+		if (!status.isOK()) {
+			throw new CoreException(status);
+		}
+
+		// Update JAVA_OPTS env variable with Remote DevTools Client secret
+		if (project != null) {
+			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(),
+					DevtoolsUtil.getSecret(project));
+		}
+
+		return deploymentProperties;
 	}
 }

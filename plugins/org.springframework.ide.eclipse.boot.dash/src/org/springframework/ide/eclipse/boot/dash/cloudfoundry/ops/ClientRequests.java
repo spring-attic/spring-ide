@@ -40,7 +40,7 @@ public class ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
-						new Staging(null, deploymentProperties.getBuildpackUrl()), deploymentProperties.getMemory(),
+						new Staging(null, deploymentProperties.getBuildpack()), deploymentProperties.getMemory(),
 						deploymentProperties.getUrls(), deploymentProperties.getServices());
 			}
 		}.run();
