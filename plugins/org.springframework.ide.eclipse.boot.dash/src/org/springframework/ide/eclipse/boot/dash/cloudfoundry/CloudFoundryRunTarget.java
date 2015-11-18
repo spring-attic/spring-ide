@@ -30,12 +30,16 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -47,6 +51,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
@@ -57,6 +63,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	// Cache these to avoid frequent client calls
 	private List<CloudDomain> domains;
 	private List<CloudSpace> spaces;
+	private List<Buildpack> buildpacks;
 
 	private CloudFoundryOperations cachedClient;
 	private CloudFoundryClientFactory clientFactory;
@@ -136,9 +143,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public void refresh() throws Exception {
 		// Fetching a new client always validates the CF credentials
-		cachedClient = createClient();
-		domains = null;
-		spaces = null;
+		this.cachedClient = createClient();
+		this.domains = null;
+		this.spaces = null;
+		this.buildpacks = null;
 	}
 
 	@Override
@@ -194,6 +202,60 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
 		HttpProxyConfiguration proxyConf = null; //TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
 		return SshClientSupport.create(client, creds, proxyConf, targetProperties.isSelfsigned());
+	}
+
+	public String getBuildpack(IProject project) {
+		// Only support Java project for now
+		IJavaProject javaProject = JavaCore.create(project);
+
+		if (javaProject != null) {
+			try {
+				CloudInfo info = getClient().getCloudInfo();
+				if (info == null) {
+					return null;
+				}
+
+				if (info.getApiVersion() != null && info.getApiVersion().compareTo("2.40") >= 0) {
+					if (this.buildpacks == null) {
+						CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(),
+								targetProperties.getPassword());
+						HttpProxyConfiguration proxyConf = null;
+						BuildpackSupport support = BuildpackSupport.create(getClient(), creds, proxyConf,
+								targetProperties.isSelfsigned());
+
+						// Cache it to avoid frequent calls to CF
+						this.buildpacks = support.getBuildpacks();
+					}
+
+					if (this.buildpacks != null) {
+						String javaBuildpack = null;
+						// Only chose a java build iff ONE java buildpack exists
+						// that contains the java_buildpack pattern.
+
+						for (Buildpack bp : this.buildpacks) {
+							// iterate through all buildpacks to make sure only
+							// ONE java buildpack exists
+							if (bp.getName().contains("java_buildpack")) {
+								if (javaBuildpack == null) {
+									javaBuildpack = bp.getName();
+								} else {
+									// If more than two buildpacks contain
+									// "java_buildpack", do not chose any. Let CF buildpack
+									// detection decided which one to chose.
+									javaBuildpack = null;
+									break;
+								}
+							}
+						}
+						return javaBuildpack;
+					}
+				}
+			} catch (Exception e) {
+				BootDashActivator.log(e);
+			}
+		}
+
+		return null;
 	}
 
 }

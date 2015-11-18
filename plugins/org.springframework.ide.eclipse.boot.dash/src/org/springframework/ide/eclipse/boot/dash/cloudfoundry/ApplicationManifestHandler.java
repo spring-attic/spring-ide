@@ -254,7 +254,7 @@ public class ApplicationManifestHandler {
 
 		readApplicationURL(appMap, allResults, properties);
 
-		readBuildpackURL(appMap, allResults, properties);
+		readBuildpack(appMap, allResults, properties);
 
 		readEnvVars(appMap, allResults, properties);
 
@@ -465,15 +465,15 @@ public class ApplicationManifestHandler {
 		}
 	}
 
-	protected void readBuildpackURL(Map<?, ?> application, Map<Object, Object> allResults,
+	protected void readBuildpack(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 
-		String buildpackurl = getStringValue(allResults, BUILDPACK_PROP);
-		if (buildpackurl == null) {
-			buildpackurl = getStringValue(application, BUILDPACK_PROP);
+		String buildpack = getStringValue(allResults, BUILDPACK_PROP);
+		if (buildpack == null) {
+			buildpack = getStringValue(application, BUILDPACK_PROP);
 		}
-		if (buildpackurl != null) {
-			properties.setBuildpackUrl(buildpackurl);
+		if (buildpack != null) {
+			properties.setBuildpack(buildpack);
 		}
 	}
 
