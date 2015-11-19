@@ -66,14 +66,14 @@ class TypeConverterBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// add components
 		for (Element component : components) {
 			Object object = BlueprintParser.parsePropertySubElement(parserContext, component,
-					registrarDefinitionBuilder.getBeanDefinition());
+					registrarDefinitionBuilder.getRawBeanDefinition());
 			checkConverter(object, parserContext, component);
 			converterList.add(object);
 		}
 		// followed by bean references
 		for (Element componentRef : componentRefs) {
 			Object converter = BlueprintParser.parsePropertySubElement(parserContext, componentRef,
-					registrarDefinitionBuilder.getBeanDefinition());
+					registrarDefinitionBuilder.getRawBeanDefinition());
 
 			checkConverter(converter, parserContext, componentRef);
 			converterList.add(converter);

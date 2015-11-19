@@ -141,30 +141,4 @@ public abstract class ParserUtils {
 		System.arraycopy(callbacksB, 0, newCallbacks, callbacksA.length, callbacksB.length);
 		return newCallbacks;
 	}
-
-	/**
-	 * Utility method used for maintaining backwards compatibility by converting
-	 * Class objects to String (using their class names). Used by importer and
-	 * exporter parsing to set the 'interfaces' property.
-	 * 
-	 * @param parsedClasses
-	 *            collection of parsed classes
-	 * @return a collection of converted (if necessary) metadata
-	 */
-	public static Set<?> convertClassesToStrings(Set<?> parsedClasses) {
-		Set<Object> interfaces = new ManagedSet<Object>(parsedClasses.size());
-
-		for (Object clazz : parsedClasses) {
-			if (clazz instanceof TypedStringValue || clazz instanceof String) {
-				interfaces.add(clazz);
-			} else {
-				// add adapter definition for bean references (which can be
-				// classes)
-				interfaces.add(BeanDefinitionBuilder.genericBeanDefinition(ToStringClassAdapter.class)
-						.addConstructorArgValue(clazz).getBeanDefinition());
-			}
-		}
-
-		return interfaces;
-	}
 }

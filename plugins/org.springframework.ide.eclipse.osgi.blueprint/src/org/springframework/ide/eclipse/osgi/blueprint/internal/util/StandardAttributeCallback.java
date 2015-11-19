@@ -40,7 +40,7 @@ public class StandardAttributeCallback implements AttributeCallback {
 		}
 
 		if (BeanDefinitionParserDelegate.DEPENDS_ON_ATTRIBUTE.equals(name)) {
-			builder.getBeanDefinition().setDependsOn((StringUtils.tokenizeToStringArray(attribute.getValue(),
+			builder.getRawBeanDefinition().setDependsOn((StringUtils.tokenizeToStringArray(attribute.getValue(),
 					BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS)));
 			return false;
 		}

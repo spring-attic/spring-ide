@@ -170,7 +170,7 @@ public class BlueprintReferenceBeanDefinitionParser extends AbstractBeanDefiniti
 	}
 
 	private boolean isCardinalitySpecified(BeanDefinitionBuilder builder) {
-		return (builder.getBeanDefinition().getPropertyValues().getPropertyValue(AVAILABILITY) != null);
+		return (builder.getRawBeanDefinition().getPropertyValues().getPropertyValue(AVAILABILITY) != null);
 	}
 
 	private String getListenerElementName() {
@@ -227,6 +227,9 @@ public class BlueprintReferenceBeanDefinitionParser extends AbstractBeanDefiniti
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
 
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		builder.getRawBeanDefinition().setSynthetic(true);
+		//fake factory to prevent validation error in ui
+		builder.getRawBeanDefinition().setFactoryBeanName("internal");
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
 
 		BlueprintDefaultsDefinition defaults = resolveDefaults(element.getOwnerDocument(), parserContext);
@@ -298,7 +301,7 @@ public class BlueprintReferenceBeanDefinitionParser extends AbstractBeanDefiniti
 								"nested bean declaration is not allowed if 'ref' attribute has been specified",
 								beanDef);
 
-					target = parsePropertySubElement(context, beanDef, builder.getBeanDefinition());
+					target = parsePropertySubElement(context, beanDef, builder.getRawBeanDefinition());
 
 					// if this is a bean reference (nested <ref>), extract the
 					// name
@@ -331,7 +334,7 @@ public class BlueprintReferenceBeanDefinitionParser extends AbstractBeanDefiniti
 			if (targetName != null) {
 				// no validation could be performed, save the name for easier
 				// retrieval
-				AbstractBeanDefinition bd = builder.getBeanDefinition();
+				AbstractBeanDefinition bd = builder.getRawBeanDefinition();
 				Collection<String> str = (Collection<String>) bd.getAttribute(ParserUtils.REFERENCE_LISTENER_REF_ATTR);
 				if (str == null) {
 					str = new LinkedHashSet<String>(2);

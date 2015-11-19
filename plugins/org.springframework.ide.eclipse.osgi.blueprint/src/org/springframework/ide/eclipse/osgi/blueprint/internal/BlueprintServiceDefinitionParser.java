@@ -113,6 +113,9 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 		}
 
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		builder.getRawBeanDefinition().setSynthetic(true);
+		//fake factory to prevent validation error in ui
+		builder.getRawBeanDefinition().setFactoryBeanName("internal");
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
 
 		BlueprintDefaultsDefinition defaults = resolveDefaults(element.getOwnerDocument(), parserContext);
@@ -182,7 +185,7 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 		if (parent.hasAttribute(REF))
 			parserContext.getReaderContext()
 					.error("nested bean definition/reference cannot be used when attribute 'ref' is specified", parent);
-		return parsePropertySubElement(parserContext, element, builder.getBeanDefinition());
+		return parsePropertySubElement(parserContext, element, builder.getRawBeanDefinition());
 	}
 
 	private void parseAttributes(Element element, BeanDefinitionBuilder builder, AttributeCallback[] callbacks,
@@ -240,7 +243,7 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 				parserContext.getReaderContext()
 						.error("either 'interface' attribute or <intefaces> sub-element has be specified", parent);
 			}
-			Set<?> interfaces = parsePropertySetElement(parserContext, element, builder.getBeanDefinition());
+			Set<?> interfaces = parsePropertySetElement(parserContext, element, builder.getRawBeanDefinition());
 			builder.addPropertyValue(INTERFACES, interfaces);
 			return true;
 		}
@@ -296,7 +299,7 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 							"nested bean declaration is not allowed if 'ref' attribute has been specified",
 							nestedDefinition);
 
-				target = parsePropertySubElement(context, nestedDefinition, builder.getBeanDefinition());
+				target = parsePropertySubElement(context, nestedDefinition, builder.getRawBeanDefinition());
 				// if this is a bean reference (nested <ref>), extract the name
 				if (target instanceof RuntimeBeanReference) {
 					targetName = ((RuntimeBeanReference) target).getBeanName();
