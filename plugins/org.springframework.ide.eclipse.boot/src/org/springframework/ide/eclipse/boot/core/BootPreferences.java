@@ -29,7 +29,6 @@ public class BootPreferences implements IPreferenceChangeListener {
 
 	private static BootPreferences INSTANCE = null;
 	private IEclipsePreferences prefs;
-
 	private final LiveExpression<Pattern> projectExclude = new LiveExpression<Pattern>(DEFAULT_BOOT_PROJECT_EXCLUDE) {
 		@Override
 		protected Pattern compute() {
@@ -40,6 +39,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 	private BootPreferences() {
 		this.prefs = getPrefs();
 		this.prefs.addPreferenceChangeListener(this);
+		this.projectExclude.refresh();
 	}
 
 	public synchronized static BootPreferences getInstance() {
