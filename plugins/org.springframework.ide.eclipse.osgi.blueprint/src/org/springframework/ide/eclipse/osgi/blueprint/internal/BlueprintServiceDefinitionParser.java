@@ -33,8 +33,6 @@ import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Conventions;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TautoExportModes;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TregistrationListener;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.Tservice;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.util.AttributeCallback;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.util.ParserUtils;
 import org.springframework.util.StringUtils;
@@ -94,7 +92,7 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
-		return Tservice.class;
+		return null;
 	}
 
 	@Override
@@ -324,7 +322,7 @@ public class BlueprintServiceDefinitionParser extends AbstractSingleBeanDefiniti
 		}
 
 		// create serviceListener wrapper
-		RootBeanDefinition wrapperDef = new RootBeanDefinition(TregistrationListener.class);
+		RootBeanDefinition wrapperDef = new RootBeanDefinition();
 
 		// set the target name (if we have one)
 		if (targetName != null) {

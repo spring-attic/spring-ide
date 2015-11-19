@@ -30,7 +30,6 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.BlueprintParser;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.support.BlueprintConverterConfigurer;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -57,7 +56,6 @@ class TypeConverterBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
 		BeanDefinitionBuilder registrarDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition();
-		registrarDefinitionBuilder.getRawBeanDefinition().setBeanClass(BlueprintConverterConfigurer.class);
 
 		List<Element> components = DomUtils.getChildElementsByTagName(element, BlueprintParser.BEAN);
 		List<Element> componentRefs = DomUtils.getChildElementsByTagName(element,

@@ -36,11 +36,8 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Conventions;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.Tavailability;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TreferenceList;
-import org.springframework.ide.eclipse.osgi.blueprint.internal.jaxb.TreferenceListener;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.util.AttributeCallback;
 import org.springframework.ide.eclipse.osgi.blueprint.internal.util.ParserUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Attr;
@@ -134,10 +131,6 @@ public class BlueprintReferenceListBeanDefinitionParser extends AbstractBeanDefi
 				new AttributeCallback[] { memberTypeCallback, blueprintCallback }));
 	}
 
-	private Class<?> getBeanClass(Element element) {
-		return TreferenceList.class;
-	}
-
 	private Object parsePropertySubElement(ParserContext context, Element beanDef, BeanDefinition beanDefinition) {
 		return BlueprintParser.parsePropertySubElement(context, beanDef, beanDefinition);
 	}
@@ -213,13 +206,6 @@ public class BlueprintReferenceListBeanDefinitionParser extends AbstractBeanDefi
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
-
-		Class<?> beanClass = getBeanClass(element);
-		Assert.notNull(beanClass);
-
-		if (beanClass != null) {
-			builder.getRawBeanDefinition().setBeanClass(beanClass);
-		}
 
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
@@ -320,7 +306,7 @@ public class BlueprintReferenceListBeanDefinitionParser extends AbstractBeanDefi
 			}
 
 			// create serviceListener adapter
-			RootBeanDefinition wrapperDef = new RootBeanDefinition(TreferenceListener.class);
+			RootBeanDefinition wrapperDef = new RootBeanDefinition();
 
 			// set the target name (if we have one)
 			if (targetName != null) {
