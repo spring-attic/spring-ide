@@ -114,13 +114,10 @@ public class BootPropertyTester extends PropertyTester {
 	 * @return whether given resource is either Spring Boot IProject or nested inside one.
 	 */
 	public static boolean isBootResource(IResource rsrc) {
-//		debug("isBootResource: "+rsrc.getName());
 		if (rsrc==null || ! rsrc.isAccessible()) {
-//			debug("isBootResource => false");
 			return false;
 		}
 		boolean result = isBootProject(rsrc.getProject());
-//		debug("isBootResource => "+result);
 		return result;
 	}
 
