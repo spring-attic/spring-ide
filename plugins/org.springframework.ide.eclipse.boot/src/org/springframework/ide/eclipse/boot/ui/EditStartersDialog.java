@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
@@ -37,7 +36,7 @@ public class EditStartersDialog extends DialogWithSections {
 		super("Edit Spring Boot Starters", model, shell);
 		this.model = model;
 	}
-	
+
 	@Override
 	protected List<WizardPageSection> createSections() throws CoreException {
 		//return super.createSections();

@@ -20,10 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
