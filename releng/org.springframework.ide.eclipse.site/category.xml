@@ -205,6 +205,7 @@
 		<bundle id="javax.xml.ws" version="0.0.0"/>
 		<bundle id="javax.xml.bind" version="0.0.0"/>
 		<bundle id="javax.xml.stream" version="0.0.0"/>
+		<bundle id="javax.validation" version="0.0.0"/>
 		<bundle id="org.json" version="0.0.0"/>
 		<bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
 		<bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
