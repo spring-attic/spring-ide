@@ -20,7 +20,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.debug.core,
  org.eclipse.jdt.launching,
- org.eclipse.buildship.core
+ org.eclipse.buildship.core,
+ com.fasterxml.jackson.core.jackson-core,
+ com.fasterxml.jackson.core.jackson-databind
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

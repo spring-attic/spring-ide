@@ -31,6 +31,14 @@ public interface ISpringBootProject {
 	public IProject getProject();
 
 	/**
+	 * Fetches list of dependencies from the project. Dependencies returned may have 'incomplete' coordinates.
+	 * For example may only have group-id and artifact-id but not version. The info is extracted
+	 * from something like a pom.xml and the info that is listed there may also be incomplete.
+	 * @throws CoreException
+	 */
+	public List<IMavenCoordinates> getDependencies() throws CoreException;
+
+	/**
 	 * @return List of maven coordinates for known boot starters. These are discovered dynamically
 	 * based on project contents. E.g. for maven projects we examine the 'dependencyManagement'
 	 * section of the project's effective pom.
@@ -73,12 +81,12 @@ public interface ISpringBootProject {
 	 * for a maven project it will be added to the project's pom file in the
 	 * dependencies section.
 	 */
-	public void addMavenDependency(MavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
+	public void addMavenDependency(IMavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
 
 	/**
 	 * @since 3.7.0
 	 */
-	public void addMavenDependency(MavenCoordinates depConfigurationProcessor, boolean preferManagedVersion, boolean optional) throws CoreException;
+	public void addMavenDependency(IMavenCoordinates depConfigurationProcessor, boolean preferManagedVersion, boolean optional) throws CoreException;
 
 
 	/**

@@ -132,6 +132,26 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return Collections.emptyList();
 	}
 
+
+	@Override
+	public List<IMavenCoordinates> getDependencies() throws CoreException {
+		MavenProject mp = getMavenProject();
+		if (mp!=null) {
+			return toMavenCoordinates(mp.getDependencies());
+		}
+		return Collections.emptyList();
+	}
+
+
+
+	private List<IMavenCoordinates> toMavenCoordinates(List<Dependency> dependencies) {
+		ArrayList<IMavenCoordinates> converted = new ArrayList<>(dependencies.size());
+		for (Dependency d : dependencies) {
+			converted.add(new MavenCoordinates(d.getGroupId(), d.getArtifactId(), d.getClassifier(), d.getVersion()));
+		}
+		return converted;
+	}
+
 	private List<SpringBootStarter> getStarters(List<Dependency> deps) {
 		if (deps != null) {
 			ArrayList<SpringBootStarter> starters = new ArrayList<SpringBootStarter>();
@@ -179,7 +199,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	 * Determine the 'managed' version, if any, associate with a given dependency.
 	 * @return Version string or null.
 	 */
-	private String getManagedVersion(MavenCoordinates dep) {
+	private String getManagedVersion(IMavenCoordinates dep) {
 		try {
 			MavenProject mp = getMavenProject();
 			if (mp!=null) {
@@ -211,13 +231,13 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 
 	@Override
-	public void addMavenDependency(final MavenCoordinates dep, final boolean preferManagedVersion) throws CoreException {
+	public void addMavenDependency(final IMavenCoordinates dep, final boolean preferManagedVersion) throws CoreException {
 		addMavenDependency(dep, preferManagedVersion, false);
 	}
 
 	@Override
 	public void addMavenDependency(
-			final MavenCoordinates dep,
+			final IMavenCoordinates dep,
 			final boolean preferManagedVersion, final boolean optional
 	) throws CoreException {
 		try {
@@ -330,5 +350,4 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 		return SpringBootCore.getDefaultBootVersion();
 	}
-
 }

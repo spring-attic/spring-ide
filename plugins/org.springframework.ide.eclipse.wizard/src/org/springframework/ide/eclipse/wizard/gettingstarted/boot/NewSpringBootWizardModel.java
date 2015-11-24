@@ -11,12 +11,10 @@
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -79,7 +77,6 @@ import com.google.common.base.Optional;
  */
 public class NewSpringBootWizardModel {
 
-	private static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
@@ -113,13 +110,12 @@ public class NewSpringBootWizardModel {
 
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String JSON_URL;
-	private final String CONTENT_TYPE;
 	private PopularityTracker popularities;
 	private PreferredSelections preferredSelections;
 
 	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
 		this(
-				new URLConnectionFactory(),
+				WizardPlugin.getUrlConnectionFactory(),
 				StsProperties.getInstance(new NullProgressMonitor()),
 				prefs
 		);
@@ -127,22 +123,21 @@ public class NewSpringBootWizardModel {
 
 	public NewSpringBootWizardModel() throws Exception {
 		this(
-				new URLConnectionFactory(),
+				WizardPlugin.getUrlConnectionFactory(),
 				StsProperties.getInstance(new NullProgressMonitor()),
 				WizardPlugin.getDefault().getPreferenceStore()
 		);
 	}
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER, prefs);
+		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), prefs);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType, IPreferenceStore prefs) throws Exception {
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
 		this.preferredSelections = new PreferredSelections(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
-		this.CONTENT_TYPE = contentType;
 
 		baseUrl = new LiveVariable<String>("<computed>");
 		baseUrlValidator = new UrlValidator("Base Url", baseUrl);
@@ -230,46 +225,14 @@ public class NewSpringBootWizardModel {
 	 * @return An array of the most popular dependencies. May return fewer items than requested.
 	 */
 	public List<CheckBoxModel<Dependency>> getMostPopular(int howMany) {
-		final Map<CheckBoxModel<Dependency>, Integer> useCounts = new HashMap<CheckBoxModel<Dependency>, Integer>(); //usecounts by dependency id
-
-		ArrayList<CheckBoxModel<Dependency>> allUsedBoxes = new ArrayList<CheckBoxModel<Dependency>>();
-		for (String category : dependencies.getCategories()) {
-			allUsedBoxes.addAll(dependencies.getContents(category).getCheckBoxModels());
-		}
-
-		for (Iterator<CheckBoxModel<Dependency>> iterator = allUsedBoxes.iterator(); iterator.hasNext();) {
-			CheckBoxModel<Dependency> cb = iterator.next();
-			int useCount = popularities.getUsageCount(cb.getValue());
-			if (useCount==0) {
-				iterator.remove(); //don't care about those options never used at all.
-			} else {
-				useCounts.put(cb, popularities.getUsageCount(cb.getValue()));
-			}
-		}
-		Collections.sort(allUsedBoxes, new Comparator<CheckBoxModel<Dependency>>() {
-			public int compare(CheckBoxModel<Dependency> o1, CheckBoxModel<Dependency> o2) {
-				return useCounts.get(o2) - useCounts.get(o1);
-			}
-		});
-
-		howMany = Math.min(allUsedBoxes.size(), howMany);
-		List<CheckBoxModel<Dependency>> result = new ArrayList<CheckBoxModel<Dependency>>();
-		for (int i = 0; i < howMany; i++) {
-			result.add(allUsedBoxes.get(i));
-		}
-		return Collections.unmodifiableList(result);
+		return popularities.getMostPopular(dependencies, howMany);
 	}
 
 	/**
 	 * Shouldn't be public really. This is just to make it easier to call from unit test.
 	 */
 	public void updateUsageCounts() {
-		for (String category : dependencies.getCategories()) {
-			MultiSelectionFieldModel<Dependency> contents = dependencies.getContents(category);
-			for (Dependency d : contents.getCurrentSelections()) {
-				popularities.incrementUsageCount(d);
-			}
-		}
+		popularities.incrementUsageCount(dependencies.getCurrentSelection());
 	}
 
 
@@ -423,28 +386,23 @@ public class NewSpringBootWizardModel {
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
 			String catName = dgroup.getName();
 			for (Dependency dep : dgroup.getContent()) {
-				dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep.getVersionRange()));
+				dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep));
 			}
 		}
 	}
 
-	private LiveExpression<Boolean> createEnablementExp(final RadioGroup bootVersion, String versionRange) {
+	private LiveExpression<Boolean> createEnablementExp(final RadioGroup bootVersion, final Dependency dep) {
 		try {
+			String versionRange = dep.getVersionRange();
 			if (StringUtils.hasText(versionRange)) {
-				final VersionRange range = new VersionRange(versionRange);
 				return new LiveExpression<Boolean>() {
 					{ dependsOn(bootVersion.getSelection().selection); }
 					@Override
 					protected Boolean compute() {
-						try {
-							String versionStr = bootVersion.getSelection().selection.getValue().getValue();
-							if (versionStr!=null) {
-								Version version = new Version(versionStr.replace("BUILD-SNAPSHOT", "ZZZZZZZZZZZZZ"));
-								//replacement of BS -> ZZ: see bug https://www.pivotaltracker.com/story/show/100963226
-								return range.includes(version);
-							}
-						} catch (Exception e) {
-							WizardPlugin.log(e);
+						RadioInfo radio = bootVersion.getValue();
+						if (radio!=null) {
+							String versionString = radio.getValue();
+							return dep.isSupportedFor(versionString);
 						}
 						return true;
 					}
@@ -465,25 +423,7 @@ public class NewSpringBootWizardModel {
 	}
 
 	private InitializrServiceSpec parseJsonFrom(URL url) throws Exception {
-		URLConnection conn = null;
-		InputStream input = null;
-		try {
-			conn = urlConnectionFactory.createConnection(url);
-			conn.addRequestProperty("User-Agent", "STS "+WizardPlugin.getDefault().getBundle().getVersion());
-			if (CONTENT_TYPE!=null) {
-				conn.addRequestProperty("Accept", CONTENT_TYPE);
-			}
-			conn.connect();
-			input = conn.getInputStream();
-			return InitializrServiceSpec.parseFrom(input);
-		} finally {
-			if (input!=null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-				}
-			}
-		}
+		return InitializrServiceSpec.parseFrom(urlConnectionFactory, url);
 	}
 
 	private URL newURL(String value) {

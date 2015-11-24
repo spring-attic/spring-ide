@@ -13,14 +13,14 @@ package org.springframework.ide.eclipse.boot.core;
 /**
  * Identifies a boot starter within the scope of a project (i.e. this is a 'key' that can
  * be used to lookup a Starter in a project. It doesn't contain version info.
- * 
+ *
  * @author Kris De Volder
  */
 public class StarterId {
 
 	final private String groupId;
 	final private String artifactId;
-	
+
 	public StarterId(String groupId, String artifactId) {
 		super();
 		this.groupId = groupId;
@@ -66,6 +66,11 @@ public class StarterId {
 		} else if (!groupId.equals(other.groupId))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "StarterId [groupId=" + groupId + ", artifactId=" + artifactId + "]";
 	}
 
 }

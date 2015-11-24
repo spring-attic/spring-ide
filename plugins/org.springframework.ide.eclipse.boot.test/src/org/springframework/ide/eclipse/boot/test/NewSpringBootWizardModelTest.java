@@ -66,7 +66,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath, IPreferenceStore store) throws Exception {
 		URL formUrl = resourceUrl(resourcePath);
-		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), "application/json", store);
+		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), store);
 	}
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
@@ -450,7 +450,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		HashSet<Dependency> selecteds = new HashSet<InitializrServiceSpec.Dependency>();
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
-			selecteds.addAll(cat.getCurrentSelections());
+			selecteds.addAll(cat.getCurrentSelection());
 		}
 		return selecteds;
 	}
