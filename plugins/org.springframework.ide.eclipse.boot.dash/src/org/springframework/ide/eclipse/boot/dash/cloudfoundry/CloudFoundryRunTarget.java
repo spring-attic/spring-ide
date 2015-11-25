@@ -248,45 +248,38 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 		if (javaProject != null) {
 			try {
-				CloudInfo info = getClient().getCloudInfo();
-				if (info == null) {
-					return null;
+				if (this.buildpacks == null) {
+					CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(),
+							targetProperties.getPassword());
+					HttpProxyConfiguration proxyConf = getProxyConf();
+					BuildpackSupport support = BuildpackSupport.create(getClient(), creds, proxyConf,
+							targetProperties.isSelfsigned());
+
+					// Cache it to avoid frequent calls to CF
+					this.buildpacks = support.getBuildpacks();
 				}
 
-				if (info.getApiVersion() != null && info.getApiVersion().compareTo("2.40") >= 0) {
-					if (this.buildpacks == null) {
-						CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(),
-								targetProperties.getPassword());
-						HttpProxyConfiguration proxyConf = getProxyConf();
-						BuildpackSupport support = BuildpackSupport.create(getClient(), creds, proxyConf,
-								targetProperties.isSelfsigned());
+				if (this.buildpacks != null) {
+					String javaBuildpack = null;
+					// Only chose a java build iff ONE java buildpack exists
+					// that contains the java_buildpack pattern.
 
-						// Cache it to avoid frequent calls to CF
-						this.buildpacks = support.getBuildpacks();
-					}
-
-					if (this.buildpacks != null) {
-						String javaBuildpack = null;
-						// Only chose a java build iff ONE java buildpack exists
-						// that contains the java_buildpack pattern.
-
-						for (Buildpack bp : this.buildpacks) {
-							// iterate through all buildpacks to make sure only
-							// ONE java buildpack exists
-							if (bp.getName().contains("java_buildpack")) {
-								if (javaBuildpack == null) {
-									javaBuildpack = bp.getName();
-								} else {
-									// If more than two buildpacks contain
-									// "java_buildpack", do not chose any. Let CF buildpack
-									// detection decided which one to chose.
-									javaBuildpack = null;
-									break;
-								}
+					for (Buildpack bp : this.buildpacks) {
+						// iterate through all buildpacks to make sure only
+						// ONE java buildpack exists
+						if (bp.getName().contains("java_buildpack")) {
+							if (javaBuildpack == null) {
+								javaBuildpack = bp.getName();
+							} else {
+								// If more than two buildpacks contain
+								// "java_buildpack", do not chose any. Let CF buildpack
+								// detection decided which one to chose.
+								javaBuildpack = null;
+								break;
 							}
 						}
-						return javaBuildpack;
 					}
+					return javaBuildpack;
 				}
 			} catch (Exception e) {
 				BootDashActivator.log(e);
