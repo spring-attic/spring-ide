@@ -22,6 +22,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
+import java.net.URL;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
@@ -53,6 +55,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProp
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
@@ -65,8 +68,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private List<CloudSpace> spaces;
 	private List<Buildpack> buildpacks;
 
+	private CloudInfoV2 cachedCloudInfo;
 	private CloudFoundryOperations cachedClient;
 	private CloudFoundryClientFactory clientFactory;
+
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
@@ -99,6 +104,24 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			cachedClient = createClient();
 		}
 		return cachedClient;
+	}
+
+	public Version getCCApiVersion() {
+		try {
+			CloudFoundryOperations client = getClient();
+			if (client!=null) {
+				CloudInfo info = client.getCloudInfo();
+				if (info!=null) {
+					String versionString = info.getApiVersion();
+					if (versionString!=null) {
+						return new Version(versionString);
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
 	}
 
 	protected CloudFoundryOperations createClient() throws Exception {
@@ -144,6 +167,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	public void refresh() throws Exception {
 		// Fetching a new client always validates the CF credentials
 		this.cachedClient = createClient();
+		this.cachedCloudInfo = null;
 		this.domains = null;
 		this.spaces = null;
 		this.buildpacks = null;
@@ -192,16 +216,30 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	public HealthCheckSupport getHealthCheckSupport() throws Exception {
 		CloudFoundryOperations client = getClient();
-		CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
-		HttpProxyConfiguration proxyConf = null; //TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
-		return HealthCheckSupport.create(client, creds, proxyConf, targetProperties.isSelfsigned());
+		HttpProxyConfiguration proxyConf = getProxyConf();
+		return new HealthCheckSupport(client, getCloudInfoV2(), targetProperties.isSelfsigned(), proxyConf);
+	}
+
+	public HttpProxyConfiguration getProxyConf() {
+		//TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
+		return null;
 	}
 
 	public SshClientSupport getSshClientSupport() throws Exception {
 		CloudFoundryOperations client = getClient();
-		CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
-		HttpProxyConfiguration proxyConf = null; //TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
-		return SshClientSupport.create(client, creds, proxyConf, targetProperties.isSelfsigned());
+		HttpProxyConfiguration proxyConf = getProxyConf();
+		return new SshClientSupport(client, getCloudInfoV2(), targetProperties.isSelfsigned(), proxyConf);
+	}
+
+	private CloudInfoV2 getCloudInfoV2() throws Exception {
+		//cached cloudInfo as it doesn't really change and is more like a bunch of static info about how a target is configured.
+		if (this.cachedCloudInfo==null) {
+			CloudFoundryOperations client = getClient();
+			CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
+			HttpProxyConfiguration proxyConf = getProxyConf();
+			this.cachedCloudInfo = new CloudInfoV2(creds, client.getCloudControllerUrl(), proxyConf, targetProperties.isSelfsigned());
+		}
+		return this.cachedCloudInfo;
 	}
 
 	public String getBuildpack(IProject project) {
@@ -219,7 +257,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 					if (this.buildpacks == null) {
 						CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(),
 								targetProperties.getPassword());
-						HttpProxyConfiguration proxyConf = null;
+						HttpProxyConfiguration proxyConf = getProxyConf();
 						BuildpackSupport support = BuildpackSupport.create(getClient(), creds, proxyConf,
 								targetProperties.isSelfsigned());
 

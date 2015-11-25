@@ -18,7 +18,10 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
@@ -31,6 +34,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.*;
@@ -52,16 +57,32 @@ public class SshDebugSupport extends DebugSupport {
 
 	@Override
 	public boolean isSupported(CloudDashElement app) {
-		CloudFoundryRunTarget target = app.getTarget();
-		//TODO: only on PWS for now, but this can be broadened. How do we know/determine when it is supported?
-		// Probably a combination of:
-		//   PCF version >= 1.6 and using the java client to ask whether diego is enabled and whether ssh support is enabled.
-		return target.isPWS();
+		String notSupportedMessage = getNotSupportedMessage(app);
+		return notSupportedMessage==null;
 	}
 
 	@Override
 	public String getNotSupportedMessage(CloudDashElement app) {
-		return "SSH debugging is only supported on PWS";
+		//TODO: There are a number of different ways that ssh and/or diego might be disabled for
+		//  an app. e.g. it can be disabled on the app itself, on the space, on the org or
+		//  on the whole CF installation. This check should recognize these situation.
+		//  At the moment it pretty much returns true if the CF has global info about the 'ssh-host',
+		//  but this probably usually the case on any recent enough version of PCF, even if
+		//  ssh has been explicitly disabled.
+		CloudFoundryRunTarget target = app.getTarget();
+		try {
+			if (target.getSshClientSupport().getSshHost()==null) {
+				return "Cloud controller doesn't specify an ssh-host. This probably means your version of CloudFoundry doesn't support SSH.";
+			}
+			return null;
+		} catch (Exception e) {
+			BootDashActivator.log(e); //for traceability
+			String msg = ExceptionUtil.getMessage(e);
+			if (!StringUtil.hasText(msg)) {
+				msg = "Exception: "+e.getClass().getName();
+			}
+			return msg;
+		}
 	}
 
 	@Override
