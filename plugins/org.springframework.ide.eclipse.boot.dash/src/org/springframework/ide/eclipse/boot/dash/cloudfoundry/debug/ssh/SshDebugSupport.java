@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.getApp;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.getLaunchType;
+
 import java.util.Arrays;
 import java.util.Map;
 
@@ -18,8 +21,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.IDebugTarget;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
@@ -34,11 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
-
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.*;
 
 /**
  * Uses ssh tunnelling on Diego to support debugging of app running on CF.
