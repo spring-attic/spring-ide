@@ -12,10 +12,13 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml.ast;
 
 import java.io.StringReader;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -36,8 +39,17 @@ public class YamlASTProvider {
 	 * For cache invalidation
 	 */
 	private IDocumentListener listener = new IDocumentListener() {
-		public void documentChanged(DocumentEvent event) {
-			changed(event.fDocument);
+
+		public void documentChanged(final DocumentEvent event) {
+			Job job = new Job("Clear YamlASTProvider Cache") {
+				protected IStatus run(IProgressMonitor monitor) {
+					changed(event.getDocument());
+					return Status.OK_STATUS;
+				}
+			};
+			job.setPriority(Job.INTERACTIVE);
+			job.setSystem(true);
+			job.schedule();
 		}
 		public void documentAboutToBeChanged(DocumentEvent event) {
 			//Don't care.
