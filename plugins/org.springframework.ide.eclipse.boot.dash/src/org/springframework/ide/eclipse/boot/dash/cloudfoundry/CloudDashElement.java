@@ -38,6 +38,8 @@ import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 
+import com.google.common.base.Objects;
+
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
  * application state as it may be discarded and created multiple times for the
@@ -226,6 +228,18 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return getCloudModel().getAppCache().getHealthCheck(this);
 	}
 
+	/**
+	 * Changes the cached health-check value for this model element. Note that this
+	 * doesn *not* change the real value of the health-check.
+	 */
+	public void setHealthCheck(String hc) {
+		String old = getHealthCheck();
+		if (!Objects.equal(old, hc)) {
+			CloudFoundryBootDashModel model = getCloudModel();
+			model.getAppCache().setHealthCheck(this, hc);
+			model.notifyElementChanged(this);
+		}
+	}
 
 	public UUID getAppGuid() {
 		CloudApplication app = getCloudModel().getAppCache().getApp(getName());

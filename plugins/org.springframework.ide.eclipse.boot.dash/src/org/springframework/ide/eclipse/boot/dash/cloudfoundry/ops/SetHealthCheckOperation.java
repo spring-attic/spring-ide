@@ -64,7 +64,7 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 					}
 					if (confirmed) {
 						hc.setHealthCheck(guid, hcType);
-						app.getCloudModel().getAppCache().setHealthCheck(app, hcType);
+						app.setHealthCheck(hcType);
 					}
 					monitor.worked(1);
 				}

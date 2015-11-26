@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -99,6 +100,11 @@ public class AddElementOperation extends CloudApplicationOperation {
 			BootDashElement localElement = findLocalBdeForProject(project);
 			if (localElement != null) {
 				copyTags(localElement, bde);
+			}
+			if (bde instanceof CloudDashElement) {
+				CloudDashElement cde = (CloudDashElement) bde;
+				String hc = cde.getTarget().getHealthCheckSupport().getHealthCheck(cde.getAppGuid());
+				cde.setHealthCheck(hc);
 			}
 		}
 	}
