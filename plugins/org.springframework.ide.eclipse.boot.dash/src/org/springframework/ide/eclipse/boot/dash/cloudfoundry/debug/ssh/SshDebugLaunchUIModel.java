@@ -11,15 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.launch.ExistingBootProjectSelectionValidator;
-import org.springframework.ide.eclipse.boot.launch.LaunchTabSelectionModel;
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.devtools.DevtoolsEnabledValidator;
 import org.springframework.ide.eclipse.boot.launch.devtools.StringFieldLaunchTabModel;
@@ -95,7 +92,7 @@ public class SshDebugLaunchUIModel {
 						IProject project = projectSelection.getValue();
 						IProject appProject = app.getProject();
 						if (appProject==null) {
-							//  we don't know what project goes with an app so give the user
+							//  we don't know what project goes with selected app so give the user
 							// the benefit of the doubdt
 							// => no error!
 						} else if (project==null) {
