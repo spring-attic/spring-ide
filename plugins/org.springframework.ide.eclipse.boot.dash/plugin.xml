@@ -144,7 +144,6 @@
 	          name="Boot Dash SSH Debug Tunnel"
 	          delegate="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate"
 	          modes="debug"
-	          public="false"
 	          sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
 	          sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
 	    </launchConfigurationType>
@@ -158,5 +157,13 @@
 	        id="org.springframework.ide.eclipse.boot.dash.ssh.tunnel.launch.image">
 	    </launchConfigurationTypeImage>
     </extension>
+
+<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    <launchConfigurationTabGroup
+        type="org.springframework.ide.eclipse.boot.dash.ssh.tunnel.launch"
+        class="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationTabGroup"
+        id="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationTabGroup">
+    </launchConfigurationTabGroup>
+</extension>
 
 </plugin>

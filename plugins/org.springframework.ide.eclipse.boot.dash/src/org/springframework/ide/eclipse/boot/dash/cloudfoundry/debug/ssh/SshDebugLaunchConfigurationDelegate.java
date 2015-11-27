@@ -76,6 +76,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor mon)
 			throws CoreException {
+		conf = configureSourcePathProvider(conf);
 		Assert.isTrue(ILaunchManager.DEBUG_MODE.equals(mode));
 		BootDashViewModel context = getContext();
 		mon.beginTask("Establish SSH Debug Connection to "+getAppName(conf)+" on "+getRunTarget(conf, context), 4);
@@ -90,7 +91,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 				app.log("Fetching SSH tunnel parameters...");
 				SshClientSupport sshInfo = target.getSshClientSupport();
 				SshHost sshHost = sshInfo.getSshHost();
-				String sshUser = sshInfo.getSshUser(app.getAppGuid(), 0);
+				String sshUser = sshInfo.getSshUser(app.getAppGuid(), getInstanceIndex(conf));
 				String sshCode = sshInfo.getSshCode();
 				int remotePort = debugSupport.getRemotePort();
 
@@ -115,6 +116,15 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		} finally {
 			mon.done();
 		}
+	}
+
+	public static int getInstanceIndex(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(INSTANCE_IDX, 0);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return 0;
 	}
 
 	private SshDebugSupport getDebugSupport(ILaunchConfiguration conf, BootDashViewModel context) {

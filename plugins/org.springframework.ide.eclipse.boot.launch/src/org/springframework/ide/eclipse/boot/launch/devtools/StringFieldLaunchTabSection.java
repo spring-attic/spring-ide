@@ -11,12 +11,13 @@
 package org.springframework.ide.eclipse.boot.launch.devtools;
 
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
+import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 
 public class StringFieldLaunchTabSection {
 
-	public static IPageSection create(BootDevtoolsClientMainTab owner, StringFieldLaunchTabModel field) {
+	public static IPageSection create(LaunchConfigurationTabWithSections owner, StringFieldLaunchTabModel field) {
 		StringFieldSection ui = new StringFieldSection(owner, field.field);
 		return new DelegatingLaunchConfigurationTabSection(owner, field, ui);
 	}

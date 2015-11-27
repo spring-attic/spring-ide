@@ -337,11 +337,16 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
+		conf = configureSourcePathProvider(conf);
+		super.launch(conf, mode, launch, monitor);
+	}
+
+	protected ILaunchConfiguration configureSourcePathProvider(ILaunchConfiguration conf) throws CoreException {
 		IProject project = BootLaunchConfigurationDelegate.getProject(conf);
 		if (project.hasNature(SpringBootCore.M2E_NATURE)) {
 			conf = setAttribute(conf, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
 		}
-		super.launch(conf, mode, launch, monitor);
+		return conf;
 	}
 
 	private ILaunchConfiguration setAttribute(ILaunchConfiguration conf, String a, String v) {
