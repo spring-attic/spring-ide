@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
-import org.springframework.ide.eclipse.boot.util.livexp.ui.ReflowableDialogWithSections;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.DependencyFilterBox;
@@ -27,6 +26,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.SearchBoxSecti
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -34,7 +34,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 /**
  * @author Kris De Volder
  */
-public class EditStartersDialog extends ReflowableDialogWithSections {
+public class EditStartersDialog extends DialogWithSections {
 
 	private static final int NUM_DEP_COLUMNS = 4;
 	public EditStartersModel model;
