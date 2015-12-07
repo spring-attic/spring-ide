@@ -49,6 +49,7 @@ public class GradleImportStrategy extends ImportStrategy {
 		@Override
 		public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
 			Assert.isLegal(buildType==BuildType.GRADLE);
+			Class.forName("org.springsource.ide.eclipse.gradle.core.samples.SampleProject");
 			return new GradleImportStrategy(buildType, name, notInstalledMessage);
 		}
 	}
