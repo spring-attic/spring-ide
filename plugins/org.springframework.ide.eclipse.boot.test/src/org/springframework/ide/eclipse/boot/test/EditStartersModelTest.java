@@ -150,6 +150,27 @@ public class EditStartersModelTest {
 		assertEquals("test", getScope(depEl));
 	}
 
+	@Test
+	public void addStarterWithBom() throws Exception {
+// We'll be adding this starter:
+//	      "id": "cloud-eureka",
+//	      "groupId": "org.springframework.cloud",
+//	      "artifactId": "spring-cloud-starter-eureka",
+//	      "scope": "compile",
+//	      "bom": "cloud-bom"
+
+		IProject project = harness.createBootProject("foo", withStarters("web"));
+		final ISpringBootProject bootProject = SpringBootCore.create(project);
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("cloud-eureka");
+		wizard.performOk();
+
+		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+		StsTestUtil.assertNoErrors(project); //force project build
+
+		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka");
+	}
+
 	//TODO: testing of...
 	// - adding a starter that has a bom
 	//    - bom added if not present yet
