@@ -32,6 +32,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -79,6 +81,8 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 		private Text hostText;
 
+		private Text memoryText;
+
 		protected DeploymentPropertiesPage() {
 			super("Enter Application Deployment Properties");
 			setTitle("Enter Application Deployment Properties");
@@ -96,7 +100,7 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 			Label appNameLabel = new Label(composite, SWT.NONE);
 			appNameLabel.setText("Application Name:");
-			GridDataFactory.fillDefaults().grab(false, false).applyTo(appNameLabel);
+			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).grab(false, false).applyTo(appNameLabel);
 
 			final Text appNameText = new Text(composite, SWT.BORDER);
 			if (properties.getAppName() != null) {
@@ -115,7 +119,7 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 			Label hostNameLabel = new Label(composite, SWT.NONE);
 			hostNameLabel.setText("Host:");
-			GridDataFactory.fillDefaults().grab(false, false).applyTo(hostNameLabel);
+			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).grab(false, false).applyTo(hostNameLabel);
 
 			hostText = new Text(composite, SWT.BORDER);
 			if (url != null && url.getSubdomain() != null) {
@@ -134,7 +138,7 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 			Label domainLabel = new Label(composite, SWT.NONE);
 			domainLabel.setText("Domain:");
-			GridDataFactory.fillDefaults().grab(false, false).applyTo(domainLabel);
+			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).grab(false, false).applyTo(domainLabel);
 
 			domainCombo = new Combo(composite, SWT.BORDER | SWT.READ_ONLY);
 
@@ -144,6 +148,44 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					setUrl();
+				}
+			});
+
+			Label memoryLabel = new Label(composite, SWT.NONE);
+			memoryLabel.setText("Memory (Mb):");
+			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).grab(false, false).applyTo(memoryLabel);
+
+			memoryText = new Text(composite, SWT.BORDER);
+			GridDataFactory.fillDefaults().grab(false, false).applyTo(memoryText);
+			memoryText.setText(properties.getMemory() < 0 ? "" : String.valueOf(properties.getMemory()));
+			/*
+			 * Text length limit is set such that it would always be a number less than MAX_INT
+			 * Note that only numbers are accepted input chars
+			 */
+			memoryText.setTextLimit(9);
+			memoryText.addVerifyListener(new VerifyListener() {
+				@Override
+				public void verifyText(VerifyEvent e) {
+					String string = e.text;
+					char [] chars = new char [string.length ()];
+					string.getChars (0, chars.length, chars, 0);
+					for (int i=0; i<chars.length; i++) {
+						if (!('0' <= chars [i] && chars [i] <= '9')) {
+							e.doit = false;
+							return;
+						}
+					}
+				}
+			});
+			memoryText.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					if (memoryText.getText().isEmpty()) {
+						properties.setMemory(-1);
+					} else {
+						properties.setMemory(Integer.valueOf(memoryText.getText()));
+					}
+					update();
 				}
 			});
 
@@ -246,6 +288,8 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 			error = "Please enter an application name";
 		} else if (properties.getUrls() == null || properties.getUrls().isEmpty()) {
 			error = "Please specify a host and domain for the application URL";
+		} else if (properties.getMemory() <= 0) {
+			error = "Please specify valid memory size in Megabytes";
 		}
 
 		if (error != null) {

@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
 public class CloudApplicationDeploymentProperties extends BaseDeploymentProperties {
 
-	public static final int DEFAULT_MEMORY = 1024;
 	public static final int DEFAULT_INSTANCES = 1;
 	/*
 	 * These should never be null
@@ -31,10 +30,8 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 	private final List<String> boundServices = new ArrayList<String>();
 	private final Map<String, String> environmentVariables = new HashMap<String, String>();
 
-	private int memory = DEFAULT_MEMORY;
 	private int instances = DEFAULT_INSTANCES;
-	
-	
+
 	/*
 	 * Additional properties
 	 */
@@ -55,10 +52,6 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 		if (services != null) {
 			this.boundServices.addAll(services);
 		}
-	}
-
-	public void setMemory(int memory) {
-		this.memory = memory;
 	}
 
 	public void setInstances(int instances) {
@@ -82,10 +75,6 @@ public class CloudApplicationDeploymentProperties extends BaseDeploymentProperti
 
 	public String getBuildpack() {
 		return buildpack;
-	}
-
-	public int getMemory() {
-		return memory;
 	}
 
 	public int getInstances() {

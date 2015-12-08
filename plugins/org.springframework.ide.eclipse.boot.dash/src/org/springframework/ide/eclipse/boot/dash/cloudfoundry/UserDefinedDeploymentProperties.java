@@ -50,6 +50,7 @@ public class UserDefinedDeploymentProperties extends BaseDeploymentProperties {
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties(this.getProject());
 		properties.setAppName(this.getAppName());
 		properties.setUrls(this.getUrls());
+		properties.setMemory(this.getMemory());
 		return properties;
 	}
 
