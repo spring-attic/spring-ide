@@ -1,59 +1,50 @@
-
-
 {
+  "bootVersion": "1.3.0.RELEASE",
   "dependencies": [
     {
       "id": "security",
-      "name": "Security",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-security",
       "scope": "compile"
     },
     {
       "id": "aop",
-      "name": "AOP",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-aop",
       "scope": "compile"
     },
     {
       "id": "jta-atomikos",
-      "name": "Atomikos (JTA)",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-jta-atomikos",
       "scope": "compile"
     },
     {
       "id": "jta-bitronix",
-      "name": "Bitronix (JTA)",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-jta-bitronix",
       "scope": "compile"
     },
     {
       "id": "cache",
-      "name": "Cache",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-cache",
       "scope": "compile"
     },
     {
       "id": "devtools",
-      "name": "DevTools",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-devtools",
       "scope": "compile"
     },
     {
       "id": "validation",
-      "name": "Validation",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-validation",
       "scope": "compile"
     },
     {
       "id": "lombok",
-      "name": "Lombok",
       "groupId": "org.projectlombok",
       "artifactId": "lombok",
       "scope": "compile",
@@ -61,35 +52,30 @@
     },
     {
       "id": "web",
-      "name": "Web",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-web",
       "scope": "compile"
     },
     {
       "id": "websocket",
-      "name": "Websocket",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-websocket",
       "scope": "compile"
     },
     {
       "id": "ws",
-      "name": "WS",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-ws",
       "scope": "compile"
     },
     {
       "id": "jersey",
-      "name": "Jersey (JAX-RS)",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-jersey",
       "scope": "compile"
     },
     {
       "id": "ratpack",
-      "name": "Ratpack",
       "groupId": "io.ratpack",
       "artifactId": "ratpack-spring-boot",
       "version": "1.1.1",
@@ -97,7 +83,6 @@
     },
     {
       "id": "vaadin",
-      "name": "Vaadin",
       "groupId": "com.vaadin",
       "artifactId": "vaadin-spring-boot-starter",
       "version": "1.0.0",
@@ -106,148 +91,127 @@
     },
     {
       "id": "data-rest",
-      "name": "Rest Repositories",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-rest",
       "scope": "compile"
     },
     {
       "id": "hateoas",
-      "name": "HATEOAS",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-hateoas",
       "scope": "compile"
     },
     {
       "id": "data-rest-hal",
-      "name": "Rest Repositories HAL Browser",
       "groupId": "org.springframework.data",
       "artifactId": "spring-data-rest-hal-browser",
       "scope": "compile"
     },
     {
       "id": "mobile",
-      "name": "Mobile",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-mobile",
       "scope": "compile"
     },
     {
       "id": "restdocs",
-      "name": "REST Docs",
       "groupId": "org.springframework.restdocs",
       "artifactId": "spring-restdocs-mockmvc",
-      "version": "1.0.0.RC1",
+      "version": "1.0.0.RELEASE",
       "scope": "test"
     },
     {
       "id": "freemarker",
-      "name": "Freemarker",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-freemarker",
       "scope": "compile"
     },
     {
       "id": "velocity",
-      "name": "Velocity",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-velocity",
       "scope": "compile"
     },
     {
       "id": "groovy-templates",
-      "name": "Groovy Templates",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-groovy-templates",
       "scope": "compile"
     },
     {
       "id": "thymeleaf",
-      "name": "Thymeleaf",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-thymeleaf",
       "scope": "compile"
     },
     {
       "id": "mustache",
-      "name": "Mustache",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-mustache",
       "scope": "compile"
     },
     {
       "id": "jdbc",
-      "name": "JDBC",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-jdbc",
       "scope": "compile"
     },
     {
       "id": "data-jpa",
-      "name": "JPA",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-jpa",
       "scope": "compile"
     },
     {
       "id": "data-jpa",
-      "name": "JPA",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-jpa",
       "scope": "compile"
     },
     {
       "id": "jooq",
-      "name": "JOOQ",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-jooq",
       "scope": "compile"
     },
     {
       "id": "data-mongodb",
-      "name": "MongoDB",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-mongodb",
       "scope": "compile"
     },
     {
       "id": "data-cassandra",
-      "name": "Cassandra",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-cassandra",
       "scope": "compile"
     },
     {
       "id": "redis",
-      "name": "Redis",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-redis",
       "scope": "compile"
     },
     {
       "id": "data-gemfire",
-      "name": "Gemfire",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-gemfire",
       "scope": "compile"
     },
     {
       "id": "data-solr",
-      "name": "Solr",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-solr",
       "scope": "compile"
     },
     {
       "id": "data-elasticsearch",
-      "name": "Elasticsearch",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-data-elasticsearch",
       "scope": "compile"
     },
     {
       "id": "cloud-connectors",
-      "name": "Cloud Connectors",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-cloud-connectors",
       "scope": "compile",
@@ -255,7 +219,6 @@
     },
     {
       "id": "cloud-starter",
-      "name": "Cloud Bootstrap",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter",
       "scope": "compile",
@@ -263,7 +226,6 @@
     },
     {
       "id": "cloud-security",
-      "name": "Cloud Security",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-security",
       "scope": "compile",
@@ -271,7 +233,6 @@
     },
     {
       "id": "cloud-oauth2",
-      "name": "Cloud OAuth2",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-oauth2",
       "scope": "compile",
@@ -279,7 +240,6 @@
     },
     {
       "id": "cloud-config-client",
-      "name": "Config Client",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-config",
       "scope": "compile",
@@ -287,7 +247,6 @@
     },
     {
       "id": "cloud-config-server",
-      "name": "Config Server",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-config-server",
       "scope": "compile",
@@ -295,7 +254,6 @@
     },
     {
       "id": "cloud-starter-zookeeper-config",
-      "name": "Zookeeper Configuration",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-zookeeper-config",
       "scope": "compile",
@@ -303,7 +261,6 @@
     },
     {
       "id": "cloud-starter-consul-config",
-      "name": "Consul Configuration",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-consul-config",
       "scope": "compile",
@@ -311,7 +268,6 @@
     },
     {
       "id": "cloud-eureka",
-      "name": "Eureka Discovery",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-eureka",
       "scope": "compile",
@@ -319,7 +275,6 @@
     },
     {
       "id": "cloud-eureka-server",
-      "name": "Eureka Server",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-eureka-server",
       "scope": "compile",
@@ -327,7 +282,6 @@
     },
     {
       "id": "cloud-starter-zookeeper-discovery",
-      "name": "Zookeeper Discovery",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-zookeeper-discovery",
       "scope": "compile",
@@ -335,7 +289,6 @@
     },
     {
       "id": "cloud-cloudfoundry-discovery",
-      "name": "Cloud Foundry Discovery",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-cloudfoundry-discovery",
       "scope": "compile",
@@ -343,7 +296,6 @@
     },
     {
       "id": "cloud-starter-consul-discovery",
-      "name": "Consul Discovery",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-consul-discovery",
       "scope": "compile",
@@ -351,7 +303,6 @@
     },
     {
       "id": "cloud-zuul",
-      "name": "Zuul",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-zuul",
       "scope": "compile",
@@ -359,7 +310,6 @@
     },
     {
       "id": "cloud-ribbon",
-      "name": "Ribbon",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-ribbon",
       "scope": "compile",
@@ -367,7 +317,6 @@
     },
     {
       "id": "cloud-feign",
-      "name": "Feign",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-feign",
       "scope": "compile",
@@ -375,7 +324,6 @@
     },
     {
       "id": "cloud-hystrix",
-      "name": "Hystrix",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-hystrix",
       "scope": "compile",
@@ -383,7 +331,6 @@
     },
     {
       "id": "cloud-hystrix-dashboard",
-      "name": "Hystrix Dashboard",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-hystrix-dashboard",
       "scope": "compile",
@@ -391,23 +338,13 @@
     },
     {
       "id": "cloud-turbine",
-      "name": "Turbine",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-turbine",
       "scope": "compile",
       "bom": "cloud-bom"
     },
     {
-      "id": "cloud-turbine-amqp",
-      "name": "Turbine AMQP",
-      "groupId": "org.springframework.cloud",
-      "artifactId": "spring-cloud-starter-turbine-amqp",
-      "scope": "compile",
-      "bom": "cloud-bom"
-    },
-    {
       "id": "cloud-turbine-stream",
-      "name": "Turbine Stream",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-turbine-stream",
       "scope": "compile",
@@ -415,7 +352,6 @@
     },
     {
       "id": "cloud-starter-sleuth",
-      "name": "Sleuth",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-sleuth",
       "scope": "compile",
@@ -423,7 +359,6 @@
     },
     {
       "id": "cloud-starter-zipkin",
-      "name": "Zipkin",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-zipkin",
       "scope": "compile",
@@ -431,23 +366,13 @@
     },
     {
       "id": "cloud-bus-amqp",
-      "name": "Cloud Bus AMQP",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-bus-amqp",
       "scope": "compile",
       "bom": "cloud-bom"
     },
     {
-      "id": "cloud-bus-rabbit",
-      "name": "Cloud Bus Rabbit",
-      "groupId": "org.springframework.cloud",
-      "artifactId": "spring-cloud-starter-bus-rabbit",
-      "scope": "compile",
-      "bom": "cloud-bom"
-    },
-    {
       "id": "cloud-bus-redis",
-      "name": "Cloud Bus Redis",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-bus-redis",
       "scope": "compile",
@@ -455,7 +380,6 @@
     },
     {
       "id": "cloud-bus-kafka",
-      "name": "Cloud Bus Kafka",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-bus-kafka",
       "scope": "compile",
@@ -463,7 +387,6 @@
     },
     {
       "id": "cloud-starter-consul-bus",
-      "name": "Consul Bus",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-consul-bus",
       "scope": "compile",
@@ -471,7 +394,6 @@
     },
     {
       "id": "cloud-stream-binder-rabbit",
-      "name": "Stream Rabbit",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-stream-rabbit",
       "scope": "compile",
@@ -479,7 +401,6 @@
     },
     {
       "id": "cloud-stream-binder-redis",
-      "name": "Stream Redis",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-stream-redis",
       "scope": "compile",
@@ -487,7 +408,6 @@
     },
     {
       "id": "cloud-stream-binder-kafka",
-      "name": "Stream Kafka",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-stream-kafka",
       "scope": "compile",
@@ -495,7 +415,6 @@
     },
     {
       "id": "cloud-aws",
-      "name": "AWS Core",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-aws",
       "scope": "compile",
@@ -503,7 +422,6 @@
     },
     {
       "id": "cloud-aws-jdbc",
-      "name": "AWS JDBC",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-aws-jdbc",
       "scope": "compile",
@@ -511,7 +429,6 @@
     },
     {
       "id": "cloud-aws-messaging",
-      "name": "AWS Messaging",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-starter-aws-messaging",
       "scope": "compile",
@@ -519,7 +436,6 @@
     },
     {
       "id": "cloud-cluster-redis",
-      "name": "Cluster Redis",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-cluster-redis",
       "scope": "compile",
@@ -527,7 +443,6 @@
     },
     {
       "id": "cloud-cluster-zookeeper",
-      "name": "Cluster Zookeeper",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-cluster-zookeeper",
       "scope": "compile",
@@ -535,7 +450,6 @@
     },
     {
       "id": "cloud-cluster-hazelcast",
-      "name": "Cluster Hazelcast",
       "groupId": "org.springframework.cloud",
       "artifactId": "spring-cloud-cluster-hazelcast",
       "scope": "compile",
@@ -543,35 +457,30 @@
     },
     {
       "id": "h2",
-      "name": "H2",
       "groupId": "com.h2database",
       "artifactId": "h2",
       "scope": "runtime"
     },
     {
       "id": "hsql",
-      "name": "HSQLDB",
       "groupId": "org.hsqldb",
       "artifactId": "hsqldb",
       "scope": "runtime"
     },
     {
       "id": "derby",
-      "name": "Apache Derby",
       "groupId": "org.apache.derby",
       "artifactId": "derby",
       "scope": "runtime"
     },
     {
       "id": "mysql",
-      "name": "MySQL",
       "groupId": "mysql",
       "artifactId": "mysql-connector-java",
       "scope": "runtime"
     },
     {
       "id": "postgresql",
-      "name": "PostgreSQL",
       "groupId": "org.postgresql",
       "artifactId": "postgresql",
       "version": "9.4-1201-jdbc41",
@@ -579,42 +488,36 @@
     },
     {
       "id": "social-facebook",
-      "name": "Facebook",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-social-facebook",
       "scope": "compile"
     },
     {
       "id": "social-linkedin",
-      "name": "LinkedIn",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-social-linkedin",
       "scope": "compile"
     },
     {
       "id": "social-twitter",
-      "name": "Twitter",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-social-twitter",
       "scope": "compile"
     },
     {
       "id": "batch",
-      "name": "Batch",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-batch",
       "scope": "compile"
     },
     {
       "id": "integration",
-      "name": "Integration",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-integration",
       "scope": "compile"
     },
     {
       "id": "activiti-basic",
-      "name": "Activiti",
       "groupId": "org.activiti",
       "artifactId": "activiti-spring-boot-starter-basic",
       "version": "5.19.0",
@@ -622,54 +525,70 @@
     },
     {
       "id": "artemis",
-      "name": "JMS (Artemis)",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-artemis",
       "scope": "compile"
     },
     {
       "id": "hornetq",
-      "name": "JMS (HornetQ)",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-hornetq",
       "scope": "compile"
     },
     {
       "id": "amqp",
-      "name": "AMQP",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-amqp",
       "scope": "compile"
     },
     {
       "id": "mail",
-      "name": "Mail",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-mail",
       "scope": "compile"
     },
     {
       "id": "actuator",
-      "name": "Actuator",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-actuator",
       "scope": "compile"
     },
     {
       "id": "actuator-docs",
-      "name": "Actuator Docs",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-actuator-docs",
       "scope": "compile"
     },
     {
       "id": "remote-shell",
-      "name": "Remote Shell",
       "groupId": "org.springframework.boot",
       "artifactId": "spring-boot-starter-remote-shell",
       "scope": "compile"
     }
-  ]
+  ],
+  "repositories": {
+    "spring-snapshots": {
+      "name": "Spring Snapshots",
+      "url": "https:\/\/repo.spring.io\/snapshot",
+      "snapshotEnabled": true
+    },
+    "spring-milestones": {
+      "name": "Spring Milestones",
+      "url": "https:\/\/repo.spring.io\/milestone",
+      "snapshotEnabled": false
+    }
+  },
+  "boms": {
+    "cloud-bom": {
+      "groupId": "org.springframework.cloud",
+      "artifactId": "spring-cloud-starter-parent",
+      "version": "Brixton.M3"
+    },
+    "vaadin-bom": {
+      "groupId": "com.vaadin",
+      "artifactId": "vaadin-bom",
+      "version": "7.5.5"
+    }
+  }
 }
-
 

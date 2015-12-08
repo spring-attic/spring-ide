@@ -16,12 +16,12 @@ package org.springframework.ide.eclipse.boot.core;
  *
  * @author Kris De Volder
  */
-public class StarterId {
+public class MavenId {
 
 	final private String groupId;
 	final private String artifactId;
 
-	public StarterId(String groupId, String artifactId) {
+	public MavenId(String groupId, String artifactId) {
 		super();
 		this.groupId = groupId;
 		this.artifactId = artifactId;
@@ -54,7 +54,7 @@ public class StarterId {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		StarterId other = (StarterId) obj;
+		MavenId other = (MavenId) obj;
 		if (artifactId == null) {
 			if (other.artifactId != null)
 				return false;

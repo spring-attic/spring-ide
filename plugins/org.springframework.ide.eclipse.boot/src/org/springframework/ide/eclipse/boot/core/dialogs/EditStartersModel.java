@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +30,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.core.StarterId;
+import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.starters.SpringBootStarters;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
@@ -63,7 +62,8 @@ public class EditStartersModel implements OkButtonHandler {
 	private URLConnectionFactory urlConnectionFactory;
 	private URL INITIALIZER_JSON_URL;
 
-	private HashSet<StarterId> activeStarters;
+	private HashSet<MavenId> activeStarters;
+	private SpringBootStarters starters;
 
 	public EditStartersModel(IProject selectedProject) throws Exception {
 		this(
@@ -86,11 +86,12 @@ public class EditStartersModel implements OkButtonHandler {
 		this.urlConnectionFactory = connectionFactory;
 		this.INITIALIZER_JSON_URL = initializerUrl;
 		discoverOptions(dependencies);
-
-//		Map<StarterId, String> idMap =
-//TODO:
-//		starters.addAll(project.getBootStarters());
 	}
+
+	public String getBootVersion() {
+		return starters.getBootVersion();
+	}
+
 
 	public String getProjectName() {
 		return project.getProject().getName();
@@ -121,16 +122,16 @@ public class EditStartersModel implements OkButtonHandler {
 	 */
 	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
 		String bootVersion = project.getBootVersion();
-		SpringBootStarters starters = new SpringBootStarters(bootVersion, INITIALIZER_JSON_URL, urlConnectionFactory);
+		starters = new SpringBootStarters(bootVersion, INITIALIZER_JSON_URL, urlConnectionFactory);
 
-		Set<StarterId> activeStarters = getActiveStarters();
+		Set<MavenId> activeStarters = getActiveStarters();
 
 		for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 			String catName = dgroup.getName();
 			for (Dependency dep : dgroup.getContent()) {
-				if (dep.isSupportedFor(bootVersion)) {
+				if (starters.contains(dep.getId())) {
 					dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), LiveExpression.constant(true));
-					StarterId mavenId = starters.getMavenId(dep.getId());
+					MavenId mavenId = starters.getMavenId(dep.getId());
 					boolean selected = activeStarters.contains(mavenId);
 					initialDependencies.add(dep);
 					if (selected) {
@@ -142,16 +143,16 @@ public class EditStartersModel implements OkButtonHandler {
 		}
 	}
 
-	private Set<StarterId> getActiveStarters() throws Exception {
+	private Set<MavenId> getActiveStarters() throws Exception {
 		if (this.activeStarters==null) {
-			this.activeStarters = new HashSet<StarterId>();
+			this.activeStarters = new HashSet<MavenId>();
 			List<IMavenCoordinates> deps = project.getDependencies();
 			if (deps!=null) {
 				for (IMavenCoordinates coords : deps) {
 					String gid = coords.getGroupId();
 					String aid = coords.getArtifactId();
 					if (aid!=null && gid!=null) {
-						this.activeStarters.add(new StarterId(gid, aid));
+						this.activeStarters.add(new MavenId(gid, aid));
 					}
 				}
 			}

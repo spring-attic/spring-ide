@@ -3,6 +3,7 @@ package org.springframework.ide.eclipse.boot.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -12,7 +13,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		NewSpringBootWizardModelTest.class,
 		NewSpringBootWizardTest.class,
 		SpringBootValidationTest.class,
-		InitializrDependencySpecTest.class
+		InitializrDependencySpecTest.class,
+		EditStartersModelTest.class
 })
 public class AllSpringBootTests {
 

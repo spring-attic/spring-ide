@@ -14,16 +14,14 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.OPTIONAL;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElementWithText;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.format;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElementWithText;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.format;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.OPTIONAL;
-
-import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,15 +44,18 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
+import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
+import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.core.StarterId;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,9 +73,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 	//TODO: properly handle pom manipulation when pom file is open / dirty in an editor.
 	// minimum requirement: detect and prohibit by throwing an error.
 
-	private static final List<SpringBootStarter> NO_STARTERS = Arrays
-			.asList(new SpringBootStarter[0]);
-
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private IProject project;
@@ -89,27 +87,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return project;
 	}
 
-	/**
-	 * @return List of maven coordinates for known boot starters. These are
-	 *         discovered dynamically based on project contents. E.g. for maven
-	 *         projects we examine the 'dependencyManagement' section of the
-	 *         project's effective pom.
-	 *
-	 * @throws CoreException
-	 */
-	@Override
-	public List<SpringBootStarter> getKnownStarters() throws CoreException {
-		MavenProject mp = getMavenProject();
-		if (mp!=null) {
-			DependencyManagement depMan = mp.getDependencyManagement();
-			if (depMan != null) {
-				List<Dependency> deps = depMan.getDependencies();
-				return getStarters(deps);
-			}
-		}
-		return NO_STARTERS;
-	}
-
 	private MavenProject getMavenProject() throws CoreException {
 		IMavenProjectRegistry pr = MavenPlugin.getMavenProjectRegistry();
 		IMavenProjectFacade mpf = pr.getProject(project);
@@ -121,15 +98,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	private IFile getPomFile() {
 		return project.getFile(new Path("pom.xml"));
-	}
-
-	@Override
-	public List<SpringBootStarter> getBootStarters() throws CoreException {
-		MavenProject mp = getMavenProject();
-		if (mp!=null) {
-			return getStarters(mp.getDependencies());
-		}
-		return Collections.emptyList();
 	}
 
 
@@ -150,21 +118,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 			converted.add(new MavenCoordinates(d.getGroupId(), d.getArtifactId(), d.getClassifier(), d.getVersion()));
 		}
 		return converted;
-	}
-
-	private List<SpringBootStarter> getStarters(List<Dependency> deps) {
-		if (deps != null) {
-			ArrayList<SpringBootStarter> starters = new ArrayList<SpringBootStarter>();
-			for (Dependency _dep : deps) {
-				IMavenCoordinates dep = new MavenCoordinates(_dep.getGroupId(),
-						_dep.getArtifactId(), _dep.getVersion());
-				if (SpringBootStarter.isStarter(dep)) {
-					starters.add(new SpringBootStarter(dep));
-				}
-			}
-			return starters;
-		}
-		return NO_STARTERS;
 	}
 
 	@Override
@@ -279,7 +232,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	@Override
 	public void setStarters(Collection<SpringBootStarter> _starters) throws CoreException {
 		try {
-			final Set<StarterId> starters = new HashSet<StarterId>();
+			final Set<MavenId> starters = new HashSet<MavenId>();
 			for (SpringBootStarter s : _starters) {
 				starters.add(s.getId());
 			}
@@ -298,8 +251,8 @@ public class MavenSpringBootProject extends SpringBootProject {
 						String aid = getTextValue(findChild(c, ARTIFACT_ID));
 						String gid = getTextValue(findChild(c, GROUP_ID));
 						if (aid!=null && gid!=null) { //ignore invalid entries that don't have gid or aid
-							if (SpringBootStarter.isStarterAId(aid)) {
-								StarterId id = new StarterId(gid, aid);
+							if (isKnownStarter(new MavenId(gid, aid))) {
+								MavenId id = new MavenId(gid, aid);
 								boolean keep = starters.remove(id);
 								if (!keep) {
 									depsEl.removeChild(c);
@@ -310,12 +263,13 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 					//if 'starters' is not empty at this point, it contains remaining ids we have not seen
 					// in the pom, so we need to add them.
-					for (StarterId s : starters) {
+					for (MavenId s : starters) {
 						PomHelper.createDependency(depsEl,
 								s.getGroupId(), s.getArtifactId(),
 								null);
 					}
 				}
+
 			}));
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);

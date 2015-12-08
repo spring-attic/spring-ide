@@ -130,7 +130,6 @@ public class SpringBootProjectTests extends TestCase {
 			if (!starter.getDep().getArtifactId().equals("spring-boot-devtools")) {
 				assertEquals("ArtifactId", SpringBootStarter.AID_PREFIX+name, starter.getDep().getArtifactId());
 				assertEquals("GroupId", BOOT_STARTER_GROUP_ID, starter.getDep().getGroupId());
-				assertEquals("Version", BOOT_STARTER_VERSION, starter.getDep().getVersion());
 			}
 			expecteds.remove(starter.getName());
 		}

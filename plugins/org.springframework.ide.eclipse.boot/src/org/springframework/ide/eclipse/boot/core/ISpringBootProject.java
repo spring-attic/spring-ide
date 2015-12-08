@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.core.starters.SpringBootStarters;
 
 /**
  * SpringBoot-centric view on an IProject instance.
@@ -39,9 +40,8 @@ public interface ISpringBootProject {
 	public List<IMavenCoordinates> getDependencies() throws CoreException;
 
 	/**
-	 * @return List of maven coordinates for known boot starters. These are discovered dynamically
-	 * based on project contents. E.g. for maven projects we examine the 'dependencyManagement'
-	 * section of the project's effective pom.
+	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
+	 * the initializr web service.
 	 *
 	 * @throws CoreException
 	 */
