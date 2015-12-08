@@ -16,6 +16,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,25 +29,35 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
 	/**
@@ -106,23 +119,84 @@ public class EditStartersModelTest {
 		StsTestUtil.assertNoErrors(project); //force project build
 
 		assertStarters(bootProject.getBootStarters(), "web", "actuator");
+
+		//check that the 'scope' is not set in the pom.xml:
+		IDOMDocument pom = parsePom(project);
+
+		Element depEl = findDependency(bootProject, pom, "actuator");
+		assertEquals("org.springframework.boot", getGroupId(depEl));
+		assertEquals("spring-boot-starter-actuator", getArtifactId(depEl));
+		assertEquals(null, getScope(depEl));
 	}
 
+	@Test
+	public void addStarterWithTestScope() throws Exception {
+		IProject project = harness.createBootProject("foo", withStarters("web"));
+		final ISpringBootProject bootProject = SpringBootCore.create(project);
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("restdocs");
+		wizard.performOk();
+
+		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+
+		StsTestUtil.assertNoErrors(project); //force project build
+
+		assertStarters(bootProject.getBootStarters(), "web", "restdocs");
+
+		//check that the 'scope' is set properly
+		IDOMDocument pom = parsePom(project);
+		Element depEl = findDependency(bootProject, pom, "restdocs");
+		assertEquals("spring-restdocs-mockmvc", getArtifactId(depEl));
+		assertEquals("test", getScope(depEl));
+	}
 
 	//TODO: testing of...
-	// - adding a starter
-	// - adding a starter that has a scope 'compile' -> scope should not be set in pom element
-	// - adding a starter that has a scope other than 'compile'
 	// - adding a starter that has a bom
 	//    - bom added if not present yet
 	//       - bom section created if not existing yet
 	//       - bom section reused if already exists (i.e. contains a different bom already)
 	//    - bom not added if it is already present
-	// - usage counts increased when starter added via this wizard?
 
 	////////////// Harness code below ///////////////////////////////////////////////
 
+	private String getScope(Element depEl) {
+		return getTextChild(depEl, SCOPE);
+	}
 
+	private String getTextChild(Element depEl, String name) {
+		Element child = findChild(depEl, name);
+		if (child!=null) {
+			return PomEdits.getTextValue(child);
+		}
+		return null;
+	}
+
+	private String getGroupId(Element depEl) {
+		return getTextChild(depEl, GROUP_ID);
+	}
+
+	private String getArtifactId(Element depEl) {
+		return getTextChild(depEl, ARTIFACT_ID);
+	}
+
+	public IDOMDocument parsePom(IProject project) throws IOException, CoreException {
+		return ((IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(project.getFile("pom.xml"))).getDocument();
+	}
+
+	private Element findDependency(ISpringBootProject project, Document pom, String id) {
+		SpringBootStarters starters = project.getStarterInfos();
+		MavenId mid = starters.getMavenId(id);
+		if (mid!=null) {
+			return findDependency(pom, mid);
+		}
+		return null;
+	}
+
+	public static Element findDependency(Document document, MavenId dependency) {
+		Element dependenciesElement = findChild(document.getDocumentElement(), DEPENDENCIES);
+		return findChild(dependenciesElement, DEPENDENCY, childEquals(GROUP_ID, dependency.getGroupId()),
+				childEquals(ARTIFACT_ID, dependency.getArtifactId()));
+	}
 
 
 	BootProjectTestHarness harness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
@@ -209,6 +283,5 @@ public class EditStartersModelTest {
 
 		assertTrue("Expected usage counts not found: "+expect, expect.isEmpty());
 	}
-
 
 }

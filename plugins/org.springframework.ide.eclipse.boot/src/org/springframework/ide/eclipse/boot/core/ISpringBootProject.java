@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.core.starters.SpringBootStarters;
 
 /**
  * SpringBoot-centric view on an IProject instance.
@@ -38,6 +37,14 @@ public interface ISpringBootProject {
 	 * @throws CoreException
 	 */
 	public List<IMavenCoordinates> getDependencies() throws CoreException;
+
+	/**
+	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
+	 * the initializr web service.
+	 *
+	 * TODO: if we have this, do we still need 'getKnownStarters' method?
+	 */
+	public SpringBootStarters getStarterInfos();
 
 	/**
 	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
@@ -101,6 +108,5 @@ public interface ISpringBootProject {
 	 * asynchronous.
 	 */
 	void updateProjectConfiguration();
-
 
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.core.starters;
+package org.springframework.ide.eclipse.boot.core;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.DependencyInfo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.SimpleUriBuilder;
@@ -38,8 +37,8 @@ public class SpringBootStarters {
 
 	private InitializrDependencySpec dependencySpec;
 	private InitializrServiceSpec initializrSpec;
-	private HashMap<String, MavenId> idToMavenId;
-	private HashMap<MavenId, String> mavenIdToId;
+	private HashMap<String, SpringBootStarter> byId;
+	private HashMap<MavenId, SpringBootStarter> byMavenId;
 
 	public SpringBootStarters(String bootVersion, URL initializerUrl, URLConnectionFactory urlConnFac) throws Exception {
 		this.bootVersion = bootVersion;
@@ -59,19 +58,37 @@ public class SpringBootStarters {
 		return initializrSpec.getDependencies();
 	}
 
-	public synchronized MavenId getMavenId(String findId) {
-		if (idToMavenId==null) {
-			idToMavenId = new HashMap<String, MavenId>();
+	public MavenId getMavenId(String findId) {
+		ensureIndexes();
+		SpringBootStarter starter = byId.get(findId);
+		if (starter!=null) {
+			return starter.getMavenId();
+		}
+		return null;
+	}
+
+	/**
+	 * Ensures that the indexes 'byId' and 'byMavenId' have been created. Any method using
+	 * one of the indexes should call this method first.
+	 */
+	private synchronized void ensureIndexes() {
+		if (byId==null) {
+			byId = new HashMap<>();
+			byMavenId = new HashMap<>();
 			for (DependencyInfo dep : dependencySpec.getDependencies()) {
 				String id = dep.getId();
 				String groupId = dep.getGroupId();
 				String artifactId = dep.getArtifactId();
+				String scope = dep.getScope();
 				if (id!=null && groupId!=null && artifactId!=null) {
-					idToMavenId.put(dep.getId(), new MavenId(groupId, artifactId));
+					MavenId mid = new MavenId(groupId, artifactId);
+					//ignore invalid looking entries. Should at least have an id, aid and gid
+					SpringBootStarter starter = new SpringBootStarter(id, mid, scope);
+					byId.put(id, starter);
+					byMavenId.put(mid, starter);
 				}
 			}
 		}
-		return idToMavenId.get(findId);
 	}
 
 	public String getBootVersion() {
@@ -83,23 +100,27 @@ public class SpringBootStarters {
 	}
 
 	public List<String> getStarterIds() {
-		getMavenId(""); // force intializationg of the idToMavenId index
-		return Collections.unmodifiableList(new ArrayList<>(idToMavenId.keySet()));
+		ensureIndexes();
+		return Collections.unmodifiableList(new ArrayList<>(byId.keySet()));
 	}
 
 	public synchronized String getId(MavenId mavenId) {
-		if (mavenIdToId==null) {
-			mavenIdToId = new HashMap<>();
-			for (DependencyInfo dep : dependencySpec.getDependencies()) {
-				String id = dep.getId();
-				String groupId = dep.getGroupId();
-				String artifactId = dep.getArtifactId();
-				if (id!=null && groupId!=null && artifactId!=null) {
-					mavenIdToId.put(new MavenId(groupId, artifactId), id);
-				}
-			}
+		ensureIndexes();
+		SpringBootStarter starter = byMavenId.get(mavenId);
+		if (starter!=null) {
+			return starter.getId();
 		}
-		return mavenIdToId.get(mavenId);
+		return null;
+	}
+
+	public SpringBootStarter getStarter(MavenId mavenId) {
+		ensureIndexes();
+		return byMavenId.get(mavenId);
+	}
+
+	public SpringBootStarter getStarter(String id) {
+		ensureIndexes();
+		return byId.get(id);
 	}
 
 }

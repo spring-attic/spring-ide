@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.core.starters.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
@@ -110,9 +110,9 @@ public class EditStartersModel implements OkButtonHandler {
 					List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
 					for (Dependency dep : selected) {
 						String id = dep.getId();
-						MavenId mid = starters.getMavenId(id);
-						if (mid!=null) {
-							selectedStarters.add(new SpringBootStarter(id, mid));
+						SpringBootStarter starter = starters.getStarter(id);
+						if (starter!=null) {
+							selectedStarters.add(starter);
 						}
 					}
 					project.setStarters(selectedStarters);

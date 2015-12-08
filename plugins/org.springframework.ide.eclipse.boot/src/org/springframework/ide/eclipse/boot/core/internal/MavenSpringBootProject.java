@@ -263,12 +263,10 @@ public class MavenSpringBootProject extends SpringBootProject {
 					//if 'starters' is not empty at this point, it contains remaining ids we have not seen
 					// in the pom, so we need to add them.
 					for (MavenId s : starters) {
-						PomHelper.createDependency(depsEl,
-								s.getGroupId(), s.getArtifactId(),
-								null);
+						createDependency(depsEl,
+								s.getGroupId(), s.getArtifactId(), /*version*/null, getScope(s));
 					}
 				}
-
 			}));
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);

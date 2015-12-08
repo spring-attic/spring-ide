@@ -18,47 +18,31 @@ package org.springframework.ide.eclipse.boot.core;
  */
 public class SpringBootStarter {
 
-	/**
-	 * ArtifactId prefix to recognize when a dependency is a spring-boot-starter.
-	 */
-	public static final String AID_PREFIX = "spring-boot-starter-";
-
-	public static final String SB_PREFIX = "spring-boot-";
-
 	private String id; //id used by initalizr service
-	private MavenId dep;
+	private MavenId mavenId;
+	private String scope;
 
-	public SpringBootStarter(String id, MavenId dep) {
+	public SpringBootStarter(String id, MavenId dep, String scope) {
 		this.id = id;
-		this.dep = dep;
+		this.mavenId = dep;
+		this.scope = scope;
 	}
 
-	public MavenId getDep() {
-		return dep;
-	}
-
-	public static boolean isStarter(IMavenCoordinates dep) {
-		return isStarterAId(dep.getArtifactId());
-	}
-
-	public static boolean isStarterAId(String aid) {
-		return aid!=null && (
-				aid.startsWith(AID_PREFIX) ||
-				aid.equals("spring-boot-devtools")
-		);
+	public String getScope() {
+		return scope;
 	}
 
 	@Override
 	public String toString() {
-		return "SpringBootStarter("+id+", "+dep+")";
+		return "SpringBootStarter("+id+", "+mavenId+")";
 	}
 
 	public String getArtifactId() {
-		return getDep().getArtifactId();
+		return getMavenId().getArtifactId();
 	}
 
 	public String getGroupId() {
-		return getDep().getGroupId();
+		return getMavenId().getGroupId();
 	}
 
 	public String getId() {
@@ -71,14 +55,14 @@ public class SpringBootStarter {
 	 * a project so it isn't part of the 'id'.
 	 */
 	public MavenId getMavenId() {
-		return new MavenId(getGroupId(), getArtifactId());
+		return mavenId;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((dep == null) ? 0 : dep.hashCode());
+		result = prime * result + ((mavenId == null) ? 0 : mavenId.hashCode());
 		return result;
 	}
 
@@ -91,12 +75,11 @@ public class SpringBootStarter {
 		if (getClass() != obj.getClass())
 			return false;
 		SpringBootStarter other = (SpringBootStarter) obj;
-		if (dep == null) {
-			if (other.dep != null)
+		if (mavenId == null) {
+			if (other.mavenId != null)
 				return false;
-		} else if (!dep.equals(other.dep))
+		} else if (!mavenId.equals(other.mavenId))
 			return false;
 		return true;
 	}
-
 }

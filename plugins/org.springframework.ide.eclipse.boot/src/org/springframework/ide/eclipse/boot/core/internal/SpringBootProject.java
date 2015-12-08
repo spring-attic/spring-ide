@@ -15,16 +15,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.maven.model.Dependency;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.core.starters.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 
@@ -36,19 +33,21 @@ public abstract class SpringBootProject implements ISpringBootProject {
 
 	@Override
 	public List<SpringBootStarter> getKnownStarters() {
-		SpringBootStarters infos = getInfos();
+		SpringBootStarters infos = getStarterInfos();
 		if (infos!=null) {
 			List<String> knownIds = infos.getStarterIds();
 			List<SpringBootStarter> starters = new ArrayList<>(knownIds.size());
 			for (String id : knownIds) {
-				starters.add(new SpringBootStarter(id, infos.getMavenId(id)));
+				SpringBootStarter starter = infos.getStarter(id);
+				starters.add(starter);
 			}
 			return starters;
 		}
 		return NO_STARTERS;
 	}
 
-	private SpringBootStarters getInfos() {
+	@Override
+	public SpringBootStarters getStarterInfos() {
 		try {
 			String bootVersion = getBootVersion();
 			if (bootVersion!=null) {
@@ -70,7 +69,7 @@ public abstract class SpringBootProject implements ISpringBootProject {
 
 	@Override
 	public List<SpringBootStarter> getBootStarters() throws CoreException {
-		SpringBootStarters infos = getInfos();
+		SpringBootStarters infos = getStarterInfos();
 		List<IMavenCoordinates> deps = getDependencies();
 		ArrayList<SpringBootStarter> starters = new ArrayList<>();
 		for (IMavenCoordinates dep : deps) {
@@ -78,9 +77,9 @@ public abstract class SpringBootProject implements ISpringBootProject {
 			String gid = dep.getGroupId();
 			if (aid!=null && gid!=null) {
 				MavenId mavenId = new MavenId(gid, aid);
-				String id = infos.getId(mavenId);
-				if (id!=null) {
-					starters.add(new SpringBootStarter(id, mavenId));
+				SpringBootStarter starter = infos.getStarter(mavenId);
+				if (starter!=null) {
+					starters.add(starter);
 				}
 			}
 		}
@@ -88,11 +87,19 @@ public abstract class SpringBootProject implements ISpringBootProject {
 	}
 
 	public boolean isKnownStarter(MavenId mavenId) {
-		SpringBootStarters infos = getInfos();
+		SpringBootStarters infos = getStarterInfos();
 		if (infos!=null) {
 			return infos.getId(mavenId)!=null;
 		}
 		return false;
+	}
+
+	public String getScope(MavenId mavenId) {
+		SpringBootStarters infos = getStarterInfos();
+		if (infos!=null) {
+			return infos.getStarter(mavenId).getScope();
+		}
+		return null;
 	}
 
 
