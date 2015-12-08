@@ -66,7 +66,7 @@ public class SpringBootProjectTests extends TestCase {
 			knownStarters = new HashMap<String, SpringBootStarter>();
 
 			for (SpringBootStarter s : project.getKnownStarters()) {
-				knownStarters.put(s.getName(), s);
+				knownStarters.put(s.getId(), s);
 			}
 			assertFalse(knownStarters.isEmpty());
 
@@ -115,23 +115,23 @@ public class SpringBootProjectTests extends TestCase {
 	}
 
 	private void assertInitialStarters(ISpringBootProject project) throws Exception {
-		//Old: initial project has no starters applied
+		//Oldest: initial project has no starters applied
 		//assertTrue(project.getBootStarters().isEmpty());
 
-		//Now: the 'test' starter is applied by default.
-		assertStarters(project, Arrays.asList(knownStarters.get("test")));
+		//Old: the 'test' starter is applied by default.
+		//assertStarters(project, Arrays.asList(knownStarters.get("test")));
+
+		//Now: back to 'old' way because 'test' starter is not amongst the ones listed in initializr app, so its not
+		// treated as a 'starter' anymore even though it is always applied to a project created by the wizard.
+		assertTrue(project.getBootStarters().isEmpty());
 	}
 
 	public static void assertContainsStarters(List<SpringBootStarter> starters, String... artifactIds) {
 		HashSet<String> expecteds = new HashSet<String>(Arrays.asList(artifactIds));
 		for (SpringBootStarter starter : starters) {
-			String name = starter.getName();
+			String name = starter.getId();
 			assertNotNull(name);
-			if (!starter.getDep().getArtifactId().equals("spring-boot-devtools")) {
-				assertEquals("ArtifactId", SpringBootStarter.AID_PREFIX+name, starter.getDep().getArtifactId());
-				assertEquals("GroupId", BOOT_STARTER_GROUP_ID, starter.getDep().getGroupId());
-			}
-			expecteds.remove(starter.getName());
+			expecteds.remove(starter.getId());
 		}
 		if (!expecteds.isEmpty()) {
 			StringBuilder msg = new StringBuilder("Missing artifacts: \n");

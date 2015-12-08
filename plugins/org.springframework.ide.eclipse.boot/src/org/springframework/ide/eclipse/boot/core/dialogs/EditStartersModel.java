@@ -29,12 +29,14 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.MavenId;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.starters.SpringBootStarters;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
@@ -103,6 +105,15 @@ public class EditStartersModel implements OkButtonHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					List<Dependency> selected = dependencies.getCurrentSelection();
+					List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
+					for (Dependency dep : selected) {
+						String id = dep.getId();
+						MavenId mid = starters.getMavenId(id);
+						if (mid!=null) {
+							selectedStarters.add(new SpringBootStarter(id, mid));
+						}
+					}
+					project.setStarters(selectedStarters);
 					if (!initialDependencies.contains(selected)) {
 						popularities.incrementUsageCount(selected);
 					}
@@ -191,6 +202,42 @@ public class EditStartersModel implements OkButtonHandler {
 			}
 		}
 		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * Convenience method for easier scripting of the wizard model (used in testing). Not used
+	 * by the UI itself. If the dependencyId isn't found in the wizard model then an IllegalArgumentException
+	 * will be raised.
+	 */
+	public void removeDependency(String dependencyId) {
+		for (String catName : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
+			for (Dependency dep : cat.getChoices()) {
+				if (dependencyId.equals(dep.getId())) {
+					cat.unselect(dep);
+					return; //dep found and unselected
+				}
+			}
+		}
+		throw new IllegalArgumentException("No such dependency: "+dependencyId);
+	}
+
+	/**
+	 * Convenience method for easier scripting of the wizard model (used in testing). Not used
+	 * by the UI itself. If the dependencyId isn't found in the wizard model then an IllegalArgumentException
+	 * will be raised.
+	 */
+	public void addDependency(String dependencyId){
+		for (String catName : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
+			for (Dependency dep : cat.getChoices()) {
+				if (dependencyId.equals(dep.getId())) {
+					cat.select(dep);
+					return; //dep found and added to selection
+				}
+			}
+		}
+		throw new IllegalArgumentException("No such dependency: "+dependencyId);
 	}
 
 }

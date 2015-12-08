@@ -66,7 +66,7 @@ public class DevToolsStarterTests extends TestCase {
 
 	private SpringBootStarter getStarter(List<SpringBootStarter> knownStarters, String name) {
 		for (SpringBootStarter s : knownStarters) {
-			if (s.getName().equals(name)) {
+			if (s.getId().equals(name)) {
 				return s;
 			}
 		}
@@ -75,7 +75,7 @@ public class DevToolsStarterTests extends TestCase {
 
 	public static void assertNoStarter(List<SpringBootStarter> starters, String starterName) {
 		for (SpringBootStarter s : starters) {
-			if (s.getName().equals(starterName)) {
+			if (s.getId().equals(starterName)) {
 				Assert.fail("Not expecting a starter '"+starterName+"' but found it: "+s);
 			}
 		}
@@ -85,7 +85,7 @@ public class DevToolsStarterTests extends TestCase {
 		StringBuilder found = new StringBuilder();
 		for (SpringBootStarter s : starters) {
 			found.append(s+"\n");
-			if (s.getName().equals(expectedName)) {
+			if (s.getId().equals(expectedName)) {
 				return;
 			}
 		}

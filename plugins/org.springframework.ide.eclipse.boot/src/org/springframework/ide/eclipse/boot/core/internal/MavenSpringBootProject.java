@@ -15,6 +15,9 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.OPTIONAL;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElement;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElementWithText;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
@@ -24,7 +27,6 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,8 +56,6 @@ import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -99,7 +99,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 	private IFile getPomFile() {
 		return project.getFile(new Path("pom.xml"));
 	}
-
 
 	@Override
 	public List<IMavenCoordinates> getDependencies() throws CoreException {
@@ -234,7 +233,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 		try {
 			final Set<MavenId> starters = new HashSet<MavenId>();
 			for (SpringBootStarter s : _starters) {
-				starters.add(s.getId());
+				starters.add(s.getMavenId());
 			}
 
 			IFile file = getPomFile();
@@ -304,4 +303,26 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 		return SpringBootCore.getDefaultBootVersion();
 	}
+
+	/**
+	 * creates and adds new dependency to the parent. formats the result.
+	 */
+	public static Element createDependency(Element parentList, String groupId, String artifactId, String version, String scope) {
+		//TODO: not used yet, but we'll need this later to properly handle 'scope' of added dependency
+		Element dep = createElement(parentList, DEPENDENCY);
+
+		if(groupId != null) {
+			createElementWithText(dep, GROUP_ID, groupId);
+		}
+		createElementWithText(dep, ARTIFACT_ID, artifactId);
+		if(version != null) {
+			createElementWithText(dep, VERSION, version);
+		}
+		if (scope !=null && !scope.equals("compile")) {
+			createElementWithText(dep, SCOPE, scope);
+		}
+		format(dep);
+		return dep;
+	}
+
 }

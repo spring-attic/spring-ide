@@ -61,8 +61,7 @@ public class SpringBootStarter {
 		return getDep().getGroupId();
 	}
 
-	public String getName() {
-		//TODO: Confusing name!
+	public String getId() {
 		return id;
 	}
 
@@ -71,8 +70,7 @@ public class SpringBootStarter {
 	 * Typically the gid + aid will identify the starter. The version is 'fixed' within
 	 * a project so it isn't part of the 'id'.
 	 */
-	public MavenId getId() {
-		//TODO: Confusing name!
+	public MavenId getMavenId() {
 		return new MavenId(getGroupId(), getArtifactId());
 	}
 
