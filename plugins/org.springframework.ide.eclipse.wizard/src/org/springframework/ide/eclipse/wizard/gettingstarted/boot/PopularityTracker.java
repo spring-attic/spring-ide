@@ -52,7 +52,7 @@ public class PopularityTracker {
 		return getUsageCount(d.getId());
 	}
 
-	private int getUsageCount(String id) {
+	public int getUsageCount(String id) {
 		return store.getInt(key(id));
 	}
 

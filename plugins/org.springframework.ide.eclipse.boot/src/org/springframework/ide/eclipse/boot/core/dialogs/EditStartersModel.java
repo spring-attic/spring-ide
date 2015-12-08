@@ -49,6 +49,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
 public class EditStartersModel implements OkButtonHandler {
 
+	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
+
 	private final ISpringBootProject project;
 	private final PopularityTracker popularities;
 
@@ -114,14 +116,20 @@ public class EditStartersModel implements OkButtonHandler {
 						}
 					}
 					project.setStarters(selectedStarters);
-					if (!initialDependencies.contains(selected)) {
-						popularities.incrementUsageCount(selected);
+					for (Dependency s : selected) {
+						if (!initialDependencies.contains(s)) {
+							popularities.incrementUsageCount(s);
+						}
 					}
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					BootActivator.log(e);
 					return ExceptionUtil.status(e);
 				}
+			}
+			@Override
+			public boolean belongsTo(Object family) {
+				return family==JOB_FAMILY;
 			}
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
@@ -144,9 +152,8 @@ public class EditStartersModel implements OkButtonHandler {
 					dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), LiveExpression.constant(true));
 					MavenId mavenId = starters.getMavenId(dep.getId());
 					boolean selected = activeStarters.contains(mavenId);
-					initialDependencies.add(dep);
 					if (selected) {
-						System.out.println("select: "+dep.getId()+"("+mavenId+") = "+selected);
+						initialDependencies.add(dep);
 					}
 					dependencies.setSelection(catName, dep, selected);
 				}
