@@ -21,11 +21,13 @@ public class SpringBootStarter {
 	private String id; //id used by initalizr service
 	private MavenId mavenId;
 	private String scope;
+	private IMavenCoordinates bom;
 
-	public SpringBootStarter(String id, MavenId dep, String scope) {
+	public SpringBootStarter(String id, MavenId dep, String scope, IMavenCoordinates bom) {
 		this.id = id;
 		this.mavenId = dep;
 		this.scope = scope;
+		this.bom = bom;
 	}
 
 	public String getScope() {
@@ -81,5 +83,9 @@ public class SpringBootStarter {
 		} else if (!mavenId.equals(other.mavenId))
 			return false;
 		return true;
+	}
+
+	public IMavenCoordinates getBom() {
+		return bom;
 	}
 }

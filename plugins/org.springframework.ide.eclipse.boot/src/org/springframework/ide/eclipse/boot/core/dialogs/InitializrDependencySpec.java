@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
@@ -66,6 +67,8 @@ public class InitializrDependencySpec {
 		private String version;
 		private String scope;
 		private String bom;
+		private String classifier;
+
 		public String getId() {
 			return id;
 		}
@@ -102,11 +105,48 @@ public class InitializrDependencySpec {
 		public void setBom(String bom) {
 			this.bom = bom;
 		}
+		public String getClassifier() {
+			return this.classifier;
+		}
+		public void setClassifier(String classifier) {
+			this.classifier = classifier;
+		}
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown=true)
+	@JsonInclude(value=Include.NON_NULL)
+	public static class RepoInfo {
+		private String name;
+		private String url;
+		private Boolean snapshotEnabled;
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public String getUrl() {
+			return url;
+		}
+		public void setUrl(String url) {
+			this.url = url;
+		}
+		public Boolean getSnapshotEnabled() {
+			return snapshotEnabled;
+		}
+		public void setSnapshotEnabled(Boolean snapshotEnabled) {
+			this.snapshotEnabled = snapshotEnabled;
+		}
 	}
 
 	private static final String JSON_CONTENT_TYPE_HEADER = "application/json";
 
 	private DependencyInfo[] dependencies;
+	private Map<String, DependencyInfo> boms; //Note, not all fields of DependencyInfo are applicable for boms
+							// (e.g. boms don't have their own nested boms)
+							// but its easier to reuse this class than create another very similar one.
+
+	private Map<String, RepoInfo> repositories;
 
 	public static InitializrDependencySpec parseFrom(InputStream input) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
@@ -163,4 +203,21 @@ public class InitializrDependencySpec {
 		}
 		throw exception;
 	}
+
+	public Map<String, DependencyInfo> getBoms() {
+		return boms;
+	}
+
+	public void setBoms(Map<String, DependencyInfo> boms) {
+		this.boms = boms;
+	}
+
+	public Map<String, RepoInfo> getRepositories() {
+		return repositories;
+	}
+
+	public void setRepositories(Map<String, RepoInfo> repositories) {
+		this.repositories = repositories;
+	}
+
 }

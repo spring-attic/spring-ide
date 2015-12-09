@@ -87,20 +87,14 @@ public abstract class SpringBootProject implements ISpringBootProject {
 	}
 
 	public boolean isKnownStarter(MavenId mavenId) {
-		SpringBootStarters infos = getStarterInfos();
-		if (infos!=null) {
-			return infos.getId(mavenId)!=null;
-		}
-		return false;
+		return getStarter(mavenId)!=null;
 	}
 
-	public String getScope(MavenId mavenId) {
+	protected SpringBootStarter getStarter(MavenId mavenId) {
 		SpringBootStarters infos = getStarterInfos();
 		if (infos!=null) {
-			return infos.getStarter(mavenId).getScope();
+			return infos.getStarter(mavenId);
 		}
 		return null;
 	}
-
-
 }

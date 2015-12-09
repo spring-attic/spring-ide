@@ -10,27 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.internal;
 
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.OPTIONAL;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElement;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElementWithText;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.format;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.maven.model.Dependency;
@@ -47,6 +35,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
+import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
@@ -56,6 +45,8 @@ import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.RepoInfo;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -75,6 +66,12 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
+	private static final String REPOSITORIES = "repositories";
+	private static final String REPOSITORY = "repository";
+	private static final String SNAPSHOTS = "snapshots";
+
+	private static final String ENABLED = "enabled";
+
 	private IProject project;
 
 	public MavenSpringBootProject(IProject project) {
@@ -84,6 +81,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	@Override
 	public IProject getProject() {
+
 		return project;
 	}
 
@@ -262,11 +260,29 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 					//if 'starters' is not empty at this point, it contains remaining ids we have not seen
 					// in the pom, so we need to add them.
-					for (MavenId s : starters) {
+					for (MavenId mid : starters) {
+						SpringBootStarter starter = getStarter(mid);
 						createDependency(depsEl,
-								s.getGroupId(), s.getArtifactId(), /*version*/null, getScope(s));
+								mid.getGroupId(), mid.getArtifactId(), /*version*/null, starter.getScope());
+						createBomIfNeeded(document, starter.getBom());
 					}
 				}
+
+				private void createBomIfNeeded(Document pom, IMavenCoordinates bom) {
+					if (bom!=null) {
+						Element bomList = ensureDependencyMgmtSection(pom);
+						Element existing = PomEdits.findChild(bomList, DEPENDENCY,
+								childEquals(GROUP_ID, bom.getGroupId()),
+								childEquals(ARTIFACT_ID, bom.getArtifactId())
+						);
+						if (existing==null) {
+							createBom(bomList, bom);
+							addReposIfNeeded(pom, getStarterInfos().getRepos());
+						}
+					}
+				}
+
+
 			}));
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);
@@ -302,11 +318,83 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return SpringBootCore.getDefaultBootVersion();
 	}
 
+	private static Element ensureDependencyMgmtSection(Document pom) {
+		/* Ensure that this exists in the pom:
+	<dependencyManagement>
+		<dependencies> <---- RETURNED
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-parent</artifactId>
+				<version>Brixton.M3</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+		 */
+		boolean needFormatting = false;
+		Element doc = pom.getDocumentElement();
+		Element depman = findChild(doc, DEPENDENCY_MANAGEMENT);
+		if (depman==null) {
+			depman = createElement(doc, DEPENDENCY_MANAGEMENT);
+			needFormatting = true;
+		}
+		Element deplist = findChild(depman, DEPENDENCIES);
+		if (deplist==null) {
+			deplist = createElement(depman, DEPENDENCIES);
+		}
+		if (needFormatting) {
+			format(depman);
+		}
+		return deplist;
+	}
+
+	private static Element createBom(Element parentList, IMavenCoordinates coords) {
+		/*
+	<dependencyManagement>
+		<dependencies> <---- parentList
+			<dependency> <---- create and return
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-parent</artifactId>
+				<version>Brixton.M3</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+		 */
+
+		String groupId = coords.getGroupId();
+		String artifactId = coords.getArtifactId();
+		String version = coords.getVersion();
+		String classifier = coords.getClassifier();
+		String type = "pom";
+		String scope = "import";
+
+		Element dep = createElement(parentList, DEPENDENCY);
+
+		if(groupId != null) {
+			createElementWithText(dep, GROUP_ID, groupId);
+		}
+		createElementWithText(dep, ARTIFACT_ID, artifactId);
+		if(version != null) {
+			createElementWithText(dep, VERSION, version);
+		}
+		createElementWithText(dep, TYPE, type);
+		if (scope !=null && !scope.equals("compile")) {
+			createElementWithText(dep, SCOPE, scope);
+		}
+		if (classifier!=null) {
+			createElementWithText(dep, CLASSIFIER, classifier);
+		}
+		format(dep);
+		return dep;
+	}
+
 	/**
 	 * creates and adds new dependency to the parent. formats the result.
 	 */
 	public static Element createDependency(Element parentList, String groupId, String artifactId, String version, String scope) {
-		//TODO: not used yet, but we'll need this later to properly handle 'scope' of added dependency
 		Element dep = createElement(parentList, DEPENDENCY);
 
 		if(groupId != null) {
@@ -321,6 +409,60 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 		format(dep);
 		return dep;
+	}
+
+	private void addReposIfNeeded(Document pom, Map<String, RepoInfo> repoInfo) {
+		//Example:
+		//	<repositories>
+		//		<repository>
+		//			<id>spring-snapshots</id>
+		//			<name>Spring Snapshots</name>
+		//			<url>https://repo.spring.io/snapshot</url>
+		//			<snapshots>
+		//				<enabled>true</enabled>
+		//			</snapshots>
+		//		</repository>
+		//		<repository>
+		//			<id>spring-milestones</id>
+		//			<name>Spring Milestones</name>
+		//			<url>https://repo.spring.io/milestone</url>
+		//			<snapshots>
+		//				<enabled>false</enabled>
+		//			</snapshots>
+		//		</repository>
+		//	</repositories>
+
+		if (repoInfo!=null && !repoInfo.isEmpty()) {
+			Element doc = pom.getDocumentElement();
+			Element repoList = findChild(doc, REPOSITORIES);
+			if (repoList==null) {
+				repoList = createElement(doc, REPOSITORIES);
+				format(repoList);
+			}
+			for (Entry<String, RepoInfo> e : repoInfo.entrySet()) {
+				String id = e.getKey();
+				RepoInfo repo = e.getValue();
+				Element repoEl = findChild(repoList, REPOSITORY, childEquals(ID, id));
+				if (repoEl==null) {
+					repoEl = createElement(repoList, REPOSITORY);
+					createElementWithTextMaybe(repoEl, ID, id);
+					createElementWithTextMaybe(repoEl, NAME, repo.getName());
+					createElementWithTextMaybe(repoEl, URL, repo.getUrl());
+					Boolean isSnapshot = repo.getSnapshotEnabled();
+					if (isSnapshot!=null) {
+						Element snapshot = createElement(repoEl, SNAPSHOTS);
+						createElementWithText(snapshot, ENABLED, isSnapshot.toString());
+					}
+					format(repoEl);
+				}
+			}
+		}
+	}
+
+	private void createElementWithTextMaybe(Element parent, String name, String text) {
+		if (StringUtil.hasText(text)) {
+			createElementWithText(parent, name, text);
+		}
 	}
 
 }

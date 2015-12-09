@@ -15,9 +15,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.DependencyInfo;
+import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.RepoInfo;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.SimpleUriBuilder;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
@@ -72,6 +75,13 @@ public class SpringBootStarters {
 	 * one of the indexes should call this method first.
 	 */
 	private synchronized void ensureIndexes() {
+		HashMap<String, IMavenCoordinates> bomsById = new HashMap<>();
+		for (Entry<String, DependencyInfo> e : dependencySpec.getBoms().entrySet()) {
+			DependencyInfo bomInfo = e.getValue();
+			IMavenCoordinates bom = new MavenCoordinates(bomInfo.getGroupId(), bomInfo.getArtifactId(), bomInfo.getClassifier(), bomInfo.getVersion());
+			bomsById.put(e.getKey(), bom);
+		}
+
 		if (byId==null) {
 			byId = new HashMap<>();
 			byMavenId = new HashMap<>();
@@ -80,10 +90,11 @@ public class SpringBootStarters {
 				String groupId = dep.getGroupId();
 				String artifactId = dep.getArtifactId();
 				String scope = dep.getScope();
+				String bom = dep.getBom();
 				if (id!=null && groupId!=null && artifactId!=null) {
 					MavenId mid = new MavenId(groupId, artifactId);
 					//ignore invalid looking entries. Should at least have an id, aid and gid
-					SpringBootStarter starter = new SpringBootStarter(id, mid, scope);
+					SpringBootStarter starter = new SpringBootStarter(id, mid, scope, bomsById.get(bom));
 					byId.put(id, starter);
 					byMavenId.put(mid, starter);
 				}
@@ -121,6 +132,10 @@ public class SpringBootStarters {
 	public SpringBootStarter getStarter(String id) {
 		ensureIndexes();
 		return byId.get(id);
+	}
+
+	public Map<String, RepoInfo> getRepos() {
+		return dependencySpec.getRepositories();
 	}
 
 }

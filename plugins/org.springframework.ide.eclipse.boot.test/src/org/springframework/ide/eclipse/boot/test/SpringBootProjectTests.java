@@ -31,22 +31,6 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 public class SpringBootProjectTests extends TestCase {
 
-	/**
-	 * The group id we expect to see for boot starters. Some tests will fail if this doesn't match.
-	 * But the infrastructure itself assumes no specific group id.
-	 */
-	private static final String BOOT_STARTER_GROUP_ID = "org.springframework.boot";
-
-	/**
-	 * The version we expect to see for boot starters. Some tests will fail if this doesn't match.
-	 * But the infrastructure itself assumes no specific version (should work with different versions
-	 * of spring-boot.
-	 *
-	 * The version number in here should be the version of spring boot used by projects created
-	 * via the spring intializer app.
-	 */
-	private static final String BOOT_STARTER_VERSION = "1.3.0.RELEASE";
-
 	private static final long MAVEN_POM_REFRESH_TIMEOUT = 3*60*1000;
 
 	private static String projectName;
