@@ -18,6 +18,8 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.w
 
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -245,8 +247,7 @@ public class EditStartersModelTest {
 	private EditStartersModel createWizard(IProject project) throws Exception {
 		return new EditStartersModel(
 				project,
-				WizardPlugin.getUrlConnectionFactory(),
-				new URL(StsProperties.getInstance().get("spring.initializr.json.url")),
+				InitializrService.DEFAULT,
 				prefs
 		);
 	}

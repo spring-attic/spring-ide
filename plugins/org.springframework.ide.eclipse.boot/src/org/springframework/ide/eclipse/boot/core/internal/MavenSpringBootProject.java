@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.RepoInfo;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
@@ -56,10 +57,6 @@ import org.w3c.dom.Element;
  */
 @SuppressWarnings("restriction")
 public class MavenSpringBootProject extends SpringBootProject {
-
-	//TODO: all of the starter manipulation code completely ignores the version infos in SpringBootStarter objects.
-	// This is ok assuming that versions always follow the 'managed' version in parent pom.
-	// If that is not the case then... ??
 
 	//TODO: properly handle pom manipulation when pom file is open / dirty in an editor.
 	// minimum requirement: detect and prohibit by throwing an error.
@@ -74,7 +71,8 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	private IProject project;
 
-	public MavenSpringBootProject(IProject project) {
+	public MavenSpringBootProject(IProject project, InitializrService initializr) {
+		super(initializr);
 		Assert.isNotNull(project);
 		this.project = project;
 	}

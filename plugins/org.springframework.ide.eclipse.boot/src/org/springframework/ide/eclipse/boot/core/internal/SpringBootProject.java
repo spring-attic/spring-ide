@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.internal;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,14 +21,18 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 
 public abstract class SpringBootProject implements ISpringBootProject {
 
 	static final List<SpringBootStarter> NO_STARTERS = Collections.emptyList();
+	private final InitializrService initializr;
 
 	private SpringBootStarters cachedInfos;
+
+	public SpringBootProject(InitializrService initializr) {
+		this.initializr = initializr;
+	}
 
 	@Override
 	public List<SpringBootStarter> getKnownStarters() {
@@ -55,11 +58,7 @@ public abstract class SpringBootProject implements ISpringBootProject {
 				if (infos!=null && bootVersion.equals(infos.getBootVersion())) {
 					return infos;
 				}
-				return cachedInfos = new SpringBootStarters(
-						bootVersion,
-						new URL(StsProperties.getInstance().get("spring.initializr.json.url")),
-						WizardPlugin.getUrlConnectionFactory()
-				);
+				return cachedInfos = initializr.getStarters(bootVersion);
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);

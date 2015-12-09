@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
@@ -51,6 +52,7 @@ public class EditStartersModel implements OkButtonHandler {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
+	private final InitializrService initializr;
 	private final ISpringBootProject project;
 	private final PopularityTracker popularities;
 
@@ -63,32 +65,25 @@ public class EditStartersModel implements OkButtonHandler {
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
 			.label("Dependencies:");
 
-	private URLConnectionFactory urlConnectionFactory;
-	private URL INITIALIZER_JSON_URL;
-
 	private HashSet<MavenId> activeStarters;
 	private SpringBootStarters starters;
+
 
 	public EditStartersModel(IProject selectedProject) throws Exception {
 		this(
 				selectedProject,
-				WizardPlugin.getUrlConnectionFactory(),
-				url(StsProperties.getInstance().get("spring.initializr.json.url")),
+				InitializrService.DEFAULT,
 				WizardPlugin.getDefault().getPreferenceStore()
 		);
 	}
 
-	private static URL url(String string) throws MalformedURLException {
-		return new URL(string);
-	}
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
 	 */
-	public EditStartersModel(IProject selectedProject, URLConnectionFactory connectionFactory, URL initializerUrl, IPreferenceStore store) throws Exception {
+	public EditStartersModel(IProject selectedProject, InitializrService initializr, IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
 		this.project = SpringBootCore.create(selectedProject);
-		this.urlConnectionFactory = connectionFactory;
-		this.INITIALIZER_JSON_URL = initializerUrl;
+		this.initializr = initializr;
 		discoverOptions(dependencies);
 	}
 
@@ -141,7 +136,7 @@ public class EditStartersModel implements OkButtonHandler {
 	 */
 	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
 		String bootVersion = project.getBootVersion();
-		starters = new SpringBootStarters(bootVersion, INITIALIZER_JSON_URL, urlConnectionFactory);
+		starters = initializr.getStarters(bootVersion);
 
 		Set<MavenId> activeStarters = getActiveStarters();
 

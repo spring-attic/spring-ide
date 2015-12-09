@@ -85,8 +85,9 @@ public class SpringBootStarters {
 		if (byId==null) {
 			byId = new HashMap<>();
 			byMavenId = new HashMap<>();
-			for (DependencyInfo dep : dependencySpec.getDependencies()) {
-				String id = dep.getId();
+			for (Entry<String, DependencyInfo> e : dependencySpec.getDependencies().entrySet()) {
+				String id = e.getKey();
+				DependencyInfo dep = e.getValue();
 				String groupId = dep.getGroupId();
 				String artifactId = dep.getArtifactId();
 				String scope = dep.getScope();

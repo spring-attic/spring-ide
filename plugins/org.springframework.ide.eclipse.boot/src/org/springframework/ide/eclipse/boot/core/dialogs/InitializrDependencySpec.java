@@ -61,20 +61,14 @@ public class InitializrDependencySpec {
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	@JsonInclude(value=Include.NON_NULL)
 	public static class DependencyInfo {
-		private String id;
 		private String groupId;
 		private String artifactId;
 		private String version;
 		private String scope;
 		private String bom;
 		private String classifier;
+		private String repository;
 
-		public String getId() {
-			return id;
-		}
-		public void setId(String id) {
-			this.id = id;
-		}
 		public String getGroupId() {
 			return groupId;
 		}
@@ -111,6 +105,12 @@ public class InitializrDependencySpec {
 		public void setClassifier(String classifier) {
 			this.classifier = classifier;
 		}
+		public String getRepository() {
+			return repository;
+		}
+		public void setRepository(String repository) {
+			this.repository = repository;
+		}
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
@@ -141,7 +141,7 @@ public class InitializrDependencySpec {
 
 	private static final String JSON_CONTENT_TYPE_HEADER = "application/json";
 
-	private DependencyInfo[] dependencies;
+	private Map<String, DependencyInfo> dependencies;
 	private Map<String, DependencyInfo> boms; //Note, not all fields of DependencyInfo are applicable for boms
 							// (e.g. boms don't have their own nested boms)
 							// but its easier to reuse this class than create another very similar one.
@@ -153,11 +153,11 @@ public class InitializrDependencySpec {
 		return mapper.readValue(input, InitializrDependencySpec.class);
 	}
 
-	public DependencyInfo[] getDependencies() {
+	public Map<String, DependencyInfo> getDependencies() {
 		return dependencies;
 	}
 
-	public void setDependencies(DependencyInfo[] dependencies) {
+	public void setDependencies(Map<String, DependencyInfo> dependencies) {
 		this.dependencies = dependencies;
 	}
 

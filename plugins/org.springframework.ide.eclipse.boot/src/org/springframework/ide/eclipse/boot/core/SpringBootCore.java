@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.core;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -21,20 +22,66 @@ public class SpringBootCore {
 
 	public static final String M2E_NATURE = "org.eclipse.m2e.core.maven2Nature";
 	private static final StsProperties stsProps = StsProperties.getInstance();
+	private InitializrService initializr;
+
+	public SpringBootCore(InitializrService initializr) {
+		this.initializr = initializr;
+	}
+
+	/**
+	 * Deprecated, use of this method hampers testability. Instead 'good' code
+	 * should use a SpringBootCore instance from its context to create a project.
+	 *
+	 * @return a SpringBoot centric view on a eclipse project.
+	 */
+	@Deprecated
+	public static ISpringBootProject create(IProject project) throws CoreException {
+		return getDefault().project(project);
+	}
+
+	/**
+	 * Deprecated, use of this method hampers testability. Instead 'good' code
+	 * should use a SpringBootCore instance from its context to create a project.
+	 *
+	 * @return a SpringBoot centric view on a eclipse project.
+	 */
+	@Deprecated
+	public static ISpringBootProject create(IJavaProject project) throws CoreException {
+		return getDefault().project(project);
+	}
+
+	private static SpringBootCore instance;
+
+	/**
+	 * Gets the default instance. Callers should be careful calling this method as this
+	 * makes it hard to test the calling code (i.e. dependency injection of mocks).
+	 * <p>
+	 * Generally callers should instead seek to obtain a reference to a {@link SpringBootCore}
+	 * instance from their context.
+	 */
+	public static SpringBootCore getDefault() {
+		if (instance==null) {
+			instance = new SpringBootCore(InitializrService.DEFAULT);
+		}
+		return instance;
+	}
 
 	/**
 	 * @return a SpringBoot centric view on a eclipse project.
 	 */
-	public static ISpringBootProject create(IProject project) throws CoreException {
+	public ISpringBootProject project(IJavaProject project) throws CoreException {
+		return project(project.getProject());
+	}
+
+	/**
+	 * @return a SpringBoot centric view on a eclipse project.
+	 */
+	public ISpringBootProject project(IProject project) throws CoreException {
 		if (project.hasNature(M2E_NATURE)) {
-			return new MavenSpringBootProject(project);
+			return new MavenSpringBootProject(project, initializr);
 		} else {
 			throw ExceptionUtil.coreException("This feature is only implemented for m2e enabled maven projects");
 		}
-	}
-
-	public static ISpringBootProject create(IJavaProject project) throws CoreException {
-		return create(project.getProject());
 	}
 
 	/**
