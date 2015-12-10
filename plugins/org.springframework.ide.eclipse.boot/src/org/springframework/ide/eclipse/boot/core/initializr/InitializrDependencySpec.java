@@ -8,7 +8,7 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.core.dialogs;
+package org.springframework.ide.eclipse.boot.core.initializr;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,6 @@ import java.net.URLConnection;
 import java.util.Map;
 
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,36 +27,88 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+/**
+ * Jackson 'templates' for parsing json data from start.spring.io 'dependencies' endpoint.
+ *
+ * @author Kris De Volder
+ */
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonInclude(value=Include.NON_NULL)
 public class InitializrDependencySpec {
 
 	/* Some examples:
-    {
-        "id": "activiti-basic",
-        "name": "Activiti",
-        "groupId": "org.activiti",
-        "artifactId": "activiti-spring-boot-starter-basic",
-        "version": "5.19.0",
-        "scope": "compile"
-      },
-    {
-      "id": "lombok",
-      "name": "Lombok",
-      "groupId": "org.projectlombok",
-      "artifactId": "lombok",
-      "scope": "compile",
-      "bom": "cloud-bom"
-    },
-    {
-      "id": "postgresql",
-      "name": "PostgreSQL",
-      "groupId": "org.postgresql",
-      "artifactId": "postgresql",
-      "version": "9.4-1201-jdbc41",
-      "scope": "runtime"
-    },
-	 */
+	{
+	    "id": "activiti-basic",
+	    "name": "Activiti",
+	    "groupId": "org.activiti",
+	    "artifactId": "activiti-spring-boot-starter-basic",
+	    "version": "5.19.0",
+	    "scope": "compile"
+	  },
+	{
+	  "id": "lombok",
+	  "name": "Lombok",
+	  "groupId": "org.projectlombok",
+	  "artifactId": "lombok",
+	  "scope": "compile",
+	  "bom": "cloud-bom"
+	},
+	{
+	  "id": "postgresql",
+	  "name": "PostgreSQL",
+	  "groupId": "org.postgresql",
+	  "artifactId": "postgresql",
+	  "version": "9.4-1201-jdbc41",
+	  "scope": "runtime"
+	},
+		 */
+
+	@JsonIgnoreProperties(ignoreUnknown=true)
+	@JsonInclude(value=Include.NON_NULL)
+	public static class BomInfo {
+		private String groupId;
+		private String artifactId;
+		private String version;
+		private String scope;
+		private String classifier;
+		private String[] repositories;
+		public String getGroupId() {
+			return groupId;
+		}
+		public void setGroupId(String groupId) {
+			this.groupId = groupId;
+		}
+		public String getArtifactId() {
+			return artifactId;
+		}
+		public void setArtifactId(String artifactId) {
+			this.artifactId = artifactId;
+		}
+		public String getVersion() {
+			return version;
+		}
+		public void setVersion(String version) {
+			this.version = version;
+		}
+		public String getScope() {
+			return scope;
+		}
+		public void setScope(String scope) {
+			this.scope = scope;
+		}
+		public String getClassifier() {
+			return classifier;
+		}
+		public void setClassifier(String classifier) {
+			this.classifier = classifier;
+		}
+		public String[] getRepositories() {
+			return repositories;
+		}
+		public void setRepositories(String[] repositories) {
+			this.repositories = repositories;
+		}
+	}
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	@JsonInclude(value=Include.NON_NULL)
@@ -144,10 +195,7 @@ public class InitializrDependencySpec {
 
 	private String bootVersion;
 	private Map<String, DependencyInfo> dependencies;
-	private Map<String, DependencyInfo> boms; //Note, not all fields of DependencyInfo are applicable for boms
-							// (e.g. boms don't have their own nested boms)
-							// but its easier to reuse this class than create another very similar one.
-
+	private Map<String, BomInfo> boms;
 	private Map<String, RepoInfo> repositories;
 
 
@@ -207,11 +255,11 @@ public class InitializrDependencySpec {
 		throw exception;
 	}
 
-	public Map<String, DependencyInfo> getBoms() {
+	public Map<String, BomInfo> getBoms() {
 		return boms;
 	}
 
-	public void setBoms(Map<String, DependencyInfo> boms) {
+	public void setBoms(Map<String, BomInfo> boms) {
 		this.boms = boms;
 	}
 

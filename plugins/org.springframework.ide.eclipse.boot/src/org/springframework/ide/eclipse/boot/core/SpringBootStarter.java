@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2012 GoPivotal, Inc.
+ * Copyright (c) 2012-2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
@@ -21,39 +21,39 @@ public class SpringBootStarter {
 	private String id; //id used by initalizr service
 	private IMavenCoordinates dep;
 	private String scope;
-	private IMavenCoordinates bom;
+	private Bom bom;
+	private Repo repo;
 
-	public SpringBootStarter(String id, IMavenCoordinates dep, String scope, IMavenCoordinates bom) {
+	public SpringBootStarter(String id, IMavenCoordinates dep, String scope, Bom bom, Repo repo) {
 		this.id = id;
 		this.dep = dep;
 		this.scope = scope;
 		this.bom = bom;
+		this.repo = repo;
 	}
-
-	public String getScope() {
-		return scope;
+	public String getId() {
+		return id;
 	}
-
-	@Override
-	public String toString() {
-		return "SpringBootStarter("+id+")";
-	}
-
 	public String getArtifactId() {
 		return dep.getArtifactId();
 	}
-
 	public String getGroupId() {
 		return dep.getGroupId();
 	}
-
 	public String getVersion() {
 		return dep.getVersion();
 	}
-
-
-	public String getId() {
-		return id;
+	public IMavenCoordinates getDependency() {
+		return dep;
+	}
+	public String getScope() {
+		return scope;
+	}
+	public Bom getBom() {
+		return bom;
+	}
+	public Repo getRepo() {
+		return repo;
 	}
 
 	/**
@@ -89,13 +89,8 @@ public class SpringBootStarter {
 			return false;
 		return true;
 	}
-
-	public IMavenCoordinates getBom() {
-		return bom;
+	@Override
+	public String toString() {
+		return "SpringBootStarter("+id+")";
 	}
-
-	public IMavenCoordinates getDependency() {
-		return dep;
-	}
-
 }

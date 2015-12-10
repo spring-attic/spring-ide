@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.InputStream;
 
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
 
 /**
  * @author Kris De Volder

@@ -34,6 +34,11 @@
             "name": "Eureka Discovery",
             "description": "Service discovery using spring-cloud-netflix and Eureka",
             "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "fake-dep",
+            "name": "Fake Dependency",
+            "description": "Does not really exist"
           }
         ]
       }

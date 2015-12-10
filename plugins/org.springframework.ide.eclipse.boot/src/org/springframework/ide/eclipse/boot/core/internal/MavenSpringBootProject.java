@@ -39,14 +39,17 @@ import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
+import org.springframework.ide.eclipse.boot.core.Bom;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenId;
+import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.RepoInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.RepoInfo;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
@@ -79,7 +82,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	@Override
 	public IProject getProject() {
-
 		return project;
 	}
 
@@ -234,9 +236,9 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 			IFile file = getPomFile();
 			performOnDOMDocument(new OperationTuple(file, new Operation() {
-				public void process(Document document) {
+				public void process(Document pom) {
 					Element depsEl = getChild(
-							document.getDocumentElement(), DEPENDENCIES);
+							pom.getDocumentElement(), DEPENDENCIES);
 					List<Element> children = findChilds(depsEl, DEPENDENCY);
 					for (Element c : children) {
 						//We only care about 'starter' dependencies. Leave everything else alone.
@@ -261,21 +263,8 @@ public class MavenSpringBootProject extends SpringBootProject {
 					for (MavenId mid : starters) {
 						SpringBootStarter starter = getStarter(mid);
 						createDependency(depsEl, starter.getDependency(), starter.getScope());
-						createBomIfNeeded(document, starter.getBom());
-					}
-				}
-
-				private void createBomIfNeeded(Document pom, IMavenCoordinates bom) {
-					if (bom!=null) {
-						Element bomList = ensureDependencyMgmtSection(pom);
-						Element existing = PomEdits.findChild(bomList, DEPENDENCY,
-								childEquals(GROUP_ID, bom.getGroupId()),
-								childEquals(ARTIFACT_ID, bom.getArtifactId())
-						);
-						if (existing==null) {
-							createBom(bomList, bom);
-							addReposIfNeeded(pom, getStarterInfos().getRepos());
-						}
+						createBomIfNeeded(pom, starter.getBom());
+						createRepoIfNeeded(pom, starter.getRepo());
 					}
 				}
 
@@ -315,7 +304,27 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return SpringBootCore.getDefaultBootVersion();
 	}
 
-	private static Element ensureDependencyMgmtSection(Document pom) {
+	private void createRepoIfNeeded(Document pom, Repo repo) {
+		if (repo!=null) {
+			addReposIfNeeded(pom, Collections.singletonList(repo));
+		}
+	}
+
+	private void createBomIfNeeded(Document pom, Bom bom) {
+		if (bom!=null) {
+			Element bomList = ensureDependencyMgmtSection(pom);
+			Element existing = PomEdits.findChild(bomList, DEPENDENCY,
+					childEquals(GROUP_ID, bom.getGroupId()),
+					childEquals(ARTIFACT_ID, bom.getArtifactId())
+			);
+			if (existing==null) {
+				createBom(bomList, bom);
+				addReposIfNeeded(pom, bom.getRepos());
+			}
+		}
+	}
+
+	private Element ensureDependencyMgmtSection(Document pom) {
 		/* Ensure that this exists in the pom:
 	<dependencyManagement>
 		<dependencies> <---- RETURNED
@@ -346,7 +355,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return deplist;
 	}
 
-	private static Element createBom(Element parentList, IMavenCoordinates coords) {
+	private static Element createBom(Element parentList, Bom bom) {
 		/*
 	<dependencyManagement>
 		<dependencies> <---- parentList
@@ -361,10 +370,10 @@ public class MavenSpringBootProject extends SpringBootProject {
 	</dependencyManagement>
 		 */
 
-		String groupId = coords.getGroupId();
-		String artifactId = coords.getArtifactId();
-		String version = coords.getVersion();
-		String classifier = coords.getClassifier();
+		String groupId = bom.getGroupId();
+		String artifactId = bom.getArtifactId();
+		String version = bom.getVersion();
+		String classifier = bom.getClassifier();
 		String type = "pom";
 		String scope = "import";
 
@@ -391,7 +400,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	/**
 	 * creates and adds new dependency to the parent. formats the result.
 	 */
-	public static Element createDependency(Element parentList, IMavenCoordinates info, String scope) {
+	private Element createDependency(Element parentList, IMavenCoordinates info, String scope) {
 		Element dep = createElement(parentList, DEPENDENCY);
 		String groupId = info.getGroupId();
 		String artifactId = info.getArtifactId();
@@ -415,7 +424,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return dep;
 	}
 
-	private void addReposIfNeeded(Document pom, Map<String, RepoInfo> repoInfo) {
+	private void addReposIfNeeded(Document pom, List<Repo> repos) {
 		//Example:
 		//	<repositories>
 		//		<repository>
@@ -436,16 +445,15 @@ public class MavenSpringBootProject extends SpringBootProject {
 		//		</repository>
 		//	</repositories>
 
-		if (repoInfo!=null && !repoInfo.isEmpty()) {
+		if (repos!=null && !repos.isEmpty()) {
 			Element doc = pom.getDocumentElement();
 			Element repoList = findChild(doc, REPOSITORIES);
 			if (repoList==null) {
 				repoList = createElement(doc, REPOSITORIES);
 				format(repoList);
 			}
-			for (Entry<String, RepoInfo> e : repoInfo.entrySet()) {
-				String id = e.getKey();
-				RepoInfo repo = e.getValue();
+			for (Repo repo : repos) {
+				String id = repo.getId();
 				Element repoEl = findChild(repoList, REPOSITORY, childEquals(ID, id));
 				if (repoEl==null) {
 					repoEl = createElement(repoList, REPOSITORY);

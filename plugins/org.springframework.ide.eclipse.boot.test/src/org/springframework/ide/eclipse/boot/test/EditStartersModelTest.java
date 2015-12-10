@@ -10,20 +10,25 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY_MANAGEMENT;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.TYPE;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +58,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
-import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
@@ -61,7 +66,6 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.Initializ
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * @author Kris De Volder
@@ -311,6 +315,37 @@ public class EditStartersModelTest {
 		//check that only ONE repo got added
 		IDOMDocument pom = parsePom(project);
 
+		assertNotNull(getRepo(pom, "spring-milestones"));
+		assertNull(getRepo(pom, "spring-snapshots"));
+		assertRepoCount(1, pom);
+	}
+
+	@Test
+	public void addDependencyWithRepo() throws Exception {
+		//This test uses more 'controlled' parameters:
+		String bootVersion = "1.3.0.RELEASE";
+		IProject project = harness.createBootProject("foo",
+				bootVersion(bootVersion), // boot version fixed
+				withStarters("web")
+		);
+
+		initializr.setInputs("sample-with-fakes"); // must use 'fake' data because the situation we are after doesn't exist in the real data
+
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("fake-dep");
+		wizard.performOk();
+
+		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+
+		//!!! fake data may not produce a project that builds without
+		//!!! problem so don't check for build errors in this test
+
+		IDOMDocument pom = parsePom(project);
+
+		//check the dependency got added to the pom
+		assertNotNull(findDependency(pom, new MavenId("org.springframework.fake", "spring-fake-dep")));
+
+		//check that just the expected repo got added
 		assertNotNull(getRepo(pom, "spring-milestones"));
 		assertNull(getRepo(pom, "spring-snapshots"));
 		assertRepoCount(1, pom);

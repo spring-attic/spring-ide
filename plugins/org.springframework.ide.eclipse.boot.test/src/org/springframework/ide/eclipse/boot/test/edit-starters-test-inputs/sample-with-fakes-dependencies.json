@@ -6,6 +6,12 @@
       "artifactId": "spring-cloud-starter-eureka",
       "scope": "compile",
       "bom": "cloud-bom"
+    },
+    "fake-dep": {
+      "groupId": "org.springframework.fake",
+      "artifactId": "spring-fake-dep",
+      "scope": "compile",
+      "repository": "spring-milestones"
     }
   },
   "repositories": {
