@@ -23,7 +23,7 @@ public class TagFilterBoxModel extends FilterBoxModel<BootDashElement> {
 	@Override
 	protected Filter<BootDashElement> createFilterForInput(String text) {
 		if (StringUtil.hasText(text)) {
-			return new TagSearchFilter(text);
+			return new BootDashElementSearchFilter(text);
 		} else {
 			return Filters.acceptAll();
 		}
