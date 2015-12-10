@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import org.springframework.ide.eclipse.boot.core.dialogs.InitializrDependencySpec.DependencyInfo;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
@@ -31,6 +32,10 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 		this.artifact = artifact;
 		this.version = version;
 		this.classifier = null;
+	}
+
+	public MavenCoordinates(DependencyInfo dep) {
+		this(dep.getGroupId(),dep.getArtifactId(),dep.getClassifier(),dep.getVersion());
 	}
 
 	@Override

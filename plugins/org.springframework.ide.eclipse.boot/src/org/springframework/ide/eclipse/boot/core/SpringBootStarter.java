@@ -19,13 +19,13 @@ package org.springframework.ide.eclipse.boot.core;
 public class SpringBootStarter {
 
 	private String id; //id used by initalizr service
-	private MavenId mavenId;
+	private IMavenCoordinates dep;
 	private String scope;
 	private IMavenCoordinates bom;
 
-	public SpringBootStarter(String id, MavenId dep, String scope, IMavenCoordinates bom) {
+	public SpringBootStarter(String id, IMavenCoordinates dep, String scope, IMavenCoordinates bom) {
 		this.id = id;
-		this.mavenId = dep;
+		this.dep = dep;
 		this.scope = scope;
 		this.bom = bom;
 	}
@@ -36,16 +36,21 @@ public class SpringBootStarter {
 
 	@Override
 	public String toString() {
-		return "SpringBootStarter("+id+", "+mavenId+")";
+		return "SpringBootStarter("+id+")";
 	}
 
 	public String getArtifactId() {
-		return getMavenId().getArtifactId();
+		return dep.getArtifactId();
 	}
 
 	public String getGroupId() {
-		return getMavenId().getGroupId();
+		return dep.getGroupId();
 	}
+
+	public String getVersion() {
+		return dep.getVersion();
+	}
+
 
 	public String getId() {
 		return id;
@@ -57,14 +62,14 @@ public class SpringBootStarter {
 	 * a project so it isn't part of the 'id'.
 	 */
 	public MavenId getMavenId() {
-		return mavenId;
+		return new MavenId(dep.getGroupId(), dep.getArtifactId());
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((mavenId == null) ? 0 : mavenId.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -77,10 +82,10 @@ public class SpringBootStarter {
 		if (getClass() != obj.getClass())
 			return false;
 		SpringBootStarter other = (SpringBootStarter) obj;
-		if (mavenId == null) {
-			if (other.mavenId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!mavenId.equals(other.mavenId))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
@@ -88,4 +93,9 @@ public class SpringBootStarter {
 	public IMavenCoordinates getBom() {
 		return bom;
 	}
+
+	public IMavenCoordinates getDependency() {
+		return dep;
+	}
+
 }

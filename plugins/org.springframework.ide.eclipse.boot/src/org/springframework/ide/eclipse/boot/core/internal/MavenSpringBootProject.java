@@ -260,8 +260,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 					// in the pom, so we need to add them.
 					for (MavenId mid : starters) {
 						SpringBootStarter starter = getStarter(mid);
-						createDependency(depsEl,
-								mid.getGroupId(), mid.getArtifactId(), /*version*/null, starter.getScope());
+						createDependency(depsEl, starter.getDependency(), starter.getScope());
 						createBomIfNeeded(document, starter.getBom());
 					}
 				}
@@ -392,8 +391,12 @@ public class MavenSpringBootProject extends SpringBootProject {
 	/**
 	 * creates and adds new dependency to the parent. formats the result.
 	 */
-	public static Element createDependency(Element parentList, String groupId, String artifactId, String version, String scope) {
+	public static Element createDependency(Element parentList, IMavenCoordinates info, String scope) {
 		Element dep = createElement(parentList, DEPENDENCY);
+		String groupId = info.getGroupId();
+		String artifactId = info.getArtifactId();
+		String version = info.getVersion();
+		String classifier = info.getClassifier();
 
 		if(groupId != null) {
 			createElementWithText(dep, GROUP_ID, groupId);
@@ -402,7 +405,10 @@ public class MavenSpringBootProject extends SpringBootProject {
 		if(version != null) {
 			createElementWithText(dep, VERSION, version);
 		}
-		if (scope !=null && !scope.equals("compile")) {
+		if (classifier != null) {
+			createElementWithText(dep, CLASSIFIER, classifier);
+		}
+		if (scope!=null && !scope.equals("compile")) {
 			createElementWithText(dep, SCOPE, scope);
 		}
 		format(dep);

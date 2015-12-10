@@ -35,26 +35,21 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLC
  */
 public class SpringBootStarters {
 
-	private String bootVersion;
-	private URLConnectionFactory urlConnectionFactory;
-
 	private InitializrDependencySpec dependencySpec;
 	private InitializrServiceSpec initializrSpec;
 	private HashMap<String, SpringBootStarter> byId;
 	private HashMap<MavenId, SpringBootStarter> byMavenId;
 
-	public SpringBootStarters(String bootVersion, URL initializerUrl, URLConnectionFactory urlConnFac) throws Exception {
-		this.bootVersion = bootVersion;
-		this.urlConnectionFactory = urlConnFac;
-
-		this.initializrSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, initializerUrl);
-		this.dependencySpec = InitializrDependencySpec.parseFrom(urlConnectionFactory, dependencyUrl(initializerUrl));
+	public SpringBootStarters(InitializrServiceSpec initializrSpec, InitializrDependencySpec dependencySpec) {
+		this.dependencySpec = dependencySpec;
+		this.initializrSpec = initializrSpec;
 	}
 
-	protected String dependencyUrl(URL initializerUrl) {
-		SimpleUriBuilder builder = new SimpleUriBuilder(initializerUrl.toString()+"/dependencies");
-		builder.addParameter("bootVersion", bootVersion);
-		return builder.toString();
+	public SpringBootStarters(URL initializerUrl, URL dependencyUrl, URLConnectionFactory urlConnectionFactory) throws Exception {
+		this(
+				InitializrServiceSpec.parseFrom(urlConnectionFactory, initializerUrl),
+				InitializrDependencySpec.parseFrom(urlConnectionFactory, dependencyUrl)
+		);
 	}
 
 	public DependencyGroup[] getDependencyGroups() {
@@ -93,18 +88,17 @@ public class SpringBootStarters {
 				String scope = dep.getScope();
 				String bom = dep.getBom();
 				if (id!=null && groupId!=null && artifactId!=null) {
-					MavenId mid = new MavenId(groupId, artifactId);
 					//ignore invalid looking entries. Should at least have an id, aid and gid
-					SpringBootStarter starter = new SpringBootStarter(id, mid, scope, bomsById.get(bom));
+					SpringBootStarter starter = new SpringBootStarter(id, new MavenCoordinates(dep), scope, bomsById.get(bom));
 					byId.put(id, starter);
-					byMavenId.put(mid, starter);
+					byMavenId.put(new MavenId(groupId, artifactId), starter);
 				}
 			}
 		}
 	}
 
 	public String getBootVersion() {
-		return bootVersion;
+		return dependencySpec.getBootVersion();
 	}
 
 	public boolean contains(String id) {

@@ -17,6 +17,7 @@ import java.net.URLConnection;
 import java.util.Map;
 
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -141,12 +142,14 @@ public class InitializrDependencySpec {
 
 	private static final String JSON_CONTENT_TYPE_HEADER = "application/json";
 
+	private String bootVersion;
 	private Map<String, DependencyInfo> dependencies;
 	private Map<String, DependencyInfo> boms; //Note, not all fields of DependencyInfo are applicable for boms
 							// (e.g. boms don't have their own nested boms)
 							// but its easier to reuse this class than create another very similar one.
 
 	private Map<String, RepoInfo> repositories;
+
 
 	public static InitializrDependencySpec parseFrom(InputStream input) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
@@ -218,6 +221,13 @@ public class InitializrDependencySpec {
 
 	public void setRepositories(Map<String, RepoInfo> repositories) {
 		this.repositories = repositories;
+	}
+
+	public String getBootVersion() {
+		return bootVersion;
+	}
+	public void setBootVersion(String bootVersion) {
+		this.bootVersion = bootVersion;
 	}
 
 }

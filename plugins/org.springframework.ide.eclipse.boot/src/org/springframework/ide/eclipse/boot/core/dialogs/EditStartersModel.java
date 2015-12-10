@@ -52,7 +52,6 @@ public class EditStartersModel implements OkButtonHandler {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
-	private final InitializrService initializr;
 	private final ISpringBootProject project;
 	private final PopularityTracker popularities;
 
@@ -72,7 +71,7 @@ public class EditStartersModel implements OkButtonHandler {
 	public EditStartersModel(IProject selectedProject) throws Exception {
 		this(
 				selectedProject,
-				InitializrService.DEFAULT,
+				SpringBootCore.getDefault(),
 				WizardPlugin.getDefault().getPreferenceStore()
 		);
 	}
@@ -80,10 +79,9 @@ public class EditStartersModel implements OkButtonHandler {
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
 	 */
-	public EditStartersModel(IProject selectedProject, InitializrService initializr, IPreferenceStore store) throws Exception {
+	public EditStartersModel(IProject selectedProject, SpringBootCore springBootCore, IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
-		this.project = SpringBootCore.create(selectedProject);
-		this.initializr = initializr;
+		this.project = springBootCore.project(selectedProject);
 		discoverOptions(dependencies);
 	}
 
@@ -135,8 +133,7 @@ public class EditStartersModel implements OkButtonHandler {
 	 * Dynamically discover input fields and 'style' options by parsing initializr form.
 	 */
 	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
-		String bootVersion = project.getBootVersion();
-		starters = initializr.getStarters(bootVersion);
+		starters = project.getStarterInfos();
 
 		Set<MavenId> activeStarters = getActiveStarters();
 

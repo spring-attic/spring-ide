@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.initializr;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.SimpleUriBuilder;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 
 public interface InitializrService {
@@ -21,14 +25,22 @@ public interface InitializrService {
 		@Override
 		public SpringBootStarters getStarters(String bootVersion) {
 			try {
-				return new SpringBootStarters(bootVersion,
-						StsProperties.getInstance().url("spring.initializr.json.url"),
+				URL initializrUrl = StsProperties.getInstance().url("spring.initializr.json.url");
+				URL dependencyUrl = dependencyUrl(bootVersion, initializrUrl);
+				return new SpringBootStarters(
+						initializrUrl, dependencyUrl,
 						WizardPlugin.getUrlConnectionFactory()
 				);
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}
 			return null;
+		}
+
+		private URL dependencyUrl(String bootVersion, URL initializerUrl) throws MalformedURLException {
+			SimpleUriBuilder builder = new SimpleUriBuilder(initializerUrl.toString()+"/dependencies");
+			builder.addParameter("bootVersion", bootVersion);
+			return new URL(builder.toString());
 		}
 	};
 

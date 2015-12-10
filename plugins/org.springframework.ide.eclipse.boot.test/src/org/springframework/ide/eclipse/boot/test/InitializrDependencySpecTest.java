@@ -27,7 +27,7 @@ public class InitializrDependencySpecTest {
 	 */
 	@Test
 	public void parseInitializrDependencies() throws Exception {
-		InitializrDependencySpec spec = parseDependencies("initializr-dependencies.json");
+		InitializrDependencySpec spec = parseDependencies("edit-starters-test-inputs/sample-dependencies.json");
 		assertNotNull(spec);
 	}
 

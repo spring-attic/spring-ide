@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
 import java.util.Arrays;
@@ -84,6 +85,25 @@ public class BootProjectTestHarness {
 		return new WizardConfigurer() {
 			public void apply(NewSpringBootWizardModel wizard) {
 				wizard.getStringInput("packageName").setValue(pkgName);
+			}
+		};
+	}
+
+	/**
+	 * @return A wizard configurer that ensures the selected 'boot version' is exactly
+	 * a given version of boot.
+	 */
+	public static WizardConfigurer bootVersion(final String wantedVersion) throws Exception {
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				for (RadioInfo option : bootVersionRadio.getRadios()) {
+					if (option.getValue().equals(wantedVersion)) {
+						bootVersionRadio.setValue(option);
+						return;
+					}
+				}
+				fail("The wanted bootVersion '"+wantedVersion+"'is not found in the wizard");
 			}
 		};
 	}
