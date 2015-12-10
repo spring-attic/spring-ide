@@ -16,6 +16,9 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 
 public class BaseDeploymentProperties {
+
+	public static final int DEFAULT_MEMORY = 1024;
+
 	/*
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
@@ -24,6 +27,8 @@ public class BaseDeploymentProperties {
 	private String appName;
 
 	private IProject project;
+
+	private int memory = DEFAULT_MEMORY;
 
 	public BaseDeploymentProperties(IProject project) {
 		this.project = project;
@@ -59,5 +64,13 @@ public class BaseDeploymentProperties {
 
 	public String getAppName() {
 		return appName;
+	}
+
+	public int getMemory() {
+		return memory;
+	}
+
+	public void setMemory(int memory) {
+		this.memory = memory;
 	}
 }
