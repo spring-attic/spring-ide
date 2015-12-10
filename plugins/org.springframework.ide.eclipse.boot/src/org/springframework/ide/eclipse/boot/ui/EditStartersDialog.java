@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
@@ -107,7 +108,15 @@ public class EditStartersDialog extends DialogWithSections {
 	}
 
 	public static int openFor(IProject selectedProject, Shell shell) throws Exception {
-		return new EditStartersDialog(new EditStartersModel(selectedProject), shell).open();
+		EditStartersModel model = new EditStartersModel(selectedProject);
+		String notSupported = model.getNotSupportedMessage();
+		if (notSupported==null) {
+			return new EditStartersDialog(model, shell).open();
+		}
+		MessageDialog.openError(shell, "Couldn't open the 'Edit Starters' dialog",
+				notSupported
+		);
+		return 0;
 	}
 
 }

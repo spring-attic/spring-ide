@@ -73,6 +73,19 @@ public class EditStartersModel implements OkButtonHandler {
 		);
 	}
 
+	public boolean isSupported() {
+		String notSupportedMsg = getNotSupportedMessage();
+		return notSupportedMsg == null;
+	}
+
+	public String getNotSupportedMessage() {
+		if (starters==null) {
+			return "Could not obtain starter dependencies information. This information is obtained by accessing the 'start.spring.io' webservice. "
+					+ "Are you connected to the internet?";
+		}
+		return null;
+	}
+
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
 	 */
@@ -134,17 +147,19 @@ public class EditStartersModel implements OkButtonHandler {
 
 		Set<MavenId> activeStarters = getActiveStarters();
 
-		for (DependencyGroup dgroup : starters.getDependencyGroups()) {
-			String catName = dgroup.getName();
-			for (Dependency dep : dgroup.getContent()) {
-				if (starters.contains(dep.getId())) {
-					dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), LiveExpression.constant(true));
-					MavenId mavenId = starters.getMavenId(dep.getId());
-					boolean selected = activeStarters.contains(mavenId);
-					if (selected) {
-						initialDependencies.add(dep);
+		if (starters!=null) {
+			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
+				String catName = dgroup.getName();
+				for (Dependency dep : dgroup.getContent()) {
+					if (starters.contains(dep.getId())) {
+						dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), LiveExpression.constant(true));
+						MavenId mavenId = starters.getMavenId(dep.getId());
+						boolean selected = activeStarters.contains(mavenId);
+						if (selected) {
+							initialDependencies.add(dep);
+						}
+						dependencies.setSelection(catName, dep, selected);
 					}
-					dependencies.setSelection(catName, dep, selected);
 				}
 			}
 		}

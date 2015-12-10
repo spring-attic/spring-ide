@@ -109,6 +109,8 @@ public class EditStartersModelTest {
 		IProject project = harness.createBootProject("foo", withStarters("web", "actuator"));
 		ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
+		assertTrue(wizard.isSupported());
+
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
 		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
 	}
@@ -351,6 +353,20 @@ public class EditStartersModelTest {
 		assertRepoCount(1, pom);
 	}
 
+	@Test
+	public void serviceUnavailable() throws Exception {
+		String bootVersion = "1.3.0.RELEASE";
+		IProject project = harness.createBootProject("foo",
+				bootVersion(bootVersion), // boot version fixed
+				withStarters("web")
+		);
+
+		initializr.makeUnavailable();
+
+		EditStartersModel wizard = createWizard(project);
+		assertFalse(wizard.isSupported());
+	}
+
 	//TODO: testing of...
 	// - repository field in individual dependency taken into account?
 
@@ -525,6 +541,7 @@ public class EditStartersModelTest {
 	public class MockInitializrService implements InitializrService {
 
 		private SpringBootStarters starters;
+		private boolean unavailable = false;
 
 		/**
 		 * Causes the mock to parse input from given input streams instead of calling out to
@@ -551,11 +568,21 @@ public class EditStartersModelTest {
 
 		@Override
 		public SpringBootStarters getStarters(String bootVersion) {
-			if (starters!=null) {
+			if (unavailable) {
+				return null;
+			} else if (starters!=null) {
 				return starters;
 			} else {
 				return InitializrService.DEFAULT.getStarters(bootVersion);
 			}
+		}
+
+		/**
+		 * Make the mock behave as if the 'dependencies' endpoint is not available (either the service is down,
+		 * there is no internet connection, or this is an old service that doesn't implement the endpoint yet).
+		 */
+		public void makeUnavailable() {
+			this.unavailable = true;
 		}
 
 	}
