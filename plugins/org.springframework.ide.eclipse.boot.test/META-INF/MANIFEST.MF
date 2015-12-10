@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui,
  com.fasterxml.jackson.core.jackson-databind,
  org.eclipse.m2e.core.ui,
  org.eclipse.wst.sse.core,
- org.eclipse.wst.xml.core
+ org.eclipse.wst.xml.core,
+ org.mockito
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

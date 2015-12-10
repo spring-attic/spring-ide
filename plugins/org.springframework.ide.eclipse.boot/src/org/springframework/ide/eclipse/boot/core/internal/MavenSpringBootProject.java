@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.core.internal;
 
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -117,34 +118,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 		return converted;
 	}
 
-	@Override
-	public void removeStarter(final SpringBootStarter starter)
-			throws CoreException {
-		try {
-			List<SpringBootStarter> starters = getBootStarters();
-			boolean changed = starters.remove(starter);
-			if (changed) {
-				setStarters(starters);
-			}
-		} catch (Throwable e) {
-			throw ExceptionUtil.coreException(e);
-		}
-	}
-
-	@Override
-	public void addStarter(final SpringBootStarter starter)
-			throws CoreException {
-		try {
-			List<SpringBootStarter> starters = getBootStarters();
-			boolean changed = starters.add(starter);
-			if (changed) {
-				setStarters(starters);
-			}
-		} catch (Throwable e) {
-			throw ExceptionUtil.coreException(e);
-		}
-	}
-
 	/**
 	 * Determine the 'managed' version, if any, associate with a given dependency.
 	 * @return Version string or null.
@@ -178,7 +151,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 			System.out.println(string);
 		}
 	}
-
 
 	@Override
 	public void addMavenDependency(final IMavenCoordinates dep, final boolean preferManagedVersion) throws CoreException {
@@ -272,6 +244,31 @@ public class MavenSpringBootProject extends SpringBootProject {
 			}));
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);
+		}
+	}
+
+	@Override
+	public void removeMavenDependency(final MavenId mavenId) {
+		IFile file = getPomFile();
+		try {
+			performOnDOMDocument(new OperationTuple(file, new Operation() {
+				@Override
+				public void process(Document pom) {
+					Element depsEl = getChild(
+							pom.getDocumentElement(), DEPENDENCIES);
+					if (depsEl!=null) {
+						Element dep = findChild(depsEl, DEPENDENCY,
+								childEquals(GROUP_ID, mavenId.getGroupId()),
+								childEquals(ARTIFACT_ID, mavenId.getArtifactId())
+						);
+						if (dep!=null) {
+							depsEl.removeChild(dep);
+						}
+					}
+				}
+			}));
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
 	}
 

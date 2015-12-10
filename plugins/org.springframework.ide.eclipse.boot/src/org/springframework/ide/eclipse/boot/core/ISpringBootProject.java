@@ -61,21 +61,6 @@ public interface ISpringBootProject {
 	public List<SpringBootStarter> getBootStarters() throws CoreException;
 
 	/**
-	 * Modify project classpath, adding a SpringBootStarter. Note that this has to be done indirectly,
-	 * by modifying the project's build scripts or pom rather than by directly modifying the classpath
-	 * itself.
-	 * @throws CoreException
-	 */
-	public void addStarter(SpringBootStarter webStarter) throws CoreException;
-
-	/**
-	 * Modify project classpath, removing a SpringBootStarter. Note that this has to be done indirectly,
-	 * by modifying the project's build scripts or pom rather than by directly modifying the classpath
-	 * itself.
-	 */
-	public void removeStarter(SpringBootStarter webStarter) throws CoreException;
-
-	/**
 	 * Modify project classpath adding and/or removing starters to make them match the given
 	 * set of starters. Note that versions of starters are generally ignored by this operation.
 	 * @throws CoreException
@@ -108,5 +93,10 @@ public interface ISpringBootProject {
 	 * asynchronous.
 	 */
 	void updateProjectConfiguration();
+
+	/**
+	 * Remove a dependency with given group-id and artifact-id from project's pom or build script.
+	 */
+	public void removeMavenDependency(MavenId mavenId) throws CoreException;
 
 }
