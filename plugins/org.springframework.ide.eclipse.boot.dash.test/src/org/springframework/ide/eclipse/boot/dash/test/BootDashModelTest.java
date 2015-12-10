@@ -78,6 +78,9 @@ public class BootDashModelTest {
 	private BootProjectTestHarness projects;
 	private BootDashModel model;
 
+	@Rule
+	public TestBracketter testBracketer = new TestBracketter();
+
 	/**
 	 * Test that newly created spring boot project gets added to the model.
 	 */
@@ -364,7 +367,7 @@ public class BootDashModelTest {
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.RUNNING);
 			List<RequestMapping> mappings = element.getLiveRequestMappings();
-			assertNotNull(mappings);
+			assertNotNull(mappings); //Why is the test sometimes failing here?
 			assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
 			                                 // for example an 'error' page.
 			System.out.println(">>> Found RequestMappings");
