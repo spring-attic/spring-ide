@@ -18,6 +18,7 @@ import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -208,7 +209,20 @@ public class BootProjectTestHarness {
 		return workspace.getRoot().getProject(projectName);
 	}
 
-	public static void buildMavenBootProject(IProject p) throws CoreException {
+	public static void buildMavenProject(IProject p) throws CoreException {
+		ISpringBootProject bp = SpringBootCore.create(p);
+		Job job = bp.updateProjectConfiguration();
+		if (job!=null) {
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				throw ExceptionUtil.coreException(e);
+			}
+		}
+		bp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+	}
+
+	public static void assertNoErrors(IProject p) throws CoreException {
 		ISpringBootProject bp = SpringBootCore.create(p);
 		Job job = bp.updateProjectConfiguration();
 		if (job!=null) {

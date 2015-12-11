@@ -529,7 +529,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		StsTestUtil.setAutoBuilding(false);
 		IProject p = super.createPredefinedProject(projectName);
 		if (mavenUpdate) {
-			BootProjectTestHarness.buildMavenBootProject(p);
+			BootProjectTestHarness.assertNoErrors(p);
 		}
 		return p;
 	}
