@@ -18,15 +18,12 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.properties.editor.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
@@ -37,7 +34,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IRecon
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -524,20 +521,16 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		data("spring.view.suffix", "java.lang.String", null, "Spring MVC view suffix.");
 	}
 
-	@Override
 	protected IProject createPredefinedProject(String projectName) throws CoreException, IOException {
+		return createPredefinedProject(projectName, true);
+	}
+
+	protected IProject createPredefinedProject(String projectName, boolean mavenUpdate) throws CoreException, IOException {
 		StsTestUtil.setAutoBuilding(false);
 		IProject p = super.createPredefinedProject(projectName);
-		ISpringBootProject bp = SpringBootCore.create(p);
-		Job job = bp.updateProjectConfiguration();
-		if (job!=null) {
-			try {
-				job.join();
-			} catch (InterruptedException e) {
-				throw ExceptionUtil.coreException(e);
-			}
+		if (mavenUpdate) {
+			BootProjectTestHarness.buildMavenBootProject(p);
 		}
-		StsTestUtil.assertNoErrors(p);
 		return p;
 	}
 
