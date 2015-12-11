@@ -10,16 +10,34 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.internal;
 
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.CLASSIFIER;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY_MANAGEMENT;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ID;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.NAME;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.OPTIONAL;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.TYPE;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.URL;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElement;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.createElementWithText;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.format;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.maven.model.Dependency;
@@ -32,6 +50,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
@@ -49,8 +68,6 @@ import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.RepoInfo;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
@@ -273,10 +290,12 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	@Override
-	public void updateProjectConfiguration() {
-		new UpdateMavenProjectJob(new IProject[] {
+	public Job updateProjectConfiguration() {
+		Job job = new UpdateMavenProjectJob(new IProject[] {
 				getProject()
-		}).schedule();
+		});
+		job.schedule();
+		return job;
  	}
 
 	@Override
