@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.lattice.LatticeRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
@@ -51,6 +50,4 @@ public class RunTargetTypes {
 			return BootDashActivator.getImageDescriptor("icons/boot-icon.png");
 		};
 	};
-
-	public static final RunTargetType LATTICE = new LatticeRunTargetType();
 }
