@@ -38,7 +38,7 @@ public interface BootDashElement extends Nameable, Taggable {
 
 	/**
 	 * Get the request mappings from a running process. May return null if
-	 * request mappings can not be determined. (Son 'null' means 'unknown', whereas
+	 * request mappings can not be determined. (So 'null' means 'unknown', whereas
 	 * an empty list means 'no request mappings').
 	 */
 	List<RequestMapping> getLiveRequestMappings();
