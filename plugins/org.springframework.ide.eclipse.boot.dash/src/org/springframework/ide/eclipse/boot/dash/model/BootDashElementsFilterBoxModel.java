@@ -18,7 +18,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 /**
  * @author Kris De Volder
  */
-public class TagFilterBoxModel extends FilterBoxModel<BootDashElement> {
+public class BootDashElementsFilterBoxModel extends FilterBoxModel<BootDashElement> {
 
 	@Override
 	protected Filter<BootDashElement> createFilterForInput(String text) {

@@ -61,7 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.TagFilterBoxModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -541,7 +541,7 @@ public class BootDashModelTest {
 		}
 		waitForJobsToComplete();
 		
-		TagFilterBoxModel filterModel = new TagFilterBoxModel();
+		BootDashElementsFilterBoxModel filterModel = new BootDashElementsFilterBoxModel();
 		filterModel.getText().setValue(filterText);
 		Filter<BootDashElement> filter = filterModel.getFilter().getValue();
 		
