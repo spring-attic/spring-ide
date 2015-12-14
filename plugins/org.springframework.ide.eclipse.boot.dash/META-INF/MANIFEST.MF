@@ -44,6 +44,7 @@ Bundle-ClassPath: .,
  lib/spring-core-4.1.6.RELEASE.jar
 Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging,
+ org.springframework.ide.eclipse.boot.dash.livexp,
  org.springframework.ide.eclipse.boot.dash.metadata,
  org.springframework.ide.eclipse.boot.dash.model,
  org.springframework.ide.eclipse.boot.dash.model.requestmappings,

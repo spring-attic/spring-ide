@@ -37,6 +37,8 @@ import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -60,6 +62,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
+import com.google.common.base.Function;
+
 /**
  * Concrete BootDashElement that wraps an IProject
  *
@@ -77,6 +81,8 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
 	private BootDashElementFactory factory;
+
+	private ObservableSet<BootDashElement> children;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootDashElementFactory factory) {
 		super(context, project);
@@ -580,6 +586,12 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	public void dispose() {
 		this.context.removeElementStateListener(this);
 		factory.disposed(this);
+		if (this.children!=null) {
+			if (this.children instanceof Disposable) {
+				((Disposable) this.children).dispose();
+			}
+			this.children = null;
+		}
 	}
 
 	public void refreshLivePorts() {
@@ -593,5 +605,22 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			}
 		}
 	}
+
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+		if (children==null) {
+			children = LiveSets.map(context.launchConfTracker.getConfigs(delegate),
+					new Function<ILaunchConfiguration, BootDashElement>() {
+						public BootDashElement apply(ILaunchConfiguration input) {
+							return new BootDashLaunchConfElement(getBootDashModel(), input);
+						}
+					}
+			);
+			children.setOwner(this);
+		}
+		return this.children;
+	}
+
+
 
 }

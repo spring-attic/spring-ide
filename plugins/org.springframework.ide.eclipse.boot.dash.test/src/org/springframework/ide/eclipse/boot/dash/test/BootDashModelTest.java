@@ -45,7 +45,10 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
+import org.hamcrest.generator.qdox.model.JavaClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -86,7 +89,7 @@ public class BootDashModelTest {
 	 */
 	@Test public void testNewSpringBootProject() throws Exception {
 
-		assertWorkspaceProjects(/*none*/);
+//		assertWorkspaceProjects(/*none*/);
 		assertModelElements(/*none*/);
 
 		String projectName = "testProject";
@@ -97,7 +100,46 @@ public class BootDashModelTest {
 				return true;
 			}
 		}.waitFor(3000);
+
+		BootDashElement projectEl = getElement("testProject");
+		assertTrue(projectEl.getCurrentChildren().isEmpty());
 	}
+
+	/**
+	 * Test that project with multiple associated launch configs has
+	 * a child for each config.
+	 */
+	@Test public void testSpringBootProjectChildren() throws Exception {
+
+//		assertWorkspaceProjects(/*none*/);
+		assertModelElements(/*none*/);
+
+		String projectName = "testProject";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		new ACondition("Model update") {
+			public boolean test() throws Exception {
+				assertModelElements("testProject");
+				return true;
+			}
+		}.waitFor(3000);
+
+		BootDashElement projectEl = getElement("testProject");
+		assertTrue(projectEl.getCurrentChildren().isEmpty());
+
+		ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertFalse(conf1.equals(conf2));
+
+		assertEquals(2, projectEl.getCurrentChildren().size());
+
+		conf1.delete();
+
+		assertEquals(1, projectEl.getCurrentChildren().size());
+
+	}
+
+
 
 	private IProject createBootProject(String projectName, WizardConfigurer... extraConfs) throws Exception {
 		return projects.createBootWebProject(projectName, extraConfs);

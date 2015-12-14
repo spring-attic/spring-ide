@@ -18,11 +18,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 
-public abstract class WrappingBootDashElement<T> implements BootDashElement {
+import com.google.common.collect.ImmutableSet;
 
+public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	public static final String TAGS_KEY = "tags";
 
@@ -31,11 +34,11 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	protected final T delegate;
 
-	private BootDashModel parent;
+	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
 
-	public WrappingBootDashElement(BootDashModel parent, T delegate) {
-		this.parent = parent;
+	public WrappingBootDashElement(BootDashModel bootDashModel, T delegate) {
+		this.bootDashModel = bootDashModel;
 		this.delegate = delegate;
 	}
 
@@ -114,7 +117,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 			} else {
 				getPersistentProperties().put(TAGS_KEY, newTags.toArray(new String[newTags.size()]));
 			}
-			parent.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
@@ -129,14 +132,14 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 	public final void setDefaultRequestMapingPath(String defaultPath) {
 		try {
 			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
-			parent.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
 	}
 
-	public BootDashModel getParent() {
-		return parent;
+	public BootDashModel getBootDashModel() {
+		return bootDashModel;
 	}
 
 	@Override
@@ -144,5 +147,14 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 		return getProject() != null ? JavaCore.create(getProject()) : null;
 	}
 
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+		return LiveSets.emptySet(BootDashElement.class);
+	}
+
+	@Override
+	public ImmutableSet<BootDashElement> getCurrentChildren() {
+		return getChildren().getValue();
+	}
 
 }

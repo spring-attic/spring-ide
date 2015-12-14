@@ -66,7 +66,7 @@ public class OpenInPackageExplorer extends AbstractBootDashElementsAction {
 			// Show first element only for now
 			if (it.hasNext()) {
 				BootDashElement element = selectedElements.iterator().next();
-				BootDashModel model = element.getParent();
+				BootDashModel model = element.getBootDashModel();
 				try {
 					if (model.getElementConsoleManager() != null) {
 						model.getElementConsoleManager().showConsole(element);

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -41,7 +42,7 @@ public abstract class BootDashModel {
 		}
 	}
 
-	abstract public LiveSet<BootDashElement> getElements();
+	abstract public ObservableSet<BootDashElement> getElements();
 
 	abstract public BootDashModelConsoleManager getElementConsoleManager();
 
