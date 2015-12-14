@@ -41,7 +41,7 @@ public class BootDashElementSearchFilter extends TagSearchFilter<BootDashElement
 			for (IWorkingSet ws : PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets()) {
 				if (!ws.isAggregateWorkingSet()) {
 					for (IAdaptable a : ws.getElements()) {
-						IProject project = a.getAdapter(IProject.class);
+						IProject project = (IProject)a.getAdapter(IProject.class);
 						if (project != null) {
 							Set<String> set = mapping.get(project);
 							if (set == null) {
