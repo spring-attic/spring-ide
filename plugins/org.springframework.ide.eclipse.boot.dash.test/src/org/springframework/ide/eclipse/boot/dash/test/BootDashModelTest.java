@@ -63,6 +63,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -116,7 +117,8 @@ public class BootDashModelTest {
 	 * Test that project with multiple associated launch configs has
 	 * a child for each config.
 	 */
-	@Test public void testSpringBootProjectChildren() throws Exception {
+	@Test
+	public void testSpringBootProjectChildren() throws Exception {
 
 //		assertWorkspaceProjects(/*none*/);
 		assertModelElements(/*none*/);
@@ -142,7 +144,11 @@ public class BootDashModelTest {
 
 		conf1.delete();
 
-		assertEquals(1, projectEl.getCurrentChildren().size());
+		//When there is only one child (i.e. launch config), then it is not shown in the model (the parent subsumes all the
+		// child's functionality and we don't show the child to avoid cluttering the view)
+		assertEquals(0, projectEl.getCurrentChildren().size());
+
+		assertEquals(1, ((BootProjectDashElement)projectEl).getAllChildren().getValues().size());
 
 	}
 

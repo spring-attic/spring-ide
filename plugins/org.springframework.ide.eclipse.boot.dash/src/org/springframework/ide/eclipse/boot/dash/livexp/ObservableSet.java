@@ -10,23 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 
 /**
  * This is like LiveSet, but it can only be 'observed' not mutated.
- * <p>
- * Note, this should really only be used to create instances of LiveExpression<Set<?>> by calling
- * 'new'. You should not use this type in method signatures and the like. ObservableSet<T> really
- * should be an 'alias' for LiveExpression<Set<T>> but instead it is a sub-type. Methods that
- * explicitly use ObservableSet<T> in their signatures are therfore almost certainly being too specific
- * about what they expect / return.
  */
 public abstract class ObservableSet<T> extends LiveExpression<ImmutableSet<T>> {
 

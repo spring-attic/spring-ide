@@ -158,7 +158,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (tv != null && !tv.getControl().isDisposed()) {
-						tv.update(e, null);
+						//tv.update(e, null);
+						tv.refresh(e, true);
 					}
 				}
 			});

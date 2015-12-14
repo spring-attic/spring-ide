@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -22,10 +23,17 @@ import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
+import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;
 
-public abstract class WrappingBootDashElement<T> implements BootDashElement {
+/**
+ * Abstract base class that is convenient to implement {@link BootDashElement}.
+ * @author Kris De Volder
+ */
+public abstract class WrappingBootDashElement<T> implements BootDashElement, Disposable, OnDispose {
 
 	public static final String TAGS_KEY = "tags";
 
@@ -36,6 +44,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
+	private ListenerList disposeListeners = new ListenerList();
 
 	public WrappingBootDashElement(BootDashModel bootDashModel, T delegate) {
 		this.bootDashModel = bootDashModel;
@@ -155,6 +164,30 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 	@Override
 	public ImmutableSet<BootDashElement> getCurrentChildren() {
 		return getChildren().getValue();
+	}
+
+	@Override
+	public void onDispose(DisposeListener listener) {
+		this.disposeListeners.add(listener);
+	}
+
+	@Override
+	public void dispose() {
+		for (Object l : disposeListeners.getListeners()) {
+			((DisposeListener)l).disposed(this);
+		}
+	}
+
+	/**
+	 * Convenience method to declare that a given {@link Disposable} is an 'owned' child of
+	 * this element and should also be disposed when this element itself is disposed.
+	 */
+	public void addDisposableChild(final Disposable child) {
+		onDispose(new DisposeListener() {
+			public <D extends Disposable> void disposed(D disposed) {
+				child.dispose();
+			}
+		});
 	}
 
 }

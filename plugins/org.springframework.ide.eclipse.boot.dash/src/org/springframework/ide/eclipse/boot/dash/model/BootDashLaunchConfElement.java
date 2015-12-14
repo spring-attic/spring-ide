@@ -13,38 +13,49 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
+/**
+ * Concrete {@link BootDashElement} that wraps a launch config.
+ *
+ * @author Kris De Volder
+ */
 public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchConfiguration> {
 
-	public BootDashLaunchConfElement(BootDashModel parent, ILaunchConfiguration delegate) {
-		super(parent, delegate);
+	private PropertyStoreApi persistentProperties;
+
+	public BootDashLaunchConfElement(BootDashModel bootDashModel, ILaunchConfiguration delegate) {
+		super(bootDashModel, delegate);
+		IPropertyStore backingStore = PropertyStoreFactory.createFor(delegate);
+		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
 	@Override
 	public IProject getProject() {
-		// TODO Auto-generated method stub
-		return null;
+		return BootLaunchConfigurationDelegate.getProject(delegate);
 	}
 
 	@Override
 	public RunState getRunState() {
 		// TODO Auto-generated method stub
-		return null;
+		return RunState.UNKNOWN;
 	}
 
 	@Override
 	public RunTarget getTarget() {
-		// TODO Auto-generated method stub
-		return null;
+		return getBootDashModel().getRunTarget();
 	}
 
 	@Override
 	public int getLivePort() {
 		// TODO Auto-generated method stub
-		return 0;
+		return -1;
 	}
 
 	@Override
@@ -61,20 +72,20 @@ public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchCo
 
 	@Override
 	public ILaunchConfiguration getActiveConfig() {
-		// TODO Auto-generated method stub
-		return null;
+		return delegate;
 	}
 
 	@Override
 	public ILaunchConfiguration getPreferredConfig() {
-		// TODO Auto-generated method stub
-		return null;
+		return delegate;
 	}
 
 	@Override
 	public void setPreferredConfig(ILaunchConfiguration config) {
-		// TODO Auto-generated method stub
-
+		//This operation is not supported since the element is tied to a specific launch config
+		//For convenience we allow the caller to set the element anyways as long as they set it
+		//to its only legal value.
+		Assert.isLegal(delegate.equals(config));
 	}
 
 	@Override
@@ -92,7 +103,6 @@ public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchCo
 	@Override
 	public void openConfig(UserInteractions ui) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -109,14 +119,12 @@ public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchCo
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return delegate.getName();
 	}
 
 	@Override
 	public PropertyStoreApi getPersistentProperties() {
-		// TODO Auto-generated method stub
-		return null;
+		return persistentProperties;
 	}
 
 
