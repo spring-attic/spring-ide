@@ -27,11 +27,14 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -48,13 +51,16 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
-import org.hamcrest.generator.qdox.model.JavaClass;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -67,6 +73,7 @@ import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
@@ -523,9 +530,114 @@ public class BootDashModelTest {
 		testSettingTags(null, new String[0]);
 	}
 
+	private class BdeInfo {
+		String name;
+		String[] tags;
+		String workingSet;
+
+		BdeInfo(String name, String[] tags, String workingSet) {
+			this.name = name;
+			this.tags = tags;
+			this.workingSet = workingSet;
+		}
+	}
 
 	/**************************************************************************************
 	 * TAGS Tests END
+	 *************************************************************************************/
+
+	/**************************************************************************************
+	 * BDEs Filtering Tests START
+	 *************************************************************************************/
+
+	private void testBdeFiltering(BdeInfo[] bdeInfo, String filterText, String[] expectedBdes) throws Exception {
+		Map<String, List<IProject>> wsMap = new HashMap<>();
+		List<BootDashElement> bdes = new ArrayList<>(bdeInfo.length);
+		for (BdeInfo info : bdeInfo) {
+			createBootProject(info.name);
+			BootDashElement element = getElement(info.name);
+			IProject project = element.getProject();
+			if (info.tags != null && info.tags.length > 0) {
+				element.setTags(new LinkedHashSet<String>(Arrays.asList(info.tags)));
+			}
+			if (info.workingSet != null && !info.workingSet.isEmpty() && project != null) {
+				List<IProject> projects = wsMap.get(info.workingSet);
+				if (projects == null) {
+					projects = new ArrayList<>();
+					wsMap.put(info.workingSet, projects);
+				}
+				projects.add(project);
+			}
+			bdes.add(element);
+		}
+		IWorkingSetManager wsManager = PlatformUI.getWorkbench().getWorkingSetManager();
+		for (Map.Entry<String, List<IProject>> entry : wsMap.entrySet()) {
+			IWorkingSet ws = wsManager.getWorkingSet(entry.getKey());
+			if (ws == null) {
+				ws = wsManager.createWorkingSet(entry.getKey(), entry.getValue().toArray(new IProject[entry.getValue().size()]));
+				wsManager.addWorkingSet(ws);
+			} else {
+				ws.setElements(entry.getValue().toArray(new IProject[entry.getValue().size()]));
+			}
+		}
+		waitForJobsToComplete();
+
+		BootDashElementsFilterBoxModel filterModel = new BootDashElementsFilterBoxModel();
+		filterModel.getText().setValue(filterText);
+		Filter<BootDashElement> filter = filterModel.getFilter().getValue();
+
+		List<String> result = new ArrayList<>();
+		for (BootDashElement bde : bdes) {
+			if (filter.accept(bde) && bde.getProject() != null) {
+				result.add(bde.getProject().getName());
+			}
+		}
+		String[] actualBdes = result.toArray(new String[result.size()]);
+		assertArrayEquals(expectedBdes, actualBdes);
+	}
+
+	@Test
+	public void testNoWorkingSetMatch_1() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, null), new BdeInfo("b", null, null)}, "x", new String[0]);
+	}
+
+	@Test
+	public void testNoWorkingSetMatch_2() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "x,", new String[0]);
+	}
+
+	@Test
+	public void testNoWorkingSetMatch_3() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "xxx, a", new String[0]);
+	}
+
+	@Test
+	public void testNoWorkingSetMatch_4() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "a, x", new String[0]);
+	}
+
+	@Test
+	public void testWorkingSetMatch_1() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "x"), new BdeInfo("b", null, null), new BdeInfo("c", null, "x")}, "x", new String[]{"a", "c"});
+	}
+
+	@Test
+	public void testWorkingSetMatch_2() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, null), new BdeInfo("c", null, "xxxx")}, "xxx,", new String[]{"a"});
+	}
+
+	@Test
+	public void testWorkingSetMatch_3() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"), new BdeInfo("b", new String[]{"a", "c"}, "xxx")}, "xxx, a", new String[]{"a", "b"});
+	}
+
+	@Test
+	public void testWorkingSetMatch_4() throws Exception {
+		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"), new BdeInfo("b", new String[]{"a", "c"}, "xxx")}, "a, x", new String[]{"b"});
+	}
+
+	/**************************************************************************************
+	 * BDEs Filtering Tests END
 	 *************************************************************************************/
 
 	///////////////// harness code ////////////////////////
@@ -579,6 +691,16 @@ public class BootDashModelTest {
 
 		for (ILaunchConfiguration conf : launchManager.getLaunchConfigurations()) {
 			conf.delete();
+		}
+
+		/*
+		 * Remove any working sets created by the tests (BDEs filtering tests create working sets)
+		 */
+		IWorkingSetManager wsManager = PlatformUI.getWorkbench().getWorkingSetManager();
+		for (IWorkingSet ws : wsManager.getAllWorkingSets()) {
+			if (!ws.isAggregateWorkingSet()) {
+				wsManager.removeWorkingSet(ws);
+			}
 		}
 
 		this.harness.dispose();

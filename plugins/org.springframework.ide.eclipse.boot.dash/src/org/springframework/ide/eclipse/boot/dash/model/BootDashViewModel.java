@@ -39,7 +39,7 @@ public class BootDashViewModel implements Disposable {
 	private Set<RunTargetType> runTargetTypes;
 	private RunTargetPropertiesManager manager;
 	private ToggleFiltersModel toggleFiltersModel;
-	private TagFilterBoxModel filterBox;
+	private BootDashElementsFilterBoxModel filterBox;
 	private LiveExpression<Filter<BootDashElement>> filter;
 	private ProcessTracker devtoolsProcessTracker;
 	private List<RunTargetType> orderedRunTargetTypes;
@@ -63,7 +63,7 @@ public class BootDashViewModel implements Disposable {
 		this.modelComparator = new BootModelComparator(orderedRunTargetTypes);
 
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(orderedRunTargetTypes);
-		filterBox = new TagFilterBoxModel();
+		filterBox = new BootDashElementsFilterBoxModel();
 		toggleFiltersModel = new ToggleFiltersModel();
 		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
 		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
@@ -128,7 +128,7 @@ public class BootDashViewModel implements Disposable {
 		return toggleFiltersModel;
 	}
 
-	public TagFilterBoxModel getFilterBox() {
+	public BootDashElementsFilterBoxModel getFilterBox() {
 		return filterBox;
 	}
 

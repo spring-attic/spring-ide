@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -22,7 +22,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
  * @author Alex Boyko
  *
  */
-public class TagSearchFilter implements Filter<BootDashElement> {
+public class  TagSearchFilter<T extends Taggable> implements Filter<T> {
 
 	private String searchTerm;
 
@@ -53,11 +53,11 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 	}
 
 	@Override
-	public boolean accept(BootDashElement element) {
+	public boolean accept(T element) {
 		if (searchTags.length == 0 && searchTerm.isEmpty()) {
 			return true;
 		}
-		LinkedHashSet<String> elementTags = ((Taggable) element).getTags();
+		Set<String> elementTags = getTags(element);
 		int initSize = elementTags.size();
 		elementTags.removeAll(Arrays.asList(searchTags));
 		// Check if all search tags are present in the element tags set
@@ -82,6 +82,10 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 			initSearchText += TagUtils.SEPARATOR + searchTerm;
 		}
 		return initSearchText;
+	}
+
+	protected Set<String> getTags(T element) {
+		return element.getTags();
 	}
 
 }
