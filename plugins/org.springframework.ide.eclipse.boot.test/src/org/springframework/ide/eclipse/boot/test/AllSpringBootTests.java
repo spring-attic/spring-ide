@@ -9,13 +9,12 @@ import org.junit.runners.Suite.SuiteClasses;
 		//SpringBootProjectTests.class: removed for now
 		//  functionality for this is now tested via EditStartersModelTest, and
 		//  other tests that use the functionalities provided by ISpringBootProject
+		EditStartersModelTest.class,
 		EnableDisableBootDevtoolsTest.class,
-
 		NewSpringBootWizardModelTest.class,
 		NewSpringBootWizardTest.class,
-		SpringBootValidationTest.class,
 		InitializrDependencySpecTest.class,
-		EditStartersModelTest.class
+		SpringBootValidationTest.class
 })
 public class AllSpringBootTests {
 
