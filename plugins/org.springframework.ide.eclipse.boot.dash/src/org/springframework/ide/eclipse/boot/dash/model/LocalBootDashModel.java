@@ -85,7 +85,7 @@ public class LocalBootDashModel extends BootDashModel {
 	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
 		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
-		this.launchConfElementFactory = new BootDashLaunchConfElementFactory(this);
+		this.launchConfElementFactory = new BootDashLaunchConfElementFactory(this, context.getLaunchManager());
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
 		try {
