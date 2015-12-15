@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
+import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
@@ -49,12 +49,17 @@ public class LocalBootDashModel extends BootDashModel {
 	private IWorkspace workspace;
 	ProjectChangeListenerManager openCloseListenerManager;
 	ClasspathListenerManager classpathListenerManager;
-	BootDashElementFactory elementFactory;
-	ProjectRunStateTracker runStateTracker;
+	BootProjectDashElementFactory projectElementFactory;
+
+	ProjectRunStateTracker projectRunStateTracker; //TODO: we should get rid of this and make projectRunstate an aggregator
+													// based on the nested launch confs.
+	ProjectRunStateTracker launchConfRunStateTracker;
+
 	LiveSetVariable<BootDashElement> elements; //lazy created
 	private BootDashModelConsoleManager consoleManager;
 
 	LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
+
 
 	private BootDashModelStateSaver modelState;
 	private DevtoolsPortRefresher devtoolsPortRefresher;
@@ -77,15 +82,15 @@ public class LocalBootDashModel extends BootDashModel {
 	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
 		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
-		this.elementFactory = new BootDashElementFactory(this, context.getProjectProperties());
+		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties());
 		this.consoleManager = new LocalElementConsoleManager();
 		try {
-			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, elementFactory));
+			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, projectElementFactory));
 			modelState.restore(lastState);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
-		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, elementFactory);
+		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		this.projectExclusion = context.getBootProjectExclusion();
 	}
 
@@ -95,10 +100,10 @@ public class LocalBootDashModel extends BootDashModel {
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
-			this.runStateTracker = new ProjectRunStateTracker();
-			runStateTracker.setListener(new ProjectRunStateListener() {
+			this.projectRunStateTracker = new ProjectRunStateTracker();
+			projectRunStateTracker.setListener(new RunStateListener<IProject>() {
 				public void stateChanged(IProject p) {
-					BootDashElement e = elementFactory.createOrGet(p);
+					BootDashElement e = projectElementFactory.createOrGet(p);
 					if (e!=null) {
 						notifyElementChanged(e);
 					}
@@ -116,7 +121,7 @@ public class LocalBootDashModel extends BootDashModel {
 	void updateElementsFromWorkspace() {
 		Set<BootDashElement> newElements = new HashSet<BootDashElement>();
 		for (IProject p : this.workspace.getRoot().getProjects()) {
-			BootDashElement element = elementFactory.createOrGet(p);
+			BootDashElement element = projectElementFactory.createOrGet(p);
 			if (element!=null) {
 				newElements.add(element);
 			}
@@ -144,9 +149,9 @@ public class LocalBootDashModel extends BootDashModel {
 		if (elements!=null) {
 			elements = null;
 			openCloseListenerManager.dispose();
-			elementFactory.dispose();
+			projectElementFactory.dispose();
 			classpathListenerManager.dispose();
-			runStateTracker.dispose();
+			projectRunStateTracker.dispose();
 			devtoolsPortRefresher.dispose();
 			if (projectExclusionListener!=null) {
 				projectExclusion.removeListener(projectExclusionListener);
@@ -170,10 +175,8 @@ public class LocalBootDashModel extends BootDashModel {
 
 	////////////// listener cruft ///////////////////////////
 
-
-
-	public ProjectRunStateTracker getRunStateTracker() {
-		return runStateTracker;
+	public ProjectRunStateTracker getProjectRunStateTracker() {
+		return projectRunStateTracker;
 	}
 
 	public ILaunchConfiguration getPreferredConfigs(WrappingBootDashElement<IProject> e) {

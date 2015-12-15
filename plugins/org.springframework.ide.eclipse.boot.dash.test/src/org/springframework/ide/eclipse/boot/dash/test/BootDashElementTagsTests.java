@@ -23,7 +23,7 @@ import java.util.LinkedHashSet;
 import org.eclipse.core.resources.IProject;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 public class BootDashElementTagsTests extends Mocks {
 
 	private static TestElement createElement(String name, String[] tags) {
-		BootDashElementFactory factory = mock(BootDashElementFactory.class);
+		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
 		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(name, true);

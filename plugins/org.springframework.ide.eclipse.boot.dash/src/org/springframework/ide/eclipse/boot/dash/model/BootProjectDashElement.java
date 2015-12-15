@@ -80,13 +80,13 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	private LiveExpression<RunState> runState;
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
-	private BootDashElementFactory factory;
+	private BootProjectDashElementFactory factory;
 
 	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
 
 
-	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootDashElementFactory factory) {
+	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootProjectDashElementFactory factory) {
 		super(context, project);
 		this.context = context;
 		this.persistentProperties = PropertyStoreFactory.createApi(
@@ -118,7 +118,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	}
 
 	private ProjectRunStateTracker runStateTracker() {
-		return context.getRunStateTracker();
+		return context.getProjectRunStateTracker();
 	}
 
 	@Override
