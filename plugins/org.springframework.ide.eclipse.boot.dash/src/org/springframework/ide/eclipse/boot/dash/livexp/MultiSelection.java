@@ -15,6 +15,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Represents a selection of zero or more elements of type T in some UI component.
  *
@@ -42,9 +44,9 @@ public final class MultiSelection<T> {
 	}
 
 	private final Class<T> elementType;
-	private final LiveExpression<Set<T>> elements;
+	private final ObservableSet<T> elements;
 
-	public MultiSelection(Class<T> elementType, LiveExpression<Set<T>> elements) {
+	public MultiSelection(Class<T> elementType, ObservableSet<T> elements) {
 		this.elementType = elementType;
 		this.elements = elements;
 	}
@@ -78,7 +80,7 @@ public final class MultiSelection<T> {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <U> MultiSelection<U> as(Class<U> toElementType) {
 		if (toElementType.isAssignableFrom(elementType)) {
-			return new MultiSelection<U>(toElementType, ((LiveExpression) elements));
+			return new MultiSelection<U>(toElementType, ((ObservableSet) elements));
 		} else {
 			return null;
 		}
@@ -100,11 +102,11 @@ public final class MultiSelection<T> {
 	}
 
 
-	public LiveExpression<Set<T>> getElements() {
+	public ObservableSet<T> getElements() {
 		return elements;
 	}
 
-	public static <T> MultiSelection<T> from(Class<T> type, LiveExpression<Set<T>> elements) {
+	public static <T> MultiSelection<T> from(Class<T> type, ObservableSet<T> elements) {
 		return new MultiSelection<T>(type, elements);
 	}
 

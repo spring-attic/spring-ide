@@ -14,6 +14,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
@@ -81,6 +83,32 @@ public class PropertyStoreFactory {
 			@Override
 			public String get(String key) {
 				return backingStore.get(subkey(key));
+			}
+		};
+	}
+
+	public static IPropertyStore createFor(final ILaunchConfiguration launchConf) {
+		return new IPropertyStore() {
+
+			private static final String prefix = "boot.dash.";
+			private ILaunchConfiguration conf = launchConf;
+
+			@Override
+			public synchronized void put(String key, String value) throws Exception {
+				ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+				wc.setAttribute(prefix+key, value);
+				wc.doSave();
+			}
+
+
+			@Override
+			public String get(String key) {
+				try {
+					return conf.getAttribute(prefix+key,(String)null);
+				} catch (Exception e) {
+					BootDashActivator.log(e);
+				};
+				return null;
 			}
 		};
 	}

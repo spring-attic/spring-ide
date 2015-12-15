@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
  * We use mostly use mockito to mock BootDashModel, but some test cases need
@@ -30,10 +31,10 @@ public class MockBootDashModel extends BootDashModel {
 		super(target, parent);
 	}
 
-	private LiveSet<BootDashElement> elements = new LiveSet<BootDashElement>();
+	private LiveSetVariable<BootDashElement> elements = new LiveSetVariable<>();
 
 	@Override
-	public LiveSet<BootDashElement> getElements() {
+	public ObservableSet<BootDashElement> getElements() {
 		return elements;
 	}
 
@@ -49,6 +50,10 @@ public class MockBootDashModel extends BootDashModel {
 
 	@Override
 	public void refresh() {
+	}
+
+	public void add(BootDashElement element) {
+		elements.add(element);
 	}
 
 }

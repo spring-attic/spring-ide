@@ -64,7 +64,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
-		return (CloudFoundryBootDashModel) getParent();
+		return (CloudFoundryBootDashModel) getBootDashModel();
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		// it is stopped
 		boolean updateElementRunStateInModel = true;
 		CloudApplicationOperation op = new CompositeApplicationOperation(new ApplicationStopOperation(this.getName(),
-				(CloudFoundryBootDashModel) getParent(), updateElementRunStateInModel));
+				(CloudFoundryBootDashModel) getBootDashModel(), updateElementRunStateInModel));
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
@@ -115,7 +115,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		} else {
 			// Set the initial run state as Starting
 			op = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getParent(), RunState.STARTING);
+					(CloudFoundryBootDashModel) getBootDashModel(), RunState.STARTING);
 //			op = new CompositeApplicationOperation(restartOp);
 		}
 
@@ -128,13 +128,13 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	public BootDashViewModel getViewModel() {
-		return getParent().getViewModel();
+		return getBootDashModel().getViewModel();
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getParent(), RunState.STARTING);
+				(CloudFoundryBootDashModel) getBootDashModel(), RunState.STARTING);
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(restartOp));
 	}

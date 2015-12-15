@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -70,8 +69,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
@@ -159,7 +158,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (tv != null && !tv.getControl().isDisposed()) {
-						tv.update(e, null);
+						//tv.update(e, null);
+						tv.refresh(e, true);
 					}
 				}
 			});
@@ -174,8 +174,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
-	private final ValueListener<Set<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<Set<BootDashElement>>() {
-		protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
+	private final ValueListener<ImmutableSet<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<ImmutableSet<BootDashElement>>() {
+		protected void uiGotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
 				//TODO: refreshing the whole table is overkill, but is a bit tricky to figure out which BDM
 				// this set of elements belong to. If we did know then we could just refresh the node representing its section
@@ -371,7 +371,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		if (mixedSelection==null) {
 			mixedSelection = MultiSelection.from(Object.class, new ObservableSet<Object>() {
 				@Override
-				protected Set<Object> compute() {
+				protected ImmutableSet<Object> compute() {
 					if (tv!=null) {
 						ISelection s = tv.getSelection();
 						if (s instanceof IStructuredSelection) {
@@ -379,7 +379,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							return ImmutableSet.copyOf(elements);
 						}
 					}
-					return Collections.emptySet();
+					return ImmutableSet.of();
 				}
 			});
 			debug("mixedSelection", mixedSelection.getElements());
@@ -670,7 +670,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			return false;
 		}
 		for (BootDashElement e : selection) {
-			if (!e.getParent().getRunTarget().canDeployAppsFrom()) {
+			if (!e.getBootDashModel().getRunTarget().canDeployAppsFrom()) {
 				return false;
 			}
 		}

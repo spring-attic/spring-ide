@@ -41,6 +41,8 @@ public class BootDashTreeContentProvider implements ITreeContentProvider {
 			return ((BootDashViewModel) e).getSectionModels().getValue().toArray();
 		} else if (e instanceof BootDashModel) {
 			return ((BootDashModel) e).getElements().getValues().toArray();
+		} else if (e instanceof BootDashElement) {
+			return ((BootDashElement)e).getChildren().getValues().toArray();
 		}
 		return null;
 	}
@@ -48,7 +50,7 @@ public class BootDashTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object getParent(Object e) {
 		if (e instanceof BootDashElement) {
-			return ((BootDashElement) e).getParent();
+			return ((BootDashElement) e).getBootDashModel();
 		}
 		return null;
 	}

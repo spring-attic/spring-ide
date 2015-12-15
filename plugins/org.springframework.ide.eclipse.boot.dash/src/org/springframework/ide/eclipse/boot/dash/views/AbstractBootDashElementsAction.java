@@ -19,6 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Abstract super class for BootDash actions that operate on selections
  * of elements.
@@ -28,14 +30,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 
 	private final MultiSelection<BootDashElement> selection;
-	private ValueListener<Set<BootDashElement>> selectionListener;
+	private ValueListener<ImmutableSet<BootDashElement>> selectionListener;
 
 	public AbstractBootDashElementsAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(ui);
 		this.selection = selection;
-		selection.getElements().addListener(selectionListener = new ValueListener<Set<BootDashElement>>() {
-			public void gotValue(LiveExpression<Set<BootDashElement>> exp,
-					Set<BootDashElement> selecteds) {
+		selection.getElements().addListener(selectionListener = new ValueListener<ImmutableSet<BootDashElement>>() {
+			public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> selecteds) {
 				updateEnablement();
 			}
 		});

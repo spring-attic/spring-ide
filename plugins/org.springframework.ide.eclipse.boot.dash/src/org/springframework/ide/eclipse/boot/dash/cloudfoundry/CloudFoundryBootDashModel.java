@@ -43,6 +43,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -57,6 +59,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
+import com.google.common.collect.ImmutableSet;
+
 public class CloudFoundryBootDashModel extends BootDashModel implements ModifiableModel {
 
 	private IPropertyStore modelStore;
@@ -69,7 +73,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	private CloudDashElementFactory elementFactory;
 
-	private LiveSet<BootDashElement> elements;
+	private LiveSetVariable<BootDashElement> elements;
 
 	private BootDashModelConsoleManager consoleManager;
 
@@ -165,11 +169,9 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public LiveSet<BootDashElement> getElements() {
-
+	public ObservableSet<BootDashElement> getElements() {
 		if (elements == null) {
-			elements = new LiveSet<BootDashElement>();
-
+			elements = new LiveSetVariable<BootDashElement>();
 			asyncRefreshElements();
 		}
 		return elements;
@@ -258,7 +260,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	protected boolean isFromDifferentTarget(Object dropSource) {
 		if (dropSource instanceof BootDashElement) {
-			return ((BootDashElement) dropSource).getParent() != this;
+			return ((BootDashElement) dropSource).getBootDashModel() != this;
 		}
 
 		// If not a boot element that is being dropped, it is an element
@@ -282,7 +284,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		synchronized (this) {
 
 			// Safe iterate via getValues(); a copy, instead of getValue()
-			List<BootDashElement> existing = elements.getValues();
+			ImmutableSet<BootDashElement> existing = elements.getValues();
 
 			addedElement = elementFactory.create(appInstances.getApplication().getName());
 
@@ -473,7 +475,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 				synchronized (CloudFoundryBootDashModel.this) {
 					// Safe iterate via getValues(); a copy, instead of
 					// getValue()
-					List<BootDashElement> existing = elements.getValues();
+					ImmutableSet<BootDashElement> existing = elements.getValues();
 
 					// Be sure it is removed from the cache as well as
 					// elements
