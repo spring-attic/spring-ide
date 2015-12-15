@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 /**
@@ -29,9 +30,11 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchConfiguration> {
 
 	private PropertyStoreApi persistentProperties;
+	private LaunchConfRunStateTracker runStateTracker;
 
-	public BootDashLaunchConfElement(BootDashModel bootDashModel, ILaunchConfiguration delegate) {
+	public BootDashLaunchConfElement(LocalBootDashModel bootDashModel, ILaunchConfiguration delegate) {
 		super(bootDashModel, delegate);
+		this.runStateTracker = bootDashModel.getLaunchConfRunStateTracker();
 		IPropertyStore backingStore = PropertyStoreFactory.createFor(delegate);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
@@ -43,8 +46,7 @@ public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchCo
 
 	@Override
 	public RunState getRunState() {
-		// TODO Auto-generated method stub
-		return RunState.UNKNOWN;
+		return runStateTracker.getState(delegate);
 	}
 
 	@Override

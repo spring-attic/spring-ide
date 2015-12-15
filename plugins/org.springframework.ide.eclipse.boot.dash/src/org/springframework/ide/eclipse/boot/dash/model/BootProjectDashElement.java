@@ -81,12 +81,14 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
 	private BootProjectDashElementFactory factory;
+	private BootDashLaunchConfElementFactory childFactory;
 
 	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
 
 
-	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootProjectDashElementFactory factory) {
+	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
+			BootProjectDashElementFactory factory, BootDashLaunchConfElementFactory childFactory) {
 		super(context, project);
 		this.context = context;
 		this.persistentProperties = PropertyStoreFactory.createApi(
@@ -100,6 +102,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		});
 		this.actuatorPort = createLivePortExp(runState, "local.management.port");
 		this.factory = factory;
+		this.childFactory = childFactory;
 	}
 
 	public IProject getProject() {
@@ -627,6 +630,11 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 		return children;
 	}
 
+	@Override
+	public LocalBootDashModel getBootDashModel() {
+		return (LocalBootDashModel) super.getBootDashModel();
+	}
+
 	/**
 	 * All children including 'invisible ones' that may be hidden from the children returned
 	 * by getChildren.
@@ -636,7 +644,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			rawChildren = LiveSets.map(context.launchConfTracker.getConfigs(delegate),
 					new Function<ILaunchConfiguration, BootDashElement>() {
 						public BootDashElement apply(ILaunchConfiguration input) {
-							return new BootDashLaunchConfElement(getBootDashModel(), input);
+							return childFactory.createOrGet(getBootDashModel(), input);
 						}
 					}
 			);

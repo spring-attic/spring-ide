@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashLaunchConfElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -46,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 
 /**
@@ -62,8 +64,9 @@ public class BootProjectDashElementTest extends Mocks {
 
 	public static class TestElement extends BootProjectDashElement {
 
-		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootProjectDashElementFactory factory) {
-			super(project, context, projectProperties, factory);
+		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
+				BootProjectDashElementFactory factory, BootDashLaunchConfElementFactory childFactory) {
+			super(project, context, projectProperties, factory, childFactory);
 		}
 
 		@Override
@@ -80,8 +83,9 @@ public class BootProjectDashElementTest extends Mocks {
 
 	public static TestElement createElement(LocalBootDashModel model, IJavaProject javaProject, RunTarget runTarget, IScopedPropertyStore<IProject> projectProperties) {
 		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
+		BootDashLaunchConfElementFactory childFactory = mock(BootDashLaunchConfElementFactory.class);
 		IProject project = javaProject.getProject();
-		TestElement element = spy(new TestElement(project, model, projectProperties, factory));
+		TestElement element = spy(new TestElement(project, model, projectProperties, factory, childFactory));
 		when(element.getTarget()).thenReturn(runTarget);
 		doReturn(javaProject).when(element).getJavaProject();
 		return element;

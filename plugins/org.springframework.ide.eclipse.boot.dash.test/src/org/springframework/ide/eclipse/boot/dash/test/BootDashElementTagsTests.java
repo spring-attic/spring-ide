@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashLaunchConfElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.test.BootProjectDashElementTest.TestElement;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
@@ -40,11 +41,12 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 public class BootDashElementTagsTests extends Mocks {
 
 	private static TestElement createElement(String name, String[] tags) {
+		BootDashLaunchConfElementFactory childFactory = mock(BootDashLaunchConfElementFactory.class);
 		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
 		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(name, true);
-		TestElement element = spy(new TestElement(project, model, projectProperties, factory));
+		TestElement element = spy(new TestElement(project, model, projectProperties, factory, childFactory));
 		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
 		return element;
 	}
