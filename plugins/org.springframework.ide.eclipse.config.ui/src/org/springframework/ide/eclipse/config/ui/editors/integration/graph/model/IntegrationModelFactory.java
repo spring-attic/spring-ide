@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012-2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -28,6 +28,10 @@ public class IntegrationModelFactory extends AbstractIntegrationModelFactory imp
 		if (input.getLocalName().equals(IntegrationSchemaConstants.ELEM_AGGREGATOR)) {
 			AggregatorModelElement aggregator = new AggregatorModelElement(input, parent.getDiagram());
 			list.add(aggregator);
+		}
+		else if (input.getLocalName().equals(IntegrationSchemaConstants.ELEM_BARRIER)) {
+			BarrierModelElement bridge = new BarrierModelElement(input, parent.getDiagram());
+			list.add(bridge);
 		}
 		else if (input.getLocalName().equals(IntegrationSchemaConstants.ELEM_BRIDGE)) {
 			BridgeModelElement bridge = new BridgeModelElement(input, parent.getDiagram());
