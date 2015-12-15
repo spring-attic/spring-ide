@@ -82,7 +82,7 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<encoding>UTF-8</encoding>
-		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=http://start-development.cfapps.io</test.vmargs>
+		<test.vmargs>${test.osvmargs}</test.vmargs>
 		<test.osvmargs></test.osvmargs>
 	</properties>
 
