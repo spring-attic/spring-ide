@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.wizard.template.BundleTemplateLocation;
 import org.springsource.ide.eclipse.commons.content.core.ContentLocation;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -102,5 +107,19 @@ public class WizardPlugin extends AbstractUIPlugin {
 
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(createErrorStatus(exception));
+	}
+
+	public static URLConnectionFactory getUrlConnectionFactory() {
+		final String userAgent = "STS "+WizardPlugin.getDefault().getBundle().getVersion();
+		//TODO: post 3.7.2 the URLConnectionFactory in master will have support for adding userAgent string
+		//  so we do not have to implement it here by subclassing.
+		return new URLConnectionFactory() {
+			@Override
+			public URLConnection createConnection(URL url) throws IOException {
+				URLConnection conn = super.createConnection(url);
+				conn.addRequestProperty("User-Agent", userAgent);
+				return conn;
+			}
+		};
 	}
 }

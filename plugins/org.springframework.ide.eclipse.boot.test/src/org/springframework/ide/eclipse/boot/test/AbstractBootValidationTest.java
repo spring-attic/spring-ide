@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.test;
 
 import static org.junit.Assert.fail;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.buildMavenProject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -24,9 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.hamcrest.Description;
@@ -84,7 +83,7 @@ public abstract class AbstractBootValidationTest {
 			throws Exception {
 		StsTestUtil.createPredefinedProject(projectName, BUNDLE_ID);
 		IProject project = getProject(projectName);
-		project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+		buildMavenProject(project);
 		return project;
 	}
 

@@ -1,20 +1,24 @@
 /*******************************************************************************
- * Copyright (c) 2015 GoPivotal, Inc.
+ * Copyright (c) 2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     GoPivotal, Inc. - initial API and implementation
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -74,8 +78,37 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 		cat.choice(name, dep, tooltipText, enablement);
 	}
 
+	public void setSelection(String catName, T dep, boolean selected) {
+		MultiSelectionFieldModel<T> cat = categories.get(catName);
+		if (cat!=null) {
+			cat.getSelection(dep).setValue(selected);
+		}
+	}
+
+
+
 	public String getLabel() {
 		return label;
+	}
+
+	public List<T> getCurrentSelection() {
+		ArrayList<T> selecteds = new ArrayList<>();
+		for (String cat : getCategories()) {
+			selecteds.addAll(getContents(cat).getCurrentSelection());
+		}
+		return Collections.unmodifiableList(selecteds);
+	}
+
+	/**
+	 * Gets the checkbox models for all the checkboxes in all the categories in a single
+	 * list.
+	 */
+	public List<CheckBoxModel<T>> getAllBoxes() {
+		ArrayList<CheckBoxModel<T>> allUsedBoxes = new ArrayList<CheckBoxModel<T>>();
+		for (String category : getCategories()) {
+			allUsedBoxes.addAll(getContents(category).getCheckBoxModels());
+		}
+		return allUsedBoxes;
 	}
 
 }

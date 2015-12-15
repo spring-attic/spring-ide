@@ -174,7 +174,7 @@ public class MultiSelectionFieldModel<T> {
 		return ALLWAYS_ENABLED;
 	}
 
-	public synchronized List<T> getCurrentSelections() {
+	public synchronized List<T> getCurrentSelection() {
 		List<T> selecteds = new ArrayList<T>();
 		for (Entry<T, LiveVariable<Boolean>> e : selections.entrySet()) {
 			if (e.getValue().getValue()) {

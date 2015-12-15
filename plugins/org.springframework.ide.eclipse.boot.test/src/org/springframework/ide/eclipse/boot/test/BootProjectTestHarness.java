@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
 import java.util.Arrays;
@@ -17,7 +18,9 @@ import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,6 +28,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
@@ -83,6 +88,25 @@ public class BootProjectTestHarness {
 		return new WizardConfigurer() {
 			public void apply(NewSpringBootWizardModel wizard) {
 				wizard.getStringInput("packageName").setValue(pkgName);
+			}
+		};
+	}
+
+	/**
+	 * @return A wizard configurer that ensures the selected 'boot version' is exactly
+	 * a given version of boot.
+	 */
+	public static WizardConfigurer bootVersion(final String wantedVersion) throws Exception {
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				for (RadioInfo option : bootVersionRadio.getRadios()) {
+					if (option.getValue().equals(wantedVersion)) {
+						bootVersionRadio.setValue(option);
+						return;
+					}
+				}
+				fail("The wanted bootVersion '"+wantedVersion+"'is not found in the wizard");
 			}
 		};
 	}
@@ -183,6 +207,32 @@ public class BootProjectTestHarness {
 
 	public IProject getProject(String projectName) {
 		return workspace.getRoot().getProject(projectName);
+	}
+
+	public static void buildMavenProject(IProject p) throws CoreException {
+		ISpringBootProject bp = SpringBootCore.create(p);
+		Job job = bp.updateProjectConfiguration();
+		if (job!=null) {
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				throw ExceptionUtil.coreException(e);
+			}
+		}
+		bp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+	}
+
+	public static void assertNoErrors(IProject p) throws CoreException {
+		ISpringBootProject bp = SpringBootCore.create(p);
+		Job job = bp.updateProjectConfiguration();
+		if (job!=null) {
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				throw ExceptionUtil.coreException(e);
+			}
+		}
+		StsTestUtil.assertNoErrors(p);
 	}
 
 	public static void assertOk(IStatus result) throws Exception {

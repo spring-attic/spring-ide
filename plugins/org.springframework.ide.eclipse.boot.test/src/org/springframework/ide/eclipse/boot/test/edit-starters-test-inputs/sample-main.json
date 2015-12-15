@@ -1,0 +1,747 @@
+
+
+{
+  "_links": {
+    "maven-project": {
+      "href": "https:\/\/start-development.cfapps.io\/starter.zip?type=maven-project{&dependencies,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+      "templated": true
+    },
+    "maven-build": {
+      "href": "https:\/\/start-development.cfapps.io\/pom.xml?type=maven-build{&dependencies,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+      "templated": true
+    },
+    "gradle-project": {
+      "href": "https:\/\/start-development.cfapps.io\/starter.zip?type=gradle-project{&dependencies,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+      "templated": true
+    },
+    "gradle-build": {
+      "href": "https:\/\/start-development.cfapps.io\/build.gradle?type=gradle-build{&dependencies,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+      "templated": true
+    },
+    "dependencies": {
+      "href": "https:\/\/start-development.cfapps.io\/dependencies{?bootVersion}",
+      "templated": true
+    }
+  },
+  "dependencies": {
+    "type": "hierarchical-multi-select",
+    "values": [
+      {
+        "name": "Core",
+        "values": [
+          {
+            "id": "security",
+            "name": "Security",
+            "description": "Secure your application via spring-security"
+          },
+          {
+            "id": "aop",
+            "name": "AOP",
+            "description": "Aspect-oriented programming including spring-aop and AspectJ"
+          },
+          {
+            "id": "jta-atomikos",
+            "name": "Atomikos (JTA)",
+            "description": "JTA distributed transactions via Atomikos",
+            "versionRange": "1.2.0.M1"
+          },
+          {
+            "id": "jta-bitronix",
+            "name": "Bitronix (JTA)",
+            "description": "JTA distributed transactions via Bitronix",
+            "versionRange": "1.2.0.M1"
+          },
+          {
+            "id": "cache",
+            "name": "Cache",
+            "description": "Spring's Cache abstraction",
+            "versionRange": "1.3.0.M1"
+          },
+          {
+            "id": "devtools",
+            "name": "DevTools",
+            "description": "Spring Boot Development Tools",
+            "versionRange": "1.3.0.M1"
+          },
+          {
+            "id": "validation",
+            "name": "Validation",
+            "description": "JSR-303 validation infrastructure (already included with web)",
+            "versionRange": "1.3.0.M1"
+          },
+          {
+            "id": "lombok",
+            "name": "Lombok",
+            "description": "Lombok",
+            "versionRange": "1.3.0.M4"
+          }
+        ]
+      },
+      {
+        "name": "Web",
+        "values": [
+          {
+            "id": "web",
+            "name": "Web",
+            "description": "Full-stack web development with Tomcat and Spring MVC"
+          },
+          {
+            "id": "websocket",
+            "name": "Websocket",
+            "description": "Websocket development with SockJS and STOMP"
+          },
+          {
+            "id": "ws",
+            "name": "WS",
+            "description": "Contract-first SOAP service development with Spring Web Services"
+          },
+          {
+            "id": "jersey",
+            "name": "Jersey (JAX-RS)",
+            "description": "the Jersey RESTful Web Services framework",
+            "versionRange": "1.2.0.RELEASE"
+          },
+          {
+            "id": "ratpack",
+            "name": "Ratpack",
+            "description": "Spring Boot integration for the Ratpack framework",
+            "versionRange": "1.2.0.RELEASE"
+          },
+          {
+            "id": "vaadin",
+            "name": "Vaadin",
+            "description": "Vaadin"
+          },
+          {
+            "id": "data-rest",
+            "name": "Rest Repositories",
+            "description": "Exposing Spring Data repositories over REST via spring-data-rest-webmvc"
+          },
+          {
+            "id": "hateoas",
+            "name": "HATEOAS",
+            "description": "HATEOAS-based RESTful services",
+            "versionRange": "1.2.2.RELEASE"
+          },
+          {
+            "id": "data-rest-hal",
+            "name": "Rest Repositories HAL Browser",
+            "description": "Browsing Spring Data REST repositories with an HTML UI",
+            "versionRange": "1.3.0.M1"
+          },
+          {
+            "id": "mobile",
+            "name": "Mobile",
+            "description": "Simplify the development of mobile web applications with spring-mobile"
+          },
+          {
+            "id": "restdocs",
+            "name": "REST Docs",
+            "description": "Document RESTful services by combining hand-written and auto-generated documentation"
+          }
+        ]
+      },
+      {
+        "name": "Template Engines",
+        "values": [
+          {
+            "id": "freemarker",
+            "name": "Freemarker",
+            "description": "FreeMarker templating engine"
+          },
+          {
+            "id": "velocity",
+            "name": "Velocity",
+            "description": "Velocity templating engine"
+          },
+          {
+            "id": "groovy-templates",
+            "name": "Groovy Templates",
+            "description": "Groovy templating engine"
+          },
+          {
+            "id": "thymeleaf",
+            "name": "Thymeleaf",
+            "description": "Thymeleaf templating engine, including integration with Spring"
+          },
+          {
+            "id": "mustache",
+            "name": "Mustache",
+            "description": "Mustache templating engine",
+            "versionRange": "1.2.2.RELEASE"
+          }
+        ]
+      },
+      {
+        "name": "Data",
+        "values": [
+          {
+            "id": "jdbc",
+            "name": "JDBC",
+            "description": "JDBC databases"
+          },
+          {
+            "id": "data-jpa",
+            "name": "JPA",
+            "description": "Java Persistence API including spring-data-jpa, spring-orm and Hibernate"
+          },
+          {
+            "id": "jooq",
+            "name": "JOOQ",
+            "description": "Persistence support using Java Object Oriented Querying",
+            "versionRange": "1.3.0.M2"
+          },
+          {
+            "id": "data-mongodb",
+            "name": "MongoDB",
+            "description": "MongoDB NoSQL Database, including spring-data-mongodb"
+          },
+          {
+            "id": "data-cassandra",
+            "name": "Cassandra",
+            "description": "Cassandra NoSQL Database, including spring-data-cassandra",
+            "versionRange": "1.3.0.RC1"
+          },
+          {
+            "id": "redis",
+            "name": "Redis",
+            "description": "REDIS key-value data store, including spring-redis"
+          },
+          {
+            "id": "data-gemfire",
+            "name": "Gemfire",
+            "description": "GemFire distributed data store including spring-data-gemfire"
+          },
+          {
+            "id": "data-solr",
+            "name": "Solr",
+            "description": "Apache Solr search platform, including spring-data-solr"
+          },
+          {
+            "id": "data-elasticsearch",
+            "name": "Elasticsearch",
+            "description": "Elasticsearch search and analytics engine including spring-data-elasticsearch"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Core",
+        "values": [
+          {
+            "id": "cloud-connectors",
+            "name": "Cloud Connectors",
+            "description": "Simplifies connecting to services in cloud platforms, including spring-cloud-connector and spring-cloud-cloudfoundry-connector",
+            "versionRange": "1.2.0.RELEASE"
+          },
+          {
+            "id": "cloud-starter",
+            "name": "Cloud Bootstrap",
+            "description": "spring-cloud-context (e.g. Bootstrap context and @RefreshScope)",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-security",
+            "name": "Cloud Security",
+            "description": "Secure load balancing and routing with spring-cloud-security",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-oauth2",
+            "name": "Cloud OAuth2",
+            "description": "OAuth2 and distributed application patterns with spring-cloud-security",
+            "versionRange": "1.2.3.RELEASE"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Config",
+        "values": [
+          {
+            "id": "cloud-config-client",
+            "name": "Config Client",
+            "description": "spring-cloud-config Client",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-config-server",
+            "name": "Config Server",
+            "description": "Central management for configuration via a git or svn backend",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-starter-zookeeper-config",
+            "name": "Zookeeper Configuration",
+            "description": "Configuration management with Zookeeper and spring-cloud-zookeeper-config",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-starter-consul-config",
+            "name": "Consul Configuration",
+            "description": "Configuration management with Hashicorp Consul",
+            "versionRange": "1.3.0.M4"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Discovery",
+        "values": [
+          {
+            "id": "cloud-eureka",
+            "name": "Eureka Discovery",
+            "description": "Service discovery using spring-cloud-netflix and Eureka",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-eureka-server",
+            "name": "Eureka Server",
+            "description": "spring-cloud-netflix Eureka Server",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-starter-zookeeper-discovery",
+            "name": "Zookeeper Discovery",
+            "description": "Service discovery with Zookeeper and spring-cloud-zookeeper-discovery",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-cloudfoundry-discovery",
+            "name": "Cloud Foundry Discovery",
+            "description": "Service discovery with Cloud Foundry",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-starter-consul-discovery",
+            "name": "Consul Discovery",
+            "description": "Service discovery with Hashicorp Consul",
+            "versionRange": "1.3.0.M4"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Routing",
+        "values": [
+          {
+            "id": "cloud-zuul",
+            "name": "Zuul",
+            "description": "Intelligent and programmable routing with spring-cloud-netflix Zuul",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-ribbon",
+            "name": "Ribbon",
+            "description": "Client side load balancing with spring-cloud-netflix and Ribbon",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-feign",
+            "name": "Feign",
+            "description": "Declarative REST clients with spring-cloud-netflix Feign",
+            "versionRange": "1.2.3.RELEASE"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Circuit Breaker",
+        "values": [
+          {
+            "id": "cloud-hystrix",
+            "name": "Hystrix",
+            "description": "Circuit breaker with spring-cloud-netflix Hystrix",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-hystrix-dashboard",
+            "name": "Hystrix Dashboard",
+            "description": "Circuit breaker dashboard with spring-cloud-netflix Hystrix",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-turbine",
+            "name": "Turbine",
+            "description": "Circuit breaker metric aggregation using spring-cloud-netflix with Turbine and server-sent events",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-turbine-amqp",
+            "name": "Turbine AMQP",
+            "description": "Circuit breaker metric aggregation using spring-cloud-netflix with Turbine and AMQP",
+            "versionRange": "[0.0.0.RELEASE,1.3.0.M5]"
+          },
+          {
+            "id": "cloud-turbine-stream",
+            "name": "Turbine Stream",
+            "description": "Circuit breaker metric aggregation using spring-cloud-netflix with Turbine and Spring Cloud Stream (choose a specific Stream binder implementation to complement this)",
+            "versionRange": "(1.3.0.M5,999.9.9.RELEASE]"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Tracing",
+        "values": [
+          {
+            "id": "cloud-starter-sleuth",
+            "name": "Sleuth",
+            "description": "Distributed tracing via logs with spring-cloud-sleuth",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-starter-zipkin",
+            "name": "Zipkin",
+            "description": "Distributed tracing via Zipkin and spring-cloud-sleuth-zipkin",
+            "versionRange": "1.3.0.M4"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Messaging",
+        "values": [
+          {
+            "id": "cloud-bus-amqp",
+            "name": "Cloud Bus AMQP",
+            "description": "A simple control bus with AMQP and spring-cloud-bus-amqp",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-bus-redis",
+            "name": "Cloud Bus Redis",
+            "description": "A simple control bus with Redis and spring-cloud-bus",
+            "versionRange": "(1.3.0.M5,9999.9.9.RELEASE]"
+          },
+          {
+            "id": "cloud-bus-kafka",
+            "name": "Cloud Bus Kafka",
+            "description": "A simple control bus with Kafka and spring-cloud-bus",
+            "versionRange": "(1.3.0.M5,9999.9.9.RELEASE]"
+          },
+          {
+            "id": "cloud-starter-consul-bus",
+            "name": "Consul Bus",
+            "description": "Inter instance control events with Hashicorp Consul",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-stream-binder-rabbit",
+            "name": "Stream Rabbit",
+            "description": "Messaging microservices with RabbitMQ",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-stream-binder-redis",
+            "name": "Stream Redis",
+            "description": "Messaging microservices with Redis",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-stream-binder-kafka",
+            "name": "Stream Kafka",
+            "description": "Messaging microservices with Kafka",
+            "versionRange": "1.3.0.M4"
+          }
+        ]
+      },
+      {
+        "name": "Cloud AWS",
+        "values": [
+          {
+            "id": "cloud-aws",
+            "name": "AWS Core",
+            "description": "AWS native services from spring-cloud-aws",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-aws-jdbc",
+            "name": "AWS JDBC",
+            "description": "Relational databases on AWS with RDS and spring-cloud-aws-jdbc",
+            "versionRange": "1.2.3.RELEASE"
+          },
+          {
+            "id": "cloud-aws-messaging",
+            "name": "AWS Messaging",
+            "description": "Messaging on AWS with SQS and spring-cloud-aws-messaging",
+            "versionRange": "1.2.3.RELEASE"
+          }
+        ]
+      },
+      {
+        "name": "Cloud Cluster",
+        "values": [
+          {
+            "id": "cloud-cluster-redis",
+            "name": "Cluster Redis",
+            "description": "Leadership election and global state with Redis and spring-cloud-cluster-redis",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-cluster-zookeeper",
+            "name": "Cluster Zookeeper",
+            "description": "Leadership election and global state with Zookeeper and spring-cloud-cluster-zookeeper",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "cloud-cluster-hazelcast",
+            "name": "Cluster Hazelcast",
+            "description": "Leadership election and global state with Hazelcast and spring-cloud-cluster-hazelcast",
+            "versionRange": "1.3.0.M4"
+          }
+        ]
+      },
+      {
+        "name": "Database",
+        "values": [
+          {
+            "id": "h2",
+            "name": "H2",
+            "description": "H2 database (with embedded support)"
+          },
+          {
+            "id": "hsql",
+            "name": "HSQLDB",
+            "description": "HSQLDB database (with embedded support)"
+          },
+          {
+            "id": "derby",
+            "name": "Apache Derby",
+            "description": "Apache Derby database (with embedded support)",
+            "versionRange": "1.2.2.RELEASE"
+          },
+          {
+            "id": "mysql",
+            "name": "MySQL",
+            "description": "MySQL jdbc driver"
+          },
+          {
+            "id": "postgresql",
+            "name": "PostgreSQL",
+            "description": "PostgreSQL jdbc driver"
+          }
+        ]
+      },
+      {
+        "name": "Social",
+        "values": [
+          {
+            "id": "social-facebook",
+            "name": "Facebook",
+            "description": "spring-social-facebook"
+          },
+          {
+            "id": "social-linkedin",
+            "name": "LinkedIn",
+            "description": "spring-social-linkedin"
+          },
+          {
+            "id": "social-twitter",
+            "name": "Twitter",
+            "description": "spring-social-twitter"
+          }
+        ]
+      },
+      {
+        "name": "I\/O",
+        "values": [
+          {
+            "id": "batch",
+            "name": "Batch",
+            "description": "Spring Batch including HSQLDB database"
+          },
+          {
+            "id": "integration",
+            "name": "Integration",
+            "description": "Common spring-integration modules"
+          },
+          {
+            "id": "activiti-basic",
+            "name": "Activiti",
+            "description": "Activiti BPMN workflow engine"
+          },
+          {
+            "id": "artemis",
+            "name": "JMS (Artemis)",
+            "description": "Java Message Service API via Apache Artemis",
+            "versionRange": "1.3.0.M2"
+          },
+          {
+            "id": "hornetq",
+            "name": "JMS (HornetQ)",
+            "description": "Java Message Service API via HornetQ"
+          },
+          {
+            "id": "amqp",
+            "name": "AMQP",
+            "description": "Advanced Message Queuing Protocol via spring-rabbit"
+          },
+          {
+            "id": "mail",
+            "name": "Mail",
+            "description": "javax.mail",
+            "versionRange": "1.2.0.RC1"
+          }
+        ]
+      },
+      {
+        "name": "Ops",
+        "values": [
+          {
+            "id": "actuator",
+            "name": "Actuator",
+            "description": "Production ready features to help you monitor and manage your application"
+          },
+          {
+            "id": "actuator-docs",
+            "name": "Actuator Docs",
+            "description": "API documentation for the Actuator endpoints",
+            "versionRange": "1.3.0.M4"
+          },
+          {
+            "id": "remote-shell",
+            "name": "Remote Shell",
+            "description": "CRaSH shell integration"
+          }
+        ]
+      }
+    ]
+  },
+  "type": {
+    "type": "action",
+    "default": "maven-project",
+    "values": [
+      {
+        "id": "maven-project",
+        "name": "Maven Project",
+        "description": "Generate a Maven based project archive",
+        "action": "\/starter.zip",
+        "tags": {
+          "build": "maven",
+          "format": "project"
+        }
+      },
+      {
+        "id": "maven-build",
+        "name": "Maven POM",
+        "description": "Generate a Maven pom.xml",
+        "action": "\/pom.xml",
+        "tags": {
+          "build": "maven",
+          "format": "build"
+        }
+      },
+      {
+        "id": "gradle-project",
+        "name": "Gradle Project",
+        "description": "Generate a Gradle based project archive",
+        "action": "\/starter.zip",
+        "tags": {
+          "build": "gradle",
+          "format": "project"
+        }
+      },
+      {
+        "id": "gradle-build",
+        "name": "Gradle Config",
+        "description": "Generate a Gradle build file",
+        "action": "\/build.gradle",
+        "tags": {
+          "build": "gradle",
+          "format": "build"
+        }
+      }
+    ]
+  },
+  "packaging": {
+    "type": "single-select",
+    "default": "jar",
+    "values": [
+      {
+        "id": "jar",
+        "name": "Jar"
+      },
+      {
+        "id": "war",
+        "name": "War"
+      }
+    ]
+  },
+  "javaVersion": {
+    "type": "single-select",
+    "default": "1.8",
+    "values": [
+      {
+        "id": "1.8",
+        "name": "1.8"
+      },
+      {
+        "id": "1.7",
+        "name": "1.7"
+      },
+      {
+        "id": "1.6",
+        "name": "1.6"
+      }
+    ]
+  },
+  "language": {
+    "type": "single-select",
+    "default": "java",
+    "values": [
+      {
+        "id": "java",
+        "name": "Java"
+      },
+      {
+        "id": "groovy",
+        "name": "Groovy"
+      }
+    ]
+  },
+  "bootVersion": {
+    "type": "single-select",
+    "default": "1.3.0.RELEASE",
+    "values": [
+      {
+        "id": "1.3.1.BUILD-SNAPSHOT",
+        "name": "1.3.1 (SNAPSHOT)"
+      },
+      {
+        "id": "1.3.0.RELEASE",
+        "name": "1.3.0"
+      },
+      {
+        "id": "1.2.8.BUILD-SNAPSHOT",
+        "name": "1.2.8 (SNAPSHOT)"
+      },
+      {
+        "id": "1.2.7.RELEASE",
+        "name": "1.2.7"
+      },
+      {
+        "id": "1.1.12.RELEASE",
+        "name": "1.1.12"
+      }
+    ]
+  },
+  "groupId": {
+    "type": "text",
+    "default": "com.example"
+  },
+  "artifactId": {
+    "type": "text",
+    "default": "demo"
+  },
+  "version": {
+    "type": "text",
+    "default": "0.0.1-SNAPSHOT"
+  },
+  "name": {
+    "type": "text",
+    "default": "demo"
+  },
+  "description": {
+    "type": "text",
+    "default": "Demo project for Spring Boot"
+  },
+  "packageName": {
+    "type": "text",
+    "default": "com.example"
+  }
+}
+

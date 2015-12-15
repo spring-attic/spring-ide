@@ -189,7 +189,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnableApt() throws Throwable {
-		IProject p = createPredefinedProject("demo-live-metadata");
+		IProject p = createPredefinedProject("demo-live-metadata", false);
 		IJavaProject jp = JavaCore.create(p);
 
 		//Check some assumptions about the initial state of the test project (if these checks fail then
