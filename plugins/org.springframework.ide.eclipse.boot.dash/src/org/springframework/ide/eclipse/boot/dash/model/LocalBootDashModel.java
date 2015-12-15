@@ -86,7 +86,7 @@ public class LocalBootDashModel extends BootDashModel {
 	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
 		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
-		this.launchConfElementFactory = new BootDashLaunchConfElementFactory();
+		this.launchConfElementFactory = new BootDashLaunchConfElementFactory(this);
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
 		try {
@@ -123,7 +123,10 @@ public class LocalBootDashModel extends BootDashModel {
 			this.launchConfRunStateTracker = new LaunchConfRunStateTracker();
 			launchConfRunStateTracker.setListener(new RunStateListener<ILaunchConfiguration>() {
 				public void stateChanged(ILaunchConfiguration owner) {
-
+					BootDashLaunchConfElement e = launchConfElementFactory.createOrGet(owner);
+					if (e!=null) {
+						notifyElementChanged(e);
+					}
 				}
 			});
 

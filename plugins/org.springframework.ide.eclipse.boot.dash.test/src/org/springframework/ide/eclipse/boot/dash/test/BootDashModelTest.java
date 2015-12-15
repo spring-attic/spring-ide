@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
@@ -76,6 +76,8 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardCo
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -186,6 +188,73 @@ public class BootDashModelTest {
 		waitModelElements("testProject");
 	}
 
+	/**
+	 * Test that element state listener for launch conf element is notified when it is
+	 * launched via its project.
+	 */
+	@Test public void testLaunchConfRunStateChanges() throws Exception {
+		doTestLaunchConfRunStateChanges(RunState.RUNNING);
+	}
+
+	/**
+	 * Test that element state listener for launch conf element is notified when it is
+	 * launched via its project.
+	 */
+	@Test public void testLaunchConfDebugStateChanges() throws Exception {
+		doTestLaunchConfRunStateChanges(RunState.DEBUGGING);
+	}
+
+	protected void doTestLaunchConfRunStateChanges(RunState runState) throws Exception {
+		String projectName = "testProject";
+		createBootProject(projectName);
+		waitModelElements(projectName);
+
+		BootProjectDashElement element = getElement(projectName);
+		element.openConfig(ui); //Ensure that at least one launch config exists.
+		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui);
+		BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
+
+		ElementStateListener listener = mock(ElementStateListener.class);
+		model.addElementStateListener(listener);
+//		System.out.println("Element state listener ADDED");
+//		model.addElementStateListener(new ElementStateListener() {
+//			public void stateChanged(BootDashElement e) {
+//				System.out.println("Changed: "+e);
+//			}
+//		});
+
+		element.restart(runState, null);
+		waitForState(element, runState);
+		waitForState(childElement, runState);
+
+		ElementStateListener oldListener = listener;
+		model.removeElementStateListener(oldListener);
+//		System.out.println("Element state listener REMOVED");
+
+		listener = mock(ElementStateListener.class);
+		model.addElementStateListener(listener);
+
+		element.stopAsync(ui);
+		waitForState(element, RunState.INACTIVE);
+		waitForState(childElement, RunState.INACTIVE);
+
+		//3 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set)
+		verify(oldListener, times(3)).stateChanged(element);
+		verify(oldListener, times(2)).stateChanged(childElement); //TODO: should be 3 but liveport not being set yet
+		//2 changes: RUNNING -> INACTIVE, liveport(unset)
+		verify(listener, times(2)).stateChanged(element);
+		verify(listener, times(1)).stateChanged(childElement); //TODO: should be 2 but liveport not being set yet
+	}
+
+
+	private BootDashElement getSingleValue(ImmutableSet<BootDashElement> values) {
+		assertEquals("Unexpected number of values in "+values, 1, values.size());
+		for (BootDashElement e : values) {
+			return e;
+		}
+		throw new IllegalStateException("This code should be unreachable");
+	}
 
 	/**
 	 * Test that element state listener is notified when a project is launched and terminated.
@@ -741,10 +810,10 @@ public class BootDashModelTest {
 		}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
 	}
 
-	private BootDashElement getElement(String name) {
+	private BootProjectDashElement getElement(String name) {
 		for (BootDashElement el : model.getElements().getValues()) {
 			if (name.equals(el.getName())) {
-				return el;
+				return (BootProjectDashElement) el;
 			}
 		}
 		return null;

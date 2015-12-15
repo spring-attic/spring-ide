@@ -644,7 +644,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 			rawChildren = LiveSets.map(context.launchConfTracker.getConfigs(delegate),
 					new Function<ILaunchConfiguration, BootDashElement>() {
 						public BootDashElement apply(ILaunchConfiguration input) {
-							return childFactory.createOrGet(getBootDashModel(), input);
+							return childFactory.createOrGet(input);
 						}
 					}
 			);

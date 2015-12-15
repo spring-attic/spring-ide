@@ -17,7 +17,13 @@ import org.eclipse.debug.core.ILaunchConfiguration;
  */
 public class BootDashLaunchConfElementFactory {
 
-	public BootDashLaunchConfElement createOrGet(LocalBootDashModel bootDashModel, ILaunchConfiguration conf) {
+	private LocalBootDashModel bootDashModel;
+
+	public BootDashLaunchConfElementFactory(LocalBootDashModel bootDashModel) {
+		this.bootDashModel = bootDashModel;
+	}
+
+	public BootDashLaunchConfElement createOrGet(ILaunchConfiguration conf) {
 		return new BootDashLaunchConfElement(bootDashModel, conf);
 	}
 }
