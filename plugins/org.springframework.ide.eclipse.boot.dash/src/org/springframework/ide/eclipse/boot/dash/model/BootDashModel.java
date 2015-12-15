@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -41,7 +41,7 @@ public abstract class BootDashModel {
 		}
 	}
 
-	abstract public LiveSet<BootDashElement> getElements();
+	abstract public ObservableSet<BootDashElement> getElements();
 
 	abstract public BootDashModelConsoleManager getElementConsoleManager();
 
@@ -81,8 +81,13 @@ public abstract class BootDashModel {
 		/**
 		 * Called when something about the element has changed.
 		 * <p>
-		 * Note this doesn't get called when elements are added / removed etc.
-		 * Only when some property of the element itself has changed.
+		 * Note this doesn't get called when (top-level) elements are
+		 * added / removed to the model. Only when some property of
+		 * the element itself has changed.
+		 * <p>
+		 * Note: think of the 'children' of an element as a propery of its parent element.
+		 * So, if a child is added/removed to/from an element then the element
+		 * itself will receive a stateChanged event.
 		 */
 		void stateChanged(BootDashElement e);
 	}

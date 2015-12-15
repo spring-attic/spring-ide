@@ -102,7 +102,7 @@ public abstract class DebugSupport {
 			private void handleStateChange(ILaunch l) {
 				CloudDashElement e = getElementFor(l, viewModel);
 				if (e!=null) {
-					BootDashModel model = e.getParent();
+					BootDashModel model = e.getBootDashModel();
 					model.notifyElementChanged(e);
 				}
 			}

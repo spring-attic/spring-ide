@@ -48,7 +48,9 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -58,10 +60,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -94,7 +97,7 @@ public class BootDashModelTest {
 	 */
 	@Test public void testNewSpringBootProject() throws Exception {
 
-		assertWorkspaceProjects(/*none*/);
+//		assertWorkspaceProjects(/*none*/);
 		assertModelElements(/*none*/);
 
 		String projectName = "testProject";
@@ -105,7 +108,51 @@ public class BootDashModelTest {
 				return true;
 			}
 		}.waitFor(3000);
+
+		BootDashElement projectEl = getElement("testProject");
+		assertTrue(projectEl.getCurrentChildren().isEmpty());
 	}
+
+	/**
+	 * Test that project with multiple associated launch configs has
+	 * a child for each config.
+	 */
+	@Test
+	public void testSpringBootProjectChildren() throws Exception {
+
+//		assertWorkspaceProjects(/*none*/);
+		assertModelElements(/*none*/);
+
+		String projectName = "testProject";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		new ACondition("Model update") {
+			public boolean test() throws Exception {
+				assertModelElements("testProject");
+				return true;
+			}
+		}.waitFor(3000);
+
+		BootDashElement projectEl = getElement("testProject");
+		assertTrue(projectEl.getCurrentChildren().isEmpty());
+
+		ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertFalse(conf1.equals(conf2));
+
+		assertEquals(2, projectEl.getCurrentChildren().size());
+
+		conf1.delete();
+
+		//When there is only one child (i.e. launch config), then it is not shown in the model (the parent subsumes all the
+		// child's functionality and we don't show the child to avoid cluttering the view)
+		assertEquals(0, projectEl.getCurrentChildren().size());
+
+		assertEquals(1, ((BootProjectDashElement)projectEl).getAllChildren().getValues().size());
+
+	}
+
+
 
 	private IProject createBootProject(String projectName, WizardConfigurer... extraConfs) throws Exception {
 		return projects.createBootWebProject(projectName, extraConfs);
@@ -488,19 +535,19 @@ public class BootDashModelTest {
 	public void setNullTags() throws Exception {
 		testSettingTags(null, new String[0]);
 	}
-	
+
 	private class BdeInfo {
 		String name;
 		String[] tags;
 		String workingSet;
-		
+
 		BdeInfo(String name, String[] tags, String workingSet) {
 			this.name = name;
 			this.tags = tags;
 			this.workingSet = workingSet;
 		}
 	}
-	
+
 	/**************************************************************************************
 	 * TAGS Tests END
 	 *************************************************************************************/
@@ -508,7 +555,7 @@ public class BootDashModelTest {
 	/**************************************************************************************
 	 * BDEs Filtering Tests START
 	 *************************************************************************************/
-	
+
 	private void testBdeFiltering(BdeInfo[] bdeInfo, String filterText, String[] expectedBdes) throws Exception {
 		Map<String, List<IProject>> wsMap = new HashMap<>();
 		List<BootDashElement> bdes = new ArrayList<>(bdeInfo.length);
@@ -530,7 +577,7 @@ public class BootDashModelTest {
 			bdes.add(element);
 		}
 		IWorkingSetManager wsManager = PlatformUI.getWorkbench().getWorkingSetManager();
-		for (Map.Entry<String, List<IProject>> entry : wsMap.entrySet()) {			
+		for (Map.Entry<String, List<IProject>> entry : wsMap.entrySet()) {
 			IWorkingSet ws = wsManager.getWorkingSet(entry.getKey());
 			if (ws == null) {
 				ws = wsManager.createWorkingSet(entry.getKey(), entry.getValue().toArray(new IProject[entry.getValue().size()]));
@@ -540,11 +587,11 @@ public class BootDashModelTest {
 			}
 		}
 		waitForJobsToComplete();
-		
+
 		BootDashElementsFilterBoxModel filterModel = new BootDashElementsFilterBoxModel();
 		filterModel.getText().setValue(filterText);
 		Filter<BootDashElement> filter = filterModel.getFilter().getValue();
-		
+
 		List<String> result = new ArrayList<>();
 		for (BootDashElement bde : bdes) {
 			if (filter.accept(bde) && bde.getProject() != null) {
@@ -554,7 +601,7 @@ public class BootDashModelTest {
 		String[] actualBdes = result.toArray(new String[result.size()]);
 		assertArrayEquals(expectedBdes, actualBdes);
 	}
-	
+
 	@Test
 	public void testNoWorkingSetMatch_1() throws Exception {
 		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, null), new BdeInfo("b", null, null)}, "x", new String[0]);
@@ -564,7 +611,7 @@ public class BootDashModelTest {
 	public void testNoWorkingSetMatch_2() throws Exception {
 		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "x,", new String[0]);
 	}
-	
+
 	@Test
 	public void testNoWorkingSetMatch_3() throws Exception {
 		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "xxx, a", new String[0]);
@@ -584,7 +631,7 @@ public class BootDashModelTest {
 	public void testWorkingSetMatch_2() throws Exception {
 		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, null), new BdeInfo("c", null, "xxxx")}, "xxx,", new String[]{"a"});
 	}
-	
+
 	@Test
 	public void testWorkingSetMatch_3() throws Exception {
 		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"), new BdeInfo("b", new String[]{"a", "c"}, "xxx")}, "xxx, a", new String[]{"a", "b"});
@@ -594,7 +641,7 @@ public class BootDashModelTest {
 	public void testWorkingSetMatch_4() throws Exception {
 		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"), new BdeInfo("b", new String[]{"a", "c"}, "xxx")}, "a, x", new String[]{"b"});
 	}
-	
+
 	/**************************************************************************************
 	 * BDEs Filtering Tests END
 	 *************************************************************************************/
@@ -651,7 +698,7 @@ public class BootDashModelTest {
 		for (ILaunchConfiguration conf : launchManager.getLaunchConfigurations()) {
 			conf.delete();
 		}
-		
+
 		/*
 		 * Remove any working sets created by the tests (BDEs filtering tests create working sets)
 		 */

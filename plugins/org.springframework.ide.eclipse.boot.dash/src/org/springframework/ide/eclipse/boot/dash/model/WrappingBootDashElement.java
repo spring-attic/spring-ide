@@ -13,16 +13,27 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
+import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
-public abstract class WrappingBootDashElement<T> implements BootDashElement {
+import com.google.common.collect.ImmutableSet;
 
+/**
+ * Abstract base class that is convenient to implement {@link BootDashElement}.
+ * @author Kris De Volder
+ */
+public abstract class WrappingBootDashElement<T> implements BootDashElement, Disposable, OnDispose {
 
 	public static final String TAGS_KEY = "tags";
 
@@ -31,11 +42,12 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	protected final T delegate;
 
-	private BootDashModel parent;
+	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
+	private ListenerList disposeListeners = new ListenerList();
 
-	public WrappingBootDashElement(BootDashModel parent, T delegate) {
-		this.parent = parent;
+	public WrappingBootDashElement(BootDashModel bootDashModel, T delegate) {
+		this.bootDashModel = bootDashModel;
 		this.delegate = delegate;
 	}
 
@@ -114,7 +126,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 			} else {
 				getPersistentProperties().put(TAGS_KEY, newTags.toArray(new String[newTags.size()]));
 			}
-			parent.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
@@ -129,14 +141,14 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 	public final void setDefaultRequestMapingPath(String defaultPath) {
 		try {
 			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
-			parent.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
 	}
 
-	public BootDashModel getParent() {
-		return parent;
+	public BootDashModel getBootDashModel() {
+		return bootDashModel;
 	}
 
 	@Override
@@ -144,5 +156,38 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 		return getProject() != null ? JavaCore.create(getProject()) : null;
 	}
 
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+		return LiveSets.emptySet(BootDashElement.class);
+	}
+
+	@Override
+	public ImmutableSet<BootDashElement> getCurrentChildren() {
+		return getChildren().getValue();
+	}
+
+	@Override
+	public void onDispose(DisposeListener listener) {
+		this.disposeListeners.add(listener);
+	}
+
+	@Override
+	public void dispose() {
+		for (Object l : disposeListeners.getListeners()) {
+			((DisposeListener)l).disposed(this);
+		}
+	}
+
+	/**
+	 * Convenience method to declare that a given {@link Disposable} is an 'owned' child of
+	 * this element and should also be disposed when this element itself is disposed.
+	 */
+	public void addDisposableChild(final Disposable child) {
+		onDispose(new DisposeListener() {
+			public <D extends Disposable> void disposed(D disposed) {
+				child.dispose();
+			}
+		});
+	}
 
 }

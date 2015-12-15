@@ -267,7 +267,7 @@ public class BootDashLabels implements Disposable {
 				label = host == null ? UNKNOWN_LABEL : host;
 				break;
 			case TREE_VIEWER_MAIN:
-				BootDashColumn[] cols = element.getParent().getRunTarget().getDefaultColumns();
+				BootDashColumn[] cols = element.getBootDashModel().getRunTarget().getDefaultColumns();
 				styledLabel = new StyledString();
 				for (BootDashColumn col : cols) {
 					//Ignore RUN_STATE_ICN because its already represented in the label's icon.

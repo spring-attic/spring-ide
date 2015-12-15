@@ -150,7 +150,7 @@ public class BootDashViewModelTest {
 				targetType
 		);
 		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
-		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
+		MockBootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
@@ -165,7 +165,7 @@ public class BootDashViewModelTest {
 		assertEquals(1, models.size());
 
 		BootDashElement element = mock(BootDashElement.class);
-		bdm.getElements().add(element);
+		bdm.add(element);
 
 		/////Add listener////////
 
@@ -200,7 +200,7 @@ public class BootDashViewModelTest {
 				targetType
 		);
 		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
-		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
+		MockBootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
@@ -220,7 +220,7 @@ public class BootDashViewModelTest {
 		assertEquals(1, models.size());
 
 		BootDashElement element = mock(BootDashElement.class);
-		bdm.getElements().add(element);
+		bdm.add(element);
 
 		////Fire event///////////
 

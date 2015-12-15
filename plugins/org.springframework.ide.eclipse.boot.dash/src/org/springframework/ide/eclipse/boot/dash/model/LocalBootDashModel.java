@@ -21,17 +21,20 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -48,8 +51,10 @@ public class LocalBootDashModel extends BootDashModel {
 	ClasspathListenerManager classpathListenerManager;
 	BootDashElementFactory elementFactory;
 	ProjectRunStateTracker runStateTracker;
-	LiveSet<BootDashElement> elements; //lazy created
+	LiveSetVariable<BootDashElement> elements; //lazy created
 	private BootDashModelConsoleManager consoleManager;
+
+	LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
 	private BootDashModelStateSaver modelState;
 	private DevtoolsPortRefresher devtoolsPortRefresher;
@@ -86,7 +91,7 @@ public class LocalBootDashModel extends BootDashModel {
 
 	void init() {
 		if (elements==null) {
-			this.elements = new LiveSet<BootDashElement>();
+			this.elements = new LiveSetVariable<BootDashElement>();
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
@@ -126,7 +131,7 @@ public class LocalBootDashModel extends BootDashModel {
 		elements.replaceAll(newElements);
 	}
 
-	public synchronized LiveSet<BootDashElement> getElements() {
+	public synchronized ObservableSet<BootDashElement> getElements() {
 		init();
 		return elements;
 	}
@@ -146,6 +151,7 @@ public class LocalBootDashModel extends BootDashModel {
 			if (projectExclusionListener!=null) {
 				projectExclusion.removeListener(projectExclusionListener);
 			}
+			launchConfTracker.dispose();
 		}
 	}
 

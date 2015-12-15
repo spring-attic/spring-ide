@@ -37,6 +37,8 @@ import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -57,15 +59,17 @@ import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFin
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
+
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Concrete BootDashElement that wraps an IProject
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements ElementStateListener, Disposable {
+public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements ElementStateListener {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -77,6 +81,10 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
 	private BootDashElementFactory factory;
+
+	private ObservableSet<BootDashElement> rawChildren;
+	private ObservableSet<BootDashElement> children;
+
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties, BootDashElementFactory factory) {
 		super(context, project);
@@ -578,6 +586,7 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 
 	@Override
 	public void dispose() {
+		super.dispose();
 		this.context.removeElementStateListener(this);
 		factory.disposed(this);
 	}
@@ -592,6 +601,53 @@ public class BootProjectDashElement extends WrappingBootDashElement<IProject> im
 				e.refresh();
 			}
 		}
+	}
+
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+		if (this.children==null) {
+			final ObservableSet<BootDashElement> all = getAllChildren();
+			children = new ObservableSet<BootDashElement>() {
+				{
+					dependsOn(all);
+				}
+
+				@Override
+				protected ImmutableSet<BootDashElement> compute() {
+					ImmutableSet<BootDashElement> elements = all.getValues();
+					if (elements.size()>1) {
+						return elements;
+					} else {
+						return ImmutableSet.of();
+					}
+				}
+			};
+			addDisposableChild(children);
+		}
+		return children;
+	}
+
+	/**
+	 * All children including 'invisible ones' that may be hidden from the children returned
+	 * by getChildren.
+	 */
+	public ObservableSet<BootDashElement> getAllChildren() {
+		if (rawChildren==null) {
+			rawChildren = LiveSets.map(context.launchConfTracker.getConfigs(delegate),
+					new Function<ILaunchConfiguration, BootDashElement>() {
+						public BootDashElement apply(ILaunchConfiguration input) {
+							return new BootDashLaunchConfElement(getBootDashModel(), input);
+						}
+					}
+			);
+			rawChildren.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
+				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
+					context.notifyElementChanged(BootProjectDashElement.this);
+				}
+			});
+			addDisposableChild(rawChildren);
+		}
+		return this.rawChildren;
 	}
 
 }

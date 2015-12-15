@@ -45,7 +45,7 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 		//Deletes are implemented per BootDashModel. So sort selection into bins per model.
 		Multimap<BootDashModel, BootDashElement> sortingBins = HashMultimap.create();
 		for (BootDashElement e : getSelectedElements()) {
-			BootDashModel model = e.getParent();
+			BootDashModel model = e.getBootDashModel();
 			//We are only capable of removing elements from a ModifiableModel (the 'local' model is read-only).
 			if (model instanceof ModifiableModel) {
 				sortingBins.put(model, e);
@@ -91,7 +91,7 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 	}
 
 	private boolean canDelete(BootDashElement bde) {
-		return bde.getParent() instanceof ModifiableModel;
+		return bde.getBootDashModel() instanceof ModifiableModel;
 	}
 
 }

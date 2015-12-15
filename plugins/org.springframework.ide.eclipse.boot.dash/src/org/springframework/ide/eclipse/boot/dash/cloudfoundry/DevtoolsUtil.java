@@ -257,7 +257,7 @@ public class DevtoolsUtil {
 			private void handleStateChange(ILaunch l) {
 				CloudDashElement e = DevtoolsUtil.getElement(l, viewModel);
 				if (e!=null) {
-					BootDashModel model = e.getParent();
+					BootDashModel model = e.getBootDashModel();
 					model.notifyElementChanged(e);
 				}
 			}

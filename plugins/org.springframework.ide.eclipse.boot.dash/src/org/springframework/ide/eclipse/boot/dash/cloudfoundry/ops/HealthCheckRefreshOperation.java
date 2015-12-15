@@ -45,7 +45,7 @@ public class HealthCheckRefreshOperation extends CloudOperation {
 				String oldHc = cache.getHealthCheck(cde);
 				if (!Objects.equals(newHc, oldHc)) {
 					cache.setHealthCheck(cde, newHc);
-					cde.getParent().notifyElementChanged(cde);
+					cde.getBootDashModel().notifyElementChanged(cde);
 				}
 			}
 		}

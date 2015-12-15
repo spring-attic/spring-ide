@@ -244,6 +244,11 @@ public class GSImportWizardModel {
 	 * status changes.
 	 */
 	private final LiveExpression<Void> autoSelectBuildType = new LiveExpression<Void>() {
+		{
+			dependsOn(isDownloaded);
+			dependsOn(guide);
+		}
+
 		@Override
 		protected Void compute() {
 			GSContent g = guide.getValue();
@@ -266,9 +271,7 @@ public class GSImportWizardModel {
 			}
 			return null;
 		};
-	}
-	.dependsOn(isDownloaded)
-	.dependsOn(guide);
+	};
 
 
 	public final LiveExpression<ValidationResult> downloadStatus = new Validator() {

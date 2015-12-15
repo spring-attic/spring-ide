@@ -11,11 +11,17 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+
+import com.google.common.collect.ImmutableSet;
 
 public interface BootDashElement extends Nameable, Taggable {
 	IJavaProject getJavaProject();
@@ -77,12 +83,15 @@ public interface BootDashElement extends Nameable, Taggable {
 	String getDefaultRequestMappingPath();
 	void setDefaultRequestMapingPath(String defaultPath);
 
-	BootDashModel getParent();
+	BootDashModel getBootDashModel();
 
 	void stopAsync(UserInteractions ui) throws Exception;
 	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
 	void openConfig(UserInteractions ui);
 	int getActualInstances();
 	int getDesiredInstances();
+
+	ImmutableSet<BootDashElement> getCurrentChildren();
+	ObservableSet<BootDashElement> getChildren();
 
 }

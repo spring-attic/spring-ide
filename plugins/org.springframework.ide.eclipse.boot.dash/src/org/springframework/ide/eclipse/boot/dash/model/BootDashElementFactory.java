@@ -21,10 +21,6 @@ import com.google.common.collect.MapMaker;
 /**
  * Manages the creating of BootProjectDashElement. It keeps track of all the created instances and
  * ensures that if an element represents the same entity then the instance is reused.
- * <p>
- * To avoid the element cache from becoming a memory leak, clients are expected to call 'retainOnly'
- * at points in time where they have a complete picture of all relevant elements to retain (whereas
- * any others can this be safely discarded at this point).
  *
  * @author Kris De Volder
  */
@@ -59,6 +55,10 @@ public class BootDashElementFactory {
 		cache = null;
 	}
 
+	/**
+	 * Clients should call this when elements are no longer relevant
+	 * @param e
+	 */
 	public void disposed(BootProjectDashElement e) {
 		Map<IProject, BootProjectDashElement> c = cache;
 		if (c!=null) {

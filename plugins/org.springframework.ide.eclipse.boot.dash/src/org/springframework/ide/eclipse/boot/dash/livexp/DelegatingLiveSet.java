@@ -16,6 +16,8 @@ import java.util.Set;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * A LiveSet (i.e. LiveExp<Set<T>>) which is defined as mirroring the
  * contents of a delegate.
@@ -28,7 +30,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  *
  * @author Kris De Volder
  */
-public class DelegatingLiveSet<T> extends LiveExpression<Set<T>> {
+public class DelegatingLiveSet<T> extends ObservableSet<T> {
 
 	//TODO: This implementation is known to be buggy.
 	// Because it is a basic LiveExpression it doesn't properly respond to
@@ -37,27 +39,26 @@ public class DelegatingLiveSet<T> extends LiveExpression<Set<T>> {
 
 	@SuppressWarnings("unchecked")
 	public DelegatingLiveSet() {
-		super(Collections.EMPTY_SET);
 	}
 
-	private LiveExpression<Set<T>> delegate = null;
-	private ValueListener<Set<T>> delegateListener = new ValueListener<Set<T>>() {
-		public void gotValue(LiveExpression<Set<T>> exp, Set<T> value) {
+	private ObservableSet<T> delegate = null;
+	private ValueListener<ImmutableSet<T>> delegateListener = new ValueListener<ImmutableSet<T>>() {
+		public void gotValue(LiveExpression<ImmutableSet<T>> exp, ImmutableSet<T> value) {
 			refresh();
 		}
 	};
 
 	@Override
-	protected Set<T> compute() {
+	protected ImmutableSet<T> compute() {
 		if (delegate==null) {
-			return Collections.emptySet();
+			return ImmutableSet.of();
 		} else {
 			return delegate.getValue();
 		}
 	}
 
-	public synchronized void setDelegate(LiveExpression<Set<T>> newDelegate) {
-		LiveExpression<Set<T>> oldDelegate = this.delegate;
+	public synchronized void setDelegate(ObservableSet<T> newDelegate) {
+		LiveExpression<ImmutableSet<T>> oldDelegate = this.delegate;
 		this.delegate = newDelegate;
 		if (oldDelegate==newDelegate) {
 			return;

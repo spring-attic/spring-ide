@@ -175,9 +175,12 @@ public class NewSpringBootWizardModel {
 	 * build type is supported.
 	 */
 	private void addBuildTypeValidator() {
-		RadioGroup buildTypeGroup = getRadioGroups().getGroup("type");
+		final RadioGroup buildTypeGroup = getRadioGroups().getGroup("type");
 		if (buildTypeGroup!=null) {
 			buildTypeGroup.validator(new Validator() {
+				{
+					dependsOn(buildTypeGroup.getVariable());
+				}
 				@Override
 				protected ValidationResult compute() {
 					ImportStrategy s = getImportStrategy();
@@ -189,7 +192,7 @@ public class NewSpringBootWizardModel {
 					}
 					return ValidationResult.OK;
 				}
-			}.dependsOn(buildTypeGroup.getVariable()));
+			});
 		}
 	}
 

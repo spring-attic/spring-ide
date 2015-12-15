@@ -11,8 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.livexp.ui;
 
 /**
+ * Deprecated. This type has been moved to commons. Anything using it here should
+ * stop doing that and use the type in commons instead.
+ *
  * @author Kris De Volder
  */
+@Deprecated
 public interface Reflowable {
 	/**
 	 * Returns true when reflow can stop here, false otherwise. Basically, this is

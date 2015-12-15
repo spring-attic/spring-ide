@@ -52,6 +52,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * @author Kris De Volder
  */
@@ -133,9 +135,9 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 				}
 			}
 			this.selection = selection;
-			selection.getElements().addListener(new ValueListener<Set<BootDashElement>>() {
+			selection.getElements().addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
 				@Override
-				public void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
+				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 					ISelection selection = getSelection();
 					for (ISelectionChangedListener selectionListener : selectionListeners) {
 						selectionListener.selectionChanged(new SelectionChangedEvent(BootDashTreeView.this, selection));
