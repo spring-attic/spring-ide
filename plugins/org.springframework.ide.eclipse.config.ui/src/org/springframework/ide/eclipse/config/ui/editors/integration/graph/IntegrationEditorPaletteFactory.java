@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012-2015 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.config.graph.model.ModelElementCreationFa
 import org.springframework.ide.eclipse.config.graph.model.TransitionCreationFactory;
 import org.springframework.ide.eclipse.config.graph.parts.AbstractConfigPaletteFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.AggregatorModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.BarrierModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.BridgeModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.ChainModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.model.ChannelModelElement;
@@ -110,11 +111,16 @@ public class IntegrationEditorPaletteFactory extends AbstractConfigPaletteFactor
 				IntegrationImages.AGGREGATOR_SMALL, IntegrationImages.AGGREGATOR);
 		entries.add(entry);
 
-		entry = new CombinedTemplateCreationEntry(
-				IntegrationSchemaConstants.ELEM_BRIDGE,
+		entry = new CombinedTemplateCreationEntry(IntegrationSchemaConstants.ELEM_BARRIER,
+				Messages.getString("IntegrationEditorPaletteFactory.BARRIER_COMPONENT_DESCRIPTION"), //$NON-NLS-1$
+				new ModelElementCreationFactory(BarrierModelElement.class, getDiagram()),
+				IntegrationImages.BARRIER_SMALL, IntegrationImages.BARRIER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntegrationSchemaConstants.ELEM_BRIDGE,
 				Messages.getString("IntegrationEditorPaletteFactory.BRIDGE_COMPONENT_DESCRIPTION"), //$NON-NLS-1$
-				new ModelElementCreationFactory(BridgeModelElement.class, getDiagram()),
-				IntegrationImages.BRIDGE_SMALL, IntegrationImages.BRIDGE);
+				new ModelElementCreationFactory(BridgeModelElement.class, getDiagram()), IntegrationImages.BRIDGE_SMALL,
+				IntegrationImages.BRIDGE);
 		entries.add(entry);
 
 		entry = new CombinedTemplateCreationEntry(
