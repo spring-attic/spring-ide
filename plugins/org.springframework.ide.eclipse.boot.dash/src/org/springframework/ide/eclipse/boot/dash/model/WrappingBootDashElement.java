@@ -182,12 +182,13 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement, Dis
 	 * Convenience method to declare that a given {@link Disposable} is an 'owned' child of
 	 * this element and should also be disposed when this element itself is disposed.
 	 */
-	public void addDisposableChild(final Disposable child) {
+	public <C extends Disposable> C addDisposableChild(final C child) {
 		onDispose(new DisposeListener() {
 			public <D extends Disposable> void disposed(D disposed) {
 				child.dispose();
 			}
 		});
+		return child;
 	}
 
 }
