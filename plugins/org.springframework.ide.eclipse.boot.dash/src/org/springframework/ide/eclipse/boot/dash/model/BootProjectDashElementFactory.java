@@ -24,14 +24,14 @@ import com.google.common.collect.MapMaker;
  *
  * @author Kris De Volder
  */
-public class BootDashElementFactory {
+public class BootProjectDashElementFactory {
 
 	private LocalBootDashModel model;
 	private IScopedPropertyStore<IProject> projectProperties;
 
 	private Map<IProject, BootProjectDashElement> cache;
 
-	public BootDashElementFactory(LocalBootDashModel model, IScopedPropertyStore<IProject> projectProperties) {
+	public BootProjectDashElementFactory(LocalBootDashModel model, IScopedPropertyStore<IProject> projectProperties) {
 		this.cache = new MapMaker()
 				.concurrencyLevel(1) //single thread only so don't waste space for 'connurrencyLevel' support
 				.weakValues()

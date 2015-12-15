@@ -20,7 +20,7 @@ import org.eclipse.debug.core.model.IStreamMonitor;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -43,9 +43,9 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 public class DevtoolsPortRefresher implements Disposable, ProcessListener {
 
 	private ProcessTracker processTracker;
-	private BootDashElementFactory elementFactory;
+	private BootProjectDashElementFactory elementFactory;
 
-	public DevtoolsPortRefresher(LocalBootDashModel localBootDashModel, BootDashElementFactory elementFactory) {
+	public DevtoolsPortRefresher(LocalBootDashModel localBootDashModel, BootProjectDashElementFactory elementFactory) {
 		processTracker = new ProcessTracker(this);
 		this.elementFactory = elementFactory;
 	}

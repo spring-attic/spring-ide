@@ -38,10 +38,10 @@ public class BootDashModelStateSaver implements ISaveParticipant {
 	private static final String PREFERRED_LAUNCHES = "preferredLaunches";
 	private Map<BootDashElement, ILaunchConfiguration> preferredLaunchconfigs = new HashMap<BootDashElement, ILaunchConfiguration>();
 
-	private BootDashElementFactory factory;
+	private BootProjectDashElementFactory factory;
 	private BootDashModelContext modelContext;
 
-	public BootDashModelStateSaver(BootDashModelContext context, BootDashElementFactory f) {
+	public BootDashModelStateSaver(BootDashModelContext context, BootProjectDashElementFactory f) {
 		this.modelContext = context;
 		this.factory = f;
 	}

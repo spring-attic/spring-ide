@@ -41,7 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElementFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelStateSaver;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 
@@ -51,7 +51,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 public class BootDashModelStateSaverTest extends Mocks {
 
 	private TestBootDashModelContext context;
-	private BootDashElementFactory factory;
+	private BootProjectDashElementFactory factory;
 
 	/**
 	 * Path of the save file without save numbers, relative to the state location.
@@ -76,7 +76,7 @@ public class BootDashModelStateSaverTest extends Mocks {
 	public void setup() throws Exception {
 		this.context = spy(new TestBootDashModelContext(mock(IWorkspace.class), mock(ILaunchManager.class)));
 		when(context.getWorkspace().getRoot()).thenReturn(mock(IWorkspaceRoot.class));
-		this.factory = mock(BootDashElementFactory.class);
+		this.factory = mock(BootProjectDashElementFactory.class);
 	}
 
 	////////////////////////////////////////////////////////////////
