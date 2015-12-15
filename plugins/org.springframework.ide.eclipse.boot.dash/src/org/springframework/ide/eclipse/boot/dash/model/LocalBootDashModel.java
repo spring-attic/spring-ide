@@ -165,6 +165,7 @@ public class LocalBootDashModel extends BootDashModel {
 			elements = null;
 			openCloseListenerManager.dispose();
 			projectElementFactory.dispose();
+			launchConfElementFactory.dispose();
 			classpathListenerManager.dispose();
 			projectRunStateTracker.dispose();
 			launchConfRunStateTracker.dispose();

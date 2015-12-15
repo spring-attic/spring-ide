@@ -31,13 +31,17 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 
 	private Map<ILaunchConfiguration, BootDashLaunchConfElement> cache;
 
+	private ILaunchConfigurationListener listener;
+
+	private ILaunchManager launchManager;
+
 	public BootDashLaunchConfElementFactory(LocalBootDashModel bootDashModel, ILaunchManager lm) {
 		this.cache = new MapMaker()
 				.concurrencyLevel(1) //single thread only so don't waste space for 'connurrencyLevel' support
-				.weakValues()
 				.makeMap();
 		this.model = bootDashModel;
-		lm.addLaunchConfigurationListener(new ILaunchConfigurationListener() {
+		this.launchManager = lm;
+		lm.addLaunchConfigurationListener(listener = new ILaunchConfigurationListener() {
 
 			@Override
 			public void launchConfigurationRemoved(ILaunchConfiguration configuration) {
@@ -72,11 +76,10 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 		return null;
 	}
 
-
-
 	/**
 	 * Should be called by client code when conf is no longer interesting. This is to
-	 * avoid the cache this factor
+	 * avoid the cache this factory maintains to grow unboundedly as launch confs get
+	 * created / deleted.
 	 */
 	private synchronized void disposed(ILaunchConfiguration conf) {
 		Map<ILaunchConfiguration, BootDashLaunchConfElement> c = cache;
@@ -89,6 +92,11 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 	@Override
 	public void dispose() {
 		cache = null;
+		if (listener!=null) {
+			launchManager.removeLaunchConfigurationListener(listener);
+			listener = null;
+			launchManager = null;
+		}
 	}
 
 }
