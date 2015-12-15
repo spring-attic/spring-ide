@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
 import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
+import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
@@ -96,7 +96,7 @@ public class LocalBootDashModel extends BootDashModel {
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
 			this.runStateTracker = new ProjectRunStateTracker();
-			runStateTracker.setListener(new ProjectRunStateListener() {
+			runStateTracker.setListener(new RunStateListener<IProject>() {
 				public void stateChanged(IProject p) {
 					BootDashElement e = elementFactory.createOrGet(p);
 					if (e!=null) {
