@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * Generalization of OwnerRunStateTracker. An instance of this class tracks active processes
@@ -43,7 +44,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  *
  * @author Kris De Volder
  */
-public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
+public abstract class RunStateTracker<T> extends ProcessListenerAdapter implements Disposable {
 
 	//// public API ///////////////////////////////////////////////////////////////////
 

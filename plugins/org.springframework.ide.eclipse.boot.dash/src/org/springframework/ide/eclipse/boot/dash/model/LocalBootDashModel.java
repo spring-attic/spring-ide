@@ -63,7 +63,6 @@ public class LocalBootDashModel extends BootDashModel {
 
 	LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
-
 	private BootDashModelStateSaver modelState;
 	private DevtoolsPortRefresher devtoolsPortRefresher;
 	private LiveExpression<Pattern> projectExclusion;
@@ -196,7 +195,7 @@ public class LocalBootDashModel extends BootDashModel {
 		return projectRunStateTracker;
 	}
 
-	public ILaunchConfiguration getPreferredConfigs(WrappingBootDashElement<IProject> e) {
+	public ILaunchConfiguration getPreferredConfig(WrappingBootDashElement<IProject> e) {
 		return modelState.getPreferredConfig(e);
 	}
 

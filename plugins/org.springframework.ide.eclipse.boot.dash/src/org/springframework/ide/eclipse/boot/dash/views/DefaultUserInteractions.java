@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
@@ -63,7 +64,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public ILaunchConfiguration chooseConfigurationDialog(final String dialogTitle, final String message,
-			final List<ILaunchConfiguration> configs) {
+			final Collection<ILaunchConfiguration> configs) {
 		final LiveVariable<ILaunchConfiguration> chosen = new LiveVariable<ILaunchConfiguration>();
 		context.getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {

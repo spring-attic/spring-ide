@@ -58,6 +58,8 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
+import com.google.common.collect.ImmutableSet;
+
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private CloudFoundryTargetProperties targetProperties;
@@ -89,8 +91,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		return Collections.emptyList();
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
+		return ImmutableSet.of();
 	}
 
 	@Override

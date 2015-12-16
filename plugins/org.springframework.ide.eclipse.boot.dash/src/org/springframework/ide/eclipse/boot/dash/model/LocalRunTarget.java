@@ -22,6 +22,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
+import com.google.common.collect.ImmutableSet;
+
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 public class LocalRunTarget extends AbstractRunTarget {
@@ -39,12 +41,12 @@ public class LocalRunTarget extends AbstractRunTarget {
 	}
 
 	@Override
-	public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
 		IProject p = element.getProject();
 		if (p != null) {
-			return BootLaunchConfigurationDelegate.getLaunchConfigs(p);
+			return ImmutableSet.copyOf(BootLaunchConfigurationDelegate.getLaunchConfigs(p));
 		}
-		return Collections.emptyList();
+		return ImmutableSet.of();
 	}
 
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {

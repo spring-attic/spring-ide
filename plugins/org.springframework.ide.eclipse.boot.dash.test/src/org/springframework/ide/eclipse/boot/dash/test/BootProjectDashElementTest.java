@@ -49,6 +49,8 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
+import com.google.common.collect.ImmutableSet;
+
 
 /**
  * Unit tests some of the methods that don't have great coverage yet
@@ -233,7 +235,7 @@ public class BootProjectDashElementTest extends Mocks {
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 
-		when(runTarget.getLaunchConfigs(element)).thenReturn(Arrays.asList(conf));
+		when(runTarget.getLaunchConfigs(element)).thenReturn(ImmutableSet.of(conf));
 		doReturn(RunState.INACTIVE).when(element).getRunState();
 
 		element.openConfig(ui);
@@ -256,7 +258,7 @@ public class BootProjectDashElementTest extends Mocks {
 		ILaunchConfiguration conf1 = mock(ILaunchConfiguration.class);
 		ILaunchConfiguration conf2 = mock(ILaunchConfiguration.class);
 
-		when(runTarget.getLaunchConfigs(element)).thenReturn(Arrays.asList(conf1, conf2));
+		when(runTarget.getLaunchConfigs(element)).thenReturn(ImmutableSet.of(conf1, conf2));
 		doReturn(RunState.INACTIVE).when(element).getRunState();
 		when(ui.chooseConfigurationDialog(anyString(), anyString(), listThat(hasItems(conf1, conf2))))
 			.thenReturn(conf2);

@@ -35,6 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
+import com.google.common.collect.ImmutableSet;
+
 public class MockRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private TargetProperties properties;
@@ -58,8 +60,8 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 	}
 
 	@Override
-	public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		return Collections.emptyList();
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
+		return ImmutableSet.of();
 	}
 
 	@Override

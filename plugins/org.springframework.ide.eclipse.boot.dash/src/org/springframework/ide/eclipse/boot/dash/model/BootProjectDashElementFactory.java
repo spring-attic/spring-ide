@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.MapMaker;
@@ -25,7 +26,7 @@ import com.google.common.collect.MapMaker;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElementFactory implements Disposable {
+public class BootProjectDashElementFactory implements FactoryWithParam<IProject, BootProjectDashElement>, Disposable {
 
 	private BootDashLaunchConfElementFactory launchConfElementFactory;
 	private LocalBootDashModel model;
@@ -60,10 +61,18 @@ public class BootProjectDashElementFactory implements Disposable {
 	/**
 	 * Clients should call this when elements are no longer relevant
 	 */
-	public synchronized void disposed(BootProjectDashElement e) {
+	public void disposed(BootProjectDashElement e) {
+		disposed(e.getProject());
+	}
+
+	/**
+	 * Clients should call this when elements are no longer relevant
+	 */
+	@Override
+	public synchronized void disposed(IProject p) {
 		Map<IProject, BootProjectDashElement> c = cache;
 		if (c!=null) {
-			c.remove(e.getProject());
+			c.remove(p.getProject());
 		}
 	}
 

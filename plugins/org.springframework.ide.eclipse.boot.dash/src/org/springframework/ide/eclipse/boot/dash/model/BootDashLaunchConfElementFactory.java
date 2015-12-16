@@ -17,6 +17,7 @@ import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -25,7 +26,7 @@ import com.google.common.collect.MapMaker;
 /**
  * @author Kris De Volder
  */
-public class BootDashLaunchConfElementFactory implements Disposable {
+public class BootDashLaunchConfElementFactory implements Disposable, FactoryWithParam<ILaunchConfiguration, LaunchConfDashElement> {
 
 	private LocalBootDashModel model;
 
