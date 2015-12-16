@@ -72,7 +72,6 @@ import com.google.common.collect.ImmutableSet;
 public class BootProjectDashElement extends WrappingBootDashElement<IProject> implements ElementStateListener {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-
 	private static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
 	private LocalBootDashModel context;

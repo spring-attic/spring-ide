@@ -66,7 +66,7 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
  *
  * @author Kris De Volder
  */
-public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchConfiguration> implements ElementStateListener {
+public class LaunchConfDashElement extends WrappingBootDashElement<ILaunchConfiguration> implements ElementStateListener {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	public static void debug(String string) {
@@ -83,7 +83,7 @@ public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchCo
 	private BootDashLaunchConfElementFactory factory;
 	private PropertyStoreApi persistentProperties;
 
-	public BootDashLaunchConfElement(LocalBootDashModel bootDashModel, ILaunchConfiguration delegate) {
+	public LaunchConfDashElement(LocalBootDashModel bootDashModel, ILaunchConfiguration delegate) {
 		super(bootDashModel, delegate);
 		IPropertyStore backingStore = PropertyStoreFactory.createFor(delegate);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
@@ -91,7 +91,7 @@ public class BootDashLaunchConfElement extends WrappingBootDashElement<ILaunchCo
 		this.livePort = createLivePortExp(runState, "local.server.port");
 		livePort.addListener(new ValueListener<Integer>() {
 			public void gotValue(LiveExpression<Integer> exp, Integer value) {
-				getBootDashModel().notifyElementChanged(BootDashLaunchConfElement.this);
+				getBootDashModel().notifyElementChanged(LaunchConfDashElement.this);
 			}
 		});
 		this.actuatorPort = createLivePortExp(runState, "local.management.port");

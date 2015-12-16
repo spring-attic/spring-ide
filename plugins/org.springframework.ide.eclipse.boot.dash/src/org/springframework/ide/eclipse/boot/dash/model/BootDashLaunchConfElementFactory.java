@@ -29,7 +29,7 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 
 	private LocalBootDashModel model;
 
-	private Map<ILaunchConfiguration, BootDashLaunchConfElement> cache;
+	private Map<ILaunchConfiguration, LaunchConfDashElement> cache;
 
 	private ILaunchConfigurationListener listener;
 
@@ -58,14 +58,14 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 		});
 	}
 
-	public synchronized BootDashLaunchConfElement createOrGet(ILaunchConfiguration c) {
+	public synchronized LaunchConfDashElement createOrGet(ILaunchConfiguration c) {
 		try {
 			if (c!=null) {
 				ILaunchConfigurationType type = c.getType();
 				if (type!=null && BootLaunchConfigurationDelegate.TYPE_ID.equals(type.getIdentifier())) {
-					BootDashLaunchConfElement el = cache.get(c);
+					LaunchConfDashElement el = cache.get(c);
 					if (el==null) {
-						cache.put(c, el = new BootDashLaunchConfElement(model, c));
+						cache.put(c, el = new LaunchConfDashElement(model, c));
 					}
 					return el;
 				}
@@ -82,7 +82,7 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 	 * created / deleted.
 	 */
 	public synchronized void disposed(ILaunchConfiguration conf) {
-		Map<ILaunchConfiguration, BootDashLaunchConfElement> c = cache;
+		Map<ILaunchConfiguration, LaunchConfDashElement> c = cache;
 		if (c!=null) {
 			c.remove(conf);
 		}

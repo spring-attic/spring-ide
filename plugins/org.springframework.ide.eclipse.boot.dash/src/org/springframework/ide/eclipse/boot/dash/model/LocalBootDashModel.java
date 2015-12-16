@@ -122,7 +122,7 @@ public class LocalBootDashModel extends BootDashModel {
 			this.launchConfRunStateTracker = new LaunchConfRunStateTracker();
 			launchConfRunStateTracker.setListener(new RunStateListener<ILaunchConfiguration>() {
 				public void stateChanged(ILaunchConfiguration owner) {
-					BootDashLaunchConfElement e = launchConfElementFactory.createOrGet(owner);
+					LaunchConfDashElement e = launchConfElementFactory.createOrGet(owner);
 					if (e!=null) {
 						notifyElementChanged(e);
 					}
