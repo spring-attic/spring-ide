@@ -48,8 +48,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 public class LocalBootDashModel extends BootDashModel {
 
 	private IWorkspace workspace;
-	BootProjectDashElementFactory projectElementFactory;
-	BootDashLaunchConfElementFactory launchConfElementFactory;
+	private BootProjectDashElementFactory projectElementFactory;
+	private BootDashLaunchConfElementFactory launchConfElementFactory;
 
 	ProjectChangeListenerManager openCloseListenerManager;
 	ClasspathListenerManager classpathListenerManager;
@@ -208,5 +208,13 @@ public class LocalBootDashModel extends BootDashModel {
 
 	public LaunchConfRunStateTracker getLaunchConfRunStateTracker() {
 		return launchConfRunStateTracker;
+	}
+
+	public BootProjectDashElementFactory getProjectElementFactory() {
+		return projectElementFactory;
+	}
+
+	public BootDashLaunchConfElementFactory getLaunchConfElementFactory() {
+		return launchConfElementFactory;
 	}
 }

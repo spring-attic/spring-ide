@@ -241,10 +241,10 @@ public class BootDashModelTest {
 
 		//3 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set)
 		verify(oldListener, times(3)).stateChanged(element);
-		verify(oldListener, times(2)).stateChanged(childElement); //TODO: should be 3 but liveport not being set yet
+		verify(oldListener, times(3)).stateChanged(childElement);
 		//2 changes: RUNNING -> INACTIVE, liveport(unset)
 		verify(listener, times(2)).stateChanged(element);
-		verify(listener, times(1)).stateChanged(childElement); //TODO: should be 2 but liveport not being set yet
+		verify(listener, times(2)).stateChanged(childElement);
 	}
 
 
@@ -427,7 +427,7 @@ public class BootDashModelTest {
 		String projectName = "some-project";
 		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
 
-		BootDashElement element = getElement(projectName);
+		BootProjectDashElement element = getElement(projectName);
 		assertEquals(RunState.INACTIVE, element.getRunState());
 		assertEquals(-1, element.getLivePort()); // live port is 'unknown' if app is not running
 		try {
@@ -447,12 +447,16 @@ public class BootDashModelTest {
 			));
 			wc.doSave();
 
+			BootDashElement childElement = getSingleValue(element.getAllChildren().getValue());
+
 			assertEquals(8080, element.getLivePort()); // port still the same until we restart
+			assertEquals(8080, childElement.getLivePort());
 
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
 			assertEquals(6789, element.getLivePort());
+			assertEquals(6789, childElement.getLivePort());
 
 		} finally {
 			element.stopAsync(ui);

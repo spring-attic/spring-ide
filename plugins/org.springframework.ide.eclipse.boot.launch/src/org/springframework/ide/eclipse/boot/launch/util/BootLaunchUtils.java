@@ -82,7 +82,6 @@ public class BootLaunchUtils {
 //		}
 	}
 
-
 	public static List<ILaunch> getBootLaunches(IProject project) {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		ILaunch[] allLaunches = lm.getLaunches();
@@ -118,5 +117,6 @@ public class BootLaunchUtils {
 		}
 		return false;
 	}
+
 
 }

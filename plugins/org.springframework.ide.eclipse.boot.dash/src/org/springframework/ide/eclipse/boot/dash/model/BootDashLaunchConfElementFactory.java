@@ -81,7 +81,7 @@ public class BootDashLaunchConfElementFactory implements Disposable {
 	 * avoid the cache this factory maintains to grow unboundedly as launch confs get
 	 * created / deleted.
 	 */
-	private synchronized void disposed(ILaunchConfiguration conf) {
+	public synchronized void disposed(ILaunchConfiguration conf) {
 		Map<ILaunchConfiguration, BootDashLaunchConfElement> c = cache;
 		if (c!=null) {
 			c.remove(conf);
