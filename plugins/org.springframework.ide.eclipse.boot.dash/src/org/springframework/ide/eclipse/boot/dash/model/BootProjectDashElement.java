@@ -67,16 +67,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	}
 
 	@Override
-	public ILaunchConfiguration getPreferredConfig() {
-		return getBootDashModel().getPreferredConfig(this);
-	}
-
-	@Override
-	public void setPreferredConfig(ILaunchConfiguration config) {
-		getBootDashModel().setPreferredConfig(this, config);
-	}
-
-	@Override
 	public ObservableSet<BootDashElement> getChildren() {
 		if (this.children==null) {
 			final ObservableSet<BootDashElement> all = getAllChildren();

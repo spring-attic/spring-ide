@@ -112,12 +112,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	public abstract ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
 
 	@Override
-	public abstract ILaunchConfiguration getPreferredConfig();
-
-	@Override
-	public abstract void setPreferredConfig(ILaunchConfiguration config);
-
-	@Override
 	public abstract IProject getProject();
 
 	@Override
@@ -167,11 +161,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		ILaunchConfiguration single = CollectionUtils.getSingle(getLaunchConfigs());
 		if (single!=null) {
 			return single;
-		}
-		ImmutableSet<ILaunchConfiguration> allConfs = getLaunchConfigs();
-		ILaunchConfiguration preferred = getPreferredConfig();
-		if (preferred!=null && allConfs.contains(preferred)) {
-			return preferred;
 		}
 		return null;
 	}
@@ -360,17 +349,13 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	protected ILaunchConfiguration chooseConfig(UserInteractions ui, Collection<ILaunchConfiguration> configs) {
-		ILaunchConfiguration preferredConf = getPreferredConfig();
-		if (preferredConf!=null && configs.contains(preferredConf)) {
-			return preferredConf;
-		}
+		//TODO: this should probably be removed. Actions etc. should either apply to all the elements at once,
+		// or be disabled if that seems ill-conceived. In such a ui there should be no need to popup a dialog
+		// to choose a configuration.
 		ILaunchConfiguration conf = chooseConfigurationDialog(configs,
 				"Choose Launch Configuration",
 				"Several launch configurations are associated with '"+getName()+"' "+
 				"Choose one.", ui);
-		if (conf!=null) {
-			setPreferredConfig(conf);
-		}
 		return conf;
 	}
 

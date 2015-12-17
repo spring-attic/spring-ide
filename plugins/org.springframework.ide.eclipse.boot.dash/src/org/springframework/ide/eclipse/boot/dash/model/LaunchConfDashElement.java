@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -48,19 +47,6 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 	@Override
 	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
 		return ImmutableSet.of(delegate);
-	}
-
-	@Override
-	public ILaunchConfiguration getPreferredConfig() {
-		return delegate;
-	}
-
-	@Override
-	public void setPreferredConfig(ILaunchConfiguration config) {
-		//This operation is not supported since the element is tied to a specific launch config
-		//For convenience we allow the caller to set the element anyways as long as they set it
-		//to its only legal value.
-		Assert.isLegal(delegate.equals(config));
 	}
 
 	@Override

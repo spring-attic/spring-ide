@@ -66,13 +66,6 @@ public interface BootDashElement extends Nameable, Taggable {
 	ILaunchConfiguration getActiveConfig();
 
 	/**
-	 * A preferred configuration may be associated with an element. This is used by various operations
-	 * as a 'tie breaker' if there is more than one existing configuration associated with an element.
-	 */
-	ILaunchConfiguration getPreferredConfig();
-	void setPreferredConfig(ILaunchConfiguration config);
-
-	/**
 	 * The 'default' path is used by some actions to quickly open
 	 * the app in a browser view. This is just a stored value. There is no guarantee
 	 * that it actually exists on the given element when it is running (i.e. it may

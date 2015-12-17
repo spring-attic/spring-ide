@@ -429,7 +429,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
 		addVisible(manager, actions.getOpenConfigAction());
-		addPreferredConfigSelectionMenu(manager);
 		addVisible(manager, actions.getShowPropertiesViewAction());
 
 		manager.add(new Separator());
@@ -501,21 +500,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			return ((AbstractBootDashAction) a).isVisible();
 		}
 		return true;
-	}
-
-	private void addPreferredConfigSelectionMenu(IMenuManager parent) {
-		BootDashElement element = selection.getSingle();
-		if (element!=null) {
-			ILaunchConfiguration defaultConfig = element.getPreferredConfig();
-			ImmutableSet<ILaunchConfiguration> allConfigs = element.getLaunchConfigs();
-			if (!allConfigs.isEmpty()) {
-				MenuManager menu = new MenuManager("Default Config...", BootDashActivator.getImageDescriptor("icons/boot-icon.png"), null);
-				parent.add(menu);
-				for (ILaunchConfiguration conf : allConfigs) {
-					menu.add(actions.selectDefaultConfigAction(element, defaultConfig, conf));
-				}
-			}
-		}
 	}
 
 	private void addDragSupport(final TreeViewer viewer) {

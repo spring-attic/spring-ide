@@ -203,16 +203,6 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	@Override
-	public ILaunchConfiguration getPreferredConfig() {
-		return null;
-	}
-
-	@Override
-	public void setPreferredConfig(ILaunchConfiguration config) {
-
-	}
-
-	@Override
 	public int getActualInstances() {
 		return getCloudModel().getAppCache().getApp(getName()) != null
 				? getCloudModel().getAppCache().getApp(getName()).getRunningInstances() : 0;

@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.test.AbstractBootProjectDashElementTest.TestElement;
+import org.springframework.ide.eclipse.boot.dash.test.AbstractLaunchConfigurationsDashElementTest.TestElement;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 

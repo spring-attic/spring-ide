@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
@@ -59,7 +58,6 @@ public class LocalBootDashModel extends BootDashModel {
 
 	LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
-	private BootDashModelStateSaver modelState;
 	private DevtoolsPortRefresher devtoolsPortRefresher;
 	private LiveExpression<Pattern> projectExclusion;
 	private ValueListener<Pattern> projectExclusionListener;
@@ -83,12 +81,6 @@ public class LocalBootDashModel extends BootDashModel {
 		this.launchConfElementFactory = new LaunchConfDashElementFactory(this, context.getLaunchManager());
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
-		try {
-			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, projectElementFactory));
-			modelState.restore(lastState);
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
 		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		this.projectExclusion = context.getBootProjectExclusion();
 	}
@@ -164,19 +156,6 @@ public class LocalBootDashModel extends BootDashModel {
 	@Override
 	public BootDashModelConsoleManager getElementConsoleManager() {
 		return consoleManager;
-	}
-
-
-	////////////// listener cruft ///////////////////////////
-
-	public ILaunchConfiguration getPreferredConfig(WrappingBootDashElement<IProject> e) {
-		return modelState.getPreferredConfig(e);
-	}
-
-	public void setPreferredConfig(
-			WrappingBootDashElement<IProject> e,
-			ILaunchConfiguration c) {
-		modelState.setPreferredConfig(e, c);
 	}
 
 	public LaunchConfRunStateTracker getLaunchConfRunStateTracker() {

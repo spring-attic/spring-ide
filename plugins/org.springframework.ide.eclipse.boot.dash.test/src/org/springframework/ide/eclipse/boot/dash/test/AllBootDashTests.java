@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
-
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -24,7 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 	BootJarPackagingTest.class,
 	BootDashModelStateSaverTest.class,
 	BootDashModelTest.class,
-	AbstractBootProjectDashElementTest.class,
+	AbstractLaunchConfigurationsDashElementTest.class,
 	BootDashElementTagsTests.class,
 	JLRMethodParserTest.class,
 	ActuatorClientTest.class,

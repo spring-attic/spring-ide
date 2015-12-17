@@ -60,7 +60,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public class AbstractBootProjectDashElementTest extends Mocks {
+public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 
 	public static class TestElement extends AbstractLaunchConfigurationsDashElement<String> {
 
@@ -88,18 +88,6 @@ public class AbstractBootProjectDashElementTest extends Mocks {
 		@Override
 		public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
 			return ImmutableSet.of();
-		}
-
-		@Override
-		public ILaunchConfiguration getPreferredConfig() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public void setPreferredConfig(ILaunchConfiguration config) {
-			// TODO Auto-generated method stub
-
 		}
 
 		@Override
