@@ -40,15 +40,6 @@ public class LocalRunTarget extends AbstractRunTarget {
 		return RunTargets.LOCAL_RUN_GOAL_STATES;
 	}
 
-	@Override
-	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		IProject p = element.getProject();
-		if (p != null) {
-			return ImmutableSet.copyOf(BootLaunchConfigurationDelegate.getLaunchConfigs(p));
-		}
-		return ImmutableSet.of();
-	}
-
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
 		if (mainType != null) {
 			return BootLaunchConfigurationDelegate.createConf(mainType);

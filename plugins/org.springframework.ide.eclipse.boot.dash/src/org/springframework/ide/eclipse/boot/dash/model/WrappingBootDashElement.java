@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -191,4 +192,10 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement, Dis
 		return child;
 	}
 
+	@Override
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+		//Default implementation for BDEs that do not have any relation to launch configs
+		//Subclass should override when elements relate to launch configs.
+		return ImmutableSet.of();
+	}
 }

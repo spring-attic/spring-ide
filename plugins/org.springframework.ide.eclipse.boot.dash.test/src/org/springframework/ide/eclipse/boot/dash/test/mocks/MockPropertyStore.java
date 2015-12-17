@@ -13,71 +13,23 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 
 /**
- * A memory-backed {@link IScopedPropertyStore} suitable for testing.
- *
  * @author Kris De Volder
  */
-public class MockPropertyStore<T> implements IScopedPropertyStore<T> {
+public class MockPropertyStore implements IPropertyStore {
 
-	private Map<Key,String> store = new HashMap<Key,String>();
+	private Map<String, String> props = new HashMap<>();
 
 	@Override
-	public String get(T element, String key) {
-		return store.get(new Key(element, key));
+	public String get(String key) {
+		return props.get(key);
 	}
 
 	@Override
-	public void put(T element, String key, String value) throws Exception {
-		store.put(new Key(element, key), value);
-	}
-
-
-	private class Key {
-		public final T element;
-		public final String key;
-		public Key(T element, String key) {
-			this.element = element;
-			this.key = key;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((element == null) ? 0 : element.hashCode());
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
-			return result;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Key other = (Key) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
-			if (element == null) {
-				if (other.element != null)
-					return false;
-			} else if (!element.equals(other.element))
-				return false;
-			if (key == null) {
-				if (other.key != null)
-					return false;
-			} else if (!key.equals(other.key))
-				return false;
-			return true;
-		}
-		private MockPropertyStore getOuterType() {
-			return MockPropertyStore.this;
-		}
-
+	public void put(String key, String value) throws Exception {
+		props.put(key, value);
 	}
 
 }

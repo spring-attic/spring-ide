@@ -93,5 +93,6 @@ public interface BootDashElement extends Nameable, Taggable {
 
 	ImmutableSet<BootDashElement> getCurrentChildren();
 	ObservableSet<BootDashElement> getChildren();
+	ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
 
 }

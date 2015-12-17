@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -65,8 +65,8 @@ public class BootDashViewModelHarness {
 
 	public static class MockContext implements BootDashModelContext {
 
-		private IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockPropertyStore<RunTargetType>();
+		private IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
+		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockScopedPropertyStore<RunTargetType>();
 		private SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
 		private File stateLocation;
 		private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);

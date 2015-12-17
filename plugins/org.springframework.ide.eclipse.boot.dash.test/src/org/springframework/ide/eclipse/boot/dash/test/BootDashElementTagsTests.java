@@ -28,8 +28,8 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.test.BootProjectDashElementTest.TestElement;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.AbstractBootProjectDashElementTest.TestElement;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 
 /**
@@ -41,12 +41,12 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 public class BootDashElementTagsTests extends Mocks {
 
 	private static TestElement createElement(String name, String[] tags) {
-		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
-		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
+//		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
+//		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
+//		IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
 		IProject project = mockProject(name, true);
-		TestElement element = spy(new TestElement(project, model, projectProperties, factory, childFactory));
+		LocalBootDashModel model = mock(LocalBootDashModel.class);
+		TestElement element = spy(new TestElement(name, project, model));
 		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
 		return element;
 	}

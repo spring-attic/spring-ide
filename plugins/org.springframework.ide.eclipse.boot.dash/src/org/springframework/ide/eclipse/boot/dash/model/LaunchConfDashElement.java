@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration, LaunchConfDashElement> {
+public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
@@ -46,7 +46,7 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 	}
 
 	@Override
-	protected ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
 		return ImmutableSet.of(delegate);
 	}
 

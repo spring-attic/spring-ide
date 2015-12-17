@@ -508,7 +508,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		BootDashElement element = selection.getSingle();
 		if (element!=null) {
 			ILaunchConfiguration defaultConfig = element.getPreferredConfig();
-			ImmutableSet<ILaunchConfiguration> allConfigs = element.getTarget().getLaunchConfigs(element);
+			ImmutableSet<ILaunchConfiguration> allConfigs = element.getLaunchConfigs();
 			if (!allConfigs.isEmpty()) {
 				MenuManager menu = new MenuManager("Default Config...", BootDashActivator.getImageDescriptor("icons/boot-icon.png"), null);
 				parent.add(menu);

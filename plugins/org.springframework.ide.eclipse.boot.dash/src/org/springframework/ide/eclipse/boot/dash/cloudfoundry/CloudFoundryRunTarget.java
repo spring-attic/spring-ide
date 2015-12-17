@@ -91,11 +91,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		return ImmutableSet.of();
-	}
-
-	@Override
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
 		return null;
 	}

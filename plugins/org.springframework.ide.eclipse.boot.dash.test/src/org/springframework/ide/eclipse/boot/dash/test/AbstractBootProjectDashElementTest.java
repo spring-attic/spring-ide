@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -37,16 +38,20 @@ import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElementFactory;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 import com.google.common.collect.ImmutableSet;
@@ -62,13 +67,15 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElementTest extends Mocks {
+public class AbstractBootProjectDashElementTest extends Mocks {
 
-	public static class TestElement extends BootProjectDashElement {
+	public static class TestElement extends AbstractLaunchConfigurationsDashElement<String> {
 
-		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
-				BootProjectDashElementFactory factory, LaunchConfDashElementFactory childFactory) {
-			super(project, context, projectProperties, factory, childFactory);
+		private IProject project;
+
+		public TestElement(String delegate, IProject project, LocalBootDashModel context) {
+			super(context, delegate);
+			this.project = project;
 		}
 
 		@Override
@@ -79,15 +86,58 @@ public class BootProjectDashElementTest extends Mocks {
 		public IType[] guessMainTypes() throws CoreException {
 			return NO_TYPES;
 		}
+
+		@Override
+		protected IPropertyStore createPropertyStore() {
+			return new MockPropertyStore();
+		}
+
+		@Override
+		public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+			return ImmutableSet.of();
+		}
+
+		@Override
+		public ILaunchConfiguration getPreferredConfig() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setPreferredConfig(ILaunchConfiguration config) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public IProject getProject() {
+			return project;
+		}
+
+		@Override
+		public String getName() {
+			return delegate;
+		}
+
+		@Override
+		protected ImmutableSet<ILaunch> getLaunches() {
+			return ImmutableSet.of();
+		}
 	}
 
 	private static final IType[] NO_TYPES = {};
 
-	public static TestElement createElement(LocalBootDashModel model, IJavaProject javaProject, RunTarget runTarget, IScopedPropertyStore<IProject> projectProperties) {
-		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
-		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
-		IProject project = javaProject.getProject();
-		TestElement element = spy(new TestElement(project, model, projectProperties, factory, childFactory));
+	public static TestElement createElement(String testElementName, IProject project, IJavaProject javaProject, RunTarget runTarget) {
+//		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
+//		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
+//		LaunchConfRunStateTracker runStateTracker = mock(LaunchConfRunStateTracker.class);
+//		when(model.getLaunchConfRunStateTracker()).thenReturn(runStateTracker);
+//		IProject project = javaProject.getProject();
+
+		LocalBootDashModel model = mock(LocalBootDashModel.class);
+		LaunchConfRunStateTracker runStateTracker = mock(LaunchConfRunStateTracker.class);
+		when(model.getLaunchConfRunStateTracker()).thenReturn(runStateTracker);
+		TestElement element = spy(new TestElement(testElementName, project,  model));
 		when(element.getTarget()).thenReturn(runTarget);
 		doReturn(javaProject).when(element).getJavaProject();
 		return element;
@@ -104,12 +154,10 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test(expected=IllegalArgumentException.class)
 	public void restartWithBadArgument() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 
 		element.restart(RunState.INACTIVE, ui);
@@ -126,12 +174,10 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartNoMainTypes() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 
 		when(element.guessMainTypes()).thenReturn(NO_TYPES);
@@ -149,12 +195,10 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartOneMainType() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 		IType type = mockType(javaProject, "demo", "FooApplication");
@@ -172,12 +216,10 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void restartTwoMainTypes() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 		IType fooType = mockType(javaProject, "demo", "FooApplication");
@@ -205,12 +247,10 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithNoExistingConfs() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 
@@ -226,16 +266,14 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithOneExistingConfs() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
 
-		when(runTarget.getLaunchConfigs(element)).thenReturn(ImmutableSet.of(conf));
+		when(element.getLaunchConfigs()).thenReturn(ImmutableSet.of(conf));
 		doReturn(RunState.INACTIVE).when(element).getRunState();
 
 		element.openConfig(ui);
@@ -248,17 +286,15 @@ public class BootProjectDashElementTest extends Mocks {
 	@Test
 	public void openConfigWithTwoExistingConfs() throws Exception {
 		String projectName = "fooProject";
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
 		RunTarget runTarget = mock(RunTarget.class);
-		TestElement element = createElement(model, javaProject, runTarget, projectProperties);
+		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf1 = mock(ILaunchConfiguration.class);
 		ILaunchConfiguration conf2 = mock(ILaunchConfiguration.class);
 
-		when(runTarget.getLaunchConfigs(element)).thenReturn(ImmutableSet.of(conf1, conf2));
+		when(element.getLaunchConfigs()).thenReturn(ImmutableSet.of(conf1, conf2));
 		doReturn(RunState.INACTIVE).when(element).getRunState();
 		when(ui.chooseConfigurationDialog(anyString(), anyString(), listThat(hasItems(conf1, conf2))))
 			.thenReturn(conf2);

@@ -74,7 +74,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extends AbstractLaunchConfigurationsDashElement<T, ThisType>> extends WrappingBootDashElement<T> {
+public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
@@ -107,7 +107,9 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 	}
 
 	protected abstract IPropertyStore createPropertyStore();
-	protected abstract ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
+
+	@Override
+	public abstract ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
 
 	@Override
 	public abstract ILaunchConfiguration getPreferredConfig();
@@ -255,7 +257,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 
 	private void start(final String runMode, UserInteractions ui) {
 		try {
-			ImmutableSet<ILaunchConfiguration> configs = getTarget().getLaunchConfigs(this);
+			ImmutableSet<ILaunchConfiguration> configs = getLaunchConfigs();
 			ILaunchConfiguration conf = null;
 			if (configs.isEmpty()) {
 				IType mainType = chooseMainType(ui);
@@ -401,7 +403,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 		final LaunchConfRunStateTracker tracker = runStateTracker();
 		final LiveExpression<RunState> exp = new LiveExpression<RunState>() {
 			protected RunState compute() {
-				AbstractLaunchConfigurationsDashElement<T, ThisType> it = AbstractLaunchConfigurationsDashElement.this;
+				AbstractLaunchConfigurationsDashElement<T> it = AbstractLaunchConfigurationsDashElement.this;
 				debug("Computing runstate for "+it);
 				LaunchConfRunStateTracker tracker = runStateTracker();
 				RunState state = RunState.INACTIVE;

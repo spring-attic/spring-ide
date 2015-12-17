@@ -42,12 +42,6 @@ public interface RunTarget extends IdAble, Nameable {
 	public abstract EnumSet<RunState> supportedGoalStates();
 
 	/**
-	 * Retrieve all existing launch configurations that are applicable for
-	 * launching a given BootDashElement on this RunTarget.
-	 */
-	public abstract ImmutableSet<ILaunchConfiguration> getLaunchConfigs(BootDashElement element);
-
-	/**
 	 * Create a launch config for a given dash element and initialize it with
 	 * some suitable defaults.
 	 *

@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 	BootJarPackagingTest.class,
 	BootDashModelStateSaverTest.class,
 	BootDashModelTest.class,
-	BootProjectDashElementTest.class,
+	AbstractBootProjectDashElementTest.class,
 	BootDashElementTagsTests.class,
 	JLRMethodParserTest.class,
 	ActuatorClientTest.class,

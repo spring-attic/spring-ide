@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -30,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject, BootProjectDashElement> {
+public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
 
 	private IScopedPropertyStore<IProject> projectProperties;
 
@@ -61,8 +62,8 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	}
 
 	@Override
-	protected ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
-		return getTarget().getLaunchConfigs(this);
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+		return ImmutableSet.copyOf(BootLaunchConfigurationDelegate.getLaunchConfigs(delegate));
 	}
 
 	@Override

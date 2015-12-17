@@ -17,9 +17,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
@@ -64,7 +66,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBox
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -75,8 +76,6 @@ import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -462,7 +461,7 @@ public class BootDashModelTest {
 					assertEquals(8080, childElement.getLivePort());
 					return true;
 				}
-			};
+			}.waitFor(4000);
 
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.STARTING);
@@ -473,7 +472,7 @@ public class BootDashModelTest {
 					assertEquals(6789, childElement.getLivePort());
 					return true;
 				}
-			};
+			}.waitFor(4000);;
 
 		} finally {
 			element.stopAsync(ui);
