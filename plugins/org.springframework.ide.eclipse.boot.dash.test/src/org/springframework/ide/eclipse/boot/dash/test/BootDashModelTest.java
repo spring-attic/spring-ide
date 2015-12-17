@@ -290,11 +290,6 @@ public class BootDashModelTest {
 
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
-		model.addElementStateListener(new ElementStateListener() {
-			public void stateChanged(BootDashElement e) {
-				new Error("changed "+e).printStackTrace();
-			}
-		});
 
 		element.stopAsync(ui);
 		waitForState(element, RunState.INACTIVE);
