@@ -64,6 +64,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBox
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -434,7 +435,7 @@ public class BootDashModelTest {
 		String projectName = "some-project";
 		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
 
-		BootProjectDashElement element = getElement(projectName);
+		final BootProjectDashElement element = getElement(projectName);
 		assertEquals(RunState.INACTIVE, element.getRunState());
 		assertEquals(-1, element.getLivePort()); // live port is 'unknown' if app is not running
 		try {
@@ -453,17 +454,26 @@ public class BootDashModelTest {
 					new PropVal("server.port", "6789", true)
 			));
 			wc.doSave();
+			final BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
 
-			BootDashElement childElement = getSingleValue(element.getAllChildren().getValue());
-
-			assertEquals(8080, element.getLivePort()); // port still the same until we restart
-			assertEquals(8080, childElement.getLivePort());
+			new ACondition() {
+				public boolean test() throws Exception {
+					assertEquals(8080, element.getLivePort()); // port still the same until we restart
+					assertEquals(8080, childElement.getLivePort());
+					return true;
+				}
+			};
 
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
-			assertEquals(6789, element.getLivePort());
-			assertEquals(6789, childElement.getLivePort());
+			new ACondition() {
+				public boolean test() throws Exception {
+					assertEquals(6789, element.getLivePort());
+					assertEquals(6789, childElement.getLivePort());
+					return true;
+				}
+			};
 
 		} finally {
 			element.stopAsync(ui);

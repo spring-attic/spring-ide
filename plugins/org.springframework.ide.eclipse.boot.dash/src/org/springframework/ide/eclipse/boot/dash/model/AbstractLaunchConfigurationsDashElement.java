@@ -401,15 +401,16 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 		final LaunchConfRunStateTracker tracker = runStateTracker();
 		final LiveExpression<RunState> exp = new LiveExpression<RunState>() {
 			protected RunState compute() {
-				//debug("Computing runstate for "+this);
+				AbstractLaunchConfigurationsDashElement<T, ThisType> it = AbstractLaunchConfigurationsDashElement.this;
+				debug("Computing runstate for "+it);
 				LaunchConfRunStateTracker tracker = runStateTracker();
 				RunState state = RunState.INACTIVE;
 				for (ILaunchConfiguration conf : getLaunchConfigs()) {
 					RunState confState = tracker.getState(conf);
-					//debug("state for conf "+conf+" = "+confState);
+					debug("state for conf "+conf+" = "+confState);
 					state = state.merge(confState);
 				}
-				//debug("runstate for "+this+" => "+state);
+				debug("runstate for "+it+" => "+state);
 				return state;
 			}
 

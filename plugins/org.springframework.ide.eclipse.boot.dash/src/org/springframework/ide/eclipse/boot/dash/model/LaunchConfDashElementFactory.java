@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Map;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -26,6 +27,13 @@ import com.google.common.collect.MapMaker;
  * @author Kris De Volder
  */
 public class LaunchConfDashElementFactory implements Disposable {
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 	private LocalBootDashModel model;
 
@@ -61,6 +69,7 @@ public class LaunchConfDashElementFactory implements Disposable {
 	private synchronized void deleted(ILaunchConfiguration configuration) {
 		LaunchConfDashElement element = this.cache.remove(configuration);
 		if (element!=null) {
+			debug("deleted from factory: "+element);
 			element.dispose();
 		}
 	}
@@ -73,6 +82,7 @@ public class LaunchConfDashElementFactory implements Disposable {
 					LaunchConfDashElement el = cache.get(c);
 					if (el==null) {
 						cache.put(c, el = new LaunchConfDashElement(model, c));
+						debug("created: "+el);
 					}
 					return el;
 				}
