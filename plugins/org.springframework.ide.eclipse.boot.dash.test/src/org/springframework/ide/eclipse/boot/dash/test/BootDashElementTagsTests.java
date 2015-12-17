@@ -31,6 +31,8 @@ import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.test.AbstractBootProjectDashElementTest.TestElement;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
+import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker;
 
 /**
  * Light-weight mockito-based tests for tags.
@@ -46,6 +48,8 @@ public class BootDashElementTagsTests extends Mocks {
 //		IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
 		IProject project = mockProject(name, true);
 		LocalBootDashModel model = mock(LocalBootDashModel.class);
+		LaunchConfRunStateTracker tracker = mock(LaunchConfRunStateTracker.class);
+		when(model.getLaunchConfRunStateTracker()).thenReturn(tracker);
 		TestElement element = spy(new TestElement(name, project, model));
 		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
 		return element;
