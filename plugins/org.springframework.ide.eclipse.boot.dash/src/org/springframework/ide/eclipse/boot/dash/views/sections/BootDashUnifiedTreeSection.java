@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;

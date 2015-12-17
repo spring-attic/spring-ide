@@ -37,22 +37,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
-import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 import com.google.common.collect.ImmutableSet;
 

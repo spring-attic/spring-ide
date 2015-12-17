@@ -439,7 +439,12 @@ public class BootDashModelTest {
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
 
-			assertEquals(8080, element.getLivePort());
+			new ACondition(4000) {
+				public boolean test() throws Exception {
+					assertEquals(8080, element.getLivePort());
+					return true;
+				}
+			};
 
 			//Change port in launch conf and restart
 			ILaunchConfiguration conf = element.getActiveConfig();
@@ -450,24 +455,24 @@ public class BootDashModelTest {
 			wc.doSave();
 			final BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
 
-			new ACondition() {
+			new ACondition(4000) {
 				public boolean test() throws Exception {
 					assertEquals(8080, element.getLivePort()); // port still the same until we restart
 					assertEquals(8080, childElement.getLivePort());
 					return true;
 				}
-			}.waitFor(4000);
+			};
 
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
-			new ACondition() {
+			new ACondition(4000) {
 				public boolean test() throws Exception {
 					assertEquals(6789, element.getLivePort());
 					assertEquals(6789, childElement.getLivePort());
 					return true;
 				}
-			}.waitFor(4000);;
+			};
 
 		} finally {
 			element.stopAsync(ui);

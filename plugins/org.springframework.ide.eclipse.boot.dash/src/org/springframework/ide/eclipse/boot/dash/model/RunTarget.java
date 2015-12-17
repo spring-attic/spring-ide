@@ -18,8 +18,6 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
  *
