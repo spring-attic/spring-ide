@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -35,12 +34,12 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 
 	private IScopedPropertyStore<IProject> projectProperties;
 
-	private BootDashLaunchConfElementFactory childFactory;
+	private LaunchConfDashElementFactory childFactory;
 	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
-			BootProjectDashElementFactory factory, BootDashLaunchConfElementFactory childFactory) {
+			BootProjectDashElementFactory factory, LaunchConfDashElementFactory childFactory) {
 		super(context, project);
 		this.projectProperties = projectProperties;
 		this.childFactory = childFactory;
@@ -54,11 +53,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public String getName() {
 		return delegate.getName();
-	}
-
-	@Override
-	protected FactoryWithParam<IProject, BootProjectDashElement> getFactory() {
-		return getBootDashModel().getProjectElementFactory();
 	}
 
 	@Override

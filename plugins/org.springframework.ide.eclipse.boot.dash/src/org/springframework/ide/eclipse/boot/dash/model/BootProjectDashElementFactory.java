@@ -15,7 +15,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.MapMaker;
@@ -26,15 +25,15 @@ import com.google.common.collect.MapMaker;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElementFactory implements FactoryWithParam<IProject, BootProjectDashElement>, Disposable {
+public class BootProjectDashElementFactory implements Disposable {
 
-	private BootDashLaunchConfElementFactory launchConfElementFactory;
+	private LaunchConfDashElementFactory launchConfElementFactory;
 	private LocalBootDashModel model;
 	private IScopedPropertyStore<IProject> projectProperties;
 
 	private Map<IProject, BootProjectDashElement> cache;
 
-	public BootProjectDashElementFactory(LocalBootDashModel model, IScopedPropertyStore<IProject> projectProperties, BootDashLaunchConfElementFactory launchConfElementFactory) {
+	public BootProjectDashElementFactory(LocalBootDashModel model, IScopedPropertyStore<IProject> projectProperties, LaunchConfDashElementFactory launchConfElementFactory) {
 		this.cache = new MapMaker()
 				.concurrencyLevel(1) //single thread only so don't waste space for 'connurrencyLevel' support
 				.makeMap();
@@ -61,14 +60,6 @@ public class BootProjectDashElementFactory implements FactoryWithParam<IProject,
 	/**
 	 * Clients should call this when elements are no longer relevant
 	 */
-	public void disposed(BootProjectDashElement e) {
-		disposed(e.getProject());
-	}
-
-	/**
-	 * Clients should call this when elements are no longer relevant
-	 */
-	@Override
 	public synchronized void disposed(IProject p) {
 		Map<IProject, BootProjectDashElement> c = cache;
 		if (c!=null) {

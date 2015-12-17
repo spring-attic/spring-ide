@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashLaunchConfElementFactory;
+import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -67,7 +67,7 @@ public class BootProjectDashElementTest extends Mocks {
 	public static class TestElement extends BootProjectDashElement {
 
 		public TestElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
-				BootProjectDashElementFactory factory, BootDashLaunchConfElementFactory childFactory) {
+				BootProjectDashElementFactory factory, LaunchConfDashElementFactory childFactory) {
 			super(project, context, projectProperties, factory, childFactory);
 		}
 
@@ -85,7 +85,7 @@ public class BootProjectDashElementTest extends Mocks {
 
 	public static TestElement createElement(LocalBootDashModel model, IJavaProject javaProject, RunTarget runTarget, IScopedPropertyStore<IProject> projectProperties) {
 		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
-		BootDashLaunchConfElementFactory childFactory = mock(BootDashLaunchConfElementFactory.class);
+		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
 		IProject project = javaProject.getProject();
 		TestElement element = spy(new TestElement(project, model, projectProperties, factory, childFactory));
 		when(element.getTarget()).thenReturn(runTarget);

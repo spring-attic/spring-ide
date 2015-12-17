@@ -17,7 +17,6 @@ import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -26,7 +25,7 @@ import com.google.common.collect.MapMaker;
 /**
  * @author Kris De Volder
  */
-public class BootDashLaunchConfElementFactory implements Disposable, FactoryWithParam<ILaunchConfiguration, LaunchConfDashElement> {
+public class LaunchConfDashElementFactory implements Disposable {
 
 	private LocalBootDashModel model;
 
@@ -36,7 +35,7 @@ public class BootDashLaunchConfElementFactory implements Disposable, FactoryWith
 
 	private ILaunchManager launchManager;
 
-	public BootDashLaunchConfElementFactory(LocalBootDashModel bootDashModel, ILaunchManager lm) {
+	public LaunchConfDashElementFactory(LocalBootDashModel bootDashModel, ILaunchManager lm) {
 		this.cache = new MapMaker()
 				.concurrencyLevel(1) //single thread only so don't waste space for 'connurrencyLevel' support
 				.makeMap();
@@ -46,7 +45,7 @@ public class BootDashLaunchConfElementFactory implements Disposable, FactoryWith
 
 			@Override
 			public void launchConfigurationRemoved(ILaunchConfiguration configuration) {
-				disposed(configuration);
+				deleted(configuration);
 			}
 
 			@Override
@@ -57,6 +56,13 @@ public class BootDashLaunchConfElementFactory implements Disposable, FactoryWith
 			public void launchConfigurationAdded(ILaunchConfiguration configuration) {
 			}
 		});
+	}
+
+	private synchronized void deleted(ILaunchConfiguration configuration) {
+		LaunchConfDashElement element = this.cache.remove(configuration);
+		if (element!=null) {
+			element.dispose();
+		}
 	}
 
 	public synchronized LaunchConfDashElement createOrGet(ILaunchConfiguration c) {
@@ -75,19 +81,6 @@ public class BootDashLaunchConfElementFactory implements Disposable, FactoryWith
 			BootDashActivator.log(e);
 		}
 		return null;
-	}
-
-	/**
-	 * Should be called by client code when conf is no longer interesting. This is to
-	 * avoid the cache this factory maintains to grow unboundedly as launch confs get
-	 * created / deleted.
-	 */
-	public synchronized void disposed(ILaunchConfiguration conf) {
-		Map<ILaunchConfiguration, LaunchConfDashElement> c = cache;
-		if (c!=null) {
-			c.remove(conf);
-		}
-
 	}
 
 	@Override

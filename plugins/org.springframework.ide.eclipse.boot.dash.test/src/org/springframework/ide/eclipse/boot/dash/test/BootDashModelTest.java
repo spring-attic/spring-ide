@@ -74,6 +74,8 @@ import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -277,17 +279,22 @@ public class BootDashModelTest {
 
 		ElementStateListener listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
-		System.out.println("Element state listener ADDED");
+		//System.out.println("Element state listener ADDED");
 		BootDashElement element = getElement(projectName);
 		element.restart(runState, null);
 		waitForState(element, runState);
 
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
-		System.out.println("Element state listener REMOVED");
+		//System.out.println("Element state listener REMOVED");
 
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
+		model.addElementStateListener(new ElementStateListener() {
+			public void stateChanged(BootDashElement e) {
+				new Error("changed "+e).printStackTrace();
+			}
+		});
 
 		element.stopAsync(ui);
 		waitForState(element, RunState.INACTIVE);

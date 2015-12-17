@@ -12,12 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
@@ -28,15 +27,17 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration, LaunchConfDashElement> implements ElementStateListener {
+public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration, LaunchConfDashElement> {
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 	public LaunchConfDashElement(LocalBootDashModel bootDashModel, ILaunchConfiguration delegate) {
 		super(bootDashModel, delegate);
-	}
-
-	@Override
-	protected FactoryWithParam<ILaunchConfiguration, LaunchConfDashElement> getFactory() {
-		return getBootDashModel().getLaunchConfElementFactory();
 	}
 
 	@Override
@@ -75,6 +76,12 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 	@Override
 	protected ImmutableSet<ILaunch> getLaunches() {
 		return ImmutableSet.copyOf(LaunchUtils.getLaunches(delegate));
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		debug("Disposing: "+this);
 	}
 
 }

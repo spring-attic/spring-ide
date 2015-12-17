@@ -41,15 +41,14 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
-import org.springframework.ide.eclipse.boot.dash.util.FactoryWithParam;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
+import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
@@ -58,8 +57,10 @@ import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.async.ResolvableFuture;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -73,10 +74,10 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extends AbstractLaunchConfigurationsDashElement<T, ThisType>> extends WrappingBootDashElement<T> implements ElementStateListener {
+public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extends AbstractLaunchConfigurationsDashElement<T, ThisType>> extends WrappingBootDashElement<T> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-	public static void debug(String string) {
+	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
 		}
@@ -85,25 +86,26 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 	private static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
 	private LiveExpression<RunState> runState;
-	private LiveExpression<Integer> livePort;
+	public LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
-	private FactoryWithParam<T, ThisType> factory;
 	private PropertyStoreApi persistentProperties;
 
+	@SuppressWarnings("unchecked")
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
 		this.runState = createRunStateExp();
 		this.livePort = createLivePortExp(runState, "local.server.port");
-		livePort.addListener(new ValueListener<Integer>() {
-			public void gotValue(LiveExpression<Integer> exp, Integer value) {
+		@SuppressWarnings("rawtypes")
+		ValueListener elementNotifier = new ValueListener() {
+			public void gotValue(LiveExpression exp, Object value) {
 				getBootDashModel().notifyElementChanged(AbstractLaunchConfigurationsDashElement.this);
 			}
-		});
+		};
 		this.actuatorPort = createLivePortExp(runState, "local.management.port");
-		this.factory = getFactory();
+		livePort.addListener(elementNotifier);
+		runState.addListener(elementNotifier);
 	}
 
-	protected abstract FactoryWithParam<T, ThisType> getFactory();
 	protected abstract IPropertyStore createPropertyStore();
 	protected abstract ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
 
@@ -121,21 +123,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 
 	@Override
 	public RunState getRunState() {
-		debug("Computing runstate for "+this);
-		LaunchConfRunStateTracker tracker = runStateTracker();
-		//Careful: very early on tracker may not exist yet
-		if (tracker!=null) {
-			RunState state = RunState.INACTIVE;
-			for (ILaunchConfiguration conf : getLaunchConfigs()) {
-				RunState confState = tracker.getState(conf);
-				debug("state for conf "+conf+" = "+confState);
-				state = state.merge(confState);
-			}
-			debug("runstate for "+this+" => "+state);
-			return state;
-		}
-		debug("runstate for "+this+" => UNKNOWN");
-		return RunState.UNKNOWN;
+		return runState.getValue();
 	}
 
 	@Override
@@ -410,12 +398,42 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 	}
 
 	private LiveExpression<RunState> createRunStateExp() {
-		getBootDashModel().addElementStateListener(this);
-		LiveExpression<RunState> exp = new LiveExpression<RunState>() {
+		final LaunchConfRunStateTracker tracker = runStateTracker();
+		final LiveExpression<RunState> exp = new LiveExpression<RunState>() {
 			protected RunState compute() {
-				return getRunState();
+				//debug("Computing runstate for "+this);
+				LaunchConfRunStateTracker tracker = runStateTracker();
+				RunState state = RunState.INACTIVE;
+				for (ILaunchConfiguration conf : getLaunchConfigs()) {
+					RunState confState = tracker.getState(conf);
+					//debug("state for conf "+conf+" = "+confState);
+					state = state.merge(confState);
+				}
+				//debug("runstate for "+this+" => "+state);
+				return state;
+			}
+
+			@Override
+			public void dispose() {
+				super.dispose();
 			}
 		};
+		final RunStateListener<ILaunchConfiguration> runStateListener = new RunStateListener<ILaunchConfiguration>() {
+			@Override
+			public void stateChanged(ILaunchConfiguration changedConf) {
+				if (getLaunchConfigs().contains(changedConf)) {
+					exp.refresh();
+				}
+			}
+		};
+		tracker.addListener(runStateListener);
+		exp.onDispose(new DisposeListener() {
+			public void disposed(Disposable disposed) {
+				tracker.removeListener(runStateListener);
+			}
+		});
+		addDisposableChild(exp);
+		exp.refresh();
 		return exp;
 	}
 
@@ -592,20 +610,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T, ThisType extend
 	}
 
 	@Override
-	public void stateChanged(BootDashElement e) {
-		if (this.equals(e)) {
-			debug("Changed: "+e);
-			if (runState!=null) {
-				debug("Runstate refresh: "+ e);
-				runState.refresh();
-			}
-		}
-	}
-
-	@Override
 	public void dispose() {
-		getBootDashModel().removeElementStateListener(this);
-		factory.disposed(this.delegate);
 		super.dispose();
 	}
 

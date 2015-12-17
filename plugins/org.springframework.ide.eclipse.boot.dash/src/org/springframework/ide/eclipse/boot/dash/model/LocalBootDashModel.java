@@ -49,14 +49,12 @@ public class LocalBootDashModel extends BootDashModel {
 
 	private IWorkspace workspace;
 	private BootProjectDashElementFactory projectElementFactory;
-	private BootDashLaunchConfElementFactory launchConfElementFactory;
+	private LaunchConfDashElementFactory launchConfElementFactory;
 
 	ProjectChangeListenerManager openCloseListenerManager;
 	ClasspathListenerManager classpathListenerManager;
 
-	ProjectRunStateTracker projectRunStateTracker; //TODO: we should get rid of this and make projectRunstate an aggregator
-													// based on the nested launch confs.
-	LaunchConfRunStateTracker launchConfRunStateTracker;
+	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
 
 	LiveSetVariable<BootDashElement> elements; //lazy created
 	private BootDashModelConsoleManager consoleManager;
@@ -84,7 +82,7 @@ public class LocalBootDashModel extends BootDashModel {
 	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
 		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
-		this.launchConfElementFactory = new BootDashLaunchConfElementFactory(this, context.getLaunchManager());
+		this.launchConfElementFactory = new LaunchConfDashElementFactory(this, context.getLaunchManager());
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
 		try {
@@ -103,30 +101,12 @@ public class LocalBootDashModel extends BootDashModel {
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
-			this.projectRunStateTracker = new ProjectRunStateTracker();
-			projectRunStateTracker.setListener(new RunStateListener<IProject>() {
-				public void stateChanged(IProject p) {
-					BootDashElement e = projectElementFactory.createOrGet(p);
-					if (e!=null) {
-						notifyElementChanged(e);
-					}
-				}
-			});
 			projectExclusion.addListener(projectExclusionListener = new ValueListener<Pattern>() {
 				public void gotValue(LiveExpression<Pattern> exp, Pattern value) {
 					updateElementsFromWorkspace();
 				}
 			});
 
-			this.launchConfRunStateTracker = new LaunchConfRunStateTracker();
-			launchConfRunStateTracker.setListener(new RunStateListener<ILaunchConfiguration>() {
-				public void stateChanged(ILaunchConfiguration owner) {
-					LaunchConfDashElement e = launchConfElementFactory.createOrGet(owner);
-					if (e!=null) {
-						notifyElementChanged(e);
-					}
-				}
-			});
 
 			updateElementsFromWorkspace();
 		}
@@ -140,14 +120,15 @@ public class LocalBootDashModel extends BootDashModel {
 				newElements.add(element);
 			}
 		}
+		elements.replaceAll(newElements);
 		for (BootDashElement oldElement : elements.getValues()) {
 			if (!newElements.contains(oldElement)) {
 				if (oldElement instanceof Disposable) {
 					((Disposable) oldElement).dispose();
+					projectElementFactory.disposed(oldElement.getProject());
 				}
 			}
 		}
-		elements.replaceAll(newElements);
 	}
 
 	public synchronized ObservableSet<BootDashElement> getElements() {
@@ -166,7 +147,6 @@ public class LocalBootDashModel extends BootDashModel {
 			projectElementFactory.dispose();
 			launchConfElementFactory.dispose();
 			classpathListenerManager.dispose();
-			projectRunStateTracker.dispose();
 			launchConfRunStateTracker.dispose();
 			devtoolsPortRefresher.dispose();
 			if (projectExclusionListener!=null) {
@@ -191,10 +171,6 @@ public class LocalBootDashModel extends BootDashModel {
 
 	////////////// listener cruft ///////////////////////////
 
-	public ProjectRunStateTracker getProjectRunStateTracker() {
-		return projectRunStateTracker;
-	}
-
 	public ILaunchConfiguration getPreferredConfig(WrappingBootDashElement<IProject> e) {
 		return modelState.getPreferredConfig(e);
 	}
@@ -213,7 +189,7 @@ public class LocalBootDashModel extends BootDashModel {
 		return projectElementFactory;
 	}
 
-	public BootDashLaunchConfElementFactory getLaunchConfElementFactory() {
+	public LaunchConfDashElementFactory getLaunchConfElementFactory() {
 		return launchConfElementFactory;
 	}
 }

@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -62,11 +62,12 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 		return getState(activeStates, owner);
 	}
 
-	public void setListener(RunStateListener<T> listener) {
-		if (this.listener!=null) {
-			throw new IllegalStateException("Listener can only be set once");
-		}
-		this.listener = listener;
+	public void addListener(RunStateListener<T> listener) {
+		this.listeners.add(listener);
+	}
+
+	public void removeListener(RunStateListener<T> listener) {
+		this.listeners.remove(listener);
 	}
 
 	///////////////////////// stuff below is implementation cruft ////////////////////
@@ -82,7 +83,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private Map<T, RunState> activeStates = null;
 	private Map<ILaunch, ReadyStateMonitor> readyStateTrackers = null;
 	private ProcessTracker processTracker = null;
-	private RunStateListener<T> listener; // listeners that are interested in us (i.e. clients)
+	private ListenerList listeners = new ListenerList(); // listeners that are interested in us (i.e. clients)
 
 	private static <T> RunState getState(Map<T, RunState> states, T p) {
 		if (states!=null) {
@@ -205,8 +206,9 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 		//Note that updateOwnerStates is synchronized, but this method is not.
 		// Important not to keep locks while firing events.
 		Set<T> affected = updateOwnerStates();
-		RunStateListener<T> listener = this.listener;
-		if (listener!=null) {
+		for (Object _l : listeners.getListeners()) {
+			@SuppressWarnings("unchecked")
+			RunStateListener<T> listener = (RunStateListener<T>) _l;
 			for (T p : affected) {
 				listener.stateChanged(p);
 			}

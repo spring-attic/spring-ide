@@ -184,7 +184,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement, Dis
 	 */
 	public <C extends Disposable> C addDisposableChild(final C child) {
 		onDispose(new DisposeListener() {
-			public <D extends Disposable> void disposed(D disposed) {
+			public void disposed(Disposable disposed) {
 				child.dispose();
 			}
 		});
