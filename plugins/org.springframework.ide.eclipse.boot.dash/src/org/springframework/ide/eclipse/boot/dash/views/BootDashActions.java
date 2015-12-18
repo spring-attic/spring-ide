@@ -19,10 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -196,7 +193,7 @@ public class BootDashActions {
 		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
 		for (RunTargetType tt : targetTypes) {
 			if (tt.canInstantiate()) {
-				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), elementsSelection, ui));
+				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), ui));
 			}
 		}
 		return actions.toArray(new AddRunTargetAction[actions.size()]);

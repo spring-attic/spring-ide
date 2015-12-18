@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
-import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -37,9 +36,14 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		this.selection = selection;
 		selection.getElements().addListener(selectionListener = new ValueListener<ImmutableSet<BootDashElement>>() {
 			public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> selecteds) {
-				updateEnablement();
+				update();
 			}
 		});
+	}
+
+	public void update() {
+		updateEnablement();
+		updateVisibility();
 	}
 
 	/**
@@ -49,6 +53,10 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 	public void updateEnablement() {
 		Collection<BootDashElement> selecteds = getSelectedElements();
 		this.setEnabled(selecteds.size()==1);
+	}
+
+	public void updateVisibility() {
+		this.setVisible(getSelectedElements().size() > 0);
 	}
 
 	protected Collection<BootDashElement> getSelectedElements() {
