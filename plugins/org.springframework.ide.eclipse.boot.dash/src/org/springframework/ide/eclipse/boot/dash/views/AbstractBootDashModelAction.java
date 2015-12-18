@@ -31,10 +31,14 @@ public abstract class AbstractBootDashModelAction extends AbstractBootDashAction
 		this.sectionSelection = section;
 		this.sectionSelection.addListener(sectionListener = new ValueListener<BootDashModel>() {
 			public void gotValue(LiveExpression<BootDashModel> exp, BootDashModel value) {
-				updateVisibility();
-				updateEnablement();
+				update();
 			}
 		});
+	}
+
+	public void update() {
+		updateVisibility();
+		updateEnablement();
 	}
 
 	public void updateEnablement() {

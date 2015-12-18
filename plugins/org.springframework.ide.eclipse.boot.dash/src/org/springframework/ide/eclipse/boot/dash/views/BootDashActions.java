@@ -59,6 +59,7 @@ public class BootDashActions {
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
+	private ToggleBootDashModelConnection toggleTargetConnectionAction;
 
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -167,6 +168,7 @@ public class BootDashActions {
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
 			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
+			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
@@ -290,6 +292,10 @@ public class BootDashActions {
 
 	public IAction getOpenCloudAdminConsoleAction() {
 		return openCloudAdminConsoleAction;
+	}
+
+	public IAction getToggleTargetConnectionAction() {
+		return toggleTargetConnectionAction;
 	}
 
 	/**

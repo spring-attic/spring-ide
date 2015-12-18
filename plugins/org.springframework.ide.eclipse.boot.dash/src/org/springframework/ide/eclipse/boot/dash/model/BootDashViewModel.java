@@ -124,6 +124,10 @@ public class BootDashViewModel implements Disposable {
 		manager.secureStorage(target.getTargetProperties());
 	}
 
+	public void updateTargetPropertiesInStore() {
+		manager.store(getRunTargets().getValue());
+	}
+
 	public ToggleFiltersModel getToggleFilters() {
 		return toggleFiltersModel;
 	}

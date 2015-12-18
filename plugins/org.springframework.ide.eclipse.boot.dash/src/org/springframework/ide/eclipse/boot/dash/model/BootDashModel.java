@@ -61,11 +61,11 @@ public abstract class BootDashModel {
 	 * Returns the state of the model
 	 * @return
 	 */
-	public RefreshState getState() {
+	synchronized public RefreshState getState() {
 		return state.getValue();
 	}
 
-	public final void setState(RefreshState newState) {
+	synchronized public final void setState(RefreshState newState) {
 		state.setValue(newState);
 	}
 

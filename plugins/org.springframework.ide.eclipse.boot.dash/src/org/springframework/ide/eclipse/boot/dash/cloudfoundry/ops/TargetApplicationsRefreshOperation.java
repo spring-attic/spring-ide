@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
  *
  * @see AppInstancesRefreshOperation
  */
-public final class TargetApplicationsRefreshOperation extends CloudOperation {
+public class TargetApplicationsRefreshOperation extends CloudOperation {
 
 	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName(), model);

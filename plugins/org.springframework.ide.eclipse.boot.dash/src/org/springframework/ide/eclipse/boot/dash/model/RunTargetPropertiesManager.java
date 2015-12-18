@@ -75,6 +75,10 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 
 	@Override
 	public synchronized void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+		store(value);
+	}
+
+	public synchronized void store(Set<RunTarget> targets) {
 		Map<RunTargetType, List<RunTargetWithProperties>> propertiesToPersist = new HashMap<RunTargetType, List<RunTargetWithProperties>>();
 
 		// Only persist run target properties that can be instantiated
@@ -86,9 +90,9 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 
 		// Update the map of properties to persist based on the actual existing
 		// set of runtargets
-		if (value != null) {
+		if (targets != null) {
 
-			for (RunTarget target : value) {
+			for (RunTarget target : targets) {
 
 				if (target instanceof RunTargetWithProperties) {
 					RunTargetWithProperties targetsWithProps = (RunTargetWithProperties) target;

@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.http.auth.InvalidCredentialsException;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
@@ -21,7 +22,6 @@ import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
 public class CloudFoundryClientFactory {
@@ -91,9 +91,9 @@ public class CloudFoundryClientFactory {
 		return spaces;
 	}
 
-	public static void checkPassword(String password, String id) throws Exception {
+	public static void checkPassword(String password, String id) throws InvalidCredentialsException {
 		if (password == null) {
-			throw BootDashActivator.asCoreException("No password stored or set for: " + id
+			throw new InvalidCredentialsException("No password stored or set for: " + id
 					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
 		}
 	}
