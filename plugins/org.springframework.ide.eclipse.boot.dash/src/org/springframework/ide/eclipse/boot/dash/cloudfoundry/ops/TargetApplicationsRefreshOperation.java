@@ -48,7 +48,7 @@ public class TargetApplicationsRefreshOperation extends CloudOperation {
 
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		model.setState(RefreshState.LOADING);
+		model.setState(RefreshState.loading("Fetching..."));
 		try {
 
 			// 1. Fetch basic list of applications. Should be the "faster" of

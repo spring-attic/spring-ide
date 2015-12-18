@@ -12,103 +12,68 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
+import com.google.common.base.Objects;
+
 /**
  * Represents the different states a 'refreshable' element may be in.
  *
  * @author Alex Boyko
  * @author Kris De Volder
  */
-public abstract class RefreshState {
-	public static final RefreshState READY = new SimpleState("READY");
-	public static final RefreshState LOADING = new SimpleState("LOADING");
+public class RefreshState {
+	public static final RefreshState READY = new RefreshState("READY");
+	public static final RefreshState LOADING = new RefreshState("LOADING");
+	public static final RefreshState ERROR = new RefreshState("ERROR");
+
 	public static RefreshState error(String msg) {
-		return new ErrorState(msg);
+		return new RefreshState(ERROR.id, msg);
 	}
+
 	public static RefreshState error(Exception e) {
 		return error(ExceptionUtil.getMessage(e));
 	}
 
-	public abstract boolean isError();
-	public abstract String getErrorMessage();
-
-	////////////////////////// implementation //////////////////////////////////////
-
-	private static class SimpleState extends RefreshState {
-
-		private String id;
-
-		public SimpleState(String id) {
-			this.id = id;
-		}
-
-		@Override
-		public boolean isError() {
-			return false;
-		}
-
-		@Override
-		public String getErrorMessage() {
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return id;
-		}
+	public static RefreshState loading(String message) {
+		return new RefreshState(LOADING.id, message);
 	}
 
-	private static class ErrorState extends RefreshState {
+	private String id;
+	private String message;
 
-		private final String msg;
+	public RefreshState(String id) {
+		this.id = id;
+	}
 
-		public ErrorState(String msg) {
-			this.msg = msg;
+	public RefreshState(String id, String message) {
+		this(id);
+		this.message = message;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	@Override
+	public String toString() {
+		return id + (message == null || message.isEmpty() ? "" : message);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id, message);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj.getClass() == getClass()) {
+			RefreshState other = (RefreshState) obj;
+			return Objects.equal(id, other.id) && Objects.equal(message, other.message);
 		}
-
-		@Override
-		public String toString() {
-			if (msg!=null) {
-				return "ERROR: "+msg;
-			} else {
-				return "ERROR";
-			}
-		}
-
-		@Override
-		public boolean isError() {
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((msg == null) ? 0 : msg.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ErrorState other = (ErrorState) obj;
-			if (msg == null) {
-				if (other.msg != null)
-					return false;
-			} else if (!msg.equals(other.msg))
-				return false;
-			return true;
-		}
-
-		@Override
-		public String getErrorMessage() {
-			return msg;
-		}
-
+		return false;
 	}
 
 }

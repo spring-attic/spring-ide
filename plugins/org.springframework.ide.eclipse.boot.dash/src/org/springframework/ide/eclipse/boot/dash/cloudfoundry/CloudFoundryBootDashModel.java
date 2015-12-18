@@ -215,7 +215,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			@Override
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				setState(RefreshState.LOADING);
+				setState(RefreshState.loading("Connecting..."));
 				try {
 					getCloudTarget().connect();
 					setState(RefreshState.READY);
@@ -242,7 +242,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			@Override
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				setState(RefreshState.LOADING);
+				setState(RefreshState.loading("Disconnecting..."));
 				getCloudTarget().disconnect();
 				setState(RefreshState.READY);
 				refresh();
