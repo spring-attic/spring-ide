@@ -204,12 +204,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		if (elements == null) {
 			return;
 		}
-		Operation<Void> op = isConnected() ? new TargetApplicationsRefreshOperation(this) : new TargetApplicationsRefreshOperation(this) {
-			@Override
-			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				elements.replaceAll(Collections.<BootDashElement>emptyList());
-			}
-		};
+		Operation<Void> op = new TargetApplicationsRefreshOperation(this);
 		getOperationsExecution().runOpAsynch(op);
 	}
 
@@ -427,42 +422,50 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	public void updateElements(Map<CloudAppInstances, IProject> apps) throws Exception {
 
-		Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
-		List<String> toNotify = null;
-		synchronized (this) {
+		if (apps == null) {
+			/*
+			 * Error case: set empty list of BDEs don't modify state of local to CF artifacts mappings
+			 */
+			elements.replaceAll(Collections.<BootDashElement>emptyList());
+		} else {
 
-			// Update external cache that keeps track of additional element
-			// state (e.g the running state,
-			// app instances, and project mapping)
-			toNotify = getAppCache().updateAll(apps);
+			Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
+			List<String> toNotify = null;
+			synchronized (this) {
 
-			// Create new handles to the applications. Note that the cache
-			// should be updated first before creating elements
-			// as elements are handles to state in the cache
-			for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
-				BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
-				updated.put(addedElement.getName(), addedElement);
+				// Update external cache that keeps track of additional element
+				// state (e.g the running state,
+				// app instances, and project mapping)
+				toNotify = getAppCache().updateAll(apps);
+
+				// Create new handles to the applications. Note that the cache
+				// should be updated first before creating elements
+				// as elements are handles to state in the cache
+				for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
+					BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
+					updated.put(addedElement.getName(), addedElement);
+				}
+
+				projectAppStore.storeProjectToAppMapping(updated.values());
 			}
 
-			projectAppStore.storeProjectToAppMapping(updated.values());
-		}
+			// Fire events outside of synch block to avoid deadlock
 
-		// Fire events outside of synch block to avoid deadlock
+			// This only fires a model CHANGE event (adding/removing elements). It
+			// does not fire an event for app state changes that are tracked
+			// externally
+			// (runstate, instances, project) in the cache. The latter is handled
+			// separately
+			// below.
+			elements.replaceAll(updated.values());
 
-		// This only fires a model CHANGE event (adding/removing elements). It
-		// does not fire an event for app state changes that are tracked
-		// externally
-		// (runstate, instances, project) in the cache. The latter is handled
-		// separately
-		// below.
-		elements.replaceAll(updated.values());
-
-		// Fire app state change based on changes to the app cache
-		if (toNotify != null) {
-			for (String appName : toNotify) {
-				BootDashElement updatedEl = updated.get(appName);
-				if (updatedEl != null) {
-					notifyElementChanged(updatedEl);
+			// Fire app state change based on changes to the app cache
+			if (toNotify != null) {
+				for (String appName : toNotify) {
+					BootDashElement updatedEl = updated.get(appName);
+					if (updatedEl != null) {
+						notifyElementChanged(updatedEl);
+					}
 				}
 			}
 		}

@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
  *
  * @see AppInstancesRefreshOperation
  */
-public class TargetApplicationsRefreshOperation extends CloudOperation {
+public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
 	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName(), model);
@@ -46,47 +46,55 @@ public class TargetApplicationsRefreshOperation extends CloudOperation {
 
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
-		model.setState(RefreshState.loading("Fetching Apps..."));
-		try {
+		if (model.isConnected()) {
+			model.setState(RefreshState.loading("Fetching Apps..."));
+			try {
 
-			// 1. Fetch basic list of applications. Should be the "faster" of
-			// the
-			// two refresh operations
+				// 1. Fetch basic list of applications. Should be the "faster" of
+				// the
+				// two refresh operations
 
-			List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
+				List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
 
-			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
-			if (apps != null) {
+				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
+				if (apps != null) {
 
-				Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
-						.getMapping();
+					Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
+							.getMapping();
 
-				for (CloudApplication app : apps) {
+					for (CloudApplication app : apps) {
 
-					String projectName = existingProjectToAppMappings.get(app.getName());
-					IProject project = null;
-					if (projectName != null) {
-						project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-						if (project == null || !project.isAccessible()) {
-							project = null;
+						String projectName = existingProjectToAppMappings.get(app.getName());
+						IProject project = null;
+						if (projectName != null) {
+							project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+							if (project == null || !project.isAccessible()) {
+								project = null;
+							}
 						}
+
+						// No stats available at this stage. Just set stats to null
+						// for now.
+						updatedApplications.put(new CloudAppInstances(app, null), project);
 					}
-
-					// No stats available at this stage. Just set stats to null
-					// for now.
-					updatedApplications.put(new CloudAppInstances(app, null), project);
 				}
+
+				this.model.updateElements(updatedApplications);
+
+				// 2. Launch the slower app stats/instances refresh operation.
+				this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
+				this.model.getOperationsExecution().runOpAsynch(new HealthCheckRefreshOperation(this.model));
+				model.setState(RefreshState.READY);
+			} catch (Exception e) {
+				/*
+				 * Failed to obtain applications list from CF
+				 */
+				model.updateElements(null);
+				model.setState(RefreshState.error(e));
+				throw e;
 			}
-
-			this.model.updateElements(updatedApplications);
-
-			// 2. Launch the slower app stats/instances refresh operation.
-			this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
-			this.model.getOperationsExecution().runOpAsynch(new HealthCheckRefreshOperation(this.model));
-			model.setState(RefreshState.READY);
-		} catch (Exception e) {
-			model.setState(RefreshState.error(e));
-			throw e;
+		} else {
+			model.updateElements(null);
 		}
 	}
 
