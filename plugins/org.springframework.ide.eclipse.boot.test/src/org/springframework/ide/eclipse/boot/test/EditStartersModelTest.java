@@ -73,6 +73,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
+	private static final String BOOT_1_3_X_RELEASE = "1.3.1.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
@@ -217,7 +218,7 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithSameBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("foo",
-				bootVersion("1.3.0.RELEASE"), // boot version fixed
+				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -258,7 +259,7 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithDifferentBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("foo",
-				bootVersion("1.3.0.RELEASE"), // boot version fixed
+				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -297,7 +298,7 @@ public class EditStartersModelTest {
 	@Test
 	public void addBomWithSubsetOfRepos() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = "1.3.0.RELEASE";
+		String bootVersion = BOOT_1_3_X_RELEASE;
 		IProject project = harness.createBootProject("foo",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
@@ -325,7 +326,7 @@ public class EditStartersModelTest {
 	@Test
 	public void addDependencyWithRepo() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = "1.3.0.RELEASE";
+		String bootVersion = BOOT_1_3_X_RELEASE;
 		IProject project = harness.createBootProject("foo",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
@@ -355,7 +356,7 @@ public class EditStartersModelTest {
 
 	@Test
 	public void serviceUnavailable() throws Exception {
-		String bootVersion = "1.3.0.RELEASE";
+		String bootVersion = BOOT_1_3_X_RELEASE;
 		IProject project = harness.createBootProject("foo",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
