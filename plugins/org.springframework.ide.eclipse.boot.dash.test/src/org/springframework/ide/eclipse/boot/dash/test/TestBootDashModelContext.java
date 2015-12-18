@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -45,8 +45,8 @@ public class TestBootDashModelContext implements BootDashModelContext {
 			this.workspace = workspace;
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
-			this.projectProperties = new MockPropertyStore<IProject>();
-			this.runTargetProperties = new MockPropertyStore<RunTargetType>();
+			this.projectProperties = new MockScopedPropertyStore<IProject>();
+			this.runTargetProperties = new MockScopedPropertyStore<RunTargetType>();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -8,28 +8,21 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test.mocks;
+package org.springframework.ide.eclipse.boot.dash.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
 
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.eclipse.debug.core.ILaunchConfiguration;
 
-/**
- * @author Kris De Volder
- */
-public class MockPropertyStore implements IPropertyStore {
+public class CollectionUtils {
 
-	private Map<String, String> props = new HashMap<>();
-
-	@Override
-	public String get(String key) {
-		return props.get(key);
-	}
-
-	@Override
-	public void put(String key, String value) throws Exception {
-		props.put(key, value);
+	public static <T> T getSingle(Collection<T> configs) {
+		if (configs.size()==1) {
+			for (T t : configs) {
+				return t;
+			}
+		}
+		return null;
 	}
 
 }

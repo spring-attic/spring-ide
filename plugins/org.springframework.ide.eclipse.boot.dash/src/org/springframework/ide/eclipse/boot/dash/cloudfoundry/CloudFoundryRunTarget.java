@@ -63,6 +63,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableSet;
+
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
 	private CloudFoundryTargetProperties targetProperties;
@@ -102,11 +104,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
 		return RUN_GOAL_STATES;
-	}
-
-	@Override
-	public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		return Collections.emptyList();
 	}
 
 	@Override

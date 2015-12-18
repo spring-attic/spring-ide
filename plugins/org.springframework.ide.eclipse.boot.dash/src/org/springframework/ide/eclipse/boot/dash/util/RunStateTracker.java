@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -31,9 +32,10 @@ import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
- * Generalization of ProjectRunStateTracker. An instance of this class tracks active processes
+ * Generalization of OwnerRunStateTracker. An instance of this class tracks active processes
  * in the eclipse DebugUI and maitains a 'RunState' that is associated indirectly with some
  * object these processes belong to.
  * <p>
@@ -42,29 +44,30 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  *
  * @author Kris De Volder
  */
-public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
+public abstract class RunStateTracker<T> extends ProcessListenerAdapter implements Disposable {
 
 	//// public API ///////////////////////////////////////////////////////////////////
 
 	public interface RunStateListener<T> {
-		void stateChanged(T project);
+		void stateChanged(T owner);
 	}
 
 	public RunStateTracker() {
 		activeStates = new HashMap<T, RunState>();
 		processTracker = new ProcessTracker(this);
-		updateProjectStatesAndFireEvents();
+		updateOwnerStatesAndFireEvents();
 	}
 
-	public synchronized RunState getState(final T project) {
-		return getState(activeStates, project);
+	public synchronized RunState getState(final T owner) {
+		return getState(activeStates, owner);
 	}
 
-	public void setListener(RunStateListener<T> listener) {
-		if (this.listener!=null) {
-			throw new IllegalStateException("Listener can only be set once");
-		}
-		this.listener = listener;
+	public void addListener(RunStateListener<T> listener) {
+		this.listeners.add(listener);
+	}
+
+	public void removeListener(RunStateListener<T> listener) {
+		this.listeners.remove(listener);
 	}
 
 	///////////////////////// stuff below is implementation cruft ////////////////////
@@ -80,7 +83,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
 	private Map<T, RunState> activeStates = null;
 	private Map<ILaunch, ReadyStateMonitor> readyStateTrackers = null;
 	private ProcessTracker processTracker = null;
-	private RunStateListener<T> listener; // listeners that are interested in us (i.e. clients)
+	private ListenerList listeners = new ListenerList(); // listeners that are interested in us (i.e. clients)
 
 	private static <T> RunState getState(Map<T, RunState> states, T p) {
 		if (states!=null) {
@@ -140,7 +143,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
 		public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 			if (value) {
 				//ready state tracker detected a launch just entered the 'ready' state
-				updateProjectStatesAndFireEvents();
+				updateOwnerStatesAndFireEvents();
 			}
 		}
 	};
@@ -199,22 +202,23 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
 		}
 	}
 
-	private void updateProjectStatesAndFireEvents() {
-		//Note that updateProjectStates is synchronized, but this method is not.
+	private void updateOwnerStatesAndFireEvents() {
+		//Note that updateOwnerStates is synchronized, but this method is not.
 		// Important not to keep locks while firing events.
-		Set<T> affected = updateProjectStates();
-		RunStateListener<T> listener = this.listener;
-		if (listener!=null) {
+		Set<T> affected = updateOwnerStates();
+		for (Object _l : listeners.getListeners()) {
+			@SuppressWarnings("unchecked")
+			RunStateListener<T> listener = (RunStateListener<T>) _l;
 			for (T p : affected) {
 				listener.stateChanged(p);
 			}
 		}
 	}
 
-	private synchronized Set<T> updateProjectStates() {
+	private synchronized Set<T> updateOwnerStates() {
 		if (updateInProgress) {
 			//Avoid bug caused by reentrance from same thread.
-			//This bug causes double update events for INAVTIVE -> RUNNING for projects that
+			//This bug causes double update events for INAVTIVE -> RUNNING for owners that
 			// don't have ready state tracking and so immediately enter the ready state upon
 			// creation.
 			return Collections.emptySet();
@@ -226,10 +230,10 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
 				activeStates = getCurrentActiveStates();
 				debug("new: "+activeStates);
 
-				// Compute set of projects who's state has changed
-				Set<T> affectedProjects = new HashSet<T>(keySet(oldStates));
-				affectedProjects.addAll(keySet(activeStates));
-				Iterator<T> iter = affectedProjects.iterator();
+				// Compute set of owners who's state has changed
+				Set<T> affectedOwners = new HashSet<T>(keySet(oldStates));
+				affectedOwners.addAll(keySet(activeStates));
+				Iterator<T> iter = affectedOwners.iterator();
 				while (iter.hasNext()) {
 					T p = iter.next();
 					RunState oldState = getState(oldStates, p);
@@ -240,7 +244,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
 						debug(p+": "+ oldState +" => " + newState);
 					}
 				}
-				return affectedProjects;
+				return affectedOwners;
 			} finally {
 				updateInProgress = false;
 			}
@@ -259,12 +263,12 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter {
 
 	@Override
 	public void processTerminated(ProcessTracker tracker, IProcess process) {
-		updateProjectStatesAndFireEvents();
+		updateOwnerStatesAndFireEvents();
 		cleanupReadyStateTrackers();
 	}
 
 	@Override
 	public void processCreated(ProcessTracker tracker, IProcess process) {
-		updateProjectStatesAndFireEvents();
+		updateOwnerStatesAndFireEvents();
 	}
 }

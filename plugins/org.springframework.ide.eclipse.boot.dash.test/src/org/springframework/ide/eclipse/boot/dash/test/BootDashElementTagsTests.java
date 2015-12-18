@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -22,14 +22,12 @@ import java.util.LinkedHashSet;
 
 import org.eclipse.core.resources.IProject;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElementFactory;
-import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.test.BootProjectDashElementTest.TestElement;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.test.AbstractLaunchConfigurationsDashElementTest.TestElement;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 
 /**
  * Light-weight mockito-based tests for tags.
@@ -40,11 +38,14 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 public class BootDashElementTagsTests extends Mocks {
 
 	private static TestElement createElement(String name, String[] tags) {
-		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
-		IScopedPropertyStore<IProject> projectProperties = new MockPropertyStore<IProject>();
-		LocalBootDashModel model = mock(LocalBootDashModel.class);
+//		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
+//		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
+//		IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
 		IProject project = mockProject(name, true);
-		TestElement element = spy(new TestElement(project, model, projectProperties, factory));
+		LocalBootDashModel model = mock(LocalBootDashModel.class);
+		LaunchConfRunStateTracker tracker = mock(LaunchConfRunStateTracker.class);
+		when(model.getLaunchConfRunStateTracker()).thenReturn(tracker);
+		TestElement element = spy(new TestElement(name, project, model));
 		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
 		return element;
 	}

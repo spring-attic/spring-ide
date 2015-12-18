@@ -366,22 +366,4 @@ public class BootDashActions {
 		return restartWithRemoteDevClientAction;
 	}
 
-	public IAction selectDefaultConfigAction(
-			final BootDashElement target,
-			final ILaunchConfiguration currentDefault,
-			final ILaunchConfiguration newDefault
-	) {
-		Action action = new Action(newDefault.getName(), SWT.CHECK) {
-			@Override
-			public void run() {
-				target.setPreferredConfig(newDefault);
-				//target.openConfig(getSite().getShell());
-			}
-		};
-		action.setChecked(newDefault.equals(currentDefault));
-		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
-				+ "be used the next time you (re)launch '"+target.getName());
-		return action;
-	}
-
 }

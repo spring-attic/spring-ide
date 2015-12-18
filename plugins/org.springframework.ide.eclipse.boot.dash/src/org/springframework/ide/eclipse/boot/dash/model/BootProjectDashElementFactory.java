@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.MapMaker;
 
@@ -24,19 +25,20 @@ import com.google.common.collect.MapMaker;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElementFactory {
+public class BootProjectDashElementFactory implements Disposable {
 
+	private LaunchConfDashElementFactory launchConfElementFactory;
 	private LocalBootDashModel model;
 	private IScopedPropertyStore<IProject> projectProperties;
 
 	private Map<IProject, BootProjectDashElement> cache;
 
-	public BootProjectDashElementFactory(LocalBootDashModel model, IScopedPropertyStore<IProject> projectProperties) {
+	public BootProjectDashElementFactory(LocalBootDashModel model, IScopedPropertyStore<IProject> projectProperties, LaunchConfDashElementFactory launchConfElementFactory) {
 		this.cache = new MapMaker()
 				.concurrencyLevel(1) //single thread only so don't waste space for 'connurrencyLevel' support
-				.weakValues()
 				.makeMap();
 		this.model = model;
+		this.launchConfElementFactory = launchConfElementFactory;
 		this.projectProperties = projectProperties;
 	}
 
@@ -44,7 +46,7 @@ public class BootProjectDashElementFactory {
 		if (BootPropertyTester.isBootProject(p)) {
 			BootProjectDashElement el = cache.get(p);
 			if (el==null) {
-				cache.put(p, el = new BootProjectDashElement(p, model, projectProperties, this));
+				cache.put(p, el = new BootProjectDashElement(p, model, projectProperties, this, launchConfElementFactory));
 			}
 			return el;
 		}
@@ -57,12 +59,11 @@ public class BootProjectDashElementFactory {
 
 	/**
 	 * Clients should call this when elements are no longer relevant
-	 * @param e
 	 */
-	public void disposed(BootProjectDashElement e) {
+	public synchronized void disposed(IProject p) {
 		Map<IProject, BootProjectDashElement> c = cache;
 		if (c!=null) {
-			c.remove(e.getProject());
+			c.remove(p.getProject());
 		}
 	}
 

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -50,6 +51,7 @@ public class PropertyStoreFactory {
 	}
 
 	public static <S> IPropertyStore createForScope(final S scope, final IScopedPropertyStore<S> scopedStore) {
+		Assert.isNotNull(scopedStore);
 		return new IPropertyStore() {
 
 			@Override

@@ -37,7 +37,7 @@ public class BootLaunchUtils {
 	/**
 	 * Boot aware launch termination. Tries to use JMX lifecycle managment bean if available.
 	 */
-	public static void terminate(List<ILaunch> launches) {
+	public static void terminate(Iterable<ILaunch> launches) {
 		//TODO: this terminates launches sequentially. It would be better to try to terminate all of them
 		// in parallel and then wait for completion of each operation.
 		for (ILaunch l : launches) {
@@ -82,7 +82,6 @@ public class BootLaunchUtils {
 //		}
 	}
 
-
 	public static List<ILaunch> getBootLaunches(IProject project) {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		ILaunch[] allLaunches = lm.getLaunches();
@@ -118,5 +117,6 @@ public class BootLaunchUtils {
 		}
 		return false;
 	}
+
 
 }

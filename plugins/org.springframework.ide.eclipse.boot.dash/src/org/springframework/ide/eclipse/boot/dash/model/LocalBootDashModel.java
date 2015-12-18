@@ -17,15 +17,13 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
-import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
@@ -47,21 +45,19 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 public class LocalBootDashModel extends BootDashModel {
 
 	private IWorkspace workspace;
+	private BootProjectDashElementFactory projectElementFactory;
+	private LaunchConfDashElementFactory launchConfElementFactory;
+
 	ProjectChangeListenerManager openCloseListenerManager;
 	ClasspathListenerManager classpathListenerManager;
-	BootProjectDashElementFactory projectElementFactory;
 
-	ProjectRunStateTracker projectRunStateTracker; //TODO: we should get rid of this and make projectRunstate an aggregator
-													// based on the nested launch confs.
-	ProjectRunStateTracker launchConfRunStateTracker;
+	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
 
 	LiveSetVariable<BootDashElement> elements; //lazy created
 	private BootDashModelConsoleManager consoleManager;
 
 	LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
-
-	private BootDashModelStateSaver modelState;
 	private DevtoolsPortRefresher devtoolsPortRefresher;
 	private LiveExpression<Pattern> projectExclusion;
 	private ValueListener<Pattern> projectExclusionListener;
@@ -82,14 +78,9 @@ public class LocalBootDashModel extends BootDashModel {
 	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
 		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
-		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties());
+		this.launchConfElementFactory = new LaunchConfDashElementFactory(this, context.getLaunchManager());
+		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
-		try {
-			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, projectElementFactory));
-			modelState.restore(lastState);
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
 		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		this.projectExclusion = context.getBootProjectExclusion();
 	}
@@ -100,20 +91,13 @@ public class LocalBootDashModel extends BootDashModel {
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
-			this.projectRunStateTracker = new ProjectRunStateTracker();
-			projectRunStateTracker.setListener(new RunStateListener<IProject>() {
-				public void stateChanged(IProject p) {
-					BootDashElement e = projectElementFactory.createOrGet(p);
-					if (e!=null) {
-						notifyElementChanged(e);
-					}
-				}
-			});
 			projectExclusion.addListener(projectExclusionListener = new ValueListener<Pattern>() {
 				public void gotValue(LiveExpression<Pattern> exp, Pattern value) {
 					updateElementsFromWorkspace();
 				}
 			});
+
+
 			updateElementsFromWorkspace();
 		}
 	}
@@ -126,14 +110,15 @@ public class LocalBootDashModel extends BootDashModel {
 				newElements.add(element);
 			}
 		}
+		elements.replaceAll(newElements);
 		for (BootDashElement oldElement : elements.getValues()) {
 			if (!newElements.contains(oldElement)) {
 				if (oldElement instanceof Disposable) {
 					((Disposable) oldElement).dispose();
+					projectElementFactory.disposed(oldElement.getProject());
 				}
 			}
 		}
-		elements.replaceAll(newElements);
 	}
 
 	public synchronized ObservableSet<BootDashElement> getElements() {
@@ -150,8 +135,9 @@ public class LocalBootDashModel extends BootDashModel {
 			elements = null;
 			openCloseListenerManager.dispose();
 			projectElementFactory.dispose();
+			launchConfElementFactory.dispose();
 			classpathListenerManager.dispose();
-			projectRunStateTracker.dispose();
+			launchConfRunStateTracker.dispose();
 			devtoolsPortRefresher.dispose();
 			if (projectExclusionListener!=null) {
 				projectExclusion.removeListener(projectExclusionListener);
@@ -172,20 +158,15 @@ public class LocalBootDashModel extends BootDashModel {
 		return consoleManager;
 	}
 
-
-	////////////// listener cruft ///////////////////////////
-
-	public ProjectRunStateTracker getProjectRunStateTracker() {
-		return projectRunStateTracker;
+	public LaunchConfRunStateTracker getLaunchConfRunStateTracker() {
+		return launchConfRunStateTracker;
 	}
 
-	public ILaunchConfiguration getPreferredConfigs(WrappingBootDashElement<IProject> e) {
-		return modelState.getPreferredConfig(e);
+	public BootProjectDashElementFactory getProjectElementFactory() {
+		return projectElementFactory;
 	}
 
-	public void setPreferredConfig(
-			WrappingBootDashElement<IProject> e,
-			ILaunchConfiguration c) {
-		modelState.setPreferredConfig(e, c);
+	public LaunchConfDashElementFactory getLaunchConfElementFactory() {
+		return launchConfElementFactory;
 	}
 }

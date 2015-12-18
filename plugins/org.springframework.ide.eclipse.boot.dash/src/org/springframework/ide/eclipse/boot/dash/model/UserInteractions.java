@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
@@ -29,7 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogMode
  * @author Kris De Volder
  */
 public interface UserInteractions {
-	ILaunchConfiguration chooseConfigurationDialog(String dialogTitle, String message, List<ILaunchConfiguration> configs);
+	ILaunchConfiguration chooseConfigurationDialog(String dialogTitle, String message, Collection<ILaunchConfiguration> configs);
 	IType chooseMainType(IType[] mainTypes, String dialogTitle, String message);
 	void errorPopup(String title, String message);
 	void openLaunchConfigurationDialogOnGroup(ILaunchConfiguration selection, String launchGroup);

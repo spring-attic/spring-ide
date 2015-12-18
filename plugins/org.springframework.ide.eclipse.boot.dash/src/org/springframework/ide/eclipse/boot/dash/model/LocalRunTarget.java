@@ -10,19 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import org.eclipse.core.resources.IProject;
+import java.util.EnumSet;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 public class LocalRunTarget extends AbstractRunTarget {
 
@@ -36,15 +38,6 @@ public class LocalRunTarget extends AbstractRunTarget {
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
 		return RunTargets.LOCAL_RUN_GOAL_STATES;
-	}
-
-	@Override
-	public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		IProject p = element.getProject();
-		if (p != null) {
-			return BootLaunchConfigurationDelegate.getLaunchConfigs(p);
-		}
-		return Collections.emptyList();
 	}
 
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {

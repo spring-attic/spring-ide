@@ -17,9 +17,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
@@ -76,6 +78,8 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardCo
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -186,6 +190,73 @@ public class BootDashModelTest {
 		waitModelElements("testProject");
 	}
 
+	/**
+	 * Test that element state listener for launch conf element is notified when it is
+	 * launched via its project.
+	 */
+	@Test public void testLaunchConfRunStateChanges() throws Exception {
+		doTestLaunchConfRunStateChanges(RunState.RUNNING);
+	}
+
+	/**
+	 * Test that element state listener for launch conf element is notified when it is
+	 * launched via its project.
+	 */
+	@Test public void testLaunchConfDebugStateChanges() throws Exception {
+		doTestLaunchConfRunStateChanges(RunState.DEBUGGING);
+	}
+
+	protected void doTestLaunchConfRunStateChanges(RunState runState) throws Exception {
+		String projectName = "testProject";
+		createBootProject(projectName);
+		waitModelElements(projectName);
+
+		BootProjectDashElement element = getElement(projectName);
+		element.openConfig(ui); //Ensure that at least one launch config exists.
+		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui);
+		BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
+
+		ElementStateListener listener = mock(ElementStateListener.class);
+		model.addElementStateListener(listener);
+//		System.out.println("Element state listener ADDED");
+//		model.addElementStateListener(new ElementStateListener() {
+//			public void stateChanged(BootDashElement e) {
+//				System.out.println("Changed: "+e);
+//			}
+//		});
+
+		element.restart(runState, null);
+		waitForState(element, runState);
+		waitForState(childElement, runState);
+
+		ElementStateListener oldListener = listener;
+		model.removeElementStateListener(oldListener);
+//		System.out.println("Element state listener REMOVED");
+
+		listener = mock(ElementStateListener.class);
+		model.addElementStateListener(listener);
+
+		element.stopAsync(ui);
+		waitForState(element, RunState.INACTIVE);
+		waitForState(childElement, RunState.INACTIVE);
+
+		//3 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set)
+		verify(oldListener, times(3)).stateChanged(element);
+		verify(oldListener, times(3)).stateChanged(childElement);
+		//2 changes: RUNNING -> INACTIVE, liveport(unset)
+		verify(listener, times(2)).stateChanged(element);
+		verify(listener, times(2)).stateChanged(childElement);
+	}
+
+
+	private BootDashElement getSingleValue(ImmutableSet<BootDashElement> values) {
+		assertEquals("Unexpected number of values in "+values, 1, values.size());
+		for (BootDashElement e : values) {
+			return e;
+		}
+		throw new IllegalStateException("This code should be unreachable");
+	}
 
 	/**
 	 * Test that element state listener is notified when a project is launched and terminated.
@@ -208,14 +279,14 @@ public class BootDashModelTest {
 
 		ElementStateListener listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
-		System.out.println("Element state listener ADDED");
+		//System.out.println("Element state listener ADDED");
 		BootDashElement element = getElement(projectName);
 		element.restart(runState, null);
 		waitForState(element, runState);
 
 		ElementStateListener oldListener = listener;
 		model.removeElementStateListener(oldListener);
-		System.out.println("Element state listener REMOVED");
+		//System.out.println("Element state listener REMOVED");
 
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
@@ -358,7 +429,7 @@ public class BootDashModelTest {
 		String projectName = "some-project";
 		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
 
-		BootDashElement element = getElement(projectName);
+		final BootProjectDashElement element = getElement(projectName);
 		assertEquals(RunState.INACTIVE, element.getRunState());
 		assertEquals(-1, element.getLivePort()); // live port is 'unknown' if app is not running
 		try {
@@ -368,7 +439,12 @@ public class BootDashModelTest {
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
 
-			assertEquals(8080, element.getLivePort());
+			new ACondition(4000) {
+				public boolean test() throws Exception {
+					assertEquals(8080, element.getLivePort());
+					return true;
+				}
+			};
 
 			//Change port in launch conf and restart
 			ILaunchConfiguration conf = element.getActiveConfig();
@@ -377,13 +453,26 @@ public class BootDashModelTest {
 					new PropVal("server.port", "6789", true)
 			));
 			wc.doSave();
+			final BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
 
-			assertEquals(8080, element.getLivePort()); // port still the same until we restart
+			new ACondition(4000) {
+				public boolean test() throws Exception {
+					assertEquals(8080, element.getLivePort()); // port still the same until we restart
+					assertEquals(8080, childElement.getLivePort());
+					return true;
+				}
+			};
 
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
-			assertEquals(6789, element.getLivePort());
+			new ACondition(4000) {
+				public boolean test() throws Exception {
+					assertEquals(6789, element.getLivePort());
+					assertEquals(6789, childElement.getLivePort());
+					return true;
+				}
+			};
 
 		} finally {
 			element.stopAsync(ui);
@@ -741,10 +830,10 @@ public class BootDashModelTest {
 		}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
 	}
 
-	private BootDashElement getElement(String name) {
+	private BootProjectDashElement getElement(String name) {
 		for (BootDashElement el : model.getElements().getValues()) {
 			if (name.equals(el.getName())) {
-				return el;
+				return (BootProjectDashElement) el;
 			}
 		}
 		return null;
