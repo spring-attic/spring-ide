@@ -81,6 +81,7 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 
 		String typeStr = type==null ?  Object.class.getName() : type.toString();
 
+		javaTypeLink(html, typeUtil, type);
 		html.raw("<a href=\"");
 		html.url("type/"+type);
 		html.raw("\">");

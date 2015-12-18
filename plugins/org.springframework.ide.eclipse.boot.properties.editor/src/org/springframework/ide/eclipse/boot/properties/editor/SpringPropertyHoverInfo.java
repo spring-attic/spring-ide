@@ -57,10 +57,6 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 
 	@Override
 	protected String renderAsHtml() {
-		return getHtmlHoverText(data);
-	}
-
-	public static String getHtmlHoverText(PropertyInfo data) {
 		HtmlBuffer html = new HtmlBuffer();
 
 		html.raw("<b>");
@@ -72,12 +68,7 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 		if (type==null) {
 			type = Object.class.getName();
 		}
-		html.raw("<a href=\"");
-		html.url("type/"+type);
-		html.raw("\">");
-		html.text(type);
-		html.raw("</a>");
-
+		javaTypeLink(html, javaProject, type);
 
 		String deflt = formatDefaultValue(data.getDefaultValue());
 		if (deflt!=null) {
