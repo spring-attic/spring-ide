@@ -14,13 +14,16 @@ import java.util.Collection;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
-	public OpenLaunchConfigAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
+	public OpenLaunchConfigAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+		super(model, selection, ui);
 		this.setText("Open Config");
 		this.setToolTipText("Open the launch configuration associated with the selected element, if one exists, or create one if it doesn't.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj.gif"));
@@ -33,6 +36,21 @@ public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 		for (BootDashElement bootDashElement : selecteds) {
 			bootDashElement.openConfig(ui);
 		}
+	}
+
+	@Override
+	public void updateEnablement() {
+		setEnabled(shouldEnable());
+	}
+
+	private boolean shouldEnable() {
+		BootDashElement element = getSingleSelectedElement();
+		if (element instanceof BootProjectDashElement) {
+			BootProjectDashElement projectEl = (BootProjectDashElement) element;
+			ObservableSet<BootDashElement> confs = projectEl.getAllChildren();
+			return confs.getValues().size()<=1;
+		}
+		return false;
 	}
 
 }

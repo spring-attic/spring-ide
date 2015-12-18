@@ -21,27 +21,12 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OpenInBrowserAction extends AbstractBootDashElementsAction {
 
-	private ElementStateListener listener;
-	private BootDashViewModel model;
-
 	public OpenInBrowserAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
-		this.model = model;
+		super(model, selection, ui);
 		this.setText("Open Web Browser");
 		this.setToolTipText("Open a Web Browser on the default URL");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.gif"));
 		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser_disabled.gif"));
-		if (model!=null) {
-			model.addElementStateListener(listener = new ElementStateListener() {
-				public void stateChanged(BootDashElement e) {
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							updateEnablement();
-						}
-					});
-				}
-			});
-		}
 	}
 
 	@Override
@@ -68,10 +53,6 @@ public class OpenInBrowserAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void dispose() {
-		if (listener==null) {
-			model.removeElementStateListener(listener);
-			listener = null;
-		}
 		super.dispose();
 	}
 

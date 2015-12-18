@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,13 +28,18 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -43,6 +51,7 @@ public class BootDashViewModelHarness {
 	public final BootDashModelContext context;
 	public BootDashViewModel model;
 	private RunTargetType[] types;
+	public final MockMultiSelection<BootDashElement> selection = new MockMultiSelection<>(BootDashElement.class);
 
 	public BootDashViewModelHarness(BootDashModelContext context, RunTargetType... types) throws Exception {
 		this.types = types;
@@ -153,6 +162,20 @@ public class BootDashViewModelHarness {
 			}
 		}
 		return list;
+	}
+
+	public BootDashElement getElementWithName(String name) {
+		BootDashElement found = null;
+		for (BootDashModel section : model.getSectionModels().getValue()) {
+			for (BootDashElement e : section.getElements().getValues()) {
+				if (name.equals(e.getName())) {
+					assertNull("Found more than one element with name '"+name+"'", found);
+					found = e;
+				}
+			}
+		}
+		assertNotNull("No element with name '"+name+"'", found);
+		return found;
 	}
 
 }
