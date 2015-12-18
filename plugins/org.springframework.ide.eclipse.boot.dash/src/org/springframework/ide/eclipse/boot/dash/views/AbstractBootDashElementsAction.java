@@ -50,7 +50,7 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 					if (selection.getValue().contains(e)) {
 						Display.getDefault().asyncExec(new Runnable() {
 							public void run() {
-								updateEnablement();
+								update();
 							}
 						});
 					}
