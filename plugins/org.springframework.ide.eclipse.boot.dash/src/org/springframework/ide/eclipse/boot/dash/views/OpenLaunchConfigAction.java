@@ -12,14 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-
-import com.google.common.collect.ImmutableSet;
 
 public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
@@ -46,9 +45,10 @@ public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
 	private boolean shouldEnable() {
 		BootDashElement element = getSingleSelectedElement();
-		if (element!=null) {
-			ImmutableSet<ILaunchConfiguration> confs = element.getLaunchConfigs();
-			return confs.size()<=1;
+		if (element instanceof BootProjectDashElement) {
+			BootProjectDashElement projectEl = (BootProjectDashElement) element;
+			ObservableSet<BootDashElement> confs = projectEl.getAllChildren();
+			return confs.getValues().size()<=1;
 		}
 		return false;
 	}
