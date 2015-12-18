@@ -28,8 +28,10 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 
 	private final ConnectionStateListener CONNECTION_LISTENER = new ConnectionStateListener() {
 		@Override
-		public void changed() {
-			update();
+		public void changed(Connectable connectable) {
+			if (listeningTo == connectable) {
+				update();
+			}
 		}
 	};
 

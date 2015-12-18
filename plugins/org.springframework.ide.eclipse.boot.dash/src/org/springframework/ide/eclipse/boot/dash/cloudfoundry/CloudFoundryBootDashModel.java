@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
@@ -62,6 +63,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -82,6 +85,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
+
+	private List<ConnectionStateListener> connectionStateListeners;
 
 	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
 		@Override
@@ -155,6 +160,15 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 	};
 
+	final private ValueListener<CloudFoundryOperations> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<CloudFoundryOperations>() {
+		@Override
+		public void gotValue(LiveExpression<CloudFoundryOperations> exp, CloudFoundryOperations value) {
+			for (ConnectionStateListener l : connectionStateListeners) {
+				l.changed(CloudFoundryBootDashModel.this);
+			}
+		}
+	};
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
 		RunTargetType type = target.getType();
@@ -165,6 +179,8 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
+		this.connectionStateListeners = new ArrayList<>();
+		getCloudTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		if (getCloudTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
 			connect();
@@ -199,6 +215,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	@Override
 	public void dispose() {
+		getCloudTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		elements = null;
 		if (debugTargetDisconnector!=null) {
 			debugTargetDisconnector.dispose();
@@ -215,17 +232,19 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			@Override
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				setState(RefreshState.loading("Connecting..."));
-				try {
-					getCloudTarget().connect();
-					setState(RefreshState.READY);
-					refresh();
-				} catch (MissingPasswordException e) {
-					setState(RefreshState.READY);
-					BootDashActivator.log(e);
-				} catch (Exception e) {
-					setState(RefreshState.error(e));
-					BootDashActivator.log(e);
+				if (!isConnected()) {
+					setState(RefreshState.loading("Connecting..."));
+					try {
+						getCloudTarget().connect();
+						setState(RefreshState.READY);
+						refresh();
+					} catch (MissingPasswordException e) {
+						setState(RefreshState.READY);
+						BootDashActivator.log(e);
+					} catch (Exception e) {
+						setState(RefreshState.error(e));
+						BootDashActivator.log(e);
+					}
 				}
 			}
 
@@ -242,10 +261,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 			@Override
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				setState(RefreshState.loading("Disconnecting..."));
-				getCloudTarget().disconnect();
-				setState(RefreshState.READY);
-				refresh();
+				if (isConnected()) {
+					setState(RefreshState.loading("Disconnecting..."));
+					getCloudTarget().disconnect();
+					setState(RefreshState.READY);
+					refresh();
+				}
 			}
 
 			public ISchedulingRule getSchedulingRule() {
@@ -262,12 +283,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	@Override
 	public void addConnectionStateListener(ConnectionStateListener l) {
-		getCloudTarget().addConnectionStateListener(l);
+		connectionStateListeners.add(l);
 	}
 
 	@Override
 	public void removeConnectionStateListener(ConnectionStateListener l) {
-		getCloudTarget().removeConnectionStateListener(l);
+		connectionStateListeners.remove(l);
 	}
 
 	@Override

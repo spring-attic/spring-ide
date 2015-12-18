@@ -22,8 +22,6 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -44,11 +42,9 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Connectable.ConnectionStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -59,11 +55,8 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-
-import com.google.common.collect.ImmutableSet;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
@@ -78,23 +71,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private LiveVariable<CloudFoundryOperations> cachedClient;
 	private CloudFoundryClientFactory clientFactory;
 
-	private List<ConnectionStateListener> connectionStateListeners;
-
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
 		this.cachedClient = new LiveVariable<>();
-		this.connectionStateListeners = new ArrayList<>();
-		this.cachedClient.addListener(new ValueListener<CloudFoundryOperations>() {
-			@Override
-			public void gotValue(LiveExpression<CloudFoundryOperations> exp, CloudFoundryOperations value) {
-				for (ConnectionStateListener l : connectionStateListeners) {
-					l.changed();
-				}
-			}
-		});
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
@@ -139,12 +121,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 	}
 
-	public void addConnectionStateListener(ConnectionStateListener l) {
-		connectionStateListeners.add(l);
+	public void addConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
+		cachedClient.addListener(l);
 	}
 
-	public void removeConnectionStateListener(ConnectionStateListener l) {
-		connectionStateListeners.remove(l);
+	public void removeConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
+		cachedClient.removeListener(l);
 	}
 
 	public Version getCCApiVersion() {

@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 public interface Connectable {
 
 	public interface ConnectionStateListener {
-		void changed();
+		void changed(Connectable connectable);
 	}
 
 	void connect();

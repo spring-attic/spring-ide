@@ -18,9 +18,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -47,8 +45,8 @@ public class TargetApplicationsRefreshOperation extends CloudOperation {
 	}
 
 	@Override
-	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		model.setState(RefreshState.loading("Fetching..."));
+	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
+		model.setState(RefreshState.loading("Fetching Apps..."));
 		try {
 
 			// 1. Fetch basic list of applications. Should be the "faster" of
@@ -88,7 +86,7 @@ public class TargetApplicationsRefreshOperation extends CloudOperation {
 			model.setState(RefreshState.READY);
 		} catch (Exception e) {
 			model.setState(RefreshState.error(e));
-			BootDashActivator.log(e);
+			throw e;
 		}
 	}
 
