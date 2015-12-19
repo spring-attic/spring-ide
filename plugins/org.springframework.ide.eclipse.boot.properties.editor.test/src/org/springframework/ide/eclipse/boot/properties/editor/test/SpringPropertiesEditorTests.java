@@ -143,9 +143,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		//Case 1: an 'exact' match of the property is in the hover region
 		assertHoverText(editor, "server.",
-				"<b>server.port</b>"+
-				"<br><a href=\"type%2Fjava.lang.Integer\">java.lang.Integer</a>"+
-				"<br><br>Server HTTP port"
+				"<b>server.port</b>"
 		);
 		//Case 2: an object/map property has extra text after the property name
 		assertHoverText(editor, "logging.", "<b>logging.level</b>");
@@ -162,9 +160,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		//Case 1: an 'exact' match of the property is in the hover region
 		assertHoverText(editor, "server.",
-				"<b>server.port</b>"+
-				"<br><a href=\"type%2Fjava.lang.Integer\">java.lang.Integer</a>"+
-				"<br><br>Server HTTP port"
+				"<b>server.port</b>"
 		);
 		//Case 2: an object/map property has extra text after the property name
 		assertHoverText(editor, "logging.", "<b>logging.level</b>");
