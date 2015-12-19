@@ -15,9 +15,11 @@ import java.util.Collection;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
@@ -49,6 +51,8 @@ public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 			BootProjectDashElement projectEl = (BootProjectDashElement) element;
 			ObservableSet<BootDashElement> confs = projectEl.getAllChildren();
 			return confs.getValues().size()<=1;
+		} else if (element instanceof LaunchConfDashElement) {
+			return true;
 		}
 		return false;
 	}
