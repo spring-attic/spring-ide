@@ -36,17 +36,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
@@ -56,9 +54,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Connectable;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -68,7 +64,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
 
-public class CloudFoundryBootDashModel extends BootDashModel implements ModifiableModel, Connectable {
+public class CloudFoundryBootDashModel extends BootDashModel implements ModifiableModel {
 
 	private IPropertyStore modelStore;
 
@@ -85,8 +81,6 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
-
-	private List<ConnectionStateListener> connectionStateListeners;
 
 	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
 		@Override
@@ -163,9 +157,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	final private ValueListener<CloudFoundryOperations> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<CloudFoundryOperations>() {
 		@Override
 		public void gotValue(LiveExpression<CloudFoundryOperations> exp, CloudFoundryOperations value) {
-			for (ConnectionStateListener l : connectionStateListeners) {
-				l.changed(CloudFoundryBootDashModel.this);
-			}
+			CloudFoundryBootDashModel.this.notifyModelStateChanged();
 		}
 	};
 
@@ -179,11 +171,10 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
-		this.connectionStateListeners = new ArrayList<>();
 		getCloudTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		if (getCloudTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
-			connect();
+			getOperationsExecution().runOpAsynch(new ConnectOperation(this, true));
 		}
 	}
 
@@ -195,17 +186,9 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	public ObservableSet<BootDashElement> getElements() {
 		if (elements == null) {
 			elements = new LiveSetVariable<BootDashElement>();
-			asyncRefreshElements();
+			refresh(null);
 		}
 		return elements;
-	}
-
-	protected void asyncRefreshElements() {
-		if (elements == null) {
-			return;
-		}
-		Operation<Void> op = new TargetApplicationsRefreshOperation(this);
-		getOperationsExecution().runOpAsynch(op);
 	}
 
 	@Override
@@ -219,76 +202,13 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 	}
 
-
-
 	@Override
-	public void connect() {
-		getOperationsExecution().runOpAsynch(new CloudOperation("Connecting run target " + getCloudTarget().getName(), this) {
-
-			@Override
-			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				if (!isConnected()) {
-					setState(RefreshState.loading("Connecting..."));
-					try {
-						getCloudTarget().connect();
-						setState(RefreshState.READY);
-						refresh();
-					} catch (MissingPasswordException e) {
-						setState(RefreshState.READY);
-						BootDashActivator.log(e);
-					} catch (Exception e) {
-						setState(RefreshState.error(e));
-						BootDashActivator.log(e);
-					}
-				}
-			}
-
-			public ISchedulingRule getSchedulingRule() {
-				return new RefreshSchedulingRule(model.getRunTarget());
-			}
-
-		});
-	}
-
-	@Override
-	public void disconnect() {
-		getOperationsExecution().runOpAsynch(new CloudOperation("Disconnecting run target " + getCloudTarget().getName(), this) {
-
-			@Override
-			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				if (isConnected()) {
-					setState(RefreshState.loading("Disconnecting..."));
-					getCloudTarget().disconnect();
-					setState(RefreshState.READY);
-					refresh();
-				}
-			}
-
-			public ISchedulingRule getSchedulingRule() {
-				return new RefreshSchedulingRule(model.getRunTarget());
-			}
-
-		});
-	}
-
-	@Override
-	public boolean isConnected() {
-		return getCloudTarget().getClient() != null;
-	}
-
-	@Override
-	public void addConnectionStateListener(ConnectionStateListener l) {
-		connectionStateListeners.add(l);
-	}
-
-	@Override
-	public void removeConnectionStateListener(ConnectionStateListener l) {
-		connectionStateListeners.remove(l);
-	}
-
-	@Override
-	public void refresh() {
-		asyncRefreshElements();
+	public void refresh(UserInteractions ui) {
+		if (elements == null) {
+			return;
+		}
+		Operation<Void> op = new TargetApplicationsRefreshOperation(this, ui);
+		getOperationsExecution(ui).runOpAsynch(op);
 	}
 
 	public CloudFoundryRunTarget getCloudTarget() {
@@ -297,7 +217,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	@Override
 	public boolean canBeAdded(List<Object> sources) {
-		if (sources != null && !sources.isEmpty()) {
+		if (sources != null && !sources.isEmpty() && getCloudTarget().isConnected()) {
 			for (Object obj : sources) {
 				// IMPORTANT: to avoid drag/drop into the SAME target, be
 				// sure

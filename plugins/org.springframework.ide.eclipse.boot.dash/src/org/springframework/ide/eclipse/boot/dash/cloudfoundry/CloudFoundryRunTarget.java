@@ -121,6 +121,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 	}
 
+	public boolean isConnected() {
+		return cachedClient.getValue() != null;
+	}
+
 	public void addConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
 		cachedClient.addListener(l);
 	}

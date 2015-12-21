@@ -55,7 +55,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -65,11 +64,9 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Connectable;
-import org.springframework.ide.eclipse.boot.dash.model.Connectable.ConnectionStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
@@ -166,6 +163,27 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
+	final private ModelStateListener MODEL_STATE_LISTENER = new ModelStateListener() {
+		public void stateChanged(final BootDashModel model) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					if (tv != null && !tv.getControl().isDisposed()) {
+						tv.update(model, null);
+						/*
+						 * TODO: ideally the above should do the repaint of
+						 * the control's area where the tree item is
+						 * located, but for some reason repaint doesn't
+						 * happen. #refresh() didn't trigger the repaint either
+						 */
+						tv.getControl().redraw();
+					} else {
+						model.removeModelStateListener(MODEL_STATE_LISTENER);
+					}
+				}
+			});
+		}
+	};
+
 	final private ValueListener<Set<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<Set<RunTarget>>() {
 		protected void uiGotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
@@ -189,48 +207,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
-	private final ValueListener<RefreshState> MODEL_STATE_LISTENER = new UIValueListener<RefreshState>() {
-		@Override
-		protected void uiGotValue(LiveExpression<RefreshState> exp, RefreshState value) {
-			BootDashModel model = exp.getOwner(BootDashModel.class);
-			if (tv != null && !tv.getControl().isDisposed()) {
-				tv.update(model, null);
-				/*
-				 * TODO: ideally the above should do the repaint of
-				 * the control's area where the tree item is
-				 * located, but for some reason repaint doesn't
-				 * happen. #refresh() didn't trigger the repaint either
-				 */
-				tv.getControl().redraw();
-			} else {
-				model.removeModelStateListener(MODEL_STATE_LISTENER);
-			}
-		}
-	};
-
-	private final ConnectionStateListener CONNECTION_STATE_LISTENER = new ConnectionStateListener() {
-		@Override
-		public void changed(final Connectable connectable) {
-			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (tv != null && !tv.getControl().isDisposed()) {
-						tv.update(connectable, null);
-						/*
-						 * TODO: ideally the above should do the repaint of
-						 * the control's area where the tree item is
-						 * located, but for some reason repaint doesn't
-						 * happen. #refresh() didn't trigger the repaint either
-						 */
-						tv.getControl().redraw();
-					} else {
-						connectable.removeConnectionStateListener(CONNECTION_STATE_LISTENER);
-					}
-				}
-			});
-		}
-	};
-
 	/**
 	 * Listener which adds element set listener to each section model.
 	 */
@@ -238,16 +214,10 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		protected void added(LiveExpression<Set<BootDashModel>> exp, BootDashModel e) {
 			e.getElements().addListener(ELEMENTS_SET_LISTENER);
 			e.addModelStateListener(MODEL_STATE_LISTENER);
-			if (e instanceof Connectable) {
-				((Connectable)e).addConnectionStateListener(CONNECTION_STATE_LISTENER);
-			}
 		}
 		protected void removed(LiveExpression<Set<BootDashModel>> exp, BootDashModel e) {
 			e.getElements().removeListener(ELEMENTS_SET_LISTENER);
 			e.removeModelStateListener(MODEL_STATE_LISTENER);
-			if (e instanceof Connectable) {
-				((Connectable)e).removeConnectionStateListener(CONNECTION_STATE_LISTENER);
-			}
 		}
 	};
 
@@ -367,9 +337,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				model.getSectionModels().removeListener(ELEMENTS_SET_LISTENER_ADAPTER);
 				for (BootDashModel m : model.getSectionModels().getValue()) {
 					m.removeModelStateListener(MODEL_STATE_LISTENER);
-					if (m instanceof Connectable) {
-						((Connectable)m).removeConnectionStateListener(CONNECTION_STATE_LISTENER);
-					}
 				}
 
 				if (searchFilterModel!=null) {

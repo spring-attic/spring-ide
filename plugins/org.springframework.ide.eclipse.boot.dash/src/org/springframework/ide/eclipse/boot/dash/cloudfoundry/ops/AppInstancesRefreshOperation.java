@@ -38,7 +38,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception {
-		this.model.setState(RefreshState.loading("Fetching App Instances..."));
+		this.model.setRefreshState(RefreshState.loading("Fetching App Instances..."));
 		try {
 			List<CloudAppInstances> appInstances = this.model.getAppCache().getAppInstances();
 
@@ -56,9 +56,9 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 					this.model.updateApplication(instances);
 				}
 			}
-			model.setState(RefreshState.READY);
+			model.setRefreshState(RefreshState.READY);
 		} catch (Exception e) {
-			this.model.setState(RefreshState.error(e));
+			this.model.setRefreshState(RefreshState.error(e));
 			throw e;
 		}
 	}

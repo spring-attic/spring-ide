@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.Connectable;
-import org.springframework.ide.eclipse.boot.dash.model.Connectable.ConnectionStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -26,82 +25,44 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  */
 public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 
-	private final ConnectionStateListener CONNECTION_LISTENER = new ConnectionStateListener() {
-		@Override
-		public void changed(Connectable connectable) {
-			if (listeningTo == connectable) {
-				update();
-			}
-		}
-	};
-
-	private Connectable listeningTo = null;
-
 	protected ToggleBootDashModelConnection(LiveExpression<BootDashModel> section, UserInteractions ui) {
 		super(section, ui);
 	}
 
 	@Override
 	public void update() {
+		super.update();
 		BootDashModel model = sectionSelection.getValue();
-		Connectable connectable = null;
-		if (model instanceof Connectable) {
-			setVisible(true);
-			setEnabled(true);
-			connectable = (Connectable) model;
-			if (connectable.isConnected()) {
+		if (model instanceof CloudFoundryBootDashModel) {
+			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
+			if (connectable.getCloudTarget().isConnected()) {
 				setText("Disconnect");
 				setDescription("Disconnect Run Target");
 			} else {
 				setText("Connect");
 				setDescription("Connect Run Target");
 			}
-		} else {
-			setVisible(false);
-			setEnabled(false);
 		}
-		// Update model state and model connection listeners
-		if (listeningTo != connectable) {
-			if (listeningTo != null) {
-				listeningTo.removeConnectionStateListener(CONNECTION_LISTENER);
-			}
-			listeningTo = connectable;
-			if (listeningTo != null) {
-				listeningTo.addConnectionStateListener(CONNECTION_LISTENER);
-			}
-		}
+	}
+
+	@Override
+	public void updateEnablement() {
+		setEnabled(isVisible());
+	}
+
+	@Override
+	public void updateVisibility() {
+		setVisible(sectionSelection.getValue() instanceof CloudFoundryBootDashModel);
 	}
 
 	@Override
 	public void run() {
 		BootDashModel model = sectionSelection.getValue();
-		if (model  instanceof Connectable) {
-			Connectable connectable = (Connectable) model;
-			if (connectable.isConnected()) {
-				connectable.disconnect();
-				if (model.getRunTarget() instanceof RunTargetWithProperties) {
-					RunTargetWithProperties target = (RunTargetWithProperties) model.getRunTarget();
-					target.getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
-					model.getViewModel().updateTargetPropertiesInStore();
-				}
-			} else {
-				connectable.connect();
-				if (model.getRunTarget() instanceof RunTargetWithProperties) {
-					RunTargetWithProperties target = (RunTargetWithProperties) model.getRunTarget();
-					target.getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null); //$NON-NLS-1$
-					model.getViewModel().updateTargetPropertiesInStore();
-				}
-			}
+		if (model  instanceof CloudFoundryBootDashModel) {
+			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
+			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getCloudTarget().isConnected()));
+			connectable.getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(connectable, ui));
 		}
-	}
-
-	@Override
-	public void dispose() {
-		if (listeningTo != null) {
-			listeningTo.removeConnectionStateListener(CONNECTION_LISTENER);
-			listeningTo = null;
-		}
-		super.dispose();
 	}
 
 }

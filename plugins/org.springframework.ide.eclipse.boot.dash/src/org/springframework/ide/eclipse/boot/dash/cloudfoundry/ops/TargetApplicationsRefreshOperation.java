@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * This performs a "two-tier" refresh as fetching list of
@@ -40,14 +41,17 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
  */
 public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
-	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
+	private UserInteractions ui;
+
+	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName(), model);
+		this.ui = ui;
 	}
 
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
-		if (model.isConnected()) {
-			model.setState(RefreshState.loading("Fetching Apps..."));
+		if (model.getCloudTarget().isConnected()) {
+			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
 			try {
 
 				// 1. Fetch basic list of applications. Should be the "faster" of
@@ -82,15 +86,15 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				this.model.updateElements(updatedApplications);
 
 				// 2. Launch the slower app stats/instances refresh operation.
-				this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
-				this.model.getOperationsExecution().runOpAsynch(new HealthCheckRefreshOperation(this.model));
-				model.setState(RefreshState.READY);
+				this.model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(this.model));
+				this.model.getOperationsExecution(ui).runOpAsynch(new HealthCheckRefreshOperation(this.model));
+				model.setRefreshState(RefreshState.READY);
 			} catch (Exception e) {
 				/*
 				 * Failed to obtain applications list from CF
 				 */
 				model.updateElements(null);
-				model.setState(RefreshState.error(e));
+				model.setRefreshState(RefreshState.error(e));
 				throw e;
 			}
 		} else {

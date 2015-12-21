@@ -17,6 +17,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 
 /**
@@ -49,7 +50,7 @@ public class MockBootDashModel extends BootDashModel {
 	}
 
 	@Override
-	public void refresh() {
+	public void refresh(UserInteractions ui) {
 	}
 
 	public void add(BootDashElement element) {

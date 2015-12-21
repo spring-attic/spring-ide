@@ -150,7 +150,7 @@ public class BootDashLabels implements Disposable {
 	private ImageDescriptor getIcon(BootDashModel element) {
 		if (element instanceof CloudFoundryBootDashModel) {
 			CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) element;
-			if (cfModel.isConnected()) {
+			if (cfModel.getCloudTarget().isConnected()) {
 				return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
 			} else {
 				return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
@@ -160,9 +160,9 @@ public class BootDashLabels implements Disposable {
 	}
 
 	private ImageDescriptor getDecoration(BootDashModel element) {
-		if (element.getState().getId() == RefreshState.ERROR.getId()) {
+		if (element.getRefreshState().getId() == RefreshState.ERROR.getId()) {
 			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
-		} else if (element.getState().getId() == RefreshState.LOADING.getId()) {
+		} else if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
 			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
 		}
 		return null;
@@ -202,10 +202,10 @@ public class BootDashLabels implements Disposable {
 			if (element.getRunTarget() != null) {
 				//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
 				// colorfully.
-				if (element.getState().getId() == RefreshState.LOADING.getId()) {
+				if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
 					StyledString prefix = new StyledString();
-					if (element.getState().getMessage() != null) {
-						prefix = new StyledString(element.getState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
+					if (element.getRefreshState().getMessage() != null) {
+						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
 					}
 					return prefix.append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
 				} else {
