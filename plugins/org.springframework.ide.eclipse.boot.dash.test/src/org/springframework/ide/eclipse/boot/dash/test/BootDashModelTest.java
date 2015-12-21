@@ -62,6 +62,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -571,7 +572,7 @@ public class BootDashModelTest {
 	}
 
 	@Test
-	public void openConfigActionEnablement() throws Exception {
+	public void openConfigActionEnablementForProject() throws Exception {
 		String projectName = "hohoho";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
@@ -623,7 +624,31 @@ public class BootDashModelTest {
 				return true;
 			}
 		};
+	}
 
+	@Test
+	public void openConfigActionEnablementForLaunchConfig() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final BootDashElement element = harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final OpenLaunchConfigAction action = new OpenLaunchConfigAction(harness.model, selection.forReading(), ui);
+
+		BootLaunchConfigurationDelegate.createConf(javaProject);
+		BootLaunchConfigurationDelegate.createConf(javaProject);
+
+		//Check initial conditions are as expected:
+		assertTrue(selection.isEmpty());
+		assertFalse(action.isEnabled());
+		assertEquals(2, element.getChildren().getValues().size());
+
+		//Check action enablement for the children
+		for (BootDashElement child : element.getChildren().getValues()) {
+			selection.setElements(child);
+			assertTrue(action.isEnabled());
+		}
 	}
 
 	/**************************************************************************************
