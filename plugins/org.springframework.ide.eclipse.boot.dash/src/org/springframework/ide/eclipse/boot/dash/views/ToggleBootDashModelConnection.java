@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
@@ -38,9 +39,11 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 			if (connectable.getCloudTarget().isConnected()) {
 				setText("Disconnect");
 				setDescription("Disconnect Run Target");
+				setImageDescriptor(BootDashActivator.getImageDescriptor("icons/cloud-inactive.png"));
 			} else {
 				setText("Connect");
 				setDescription("Connect Run Target");
+				setImageDescriptor(BootDashActivator.getImageDescriptor("icons/cloud-ready.png"));
 			}
 		}
 	}

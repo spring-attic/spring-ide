@@ -23,4 +23,8 @@ public class MissingPasswordException extends Exception {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	public MissingPasswordException(String message) {
+		super(message);
+	}
+
 }

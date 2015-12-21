@@ -14,7 +14,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.http.auth.InvalidCredentialsException;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
@@ -91,9 +90,9 @@ public class CloudFoundryClientFactory {
 		return spaces;
 	}
 
-	public static void checkPassword(String password, String id) throws InvalidCredentialsException {
+	public static void checkPassword(String password, String id) throws MissingPasswordException {
 		if (password == null) {
-			throw new InvalidCredentialsException("No password stored or set for: " + id
+			throw new MissingPasswordException("No password stored or set for: " + id
 					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
 		}
 	}
