@@ -26,6 +26,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
+import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
@@ -175,7 +176,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	protected List<IJavaElement> getLinkTargets(MockEditor editor, int pos) {
 		IRegion region = engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
-			SpringPropertyHoverInfo info = engine.getHoverInfo(editor.document, region);
+			HoverInfo info = engine.getHoverInfo(editor.document, region);
 			if (info!=null) {
 				return info.getJavaElements();
 			}

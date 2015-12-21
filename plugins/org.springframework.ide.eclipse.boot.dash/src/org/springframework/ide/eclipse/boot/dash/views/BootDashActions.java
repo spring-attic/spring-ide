@@ -83,19 +83,6 @@ public class BootDashActions {
 		makeActions();
 	}
 
-	/**
-	 * Create BDA tied to a specific section (in the old dashboard which has one section per RunTarget).
-	 */
-	public BootDashActions(BootDashViewModel model, BootDashModel sectionModel,
-			MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		this(
-				model,
-				selection,
-				LiveExpression.constant(sectionModel),
-				ui
-		);
-	}
-
 	protected void makeActions() {
 		RunStateAction restartAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.RUNNING);
 		restartAction.setText("(Re)start");
@@ -103,7 +90,14 @@ public class BootDashActions {
 		restartAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
 		restartAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
 
-		RunStateAction rebugAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.DEBUGGING);
+		RunStateAction rebugAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.DEBUGGING) {
+			@Override
+			protected boolean appliesToElement(BootDashElement e) {
+				//Do not enable redebug action for node that has multiple children
+				// See https://www.pivotaltracker.com/story/show/110374096
+				return e.getChildren().getValues().size()<=1;
+			}
+		};
 		rebugAction.setText("(Re)debug");
 		rebugAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode");
 		rebugAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));

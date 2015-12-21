@@ -45,7 +45,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		assertIsHoverRegion(editor, "server");
 		assertIsHoverRegion(editor, "port");
 
-		assertHoverContains(editor, "name", "<b>spring.application.name</b><br><a href=\"type%2Fjava.lang.String\">java.lang.String</a><br><br>Application name.</body>");
+		assertHoverContains(editor, "name", "<b>spring.application.name</b>");
 		assertHoverContains(editor, "port", "<b>server.port</b>");
 		assertHoverContains(editor, "8888", "<b>server.port</b>"); // hover over value show info about corresponding key. Is this logical?
 

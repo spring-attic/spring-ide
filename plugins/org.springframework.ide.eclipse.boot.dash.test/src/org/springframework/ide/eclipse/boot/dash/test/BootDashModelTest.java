@@ -61,7 +61,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -70,11 +69,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunTarget;
-import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -570,61 +565,6 @@ public class BootDashModelTest {
 
 	}
 
-	@Test
-	public void openConfigActionEnablement() throws Exception {
-		String projectName = "hohoho";
-		IProject project = createBootProject(projectName);
-		IJavaProject javaProject = JavaCore.create(project);
-		final BootDashElement element = harness.getElementWithName(projectName);
-
-		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final OpenLaunchConfigAction action = new OpenLaunchConfigAction(harness.model, selection.forReading(), ui);
-
-		//If selection is empty the action must not be enabled
-		assertTrue(selection.isEmpty());
-		assertFalse(action.isEnabled());
-
-		//If selection has more than one element... the action must not be enabled
-		selection.setElements(element, mock(BootDashElement.class));
-		assertFalse(action.isEnabled());
-
-		//If selection has one element...
-		selection.setElements(element);
-
-		//a) and element has no launch configs...
-		assertTrue(element.getLaunchConfigs().isEmpty());
-		assertTrue(action.isEnabled());
-
-		// Careful... when changing the launch configs of a element, the enablement state of
-		// action should auto-refresh, but this happens asyncly so the tests sequences are put in such
-		// a order that the enablement state changes on each (otherwise the ACondition may vacuously
-		// pass immediately even if the enablement didn't get updated, as it was correct from
-		// the start)
-
-		//b) and element has multiple launch config
-		assertTrue(action.isEnabled()); // make sure the test won't pass 'by accident'.
-		final ILaunchConfiguration c1 = BootLaunchConfigurationDelegate.createConf(javaProject);
-		final ILaunchConfiguration c2 = BootLaunchConfigurationDelegate.createConf(javaProject);
-		new ACondition(2000) {
-			public boolean test() throws Exception {
-				assertEquals(ImmutableSet.of(c1,c2), element.getLaunchConfigs());
-				assertFalse(action.isEnabled());
-				return true;
-			}
-		};
-
-		//b) and element has a single launch config
-		assertFalse(action.isEnabled()); // make sure the test won't pass 'by accident'.
-		c2.delete();
-		new ACondition(2000) {
-			public boolean test() throws Exception {
-				assertEquals(ImmutableSet.of(c1), element.getLaunchConfigs());
-				assertTrue(action.isEnabled());
-				return true;
-			}
-		};
-
-	}
 
 	/**************************************************************************************
 	 * TAGS Tests START
@@ -805,6 +745,9 @@ public class BootDashModelTest {
 	@Rule
 	public TestRule listenerLeakDetector = new ListenerLeakDetector();
 
+	@Rule
+	public LaunchCleanups launchCleanups = new LaunchCleanups();
+
 	private UserInteractions ui;
 	private BootDashViewModelHarness harness;
 
@@ -836,19 +779,6 @@ public class BootDashModelTest {
 
 	@After
 	public void tearDown() throws Exception {
-		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunch[] launches = launchManager.getLaunches();
-		for (ILaunch l : launches) {
-			if (!l.isTerminated()) {
-				fail("Leaky test code leaves launch running? "+l);
-			}
-			launchManager.removeLaunch(l);
-		}
-
-		for (ILaunchConfiguration conf : launchManager.getLaunchConfigurations()) {
-			conf.delete();
-		}
-
 		/*
 		 * Remove any working sets created by the tests (BDEs filtering tests create working sets)
 		 */
