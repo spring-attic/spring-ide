@@ -25,13 +25,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashActions.RunOrDebugStateAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -46,7 +46,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * @author Kris De Volder
  */
-public class BootDashActionEnablementTests {
+public class BootDashActionTests {
 
 	@Test
 	public void openConfigActionEnablementForProject() throws Exception {
@@ -155,7 +155,7 @@ public class BootDashActionEnablementTests {
 	}
 
 	@Test
-	public void openRedebugActionEnablementForProject() throws Exception {
+	public void redebugActionEnablementForProject() throws Exception {
 		String projectName = "hohoho";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
@@ -206,7 +206,7 @@ public class BootDashActionEnablementTests {
 	}
 
 	@Test
-	public void openRedebugActionEnablementForMultipleProjects() throws Exception {
+	public void redebugActionEnablementForMultipleProjects() throws Exception {
 		IProject p1 = createBootProject("project1");
 		IProject p2 = createBootProject("project2");
 
@@ -224,6 +224,101 @@ public class BootDashActionEnablementTests {
 		assertTrue(action.isEnabled());
 	}
 
+	@Test
+	public void restartActionEnablementForProject() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final BootDashElement element = harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final RunStateAction action = getRunStateAction(RunState.RUNNING);
+
+		//If selection is empty the action must not be enabled
+		assertTrue(selection.isEmpty());
+		assertFalse(action.isEnabled());
+
+		//If selection has one element...
+		selection.setElements(element);
+
+		//a) and element has no launch configs...
+		assertTrue(element.getLaunchConfigs().isEmpty());
+		assertTrue(action.isEnabled());
+
+		//b) and element has multiple launch config
+		action.setEnabled(false); // make sure the test won't pass 'by accident'.
+		final ILaunchConfiguration c1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		final ILaunchConfiguration c2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		new ACondition(2000) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(c1,c2), element.getLaunchConfigs());
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		//b) and element has a single launch config
+		action.setEnabled(false); // make sure the test won't pass 'by accident'.
+		c2.delete();
+		new ACondition(2000) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(c1), element.getLaunchConfigs());
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+	}
+
+	@Test
+	public void restartActionEnablementForMultipleProjects() throws Exception {
+		IProject p1 = createBootProject("project1");
+		IProject p2 = createBootProject("project2");
+
+		BootDashElement e1 = harness.getElementWithName(p1.getName());
+		BootDashElement e2 = harness.getElementWithName(p2.getName());
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final RunStateAction action = getRunStateAction(RunState.RUNNING);
+
+		assertTrue(selection.isEmpty());
+		assertFalse(action.isEnabled());
+
+		selection.setElements(e1, e2);
+
+		assertTrue(action.isEnabled());
+	}
+
+	@Test
+	public void restartActionTargetsChildrenDirectly() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final RunOrDebugStateAction action = (RunOrDebugStateAction) getRunStateAction(RunState.RUNNING);
+
+		final BootDashElement element = harness.getElementWithName(projectName);
+		final ILaunchConfiguration c1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		final ILaunchConfiguration c2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+
+		BootDashElement child1 = harness.getElementFor(c1);
+		BootDashElement child2 = harness.getElementFor(c2);
+
+		ImmutableSet<BootDashElement> theChildren = ImmutableSet.of(
+				child1, child2
+		);
+
+		assertEquals(theChildren, element.getChildren().getValues());
+
+		selection.setElements(element);
+		assertEquals(ImmutableSet.of(element), action.getSelectedElements());
+		assertEquals(theChildren, action.getTargetElements());
+
+		selection.setElements(element, child1);
+
+		assertEquals(ImmutableSet.of(element, child1), action.getSelectedElements());
+		assertEquals(theChildren, action.getTargetElements());
+	}
 
 	////////////////////////////////////////////////////////////////////////
 

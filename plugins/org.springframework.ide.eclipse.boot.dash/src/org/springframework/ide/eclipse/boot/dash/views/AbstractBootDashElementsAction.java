@@ -73,7 +73,7 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		this.setEnabled(selecteds.size()==1);
 	}
 
-	protected Collection<BootDashElement> getSelectedElements() {
+	public Collection<BootDashElement> getSelectedElements() {
 		return selection.getValue();
 	}
 
