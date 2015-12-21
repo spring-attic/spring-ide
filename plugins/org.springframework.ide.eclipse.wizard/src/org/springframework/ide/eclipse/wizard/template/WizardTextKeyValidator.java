@@ -17,7 +17,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.wizard.template.infrastructure.ui.WizardUIInfoElement;
 
-
+
 /**
  * @author Terry Denney
  */

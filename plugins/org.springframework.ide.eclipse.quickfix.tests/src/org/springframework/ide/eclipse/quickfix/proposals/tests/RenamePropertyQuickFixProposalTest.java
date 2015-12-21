@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.quickfix.proposals.RenamePropertyQuickfixProposal;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
 
-
+
 /**
  * @author Terry Denney
  * @author Christian Dupuis

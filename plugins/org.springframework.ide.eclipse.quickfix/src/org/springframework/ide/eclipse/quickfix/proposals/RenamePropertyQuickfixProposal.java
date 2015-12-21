@@ -47,7 +47,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.util.StringUtils;
 
-
+
 /**
  * @author Terry Denney
  * @author Christian Dupuis

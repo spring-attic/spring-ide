@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.w3c.dom.Node;
 
-
+
 /**
  * @author Terry Denney
  */
