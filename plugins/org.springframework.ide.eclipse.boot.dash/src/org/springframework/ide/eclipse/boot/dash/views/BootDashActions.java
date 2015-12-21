@@ -59,6 +59,7 @@ public class BootDashActions {
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
+	private ToggleBootDashModelConnection toggleTargetConnectionAction;
 
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -146,6 +147,7 @@ public class BootDashActions {
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
 			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
+			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
@@ -173,7 +175,7 @@ public class BootDashActions {
 		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
 		for (RunTargetType tt : targetTypes) {
 			if (tt.canInstantiate()) {
-				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), elementsSelection, ui));
+				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), ui));
 			}
 		}
 		return actions.toArray(new AddRunTargetAction[actions.size()]);
@@ -335,6 +337,10 @@ public class BootDashActions {
 
 	public IAction getOpenCloudAdminConsoleAction() {
 		return openCloudAdminConsoleAction;
+	}
+
+	public IAction getToggleTargetConnectionAction() {
+		return toggleTargetConnectionAction;
 	}
 
 	/**

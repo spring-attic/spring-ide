@@ -16,7 +16,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.springframework.ide.eclipse.quickfix.proposals.RenameMethodQuickfixProposal;
 
-
+
 /**
  * @author Terry Denney
  */

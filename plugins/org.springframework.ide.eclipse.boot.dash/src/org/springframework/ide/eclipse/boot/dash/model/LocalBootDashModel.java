@@ -15,10 +15,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
@@ -149,7 +147,7 @@ public class LocalBootDashModel extends BootDashModel {
 	/**
 	 * Trigger manual model refresh.
 	 */
-	public void refresh() {
+	public void refresh(UserInteractions ui) {
 		updateElementsFromWorkspace();
 	}
 

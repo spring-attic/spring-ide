@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -141,17 +142,28 @@ public class BootDashLabels implements Disposable {
 	// methods instead.
 
 	public Image[] getImageAnimation(BootDashModel element, BootDashColumn column) {
-		ImageDescriptor icon = element.getRunTarget().getType().getIcon();
+		ImageDescriptor icon = getIcon(element);
 		ImageDescriptor decoration = getDecoration(element);
 		return toAnimation(icon, decoration);
 	}
 
+	private ImageDescriptor getIcon(BootDashModel element) {
+		if (element instanceof CloudFoundryBootDashModel) {
+			CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) element;
+			if (cfModel.getCloudTarget().isConnected()) {
+				return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
+			} else {
+				return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
+			}
+		}
+		return element.getRunTarget().getType().getIcon();
+	}
+
 	private ImageDescriptor getDecoration(BootDashModel element) {
-		RefreshState s = element.getState();
-		if (s==RefreshState.LOADING) {
-			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
-		} else if (s.isError()) {
+		if (element.getRefreshState().getId() == RefreshState.ERROR.getId()) {
 			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
+		} else if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
+			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
 		}
 		return null;
 	}
@@ -190,8 +202,12 @@ public class BootDashLabels implements Disposable {
 			if (element.getRunTarget() != null) {
 				//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
 				// colorfully.
-				if (element.getState() == RefreshState.LOADING) {
-					return new StyledString("Loading... - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY)).append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
+				if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
+					StyledString prefix = new StyledString();
+					if (element.getRefreshState().getMessage() != null) {
+						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
+					}
+					return prefix.append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
 				} else {
 					return new StyledString(element.getRunTarget().getName(), stylers.bold());
 				}

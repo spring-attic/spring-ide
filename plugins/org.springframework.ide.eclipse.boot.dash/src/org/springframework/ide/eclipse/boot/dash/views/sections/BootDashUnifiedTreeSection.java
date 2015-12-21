@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -56,7 +55,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -66,9 +64,9 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
@@ -165,6 +163,27 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
+	final private ModelStateListener MODEL_STATE_LISTENER = new ModelStateListener() {
+		public void stateChanged(final BootDashModel model) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					if (tv != null && !tv.getControl().isDisposed()) {
+						tv.update(model, null);
+						/*
+						 * TODO: ideally the above should do the repaint of
+						 * the control's area where the tree item is
+						 * located, but for some reason repaint doesn't
+						 * happen. #refresh() didn't trigger the repaint either
+						 */
+						tv.getControl().redraw();
+					} else {
+						model.removeModelStateListener(MODEL_STATE_LISTENER);
+					}
+				}
+			});
+		}
+	};
+
 	final private ValueListener<Set<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<Set<RunTarget>>() {
 		protected void uiGotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
@@ -184,25 +203,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				//This listener can't easily be removed because of the intermediary adapter that adds it to a numner of different
 				// things. So at least remove it when model remains chatty after view got disposed.
 				exp.removeListener(this);
-			}
-		}
-	};
-
-	private final ValueListener<RefreshState> MODEL_STATE_LISTENER = new UIValueListener<RefreshState>() {
-		@Override
-		protected void uiGotValue(LiveExpression<RefreshState> exp, RefreshState value) {
-			BootDashModel model = exp.getOwner(BootDashModel.class);
-			if (tv != null && !tv.getControl().isDisposed()) {
-				tv.update(model, null);
-				/*
-				 * TODO: ideally the above should do the repaint of
-				 * the control's area where the tree item is
-				 * located, but for some reason repaint doesn't
-				 * happen. #refresh() didn't trigger the repaint either
-				 */
-				tv.getControl().redraw();
-			} else {
-				model.removeModelStateListener(MODEL_STATE_LISTENER);
 			}
 		}
 	};
@@ -474,6 +474,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		IAction openCloudAdminConsoleAction = actions.getOpenCloudAdminConsoleAction();
 		if (openCloudAdminConsoleAction != null) {
 			addVisible(manager, openCloudAdminConsoleAction);
+		}
+
+		IAction toggleCloudConnectAction = actions.getToggleTargetConnectionAction();
+		if (toggleCloudConnectAction != null) {
+			addVisible(manager, toggleCloudConnectAction);
 		}
 
 		IAction reconnectConsole = actions.getReconnectCloudConsole();

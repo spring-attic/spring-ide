@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.quickfix.validator.helper.BeansValidation
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-
+
 /**
  * @author Terry Denney
  * @author Christian Dupuis

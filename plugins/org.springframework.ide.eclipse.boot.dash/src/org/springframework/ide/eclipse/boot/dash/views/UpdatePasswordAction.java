@@ -57,7 +57,7 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 							model.updatePropertiesInStore(runTarget);
 
 							// launch refresh if it validates
-							targetModel.refresh();
+							targetModel.refresh(ui);
 
 						} catch (Exception e) {
 							ui.errorPopup("Update Password Failure", "Credentials for " + targetId

@@ -18,12 +18,11 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * This performs a "two-tier" refresh as fetching list of
@@ -42,53 +41,64 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
  */
 public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
-	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
+	private UserInteractions ui;
+
+	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName(), model);
+		this.ui = ui;
 	}
 
 	@Override
-	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		model.setState(RefreshState.LOADING);
-		try {
+	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
+		if (model.getCloudTarget().isConnected()) {
+			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
+			try {
 
-			// 1. Fetch basic list of applications. Should be the "faster" of
-			// the
-			// two refresh operations
+				// 1. Fetch basic list of applications. Should be the "faster" of
+				// the
+				// two refresh operations
 
-			List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
+				List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
 
-			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
-			if (apps != null) {
+				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
+				if (apps != null) {
 
-				Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
-						.getMapping();
+					Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
+							.getMapping();
 
-				for (CloudApplication app : apps) {
+					for (CloudApplication app : apps) {
 
-					String projectName = existingProjectToAppMappings.get(app.getName());
-					IProject project = null;
-					if (projectName != null) {
-						project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-						if (project == null || !project.isAccessible()) {
-							project = null;
+						String projectName = existingProjectToAppMappings.get(app.getName());
+						IProject project = null;
+						if (projectName != null) {
+							project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+							if (project == null || !project.isAccessible()) {
+								project = null;
+							}
 						}
+
+						// No stats available at this stage. Just set stats to null
+						// for now.
+						updatedApplications.put(new CloudAppInstances(app, null), project);
 					}
-
-					// No stats available at this stage. Just set stats to null
-					// for now.
-					updatedApplications.put(new CloudAppInstances(app, null), project);
 				}
+
+				this.model.updateElements(updatedApplications);
+
+				// 2. Launch the slower app stats/instances refresh operation.
+				this.model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(this.model));
+				this.model.getOperationsExecution(ui).runOpAsynch(new HealthCheckRefreshOperation(this.model));
+				model.setRefreshState(RefreshState.READY);
+			} catch (Exception e) {
+				/*
+				 * Failed to obtain applications list from CF
+				 */
+				model.updateElements(null);
+				model.setRefreshState(RefreshState.error(e));
+				throw e;
 			}
-
-			this.model.updateElements(updatedApplications);
-
-			// 2. Launch the slower app stats/instances refresh operation.
-			this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
-			this.model.getOperationsExecution().runOpAsynch(new HealthCheckRefreshOperation(this.model));
-			model.setState(RefreshState.READY);
-		} catch (Exception e) {
-			model.setState(RefreshState.error(e));
-			BootDashActivator.log(e);
+		} else {
+			model.updateElements(null);
 		}
 	}
 

@@ -33,7 +33,7 @@ import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.config.core.IConfigEditor;
 import org.springframework.util.ReflectionUtils;
 
-
+
 /**
  * @author Terry Denney
  * @author Christian Dupuis

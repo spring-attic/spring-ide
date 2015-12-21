@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
@@ -39,6 +41,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
@@ -52,12 +55,12 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -151,6 +154,13 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		}
 	};
 
+	final private ValueListener<CloudFoundryOperations> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<CloudFoundryOperations>() {
+		@Override
+		public void gotValue(LiveExpression<CloudFoundryOperations> exp, CloudFoundryOperations value) {
+			CloudFoundryBootDashModel.this.notifyModelStateChanged();
+		}
+	};
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
 		RunTargetType type = target.getType();
@@ -161,7 +171,11 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
+		getCloudTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+		if (getCloudTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
+			getOperationsExecution().runOpAsynch(new ConnectOperation(this, true));
+		}
 	}
 
 	public CloudAppCache getAppCache() {
@@ -172,27 +186,14 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	public ObservableSet<BootDashElement> getElements() {
 		if (elements == null) {
 			elements = new LiveSetVariable<BootDashElement>();
-			asyncRefreshElements();
+			refresh(null);
 		}
 		return elements;
 	}
 
-	protected void asyncRefreshElements() {
-		if (elements == null) {
-			return;
-		}
-
-		try {
-			Operation<Void> op = new TargetApplicationsRefreshOperation(this);
-			getOperationsExecution().runOpAsynch(op);
-		} catch (Exception e) {
-			setState(RefreshState.error(e));
-			BootDashActivator.log(e);
-		}
-	}
-
 	@Override
 	public void dispose() {
+		getCloudTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		elements = null;
 		if (debugTargetDisconnector!=null) {
 			debugTargetDisconnector.dispose();
@@ -202,8 +203,12 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 	}
 
 	@Override
-	public void refresh() {
-		asyncRefreshElements();
+	public void refresh(UserInteractions ui) {
+		if (elements == null) {
+			return;
+		}
+		Operation<Void> op = new TargetApplicationsRefreshOperation(this, ui);
+		getOperationsExecution(ui).runOpAsynch(op);
 	}
 
 	public CloudFoundryRunTarget getCloudTarget() {
@@ -212,7 +217,7 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	@Override
 	public boolean canBeAdded(List<Object> sources) {
-		if (sources != null && !sources.isEmpty()) {
+		if (sources != null && !sources.isEmpty() && getCloudTarget().isConnected()) {
 			for (Object obj : sources) {
 				// IMPORTANT: to avoid drag/drop into the SAME target, be
 				// sure
@@ -337,42 +342,50 @@ public class CloudFoundryBootDashModel extends BootDashModel implements Modifiab
 
 	public void updateElements(Map<CloudAppInstances, IProject> apps) throws Exception {
 
-		Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
-		List<String> toNotify = null;
-		synchronized (this) {
+		if (apps == null) {
+			/*
+			 * Error case: set empty list of BDEs don't modify state of local to CF artifacts mappings
+			 */
+			elements.replaceAll(Collections.<BootDashElement>emptyList());
+		} else {
 
-			// Update external cache that keeps track of additional element
-			// state (e.g the running state,
-			// app instances, and project mapping)
-			toNotify = getAppCache().updateAll(apps);
+			Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
+			List<String> toNotify = null;
+			synchronized (this) {
 
-			// Create new handles to the applications. Note that the cache
-			// should be updated first before creating elements
-			// as elements are handles to state in the cache
-			for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
-				BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
-				updated.put(addedElement.getName(), addedElement);
+				// Update external cache that keeps track of additional element
+				// state (e.g the running state,
+				// app instances, and project mapping)
+				toNotify = getAppCache().updateAll(apps);
+
+				// Create new handles to the applications. Note that the cache
+				// should be updated first before creating elements
+				// as elements are handles to state in the cache
+				for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
+					BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
+					updated.put(addedElement.getName(), addedElement);
+				}
+
+				projectAppStore.storeProjectToAppMapping(updated.values());
 			}
 
-			projectAppStore.storeProjectToAppMapping(updated.values());
-		}
+			// Fire events outside of synch block to avoid deadlock
 
-		// Fire events outside of synch block to avoid deadlock
+			// This only fires a model CHANGE event (adding/removing elements). It
+			// does not fire an event for app state changes that are tracked
+			// externally
+			// (runstate, instances, project) in the cache. The latter is handled
+			// separately
+			// below.
+			elements.replaceAll(updated.values());
 
-		// This only fires a model CHANGE event (adding/removing elements). It
-		// does not fire an event for app state changes that are tracked
-		// externally
-		// (runstate, instances, project) in the cache. The latter is handled
-		// separately
-		// below.
-		elements.replaceAll(updated.values());
-
-		// Fire app state change based on changes to the app cache
-		if (toNotify != null) {
-			for (String appName : toNotify) {
-				BootDashElement updatedEl = updated.get(appName);
-				if (updatedEl != null) {
-					notifyElementChanged(updatedEl);
+			// Fire app state change based on changes to the app cache
+			if (toNotify != null) {
+				for (String appName : toNotify) {
+					BootDashElement updatedEl = updated.get(appName);
+					if (updatedEl != null) {
+						notifyElementChanged(updatedEl);
+					}
 				}
 			}
 		}

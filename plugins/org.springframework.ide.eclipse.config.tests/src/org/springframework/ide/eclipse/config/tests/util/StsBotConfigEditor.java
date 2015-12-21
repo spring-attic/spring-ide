@@ -54,7 +54,7 @@ import org.hamcrest.Matcher;
 import org.springframework.ide.eclipse.config.tests.util.gef.StsBotGefEditor;
 import org.springframework.ide.eclipse.config.ui.editors.SpringConfigEditor;
 
-
+
 /**
  * @author Terry Denney
  * @author Leo Dos Santos
