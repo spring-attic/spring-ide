@@ -17,16 +17,12 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -34,8 +30,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-
-import com.google.common.collect.ImmutableSet;
 
 public class MockRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
@@ -70,7 +64,7 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 	}
 
 	@Override
-	public BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel viewModel) {
+	public MockBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel viewModel) {
 		return new MockBootDashModel(this, context, viewModel);
 	}
 

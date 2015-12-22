@@ -40,7 +40,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  *
  * @author Kris De Volder
  */
-public class LocalBootDashModel extends BootDashModel {
+public class LocalBootDashModel extends AbstractBootDashModel {
 
 	private IWorkspace workspace;
 	private BootProjectDashElementFactory projectElementFactory;

@@ -1,92 +1,15 @@
-/*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Pivotal, Inc. - initial API and implementation
- *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
-public abstract class BootDashModel {
+public interface BootDashModel {
 
-	private BootDashViewModel parent;
-	private RunTarget target;
-
-	private LiveVariable<RefreshState> refreshState;
-
-	public BootDashModel(RunTarget target, BootDashViewModel parent) {
-		super();
-		this.target = target;
-		this.parent = parent;
-		this.refreshState = new LiveVariable<RefreshState>(RefreshState.READY, this);
+	interface ModelStateListener {
+		void stateChanged(BootDashModel model);
 	}
 
-	public RunTarget getRunTarget() {
-		return this.target;
-	}
-
-	ListenerList elementStateListeners = new ListenerList();
-
-	public void notifyElementChanged(BootDashElement element) {
-		for (Object l : elementStateListeners.getListeners()) {
-			((ElementStateListener) l).stateChanged(element);
-		}
-	}
-
-	ListenerList modelStateListeners = new ListenerList();
-
-	protected final void notifyModelStateChanged() {
-		for (Object l : modelStateListeners.getListeners()) {
-			((ModelStateListener) l).stateChanged(this);
-		}
-	}
-
-	abstract public ObservableSet<BootDashElement> getElements();
-
-	abstract public BootDashModelConsoleManager getElementConsoleManager();
-
-	/**
-	 * When no longer needed the model should be disposed, otherwise it will
-	 * continue listening for changes to the workspace in order to keep itself
-	 * in synch.
-	 */
-	abstract public void dispose();
-
-	/**
-	 * Trigger manual model refresh.
-	 */
-	abstract public void refresh(UserInteractions ui);
-
-	/**
-	 * Returns the state of the model
-	 * @return
-	 */
-	public RefreshState getRefreshState() {
-		return refreshState.getValue();
-	}
-
-	public final void setRefreshState(RefreshState newState) {
-		refreshState.setValue(newState);
-		notifyModelStateChanged();
-	}
-
-	public void addElementStateListener(ElementStateListener l) {
-		elementStateListeners.add(l);
-	}
-
-	public void removeElementStateListener(ElementStateListener l) {
-		elementStateListeners.remove(l);
-	}
-
-	public interface ElementStateListener {
+	interface ElementStateListener {
 		/**
 		 * Called when something about the element has changed.
 		 * <p>
@@ -101,20 +24,36 @@ public abstract class BootDashModel {
 		void stateChanged(BootDashElement e);
 	}
 
-	public interface ModelStateListener {
-		void stateChanged(BootDashModel model);
-	}
+	RunTarget getRunTarget();
 
-	public void addModelStateListener(ModelStateListener l) {
-		modelStateListeners.add(l);
-	}
+	ObservableSet<BootDashElement> getElements();
 
-	public void removeModelStateListener(ModelStateListener l) {
-		modelStateListeners.remove(l);
-	}
+	BootDashModelConsoleManager getElementConsoleManager();
 
-	public BootDashViewModel getViewModel() {
-		return parent;
-	}
+	/**
+	 * When no longer needed the model should be disposed, otherwise it will
+	 * continue listening for changes to the workspace in order to keep itself
+	 * in synch.
+	 */
+	void dispose();
+
+	/**
+	 * Trigger manual model refresh.
+	 */
+	void refresh(UserInteractions ui);
+
+	void addElementStateListener(BootDashModel.ElementStateListener l);
+
+	void removeElementStateListener(BootDashModel.ElementStateListener l);
+
+	void addModelStateListener(BootDashModel.ModelStateListener l);
+
+	void removeModelStateListener(BootDashModel.ModelStateListener l);
+
+	BootDashViewModel getViewModel();
+
+	void notifyElementChanged(BootDashElement element);
+
+	RefreshState getRefreshState();
 
 }
