@@ -70,4 +70,13 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 		debug("Disposing: "+this);
 	}
 
+	@Override
+	public Object getParent() {
+		IProject p = getProject();
+		if (p!=null) {
+			return getBootDashModel().getProjectElementFactory().createOrGet(p);
+		}
+		return null;
+	}
+
 }

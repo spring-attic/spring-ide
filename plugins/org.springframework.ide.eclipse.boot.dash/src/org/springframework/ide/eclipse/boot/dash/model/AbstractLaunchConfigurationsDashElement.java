@@ -66,7 +66,7 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Abstracts out the commonlaities between {@link BootProjectDashElement} and {@link LaunchConfDashElement}. Each can
+ * Abstracts out the commonalities between {@link BootProjectDashElement} and {@link LaunchConfDashElement}. Each can
  * be viewed as representing a collection of launch configuration.
  * <p>
  * A {@link BootProjectDashElement} element represents all the launch configurations associated with a given project whereas as
@@ -86,7 +86,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	private static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
 	private LiveExpression<RunState> runState;
-	public LiveExpression<Integer> livePort;
+	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
 	private PropertyStoreApi persistentProperties;
 
@@ -135,6 +135,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	@Override
 	public int getLivePort() {
 		return livePort.getValue();
+	}
+
+	public LiveExpression<Integer> getLivePortExp() {
+		return livePort;
 	}
 
 	@Override

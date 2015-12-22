@@ -11,15 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -69,7 +66,7 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * The 'default' path is used by some actions to quickly open
 	 * the app in a browser view. This is just a stored value. There is no guarantee
 	 * that it actually exists on the given element when it is running (i.e. it may
-	 * or may not be the path of a RequestMapping returned from get getLiveRequestMappings.
+	 * or may not be the path of a RequestMapping returned from getLiveRequestMappings.
 	 * Usually, it should be, but if the request mappings have changed since the
 	 * value was stored then it may no longer exist.
 	 */
@@ -87,5 +84,12 @@ public interface BootDashElement extends Nameable, Taggable {
 	ImmutableSet<BootDashElement> getCurrentChildren();
 	ObservableSet<BootDashElement> getChildren();
 	ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
+	ImmutableSet<Integer> getLivePorts();
 
+	/**
+	 * Fetch the parent of a BDE. If this is a nested BDE then the parent will be
+	 * another {@link BootDashElement}. If the element is one owned directly by a
+	 * {@link BootDashModel} then the parent is that model.
+	 */
+	Object getParent();
 }

@@ -198,4 +198,19 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement, Dis
 		//Subclass should override when elements relate to launch configs.
 		return ImmutableSet.of();
 	}
+
+	/**
+	 * Gets a summary of the 'livePorts' for this node and its children. This default implementation
+	 * is provided for nodes that only have a single port. Nodes that need to compute an actual
+	 * summary should override this.
+	 */
+	@Override
+	public ImmutableSet<Integer> getLivePorts() {
+		int port = getLivePort();
+		if (port>0) {
+			return ImmutableSet.of(port);
+		} else {
+			return ImmutableSet.of();
+		}
+	}
 }
