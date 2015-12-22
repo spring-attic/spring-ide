@@ -32,6 +32,9 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
 public class BootDashActions {
 
 	private final static String PROPERTIES_VIEW_ID = "org.eclipse.ui.views.PropertySheet"; //$NON-NLS-1$
@@ -84,24 +87,9 @@ public class BootDashActions {
 	}
 
 	protected void makeActions() {
-		RunStateAction restartAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.RUNNING);
-		restartAction.setText("(Re)start");
-		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
-		restartAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
-		restartAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+		RunStateAction restartAction = new RestartAction(model, elementsSelection, ui, RunState.RUNNING);
 
-		RunStateAction rebugAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.DEBUGGING) {
-			@Override
-			protected boolean appliesToElement(BootDashElement e) {
-				//Do not enable redebug action for node that has multiple children
-				// See https://www.pivotaltracker.com/story/show/110374096
-				return e.getChildren().getValues().size()<=1;
-			}
-		};
-		rebugAction.setText("(Re)debug");
-		rebugAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode");
-		rebugAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
-		rebugAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
+		RunStateAction rebugAction = new RedebugAction(model, elementsSelection, ui, RunState.DEBUGGING);
 
 		RunStateAction stopAction = new RunStateAction(model, elementsSelection, ui, RunState.INACTIVE) {
 			@Override
@@ -193,7 +181,64 @@ public class BootDashActions {
 		return actions.toArray(new AddRunTargetAction[actions.size()]);
 	}
 
-	static class RunOrDebugStateAction extends RunStateAction {
+	private static final class RestartAction extends RunOrDebugStateAction {
+		private RestartAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,
+				RunState goalState) {
+			super(model, selection, ui, goalState);
+			setText("(Re)start");
+			setToolTipText("Start or restart the process associated with the selected elements");
+			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
+			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+		}
+
+		/**
+		 * Overrides parent to automatically retarget this action to apply to all the children of an element
+		 * (if it has children). This way the action behaves logically if both a parent and some children
+		 * are selected (i.e. we don't want to execute the action twice on the explicitly selected children!)
+		 */
+		@Override
+		public Collection<BootDashElement> getTargetElements() {
+			Builder<BootDashElement> builder = ImmutableSet.builder();
+			addTargetsFor(builder, getSelectedElements());
+			return builder.build();
+		}
+
+		private void addTargetsFor(Builder<BootDashElement> builder, Collection<BootDashElement> selecteds) {
+			for (BootDashElement s : selecteds) {
+				addTargetsFor(builder, s);
+			}
+		}
+
+		private void addTargetsFor(Builder<BootDashElement> builder, BootDashElement s) {
+			ImmutableSet<BootDashElement> children = s.getChildren().getValues();
+			if (children.isEmpty()) {
+				//No children, add s itself
+				builder.add(s);
+			} else {
+				addTargetsFor(builder, children);
+			}
+		}
+	}
+
+	private static final class RedebugAction extends RunOrDebugStateAction {
+		private RedebugAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,
+				RunState goalState) {
+			super(model, selection, ui, goalState);
+			setText("(Re)debug");
+			setToolTipText("Start or restart the process associated with the selected elements in debug mode");
+			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
+			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
+		}
+
+		@Override
+		protected boolean appliesToElement(BootDashElement e) {
+			//Do not enable redebug action for node that has multiple children
+			// See https://www.pivotaltracker.com/story/show/110374096
+			return e.getChildren().getValues().size()<=1;
+		}
+	}
+
+	public static class RunOrDebugStateAction extends RunStateAction {
 
 		public RunOrDebugStateAction(BootDashViewModel model, MultiSelection<BootDashElement> selection,
 				UserInteractions ui, RunState goalState) {
@@ -203,7 +248,7 @@ public class BootDashActions {
 
 		@Override
 		protected Job createJob() {
-			final Collection<BootDashElement> selecteds = getSelectedElements();
+			final Collection<BootDashElement> selecteds = getTargetElements();
 			if (!selecteds.isEmpty()) {
 				return new Job("Restarting " + selecteds.size() + " Dash Elements") {
 					@Override
@@ -228,6 +273,15 @@ public class BootDashActions {
 				};
 			}
 			return null;
+		}
+
+		/**
+		 * Determines the elements that the action will effectively operator on when
+		 * it is executed. This is typically the same as the selected elements, but some
+		 * actions may want to 'reinterpret' the selected elements.
+		 */
+		public Collection<BootDashElement> getTargetElements() {
+			return getSelectedElements();
 		}
 	}
 
