@@ -22,7 +22,6 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -43,7 +42,6 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -57,8 +55,8 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-
-import com.google.common.collect.ImmutableSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
@@ -70,15 +68,15 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private List<Buildpack> buildpacks;
 
 	private CloudInfoV2 cachedCloudInfo;
-	private CloudFoundryOperations cachedClient;
+	private LiveVariable<CloudFoundryOperations> cachedClient;
 	private CloudFoundryClientFactory clientFactory;
-
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
+		this.cachedClient = new LiveVariable<>();
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
@@ -95,11 +93,44 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return null;
 	}
 
-	public CloudFoundryOperations getClient() throws Exception {
-		if (cachedClient == null) {
-			cachedClient = createClient();
+	public CloudFoundryOperations getClient() {
+		return cachedClient.getValue();
+	}
+
+	public void connect() throws Exception {
+		try {
+			this.cachedCloudInfo = null;
+			this.domains = null;
+			this.spaces = null;
+			this.buildpacks = null;
+			cachedClient.setValue(createClient());
+		} catch (Exception e) {
+			cachedClient.setValue(null);
+			throw e;
 		}
-		return cachedClient;
+	}
+
+	public void disconnect() {
+		this.cachedCloudInfo = null;
+		this.domains = null;
+		this.spaces = null;
+		this.buildpacks = null;
+		if (getClient() != null) {
+			getClient().logout();
+			cachedClient.setValue(null);
+		}
+	}
+
+	public boolean isConnected() {
+		return cachedClient.getValue() != null;
+	}
+
+	public void addConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
+		cachedClient.addListener(l);
+	}
+
+	public void removeConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
+		cachedClient.removeListener(l);
 	}
 
 	public Version getCCApiVersion() {
@@ -162,11 +193,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public void refresh() throws Exception {
 		// Fetching a new client always validates the CF credentials
-		this.cachedClient = createClient();
-		this.cachedCloudInfo = null;
-		this.domains = null;
-		this.spaces = null;
-		this.buildpacks = null;
+		disconnect();
+		connect();
 	}
 
 	@Override

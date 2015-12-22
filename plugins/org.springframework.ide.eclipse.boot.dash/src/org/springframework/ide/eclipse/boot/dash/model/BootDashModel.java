@@ -14,19 +14,19 @@ import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public abstract class BootDashModel {
 
 	private BootDashViewModel parent;
 	private RunTarget target;
 
-	private LiveVariable<RefreshState> state = new LiveVariable<RefreshState>(RefreshState.READY, this);
+	private LiveVariable<RefreshState> refreshState;
 
 	public BootDashModel(RunTarget target, BootDashViewModel parent) {
 		super();
 		this.target = target;
 		this.parent = parent;
+		this.refreshState = new LiveVariable<RefreshState>(RefreshState.READY, this);
 	}
 
 	public RunTarget getRunTarget() {
@@ -38,6 +38,14 @@ public abstract class BootDashModel {
 	public void notifyElementChanged(BootDashElement element) {
 		for (Object l : elementStateListeners.getListeners()) {
 			((ElementStateListener) l).stateChanged(element);
+		}
+	}
+
+	ListenerList modelStateListeners = new ListenerList();
+
+	protected final void notifyModelStateChanged() {
+		for (Object l : modelStateListeners.getListeners()) {
+			((ModelStateListener) l).stateChanged(this);
 		}
 	}
 
@@ -55,18 +63,19 @@ public abstract class BootDashModel {
 	/**
 	 * Trigger manual model refresh.
 	 */
-	abstract public void refresh();
+	abstract public void refresh(UserInteractions ui);
 
 	/**
 	 * Returns the state of the model
 	 * @return
 	 */
-	public RefreshState getState() {
-		return state.getValue();
+	public RefreshState getRefreshState() {
+		return refreshState.getValue();
 	}
 
-	public final void setState(RefreshState newState) {
-		state.setValue(newState);
+	public final void setRefreshState(RefreshState newState) {
+		refreshState.setValue(newState);
+		notifyModelStateChanged();
 	}
 
 	public void addElementStateListener(ElementStateListener l) {
@@ -92,12 +101,16 @@ public abstract class BootDashModel {
 		void stateChanged(BootDashElement e);
 	}
 
-	public void addModelStateListener(ValueListener<RefreshState> l) {
-		state.addListener(l);
+	public interface ModelStateListener {
+		void stateChanged(BootDashModel model);
 	}
 
-	public void removeModelStateListener(ValueListener<RefreshState> l) {
-		state.removeListener(l);
+	public void addModelStateListener(ModelStateListener l) {
+		modelStateListeners.add(l);
+	}
+
+	public void removeModelStateListener(ModelStateListener l) {
+		modelStateListeners.remove(l);
 	}
 
 	public BootDashViewModel getViewModel() {

@@ -25,6 +25,8 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public final static String ORG_GUID = "organization_guid";
 	public final static String SPACE_GUID = "space_guid";
 
+	public final static String DISCONNECTED = "disconnected";
+
 	public CloudFoundryTargetProperties(RunTargetType runTargetType) {
 		super(runTargetType);
 	}
