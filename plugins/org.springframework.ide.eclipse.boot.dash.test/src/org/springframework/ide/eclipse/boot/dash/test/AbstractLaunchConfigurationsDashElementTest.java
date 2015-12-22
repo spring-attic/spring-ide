@@ -108,6 +108,11 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		protected ImmutableSet<ILaunch> getLaunches() {
 			return ImmutableSet.of();
 		}
+
+		@Override
+		public Object getParent() {
+			return getBootDashModel();
+		}
 	}
 
 	private static final IType[] NO_TYPES = {};

@@ -50,7 +50,7 @@ public class BootDashTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object getParent(Object e) {
 		if (e instanceof BootDashElement) {
-			return ((BootDashElement) e).getBootDashModel();
+			return ((BootDashElement) e).getParent();
 		}
 		return null;
 	}

@@ -154,4 +154,9 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		return ImmutableSet.copyOf(BootLaunchUtils.getBootLaunches(getProject()));
 	}
 
+	@Override
+	public Object getParent() {
+		return getBootDashModel();
+	}
+
 }

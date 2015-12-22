@@ -307,4 +307,9 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		}
 	}
 
+	@Override
+	public Object getParent() {
+		return getBootDashModel();
+	}
+
 }

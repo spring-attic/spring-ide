@@ -86,4 +86,10 @@ public interface BootDashElement extends Nameable, Taggable {
 	ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
 	ImmutableSet<Integer> getLivePorts();
 
+	/**
+	 * Fetch the parent of a BDE. If this is a nested BDE then the parent will be
+	 * another {@link BootDashElement}. If the element is one owned directly by a
+	 * {@link BootDashModel} then the parent is that model.
+	 */
+	Object getParent();
 }
