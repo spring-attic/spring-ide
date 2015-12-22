@@ -38,6 +38,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private LaunchConfDashElementFactory childFactory;
 	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
+	private ObservableSet<Integer> ports;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
 			BootProjectDashElementFactory factory, LaunchConfDashElementFactory childFactory) {
@@ -88,6 +89,41 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			addDisposableChild(children);
 		}
 		return children;
+	}
+
+	@Override
+	public ImmutableSet<Integer> getLivePorts() {
+		return getLivePortsExp().getValues();
+	}
+
+	public ObservableSet<Integer> getLivePortsExp() {
+		if (this.ports==null) {
+			ObservableSet<LiveExpression<Integer>> livePorts = LiveSets.map(getAllChildren(), new Function<BootDashElement, LiveExpression<Integer>>() {
+				@Override
+				public LiveExpression<Integer> apply(BootDashElement element) {
+					if (element instanceof LaunchConfDashElement) {
+						return ((LaunchConfDashElement) element).getLivePortExp();
+					}
+					return null;
+				}
+			});
+			addDisposableChild(livePorts);
+			this.ports = LiveSets.sortedMappedValues(livePorts, new Function<Integer, Integer>() {
+				public Integer apply(Integer port) {
+					if (port!=null && port>0) {
+						return port;
+					}
+					return null;
+				}
+			});
+			addDisposableChild(this.ports);
+			this.ports.addListener(new ValueListener<ImmutableSet<Integer>>() {
+				public void gotValue(LiveExpression<ImmutableSet<Integer>> exp, ImmutableSet<Integer> value) {
+					getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
+				}
+			});
+		}
+		return this.ports;
 	}
 
 	/**

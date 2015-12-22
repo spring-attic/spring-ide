@@ -61,5 +61,4 @@ public abstract class ObservableSet<T> extends LiveExpression<ImmutableSet<T>> {
 		return getValue();
 	}
 
-
 }

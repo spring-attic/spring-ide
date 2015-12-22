@@ -15,6 +15,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
 /**
@@ -103,6 +105,26 @@ public class LiveSets {
 		return new MapSet<>(input, function);
 	}
 
+	/**
+	 * Creates an observable, sorted set by applying a mapping function to each value of an ObservableSet of LiveExps.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, R extends Comparable<?>> ObservableSet<R> sortedMappedValues(ObservableSet<LiveExpression<T>> input, final Function<T,R> mappingFunction) {
+		if (input==EMPTY_SET) {
+			return EMPTY_SET;
+		}
+		return new MappedValuesSet<T, R>(input) {
 
+			@Override
+			protected R applyFun(T arg) {
+				return mappingFunction.apply(arg);
+			}
+
+			@Override
+			protected Builder<R> immutableSetBuilder() {
+				return ImmutableSortedSet.naturalOrder();
+			}
+		};
+	}
 
 }

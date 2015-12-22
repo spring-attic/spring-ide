@@ -37,6 +37,8 @@ import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Provides various methods for implementing various Label providers for the Boot Dash
  * and its related views, dialogs etc.
@@ -327,12 +329,22 @@ public class BootDashLabels implements Disposable {
 			case LIVE_PORT:
 				RunState runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
-					int port = element.getLivePort();
-					String textLabel = port < 0 ? "unknown port" : (":" + port);
+					String textLabel;
+					ImmutableSet<Integer> ports = element.getLivePorts();
+					if (ports.isEmpty()) {
+						textLabel = "unknown port";
+					} else {
+						StringBuilder str = new StringBuilder();
+						for (Integer port : ports) {
+							str.append(":");
+							str.append(port);
+						}
+						textLabel = str.toString();
+					}
 					if (stylers == null) {
 						label = textLabel;
 					} else {
-						styledLabel = new StyledString(textLabel,stylers.darkGreen());
+						styledLabel = new StyledString(textLabel, stylers.darkGreen());
 					}
 				}
 				break;
