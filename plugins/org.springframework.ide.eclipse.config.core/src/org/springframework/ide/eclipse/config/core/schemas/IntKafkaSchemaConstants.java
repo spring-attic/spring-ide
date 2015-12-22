@@ -28,6 +28,8 @@ public class IntKafkaSchemaConstants {
 
 	public static final String ELEM_OUTBOUND_CHANNEL_ADAPTER = "outbound-channel-adapter"; //$NON-NLS-1$
 
+	public static final String ELEM_MESSAGE_DRIVEN_CHANNEL_ADAPTER = "message-driven-channel-adapter"; //$NON-NLS-1$
+
 	public static final String ELEM_ZOOKEEPER_CONNECT = "zookeeper-connect"; //$NON-NLS-1$
 
 	public static final String ELEM_PRODUCER_CONTEXT = "producer-context"; //$NON-NLS-1$

@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.config.graph.model.ModelElementCreationFa
 import org.springframework.ide.eclipse.config.graph.parts.IPaletteFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.InboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.MessageDrivenChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.OutboundChannelAdapterModelElement;
 
 public class IntKafkaPaletteFactory implements IPaletteFactory {
@@ -41,6 +42,12 @@ public class IntKafkaPaletteFactory implements IPaletteFactory {
 				Messages.IntKafkaPaletteFactory_OUTBOUND_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
 				new ModelElementCreationFactory(OutboundChannelAdapterModelElement.class, diagram, namespaceUri),
 				IntegrationImages.OUTBOUND_ADAPTER_SMALL, IntegrationImages.OUTBOUND_ADAPTER);
+		entries.add(entry);
+
+		entry = new CombinedTemplateCreationEntry(IntKafkaSchemaConstants.ELEM_MESSAGE_DRIVEN_CHANNEL_ADAPTER,
+				Messages.IntKafkaPaletteFactory_MESSAGE_DRIVEN_CHANNEL_ADAPTER_COMPONENT_DESCRIPTION,
+				new ModelElementCreationFactory(MessageDrivenChannelAdapterModelElement.class, diagram, namespaceUri),
+				IntegrationImages.INBOUND_ADAPTER_SMALL, IntegrationImages.INBOUND_ADAPTER);
 		entries.add(entry);
 
 		drawer.addAll(entries);

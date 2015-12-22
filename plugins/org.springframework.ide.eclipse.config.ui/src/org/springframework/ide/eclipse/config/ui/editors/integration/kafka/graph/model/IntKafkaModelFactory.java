@@ -31,6 +31,11 @@ public class IntKafkaModelFactory extends AbstractIntegrationModelFactory {
 					parent.getDiagram());
 			list.add(adapter);
 		}
+		else if (input.getLocalName().equals(IntKafkaSchemaConstants.ELEM_MESSAGE_DRIVEN_CHANNEL_ADAPTER)) {
+			MessageDrivenChannelAdapterModelElement adapter = new MessageDrivenChannelAdapterModelElement(input,
+					parent.getDiagram());
+			list.add(adapter);
+		}
 	}
 
 }

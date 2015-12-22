@@ -15,6 +15,7 @@ import org.eclipse.gef.EditPartFactory;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.IntegrationImages;
 import org.springframework.ide.eclipse.config.ui.editors.integration.graph.parts.BadgedIntegrationPart;
 import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.InboundChannelAdapterModelElement;
+import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.MessageDrivenChannelAdapterModelElement;
 import org.springframework.ide.eclipse.config.ui.editors.integration.kafka.graph.model.OutboundChannelAdapterModelElement;
 
 public class IntKafkaEditPartFactory implements EditPartFactory {
@@ -28,6 +29,10 @@ public class IntKafkaEditPartFactory implements EditPartFactory {
 		else if (model instanceof OutboundChannelAdapterModelElement) {
 			part = new BadgedIntegrationPart((OutboundChannelAdapterModelElement) model,
 					IntegrationImages.OUTBOUND_ADAPTER, IntegrationImages.BADGE_SI_KAFKA);
+		}
+		else if (model instanceof MessageDrivenChannelAdapterModelElement) {
+			part = new BadgedIntegrationPart((MessageDrivenChannelAdapterModelElement) model,
+					IntegrationImages.INBOUND_ADAPTER, IntegrationImages.BADGE_SI_KAFKA);
 		}
 		return part;
 	}
