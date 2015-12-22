@@ -39,9 +39,9 @@ public class ConnectOperation extends CloudOperation {
 		if (model.getCloudTarget() != null) {
 			if (connect && !model.getCloudTarget().isConnected()) {
 				model.setRefreshState(RefreshState.loading("Connecting..."));
-				model.getViewModel().updateTargetPropertiesInStore();
 				try {
 					model.getCloudTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
+					model.getViewModel().updateTargetPropertiesInStore();
 					model.getCloudTarget().connect();
 					model.setRefreshState(RefreshState.READY);
 				} catch (MissingPasswordException e) {
