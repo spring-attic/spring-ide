@@ -62,6 +62,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import com.google.common.collect.ImmutableSet;
+
 public class BootDashViewModelTest {
 
 	private BootDashViewModelHarness harness = null;
@@ -477,6 +479,7 @@ public class BootDashViewModelTest {
 
 	private void assertFilterAccepts(boolean expectedAccept, LiveExpression<Filter<BootDashElement>> filter, String... tags) {
 		BootDashElement element = mock(BootDashElement.class);
+		when(element.getCurrentChildren()).thenReturn(ImmutableSet.<BootDashElement>of());
 		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
 		assertEquals(expectedAccept, filter.getValue().accept(element));
 	}
