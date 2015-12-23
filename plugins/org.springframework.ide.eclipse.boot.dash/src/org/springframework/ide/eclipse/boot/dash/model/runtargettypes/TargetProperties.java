@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.equinox.security.storage.StorageException;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
@@ -102,12 +103,20 @@ public class TargetProperties {
 		return map.get(USERNAME_PROP);
 	}
 
-	public String getPassword() {
-		return context.getSecuredCredentialsStore().getPassword(secureStoreScopeKey(type.getName(), getRunTargetId()));
+	public String getPassword() throws CannotAccessPropertyException {
+		try {
+			return context.getSecuredCredentialsStore().getPassword(secureStoreScopeKey(type.getName(), getRunTargetId()));
+		} catch (StorageException e) {
+			throw new CannotAccessPropertyException("Cannot read password.", e);
+		}
 	}
 
-	public void setPassword(String password) {
-		context.getSecuredCredentialsStore().setPassword(password, secureStoreScopeKey(type.getName(), getRunTargetId()));
+	public void setPassword(String password) throws CannotAccessPropertyException {
+		try {
+			context.getSecuredCredentialsStore().setPassword(password, secureStoreScopeKey(type.getName(), getRunTargetId()));
+		} catch (StorageException e) {
+			throw new CannotAccessPropertyException("Cannot store password.", e);
+		}
 	}
 
 	public String getUrl() {

@@ -53,7 +53,7 @@ public class UpdatePasswordDialog extends MessageDialog {
 	private Label description;
 
 	public UpdatePasswordDialog(Shell parentShell, String username, String targetId) {
-		super(parentShell, "Update Password", null, "Update password for " + username, CONFIRM,
+		super(parentShell, "Enter Password", null, "Enter password for " + username, CONFIRM,
 				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 		this.targetId = targetId;
 		setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -76,7 +76,7 @@ public class UpdatePasswordDialog extends MessageDialog {
 		// dialogue with extra space
 		GridDataFactory.fillDefaults().hint(400, SWT.DEFAULT).applyTo(description);
 		description.setText("The password must match your existing target credentials in " + targetId
-				+ ". This only updates the password locally.");
+				+ ".");
 
 		Composite composite = new Composite(area, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);

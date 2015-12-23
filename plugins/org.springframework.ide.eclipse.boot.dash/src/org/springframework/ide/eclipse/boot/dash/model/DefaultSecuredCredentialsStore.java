@@ -34,11 +34,11 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 		}
 	}
 
-	public String getPassword(String runTargetId) {
+	public String getPassword(String runTargetId) throws StorageException {
 		return readProperty(KEY_PASSWORD, runTargetId);
 	}
 
-	public void setPassword(String password, String runTargetId) {
+	public void setPassword(String password, String runTargetId) throws StorageException {
 		setProperty(KEY_PASSWORD, password, runTargetId);
 	}
 
@@ -48,27 +48,19 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 		return securePreferences;
 	}
 
-	private String readProperty(String property, String runTargetId) {
+	private String readProperty(String property, String runTargetId) throws StorageException {
 		ISecurePreferences preferences = getSecurePreferences(runTargetId);
 		String val = null;
 		if (preferences != null) {
-			try {
-				val = preferences.get(property, null);
-			} catch (StorageException e) {
-				BootDashActivator.log(e);
-			}
+			val = preferences.get(property, null);
 		}
 		return val;
 	}
 
-	private void setProperty(String property, String value, String runTargetId) {
+	private void setProperty(String property, String value, String runTargetId) throws StorageException {
 		ISecurePreferences preferences = getSecurePreferences(runTargetId);
 		if (preferences != null) {
-			try {
-				preferences.put(property, value, true);
-			} catch (StorageException e) {
-				BootDashActivator.log(e);
-			}
+			preferences.put(property, value, true);
 		}
 	}
 
