@@ -41,6 +41,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -50,6 +51,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -68,11 +70,13 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.test.util.PortFinder;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
+import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -90,6 +94,8 @@ public class BootDashModelTest {
 	private TestBootDashModelContext context;
 	private BootProjectTestHarness projects;
 	private BootDashModel model;
+
+	private PortFinder portFinder = new PortFinder();
 
 	@Rule
 	public TestBracketter testBracketer = new TestBracketter();
@@ -112,7 +118,7 @@ public class BootDashModelTest {
 				assertModelElements("testProject");
 				return true;
 			}
-		}.waitFor(3000);
+		}.waitFor(MODEL_UPDATE_TIMEOUT);
 
 		BootDashElement projectEl = getElement("testProject");
 		assertTrue(projectEl.getCurrentChildren().isEmpty());
@@ -136,7 +142,7 @@ public class BootDashModelTest {
 				assertModelElements("testProject");
 				return true;
 			}
-		}.waitFor(3000);
+		}.waitFor(MODEL_UPDATE_TIMEOUT);
 
 		BootDashElement projectEl = getElement("testProject");
 		assertTrue(projectEl.getCurrentChildren().isEmpty());
@@ -425,6 +431,45 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
+
+	@Test public void livePortSummary() throws Exception {
+		String projectName = "some-project";
+		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
+		final BootProjectDashElement project = getElement(projectName);
+		try {
+			assertEquals(RunState.INACTIVE, project.getRunState());
+			assertTrue(project.getLivePorts().isEmpty()); // live port is 'unknown' if app is not running
+
+			IType mainType = MainTypeFinder.guessMainTypes(project.getJavaProject(), new NullProgressMonitor())[0];
+
+			final int port1 = portFinder.findUniqueFreePort();
+			ILaunchConfiguration config1 = BootLaunchConfigurationDelegate.createConf(mainType);
+			setPort(config1, port1);
+
+			final int port2 = portFinder.findUniqueFreePort();
+			ILaunchConfiguration config2 = BootLaunchConfigurationDelegate.createConf(mainType);
+			setPort(config2, port2);
+
+			BootDashElement el1 = harness.getElementFor(config1);
+			BootDashElement el2 = harness.getElementFor(config2);
+
+			el1.restart(RunState.RUNNING, ui);
+			el2.restart(RunState.RUNNING, ui);
+
+			waitForState(el1, RunState.RUNNING);
+			waitForState(el2, RunState.RUNNING);
+
+			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
+				public boolean test() throws Exception {
+					assertEquals(ImmutableSet.of(port1, port2), project.getLivePorts());
+					return true;
+				}
+			};
+		} finally {
+			project.stopSync();
+		}
+	}
+
 
 	@Test public void livePort() throws Exception {
 		String projectName = "some-project";
@@ -868,4 +913,11 @@ public class BootDashModelTest {
 		}.waitFor(3 * 60 * 1000);
 	}
 
+	private void setPort(ILaunchConfiguration conf, int port) throws Exception {
+		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+		assertTrue("Only supported on 'empty' configs", BootLaunchConfigurationDelegate.getProperties(wc).isEmpty());
+		List<PropVal> props = Arrays.asList(new PropVal("server.port", ""+port, true));
+		BootLaunchConfigurationDelegate.setProperties(wc, props);
+		wc.doSave();
+	}
 }
