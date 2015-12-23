@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
@@ -120,7 +121,11 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		passwordText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				wizardModel.setPassword(passwordText.getText());
+				try {
+					wizardModel.setPassword(passwordText.getText());
+				} catch (CannotAccessPropertyException e1) {
+					// Ignore. This will execute without exception
+				}
 			}
 		});
 
@@ -209,7 +214,12 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		if (emailText != null && !emailText.isDisposed() && userName != null) {
 			emailText.setText(userName);
 		}
-		String password = wizardModel.getPassword();
+		String password = null;
+		try {
+			password = wizardModel.getPassword();
+		} catch (CannotAccessPropertyException e) {
+			// Ignore
+		}
 		if (passwordText != null && !passwordText.isDisposed() && password != null) {
 			passwordText.setText(password);
 		}

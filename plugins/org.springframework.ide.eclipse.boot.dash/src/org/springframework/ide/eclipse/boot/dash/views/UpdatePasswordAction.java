@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -45,13 +46,17 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 				protected IStatus run(IProgressMonitor monitor) {
 					String password = ui.updatePassword(userName, targetId);
 					if (password != null) {
-						runTarget.getTargetProperties().setPassword(password);
 						try {
+							runTarget.getTargetProperties().setPassword(password);
+
 							runTarget.refresh();
 
 							// launch refresh if it validates
 							targetModel.refresh(ui);
 
+						} catch (CannotAccessPropertyException e) {
+							ui.errorPopup("Update Password Failure", "Cannot store credentials for " + targetId
+									+ ". Please ensure that secure storage is unlocked.");
 						} catch (Exception e) {
 							ui.errorPopup("Update Password Failure", "Credentials for " + targetId
 									+ " are not valid. Please ensure that you entered the right credentials.");
