@@ -63,7 +63,7 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 		BootDashModel model = sectionSelection.getValue();
 		if (model  instanceof CloudFoundryBootDashModel) {
 			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
-			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getCloudTarget().isConnected()));
+			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getCloudTarget().isConnected(), ui));
 			connectable.getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(connectable, ui));
 		}
 	}

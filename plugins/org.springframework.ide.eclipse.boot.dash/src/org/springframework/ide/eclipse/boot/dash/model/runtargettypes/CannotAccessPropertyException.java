@@ -8,13 +8,21 @@
  * Contributors:
  *    Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
+package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
-import org.eclipse.equinox.security.storage.StorageException;
+public class CannotAccessPropertyException extends Exception {
 
-public interface SecuredCredentialsStore {
+	private Exception cause;
 
-	String getPassword(String string) throws StorageException;
-	void setPassword(String password, String runTargetId) throws StorageException;
+	private static final long serialVersionUID = 6564016896619132677L;
+
+	public CannotAccessPropertyException(String message, Exception cause) {
+		super(message);
+		this.cause = cause;
+	}
+
+	public Exception getCause() {
+		return cause;
+	}
 
 }
