@@ -29,6 +29,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.launch,
  org.springframework.ide.eclipse.boot.launch.devtools,
  org.springframework.ide.eclipse.boot.launch.livebean,
+ org.springframework.ide.eclipse.boot.launch.process,
  org.springframework.ide.eclipse.boot.launch.profiles,
  org.springframework.ide.eclipse.boot.launch.util
 Bundle-Activator: org.springframework.ide.eclipse.boot.launch.BootLaunchActivator

@@ -14,7 +14,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
@@ -45,7 +47,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType) {
-		super(runTargetType);
+		super(runTargetType, BootDashActivator.getDefault().getModel().getContext());
 		// The credentials validator should be notified any time there are
 		// changes
 		// to url, username, password and selfsigned setting.
@@ -141,10 +143,21 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		this.userName.setValue(userName);
 	}
 
-	public void setPassword(String password) {
-		put(PASSWORD_PROP, password);
+	public void setPassword(String password) throws CannotAccessPropertyException {
+		if (get(TargetProperties.RUN_TARGET_ID) == null) {
+			this.password.setValue(password);
+		} else {
+			super.setPassword(password);
+		}
+	}
 
-		this.password.setValue(password);
+	@Override
+	public String getPassword() throws CannotAccessPropertyException {
+		if (get(TargetProperties.RUN_TARGET_ID) == null) {
+			return password.getValue();
+		} else {
+			return super.getPassword();
+		}
 	}
 
 	class CredentialsValidator extends Validator {
@@ -154,7 +167,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 			if (isEmpty(getUsername())) {
 				infoMessage = "Enter a username";
-			} else if (isEmpty(getPassword())) {
+			} else if (isEmpty(password.getValue())) {
 				infoMessage = "Enter a password";
 			} else if (isEmpty(getUrl())) {
 				infoMessage = "Enter a target URL";
@@ -193,7 +206,13 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	public RunTarget finish() {
-		put(TargetProperties.RUN_TARGET_ID, CloudFoundryTargetProperties.getId(this));
+		String id = CloudFoundryTargetProperties.getId(this);
+		put(TargetProperties.RUN_TARGET_ID, id);
+		try {
+			super.setPassword(password.getValue());
+		} catch (CannotAccessPropertyException e) {
+			BootDashActivator.log(e);
+		}
 		return getRunTargetType().createRunTarget(this);
 	}
 }

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -155,57 +156,6 @@ public class BootDashActionTests {
 	}
 
 	@Test
-	public void redebugActionEnablementForProject() throws Exception {
-		String projectName = "hohoho";
-		IProject project = createBootProject(projectName);
-		IJavaProject javaProject = JavaCore.create(project);
-		final BootDashElement element = harness.getElementWithName(projectName);
-
-		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final RunStateAction action = getRunStateAction(RunState.DEBUGGING);
-
-		//If selection is empty the action must not be enabled
-		assertTrue(selection.isEmpty());
-		assertFalse(action.isEnabled());
-
-		//If selection has one element...
-		selection.setElements(element);
-
-		//a) and element has no launch configs...
-		assertTrue(element.getLaunchConfigs().isEmpty());
-		assertTrue(action.isEnabled());
-
-		// Careful... when changing the launch configs of a element, the enablement state of
-		// action should auto-refresh, but this happens asyncly so the tests sequences are put in such
-		// a order that the enablement state changes on each (otherwise the ACondition may vacuously
-		// pass immediately even if the enablement didn't get updated, as it was correct from
-		// the start)
-
-		//b) and element has multiple launch config
-		assertTrue(action.isEnabled()); // make sure the test won't pass 'by accident'.
-		final ILaunchConfiguration c1 = BootLaunchConfigurationDelegate.createConf(javaProject);
-		final ILaunchConfiguration c2 = BootLaunchConfigurationDelegate.createConf(javaProject);
-		new ACondition(2000) {
-			public boolean test() throws Exception {
-				assertEquals(ImmutableSet.of(c1,c2), element.getLaunchConfigs());
-				assertFalse(action.isEnabled());
-				return true;
-			}
-		};
-
-		//b) and element has a single launch config
-		assertFalse(action.isEnabled()); // make sure the test won't pass 'by accident'.
-		c2.delete();
-		new ACondition(2000) {
-			public boolean test() throws Exception {
-				assertEquals(ImmutableSet.of(c1), element.getLaunchConfigs());
-				assertTrue(action.isEnabled());
-				return true;
-			}
-		};
-	}
-
-	@Test
 	public void redebugActionEnablementForMultipleProjects() throws Exception {
 		IProject p1 = createBootProject("project1");
 		IProject p2 = createBootProject("project2");
@@ -226,13 +176,22 @@ public class BootDashActionTests {
 
 	@Test
 	public void restartActionEnablementForProject() throws Exception {
+		doRestartActionEnablementForProjectTest(RunState.RUNNING);
+	}
+
+	@Test
+	public void redebugActionEnablementForProject() throws Exception {
+		doRestartActionEnablementForProjectTest(RunState.DEBUGGING);
+	}
+
+	private void doRestartActionEnablementForProjectTest(RunState runOrDebug) throws Exception, CoreException {
 		String projectName = "hohoho";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
 		final BootDashElement element = harness.getElementWithName(projectName);
 
 		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final RunStateAction action = getRunStateAction(RunState.RUNNING);
+		final RunStateAction action = getRunStateAction(runOrDebug);
 
 		//If selection is empty the action must not be enabled
 		assertTrue(selection.isEmpty());

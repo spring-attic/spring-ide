@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManag
  *
  * @author Kris De Volder
  */
-public class MockBootDashModel extends BootDashModel {
+public class MockBootDashModel extends AbstractBootDashModel {
 
 	public MockBootDashModel(RunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);

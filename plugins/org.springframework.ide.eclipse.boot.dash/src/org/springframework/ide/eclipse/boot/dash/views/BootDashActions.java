@@ -145,7 +145,7 @@ public class BootDashActions {
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
-			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
+			updatePasswordAction = new UpdatePasswordAction(sectionSelection, ui);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
 			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
 		}
@@ -228,13 +228,6 @@ public class BootDashActions {
 			setToolTipText("Start or restart the process associated with the selected elements in debug mode");
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
 			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
-		}
-
-		@Override
-		protected boolean appliesToElement(BootDashElement e) {
-			//Do not enable redebug action for node that has multiple children
-			// See https://www.pivotaltracker.com/story/show/110374096
-			return e.getChildren().getValues().size()<=1;
 		}
 	}
 

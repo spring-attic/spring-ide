@@ -18,6 +18,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 
 /**
  * Operation for connecting/disconnecting CF run target
@@ -28,34 +30,52 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 public class ConnectOperation extends CloudOperation {
 
 	private boolean connect;
+	private UserInteractions ui;
 
 	public ConnectOperation(CloudFoundryBootDashModel model, boolean connect) {
 		super("Connecting run target " + model.getCloudTarget().getName(), model);
 		this.connect = connect;
 	}
 
+	public ConnectOperation(CloudFoundryBootDashModel model, boolean connect, UserInteractions ui) {
+		this(model, connect);
+		this.ui = ui;
+	}
+
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		if (model.getCloudTarget() != null) {
 			if (connect && !model.getCloudTarget().isConnected()) {
-				model.setRefreshState(RefreshState.loading("Connecting..."));
 				try {
+					model.setRefreshState(RefreshState.loading("Connecting..."));
+					model.getCloudTarget().connect();
 					model.getCloudTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
 					model.getViewModel().updateTargetPropertiesInStore();
-					model.getCloudTarget().connect();
 					model.setRefreshState(RefreshState.READY);
-				} catch (MissingPasswordException e) {
+				} catch (CannotAccessPropertyException e) {
 					model.setRefreshState(RefreshState.READY);
 					BootDashActivator.log(e);
+				} catch (MissingPasswordException e) {
+					model.setRefreshState(RefreshState.READY);
+					if (ui == null) {
+						BootDashActivator.log(e);
+					} else {
+						String password = ui.updatePassword(model.getCloudTarget().getTargetProperties().getUsername(), model.getCloudTarget().getId());
+						if (password != null) {
+							model.getCloudTarget().getTargetProperties().setPassword(password);
+							// At this point the password must be set otherwise an exception from the call above would be thrown
+							doCloudOp(monitor);
+						}
+					}
 				} catch (Exception e) {
 					model.setRefreshState(RefreshState.error(e));
 					throw e;
 				}
 			} else if (!connect && model.getCloudTarget().isConnected()) {
-				model.getCloudTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
-				model.getViewModel().updateTargetPropertiesInStore();
 				model.setRefreshState(RefreshState.loading("Disconnecting..."));
 				model.getCloudTarget().disconnect();
+				model.getCloudTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
+				model.getViewModel().updateTargetPropertiesInStore();
 				model.setRefreshState(RefreshState.READY);
 			}
 		}

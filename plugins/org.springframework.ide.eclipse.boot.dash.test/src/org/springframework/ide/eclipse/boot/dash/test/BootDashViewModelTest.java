@@ -462,7 +462,7 @@ public class BootDashViewModelTest {
 				targetType
 		);
 
-		TargetProperties props = new TargetProperties(targetType, targetId);
+		TargetProperties props = new TargetProperties(targetType, targetId, harness.context);
 		props.put("describe", "This is foo");
 		RunTarget savedTarget = targetType.createRunTarget(props);
 		harness.model.getRunTargets().add(savedTarget);
@@ -546,15 +546,15 @@ public class BootDashViewModelTest {
 	@Test
 	public void testUpdatePropertiesInStore() throws Exception {
 		MockRunTargetType targetType = new MockRunTargetType("mock-type");
+		harness = new BootDashViewModelHarness(targetType);
 		targetType.setRequiresCredentials(true);
-		TargetProperties properties = new TargetProperties(targetType, "target-id");
+		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
 		properties.setPassword("secret");
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
-		harness = new BootDashViewModelHarness(targetType);
 		harness.model.getRunTargets().add(target);
 
-		harness.model.updatePropertiesInStore(target);
+		harness.model.updateTargetPropertiesInStore();
 
 		SecuredCredentialsStore secureStore = harness.context.getSecuredCredentialsStore();
 

@@ -47,6 +47,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	private List<RunTargetType> orderedRunTargetTypes;
 	private Comparator<BootDashModel> modelComparator;
 	private DebugStrategyManager cfDebugStrategies;
+	private BootDashModelContext context;
 
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
@@ -54,6 +55,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
 		runTargets = new LiveSet<RunTarget>(new LinkedHashSet<RunTarget>());
+		this.context = context;
 		models = new BootDashModelManager(context, this, runTargets);
 
 		manager = new RunTargetPropertiesManager(context, runTargetTypes);
@@ -129,11 +131,6 @@ public class BootDashViewModel extends AbstractDisposable {
 		}
 	}
 
-	public void updatePropertiesInStore(RunTargetWithProperties target) {
-		// For now, only properties for secure storage can be updated (e.g. credentials for the run target)
-		manager.secureStorage(target.getTargetProperties());
-	}
-
 	public void updateTargetPropertiesInStore() {
 		manager.store(getRunTargets().getValue());
 	}
@@ -181,5 +178,8 @@ public class BootDashViewModel extends AbstractDisposable {
 		return cfDebugStrategies.getStrategy();
 	}
 
+	public BootDashModelContext getContext() {
+		return context;
+	}
 
 }

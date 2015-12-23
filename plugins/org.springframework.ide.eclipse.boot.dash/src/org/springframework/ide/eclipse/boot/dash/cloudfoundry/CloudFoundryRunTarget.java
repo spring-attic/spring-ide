@@ -42,7 +42,6 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -166,7 +165,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
+	public CloudFoundryBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
 		return new CloudFoundryBootDashModel(this, context, parent);
 	}
 

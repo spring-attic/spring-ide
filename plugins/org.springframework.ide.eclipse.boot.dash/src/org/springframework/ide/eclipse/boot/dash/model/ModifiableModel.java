@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Collection;
 import java.util.List;
 
-public interface ModifiableModel {
+public interface ModifiableModel extends BootDashModel {
 
 	abstract public boolean canBeAdded(List<Object> sources);
 
