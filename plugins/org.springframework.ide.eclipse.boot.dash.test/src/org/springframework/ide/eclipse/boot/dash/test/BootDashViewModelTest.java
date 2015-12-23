@@ -31,6 +31,9 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
@@ -50,6 +54,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProp
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunTarget;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunTargetType;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -59,6 +65,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 public class BootDashViewModelTest {
 
 	private BootDashViewModelHarness harness = null;
+	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 
 	@Before
 	public void setup() throws Exception {
@@ -415,6 +422,57 @@ public class BootDashViewModelTest {
 		toggleFilters.add(toggleFilter);
 		assertFilterAccepts(false, filter, "a-tag");
 		assertFilterAccepts(true, filter, "foo");
+	}
+
+	@Test
+	public void testFilterIsTreeAware() throws Exception {
+		harness = new BootDashViewModelHarness(
+				RunTargetTypes.LOCAL
+		);
+
+		LiveVariable<String> filterBox = harness.model.getFilterBox().getText();
+		LiveExpression<Filter<BootDashElement>> filter = harness.model.getFilter();
+
+		IProject project = projects.createBootProject("parent");
+		ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(project);
+		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(project);
+
+		BootProjectDashElement vader = harness.getElementFor(project);
+		BootDashElement luke = harness.getElementFor(conf1);
+		BootDashElement leia = harness.getElementFor(conf2);
+
+		setTags(vader, "vader");
+		setTags(luke, "luke");
+		setTags(leia, "leia");
+
+		//Blank filter set, filter matches anything
+		filterBox.setValue("");
+		assertFilterAccepts(true, filter, vader, luke, leia);
+
+		//Filter non-existing tag matches nothing
+		filterBox.setValue("not-exist");
+		assertFilterAccepts(false, filter, vader, luke, leia);
+
+		//Filter matching a parent also causes children to match
+		filterBox.setValue("vader");
+		assertFilterAccepts(true, filter, vader, luke, leia);
+
+		//Filter matching a child also causes parent to match...
+		filterBox.setValue("luke");
+		assertFilterAccepts(true, filter, vader, luke);
+		//... but not siblings
+		assertFilterAccepts(false, filter, leia);
+
+	}
+
+	private void assertFilterAccepts(boolean expected, LiveExpression<Filter<BootDashElement>> filter, BootDashElement... elements) {
+		for (BootDashElement bde : elements) {
+			assertEquals("element with tags "+bde.getTags(), expected, filter.getValue().accept(bde));
+		}
+	}
+
+	private void setTags(BootDashElement element, String... tags) {
+		element.setTags(new LinkedHashSet<>(Arrays.asList(tags)));
 	}
 
 	private void assertFilterAccepts(boolean expectedAccept, LiveExpression<Filter<BootDashElement>> filter, String... tags) {

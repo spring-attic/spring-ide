@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -189,6 +190,11 @@ public class BootDashViewModelHarness {
 	public BootDashElement getElementFor(ILaunchConfiguration conf) {
 		LocalBootDashModel localSection = (LocalBootDashModel) model.getSectionByTargetId(RunTargets.LOCAL.getId());
 		return localSection.getLaunchConfElementFactory().createOrGet(conf);
+	}
+
+	public BootProjectDashElement getElementFor(IProject project) {
+		LocalBootDashModel localSection = (LocalBootDashModel) model.getSectionByTargetId(RunTargets.LOCAL.getId());
+		return (BootProjectDashElement) localSection.getProjectElementFactory().createOrGet(project);
 	}
 
 }

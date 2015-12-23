@@ -30,6 +30,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
@@ -304,6 +305,10 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return wc;
 	}
 
+	public static ILaunchConfiguration createConf(IProject project) throws CoreException {
+		return createConf(JavaCore.create(project));
+	}
+
 	public static ILaunchConfiguration createConf(IJavaProject project) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc = null;
 		ILaunchConfigurationType configType = getConfType();
@@ -333,5 +338,6 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
 	}
+
 
 }
