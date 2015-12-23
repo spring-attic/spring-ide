@@ -96,6 +96,9 @@ public class BootDashModelTest {
 	@Rule
 	public TestBracketter testBracketer = new TestBracketter();
 
+	@Rule
+	public DumpBootProcessOutput processOutput = new DumpBootProcessOutput();
+
 	/**
 	 * Test that newly created spring boot project gets added to the model.
 	 */

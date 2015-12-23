@@ -19,7 +19,10 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.IProcessFactory;
+import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStreamMonitor;
+import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -28,6 +31,33 @@ import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecyc
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 
 public class BootProcessFactory implements IProcessFactory {
+
+	private static class DumpOutput implements IStreamListener {
+
+		private final String label;
+		private boolean first = true;
+
+		public DumpOutput(String streamName) {
+			this.label = streamName;
+		}
+
+		@Override
+		public void streamAppended(String text, IStreamMonitor monitor) {
+			//TODO: this might look messy on windows
+			if (first) {
+				System.out.print("\n"+label);
+				first = false;
+			}
+			System.out.print(text.replaceAll("\n", "\n"+label));
+		}
+
+	}
+
+	/**
+	 * This flag enables dumping the process output onto System.out. This meant to help in
+	 * diagnosing problems during CI build test execution.
+	 */
+	public static boolean ENABLE_OUTPUT_DUMPING = false;
 
 	private static final boolean DEBUG = false;
 
@@ -42,7 +72,7 @@ public class BootProcessFactory implements IProcessFactory {
 
 		final int jmxPort = getJMXPort(launch);
 		final long timeout = getNiceTerminationTimeout(launch);
-		return new RuntimeProcess(launch, process, label, attributes) {
+		RuntimeProcess rtProcess = new RuntimeProcess(launch, process, label, attributes) {
 
 			SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(jmxPort);
 
@@ -59,6 +89,14 @@ public class BootProcessFactory implements IProcessFactory {
 						}
 					}
 				}
+			}
+
+			@Override
+			protected IStreamsProxy createStreamsProxy() {
+				IStreamsProxy streams = super.createStreamsProxy();
+				streams.getOutputStreamMonitor().addListener(new DumpOutput("%out: "));
+				streams.getErrorStreamMonitor().addListener(new DumpOutput("%err: "));
+				return streams;
 			}
 
 			private boolean destroyForcibly() {
@@ -114,6 +152,8 @@ public class BootProcessFactory implements IProcessFactory {
 			}
 
 		};
+
+		return rtProcess;
 	}
 
 	private long getNiceTerminationTimeout(ILaunch launch) {
