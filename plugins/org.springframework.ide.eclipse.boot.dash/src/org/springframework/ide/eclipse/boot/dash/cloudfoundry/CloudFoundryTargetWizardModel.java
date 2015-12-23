@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -33,6 +34,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  */
 public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties {
 
+	private final static String PASSWORD_PROP = "password"; //$NON-NLS-1$
+
 	private LiveVariable<String> url = new LiveVariable<String>();
 	private LiveVariable<CloudSpace> space = new LiveVariable<CloudSpace>();
 	private LiveVariable<Boolean> selfsigned = new LiveVariable<Boolean>(false);
@@ -45,7 +48,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType) {
-		super(runTargetType);
+		super(runTargetType, BootDashActivator.getDefault().getModel().getContext());
 		// The credentials validator should be notified any time there are
 		// changes
 		// to url, username, password and selfsigned setting.
@@ -142,9 +145,21 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	public void setPassword(String password) {
-		put(PASSWORD_PROP, password);
+		if (get(TargetProperties.RUN_TARGET_ID) == null) {
+			put(PASSWORD_PROP, password);
+			this.password.setValue(password);
+		} else {
+			super.setPassword(password);
+		}
+	}
 
-		this.password.setValue(password);
+	@Override
+	public String getPassword() {
+		if (get(TargetProperties.RUN_TARGET_ID) == null) {
+			return get(PASSWORD_PROP);
+		} else {
+			return super.getPassword();
+		}
 	}
 
 	class CredentialsValidator extends Validator {
@@ -193,7 +208,9 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	public RunTarget finish() {
-		put(TargetProperties.RUN_TARGET_ID, CloudFoundryTargetProperties.getId(this));
+		String id = CloudFoundryTargetProperties.getId(this);
+		put(TargetProperties.RUN_TARGET_ID, id);
+		super.setPassword(getPassword());
 		return getRunTargetType().createRunTarget(this);
 	}
 }

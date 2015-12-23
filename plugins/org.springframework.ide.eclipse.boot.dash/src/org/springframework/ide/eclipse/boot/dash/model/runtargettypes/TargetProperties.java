@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
 /**
@@ -32,32 +33,37 @@ public class TargetProperties {
 
 	public static final String RUN_TARGET_ID = "runTargetID";
 	public static final String USERNAME_PROP = "username";
-	public static final String PASSWORD_PROP = "password";
 	public static final String URL_PROP = "url";
 
 	protected Map<String, String> map;
 	private RunTargetType type;
+	private BootDashModelContext context;
 
-	public TargetProperties(Map<String, String> map, RunTargetType type) {
+	public TargetProperties(Map<String, String> map, RunTargetType type, BootDashModelContext context) {
 		this.map = map;
 		this.type = type;
+		this.context = context;
 	}
 
-	public TargetProperties() {
-		this.map = new HashMap<String, String>();
+	public TargetProperties(BootDashModelContext context) {
+		this(new HashMap<String, String>(), null, context);
 	}
 
-	public TargetProperties(RunTargetType type) {
-		this(new HashMap<String, String>(), type);
+	public TargetProperties(TargetProperties targetProperties, RunTargetType runTargetType) {
+		this(targetProperties.getAllProperties(), runTargetType, targetProperties.context);
 	}
 
-	public TargetProperties(RunTargetType type, String runTargetId) {
-		this(new HashMap<String, String>(), type);
+	public TargetProperties(RunTargetType type, BootDashModelContext context) {
+		this(new HashMap<String, String>(), type, context);
+	}
+
+	public TargetProperties(RunTargetType type, String runTargetId, BootDashModelContext context) {
+		this(new HashMap<String, String>(), type, context);
 		put(RUN_TARGET_ID, runTargetId);
 	}
 
-	public TargetProperties(Map<String, String> map, RunTargetType type, String runTargetId) {
-		this(type);
+	public TargetProperties(Map<String, String> map, RunTargetType type, String runTargetId, BootDashModelContext context) {
+		this(type, context);
 		if (map != null) {
 			this.map = map;
 		}
@@ -97,11 +103,11 @@ public class TargetProperties {
 	}
 
 	public String getPassword() {
-		return map.get(PASSWORD_PROP);
+		return context.getSecuredCredentialsStore().getPassword(secureStoreScopeKey(type.getName(), getRunTargetId()));
 	}
 
 	public void setPassword(String password) {
-		map.put(PASSWORD_PROP, password);
+		context.getSecuredCredentialsStore().setPassword(password, secureStoreScopeKey(type.getName(), getRunTargetId()));
 	}
 
 	public String getUrl() {
@@ -115,4 +121,9 @@ public class TargetProperties {
 			map.put(key, value);
 		}
 	}
+
+	protected String secureStoreScopeKey(String targetTypeName, String targetId) {
+		return targetTypeName+":"+targetId;
+	}
+
 }
