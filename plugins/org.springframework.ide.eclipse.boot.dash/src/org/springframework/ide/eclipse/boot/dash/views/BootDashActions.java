@@ -229,13 +229,6 @@ public class BootDashActions {
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
 			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 		}
-
-		@Override
-		protected boolean appliesToElement(BootDashElement e) {
-			//Do not enable redebug action for node that has multiple children
-			// See https://www.pivotaltracker.com/story/show/110374096
-			return e.getChildren().getValues().size()<=1;
-		}
 	}
 
 	public static class RunOrDebugStateAction extends RunStateAction {
