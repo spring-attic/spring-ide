@@ -546,12 +546,12 @@ public class BootDashViewModelTest {
 	@Test
 	public void testUpdatePropertiesInStore() throws Exception {
 		MockRunTargetType targetType = new MockRunTargetType("mock-type");
+		harness = new BootDashViewModelHarness(targetType);
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
 		properties.setPassword("secret");
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
-		harness = new BootDashViewModelHarness(targetType);
 		harness.model.getRunTargets().add(target);
 
 		harness.model.updateTargetPropertiesInStore();
