@@ -25,8 +25,6 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
-import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -34,7 +32,7 @@ import com.google.common.collect.ImmutableSet;
  * Abstract base class that is convenient to implement {@link BootDashElement}.
  * @author Kris De Volder
  */
-public abstract class WrappingBootDashElement<T> implements BootDashElement, Disposable, OnDispose {
+public abstract class WrappingBootDashElement<T> extends AbstractDisposable implements BootDashElement {
 
 	public static final String TAGS_KEY = "tags";
 
@@ -177,19 +175,6 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement, Dis
 		for (Object l : disposeListeners.getListeners()) {
 			((DisposeListener)l).disposed(this);
 		}
-	}
-
-	/**
-	 * Convenience method to declare that a given {@link Disposable} is an 'owned' child of
-	 * this element and should also be disposed when this element itself is disposed.
-	 */
-	public <C extends Disposable> C addDisposableChild(final C child) {
-		onDispose(new DisposeListener() {
-			public void disposed(Disposable disposed) {
-				child.dispose();
-			}
-		});
-		return child;
 	}
 
 	@Override

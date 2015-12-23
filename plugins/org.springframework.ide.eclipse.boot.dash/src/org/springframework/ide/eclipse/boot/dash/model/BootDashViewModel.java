@@ -22,17 +22,19 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+
+import com.google.common.base.Function;
 
 /**
  * @author Kris De Volder
  */
-public class BootDashViewModel implements Disposable {
+public class BootDashViewModel extends AbstractDisposable {
 
 	private LiveSet<RunTarget> runTargets;
 	private BootDashModelManager models;
@@ -65,7 +67,15 @@ public class BootDashViewModel implements Disposable {
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(orderedRunTargetTypes);
 		filterBox = new BootDashElementsFilterBoxModel();
 		toggleFiltersModel = new ToggleFiltersModel();
-		filter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
+		LiveExpression<Filter<BootDashElement>> baseFilter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
+		addDisposableChild(baseFilter);
+		filter = baseFilter.apply(new Function<Filter<BootDashElement>, Filter<BootDashElement>>() {
+			public Filter<BootDashElement> apply(Filter<BootDashElement> input) {
+				return new TreeAwareFilter(input);
+			}
+		});
+		addDisposableChild(filter);
+
 		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
 		cfDebugStrategies = createCfDebugStrategies();
 	}
