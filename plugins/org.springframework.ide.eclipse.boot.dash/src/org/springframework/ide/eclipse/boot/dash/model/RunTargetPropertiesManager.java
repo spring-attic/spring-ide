@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertiesMapper;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -28,15 +27,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>> {
 
-	private final IScopedPropertyStore<RunTargetType> propertiesStore;
-	private final SecuredCredentialsStore credentialsStore;
+	private final BootDashModelContext context;
 	private final RunTargetType[] types;
 
 	public static final String RUN_TARGET_KEY = "runTargets";
 
 	public RunTargetPropertiesManager(BootDashModelContext context, RunTargetType[] types) {
-		this.propertiesStore = context.getRunTargetProperties();
-		this.credentialsStore = context.getSecuredCredentialsStore();
+		this.context = context;
 		this.types = types;
 	}
 
@@ -48,18 +45,12 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 			if (type==RunTargetTypes.LOCAL) {
 				targets.add(RunTargets.LOCAL);
 			} else if (type.canInstantiate()) {
-				String runTypesVal = propertiesStore.get(type, RUN_TARGET_KEY);
+				String runTypesVal = context.getRunTargetProperties().get(type, RUN_TARGET_KEY);
 				if (runTypesVal != null) {
 					List<Map<String, String>> asList = mapper.convert(runTypesVal);
 					if (asList != null) {
 						for (Map<String, String> runTargetPropMap : asList) {
-							TargetProperties targProps = new TargetProperties(runTargetPropMap, type);
-
-							// Load the password from secure storage
-							String password = credentialsStore
-									.getPassword(secureStoreScopeKey(type.getName(), runTargetPropMap.get(TargetProperties.RUN_TARGET_ID)));
-							targProps.put(TargetProperties.PASSWORD_PROP, password);
-
+							TargetProperties targProps = new TargetProperties(runTargetPropMap, type, context);
 							RunTarget target = type.createRunTarget(targProps);
 							if (target != null) {
 								targets.add(target);
@@ -114,36 +105,16 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 			for (RunTargetWithProperties storedProp : entry.getValue()) {
 				TargetProperties targProps = storedProp.getTargetProperties();
 				asStringMap.add(targProps.getPropertiesToPersist());
-				secureStorage(targProps);
 			}
 			try {
 				String serialisedVal = mapper.convertToString(asStringMap);
 				if (serialisedVal != null) {
-					propertiesStore.put(entry.getKey(), RUN_TARGET_KEY, serialisedVal);
+					context.getRunTargetProperties().put(entry.getKey(), RUN_TARGET_KEY, serialisedVal);
 				}
 			} catch (Exception e) {
 				BootDashActivator.log(e);
 			}
 		}
 	}
-
-	public synchronized void secureStorage(TargetProperties targProps) {
-		// Only support changing passwords for now as its the only thing that
-		// requires secure storage. Other target properties should be immutable
-		if (targProps.getPassword() != null && targProps.getRunTargetId() != null) {
-			credentialsStore.setPassword(targProps.getPassword(), secureStoreScopeKey(targProps));
-		}
-	}
-
-	private String secureStoreScopeKey(TargetProperties targProps) {
-		return secureStoreScopeKey(targProps.getRunTargetType().getName(), targProps.getRunTargetId());
-	}
-
-	private String secureStoreScopeKey(String targetTypeName, String targetId) {
-		return targetTypeName+":"+targetId;
-	}
-
-
-
 
 }

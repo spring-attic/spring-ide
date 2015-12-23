@@ -145,7 +145,7 @@ public class BootDashActions {
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
-			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
+			updatePasswordAction = new UpdatePasswordAction(sectionSelection, ui);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
 			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
 		}

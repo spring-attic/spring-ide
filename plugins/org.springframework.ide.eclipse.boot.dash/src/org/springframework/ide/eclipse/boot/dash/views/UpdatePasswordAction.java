@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -25,12 +24,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class UpdatePasswordAction extends AbstractBootDashModelAction {
 
-	private BootDashViewModel model;
-
-	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection, BootDashViewModel model,
+	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection,
 			UserInteractions ui) {
 		super(sectionSelection, ui);
-		this.model = model;
 		this.setText("Update Password");
 		this.setToolTipText("Update password locally for the selected target.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.gif"));
@@ -49,12 +45,9 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 				protected IStatus run(IProgressMonitor monitor) {
 					String password = ui.updatePassword(userName, targetId);
 					if (password != null) {
-						runTarget.getTargetProperties().put(TargetProperties.PASSWORD_PROP, password);
+						runTarget.getTargetProperties().setPassword(password);
 						try {
 							runTarget.refresh();
-
-							// Only store if it validates
-							model.updatePropertiesInStore(runTarget);
 
 							// launch refresh if it validates
 							targetModel.refresh(ui);
