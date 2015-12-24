@@ -229,21 +229,31 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			super(page, style);
 		}
 
-
 		@Override
-		protected Object[] getFilteredChildren(Object parent) {
-			int totalElements = sizeof(getRawChildren(parent));
-			Object[] filteredElements = super.getFilteredChildren(parent);
-			hiddenElementCount.setValue(totalElements - sizeof(filteredElements));
-			return filteredElements;
+		public void refresh(Object obj) {
+			super.refresh(obj);
+			// Every sub-tree refresh should update the hidden elements label
+			int totalElements = countChildren(getRoot());
+			int filteredElements = countFilteredChildren(getRoot());
+			hiddenElementCount.setValue(totalElements - filteredElements);
 		}
 
-		private int sizeof(Object[] os) {
-			if (os!=null) {
-				return os.length;
+		private int countChildren(Object element) {
+			int count = 0;
+			for (Object o : getRawChildren(element)) {
+				count += 1 + countChildren(o);
 			}
-			return 0;
+			return count;
 		}
+
+		private int countFilteredChildren(Object element) {
+			int count = 0;
+			for (Object o : super.getFilteredChildren(element)) {
+				count += 1 + countFilteredChildren(o);
+			}
+			return count;
+		}
+
 	}
 
 	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model, UserInteractions ui) {
