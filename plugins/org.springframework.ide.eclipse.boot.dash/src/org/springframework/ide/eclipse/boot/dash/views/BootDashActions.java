@@ -190,34 +190,6 @@ public class BootDashActions {
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
 			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
 		}
-
-		/**
-		 * Overrides parent to automatically retarget this action to apply to all the children of an element
-		 * (if it has children). This way the action behaves logically if both a parent and some children
-		 * are selected (i.e. we don't want to execute the action twice on the explicitly selected children!)
-		 */
-		@Override
-		public Collection<BootDashElement> getTargetElements() {
-			Builder<BootDashElement> builder = ImmutableSet.builder();
-			addTargetsFor(builder, getSelectedElements());
-			return builder.build();
-		}
-
-		private void addTargetsFor(Builder<BootDashElement> builder, Collection<BootDashElement> selecteds) {
-			for (BootDashElement s : selecteds) {
-				addTargetsFor(builder, s);
-			}
-		}
-
-		private void addTargetsFor(Builder<BootDashElement> builder, BootDashElement s) {
-			ImmutableSet<BootDashElement> children = s.getChildren().getValues();
-			if (children.isEmpty()) {
-				//No children, add s itself
-				builder.add(s);
-			} else {
-				addTargetsFor(builder, children);
-			}
-		}
 	}
 
 	private static final class RedebugAction extends RunOrDebugStateAction {
@@ -269,12 +241,30 @@ public class BootDashActions {
 		}
 
 		/**
-		 * Determines the elements that the action will effectively operator on when
-		 * it is executed. This is typically the same as the selected elements, but some
-		 * actions may want to 'reinterpret' the selected elements.
+		 * Automatically retarget this action to apply to all the children of an element
+		 * (if it has children). This way the action behaves logically if both a parent and some children
+		 * are selected (i.e. we don't want to execute the action twice on the explicitly selected children!)
 		 */
 		public Collection<BootDashElement> getTargetElements() {
-			return getSelectedElements();
+			Builder<BootDashElement> builder = ImmutableSet.builder();
+			addTargetsFor(builder, getSelectedElements());
+			return builder.build();
+		}
+
+		private void addTargetsFor(Builder<BootDashElement> builder, Collection<BootDashElement> selecteds) {
+			for (BootDashElement s : selecteds) {
+				addTargetsFor(builder, s);
+			}
+		}
+
+		private void addTargetsFor(Builder<BootDashElement> builder, BootDashElement s) {
+			ImmutableSet<BootDashElement> children = s.getChildren().getValues();
+			if (children.isEmpty()) {
+				//No children, add s itself
+				builder.add(s);
+			} else {
+				addTargetsFor(builder, children);
+			}
 		}
 	}
 
