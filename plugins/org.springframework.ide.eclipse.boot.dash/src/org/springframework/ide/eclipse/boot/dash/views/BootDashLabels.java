@@ -360,7 +360,7 @@ public class BootDashLabels implements Disposable {
 			case INSTANCES:
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
-				if (desired!=1) { //Don't show: less clutter, you can already see whether a single instance is running or not
+				if (desired!=1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
 					if (stylers == null) {
 						label = actual + "/" + desired;
 					} else {
