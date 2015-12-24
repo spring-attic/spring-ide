@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
+import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -85,6 +86,8 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	private LiveExpression<RunState> runState;
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
+	private LiveExpression<Integer> actualInstances;
+
 	private PropertyStoreApi persistentProperties;
 
 	@SuppressWarnings("unchecked")
@@ -92,15 +95,17 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		super(bootDashModel, delegate);
 		this.runState = createRunStateExp();
 		this.livePort = createLivePortExp(runState, "local.server.port");
+		this.actuatorPort = createLivePortExp(runState, "local.management.port");
+		this.actualInstances = createActualInstancesExp();
 		@SuppressWarnings("rawtypes")
 		ValueListener elementNotifier = new ValueListener() {
 			public void gotValue(LiveExpression exp, Object value) {
 				getBootDashModel().notifyElementChanged(AbstractLaunchConfigurationsDashElement.this);
 			}
 		};
-		this.actuatorPort = createLivePortExp(runState, "local.management.port");
 		livePort.addListener(elementNotifier);
 		runState.addListener(elementNotifier);
+		actualInstances.addListener(elementNotifier);
 	}
 
 	protected abstract IPropertyStore createPropertyStore();
@@ -298,19 +303,16 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		}
 	}
 
-
 	@Override
-	public int getActualInstances() {
-		RunState s = getRunState();
-		if (READY_STATES.contains(s)) {
-			return 1;
-		}
-		return 0;
+	public int getDesiredInstances() {
+		//special case for no launch configs (a single launch conf is created on demand,
+		//so we should treat it as if it already has one).
+		return Math.max(1, getLaunchConfigs().size());
 	}
 
 	@Override
-	public int getDesiredInstances() {
-		return 1;
+	public int getActualInstances() {
+		return actualInstances.getValue();
 	}
 
 	@Override
@@ -391,6 +393,38 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 			@Override
 			public void dispose() {
 				super.dispose();
+			}
+		};
+		final RunStateListener<ILaunchConfiguration> runStateListener = new RunStateListener<ILaunchConfiguration>() {
+			@Override
+			public void stateChanged(ILaunchConfiguration changedConf) {
+				if (getLaunchConfigs().contains(changedConf)) {
+					exp.refresh();
+				}
+			}
+		};
+		tracker.addListener(runStateListener);
+		exp.onDispose(new DisposeListener() {
+			public void disposed(Disposable disposed) {
+				tracker.removeListener(runStateListener);
+			}
+		});
+		addDisposableChild(exp);
+		exp.refresh();
+		return exp;
+	}
+
+	private LiveExpression<Integer> createActualInstancesExp() {
+		final LaunchConfRunStateTracker tracker = runStateTracker();
+		final LiveExpression<Integer> exp = new LiveExpression<Integer>(0) {
+			protected Integer compute() {
+				int activeCount = 0;
+				for (ILaunchConfiguration c : getLaunchConfigs()) {
+					if (READY_STATES.contains(tracker.getState(c))) {
+						activeCount++;
+					}
+				}
+				return activeCount;
 			}
 		};
 		final RunStateListener<ILaunchConfiguration> runStateListener = new RunStateListener<ILaunchConfiguration>() {

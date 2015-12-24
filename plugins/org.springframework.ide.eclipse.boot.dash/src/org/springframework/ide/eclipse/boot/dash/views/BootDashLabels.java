@@ -360,10 +360,12 @@ public class BootDashLabels implements Disposable {
 			case INSTANCES:
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
-				if (stylers == null) {
-					label = actual + "/" + desired;
-				} else {
-					styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+				if (desired!=1) { //Don't show: less clutter, you can already see whether a single instance is running or not
+					if (stylers == null) {
+						label = actual + "/" + desired;
+					} else {
+						styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+					}
 				}
 				break;
 			case EXPOSED_URL:

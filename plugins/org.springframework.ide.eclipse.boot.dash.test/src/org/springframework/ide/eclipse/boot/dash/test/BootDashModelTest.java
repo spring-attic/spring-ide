@@ -71,6 +71,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.util.PortFinder;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -301,10 +303,10 @@ public class BootDashModelTest {
 		element.stopAsync(ui);
 		waitForState(element, RunState.INACTIVE);
 
-		//3 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set)
-		verify(oldListener, times(3)).stateChanged(element);
-		//2 changes: RUNNING -> INACTIVE, liveport(unset)
-		verify(listener, times(2)).stateChanged(element);
+		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances++
+		verify(oldListener, times(4)).stateChanged(element);
+		//3 changes: RUNNING -> INACTIVE, liveport(unset), actualInstances--
+		verify(listener, times(3)).stateChanged(element);
 	}
 
 	@Test public void testRestartRunningProcessTest() throws Exception {
@@ -432,13 +434,15 @@ public class BootDashModelTest {
 		}
 	}
 
-	@Test public void livePortSummary() throws Exception {
+	@Test public void livePortSummaryAndInstanceCounts() throws Exception {
 		String projectName = "some-project";
 		createBootProject(projectName, bootVersionAtLeast("1.3.0")); //1.3.0 required for lifecycle support.
 		final BootProjectDashElement project = getElement(projectName);
 		try {
 			assertEquals(RunState.INACTIVE, project.getRunState());
 			assertTrue(project.getLivePorts().isEmpty()); // live port is 'unknown' if app is not running
+			assertInstances("0/1", project);
+			assertInstancesLabel("", project); //label hidden for ?/1 case
 
 			IType mainType = MainTypeFinder.guessMainTypes(project.getJavaProject(), new NullProgressMonitor())[0];
 
@@ -450,8 +454,13 @@ public class BootDashModelTest {
 			ILaunchConfiguration config2 = BootLaunchConfigurationDelegate.createConf(mainType);
 			setPort(config2, port2);
 
-			BootDashElement el1 = harness.getElementFor(config1);
-			BootDashElement el2 = harness.getElementFor(config2);
+			final BootDashElement el1 = harness.getElementFor(config1);
+			final BootDashElement el2 = harness.getElementFor(config2);
+
+			assertInstances("0/1", el1);
+			assertInstancesLabel("", el1); // hidden label for ?/1 case
+			assertInstances("0/1", el2);
+			assertInstancesLabel("", el2); // hidden label for ?/1 case
 
 			el1.restart(RunState.RUNNING, ui);
 			el2.restart(RunState.RUNNING, ui);
@@ -462,14 +471,51 @@ public class BootDashModelTest {
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
 					assertEquals(ImmutableSet.of(port1, port2), project.getLivePorts());
+
+					assertInstances("2/2", project);
+					assertInstancesLabel("2/2", project);
+					assertInstances("1/1", el1);
+					assertInstancesLabel("", el1); // hidden label for ?/1 case
+					assertInstances("1/1", el2);
+					assertInstancesLabel("", el2); // hidden label for ?/1 case
+
 					return true;
 				}
 			};
+
+			el1.stopAsync(ui);
+			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
+				public boolean test() throws Exception {
+					assertEquals(ImmutableSet.of(port2), project.getLivePorts());
+					assertEquals(2, project.getActualInstances());
+					assertEquals(2, project.getDesiredInstances());
+
+					assertInstances("1/2", project);
+					assertInstancesLabel("1/2", project);
+					assertInstances("0/1", el1);
+					assertInstancesLabel("", el1); // hidden label for ?/1 case
+					assertInstances("1/1", el2);
+					assertInstancesLabel("", el2); // hidden label for ?/1 case
+
+					return true;
+				}
+			};
+
+
 		} finally {
 			project.stopSync();
 		}
 	}
 
+	private void assertInstances(String expect, BootDashElement e) {
+		assertEquals(expect, e.getActualInstances()+"/"+e.getDesiredInstances());
+	}
+
+	private void assertInstancesLabel(String expect, BootDashElement e) {
+		BootDashLabels labels = new BootDashLabels(null); // we test this without styler, still better than not testing.
+		String actual = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
+		assertEquals(expect, actual);
+	}
 
 	@Test public void livePort() throws Exception {
 		String projectName = "some-project";

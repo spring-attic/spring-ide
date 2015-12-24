@@ -13,7 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
@@ -29,7 +31,15 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 public class LocalRunTarget extends AbstractRunTarget {
 
 	public static final RunTarget INSTANCE = new LocalRunTarget();
-	private static final BootDashColumn[] DEFAULT_COLUMNS = {RUN_STATE_ICN, APP, LIVE_PORT, DEFAULT_PATH, TAGS, EXPOSED_URL};
+	private static final BootDashColumn[] DEFAULT_COLUMNS = {
+			RUN_STATE_ICN,
+			APP,
+			LIVE_PORT,
+			INSTANCES,
+			DEFAULT_PATH,
+			TAGS,
+			EXPOSED_URL
+	};
 
 	private LocalRunTarget() {
 		super(RunTargetTypes.LOCAL, "local");
