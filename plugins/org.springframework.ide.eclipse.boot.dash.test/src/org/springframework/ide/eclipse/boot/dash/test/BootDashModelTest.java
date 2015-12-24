@@ -250,12 +250,12 @@ public class BootDashModelTest {
 		waitForState(element, RunState.INACTIVE);
 		waitForState(childElement, RunState.INACTIVE);
 
-		//3 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set)
-		verify(oldListener, times(3)).stateChanged(element);
-		verify(oldListener, times(3)).stateChanged(childElement);
-		//2 changes: RUNNING -> INACTIVE, liveport(unset)
-		verify(listener, times(2)).stateChanged(element);
-		verify(listener, times(2)).stateChanged(childElement);
+		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances
+		verify(oldListener, times(4)).stateChanged(element);
+		verify(oldListener, times(4)).stateChanged(childElement);
+		//3 changes: RUNNING -> INACTIVE, liveport(unset), actualInstances
+		verify(listener, times(3)).stateChanged(element);
+		verify(listener, times(3)).stateChanged(childElement);
 	}
 
 
@@ -487,7 +487,7 @@ public class BootDashModelTest {
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
 					assertEquals(ImmutableSet.of(port2), project.getLivePorts());
-					assertEquals(2, project.getActualInstances());
+					assertEquals(1, project.getActualInstances());
 					assertEquals(2, project.getDesiredInstances());
 
 					assertInstances("1/2", project);
