@@ -15,6 +15,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.EnumSet;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -254,29 +256,31 @@ public class BootDashActionTests {
 		IJavaProject javaProject = JavaCore.create(project);
 
 		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final RunOrDebugStateAction action = (RunOrDebugStateAction) getRunStateAction(RunState.RUNNING);
-
 		final BootDashElement element = harness.getElementWithName(projectName);
 		final ILaunchConfiguration c1 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		final ILaunchConfiguration c2 = BootLaunchConfigurationDelegate.createConf(javaProject);
-
 		BootDashElement child1 = harness.getElementFor(c1);
 		BootDashElement child2 = harness.getElementFor(c2);
 
 		ImmutableSet<BootDashElement> theChildren = ImmutableSet.of(
 				child1, child2
 		);
-
 		assertEquals(theChildren, element.getChildren().getValues());
 
-		selection.setElements(element);
-		assertEquals(ImmutableSet.of(element), action.getSelectedElements());
-		assertEquals(theChildren, action.getTargetElements());
+		for (RunState runOrDebug: EnumSet.of(RunState.RUNNING, RunState.DEBUGGING)) {
+			final RunOrDebugStateAction action = (RunOrDebugStateAction) getRunStateAction(runOrDebug);
+			selection.setElements(/*none*/);
+			assertEquals(ImmutableSet.of(), action.getSelectedElements());
+			assertEquals(ImmutableSet.of(), action.getTargetElements());
 
-		selection.setElements(element, child1);
+			selection.setElements(element);
+			assertEquals(ImmutableSet.of(element), action.getSelectedElements());
+			assertEquals(""+runOrDebug, theChildren, action.getTargetElements());
 
-		assertEquals(ImmutableSet.of(element, child1), action.getSelectedElements());
-		assertEquals(theChildren, action.getTargetElements());
+			selection.setElements(element, child1);
+			assertEquals(ImmutableSet.of(element, child1), action.getSelectedElements());
+			assertEquals(theChildren, action.getTargetElements());
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////////
