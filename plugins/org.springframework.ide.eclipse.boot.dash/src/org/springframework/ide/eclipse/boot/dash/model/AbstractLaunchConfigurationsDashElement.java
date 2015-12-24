@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -41,8 +40,6 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
@@ -144,20 +141,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	@Override
 	public String getLiveHost() {
 		return "localhost";
-	}
-
-	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
-		try {
-			URI target = getActuatorUrl();
-			if (target!=null) {
-				ActuatorClient client = new ActuatorClient(target, getTypeLookup());
-				return client.getRequestMappings();
-			}
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
-		return null;
 	}
 
 	@Override
@@ -469,6 +452,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return -1;
 	}
 
+	@Override
 	protected URI getActuatorUrl() {
 		try {
 			int actuatorPort = getActuatorPort();

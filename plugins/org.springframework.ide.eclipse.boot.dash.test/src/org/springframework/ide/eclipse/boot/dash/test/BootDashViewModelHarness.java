@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,16 +29,12 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
@@ -52,8 +46,6 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentia
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import com.google.common.collect.ImmutableSet;
 
 public class BootDashViewModelHarness {
 

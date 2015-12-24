@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.IMethod;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;

@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -23,6 +25,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 
@@ -197,5 +201,28 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		} else {
 			return ImmutableSet.of();
 		}
+	}
+
+	@Override
+	public List<RequestMapping> getLiveRequestMappings() {
+		try {
+			URI target = getActuatorUrl();
+			if (target!=null) {
+				ActuatorClient client = new ActuatorClient(target, getTypeLookup());
+				return client.getRequestMappings();
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	/**
+	 * Subclass should override to determine where to access the actuator for an app.
+	 * The Default implementation just returns null. Any functionality that depends on this
+	 * should in turn be disabled / return null.
+	 */
+	protected URI getActuatorUrl() {
+		return null;
 	}
 }

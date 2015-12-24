@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -193,11 +195,6 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 	}
 
 	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
-		return new ArrayList<RequestMapping>(0);
-	}
-
-	@Override
 	public ILaunchConfiguration getActiveConfig() {
 		return null;
 	}
@@ -312,4 +309,16 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return getBootDashModel();
 	}
 
+	@Override
+	protected URI getActuatorUrl() {
+		String host = getLiveHost();
+		try {
+			if (host!=null) {
+				return new URI("https://"+host);
+			}
+		} catch (URISyntaxException e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
 }
