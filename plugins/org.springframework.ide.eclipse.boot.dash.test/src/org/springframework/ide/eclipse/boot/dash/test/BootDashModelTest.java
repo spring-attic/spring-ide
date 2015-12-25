@@ -114,13 +114,13 @@ public class BootDashModelTest {
 		assertModelElements(/*none*/);
 
 		String projectName = "testProject";
-		IProject project = createBootProject(projectName);
-		new ACondition("Model update") {
+		createBootProject(projectName);
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertModelElements("testProject");
 				return true;
 			}
-		}.waitFor(MODEL_UPDATE_TIMEOUT);
+		};
 
 		BootDashElement projectEl = getElement("testProject");
 		assertTrue(projectEl.getCurrentChildren().isEmpty());
@@ -139,12 +139,12 @@ public class BootDashModelTest {
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
-		new ACondition("Model update") {
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertModelElements("testProject");
 				return true;
 			}
-		}.waitFor(MODEL_UPDATE_TIMEOUT);
+		};
 
 		BootDashElement projectEl = getElement("testProject");
 		assertTrue(projectEl.getCurrentChildren().isEmpty());
@@ -371,13 +371,13 @@ public class BootDashModelTest {
 	}
 
 	protected void waitForPort(final BootDashElement element, final int expectedPort) throws Exception {
-		new ACondition("Wait for port to change") {
+		new ACondition("Wait for port to change", 5000) { //Devtools should restart really fast
 			@Override
 			public boolean test() throws Exception {
 				assertEquals(expectedPort, element.getLivePort());
 				return true;
 			}
-		}.waitFor(5000); //Devtools should restart really fast
+		};
 	}
 
 	@Test public void testStartingStateObservable() throws Exception {
@@ -650,7 +650,7 @@ public class BootDashModelTest {
 		BootDashElement element = getElement(projectName);
 
 		assertNull(element.getDefaultRequestMappingPath());
-		element.setDefaultRequestMapingPath("something");
+		element.setDefaultRequestMappingPath("something");
 		assertProjectProperty(element.getProject(), "default.request-mapping.path", "something");
 
 		assertEquals("something", element.getDefaultRequestMappingPath());

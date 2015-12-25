@@ -67,11 +67,14 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * the app in a browser view. This is just a stored value. There is no guarantee
 	 * that it actually exists on the given element when it is running (i.e. it may
 	 * or may not be the path of a RequestMapping returned from getLiveRequestMappings.
-	 * Usually, it should be, but if the request mappings have changed since the
-	 * value was stored then it may no longer exist.
 	 */
 	String getDefaultRequestMappingPath();
-	void setDefaultRequestMapingPath(String defaultPath);
+	void setDefaultRequestMappingPath(String defaultPath);
+
+	/**
+	 * A 'summary' of getDefaultRequestMappingPath results for each child.
+	 */
+	ImmutableSet<String> getDefaultRequestMappingPaths();
 
 	BootDashModel getBootDashModel();
 
