@@ -335,9 +335,13 @@ public class BootDashLabels implements Disposable {
 						textLabel = "unknown port";
 					} else {
 						StringBuilder str = new StringBuilder();
+						String separator = "";
 						for (Integer port : ports) {
+							str.append(separator);
 							str.append(":");
 							str.append(port);
+
+							separator = " ";
 						}
 						textLabel = str.toString();
 					}
