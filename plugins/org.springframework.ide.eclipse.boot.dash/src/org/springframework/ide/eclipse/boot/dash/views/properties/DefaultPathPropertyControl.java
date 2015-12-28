@@ -66,7 +66,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 			public void focusLost(FocusEvent e) {
 				BootDashElement bde = getBootDashElement();
 				if (bde != null && !defaultPath.getText().equals(bde.getDefaultRequestMappingPath())) {
-					bde.setDefaultRequestMapingPath(defaultPath.getText());
+					bde.setDefaultRequestMappingPath(defaultPath.getText());
 				}
 			}
 		});

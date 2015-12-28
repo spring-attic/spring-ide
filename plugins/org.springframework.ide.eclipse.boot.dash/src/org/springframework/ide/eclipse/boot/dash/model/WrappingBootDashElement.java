@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -150,11 +151,34 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	@Override
 	public final String getDefaultRequestMappingPath() {
-		return getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
+		String storedValue = getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
+		if (storedValue!=null) {
+			return storedValue;
+		}
+		//inherit a default value from parent node?
+		Object parent = getParent();
+		if (parent instanceof BootDashElement) {
+			String inheritedValue = ((BootDashElement) parent).getDefaultRequestMappingPath();
+			return inheritedValue;
+		}
+		return null;
+	}
+
+	/**
+	 * This default implementation only computes a 'fake' summary and is
+	 * suitable only for nodes that do not have any children.
+	 */
+	@Override
+	public ImmutableSet<String> getDefaultRequestMappingPaths() {
+		String path = getDefaultRequestMappingPath();
+		if (StringUtil.hasText(path)) {
+			return ImmutableSet.of(path);
+		}
+		return ImmutableSet.of();
 	}
 
 	@Override
-	public final void setDefaultRequestMapingPath(String defaultPath) {
+	public final void setDefaultRequestMappingPath(String defaultPath) {
 		try {
 			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
 			bootDashModel.notifyElementChanged(this);

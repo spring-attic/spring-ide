@@ -59,7 +59,7 @@ public class ListenerLeakDetector implements TestRule {
 	@SuppressWarnings("unchecked")
 	protected Set<Object> getListeners() throws Exception {
 		Set<Object> listeners = new HashSet<Object>();
-		listeners.addAll(Arrays.asList(getDebugListeners()));
+		listeners.addAll(getDebugListeners());
 		listeners.addAll(getWorkspaceListeners());
 		return listeners;
 	}

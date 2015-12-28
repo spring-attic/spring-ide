@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.Collection;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
@@ -353,7 +355,8 @@ public class BootDashLabels implements Disposable {
 				}
 				break;
 			case DEFAULT_PATH:
-				String path = element.getDefaultRequestMappingPath();
+				String path = commaSeparated(element.getDefaultRequestMappingPaths());
+
 				if (stylers == null) {
 					label = path == null ? "" : path;
 				}
@@ -406,6 +409,23 @@ public class BootDashLabels implements Disposable {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// private / helper stuff
+
+	private String commaSeparated(Collection<String> elements) {
+		if (elements!=null) {
+			StringBuilder buf = new StringBuilder();
+			boolean needComma = false;
+			for (String string : elements) {
+				if (needComma) {
+					buf.append(',');
+				} else {
+					needComma = true;
+				}
+				buf.append(string);
+			}
+			return buf.toString();
+		}
+		return "";
+	}
 
 	private boolean hasText(StyledString stext) {
 		return !stext.getString().isEmpty();

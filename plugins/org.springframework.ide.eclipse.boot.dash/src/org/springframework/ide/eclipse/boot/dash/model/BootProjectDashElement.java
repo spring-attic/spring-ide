@@ -18,13 +18,19 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableSortedSet.Builder;
 
 /**
  * Concrete BootDashElement that wraps an IProject
@@ -38,6 +44,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private LaunchConfDashElementFactory childFactory;
 	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
+	private ObservableSet<String> defaultRequestMappingPaths;
 	private ObservableSet<Integer> ports;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
@@ -91,39 +98,95 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		return children;
 	}
 
+
+	@Override
+	public ImmutableSet<String> getDefaultRequestMappingPaths() {
+		return getDefaultRequestMappingPathsExp().getValues();
+	}
+
+	private ObservableSet<String> getDefaultRequestMappingPathsExp() {
+		if (defaultRequestMappingPaths==null) {
+			defaultRequestMappingPaths = createSortedLiveSummary(new Function<BootDashElement, String>() {
+				@Override public String apply(BootDashElement element) {
+					String path = element.getDefaultRequestMappingPath();
+					if (StringUtil.hasText(path)) {
+						return path;
+					}
+					return null;
+				}
+			});
+			this.dependsOn(defaultRequestMappingPaths);
+		}
+		return defaultRequestMappingPaths;
+	}
+
 	@Override
 	public ImmutableSet<Integer> getLivePorts() {
 		return getLivePortsExp().getValues();
 	}
 
-	public ObservableSet<Integer> getLivePortsExp() {
-		if (this.ports==null) {
-			ObservableSet<LiveExpression<Integer>> livePorts = LiveSets.map(getAllChildren(), new Function<BootDashElement, LiveExpression<Integer>>() {
-				@Override
-				public LiveExpression<Integer> apply(BootDashElement element) {
-					if (element instanceof LaunchConfDashElement) {
-						return ((LaunchConfDashElement) element).getLivePortExp();
-					}
-					return null;
-				}
-			});
-			addDisposableChild(livePorts);
-			this.ports = LiveSets.sortedMappedValues(livePorts, new Function<Integer, Integer>() {
-				public Integer apply(Integer port) {
-					if (port!=null && port>0) {
+	private ObservableSet<Integer> getLivePortsExp() {
+		if (ports==null) {
+			ports = createSortedLiveSummary(new Function<BootDashElement, Integer>() {
+				@Override public Integer apply(BootDashElement element) {
+					int port = element.getLivePort();
+					if (port>0) {
 						return port;
 					}
 					return null;
 				}
 			});
-			addDisposableChild(this.ports);
-			this.ports.addListener(new ValueListener<ImmutableSet<Integer>>() {
-				public void gotValue(LiveExpression<ImmutableSet<Integer>> exp, ImmutableSet<Integer> value) {
-					getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
-				}
-			});
+			this.dependsOn(ports);
 		}
-		return this.ports;
+		return ports;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void dependsOn(LiveExpression<?> liveProperty) {
+		liveProperty.addListener(new ValueListener() {
+			public void gotValue(LiveExpression exp, Object value) {
+				getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
+			}
+		});
+	}
+
+	/**
+	 * Creates a ObservableSet that is a 'summary' of some property of the children of this node. The summary
+	 * is a set of all the values of the given property on all the children. The set is sorted using the element's
+	 * natural ordering.
+	 */
+	private <T extends Comparable<T>> ObservableSet<T> createSortedLiveSummary(final Function<BootDashElement, T> getter) {
+		final ObservableSet<T> summary = new ObservableSet<T>() {
+			@Override
+			protected ImmutableSet<T> compute() {
+				Builder<T> builder = ImmutableSortedSet.naturalOrder();
+				add(builder, BootProjectDashElement.this);
+				for (BootDashElement child : getAllChildren().getValues()) {
+					add(builder, child);
+				}
+				return builder.build();
+			}
+
+			protected void add(Builder<T> builder, BootDashElement child) {
+				T v = getter.apply(child);
+				if (v!=null) {
+					builder.add(v);
+				}
+			}
+		};
+		final ElementStateListener elementListener = new ElementStateListener() {
+			public void stateChanged(BootDashElement e) {
+				summary.refresh();
+			}
+		};
+		getBootDashModel().addElementStateListener(elementListener);
+		summary.onDispose(new DisposeListener() {
+			public void disposed(Disposable disposed) {
+				getBootDashModel().removeElementStateListener(elementListener);
+			}
+		});
+		addDisposableChild(summary);
+		return summary;
 	}
 
 	/**
