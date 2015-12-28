@@ -421,11 +421,11 @@ public class BootDashModelTest {
 			// Restarting the project will/should terminate the old launch and then
 			// create a new launch.
 
-			new ACondition("Wait for launch termination") {
+			new ACondition("Wait for launch termination", RUN_STATE_CHANGE_TIMEOUT) {
 				public boolean test() throws Exception {
 					return launch.isTerminated();
 				}
-			}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
+			};
 
 			waitForState(element, toState);
 		} finally {
@@ -470,8 +470,6 @@ public class BootDashModelTest {
 
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
-					assertEquals(ImmutableSet.of(port1, port2), project.getLivePorts());
-
 					assertInstances("2/2", project);
 					assertInstancesLabel("2/2", project);
 					assertInstances("1/1", el1);
@@ -479,6 +477,10 @@ public class BootDashModelTest {
 					assertInstances("1/1", el2);
 					assertInstancesLabel("", el2); // hidden label for ?/1 case
 
+					assertEquals(port1, el1.getLivePort());
+					assertEquals(port2, el2.getLivePort());
+
+					assertEquals(ImmutableSet.of(port1, port2), project.getLivePorts());
 					return true;
 				}
 			};
