@@ -370,6 +370,35 @@ public class BootDashModelTest {
 		}
 	}
 
+	@Test public void pathSummaries() throws Exception {
+		BootProjectDashElement project = harness.getElementFor(createBootProject("boohooo"));
+
+		//Tests for childless parent...
+		assertEquals(ImmutableSet.of(), project.getDefaultRequestMappingPaths());
+
+		project.setDefaultRequestMappingPath("/vader");
+		assertEquals(ImmutableSet.of("/vader"), project.getDefaultRequestMappingPaths());
+
+		//Tests for parent with children...
+		BootDashElement child1 = harness.getElementFor(BootLaunchConfigurationDelegate.createConf(project.getProject()));
+		BootDashElement child2 = harness.getElementFor(BootLaunchConfigurationDelegate.createConf(project.getProject()));
+
+		//Test that children inherit default from parent
+		project.setDefaultRequestMappingPath("/vader");
+		assertEquals("/vader", project.getDefaultRequestMappingPath());
+		assertEquals("/vader", child1.getDefaultRequestMappingPath());
+		assertEquals("/vader", child2.getDefaultRequestMappingPath());
+		assertEquals(ImmutableSet.of("/vader"), project.getDefaultRequestMappingPaths());
+
+		//Test that child can override parent default
+		child1.setDefaultRequestMappingPath("/luke");
+		assertEquals("/vader", project.getDefaultRequestMappingPath());
+		assertEquals("/luke", child1.getDefaultRequestMappingPath());
+		assertEquals("/vader", child2.getDefaultRequestMappingPath());
+		assertEquals(ImmutableSet.of("/vader", "/luke"), project.getDefaultRequestMappingPaths());
+
+	}
+
 	protected void waitForPort(final BootDashElement element, final int expectedPort) throws Exception {
 		new ACondition("Wait for port to change", 5000) { //Devtools should restart really fast
 			@Override
