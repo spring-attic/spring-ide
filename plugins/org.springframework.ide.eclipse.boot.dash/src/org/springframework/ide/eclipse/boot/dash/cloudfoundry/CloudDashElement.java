@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import com.google.common.base.Objects;
 
@@ -309,16 +310,17 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return getBootDashModel();
 	}
 
-	@Override
-	protected URI getActuatorUrl() {
-		String host = getLiveHost();
-		try {
-			if (host!=null) {
-				return new URI("https://"+host);
-			}
-		} catch (URISyntaxException e) {
-			BootDashActivator.log(e);
-		}
-		return null;
-	}
+//	@Override
+//	protected LiveExpression<URI> getActuatorUrl() {
+//		//TODO: livepressionify the code below.
+//		String host = getLiveHost();
+//		try {
+//			if (host!=null) {
+//				return new URI("https://"+host);
+//			}
+//		} catch (URISyntaxException e) {
+//			BootDashActivator.log(e);
+//		}
+//		return null;
+//	}
 }

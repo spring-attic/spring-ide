@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchPart;
@@ -182,7 +183,31 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 			labelText.setText("");
 		}
 		tv.refresh();
-		page.getControl().getParent().layout(true, true);
+		reflow(page);
+	}
+
+	private void reflow(TabbedPropertySheetPage page) {
+		final Composite target = getReflowTarget(page);
+		if (target!=null) {
+			target.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					target.layout(true, true);
+				}
+			});
+		}
+	}
+
+	private Composite getReflowTarget(TabbedPropertySheetPage page) {
+		return page.getControl().getParent();
+//		Control c = page.getControl();
+//		Composite composite = null;
+//		while (c!=null) {
+//			if (c instanceof Composite) {
+//				composite = (Composite) c;
+//			}
+//			c = c.getParent();
+//		}
+//		return composite;
 	}
 
 	private void refreshControlsVisibility() {

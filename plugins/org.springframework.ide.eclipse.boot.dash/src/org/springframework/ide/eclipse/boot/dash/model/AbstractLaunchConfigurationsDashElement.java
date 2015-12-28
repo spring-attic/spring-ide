@@ -45,7 +45,6 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
-import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -89,6 +88,8 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	private LiveExpression<Integer> actualInstances;
 
 	private PropertyStoreApi persistentProperties;
+
+	private LiveExpression<URI> actuatorUrl;
 
 	@SuppressWarnings("unchecked")
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
@@ -487,16 +488,29 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	@Override
-	protected URI getActuatorUrl() {
-		try {
-			int actuatorPort = getActuatorPort();
-			if (actuatorPort>0) {
-					return new URI("http://localhost:"+actuatorPort);
-			}
-		} catch (URISyntaxException e) {
-			BootDashActivator.log(e);
+	protected LiveExpression<URI> getActuatorUrl() {
+		synchronized (this) {
+			if (actuatorUrl==null) {
+				actuatorUrl = new LiveExpression<URI>() {
+					{
+						dependsOn(actuatorPort);
+					}
+					protected URI compute() {
+						try {
+							Integer port = actuatorPort.getValue();
+							if (port!=null && port>0) {
+								return new URI("http://localhost:"+port);
+							}
+						} catch (URISyntaxException e) {
+							BootDashActivator.log(e);
+						}
+						return null;
+					}
+				};
+				addDisposableChild(actuatorUrl);
+			};
 		}
-		return null;
+		return actuatorUrl;
 	}
 
 	public void restartAndExpose(RunState runMode, NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {

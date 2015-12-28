@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
-import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
+import org.springsource.ide.eclipse.commons.livexp.ui.Reflowable;
 
 public class Scroller extends SharedScrolledComposite implements Reflowable {
 
