@@ -50,11 +50,10 @@ public class LocalBootDashModel extends AbstractBootDashModel {
 	ClasspathListenerManager classpathListenerManager;
 
 	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
+	final LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
 	LiveSetVariable<BootDashElement> elements; //lazy created
 	private BootDashModelConsoleManager consoleManager;
-
-	LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
 	private DevtoolsPortRefresher devtoolsPortRefresher;
 	private LiveExpression<Pattern> projectExclusion;
@@ -79,7 +78,6 @@ public class LocalBootDashModel extends AbstractBootDashModel {
 		this.launchConfElementFactory = new LaunchConfDashElementFactory(this, context.getLaunchManager());
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
-		this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		this.projectExclusion = context.getBootProjectExclusion();
 	}
 
@@ -94,10 +92,39 @@ public class LocalBootDashModel extends AbstractBootDashModel {
 					updateElementsFromWorkspace();
 				}
 			});
-
-
 			updateElementsFromWorkspace();
+			this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		}
+	}
+
+	/**
+	 * When no longer needed the model should be disposed, otherwise it will continue
+	 * listening for changes to the workspace in order to keep itself in synch.
+	 */
+	public void dispose() {
+		if (elements!=null) {
+			elements = null;
+			openCloseListenerManager.dispose();
+			openCloseListenerManager = null;
+			classpathListenerManager.dispose();
+			classpathListenerManager = null;
+			devtoolsPortRefresher.dispose();
+			devtoolsPortRefresher = null;
+		}
+		if (launchConfElementFactory!=null) {
+			launchConfElementFactory.dispose();
+			launchConfElementFactory = null;
+		}
+		if (projectElementFactory!=null) {
+			projectElementFactory.dispose();
+			projectElementFactory = null;
+		}
+		if (projectExclusionListener!=null) {
+			projectExclusion.removeListener(projectExclusionListener);
+			projectExclusionListener=null;
+		}
+		launchConfTracker.dispose();
+		launchConfRunStateTracker.dispose();
 	}
 
 	void updateElementsFromWorkspace() {
@@ -122,26 +149,6 @@ public class LocalBootDashModel extends AbstractBootDashModel {
 	public synchronized ObservableSet<BootDashElement> getElements() {
 		init();
 		return elements;
-	}
-
-	/**
-	 * When no longer needed the model should be disposed, otherwise it will continue
-	 * listening for changes to the workspace in order to keep itself in synch.
-	 */
-	public void dispose() {
-		if (elements!=null) {
-			elements = null;
-			openCloseListenerManager.dispose();
-			projectElementFactory.dispose();
-			launchConfElementFactory.dispose();
-			classpathListenerManager.dispose();
-			launchConfRunStateTracker.dispose();
-			devtoolsPortRefresher.dispose();
-			if (projectExclusionListener!=null) {
-				projectExclusion.removeListener(projectExclusionListener);
-			}
-			launchConfTracker.dispose();
-		}
 	}
 
 	/**

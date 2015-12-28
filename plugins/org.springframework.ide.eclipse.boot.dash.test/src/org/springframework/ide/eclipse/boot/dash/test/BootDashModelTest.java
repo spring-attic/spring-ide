@@ -114,13 +114,13 @@ public class BootDashModelTest {
 		assertModelElements(/*none*/);
 
 		String projectName = "testProject";
-		IProject project = createBootProject(projectName);
-		new ACondition("Model update") {
+		createBootProject(projectName);
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertModelElements("testProject");
 				return true;
 			}
-		}.waitFor(MODEL_UPDATE_TIMEOUT);
+		};
 
 		BootDashElement projectEl = getElement("testProject");
 		assertTrue(projectEl.getCurrentChildren().isEmpty());
@@ -139,12 +139,12 @@ public class BootDashModelTest {
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
-		new ACondition("Model update") {
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertModelElements("testProject");
 				return true;
 			}
-		}.waitFor(MODEL_UPDATE_TIMEOUT);
+		};
 
 		BootDashElement projectEl = getElement("testProject");
 		assertTrue(projectEl.getCurrentChildren().isEmpty());
@@ -370,14 +370,43 @@ public class BootDashModelTest {
 		}
 	}
 
+	@Test public void pathSummaries() throws Exception {
+		BootProjectDashElement project = harness.getElementFor(createBootProject("boohooo"));
+
+		//Tests for childless parent...
+		assertEquals(ImmutableSet.of(), project.getDefaultRequestMappingPaths());
+
+		project.setDefaultRequestMappingPath("/vader");
+		assertEquals(ImmutableSet.of("/vader"), project.getDefaultRequestMappingPaths());
+
+		//Tests for parent with children...
+		BootDashElement child1 = harness.getElementFor(BootLaunchConfigurationDelegate.createConf(project.getProject()));
+		BootDashElement child2 = harness.getElementFor(BootLaunchConfigurationDelegate.createConf(project.getProject()));
+
+		//Test that children inherit default from parent
+		project.setDefaultRequestMappingPath("/vader");
+		assertEquals("/vader", project.getDefaultRequestMappingPath());
+		assertEquals("/vader", child1.getDefaultRequestMappingPath());
+		assertEquals("/vader", child2.getDefaultRequestMappingPath());
+		assertEquals(ImmutableSet.of("/vader"), project.getDefaultRequestMappingPaths());
+
+		//Test that child can override parent default
+		child1.setDefaultRequestMappingPath("/luke");
+		assertEquals("/vader", project.getDefaultRequestMappingPath());
+		assertEquals("/luke", child1.getDefaultRequestMappingPath());
+		assertEquals("/vader", child2.getDefaultRequestMappingPath());
+		assertEquals(ImmutableSet.of("/vader", "/luke"), project.getDefaultRequestMappingPaths());
+
+	}
+
 	protected void waitForPort(final BootDashElement element, final int expectedPort) throws Exception {
-		new ACondition("Wait for port to change") {
+		new ACondition("Wait for port to change", 5000) { //Devtools should restart really fast
 			@Override
 			public boolean test() throws Exception {
 				assertEquals(expectedPort, element.getLivePort());
 				return true;
 			}
-		}.waitFor(5000); //Devtools should restart really fast
+		};
 	}
 
 	@Test public void testStartingStateObservable() throws Exception {
@@ -421,11 +450,11 @@ public class BootDashModelTest {
 			// Restarting the project will/should terminate the old launch and then
 			// create a new launch.
 
-			new ACondition("Wait for launch termination") {
+			new ACondition("Wait for launch termination", RUN_STATE_CHANGE_TIMEOUT) {
 				public boolean test() throws Exception {
 					return launch.isTerminated();
 				}
-			}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
+			};
 
 			waitForState(element, toState);
 		} finally {
@@ -470,8 +499,6 @@ public class BootDashModelTest {
 
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
-					assertEquals(ImmutableSet.of(port1, port2), project.getLivePorts());
-
 					assertInstances("2/2", project);
 					assertInstancesLabel("2/2", project);
 					assertInstances("1/1", el1);
@@ -479,6 +506,10 @@ public class BootDashModelTest {
 					assertInstances("1/1", el2);
 					assertInstancesLabel("", el2); // hidden label for ?/1 case
 
+					assertEquals(port1, el1.getLivePort());
+					assertEquals(port2, el2.getLivePort());
+
+					assertEquals(ImmutableSet.of(port1, port2), project.getLivePorts());
 					return true;
 				}
 			};
@@ -650,7 +681,7 @@ public class BootDashModelTest {
 		BootDashElement element = getElement(projectName);
 
 		assertNull(element.getDefaultRequestMappingPath());
-		element.setDefaultRequestMapingPath("something");
+		element.setDefaultRequestMappingPath("something");
 		assertProjectProperty(element.getProject(), "default.request-mapping.path", "something");
 
 		assertEquals("something", element.getDefaultRequestMappingPath());
