@@ -88,6 +88,9 @@ public abstract class DisposingFactory<K,V extends Disposable> implements Dispos
 	@Override
 	public synchronized void dispose() {
 		if (validKeys!=null) {
+			if (validKeyListener!=null) {
+				validKeys.removeListener(validKeyListener);
+			}
 			validKeys = null;
 			retainOnlyValidKeys();
 			cachedInstances = null;
