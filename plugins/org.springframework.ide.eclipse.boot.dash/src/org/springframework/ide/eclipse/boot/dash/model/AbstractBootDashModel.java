@@ -15,7 +15,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
-public abstract class AbstractBootDashModel implements BootDashModel {
+public abstract class AbstractBootDashModel extends AbstractDisposable implements BootDashModel {
 
 	private BootDashViewModel parent;
 	private RunTarget target;
@@ -52,14 +52,6 @@ public abstract class AbstractBootDashModel implements BootDashModel {
 	abstract public ObservableSet<BootDashElement> getElements();
 
 	abstract public BootDashModelConsoleManager getElementConsoleManager();
-
-	/**
-	 * When no longer needed the model should be disposed, otherwise it will
-	 * continue listening for changes to the workspace in order to keep itself
-	 * in synch.
-	 */
-	@Override
-	abstract public void dispose();
 
 	/**
 	 * Trigger manual model refresh.

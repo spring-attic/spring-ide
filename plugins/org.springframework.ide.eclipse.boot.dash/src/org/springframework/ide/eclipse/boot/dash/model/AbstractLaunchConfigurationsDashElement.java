@@ -80,7 +80,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		}
 	}
 
-	private static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
+	public static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
 	private LiveExpression<RunState> runState;
 	private LiveExpression<Integer> livePort;

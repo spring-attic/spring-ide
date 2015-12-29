@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +35,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -310,17 +307,13 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return getBootDashModel();
 	}
 
-//	@Override
-//	protected LiveExpression<URI> getActuatorUrl() {
-//		//TODO: livepressionify the code below.
-//		String host = getLiveHost();
-//		try {
-//			if (host!=null) {
-//				return new URI("https://"+host);
-//			}
-//		} catch (URISyntaxException e) {
-//			BootDashActivator.log(e);
-//		}
-//		return null;
-//	}
+	@Override
+	protected LiveExpression<URI> getActuatorUrl() {
+		LiveExpression<URI> urlExp = getCloudModel().getActuatorUrlFactory().createOrGet(this);
+		if (urlExp!=null) {
+			return urlExp;
+		}
+		//only happens when this element is not valid anymore, but return something harmless / usable anyhow
+		return LiveExpression.constant(null);
+	}
 }

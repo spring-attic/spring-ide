@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import static org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement.READY_STATES;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,12 +50,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
@@ -59,8 +64,11 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -161,6 +169,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 	};
 
+	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
 		RunTargetType type = target.getType();
@@ -191,6 +201,47 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return elements;
 	}
 
+	public DisposingFactory<BootDashElement, LiveExpression<URI>> getActuatorUrlFactory() {
+		if (actuatorUrlFactory==null) {
+			this.actuatorUrlFactory = new DisposingFactory<BootDashElement,LiveExpression<URI>>(getElements()) {
+				protected LiveExpression<URI> create(final BootDashElement key) {
+					final LiveExpression<URI> uriExp = new LiveExpression<URI>() {
+						protected URI compute() {
+							try {
+								RunState runstate = key.getRunState();
+								if (READY_STATES.contains(runstate)) {
+									String host = key.getLiveHost();
+									if (StringUtil.hasText(host)) {
+										return new URI("https://"+host);
+									}
+								}
+							} catch (URISyntaxException e) {
+								BootDashActivator.log(e);
+							}
+							return null;
+						}
+					};
+					final ElementStateListener elementListener = new ElementStateListener() {
+						public void stateChanged(BootDashElement e) {
+							if (e.equals(key)) {
+								uriExp.refresh();
+							}
+						}
+					};
+					uriExp.onDispose(new DisposeListener() {
+						public void disposed(Disposable disposed) {
+							removeElementStateListener(elementListener);
+						}
+					});
+					addElementStateListener(elementListener);
+					return uriExp;
+				}
+			};
+			addDisposableChild(actuatorUrlFactory);
+		}
+		return actuatorUrlFactory;
+	}
+
 	@Override
 	public void dispose() {
 		getCloudTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
@@ -200,6 +251,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			debugTargetDisconnector = null;
 		}
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		super.dispose();
 	}
 
 	@Override
