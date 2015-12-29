@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.livexp.ui;
 
 import org.eclipse.swt.widgets.Control;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.Reflowable;
 
 /**
  * @author Kris De Volder
@@ -25,7 +26,7 @@ public class ReflowUtil {
 		}
 	}
 
-	private static boolean findAndReflowControl(Control control) {
+	public static boolean findAndReflowControl(Control control) {
 		while (control!=null) {
 			if (control instanceof Reflowable) {
 				if (((Reflowable)control).reflow()) {

@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.ui.Reflowable;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springframework.ide.eclipse.boot.dash.views.ViewStyler;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -31,6 +30,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.Reflowable;
 import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
 
 /**

@@ -29,8 +29,12 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorC
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -49,6 +53,15 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
 	private ListenerList disposeListeners = new ListenerList();
+
+	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
+
+	@SuppressWarnings("rawtypes")
+	private ValueListener elementStateNotifier = new ValueListener() {
+		public void gotValue(LiveExpression exp, Object value) {
+			getBootDashModel().notifyElementChanged(WrappingBootDashElement.this);
+		}
+	};
 
 	public WrappingBootDashElement(BootDashModel bootDashModel, T delegate) {
 		this.bootDashModel = bootDashModel;
@@ -229,16 +242,37 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	@Override
 	public List<RequestMapping> getLiveRequestMappings() {
-		try {
-			URI target = getActuatorUrl();
-			if (target!=null) {
-				ActuatorClient client = new ActuatorClient(target, getTypeLookup());
-				return client.getRequestMappings();
+		final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+		synchronized (this) {
+			if (liveRequestMappings==null) {
+				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
+					protected ImmutableList<RequestMapping> compute() {
+						URI target = actuatorUrl.getValue();
+						if (target!=null) {
+							ActuatorClient client = new ActuatorClient(target, getTypeLookup());
+							List<RequestMapping> list = client.getRequestMappings();
+							if (list!=null) {
+								System.out.println("request mappings size = "+list.size());
+								return ImmutableList.copyOf(client.getRequestMappings());
+							}
+						}
+						return null;
+					}
+				};
+				liveRequestMappings.dependsOn(actuatorUrl);
+				addElementState(liveRequestMappings);
+				addDisposableChild(liveRequestMappings);
 			}
-		} catch (Exception e) {
-			BootDashActivator.log(e);
 		}
-		return null;
+		return liveRequestMappings.getValue();
+	}
+
+	/**
+	 * Ensure that element state notifications are fired when a given liveExp's value changes.
+	 */
+	@SuppressWarnings("unchecked")
+	private void addElementState(LiveExpression<?> state) {
+		state.addListener(elementStateNotifier);
 	}
 
 	/**
@@ -246,7 +280,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	 * The Default implementation just returns null. Any functionality that depends on this
 	 * should in turn be disabled / return null.
 	 */
-	protected URI getActuatorUrl() {
-		return null;
+	protected LiveExpression<URI> getActuatorUrl() {
+		return LiveExpression.constant(null);
 	}
 }
