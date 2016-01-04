@@ -626,17 +626,24 @@ public class BootDashModelTest {
 				"}\n"
 		);
 		StsTestUtil.assertNoErrors(project);
-		BootDashElement element = getElement(projectName);
+		final BootDashElement element = getElement(projectName);
 		try {
 			waitForState(element, RunState.INACTIVE);
 			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
 
 			element.restart(RunState.RUNNING, ui);
 			waitForState(element, RunState.RUNNING);
+			new ACondition("Wait for request mappings", MODEL_UPDATE_TIMEOUT) {
+				public boolean test() throws Exception {
+					List<RequestMapping> mappings = element.getLiveRequestMappings();
+					assertNotNull(mappings); //Why is the test sometimes failing here?
+					assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
+					                                 // for example an 'error' page.
+					return true;
+				}
+			};
+
 			List<RequestMapping> mappings = element.getLiveRequestMappings();
-			assertNotNull(mappings); //Why is the test sometimes failing here?
-			assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
-			                                 // for example an 'error' page.
 			System.out.println(">>> Found RequestMappings");
 			for (RequestMapping m : mappings) {
 				System.out.println(m.getPath());
