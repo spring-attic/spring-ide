@@ -94,8 +94,10 @@ public class BootProcessFactory implements IProcessFactory {
 			@Override
 			protected IStreamsProxy createStreamsProxy() {
 				IStreamsProxy streams = super.createStreamsProxy();
-				streams.getOutputStreamMonitor().addListener(new DumpOutput("%out: "));
-				streams.getErrorStreamMonitor().addListener(new DumpOutput("%err: "));
+				if (ENABLE_OUTPUT_DUMPING) {
+					streams.getOutputStreamMonitor().addListener(new DumpOutput("%out: "));
+					streams.getErrorStreamMonitor().addListener(new DumpOutput("%err: "));
+				}
 				return streams;
 			}
 
