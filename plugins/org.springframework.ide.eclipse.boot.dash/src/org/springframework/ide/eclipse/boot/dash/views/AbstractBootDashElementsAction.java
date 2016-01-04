@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -31,6 +32,14 @@ import com.google.common.collect.ImmutableSet;
  */
 public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 	private final MultiSelection<BootDashElement> selection;
 	private ValueListener<ImmutableSet<BootDashElement>> selectionListener;
 	protected final BootDashViewModel model;
@@ -47,6 +56,7 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		if (model!=null) {
 			model.addElementStateListener(modelListener = new ElementStateListener() {
 				public void stateChanged(BootDashElement e) {
+					debug("action '"+getText()+"' updating for element "+e);
 					if (selection.getValue().contains(e)) {
 						Display.getDefault().asyncExec(new Runnable() {
 							public void run() {
@@ -55,6 +65,7 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 						});
 					}
 				}
+
 			});
 		}
 		selection.getElements().addListener(selectionListener = new ValueListener<ImmutableSet<BootDashElement>>() {

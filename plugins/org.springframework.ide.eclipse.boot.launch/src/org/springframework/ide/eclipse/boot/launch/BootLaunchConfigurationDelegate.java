@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map.Entry;import javax.management.remote.JMXServiceURL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -276,6 +277,20 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static void setProfile(ILaunchConfigurationWorkingCopy conf, String profile) {
 		conf.setAttribute(PROFILE, profile);
 	}
+
+	public static ILaunchConfiguration duplicate(ILaunchConfiguration conf) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy(conf.getName());
+		for (Entry<String, Object> e : conf.getAttributes().entrySet()) {
+			String key = e.getKey();
+			Object value = e.getValue();
+			if (value instanceof String) {
+				wc.setAttribute(key, (String)value);
+			}
+		}
+		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+		return wc.doSave();
+	}
+
 
 	public static ILaunchConfigurationWorkingCopy createWorkingCopy(String nameHint) throws CoreException {
 		String name = getLaunchMan().generateLaunchConfigurationName(nameHint);

@@ -60,12 +60,12 @@ public class BootDashActions {
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ToggleBootDashModelConnection toggleTargetConnectionAction;
-
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ToggleFiltersAction toggleFiltersAction;
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
+	private DuplicateAction duplicateAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -167,6 +167,8 @@ public class BootDashActions {
 		exposeDebugAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 
 		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(model, elementsSelection, ui);
+
+		duplicateAction = new DuplicateAction(model, elementsSelection, ui);
 
 	}
 
@@ -384,6 +386,10 @@ public class BootDashActions {
 			exposeDebugAppAction.dispose();
 			exposeDebugAppAction = null;
 		}
+		if (duplicateAction != null) {
+			duplicateAction.dispose();
+			duplicateAction = null;
+		}
 	}
 
 	public IAction getToggleFiltersAction() {
@@ -392,6 +398,10 @@ public class BootDashActions {
 
 	public RestartWithRemoteDevClientAction getRestartWithRemoteDevClientAction() {
 		return restartWithRemoteDevClientAction;
+	}
+
+	public DuplicateAction getDuplicateAction() {
+		return duplicateAction;
 	}
 
 }

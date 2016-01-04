@@ -71,7 +71,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> {
+public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> implements Duplicatable<LaunchConfDashElement> {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
@@ -302,6 +302,26 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		} catch (Exception e) {
 			ui.errorPopup("Couldn't open config for "+getName(), ExceptionUtil.getMessage(e));
 		}
+	}
+
+	@Override
+	public boolean canDuplicate() {
+		return getLaunchConfigs().size()==1;
+	}
+
+	@Override
+	public LaunchConfDashElement duplicate(UserInteractions ui) {
+		try {
+			ILaunchConfiguration conf = CollectionUtils.getSingle(getLaunchConfigs());
+			if (conf!=null) {
+				ILaunchConfiguration newConf = BootLaunchConfigurationDelegate.duplicate(conf);
+				return getBootDashModel().getLaunchConfElementFactory().createOrGet(newConf);
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+			ui.errorPopup("Couldn't duplicate config", ExceptionUtil.getMessage(e));
+		}
+		return null;
 	}
 
 	@Override

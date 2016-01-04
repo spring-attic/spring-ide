@@ -15,6 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getJMXPortAsInt;
 import java.util.EnumSet;
 
 import org.eclipse.core.resources.IProject;
@@ -28,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -35,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions.RunOrDebugStateAction;
+import org.springframework.ide.eclipse.boot.dash.views.DuplicateAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -50,6 +53,130 @@ import com.google.common.collect.ImmutableSet;
  * @author Kris De Volder
  */
 public class BootDashActionTests {
+
+	@Test
+	public void duplicateConfigAction() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final DuplicateAction action = actions.getDuplicateAction();
+		final ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		selection.setElements(element);
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		action.run();
+
+		new ACondition("Wait for action post conditions", 3000) {
+			public boolean test() throws Exception {
+				ImmutableSet<ILaunchConfiguration> confs = element.getLaunchConfigs();
+				assertEquals(2, confs.size());
+				assertEquals(2, element.getCurrentChildren().size());
+				assertTrue(confs.contains(conf1));
+				for (ILaunchConfiguration other : confs) {
+					if (!other.equals(conf1)) {
+						assertFalse(getJMXPortAsInt(conf1)==getJMXPortAsInt(other));
+					}
+				}
+				return true;
+			}
+		};
+	}
+
+	@Test
+	public void duplicateConfigActionEnablementForLaunchConf() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final DuplicateAction action = actions.getDuplicateAction();
+
+		ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertEquals(2, element.getLaunchConfigs().size());
+		new ACondition("Wait for elements", 3000) {
+			public boolean test() throws Exception {
+				assertEquals(2, element.getCurrentChildren().size());
+				return true;
+			}
+		};
+
+		BootDashElement el1 = harness.getElementFor(conf1);
+		BootDashElement el2 = harness.getElementFor(conf2);
+
+		assertFalse(action.isEnabled()); // or test may pass vacuously without an actual update
+		selection.setElements(el1);
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		selection.setElements(el1, el2);
+		new ACondition("Wait for disablement", 3000) {
+			public boolean test() throws Exception {
+				assertFalse(action.isEnabled());
+				return true;
+			}
+		};
+	}
+
+	@Test
+	public void duplicateConfigActionEnablementForProject() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final DuplicateAction action = actions.getDuplicateAction();
+
+		//If selection is empty the action must not be enabled
+		assertTrue(selection.isEmpty());
+		assertFalse(action.isEnabled());
+
+		//If project is selected then...
+		selection.setElements(element);
+		// a) if project has no launch configs ...
+		assertTrue(element.getLaunchConfigs().isEmpty());
+		// then there's nothing to duplicate... so disabled
+		assertFalse(action.isEnabled());
+
+		// b) if project has exactly one launch config ...
+		BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertEquals(1, element.getLaunchConfigs().size());
+		// action enablement is updated as response to some asynchronous state changes
+		// so may not happen immediately
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		// c) if project has more than one launch config...
+		BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertEquals(2, element.getLaunchConfigs().size());
+		// ... async update may not happen right away...
+		new ACondition("Wait for disablement", 3000) {
+			public boolean test() throws Exception {
+				assertEquals(2, element.getCurrentChildren().size());
+				assertFalse(action.isEnabled());
+				return true;
+			}
+		};
+
+	}
 
 	@Test
 	public void openConfigActionEnablementForProject() throws Exception {
