@@ -66,7 +66,7 @@ public class ManifestFileDialog extends TitleAreaDialog {
 	public ManifestFileDialog(Shell parentShell, IProject project, IPath manifest) {
 		super(parentShell);
 		this.project = project;
-		pathModel.setValue(manifest == null ? new Path("").makeRelative() : manifest);
+		pathModel.setValue(manifest);
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class ManifestFileDialog extends TitleAreaDialog {
 		clearButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				pathModel.setValue(new Path("").makeRelative());
+				pathModel.setValue(null);
 			}
 		});
 		clearButton.setLayoutData(GridDataFactory.fillDefaults().hint(100, SWT.DEFAULT).create());
