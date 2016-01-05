@@ -28,9 +28,9 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
+public class DeleteElementsAction extends AbstractBootDashElementsAction {
 
-	public DeleteApplicationsAction(MultiSelection<BootDashElement> selection,
+	public DeleteElementsAction(MultiSelection<BootDashElement> selection,
 			UserInteractions ui) {
 		super(selection, ui);
 		Assert.isNotNull(ui);

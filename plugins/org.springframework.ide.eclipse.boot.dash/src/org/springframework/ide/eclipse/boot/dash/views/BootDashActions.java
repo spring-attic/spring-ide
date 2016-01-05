@@ -54,7 +54,7 @@ public class BootDashActions {
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
-	private DeleteApplicationsAction deleteApplicationsAction;
+	private DeleteElementsAction deleteElementsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
@@ -138,7 +138,7 @@ public class BootDashActions {
 		openInPackageExplorerAction = new OpenInPackageExplorer(elementsSelection, ui);
 		addTargetActions = createAddTargetActions();
 
-		deleteApplicationsAction = new DeleteApplicationsAction(elementsSelection, ui);
+		deleteElementsAction = new DeleteElementsAction(elementsSelection, ui);
 		restartOnlyAction = new RestartApplicationOnlyAction(elementsSelection, ui);
 		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(elementsSelection, ui);
 
@@ -308,8 +308,8 @@ public class BootDashActions {
 	/**
 	 * @return May be null as it may not be supported on all models.
 	 */
-	public IAction getDeleteApplicationsAction() {
-		return deleteApplicationsAction;
+	public IAction getDeleteElementsAction() {
+		return deleteElementsAction;
 	}
 
 	public IAction getRestartOnlyApplicationAction() {
