@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -32,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false;//(""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {

@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -30,7 +29,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration> implements Deletable {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);

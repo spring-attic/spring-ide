@@ -25,6 +25,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.action.IAction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,10 +50,122 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
 
+import static org.mockito.Mockito.*;
+
 /**
  * @author Kris De Volder
  */
 public class BootDashActionTests {
+
+	@Test
+	public void deleteConfigActionEnablementForProject() throws Exception {
+		//At the moment, this action does not enable for projects at all
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		BootLaunchConfigurationDelegate.createConf(javaProject);
+
+		final IAction action = actions.getDeleteElementsAction();
+		action.setEnabled(true); //force it to true so we can tell that it actually changes.
+ 		selection.setElements(element);
+ 		new ACondition("Wait for disablement", 3000) {
+			public boolean test() throws Exception {
+				assertFalse(action.isEnabled());
+				return true;
+			}
+		};
+	}
+
+	@Test
+	public void deleteConfigActionEnablementForConf() throws Exception {
+		//At the moment, this action always enables for one or more launch confs
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		BootDashElement el1 = harness.getElementFor(conf1);
+		final ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		BootDashElement el2 = harness.getElementFor(conf2);
+
+		new ACondition("Wait for children", 3000) {
+			public boolean test() throws Exception {
+				assertEquals(2, element.getCurrentChildren().size());
+				return true;
+			}
+		};
+
+		final IAction action = actions.getDeleteElementsAction();
+
+		assertFalse(action.isEnabled());
+		selection.setElements(el1);
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		action.setEnabled(false);
+		selection.setElements(el1, el2);
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+	}
+
+	@Test
+	public void deleteConfigAction() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		final BootDashElement el1 = harness.getElementFor(conf1);
+		final ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		final BootDashElement el2 = harness.getElementFor(conf2);
+
+		new ACondition("Wait for children", 3000) {
+			public boolean test() throws Exception {
+				assertEquals(2, element.getCurrentChildren().size());
+				assertEquals(ImmutableSet.of(el1, el2), element.getCurrentChildren());
+				return true;
+			}
+		};
+
+		final IAction action = actions.getDeleteElementsAction();
+
+		assertFalse(action.isEnabled());
+		selection.setElements(el1);
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		when(ui.confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
+		action.run();
+
+		new ACondition("Wait for config deletion", 3000) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(conf2), element.getLaunchConfigs());
+				assertFalse(conf1.exists());
+				assertTrue(element.getCurrentChildren().isEmpty()); //becomes empty because a single launch conf is hidden from the model.
+				return true;
+			}
+		};
+	}
 
 	@Test
 	public void duplicateConfigAction() throws Exception {

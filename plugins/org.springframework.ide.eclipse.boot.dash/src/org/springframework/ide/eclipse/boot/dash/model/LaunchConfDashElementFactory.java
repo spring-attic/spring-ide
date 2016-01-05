@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -28,7 +27,7 @@ import com.google.common.collect.MapMaker;
  */
 public class LaunchConfDashElementFactory implements Disposable {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; // (""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
