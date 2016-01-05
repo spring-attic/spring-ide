@@ -680,4 +680,16 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 		return deploymentProperties;
 	}
+
+	@Override
+	public boolean canDelete(BootDashElement element) {
+		//Assert.isLegal(getElements().getValues().contains(element));
+		return true;
+	}
+
+	@Override
+	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
+		return "Are you sure that you want to delete the selected applications from: "
+				+ getRunTarget().getName() + "? The applications will be permanently removed.";
+	}
 }

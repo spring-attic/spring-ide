@@ -14,9 +14,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -26,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
-public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration> {
+public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration> implements Deletable {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
@@ -77,6 +79,16 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 			return getBootDashModel().getProjectElementFactory().createOrGet(p);
 		}
 		return null;
+	}
+
+	@Override
+	public void delete(UserInteractions ui) {
+		try {
+			delegate.delete();
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+			ui.errorPopup("Could not delete: '"+getName()+"'", ExceptionUtil.getMessage(e));
+		}
 	}
 
 }

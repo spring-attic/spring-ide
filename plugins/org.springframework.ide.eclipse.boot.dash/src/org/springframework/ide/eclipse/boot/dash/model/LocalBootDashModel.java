@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -40,7 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  *
  * @author Kris De Volder
  */
-public class LocalBootDashModel extends AbstractBootDashModel {
+public class LocalBootDashModel extends AbstractBootDashModel implements DeletionCapabableModel {
 
 	private IWorkspace workspace;
 	private BootProjectDashElementFactory projectElementFactory;
@@ -173,5 +174,24 @@ public class LocalBootDashModel extends AbstractBootDashModel {
 
 	public LaunchConfDashElementFactory getLaunchConfElementFactory() {
 		return launchConfElementFactory;
+	}
+
+	@Override
+	public void delete(Collection<BootDashElement> elements, UserInteractions ui) {
+		for (BootDashElement e : elements) {
+			if (e instanceof Deletable) {
+				((Deletable)e).delete(ui);
+			}
+		}
+	}
+
+	@Override
+	public boolean canDelete(BootDashElement element) {
+		return element instanceof Deletable;
+	}
+
+	@Override
+	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
+		return "Are you sure you want to delete the selected local launch configuration(s)? The configuration(s) will be permanently removed from the workspace.";
 	}
 }

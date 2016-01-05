@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
+import org.springframework.ide.eclipse.boot.dash.model.DeletionCapabableModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 import com.google.common.collect.HashMultimap;
@@ -34,9 +34,8 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 			UserInteractions ui) {
 		super(selection, ui);
 		Assert.isNotNull(ui);
-		this.setText("Delete Application");
-		this.setToolTipText(
-				"Delete the selected application. The application will be permanently removed from the target.");
+		this.setText("Delete Elements");
+		this.setToolTipText("Delete the selected elements.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/delete_app.gif"));
 	}
 
@@ -46,18 +45,16 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 		Multimap<BootDashModel, BootDashElement> sortingBins = HashMultimap.create();
 		for (BootDashElement e : getSelectedElements()) {
 			BootDashModel model = e.getBootDashModel();
-			//We are only capable of removing elements from a ModifiableModel (the 'local' model is read-only).
-			if (model instanceof ModifiableModel) {
+			//We are only capable of removing elements from a DeleteCapabableModel (the 'local' model is read-only).
+			if (model instanceof DeletionCapabableModel) {
 				sortingBins.put(model, e);
 			}
 		}
 		//Now delete elements from corresponding models.
 		for (final Entry<BootDashModel, Collection<BootDashElement>> workitem : sortingBins.asMap().entrySet()) {
 			BootDashModel model = workitem.getKey();
-			final ModifiableModel modifiable = (ModifiableModel)model; //cast is safe. Only ModifiableModel are added to sortingBins
-			if (ui.confirmOperation("Deleting Applications",
-					"Are you sure that you want to delete the selected applications from: "
-							+ model.getRunTarget().getName() + "? The applications will be permanently removed.")) {
+			final DeletionCapabableModel modifiable = (DeletionCapabableModel)model; //cast is safe. Only DeleteCapabableModel are added to sortingBins
+			if (ui.confirmOperation("Deleting Elements", modifiable.getDeletionConfirmationMessage(workitem.getValue()))) {
 				Job job = new Job("Deleting apps from " + model.getRunTarget().getName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
@@ -91,7 +88,9 @@ public class DeleteApplicationsAction extends AbstractBootDashElementsAction {
 	}
 
 	private boolean canDelete(BootDashElement bde) {
-		return bde.getBootDashModel() instanceof ModifiableModel;
+		BootDashModel model = bde.getBootDashModel();
+		return model instanceof DeletionCapabableModel &&
+				((DeletionCapabableModel)model).canDelete(bde);
 	}
 
 }
