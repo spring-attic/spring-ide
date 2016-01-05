@@ -17,6 +17,7 @@ import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -46,6 +47,13 @@ public class UserDefinedDescriptorResolver extends DeploymentDescriptorResolver 
 					.getFor(existingApp, project);
 
 			deploymentProperties = deploymentProperties.mergeInto(existingProps);
+		}
+
+		// Create default manifest
+		if (deploymentProperties.writeManifest()) {
+			ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains,
+					deploymentProperties.getManifestPath());
+			manifestHandler.create(monitor, deploymentProperties);
 		}
 		return deploymentProperties;
 	}

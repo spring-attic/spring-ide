@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -42,13 +43,15 @@ public class CloudApplicationDeploymentProperties {
 	/*
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
-	protected LiveSet<String> urls = new LiveSet<String>();
+	protected final LiveSet<String> urls = new LiveSet<String>();
 
-	protected LiveVariable<String> appName = new LiveVariable<>();
+	protected final LiveVariable<String> appName = new LiveVariable<>();
 
-	protected LiveVariable<IProject> project = new LiveVariable<>();
+	protected final LiveVariable<IProject> project = new LiveVariable<>();
 
 	protected final LiveVariable<Integer> memory = new LiveVariable<Integer>(DEFAULT_MEMORY);
+
+	protected final LiveVariable<IPath> manifestPath = new LiveVariable<IPath>();
 
 	protected Validator validator;
 
@@ -76,6 +79,14 @@ public class CloudApplicationDeploymentProperties {
 
 	public int getMemory() {
 		return memory.getValue();
+	}
+
+	public void setManifestPath(IPath path) {
+		this.manifestPath.setValue(path);
+	}
+
+	public IPath getManifestPath() {
+		return this.manifestPath.getValue();
 	}
 
 	/**
@@ -141,7 +152,7 @@ public class CloudApplicationDeploymentProperties {
 	}
 
 	public String getBuildpack() {
-		return buildpack.getValue();
+		return buildpack.getValue() == null || buildpack.getValue().isEmpty() ? null : buildpack.getValue();
 	}
 
 	public int getInstances() {
@@ -169,6 +180,7 @@ public class CloudApplicationDeploymentProperties {
 			validator.dependsOn(urls);
 			validator.dependsOn(appName);
 			validator.dependsOn(project);
+			validator.dependsOn(manifestPath);
 		}
 	}
 

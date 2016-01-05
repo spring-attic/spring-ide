@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
@@ -92,7 +93,15 @@ public class ApplicationManifestHandler {
 		Assert.isNotNull(project);
 
 		this.project = project;
-		this.manifestPath = manifestPath;
+		this.manifestPath = manifestPath != null ? manifestPath : DEFAULT_PATH;
+		this.domains = domains;
+	}
+
+	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IPath manifestPath) {
+		Assert.isNotNull(project);
+
+		this.project = project;
+		this.manifestPath = manifestPath != null ? manifestPath.toString() : DEFAULT_PATH;
 		this.domains = domains;
 	}
 

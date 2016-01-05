@@ -90,6 +90,8 @@ public class AddElementOperation extends CloudApplicationOperation {
 			}
 			if (bde instanceof CloudDashElement) {
 				CloudDashElement cde = (CloudDashElement) bde;
+				// Persist the manifest path when creating the bde
+				cde.setDeploymentManifestFile(deploymentProperties.getManifestPath());
 				String hc = cde.getTarget().getHealthCheckSupport().getHealthCheck(cde.getAppGuid());
 				cde.setHealthCheck(hc);
 			}
