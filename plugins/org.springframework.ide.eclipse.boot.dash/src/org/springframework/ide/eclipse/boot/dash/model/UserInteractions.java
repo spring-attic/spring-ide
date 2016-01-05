@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015-2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
@@ -47,6 +48,14 @@ public interface UserInteractions {
 	 * @throws OperationCanceledException if deployment is canceled.
 	 */
 	UserDefinedDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
+
+	/**
+	 * Brings up the UI allowing user to select deployment manifest YAML file
+	 * @param project eclipse project
+	 * @param manifestFile current manifest deployment file selected
+	 * @return new manifest deployment file
+	 */
+	IPath selectDeploymentManifestFile(IProject project, IPath manifestFile);
 
 	/**
 	 * select a file

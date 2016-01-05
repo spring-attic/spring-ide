@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
@@ -34,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationDeploymentPropertiesWizard;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestFileDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.UserDefinedDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
@@ -239,6 +241,16 @@ public class DefaultUserInteractions implements UserInteractions {
 			throw new OperationCanceledException();
 		}
 		return props[0];
+	}
+
+	@Override
+	public IPath selectDeploymentManifestFile(IProject project, IPath manifestFile) {
+		ManifestFileDialog dialog = new ManifestFileDialog(getShell(), project, manifestFile);
+		if (dialog.open() == IDialogConstants.OK_ID) {
+			return dialog.getManifest();
+		} else {
+			return manifestFile;
+		}
 	}
 
 	@Override
