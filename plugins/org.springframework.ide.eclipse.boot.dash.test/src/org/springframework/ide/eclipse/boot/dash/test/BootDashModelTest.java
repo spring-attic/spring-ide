@@ -41,6 +41,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -166,6 +167,63 @@ public class BootDashModelTest {
 	}
 
 
+	/**
+	 * Test that when a launch config is marked as 'hidden' it is not part of the model.
+	 */
+	@Test
+	public void testSpringBootProjectHiddenChildren() throws Exception {
+		assertModelElements(/*none*/);
+
+		String projectName = "testProject";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertModelElements("testProject");
+				return true;
+			}
+		};
+
+		final BootDashElement projectEl = getElement("testProject");
+		assertTrue(projectEl.getCurrentChildren().isEmpty());
+
+		final ILaunchConfiguration[] conf = new ILaunchConfiguration[3];
+		final BootDashElement[] el = new BootDashElement[conf.length];
+		for (int i = 0; i < conf.length; i++) {
+			conf[i] =  BootLaunchConfigurationDelegate.createConf(javaProject);
+			el[i] = harness.getElementFor(conf[i]);
+		}
+
+		new ACondition("Wait for children", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.copyOf(el), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+
+		hide(conf[2]);
+		new ACondition("Wait for child to disapear", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(el[0], el[1]), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+
+		hide(conf[1]);
+		new ACondition("Wait for all children to disapear", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				//since there's just one conf left it is not shown as a child
+				assertEquals(ImmutableSet.of(), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+	}
+
+	private void hide(ILaunchConfiguration conf) throws Exception {
+		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+		BootLaunchConfigurationDelegate.setHiddenFromBootDash(wc, true);
+		wc.doSave();
+	}
 
 	private IProject createBootProject(String projectName, WizardConfigurer... extraConfs) throws Exception {
 		return projects.createBootWebProject(projectName, extraConfs);

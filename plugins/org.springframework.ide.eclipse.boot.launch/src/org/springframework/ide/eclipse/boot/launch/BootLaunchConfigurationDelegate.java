@@ -145,6 +145,10 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return DEFAULT_HIDE_FROM_BOOT_DASH;
 	}
 
+	public static void setHiddenFromBootDash(ILaunchConfigurationWorkingCopy conf, boolean hide) {
+		conf.setAttribute(HIDE_FROM_BOOT_DASH, hide);
+	}
+
 	/**
 	 * Retrieve the 'Enable Life Cycle Tracking' option from the config. Note that
 	 * this doesn't necesarily mean that this feature is effectively enabled as

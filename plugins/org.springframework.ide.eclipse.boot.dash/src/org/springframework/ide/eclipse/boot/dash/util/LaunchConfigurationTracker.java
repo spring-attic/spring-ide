@@ -31,6 +31,9 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.isHiddenFromBootDash;
 
 /**
  * This class is responsible of maintaining a map of {@link LaunchConfigurationsDialog} that are the children
@@ -38,6 +41,7 @@ import com.google.common.collect.ImmutableSet;
  *
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class LaunchConfigurationTracker implements Disposable {
 
 	private final ILaunchManager launchManager;
@@ -124,11 +128,23 @@ public class LaunchConfigurationTracker implements Disposable {
 
 	private ImmutableSet<ILaunchConfiguration> getRelevantConfs() {
 		try {
-			return ImmutableSet.copyOf(launchManager.getLaunchConfigurations(launchType));
+			ILaunchConfiguration[] allConfigs = launchManager.getLaunchConfigurations(launchType);
+			Builder<ILaunchConfiguration> builder = ImmutableSet.builder();
+			for (ILaunchConfiguration c : allConfigs) {
+				if (isRelevant(c)) {
+					builder.add(c);
+				}
+			}
+			return builder.build();
 		} catch (Exception e) {
 			BootActivator.log(e);
 			return ImmutableSet.of();
 		}
+	}
+
+	private boolean isRelevant(ILaunchConfiguration c) {
+		//Note: no need to check the launch conf type as only configs of the right type are passed in here.
+		return !isHiddenFromBootDash(c);
 	}
 
 	@Override
