@@ -45,7 +45,7 @@ public class DeleteElementsAction extends AbstractBootDashElementsAction {
 		Multimap<BootDashModel, BootDashElement> sortingBins = HashMultimap.create();
 		for (BootDashElement e : getSelectedElements()) {
 			BootDashModel model = e.getBootDashModel();
-			//We are only capable of removing elements from a DeleteCapabableModel (the 'local' model is read-only).
+			//We are only capable of removing elements from a DeleteCapabableModel.
 			if (model instanceof DeletionCapabableModel) {
 				sortingBins.put(model, e);
 			}
