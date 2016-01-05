@@ -27,23 +27,22 @@ import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentDescriptorResolvers;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationDeploymentOperations;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
@@ -88,7 +87,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	private BootDashModelConsoleManager consoleManager;
 
+	private DeploymentDescriptorResolvers deploymentDescriptorResolvers;
+
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
+
+	private ApplicationDeploymentOperations appDeploymentOperations;
 
 	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
 		@Override
@@ -181,6 +184,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
+		this.deploymentDescriptorResolvers = new DeploymentDescriptorResolvers();
+		this.appDeploymentOperations = new ApplicationDeploymentOperations(this);
 		getCloudTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		if (getCloudTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
@@ -534,7 +539,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
-				requests.deleteApplication(appName);
+				model.getCloudTarget().getClientRequests().deleteApplication(appName);
 				Set<BootDashElement> updatedElements = new HashSet<BootDashElement>();
 
 				synchronized (CloudFoundryBootDashModel.this) {
@@ -590,13 +595,15 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return this.consoleManager;
 	}
 
+	public ApplicationDeploymentOperations getApplicationDeploymentOperations() {
+		return this.appDeploymentOperations;
+	}
+
 	/**
 	 *
-	 * @param existingApp
-	 *            optional. If it does not exist, pass null.
-	 * @param domains
-	 *            in the Cloud target
-	 * @param runOrDebug
+	 * @param project
+	 * @param ui
+	 * @param requests
 	 * @param monitor
 	 * @return non-null deployment properties for the application.
 	 * @throws Exception
@@ -605,78 +612,21 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             if user canceled operation while resolving deployment
 	 *             properties
 	 */
-	public CloudApplicationDeploymentProperties getDeploymentProperties(CloudApplication existingApp, IProject project, RunState runOrDebug, UserInteractions ui, ClientRequests requests, IProgressMonitor monitor) throws Exception {
+	public CloudApplicationDeploymentProperties resolveDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
 
-		List<CloudDomain> domains = getCloudTarget().getDomains(requests, monitor);
+		String appName = getAppName(project);
 
-		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
+		monitor.setTaskName("Resolving deployment properties for: " + appName);
 
-		monitor.setTaskName("Resolving deployment properties for project: " + project.getName());
+		CloudApplicationDeploymentProperties deploymentProperties = this.deploymentDescriptorResolvers
+				.getProperties(project, appName, getCloudTarget(), ui, monitor);
 
-		CloudApplicationDeploymentProperties deploymentProperties = null;
-        // Three cases to handle:
-		// 1. Get deployment properties from manifest.yml
-		if (manifestHandler.hasManifest()) {
-			List<CloudApplicationDeploymentProperties> appProperties = manifestHandler.load(monitor);
-			if (appProperties == null || appProperties.isEmpty()) {
-				throw BootDashActivator.asCoreException("manifest.yml file detected for the project " + project.getName() + ", but failed to parse any deployment information. Please verify that the manifest.yml file is correct.");
-			} else {
-				deploymentProperties = appProperties.get(0);
-			}
-		}
-		// 2. App exists, therefore use whatever is already set in CF for the app
-		else if (existingApp != null) {
-			deploymentProperties = CloudApplicationDeploymentProperties.getFor(existingApp, project);
-		}
-		// 3. In this case, app does not exist and there is no manifest.yml, so prompt user for properties
-        else {
-			UserDefinedDeploymentProperties userDefinedProps = ui.promptApplicationDeploymentProperties(project,
-					domains);
-			if (userDefinedProps != null) {
-				deploymentProperties = userDefinedProps.asCloudAppDeploymentProperties();
-				if (userDefinedProps.writeManifest()) {
-					manifestHandler.create(monitor, deploymentProperties);
-				}
-			} else {
-				// if no deployment properties specified, cancel
-				throw new OperationCanceledException();
-			}
-
-			// Get the app AGAIN in case the app name was changed in the UI
-			// (e.g. a user wants to "link" the project to another
-			// existing application with a different name)
-			existingApp = requests.getApplication(userDefinedProps.getAppName());
-			if (existingApp != null) {
-
-				CloudApplicationDeploymentProperties existingProps = CloudApplicationDeploymentProperties
-						.getFor(existingApp, project);
-
-				deploymentProperties = userDefinedProps.mergeInto(existingProps);
-			}
+		if (deploymentProperties == null) {
+			throw BootDashActivator.asCoreException(
+					"Unable to deploy the application. Unable to resolve a deployment descriptor from registered list of deployment descriptor resolvers.");
 		}
 
-		// Set any default buildpack that may be defined for the target, if the buildpack is not set already
-		if (deploymentProperties.getBuildpack() == null) {
-			String buildpack = getCloudTarget().getBuildpack(project);
-			if (buildpack != null) {
-				deploymentProperties.setBuildpack(buildpack);
-			}
-		}
-
-		monitor.worked(10);
-
-		IStatus status = deploymentProperties.validate();
-		monitor.worked(10);
-
-		if (!status.isOK()) {
-			throw new CoreException(status);
-		}
-
-		// Update JAVA_OPTS env variable with Remote DevTools Client secret
-		if (project != null) {
-			DevtoolsUtil.setupEnvVarsForRemoteClient(deploymentProperties.getEnvironmentVariables(),
-					DevtoolsUtil.getSecret(project));
-		}
+		monitor.worked(20);
 
 		return deploymentProperties;
 	}
@@ -691,5 +641,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
 		return "Are you sure that you want to delete the selected applications from: "
 				+ getRunTarget().getName() + "? The applications will be permanently removed.";
+	}
+
+	protected String getAppName(IProject project) {
+		// check if there is a project -> app mapping:
+		CloudApplication app = getAppCache().getApp(project);
+		return app != null ? app.getName() : project.getName();
 	}
 }

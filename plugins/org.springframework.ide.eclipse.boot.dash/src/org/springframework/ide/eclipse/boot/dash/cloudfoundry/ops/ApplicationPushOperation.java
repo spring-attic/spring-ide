@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,25 +18,25 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
- * Operation that uploads an application's archive. The application must have an
+ * Operation that pushes an application's archive. The application must have an
  * accessible workspace project.
  *
  */
-public class ApplicationUploadOperation extends CloudApplicationOperation {
+public class ApplicationPushOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 	private final UserInteractions ui;
 
-	public ApplicationUploadOperation(CloudApplicationDeploymentProperties deploymentProperties,
+	public ApplicationPushOperation(CloudApplicationDeploymentProperties deploymentProperties,
 			CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
@@ -52,7 +52,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
-		CloudAppInstances appInstances = requests.getExistingAppInstances(appName);
+		CloudAppInstances appInstances = model.getCloudTarget().getClientRequests().getExistingAppInstances(appName);
 
 		monitor.worked(3);
 
@@ -82,7 +82,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 
 				logAndUpdateMonitor("Uploading archive to Cloud Foundry for application: " + appName, monitor);
 
-				requests.uploadApplication(appName, archive);
+				model.getCloudTarget().getClientRequests().uploadApplication(appName, archive);
 
 				monitor.worked(5);
 
@@ -123,7 +123,7 @@ public class ApplicationUploadOperation extends CloudApplicationOperation {
 		IProject project = deploymentProperties.getProject();
 
 		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
-				this.model.getCloudTarget().getDomains(requests, mon));
+				this.model.getCloudTarget().getDomains(mon));
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),

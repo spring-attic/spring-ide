@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,15 +8,14 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
 public abstract class BasicRequest extends ClientRequest<Void> {
 
-	public BasicRequest(CloudFoundryBootDashModel model, String appName, String requestName) {
-		super(model, appName, requestName);
+	public BasicRequest(CloudFoundryOperations client, String appName, String requestName) {
+		super(client, appName, requestName, null);
 	}
 
 	@Override

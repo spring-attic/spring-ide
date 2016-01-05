@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -62,9 +63,10 @@ public class ProjectsDeployer extends CloudOperation {
 			}
 
 			try {
-				CloudApplicationOperation op = new DeploymentOperationFactory(model, entry.getKey(), ui)
-						.getCreateAndDeploy(runOrDebug, monitor);
+				IProject project = entry.getKey();
+				CloudApplicationDeploymentProperties properties = model.resolveDeploymentProperties(project, ui, monitor);
 
+				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, runOrDebug, ui, monitor);
 				model.getOperationsExecution(ui).runOpAsynch(op);
 			} catch (Exception e) {
 				if (!(e instanceof OperationCanceledException)) {

@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.UserDefinedDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -47,7 +47,7 @@ public interface UserInteractions {
 	 * @return deployment properties for the project that at the very least should contain an application name
 	 * @throws OperationCanceledException if deployment is canceled.
 	 */
-	UserDefinedDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
 
 	/**
 	 * Brings up the UI allowing user to select deployment manifest YAML file

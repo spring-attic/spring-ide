@@ -34,9 +34,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationDeploymentPropertiesWizard;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ApplicationDeploymentPropertiesWizard;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestFileDialog;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.UserDefinedDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -218,10 +218,10 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public UserDefinedDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
 			final List<CloudDomain> domains) throws OperationCanceledException {
 		final Shell shell = getShell();
-		final UserDefinedDeploymentProperties[] props = new UserDefinedDeploymentProperties[1];
+		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[1];
 
 		if (shell != null) {
 			shell.getDisplay().syncExec(new Runnable() {
@@ -244,13 +244,23 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public IPath selectDeploymentManifestFile(IProject project, IPath manifestFile) {
-		ManifestFileDialog dialog = new ManifestFileDialog(getShell(), project, manifestFile);
-		if (dialog.open() == IDialogConstants.OK_ID) {
-			return dialog.getManifest();
-		} else {
-			return manifestFile;
-		}
+	public IPath selectDeploymentManifestFile(final IProject project, final IPath manifestFile) {
+
+		final IPath[] path = new IPath[1];
+		context.getShell().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				ManifestFileDialog dialog = new ManifestFileDialog(getShell(), project, manifestFile);
+				if (dialog.open() == IDialogConstants.OK_ID) {
+					path[0] = dialog.getManifest();
+				} else {
+					path[0] = manifestFile;
+				}
+			}
+
+		});
+		return path[0];
 	}
 
 	@Override

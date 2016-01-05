@@ -21,11 +21,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
@@ -110,13 +108,13 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 					ui.errorPopup(title, msg);
 				}
 			} else {
-				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, debugSupport, ui);
+				op = cloudModel.getApplicationDeploymentOperations().restartAndPush(opName, getName(), debugSupport,
+						runingOrDebugging, ui);
 			}
 		} else {
 			// Set the initial run state as Starting
-			op = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getBootDashModel(), RunState.STARTING);
-//			op = new CompositeApplicationOperation(restartOp);
+			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
+					getName(), RunState.STARTING);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -133,10 +131,10 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
-		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getBootDashModel(), RunState.STARTING);
+		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
+				getName(), RunState.STARTING);
 
-		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(restartOp));
+		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(op));
 	}
 
 	@Override

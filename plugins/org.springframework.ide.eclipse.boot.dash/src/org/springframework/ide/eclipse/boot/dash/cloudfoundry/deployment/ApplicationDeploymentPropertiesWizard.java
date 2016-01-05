@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,8 +20,6 @@ import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -40,13 +38,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 	private final IProject project;
 	private final Map<String, CloudDomain> domainsAsString = new LinkedHashMap<String, CloudDomain>();
-	private UserDefinedDeploymentProperties properties;
+	private CloudApplicationDeploymentProperties properties;
 	private CloudApplicationURL url = null;
+	private DeploymentPropertiesPage page;
 
 	public ApplicationDeploymentPropertiesWizard(IProject project, List<CloudDomain> domains) {
 		this.project = project;
@@ -56,7 +59,10 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				domainsAsString.put(dom.getName(), dom);
 			}
 		}
-		properties = new UserDefinedDeploymentProperties(project);
+		properties = new CloudApplicationDeploymentProperties();
+		properties.getValidator().addListener(new WizardValidator());
+
+		properties.setProject(project);
 
 		// set some default values
 		properties.setAppName(project.getName());
@@ -68,10 +74,10 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		addPage(new DeploymentPropertiesPage());
+		addPage(this.page = new DeploymentPropertiesPage());
 	}
 
-	public UserDefinedDeploymentProperties getProperties() {
+	public CloudApplicationDeploymentProperties getProperties() {
 		return properties;
 	}
 
@@ -113,7 +119,6 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				@Override
 				public void modifyText(ModifyEvent event) {
 					properties.setAppName(appNameText.getText());
-					update();
 				}
 			});
 
@@ -159,18 +164,18 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 			GridDataFactory.fillDefaults().grab(false, false).applyTo(memoryText);
 			memoryText.setText(properties.getMemory() < 0 ? "" : String.valueOf(properties.getMemory()));
 			/*
-			 * Text length limit is set such that it would always be a number less than MAX_INT
-			 * Note that only numbers are accepted input chars
+			 * Text length limit is set such that it would always be a number
+			 * less than MAX_INT Note that only numbers are accepted input chars
 			 */
 			memoryText.setTextLimit(9);
 			memoryText.addVerifyListener(new VerifyListener() {
 				@Override
 				public void verifyText(VerifyEvent e) {
 					String string = e.text;
-					char [] chars = new char [string.length ()];
-					string.getChars (0, chars.length, chars, 0);
-					for (int i=0; i<chars.length; i++) {
-						if (!('0' <= chars [i] && chars [i] <= '9')) {
+					char[] chars = new char[string.length()];
+					string.getChars(0, chars.length, chars, 0);
+					for (int i = 0; i < chars.length; i++) {
+						if (!('0' <= chars[i] && chars[i] <= '9')) {
 							e.doit = false;
 							return;
 						}
@@ -185,7 +190,6 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 					} else {
 						properties.setMemory(Integer.valueOf(memoryText.getText()));
 					}
-					update();
 				}
 			});
 
@@ -197,7 +201,6 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					properties.setWriteManifest(saveManifest.getSelection());
-					update();
 				}
 
 			});
@@ -251,50 +254,48 @@ public class ApplicationDeploymentPropertiesWizard extends Wizard {
 				properties.setUrls(new ArrayList<String>(0));
 			}
 
-			update();
-		}
-
-		private void update() {
-
-			setErrorMessage(null);
-
-			IStatus status = validateProperties();
-			if (!status.isOK()) {
-				setErrorMessage(status.getMessage());
-			}
-
-			if (getWizard() != null && getWizard().getContainer() != null) {
-				getWizard().getContainer().updateButtons();
-				setPageComplete(status.isOK());
-			}
 		}
 
 		@Override
 		public boolean isPageComplete() {
-			return validateProperties().isOK();
+			return isValid();
 		}
 
 	}
 
 	@Override
 	public boolean performFinish() {
-		return validateProperties().isOK();
+		return isValid();
 	}
 
-	protected IStatus validateProperties() {
-		IStatus status = Status.OK_STATUS;
-		String error = null;
-		if (properties.getAppName() == null || properties.getAppName().trim().length() == 0) {
-			error = "Please enter an application name";
-		} else if (properties.getUrls() == null || properties.getUrls().isEmpty()) {
-			error = "Please specify a host and domain for the application URL";
-		} else if (properties.getMemory() <= 0) {
-			error = "Please specify valid memory size in Megabytes";
+	protected boolean isValid() {
+		return properties.getValidator().getValue() != null && properties.getValidator().getValue().isOk();
+	}
+
+	class WizardValidator implements ValueListener<ValidationResult> {
+
+		@Override
+		public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult status) {
+
+			if (status == null) {
+				status = ValidationResult.OK;
+			}
+
+			if (ApplicationDeploymentPropertiesWizard.this.page == null) {
+				return;
+			}
+
+			String message = status.isOk() ? null : status.msg;
+
+			ApplicationDeploymentPropertiesWizard.this.page.setErrorMessage(message);
+
+			if (ApplicationDeploymentPropertiesWizard.this.getContainer() != null) {
+				ApplicationDeploymentPropertiesWizard.this.getContainer().updateButtons();
+				ApplicationDeploymentPropertiesWizard.this.page.setPageComplete(status.isOk());
+			}
+
 		}
 
-		if (error != null) {
-			status = BootDashActivator.createErrorStatus(null, error);
-		}
-		return status;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				}
 			}
 			if (!appsToLookUp.isEmpty()) {
-				Map<CloudApplication, ApplicationStats> stats = requests.getApplicationStats(appsToLookUp);
+				Map<CloudApplication, ApplicationStats> stats = model.getCloudTarget().getClientRequests().getApplicationStats(appsToLookUp);
 				for (Entry<CloudApplication, ApplicationStats> entry : stats.entrySet()) {
 					CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
 					this.model.updateApplication(instances);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,16 +14,14 @@ import java.util.LinkedHashSet;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
@@ -64,25 +62,14 @@ public class AddElementOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		String appName = deploymentProperties.getAppName();
-
-		monitor.beginTask("Checking application: " + appName, 10);
-
-		IStatus status = deploymentProperties.validate();
-		monitor.worked(5);
-
-		if (!status.isOK()) {
-			throw new CoreException(status);
-		}
-
 		CloudAppInstances existingInstances = null;
 		if (existingApplication == null) {
 			existingInstances = createApplication(monitor);
 		} else {
-			existingInstances = requests.getExistingAppInstances(existingApplication.getMeta().getGuid());
+			existingInstances = model.getCloudTarget().getClientRequests().getExistingAppInstances(existingApplication.getMeta().getGuid());
 		}
 
-		monitor.worked(5);
+		monitor.worked(20);
 
 		if (existingInstances == null) {
 			throw BootDashActivator.asCoreException("Failed to create a Cloud application for : "
@@ -139,16 +126,16 @@ public class AddElementOperation extends CloudApplicationOperation {
 		try {
 
 			logAndUpdateMonitor("Creating application: " + deploymentProperties.getAppName(), monitor);
-			requests.createApplication(deploymentProperties);
+			model.getCloudTarget().getClientRequests().createApplication(deploymentProperties);
 			monitor.worked(5);
 
 		} catch (Exception e) {
 			// Clean-up: If app creation failed, check if the app was created
 			// anyway
 			// and delete it to allow users to redeploy
-			CloudApplication toCleanUp = requests.getApplication(deploymentProperties.getAppName());
+			CloudApplication toCleanUp = model.getCloudTarget().getClientRequests().getApplication(deploymentProperties.getAppName());
 			if (toCleanUp != null) {
-				requests.deleteApplication(toCleanUp.getName());
+				model.getCloudTarget().getClientRequests().deleteApplication(toCleanUp.getName());
 			}
 			throw e;
 		}
@@ -156,7 +143,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		logAndUpdateMonitor(
 				"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
 				monitor);
-		CloudAppInstances instances = requests.getExistingAppInstances(deploymentProperties.getAppName());
+		CloudAppInstances instances = model.getCloudTarget().getClientRequests().getExistingAppInstances(deploymentProperties.getAppName());
 		monitor.worked(5);
 
 		return instances;

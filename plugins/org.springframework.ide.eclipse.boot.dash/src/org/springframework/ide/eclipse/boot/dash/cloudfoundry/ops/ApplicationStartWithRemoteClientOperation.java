@@ -41,14 +41,16 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 	final private DebugSupport debugSupport;
 	final private UserInteractions ui;
 	private CloudDashElement app;
+	private ApplicationDeploymentOperations operations;
 
-	public ApplicationStartWithRemoteClientOperation(String opName, CloudDashElement app,
-			RunState runOrDebug, UserInteractions ui) {
+	public ApplicationStartWithRemoteClientOperation(String opName, CloudDashElement app, RunState runOrDebug,
+			ApplicationDeploymentOperations operations, UserInteractions ui) {
 		super(opName, app.getCloudModel(), app.getName());
 		this.app = app;
 		this.runOrDebug = runOrDebug;
 		this.ui = ui;
 		this.debugSupport = app.getDebugSupport();
+		this.operations = operations;
 	}
 
 	@Override
@@ -64,13 +66,14 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 					"Local project not associated to CF app '" + appName + "'"));
 		}
 
-		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /*confirmChange*/true));
+		String opName = "Restarting application '" + cde.getName() + "' in "
+				+ (runOrDebug == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+
+		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true));
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
-			ops.add(new FullApplicationRestartOperation("Restarting application '" + cde.getName() + "'", model,
-					appName, runOrDebug, debugSupport, ui));
+			ops.add(operations.restartAndPush(opName, appName, debugSupport, runOrDebug, ui));
 		} else if (cde.getRunState() == RunState.INACTIVE) {
-			ApplicationStartOperation restartOp = new ApplicationStartOperation(appName, model, RunState.STARTING);
-			ops.add(restartOp);
+			ops.add(operations.restartOnly(cde.getProject(), appName, runOrDebug));
 		}
 
 		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));

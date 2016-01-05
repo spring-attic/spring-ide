@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,14 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 
 /**
  * Updates deployment properties (e.g. memory, URL, instances) of an existing
@@ -47,15 +45,11 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			throw BootDashActivator.asCoreException("No deployment properties for application - " + appName
 					+ " found. Unable to update the application");
 		}
-		IStatus status = deploymentProperties.validate();
-		if (!status.isOK()) {
-			throw new CoreException(status);
-		}
 
 		if (updateExistingApplicationInCloud(deploymentProperties, monitor)) {
 			boolean checkTermination = true;
 			this.eventHandler.fireEvent(
-					eventFactory.getUpdateRunStateEvent(requests.getExistingAppInstances(appName), getDashElement(), null),
+					eventFactory.getUpdateRunStateEvent(model.getCloudTarget().getClientRequests().getExistingAppInstances(appName), getDashElement(), null),
 					checkTermination);
 		}
 	}
@@ -63,7 +57,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	protected boolean updateExistingApplicationInCloud(CloudApplicationDeploymentProperties properties,
 			IProgressMonitor monitor) throws Exception {
 
-		CloudApplication app = requests.getApplication(appName);
+		CloudApplication app = model.getCloudTarget().getClientRequests().getApplication(appName);
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		boolean updated = false;
 
@@ -73,7 +67,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 					&& !properties.getEnvironmentVariables().equals(app.getEnvAsMap())) {
 				subMonitor.setTaskName("Updating " + appName + " environment variables.");
 
-				requests.updateApplicationEnvironment(appName, properties.getEnvironmentVariables());
+				model.getCloudTarget().getClientRequests().updateApplicationEnvironment(appName, properties.getEnvironmentVariables());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -83,7 +77,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 					&& !properties.getBuildpack().equals(app.getStaging().getDetectedBuildpack())) {
 				subMonitor.setTaskName("Updating " + appName + " buildpack.");
 
-				requests.updateApplicationStaging(appName, new Staging(null, properties.getBuildpack()));
+				model.getCloudTarget().getClientRequests().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack()));
 				updated = true;
 
 				subMonitor.worked(1);
@@ -92,7 +86,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			if (properties.getServices() != null && !properties.getServices().equals(app.getServices())) {
 				subMonitor.setTaskName("Updating " + appName + " bound services.");
 
-				requests.updateApplicationServices(appName, properties.getServices());
+				model.getCloudTarget().getClientRequests().updateApplicationServices(appName, properties.getServices());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -101,7 +95,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			if (properties.getMemory() > 0 && properties.getMemory() != app.getMemory()) {
 				subMonitor.setTaskName("Updating " + appName + " memory.");
 
-				requests.updateApplicationMemory(appName, properties.getMemory());
+				model.getCloudTarget().getClientRequests().updateApplicationMemory(appName, properties.getMemory());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -110,7 +104,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			if (properties.getInstances() > 0 && properties.getInstances() != app.getInstances()) {
 				subMonitor.setTaskName("Updating " + appName + " instances.");
 
-				requests.updateApplicationInstances(appName, properties.getInstances());
+				model.getCloudTarget().getClientRequests().updateApplicationInstances(appName, properties.getInstances());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -120,7 +114,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 
 				subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
 
-				requests.updateApplicationUris(appName, properties.getUrls());
+				model.getCloudTarget().getClientRequests().updateApplicationUris(appName, properties.getUrls());
 				updated = true;
 
 				subMonitor.worked(1);
