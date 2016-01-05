@@ -17,6 +17,7 @@ import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -24,8 +25,8 @@ public class UserDefinedDescriptorResolver extends DeploymentDescriptorResolver 
 
 	@Override
 	public CloudApplicationDeploymentProperties getProperties(IProject project, String appName,
-			CloudFoundryRunTarget runTarget, UserInteractions ui,  IProgressMonitor monitor) throws Exception {
-
+			CloudFoundryBootDashModel model, UserInteractions ui, IProgressMonitor monitor) throws Exception {
+		CloudFoundryRunTarget runTarget = model.getCloudTarget();
 		List<CloudDomain> domains = runTarget.getDomains(monitor);
 		CloudApplicationDeploymentProperties deploymentProperties = ui.promptApplicationDeploymentProperties(project,
 				domains);

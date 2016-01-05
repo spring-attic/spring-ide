@@ -12,13 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public abstract class DeploymentDescriptorResolver {
 
 	public abstract CloudApplicationDeploymentProperties getProperties(IProject project, String appName,
-			CloudFoundryRunTarget runTarget, UserInteractions ui, IProgressMonitor monitor)
+			CloudFoundryBootDashModel model, UserInteractions ui, IProgressMonitor monitor)
 					throws Exception;
 
 }

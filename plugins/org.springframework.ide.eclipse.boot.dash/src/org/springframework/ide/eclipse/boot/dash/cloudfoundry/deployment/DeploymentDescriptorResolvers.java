@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class DeploymentDescriptorResolvers {
@@ -22,12 +22,12 @@ public class DeploymentDescriptorResolvers {
 			new ExistingAppDescriptorResolver(), new UserDefinedDescriptorResolver() };
 
 	public CloudApplicationDeploymentProperties getProperties(IProject project, String appName,
-			CloudFoundryRunTarget runTarget, UserInteractions ui, IProgressMonitor monitor)
+			CloudFoundryBootDashModel model, UserInteractions ui, IProgressMonitor monitor)
 					throws Exception {
 
 		CloudApplicationDeploymentProperties deploymentProperties = null;
 		for (DeploymentDescriptorResolver resolver : resolvers) {
-			deploymentProperties = resolver.getProperties(project, appName, runTarget, ui, monitor);
+			deploymentProperties = resolver.getProperties(project, appName, model, ui, monitor);
 			if (deploymentProperties != null) {
 				break;
 			}
@@ -36,7 +36,7 @@ public class DeploymentDescriptorResolvers {
 		// Set any default buildpack that may be defined for the target, if the
 		// buildpack is not set already
 		if (deploymentProperties != null && deploymentProperties.getBuildpack() == null) {
-			String buildpack = runTarget.getBuildpack(project);
+			String buildpack = model.getCloudTarget().getBuildpack(project);
 			if (buildpack != null) {
 				deploymentProperties.setBuildpack(buildpack);
 			}

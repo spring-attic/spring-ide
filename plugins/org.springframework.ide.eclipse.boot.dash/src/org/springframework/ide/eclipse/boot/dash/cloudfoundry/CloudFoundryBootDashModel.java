@@ -619,7 +619,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		monitor.setTaskName("Resolving deployment properties for: " + appName);
 
 		CloudApplicationDeploymentProperties deploymentProperties = this.deploymentDescriptorResolvers
-				.getProperties(project, appName, getCloudTarget(), ui, monitor);
+				.getProperties(project, appName, this, ui, monitor);
 
 		if (deploymentProperties == null) {
 			throw BootDashActivator.asCoreException(
