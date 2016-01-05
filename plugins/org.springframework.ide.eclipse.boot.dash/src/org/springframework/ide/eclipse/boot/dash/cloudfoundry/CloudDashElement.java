@@ -16,6 +16,8 @@ import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
@@ -46,6 +48,8 @@ import com.google.common.base.Objects;
  * Cloud application state should always be resolved from external sources
  */
 public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
+
+	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -314,4 +318,23 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		//only happens when this element is not valid anymore, but return something harmless / usable anyhow
 		return LiveExpression.constant(null);
 	}
+
+	public IPath getDeploymentManifestFile() {
+		String text = getPersistentProperties().get(DEPLOYMENT_MANIFEST_FILE_PATH);
+		return text == null ? null : new Path(text).makeRelative();
+	}
+
+	public void setDeploymentManifestFile(IPath path) {
+		try {
+			if (path == null) {
+				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, (String) null);
+			} else {
+				String text = path.toString();
+				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, text.isEmpty() ? null : text);
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 }
