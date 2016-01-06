@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,13 +73,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private ClientRequests clientRequests;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
-		this(targetProperties, runTargetType, clientFactory, null);
-	}
-
-	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory, ClientRequests requests) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
-		this.clientRequests = requests;
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
 		this.cachedClient = new LiveVariable<>();
@@ -164,8 +159,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	public ClientRequests getClientRequests() {
 		if (this.clientRequests == null) {
-			// create a default one
-			this.clientRequests = new ClientRequests(getClient());
+			this.clientRequests = clientFactory.getClientRequests(getClient());
 		}
 		return this.clientRequests;
 	}

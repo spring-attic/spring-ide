@@ -11,11 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardPage;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
  * Creates a run target
@@ -24,15 +22,10 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 public class RunTargetWizard extends Wizard {
 
 	private CloudFoundryTargetWizardPage page;
-	private LiveSet<RunTarget> existingTargets;
-	private RunTargetType runTargetType;
-	private CloudFoundryClientFactory clientFactory;
+	private CloudFoundryTargetWizardModel model;
 
-	public RunTargetWizard(LiveSet<RunTarget> existingTargets, RunTargetType runTargetType,
-			CloudFoundryClientFactory clientFactory) {
-		this.existingTargets = existingTargets;
-		this.runTargetType = runTargetType;
-		this.clientFactory = clientFactory;
+	public RunTargetWizard(CloudFoundryTargetWizardModel model) {
+		this.model = model;
 
 		setWindowTitle("Add a Run Target");
 
@@ -45,7 +38,7 @@ public class RunTargetWizard extends Wizard {
 		// that shows different target types.
 		// Right it is hardcoded to load the Cloud Foundry target page.
 
-		page = new CloudFoundryTargetWizardPage(existingTargets, runTargetType, clientFactory);
+		page = new CloudFoundryTargetWizardPage(model);
 		addPage(page);
 	}
 
