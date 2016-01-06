@@ -31,10 +31,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
@@ -90,7 +93,15 @@ public class ApplicationManifestHandler {
 		Assert.isNotNull(project);
 
 		this.project = project;
-		this.manifestPath = manifestPath;
+		this.manifestPath = manifestPath != null ? manifestPath : DEFAULT_PATH;
+		this.domains = domains;
+	}
+
+	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IPath manifestPath) {
+		Assert.isNotNull(project);
+
+		this.project = project;
+		this.manifestPath = manifestPath != null ? manifestPath.toString() : DEFAULT_PATH;
 		this.domains = domains;
 	}
 
@@ -238,17 +249,12 @@ public class ApplicationManifestHandler {
 	protected CloudApplicationDeploymentProperties getDeploymentProperties(Map<?, ?> appMap,
 			Map<Object, Object> allResults, IProgressMonitor monitor) throws Exception {
 
-		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties(project);
+		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
 		String appName = getStringValue(appMap, NAME_PROP);
 
-		if (appName != null) {
-			properties.setAppName(appName);
-		} else {
-			throw BootDashActivator
-					.asCoreException("No application name found in manifest.yml. An application name is required.");
-
-		}
+		properties.setAppName(appName);
+		properties.setProject(project);
 
 		readMemory(appMap, allResults, properties);
 
@@ -261,6 +267,11 @@ public class ApplicationManifestHandler {
 		readServices(appMap, allResults, properties);
 
 		readInstances(appMap, allResults, properties);
+
+		ValidationResult validation = properties.getValidator().getValue();
+		if (validation != null && !validation.isOk()) {
+			throw BootDashActivator.asCoreException(validation.msg);
+		}
 
 		return properties;
 	}

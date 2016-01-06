@@ -40,7 +40,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -69,10 +70,16 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private CloudInfoV2 cachedCloudInfo;
 	private LiveVariable<CloudFoundryOperations> cachedClient;
 	private CloudFoundryClientFactory clientFactory;
+	private ClientRequests clientRequests;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
+		this(targetProperties, runTargetType, clientFactory, null);
+	}
+
+	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory, ClientRequests requests) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
+		this.clientRequests = requests;
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
 		this.cachedClient = new LiveVariable<>();
@@ -114,6 +121,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		this.domains = null;
 		this.spaces = null;
 		this.buildpacks = null;
+		this.clientRequests = null;
 		if (getClient() != null) {
 			getClient().logout();
 			cachedClient.setValue(null);
@@ -152,6 +160,14 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	protected CloudFoundryOperations createClient() throws Exception {
 		return clientFactory.getClient(this);
+	}
+
+	public ClientRequests getClientRequests() {
+		if (this.clientRequests == null) {
+			// create a default one
+			this.clientRequests = new ClientRequests(getClient());
+		}
+		return this.clientRequests;
 	}
 
 	@Override
@@ -201,13 +217,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return true;
 	}
 
-	public synchronized List<CloudDomain> getDomains(ClientRequests requests, IProgressMonitor monitor)
+	public synchronized List<CloudDomain> getDomains( IProgressMonitor monitor)
 			throws Exception {
 		if (domains == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 			subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
 
-			domains = requests.getDomains();
+			domains = getClientRequests().getDomains();
 
 			subMonitor.worked(5);
 		}

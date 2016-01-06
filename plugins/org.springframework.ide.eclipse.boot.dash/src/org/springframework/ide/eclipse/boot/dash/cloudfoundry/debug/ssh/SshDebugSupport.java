@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -108,7 +107,7 @@ public class SshDebugSupport extends DebugSupport {
 		CloudFoundryBootDashModel cloudModel = app.getCloudModel();
 		return new CompositeApplicationOperation(opName, cloudModel, app.getName(),
 				Arrays.asList(new CloudApplicationOperation[] {
-						new FullApplicationRestartOperation(opName, cloudModel, app.getName(), RunState.DEBUGGING, this, ui),
+						cloudModel.getApplicationDeploymentOperations().restartAndPush(opName, app.getName(), this, RunState.DEBUGGING, ui),
 						new SshDebugStartOperation(app, this)
 				}),
 				RunState.STARTING

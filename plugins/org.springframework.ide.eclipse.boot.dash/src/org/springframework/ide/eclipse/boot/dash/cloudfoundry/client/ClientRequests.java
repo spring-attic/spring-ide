@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,20 +23,22 @@ import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 
 public class ClientRequests {
 
-	protected final CloudFoundryBootDashModel model;
+	protected final CloudFoundryOperations client;
 
-	public ClientRequests(CloudFoundryBootDashModel model) {
-		this.model = model;
+
+	public ClientRequests(CloudFoundryOperations client) {
+		this.client = client;
 	}
 
+
+
 	public void createApplication(final CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
-		new BasicRequest(model, deploymentProperties.getAppName(), "Creating application") {
+		new BasicRequest(this.client, deploymentProperties.getAppName(), "Creating application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
@@ -48,7 +50,7 @@ public class ClientRequests {
 
 	public CloudApplication getApplication(final String appName) throws Exception {
 
-		return new ApplicationRequest<CloudApplication>(model, appName) {
+		return new ApplicationRequest<CloudApplication>(this.client, appName) {
 			@Override
 			protected CloudApplication doRun(CloudFoundryOperations client) throws Exception {
 				try {
@@ -78,7 +80,7 @@ public class ClientRequests {
 
 	public CloudApplication getApplication(final UUID appUUID) throws Exception {
 
-		return new ApplicationRequest<CloudApplication>(model, appUUID.toString()) {
+		return new ApplicationRequest<CloudApplication>(this.client, appUUID.toString()) {
 			@Override
 			protected CloudApplication doRun(CloudFoundryOperations client) throws Exception {
 				try {
@@ -107,7 +109,7 @@ public class ClientRequests {
 	}
 
 	public ApplicationStats getApplicationStats(final String appName) throws Exception {
-		return new ApplicationRequest<ApplicationStats>(model, appName) {
+		return new ApplicationRequest<ApplicationStats>(this.client, appName) {
 			@Override
 			protected ApplicationStats doRun(CloudFoundryOperations client) throws Exception {
 				return client.getApplicationStats(appName);
@@ -117,7 +119,7 @@ public class ClientRequests {
 
 	public Map<CloudApplication, ApplicationStats> getApplicationStats(final List<CloudApplication> appsToLookUp)
 			throws Exception {
-		return new ClientRequest<Map<CloudApplication, ApplicationStats>>(model,
+		return new ClientRequest<Map<CloudApplication, ApplicationStats>>(this.client,
 				"Getting stats for instances of all applications") {
 			@Override
 			protected Map<CloudApplication, ApplicationStats> doRun(CloudFoundryOperations client) throws Exception {
@@ -148,7 +150,7 @@ public class ClientRequests {
 	}
 
 	public List<CloudApplication> getApplicationsWithBasicInfo() throws Exception {
-		return new ClientRequest<List<CloudApplication>>(model, "Getting all Cloud applications") {
+		return new ClientRequest<List<CloudApplication>>(this.client, "Getting all Cloud applications") {
 			@Override
 			protected List<CloudApplication> doRun(CloudFoundryOperations client) throws Exception {
 				return client.getApplicationsWithBasicInfo();
@@ -158,7 +160,7 @@ public class ClientRequests {
 
 	public void uploadApplication(final String appName, final ApplicationArchive archive) throws Exception {
 
-		new BasicRequest(model, appName, "Uploading application archive") {
+		new BasicRequest(this.client, appName, "Uploading application archive") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.uploadApplication(appName, archive);
@@ -167,7 +169,7 @@ public class ClientRequests {
 	}
 
 	public void stopApplication(final String appName) throws Exception {
-		new ApplicationRequest<Void>(model, appName) {
+		new ApplicationRequest<Void>(this.client, appName) {
 			@Override
 			protected Void doRun(CloudFoundryOperations client) throws Exception {
 				client.stopApplication(appName);
@@ -177,7 +179,7 @@ public class ClientRequests {
 	}
 
 	public void restartApplication(final String appName) throws Exception {
-		new BasicRequest(model, appName, "Restarting application") {
+		new BasicRequest(this.client, appName, "Restarting application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.restartApplication(appName);
@@ -187,7 +189,7 @@ public class ClientRequests {
 
 	public void updateApplicationEnvironment(final String appName, final Map<String, String> varsToUpdate)
 			throws Exception {
-		new BasicRequest(model, appName, "Updating application environment variables") {
+		new BasicRequest(this.client, appName, "Updating application environment variables") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationEnv(appName, varsToUpdate);
@@ -196,7 +198,7 @@ public class ClientRequests {
 	}
 
 	public void updateApplicationStaging(final String appName, final Staging staging) throws Exception {
-		new BasicRequest(model, appName, "Updating application buildpack") {
+		new BasicRequest(this.client, appName, "Updating application buildpack") {
 
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -207,7 +209,7 @@ public class ClientRequests {
 
 	public void updateApplicationServices(final String appName, final List<String> services) throws Exception {
 
-		new BasicRequest(model, appName, "Updating application service bindings") {
+		new BasicRequest(this.client, appName, "Updating application service bindings") {
 
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -218,7 +220,7 @@ public class ClientRequests {
 
 	public void updateApplicationMemory(final String appName, final int memory) throws Exception {
 
-		new BasicRequest(model, appName, "Updating application memory") {
+		new BasicRequest(this.client, appName, "Updating application memory") {
 
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -229,7 +231,7 @@ public class ClientRequests {
 
 	public void updateApplicationInstances(final String appName, final int instances) throws Exception {
 
-		new BasicRequest(model, appName, "Updating application instances") {
+		new BasicRequest(this.client, appName, "Updating application instances") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationInstances(appName, instances);
@@ -238,7 +240,7 @@ public class ClientRequests {
 	}
 
 	public void updateApplicationUris(final String appName, final List<String> urls) throws Exception {
-		new BasicRequest(model, appName, "Updating application URLs") {
+		new BasicRequest(this.client, appName, "Updating application URLs") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationUris(appName, urls);
@@ -247,7 +249,7 @@ public class ClientRequests {
 	}
 
 	public void deleteApplication(final String appName) throws Exception {
-		new BasicRequest(model, appName, "Deleting application") {
+		new BasicRequest(this.client, appName, "Deleting application") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.deleteApplication(appName);
@@ -256,7 +258,7 @@ public class ClientRequests {
 	}
 
 	public List<CloudDomain> getDomains() throws Exception {
-		return new ClientRequest<List<CloudDomain>>(model, "Getting Cloud domains") {
+		return new ClientRequest<List<CloudDomain>>(this.client, "Getting Cloud domains") {
 
 			@Override
 			protected List<CloudDomain> doRun(CloudFoundryOperations client) throws Exception {
@@ -266,7 +268,7 @@ public class ClientRequests {
 	}
 
 	public List<CloudSpace> getSpaces() throws Exception {
-		return new ClientRequest<List<CloudSpace>>(model, "Getting Cloud spaces") {
+		return new ClientRequest<List<CloudSpace>>(this.client, "Getting Cloud spaces") {
 
 			@Override
 			protected List<CloudSpace> doRun(CloudFoundryOperations client) throws Exception {
@@ -285,7 +287,7 @@ public class ClientRequests {
 	 */
 	public CloudAppInstances getExistingAppInstances(final UUID guid) throws Exception {
 
-		return new ClientRequest<CloudAppInstances>(model, "Getting application instances") {
+		return new ClientRequest<CloudAppInstances>(this.client, "Getting application instances") {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
 				CloudApplication app = getApplication(guid);
@@ -300,7 +302,7 @@ public class ClientRequests {
 
 	public CloudAppInstances getExistingAppInstances(final String appName) throws Exception {
 
-		return new ClientRequest<CloudAppInstances>(model, appName, "Getting application instances") {
+		return new ClientRequest<CloudAppInstances>(this.client, appName, "Getting application instances", null) {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
 				CloudApplication app = getApplication(appName);

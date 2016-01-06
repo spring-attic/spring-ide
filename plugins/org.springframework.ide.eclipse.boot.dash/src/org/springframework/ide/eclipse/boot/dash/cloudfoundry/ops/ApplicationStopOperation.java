@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,14 +42,14 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		requests.stopApplication(this.appName);
+		model.getCloudTarget().getClientRequests().stopApplication(this.appName);
 
 		// If the element run state in the model needs to be updated (i.e. the
 		// "view" needs to show the app to be stopped)
 		if (updateElementRunState) {
 			model.getElementConsoleManager().terminateConsole(this.appName);
 
-			CloudAppInstances updatedInstances = requests.getExistingAppInstances(this.appName);
+			CloudAppInstances updatedInstances = model.getCloudTarget().getClientRequests().getExistingAppInstances(this.appName);
 
 			boolean checkTermination = false;
 			this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(),

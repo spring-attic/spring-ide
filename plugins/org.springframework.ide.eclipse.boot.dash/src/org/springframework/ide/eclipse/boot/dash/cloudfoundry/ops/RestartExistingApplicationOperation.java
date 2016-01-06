@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,12 +20,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -36,23 +34,27 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  * @author Alex Boyko
  *
  */
-public class FullApplicationRestartOperation extends CloudApplicationOperation {
+public class RestartExistingApplicationOperation extends CloudApplicationOperation {
 
 	final private UserInteractions ui;
 	private DebugSupport debugSupport;
 	private boolean isDebugging;
+	private ApplicationDeploymentOperations operations;
 
-	public FullApplicationRestartOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			RunState runOrDebug, DebugSupport debugSupport, UserInteractions ui) {
-		super(opName, model, appName);
+	public RestartExistingApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
+			DebugSupport debugSupport, RunState runState, ApplicationDeploymentOperations operations,
+			UserInteractions ui) {
+		super(opName == null ? "Re-deploying and re-starting app: " + appName : opName, model, appName);
 		this.debugSupport = debugSupport;
-		this.isDebugging = runOrDebug==RunState.DEBUGGING;
+		this.isDebugging = runState == RunState.DEBUGGING;
 		this.ui = ui;
+		this.operations = operations;
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		CloudApplication application = requests.getApplication(appName);
+		CloudApplication application = model.getCloudTarget().getClientRequests().getApplication(appName);
+		// Check that the application actually exists in Cloud Foundry
 		if (application == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"No Cloud Application found for '" + appName + "'"));
@@ -64,22 +66,12 @@ public class FullApplicationRestartOperation extends CloudApplicationOperation {
 		}
 		IProject project = cde.getProject();
 
-		List<CloudDomain> domains = model.getCloudTarget().getDomains(requests, monitor);
+		CloudApplicationDeploymentProperties properties = model.resolveDeploymentProperties(project, ui,
+				monitor);
 
-		CloudApplicationDeploymentProperties properties = null;
-		ApplicationManifestHandler manifestHandler = new ApplicationManifestHandler(project, domains);
-
-		if (manifestHandler.hasManifest()) {
-			List<CloudApplicationDeploymentProperties> props = manifestHandler.load(monitor);
-			properties = props != null && !props.isEmpty() ? props.get(0) : null;
-		}
-
-		if (properties == null) {
-			properties = CloudApplicationDeploymentProperties.getFor(application, project);
-		}
-
+		// Update JAVA_OPTS env variable with Remote DevTools Client secret
 		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project));
-		if (debugSupport!=null) {
+		if (debugSupport != null) {
 			if (isDebugging) {
 				debugSupport.setupEnvVars(properties.getEnvironmentVariables());
 			} else {
@@ -87,8 +79,10 @@ public class FullApplicationRestartOperation extends CloudApplicationOperation {
 			}
 		}
 
-		CloudApplicationOperation op = new DeploymentOperationFactory(model, project, ui)
-				.getRestartAndDeploy(properties);
+		List<CloudApplicationOperation> uploadAndRestartOps = operations.getPushAndRestartOperations(properties, ui);
+
+		CloudApplicationOperation op = new CompositeApplicationOperation(opName, model, properties.getAppName(),
+				uploadAndRestartOps, RunState.STARTING);
 
 		op.run(monitor);
 	}

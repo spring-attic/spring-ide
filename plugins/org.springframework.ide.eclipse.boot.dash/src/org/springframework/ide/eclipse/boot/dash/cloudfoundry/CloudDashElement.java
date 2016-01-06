@@ -16,16 +16,16 @@ import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.FullApplicationRestartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
@@ -48,6 +48,8 @@ import com.google.common.base.Objects;
  * Cloud application state should always be resolved from external sources
  */
 public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
+
+	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -110,13 +112,13 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 					ui.errorPopup(title, msg);
 				}
 			} else {
-				op = new FullApplicationRestartOperation(opName, cloudModel, getName(), runingOrDebugging, debugSupport, ui);
+				op = cloudModel.getApplicationDeploymentOperations().restartAndPush(opName, getName(), debugSupport,
+						runingOrDebugging, ui);
 			}
 		} else {
 			// Set the initial run state as Starting
-			op = new ApplicationStartOperation(getName(),
-					(CloudFoundryBootDashModel) getBootDashModel(), RunState.STARTING);
-//			op = new CompositeApplicationOperation(restartOp);
+			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
+					getName(), RunState.STARTING);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -133,10 +135,10 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
 
-		CloudApplicationOperation restartOp = new ApplicationStartOperation(getName(),
-				(CloudFoundryBootDashModel) getBootDashModel(), RunState.STARTING);
+		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
+				getName(), RunState.STARTING);
 
-		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(restartOp));
+		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(op));
 	}
 
 	@Override
@@ -316,4 +318,23 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		//only happens when this element is not valid anymore, but return something harmless / usable anyhow
 		return LiveExpression.constant(null);
 	}
+
+	public IPath getDeploymentManifestFile() {
+		String text = getPersistentProperties().get(DEPLOYMENT_MANIFEST_FILE_PATH);
+		return text == null ? null : new Path(text).makeRelative();
+	}
+
+	public void setDeploymentManifestFile(IPath path) {
+		try {
+			if (path == null) {
+				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, (String) null);
+			} else {
+				String text = path.toString();
+				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, text.isEmpty() ? null : text);
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 }

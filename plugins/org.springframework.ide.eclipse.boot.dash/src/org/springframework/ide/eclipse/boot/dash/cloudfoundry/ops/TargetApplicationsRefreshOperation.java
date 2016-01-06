@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// the
 				// two refresh operations
 
-				List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
+				List<CloudApplication> apps = model.getCloudTarget().getClientRequests().getApplicationsWithBasicInfo();
 
 				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 				if (apps != null) {

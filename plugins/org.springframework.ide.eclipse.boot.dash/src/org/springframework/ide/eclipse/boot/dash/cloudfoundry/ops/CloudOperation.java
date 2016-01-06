@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,12 +18,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 public abstract class CloudOperation extends Operation<Void> {
 
 	protected final CloudFoundryBootDashModel model;
-	protected final ClientRequests requests;
 
 	public CloudOperation(String opName, CloudFoundryBootDashModel model) {
 		super(opName);
 		this.model = model;
-		this.requests = new ClientRequests(model);
 	}
 
 	abstract protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException;
