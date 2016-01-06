@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ public class BootDashActions {
 	private RemoveRunTargetAction removeTargetAction;
 	private DeleteElementsAction deleteElementsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
+	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
@@ -141,6 +142,7 @@ public class BootDashActions {
 		deleteElementsAction = new DeleteElementsAction(elementsSelection, ui);
 		restartOnlyAction = new RestartApplicationOnlyAction(elementsSelection, ui);
 		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(elementsSelection, ui);
+		selectManifestAction = new SelectManifestAction(elementsSelection, ui);
 
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
@@ -314,6 +316,10 @@ public class BootDashActions {
 
 	public IAction getRestartOnlyApplicationAction() {
 		return restartOnlyAction;
+	}
+
+	public IAction getSelectManifestAction() {
+		return selectManifestAction;
 	}
 
 	public IAction getReconnectCloudConsole() {
