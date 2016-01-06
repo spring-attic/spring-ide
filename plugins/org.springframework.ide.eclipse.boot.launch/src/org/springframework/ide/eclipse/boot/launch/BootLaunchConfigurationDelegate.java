@@ -183,14 +183,6 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	}
 
 	/**
-	 * Get all ILaunchConfigurations  for "Run As >> Spring Boot App" that are
-	 * associated with a given project.
-	 */
-	public static List<ILaunchConfiguration> getLaunchConfigs(IProject p) {
-		return getLaunchConfigs(p, TYPE_ID);
-	}
-
-	/**
 	 * Sets minimal default values to create a runnable launch configuration.
 	 */
 	public static void setDefaults(ILaunchConfigurationWorkingCopy wc,
@@ -369,6 +361,5 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
 	}
-
 
 }

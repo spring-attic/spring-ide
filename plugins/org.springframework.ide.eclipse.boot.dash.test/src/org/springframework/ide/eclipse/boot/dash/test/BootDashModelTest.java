@@ -41,7 +41,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -76,7 +75,6 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
@@ -985,7 +983,7 @@ public class BootDashModelTest {
 	 * than one active launch, or no active launch this returns null.
 	 */
 	public ILaunch getActiveLaunch(BootDashElement element) {
-		List<ILaunch> ls = BootLaunchUtils.getBootLaunches(element.getProject());
+		ImmutableSet<ILaunch> ls = getBootLaunches(element);
 		ILaunch activeLaunch = null;
 		for (ILaunch l : ls) {
 			if (!l.isTerminated()) {
@@ -1000,13 +998,21 @@ public class BootDashModelTest {
 		return activeLaunch;
 	}
 
+	private ImmutableSet<ILaunch> getBootLaunches(BootDashElement element) {
+		if (element instanceof BootProjectDashElement) {
+			BootProjectDashElement project = (BootProjectDashElement) element;
+			return project.getLaunches();
+		}
+		return ImmutableSet.of();
+	}
+
 	private void waitForState(final BootDashElement element, final RunState state) throws Exception {
-		new ACondition("Wait for state") {
+		new ACondition("Wait for state", RUN_STATE_CHANGE_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
 				return element.getRunState()==state;
 			}
-		}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
+		};
 	}
 
 	private BootProjectDashElement getElement(String name) {

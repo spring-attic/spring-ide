@@ -70,6 +70,4 @@ public class CheckboxLaunchTabModel extends LaunchTabSelectionModel<Boolean> {
 	protected void setAttribute(ILaunchConfigurationWorkingCopy conf, Boolean value) {
 		conf.setAttribute(attributeName, value);
 	}
-
-
 }

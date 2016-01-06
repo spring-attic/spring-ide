@@ -120,7 +120,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private RunState getActiveState(ILaunch l) {
 		boolean isReady = getReadyState(l).getValue();
 		if (isReady) {
-			return LaunchUtil.isDebugging(l)
+			return BootLaunchUtils.isDebugging(l)
 					? RunState.DEBUGGING
 					: RunState.RUNNING;
 		}

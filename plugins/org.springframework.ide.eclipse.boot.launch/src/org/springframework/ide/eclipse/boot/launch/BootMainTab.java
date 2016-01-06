@@ -22,6 +22,8 @@ import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxSection;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
+import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
+import org.springframework.ide.eclipse.boot.launch.util.GroupLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
@@ -65,7 +67,7 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 	}
 
 	private IPageSection columns(final int numColumns, WizardPageSection... sections) {
-		return new GroupSection(this, null, sections).columns(2);
+		return new GroupLaunchTabSection(this, null, sections).columns(2);
 	}
 
 }
