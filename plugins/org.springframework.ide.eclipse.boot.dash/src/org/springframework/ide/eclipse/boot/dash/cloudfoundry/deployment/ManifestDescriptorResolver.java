@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
+import com.google.common.base.Objects;
+
 public class ManifestDescriptorResolver extends DeploymentDescriptorResolver {
 
 	@Override
@@ -118,7 +120,7 @@ public class ManifestDescriptorResolver extends DeploymentDescriptorResolver {
 		}
 		if (resource.exists() && resource.getLocation() != null && resource instanceof IFile
 				&& resource.getName().startsWith(startsWith)
-				&& ((IFile) resource).getFileExtension().equals(extension)) {
+				&& Objects.equal(((IFile) resource).getFileExtension(), extension)) {
 			paths.add(resource.getLocation());
 		} else if (resource instanceof IContainer) {
 			IContainer container = (IContainer) resource;
