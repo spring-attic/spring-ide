@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.mockito.Mockito;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
@@ -156,7 +157,7 @@ public class BootJarPackagingTest extends StsTestCase {
 
 	@Override
 	protected String getBundleName() {
-		return Activator.BUNDLE_ID;
+		return BootDashTestBundleConstants.BUNDLE_ID;
 	}
 
 }
