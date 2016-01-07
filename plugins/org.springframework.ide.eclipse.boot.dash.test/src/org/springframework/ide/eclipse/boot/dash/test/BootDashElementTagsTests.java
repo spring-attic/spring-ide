@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,6 +177,20 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
 
+	@Test
+	public void mixedCaseSearchTags_FilterTest() throws Exception {
+		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
+		filterBoxModel.getText().setValue("sPriNg,xD,");
+
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"spring"})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"Xd", "sprinG"})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "springsource"})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "spRing source"})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xD", "spring, source"})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
+	}
+	
 	@Test
 	public void multipleSearchTagsWithWhiteSpace_FilterTest() throws Exception {
 		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
