@@ -15,6 +15,7 @@ import java.util.List;
 import org.cloudfoundry.client.lib.domain.CloudEntity;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -31,14 +32,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  * Wizard page to allow users to select a target cloud space when cloning an
  * existing server.
  */
-class OrgsAndSpacesWizardPage extends WizardPage {
+class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<ValidationResult> {
 
 	protected TreeViewer orgsSpacesViewer;
 
@@ -46,23 +48,27 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	private final OrgsAndSpaces spaces;
 
-	private LiveSet<RunTarget> targets;
+	private boolean canFinish = false;
 
-	OrgsAndSpacesWizardPage(LiveSet<RunTarget> targets, OrgsAndSpaces spaces,
-			CloudFoundryTargetWizardModel targetProperties) {
+	OrgsAndSpacesWizardPage(CloudFoundryTargetWizardModel targetProperties) {
 		super("Select an Org and Space");
-		this.targets = targets;
 		setTitle("Select an Org and Space");
 		setDescription("Select a space in " + targetProperties.getUrl());
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 		this.targetProperties = targetProperties;
-		this.spaces = spaces;
+		this.spaces = targetProperties.getSpaces();
+		targetProperties.addAllPropertiesListener(this);
+	}
 
+	@Override
+	public void dispose() {
+		this.targetProperties.removeAllPropertiesListeners(this);
+		super.dispose();
 	}
 
 	@Override
 	public boolean isPageComplete() {
-		return targetProperties.getSpaceName() != null && targetProperties.getOrganizationName() != null;
+		return canFinish && targetProperties.getSpaceName() != null && targetProperties.getOrganizationName() != null;
 	}
 
 	@Override
@@ -169,31 +175,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 	}
 
 	protected void setSpaceInProperties(CloudSpace space) {
-		// TODO: Move this to a validator
-		setErrorMessage(null);
-		if (space != null) {
-			RunTarget existing = getExistingRunTarget(space);
-			if (existing != null) {
-				setErrorMessage("A run target for that space already exists: '" + existing.getName()
-						+ "'. Please select another space.");
-				targetProperties.setSpace(null);
-				return;
-			}
-		}
 		targetProperties.setSpace(space);
-	}
-
-	protected RunTarget getExistingRunTarget(CloudSpace space) {
-		if (space != null) {
-			String targetId = CloudFoundryTargetProperties.getId(targetProperties.getUsername(),
-					targetProperties.getUrl(), space.getOrganization().getName(), space.getName());
-			for (RunTarget target : targets.getValues()) {
-				if (targetId.equals(target.getId())) {
-					return target;
-				}
-			}
-		}
-		return null;
 	}
 
 	private void refreshWizardUI() {
@@ -273,5 +255,18 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 			}
 			return super.getText(element);
 		}
+	}
+
+	@Override
+	public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
+		setErrorMessage(null);
+		canFinish = true;
+		if (value.status == IStatus.ERROR) {
+			setErrorMessage(value.msg);
+			canFinish = false;
+		} else {
+			setMessage(value.msg, value.status);
+		}
+		refreshWizardUI();
 	}
 }

@@ -75,7 +75,6 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
@@ -166,6 +165,63 @@ public class BootDashModelTest {
 	}
 
 
+	/**
+	 * Test that when a launch config is marked as 'hidden' it is not part of the model.
+	 */
+	@Test
+	public void testSpringBootProjectHiddenChildren() throws Exception {
+		assertModelElements(/*none*/);
+
+		String projectName = "testProject";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertModelElements("testProject");
+				return true;
+			}
+		};
+
+		final BootDashElement projectEl = getElement("testProject");
+		assertTrue(projectEl.getCurrentChildren().isEmpty());
+
+		final ILaunchConfiguration[] conf = new ILaunchConfiguration[3];
+		final BootDashElement[] el = new BootDashElement[conf.length];
+		for (int i = 0; i < conf.length; i++) {
+			conf[i] =  BootLaunchConfigurationDelegate.createConf(javaProject);
+			el[i] = harness.getElementFor(conf[i]);
+		}
+
+		new ACondition("Wait for children", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.copyOf(el), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+
+		hide(conf[2]);
+		new ACondition("Wait for child to disapear", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(el[0], el[1]), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+
+		hide(conf[1]);
+		new ACondition("Wait for all children to disapear", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				//since there's just one conf left it is not shown as a child
+				assertEquals(ImmutableSet.of(), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+	}
+
+	private void hide(ILaunchConfiguration conf) throws Exception {
+		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+		BootLaunchConfigurationDelegate.setHiddenFromBootDash(wc, true);
+		wc.doSave();
+	}
 
 	private IProject createBootProject(String projectName, WizardConfigurer... extraConfs) throws Exception {
 		return projects.createBootWebProject(projectName, extraConfs);
@@ -927,7 +983,7 @@ public class BootDashModelTest {
 	 * than one active launch, or no active launch this returns null.
 	 */
 	public ILaunch getActiveLaunch(BootDashElement element) {
-		List<ILaunch> ls = BootLaunchUtils.getBootLaunches(element.getProject());
+		ImmutableSet<ILaunch> ls = getBootLaunches(element);
 		ILaunch activeLaunch = null;
 		for (ILaunch l : ls) {
 			if (!l.isTerminated()) {
@@ -942,13 +998,21 @@ public class BootDashModelTest {
 		return activeLaunch;
 	}
 
+	private ImmutableSet<ILaunch> getBootLaunches(BootDashElement element) {
+		if (element instanceof BootProjectDashElement) {
+			BootProjectDashElement project = (BootProjectDashElement) element;
+			return project.getLaunches();
+		}
+		return ImmutableSet.of();
+	}
+
 	private void waitForState(final BootDashElement element, final RunState state) throws Exception {
-		new ACondition("Wait for state") {
+		new ACondition("Wait for state", RUN_STATE_CHANGE_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
 				return element.getRunState()==state;
 			}
-		}.waitFor(RUN_STATE_CHANGE_TIMEOUT);
+		};
 	}
 
 	private BootProjectDashElement getElement(String name) {

@@ -16,6 +16,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
+
 /**
  * Model for the 'main type' selection widgetry on a launchconfiguration tab.
  * <p>
@@ -54,13 +56,15 @@ public class BootLaunchUIModel {
 	public final ProfileLaunchTabModel profile;
 	public final LaunchTabSelectionModel<Boolean> enableDebug;
 	public final EnableJmxFeaturesModel enableJmx;
+	public final LaunchTabSelectionModel<Boolean> hideFromDash;
 
 	public BootLaunchUIModel(IProfileHistory profileHistory) {
 		project = SelectProjectLaunchTabModel.create();
 		mainTypeName = MainTypeNameLaunchTabModel.create();
 		profile = ProfileLaunchTabModel.create(project.selection, profileHistory);
-		enableDebug = EnableDebugLaunchTabModel.create();
+		enableDebug = CheckboxLaunchTabModel.create(ENABLE_DEBUG_OUTPUT, DEFAULT_ENABLE_DEBUG_OUTPUT);
 		enableJmx = new EnableJmxFeaturesModel();
+		hideFromDash = CheckboxLaunchTabModel.create(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
 	}
 
 }

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map.Entry;import javax.management.remote.JMXServiceURL;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -60,6 +60,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static final String ENABLE_LIFE_CYCLE = "spring.boot.lifecycle.enable";
 	public static final boolean DEFAULT_ENABLE_LIFE_CYCLE = true;
+
+	public static final String HIDE_FROM_BOOT_DASH = "spring.boot.dash.hidden";
+	public static final boolean DEFAULT_HIDE_FROM_BOOT_DASH = false;
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
 	private static final String TERMINATION_TIMEOUT = "spring.boot.lifecycle.termination.timeout";
@@ -133,6 +136,19 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return enabled;
 	}
 
+	public static boolean isHiddenFromBootDash(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
+		} catch (CoreException e) {
+			BootActivator.log(e);
+		}
+		return DEFAULT_HIDE_FROM_BOOT_DASH;
+	}
+
+	public static void setHiddenFromBootDash(ILaunchConfigurationWorkingCopy conf, boolean hide) {
+		conf.setAttribute(HIDE_FROM_BOOT_DASH, hide);
+	}
+
 	/**
 	 * Retrieve the 'Enable Life Cycle Tracking' option from the config. Note that
 	 * this doesn't necesarily mean that this feature is effectively enabled as
@@ -164,14 +180,6 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			return BootPropertyTester.supportsLifeCycleManagement(p);
 		}
 		return false;
-	}
-
-	/**
-	 * Get all ILaunchConfigurations  for "Run As >> Spring Boot App" that are
-	 * associated with a given project.
-	 */
-	public static List<ILaunchConfiguration> getLaunchConfigs(IProject p) {
-		return getLaunchConfigs(p, TYPE_ID);
 	}
 
 	/**
@@ -353,6 +361,5 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
 	}
-
 
 }

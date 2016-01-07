@@ -101,4 +101,13 @@ public class CloudFoundryClientFactory {
 		}
 	}
 
+	/**
+	 * Wrapper around the client. API used by CF support in boot dash
+	 *
+	 * @return
+	 */
+	public ClientRequests getClientRequests(CloudFoundryOperations client)  {
+		return new ClientRequests(client);
+	}
+
 }

@@ -71,7 +71,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 
 	@Override
 	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
-		return ImmutableSet.copyOf(BootLaunchConfigurationDelegate.getLaunchConfigs(delegate));
+		return getLaunchConfigsExp().getValues();
 	}
 
 	@Override
@@ -97,7 +97,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		}
 		return children;
 	}
-
 
 	@Override
 	public ImmutableSet<String> getDefaultRequestMappingPaths() {
@@ -189,6 +188,10 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		return summary;
 	}
 
+	private ObservableSet<ILaunchConfiguration> getLaunchConfigsExp() {
+		return getBootDashModel().launchConfTracker.getConfigs(delegate);
+	}
+
 	/**
 	 * All children including 'invisible ones' that may be hidden from the children returned
 	 * by getChildren.
@@ -213,8 +216,8 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	}
 
 	@Override
-	protected ImmutableSet<ILaunch> getLaunches() {
-		return ImmutableSet.copyOf(BootLaunchUtils.getBootLaunches(getProject()));
+	public ImmutableSet<ILaunch> getLaunches() {
+		return ImmutableSet.copyOf(BootLaunchUtils.getLaunches(getLaunchConfigs()));
 	}
 
 	@Override

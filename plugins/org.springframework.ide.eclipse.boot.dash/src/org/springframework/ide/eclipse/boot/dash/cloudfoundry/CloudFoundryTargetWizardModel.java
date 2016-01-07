@@ -12,9 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -40,14 +45,21 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	private LiveVariable<Boolean> selfsigned = new LiveVariable<Boolean>(false);
 	private LiveVariable<String> userName = new LiveVariable<String>();
 	private LiveVariable<String> password = new LiveVariable<String>();
+	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<OrgsAndSpaces>();
 
 	private Validator credentialsValidator = new CredentialsValidator();
-	private Validator spacesValidator = new SpacesValidator();
+	private Validator spacesValidator = new CloudSpaceValidator();
+	private Validator orgsSpacesValidator = new OrgsSpacesValidator();
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
+	private CloudFoundryClientFactory clientFactory;
+	private List<RunTarget> existingTargets;
 
-	public CloudFoundryTargetWizardModel(RunTargetType runTargetType) {
-		super(runTargetType, BootDashActivator.getDefault().getModel().getContext());
+	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
+			List<RunTarget> existingTargets, BootDashModelContext context) {
+		super(runTargetType, context);
+		this.existingTargets = existingTargets == null ? new ArrayList<RunTarget>() : existingTargets;
+		this.clientFactory = clientFactory;
 		// The credentials validator should be notified any time there are
 		// changes
 		// to url, username, password and selfsigned setting.
@@ -64,36 +76,53 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		// vs space validation
 		spacesValidator.dependsOn(space);
 
+		orgsSpacesValidator.dependsOn(allSpaces);
+
 		// Aggregate of the credentials and space validator.
 		allPropertiesValidator.addChild(credentialsValidator);
 		allPropertiesValidator.addChild(spacesValidator);
+		allPropertiesValidator.addChild(orgsSpacesValidator);
 
 		setUrl(getDefaultTargetUrl());
 	}
 
 	/**
-	 *
-	 * @param allPropertiesValidationListener
-	 *            listener that is notified when any property is validated
 	 * @param credentialsValidationListener
 	 *            listener that is notified when only credential properties are
 	 *            validated (but not org/space)
+	 *
+	 */
+	public void addCredentialsListener(ValueListener<ValidationResult> credentialsValidationListener) {
+		credentialsValidator.addListener(credentialsValidationListener);
+	}
+
+	/**
 	 * @param cloudSpaceChangeListener
 	 *            listener that is notified when Cloud space is changed
+	 *
 	 */
-	public void addListeners(ValueListener<ValidationResult> allPropertiesValidationListener,
-			ValueListener<ValidationResult> credentialsValidationListener,
-			ValueListener<CloudSpace> cloudSpaceChangeListener) {
-		allPropertiesValidator.addListener(allPropertiesValidationListener);
-		credentialsValidator.addListener(credentialsValidationListener);
+	public void addSpaceSelectionListener(ValueListener<CloudSpace> cloudSpaceChangeListener) {
 		space.addListener(cloudSpaceChangeListener);
 	}
 
-	public void removeListeners(ValueListener<ValidationResult> allPropertiesValidationListener,
-			ValueListener<ValidationResult> credentialsValidationListener,
-			ValueListener<CloudSpace> cloudSpaceChangeListener) {
+	/**
+	 * @param allPropertiesValidationListener
+	 *            listener that is notified when any property is validated
+	 */
+	public void addAllPropertiesListener(ValueListener<ValidationResult> allPropertiesValidationListener) {
+		allPropertiesValidator.addListener(allPropertiesValidationListener);
+	}
+
+	public void removeAllPropertiesListeners(ValueListener<ValidationResult> allPropertiesValidationListener) {
 		allPropertiesValidator.removeListener(allPropertiesValidationListener);
+
+	}
+
+	public void removeCredentialsListeners(ValueListener<ValidationResult> credentialsValidationListener) {
 		credentialsValidator.removeListener(credentialsValidationListener);
+	}
+
+	public void removeSpaceSelectionListeners(ValueListener<CloudSpace> cloudSpaceChangeListener) {
 		space.removeListener(cloudSpaceChangeListener);
 	}
 
@@ -160,6 +189,45 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		}
 	}
 
+	protected String getDefaultTargetUrl() {
+		return "https://api.run.pivotal.io";
+	}
+
+	public OrgsAndSpaces resolveSpaces(IRunnableContext context) throws Exception {
+		OrgsAndSpaces spaces = clientFactory.getCloudSpaces(this, context);
+		allSpaces.setValue(spaces);
+		return allSpaces.getValue();
+
+	}
+
+	public OrgsAndSpaces getSpaces() {
+		return allSpaces.getValue();
+	}
+
+	protected RunTarget getExistingRunTarget(CloudSpace space) {
+		if (space != null) {
+			String targetId = CloudFoundryTargetProperties.getId(getUsername(), getUrl(),
+					space.getOrganization().getName(), space.getName());
+			for (RunTarget target : existingTargets) {
+				if (targetId.equals(target.getId())) {
+					return target;
+				}
+			}
+		}
+		return null;
+	}
+
+	public RunTarget finish() {
+		String id = CloudFoundryTargetProperties.getId(this);
+		put(TargetProperties.RUN_TARGET_ID, id);
+		try {
+			super.setPassword(password.getValue());
+		} catch (CannotAccessPropertyException e) {
+			BootDashActivator.log(e);
+		}
+		return getRunTargetType().createRunTarget(this);
+	}
+
 	class CredentialsValidator extends Validator {
 		@Override
 		protected ValidationResult compute() {
@@ -190,29 +258,39 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		}
 	}
 
-	protected String getDefaultTargetUrl() {
-		return "https://api.run.pivotal.io";
-	}
-
-	class SpacesValidator extends Validator {
+	class CloudSpaceValidator extends Validator {
 
 		@Override
 		protected ValidationResult compute() {
 			if (getSpaceName() == null || getOrganizationName() == null) {
 				return ValidationResult.info("Select a Cloud space");
 			}
+
+			if (space.getValue() != null) {
+				RunTarget existing = CloudFoundryTargetWizardModel.this.getExistingRunTarget(space.getValue());
+				if (existing != null) {
+					return ValidationResult.error("A run target for that space already exists: '" + existing.getName()
+							+ "'. Please select another space.");
+				}
+			}
 			return ValidationResult.OK;
 		}
 	}
 
-	public RunTarget finish() {
-		String id = CloudFoundryTargetProperties.getId(this);
-		put(TargetProperties.RUN_TARGET_ID, id);
-		try {
-			super.setPassword(password.getValue());
-		} catch (CannotAccessPropertyException e) {
-			BootDashActivator.log(e);
+	class OrgsSpacesValidator extends Validator {
+		@Override
+		protected ValidationResult compute() {
+
+			if (allSpaces.getValue() == null || allSpaces.getValue().getAllSpaces() == null) {
+				return ValidationResult.info("Enter credentials and select a space to validate the credentials.");
+			}
+
+			if (allSpaces.getValue().getAllSpaces().isEmpty()) {
+				return ValidationResult.error(
+						"No spaces available to select. Please check that the credentials and target URL are correct, and spaces are defined in the target.");
+			}
+
+			return ValidationResult.OK;
 		}
-		return getRunTargetType().createRunTarget(this);
 	}
 }

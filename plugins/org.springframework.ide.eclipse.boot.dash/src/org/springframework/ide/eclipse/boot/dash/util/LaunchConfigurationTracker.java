@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.isHiddenFromBootDash;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,7 +24,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsDialog;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
@@ -31,10 +32,11 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 /**
- * This class is responsible of maintaining a map of {@link LaunchConfigurationsDialog} that are the children
- * of {@link BootProjectDashElement}s.
+ * This class is responsible of maintaining a map of {@link ILaunchConfiguration}
+ * that represent the children of {@link BootProjectDashElement}s.
  *
  * @author Kris De Volder
  */
@@ -124,11 +126,23 @@ public class LaunchConfigurationTracker implements Disposable {
 
 	private ImmutableSet<ILaunchConfiguration> getRelevantConfs() {
 		try {
-			return ImmutableSet.copyOf(launchManager.getLaunchConfigurations(launchType));
+			ILaunchConfiguration[] allConfigs = launchManager.getLaunchConfigurations(launchType);
+			Builder<ILaunchConfiguration> builder = ImmutableSet.builder();
+			for (ILaunchConfiguration c : allConfigs) {
+				if (isRelevant(c)) {
+					builder.add(c);
+				}
+			}
+			return builder.build();
 		} catch (Exception e) {
 			BootActivator.log(e);
 			return ImmutableSet.of();
 		}
+	}
+
+	private boolean isRelevant(ILaunchConfiguration c) {
+		//Note: no need to check the launch conf type as only configs of the right type are passed in here.
+		return !isHiddenFromBootDash(c);
 	}
 
 	@Override
