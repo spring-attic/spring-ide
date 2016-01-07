@@ -438,13 +438,19 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenBrowserAction());
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
-		addVisible(manager, actions.getOpenConfigAction());
-		addVisible(manager, actions.getDuplicateAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());
 
 		manager.add(new Separator());
+
+		addVisible(manager, actions.getOpenConfigAction());
+		addVisible(manager, actions.getDuplicateConfigAction());
+		addVisible(manager, actions.getDeleteConfigsAction());
+
+		manager.add(new Separator());
+
 		addVisible(manager, actions.getExposeRunAppAction());
 		addVisible(manager, actions.getExposeDebugAppAction());
+
 		manager.add(new Separator());
 
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
@@ -477,7 +483,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, actions.getRestartWithRemoteDevClientAction());
 		}
 
-		IAction deleteAppsAction = actions.getDeleteElementsAction();
+		IAction deleteAppsAction = actions.getDeleteAppsAction();
 		if (deleteAppsAction != null) {
 			addVisible(manager, deleteAppsAction);
 		}

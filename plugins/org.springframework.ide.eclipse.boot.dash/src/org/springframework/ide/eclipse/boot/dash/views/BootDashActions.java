@@ -22,12 +22,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -54,7 +56,6 @@ public class BootDashActions {
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
-	private DeleteElementsAction deleteElementsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
 	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
@@ -66,7 +67,11 @@ public class BootDashActions {
 	private ToggleFiltersAction toggleFiltersAction;
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
-	private DuplicateAction duplicateAction;
+
+	private DuplicateConfigAction duplicateConfigAction;
+
+	private DeleteElementsAction<CloudFoundryRunTargetType> deleteAppsAction;
+	private DeleteElementsAction<LocalRunTargetType> deleteConfigsAction;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -139,7 +144,13 @@ public class BootDashActions {
 		openInPackageExplorerAction = new OpenInPackageExplorer(elementsSelection, ui);
 		addTargetActions = createAddTargetActions();
 
-		deleteElementsAction = new DeleteElementsAction(elementsSelection, ui);
+		deleteAppsAction = new DeleteElementsAction<>(CloudFoundryRunTargetType.class, elementsSelection, ui);
+		deleteAppsAction.setText("Delete Apps");
+		deleteAppsAction.setToolTipText("Permantently removes selected application(s) from CloudFoundry");
+		deleteConfigsAction = new DeleteElementsAction<>(LocalRunTargetType.class, elementsSelection, ui);
+		deleteConfigsAction.setText("Delete Config");
+		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
+
 		restartOnlyAction = new RestartApplicationOnlyAction(elementsSelection, ui);
 		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(elementsSelection, ui);
 		selectManifestAction = new SelectManifestAction(elementsSelection, ui);
@@ -170,8 +181,7 @@ public class BootDashActions {
 
 		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(model, elementsSelection, ui);
 
-		duplicateAction = new DuplicateAction(model, elementsSelection, ui);
-
+		duplicateConfigAction = new DuplicateConfigAction(model, elementsSelection, ui);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -307,12 +317,14 @@ public class BootDashActions {
 		return refreshAction;
 	}
 
-	/**
-	 * @return May be null as it may not be supported on all models.
-	 */
-	public IAction getDeleteElementsAction() {
-		return deleteElementsAction;
+	public IAction getDeleteAppsAction() {
+		return deleteAppsAction;
 	}
+
+	public IAction getDeleteConfigsAction() {
+		return deleteConfigsAction;
+	}
+
 
 	public IAction getRestartOnlyApplicationAction() {
 		return restartOnlyAction;
@@ -392,9 +404,9 @@ public class BootDashActions {
 			exposeDebugAppAction.dispose();
 			exposeDebugAppAction = null;
 		}
-		if (duplicateAction != null) {
-			duplicateAction.dispose();
-			duplicateAction = null;
+		if (duplicateConfigAction != null) {
+			duplicateConfigAction.dispose();
+			duplicateConfigAction = null;
 		}
 	}
 
@@ -406,8 +418,8 @@ public class BootDashActions {
 		return restartWithRemoteDevClientAction;
 	}
 
-	public DuplicateAction getDuplicateAction() {
-		return duplicateAction;
+	public DuplicateConfigAction getDuplicateConfigAction() {
+		return duplicateConfigAction;
 	}
 
 }

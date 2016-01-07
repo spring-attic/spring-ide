@@ -33,12 +33,14 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions.RunOrDebugStateAction;
-import org.springframework.ide.eclipse.boot.dash.views.DuplicateAction;
+import org.springframework.ide.eclipse.boot.dash.views.DuplicateConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -68,7 +70,7 @@ public class BootDashActionTests {
 		MockMultiSelection<BootDashElement> selection = harness.selection;
 		BootLaunchConfigurationDelegate.createConf(javaProject);
 
-		final IAction action = actions.getDeleteElementsAction();
+		final IAction action = actions.getDeleteConfigsAction();
 		action.setEnabled(true); //force it to true so we can tell that it actually changes.
  		selection.setElements(element);
  		new ACondition("Wait for disablement", 3000) {
@@ -100,7 +102,7 @@ public class BootDashActionTests {
 			}
 		};
 
-		final IAction action = actions.getDeleteElementsAction();
+		final IAction action = actions.getDeleteConfigsAction();
 
 		assertFalse(action.isEnabled());
 		selection.setElements(el1);
@@ -143,7 +145,7 @@ public class BootDashActionTests {
 			}
 		};
 
-		final IAction action = actions.getDeleteElementsAction();
+		final IAction action = actions.getDeleteConfigsAction();
 
 		assertFalse(action.isEnabled());
 		selection.setElements(el1);
@@ -175,7 +177,7 @@ public class BootDashActionTests {
 		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
 
 		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final DuplicateAction action = actions.getDuplicateAction();
+		final DuplicateConfigAction action = actions.getDuplicateConfigAction();
 		final ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		selection.setElements(element);
 		new ACondition("Wait for enablement", 3000) {
@@ -211,7 +213,7 @@ public class BootDashActionTests {
 		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
 
 		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final DuplicateAction action = actions.getDuplicateAction();
+		final DuplicateConfigAction action = actions.getDuplicateConfigAction();
 
 		ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
@@ -252,7 +254,7 @@ public class BootDashActionTests {
 		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
 
 		MockMultiSelection<BootDashElement> selection = harness.selection;
-		final DuplicateAction action = actions.getDuplicateAction();
+		final DuplicateConfigAction action = actions.getDuplicateConfigAction();
 
 		//If selection is empty the action must not be enabled
 		assertTrue(selection.isEmpty());
@@ -306,7 +308,7 @@ public class BootDashActionTests {
 		assertFalse(action.isEnabled());
 
 		//If selection has more than one element... the action must not be enabled
-		selection.setElements(element, mock(BootDashElement.class));
+		selection.setElements(element, mockLocalElement());
 		assertFalse(action.isEnabled());
 
 		//If selection has one element...
@@ -345,7 +347,6 @@ public class BootDashActionTests {
 			}
 		};
 	}
-
 
 	@Test
 	public void openConfigActionEnablementForLaunchConfig() throws Exception {
@@ -573,6 +574,15 @@ public class BootDashActionTests {
 		}
 		return null;
 	}
+
+	private BootDashElement mockLocalElement() {
+		BootDashElement element = mock(BootDashElement.class);
+		RunTarget target = RunTargets.LOCAL;
+		when(element.getBootDashModel()).thenReturn(harness.getRunTargetModel(RunTargetTypes.LOCAL));
+		when(element.getTarget()).thenReturn(target);
+		return element;
+	}
+
 
 
 }

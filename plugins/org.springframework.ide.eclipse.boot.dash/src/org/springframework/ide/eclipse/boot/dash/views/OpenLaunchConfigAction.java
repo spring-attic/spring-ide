@@ -20,7 +20,11 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
 
+/**
+ * @author Kris De Volder
+ */
 public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
 	public OpenLaunchConfigAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
@@ -54,6 +58,25 @@ public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void updateVisibility() {
+		setVisible(shouldShow());
+	}
+
+	private boolean shouldShow() {
+		//Only show if all selected elements are local elements
+		for (BootDashElement e : getSelectedElements()) {
+			if (!isCorrectTargetType(e)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isCorrectTargetType(BootDashElement e) {
+		return e.getTarget().getType() instanceof LocalRunTargetType;
 	}
 
 }

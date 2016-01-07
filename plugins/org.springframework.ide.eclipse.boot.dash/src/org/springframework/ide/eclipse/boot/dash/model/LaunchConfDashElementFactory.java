@@ -75,7 +75,7 @@ public class LaunchConfDashElementFactory implements Disposable {
 
 	public synchronized LaunchConfDashElement createOrGet(ILaunchConfiguration c) {
 		try {
-			if (c!=null) {
+			if (cache!=null && c!=null) {
 				ILaunchConfigurationType type = c.getType();
 				if (type!=null && BootLaunchConfigurationDelegate.TYPE_ID.equals(type.getIdentifier())) {
 					LaunchConfDashElement el = cache.get(c);
@@ -94,12 +94,12 @@ public class LaunchConfDashElementFactory implements Disposable {
 
 	@Override
 	public void dispose() {
-		cache = null;
 		if (listener!=null) {
 			launchManager.removeLaunchConfigurationListener(listener);
 			listener = null;
 			launchManager = null;
 		}
+		cache = null;
 	}
 
 }
