@@ -236,7 +236,7 @@ public class BootProjectTestHarness {
 	}
 
 	public static void assertOk(IStatus result) throws Exception {
-		if (!result.isOK()) {
+		if (result==null || !result.isOK()) {
 			throw ExceptionUtil.coreException(result);
 		}
 	}

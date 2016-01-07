@@ -19,12 +19,12 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 /**
  * @author Kris De Volder
  */
-public class DuplicateAction extends AbstractBootDashElementsAction {
+public class DuplicateConfigAction extends AbstractBootDashElementsAction {
 
-	public DuplicateAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public DuplicateConfigAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(model, selection, ui);
-		this.setText("Duplicate");
-		this.setToolTipText("Make a copy of this element");
+		this.setText("Duplicate Config");
+		this.setToolTipText("Make a copy of this element's LaunchConfiguration");
 	}
 
 	@Override

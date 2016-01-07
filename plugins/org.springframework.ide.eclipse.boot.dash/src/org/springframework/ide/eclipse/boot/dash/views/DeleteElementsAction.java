@@ -24,15 +24,18 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.DeletionCapabableModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-public class DeleteElementsAction extends AbstractBootDashElementsAction {
+public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootDashElementsAction {
 
-	public DeleteElementsAction(MultiSelection<BootDashElement> selection,
-			UserInteractions ui) {
+	private Class<T> targetTypeClass;
+
+	public DeleteElementsAction(Class<T> targetType, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
+		this.targetTypeClass = targetType;
 		Assert.isNotNull(ui);
 		this.setText("Delete Elements");
 		this.setToolTipText("Delete the selected elements.");
@@ -55,7 +58,7 @@ public class DeleteElementsAction extends AbstractBootDashElementsAction {
 			BootDashModel model = workitem.getKey();
 			final DeletionCapabableModel modifiable = (DeletionCapabableModel)model; //cast is safe. Only DeleteCapabableModel are added to sortingBins
 			if (ui.confirmOperation("Deleting Elements", modifiable.getDeletionConfirmationMessage(workitem.getValue()))) {
-				Job job = new Job("Deleting apps from " + model.getRunTarget().getName()) {
+				Job job = new Job("Deleting Elements from " + model.getRunTarget().getName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						modifiable.delete(workitem.getValue(), ui);
@@ -73,7 +76,22 @@ public class DeleteElementsAction extends AbstractBootDashElementsAction {
 		this.setEnabled(shouldEnableFor(getSelectedElements()));
 	}
 
-	private boolean shouldEnableFor(Collection<BootDashElement> selectedElements) {
+	@Override
+	public void updateVisibility() {
+		this.setVisible(shouldShowFor(getSelectedElements()));
+	}
+
+	protected boolean shouldShowFor(Collection<BootDashElement> selectedElements) {
+		//Only visible if all selected elements belong to the correct runtarget type
+		for (BootDashElement e : selectedElements) {
+			if (!isCorrectTargetType(e.getBootDashModel())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	protected boolean shouldEnableFor(Collection<BootDashElement> selectedElements) {
 		if (selectedElements.isEmpty()) {
 			//If no elements are selected, then action would do nothing, so disable it.
 			return false;
@@ -89,8 +107,12 @@ public class DeleteElementsAction extends AbstractBootDashElementsAction {
 
 	private boolean canDelete(BootDashElement bde) {
 		BootDashModel model = bde.getBootDashModel();
-		return model instanceof DeletionCapabableModel &&
+		return isCorrectTargetType(model) && model instanceof DeletionCapabableModel &&
 				((DeletionCapabableModel)model).canDelete(bde);
+	}
+
+	private boolean isCorrectTargetType(BootDashModel model) {
+		return targetTypeClass.isAssignableFrom(model.getRunTarget().getType().getClass());
 	}
 
 }
