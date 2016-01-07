@@ -217,7 +217,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		return null;
 	}
 
-	public RunTarget finish() {
+	public CloudFoundryRunTarget finish() {
 		String id = CloudFoundryTargetProperties.getId(this);
 		put(TargetProperties.RUN_TARGET_ID, id);
 		try {
@@ -225,7 +225,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		} catch (CannotAccessPropertyException e) {
 			BootDashActivator.log(e);
 		}
-		return getRunTargetType().createRunTarget(this);
+		return (CloudFoundryRunTarget) getRunTargetType().createRunTarget(this);
 	}
 
 	class CredentialsValidator extends Validator {
@@ -292,5 +292,12 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 			return ValidationResult.OK;
 		}
+	}
+
+	/**
+	 * @return A 'complete' validator that reflects the validation state of all the inputs in this 'ui'.
+	 */
+	public LiveExpression<ValidationResult> getValidator() {
+		return allPropertiesValidator;
 	}
 }

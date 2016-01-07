@@ -71,7 +71,7 @@ public class BootLaunchTestCase extends StsTestCase {
 		assertContains(snippet, value.msg);
 	}
 
-	public void assertOk(LiveExpression<ValidationResult> validator) {
+	public static void assertOk(LiveExpression<ValidationResult> validator) {
 		ValidationResult status = validator.getValue();
 		if (!status.isOk()) {
 			fail(status.toString());

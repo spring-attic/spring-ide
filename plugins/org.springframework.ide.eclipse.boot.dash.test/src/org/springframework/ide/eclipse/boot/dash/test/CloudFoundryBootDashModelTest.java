@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -34,14 +36,19 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
 
+/**
+ * @author Kris De Volder
+ */
 public class CloudFoundryBootDashModelTest {
 
 	private TestBootDashModelContext context;
-	private BootDashViewModelHarness harness;
+//	private BootDashViewModelHarness harness;
 	private BootProjectTestHarness projects;
 	private UserInteractions ui;
 
@@ -56,6 +63,9 @@ public class CloudFoundryBootDashModelTest {
 	@Rule
 	public AutobuildingEnablement disableAutoBuild = new AutobuildingEnablement(false);
 
+	@Rule
+	TestBracketter testBracketter = new TestBracketter();
+
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
@@ -64,17 +74,16 @@ public class CloudFoundryBootDashModelTest {
 				DebugPlugin.getDefault().getLaunchManager()
 		);
 		this.clientFactory = new CloudFoundryClientFactory();
-		this.targetType = new CloudFoundryRunTargetType(clientFactory);
-		this.harness = new BootDashViewModelHarness(context, targetType);
+		this.targetType = new CloudFoundryRunTargetType(context, clientFactory);
+//		this.harness = new BootDashViewModelHarness(context, targetType);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		this.ui = mock(UserInteractions.class);
 	}
 
 	@Test
 	public void testCreateCfTarget() throws Exception {
-		//TODO: create this test for real
 		CloudFoundryRunTarget target =  createCfTarget(CfTestTargetParams.fromEnv());
-
+		assertNotNull(target);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
@@ -86,17 +95,19 @@ public class CloudFoundryBootDashModelTest {
 		wizard.setPassword(params.getPassword());
 		wizard.setSelfsigned(false);
 		wizard.resolveSpaces(new MockRunnableContext());
-
-//		CloudSpace space = getSpace(wizard, ); //TODO
-
-
-
-//		wizard.setSpace(space);
-		return null;
+		wizard.setSpace(getSpace(wizard, params.getOrg(), params.getSpace()));
+		assertOk(wizard.getValidator());
+		return wizard.finish();
 	}
 
-	private void resolveSpaces(CloudFoundryTargetWizardModel wizard) {
-//		wizard.resolveSpaces(context)
+	private CloudSpace getSpace(CloudFoundryTargetWizardModel wizard, String orgName, String spaceName) {
+		for (CloudSpace space : wizard.getSpaces().getOrgSpaces(orgName)) {
+			if (space.getName().equals(spaceName)) {
+				return space;
+			}
+		}
+		fail("Not found org/space = "+orgName+"/"+spaceName);
+		return null;
 	}
 
 	@After
@@ -110,8 +121,14 @@ public class CloudFoundryBootDashModelTest {
 				wsManager.removeWorkingSet(ws);
 			}
 		}
-
-		this.harness.dispose();
 	}
+
+	public static void assertOk(LiveExpression<ValidationResult> validator) {
+		ValidationResult status = validator.getValue();
+		if (!status.isOk()) {
+			fail(status.toString());
+		}
+	}
+
 
 }

@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -31,15 +32,16 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
 	private CloudFoundryClientFactory clientFactory;
+	private BootDashModelContext context;
 
-	public CloudFoundryRunTargetType(CloudFoundryClientFactory clientFactory) {
+	public CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		super("Cloud Foundry");
+		this.context = context;
 		this.clientFactory = clientFactory;
 	}
 
 	@Override
 	public void openTargetCreationUi(LiveSet<RunTarget> targets) {
-		BootDashModelContext context = BootDashActivator.getDefault().getModel().getContext();
 		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory,
 				targets.getValues(), context);
 		RunTargetWizard wizard = new RunTargetWizard(model);
@@ -71,5 +73,4 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	public ImageDescriptor getIcon() {
 		return SMALL_ICON;
 	}
-
 }

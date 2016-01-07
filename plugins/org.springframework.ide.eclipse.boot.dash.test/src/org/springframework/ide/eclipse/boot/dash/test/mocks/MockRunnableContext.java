@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.lang.reflect.InvocationTargetException;
@@ -5,13 +15,12 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.junit.Assert;
 
 public class MockRunnableContext implements IRunnableContext {
 
 	@Override
 	public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
-		Assert.assertFalse("forking not yet supported by MockRunnableContext", fork);
+		//TODO: we are ignoring the 'fork' flag. Is that bad?
 		runnable.run(new NullProgressMonitor());
 	}
 
