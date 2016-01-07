@@ -236,7 +236,12 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 	}
 
 	public RunTarget getRunTarget() {
-		return wizardModel.finish();
+		try {
+			return wizardModel.finish();
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
 	}
 
 	/*

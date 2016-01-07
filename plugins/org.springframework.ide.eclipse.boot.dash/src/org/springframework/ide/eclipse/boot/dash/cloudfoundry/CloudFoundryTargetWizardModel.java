@@ -217,14 +217,10 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		return null;
 	}
 
-	public CloudFoundryRunTarget finish() {
+	public CloudFoundryRunTarget finish() throws Exception {
 		String id = CloudFoundryTargetProperties.getId(this);
 		put(TargetProperties.RUN_TARGET_ID, id);
-		try {
-			super.setPassword(password.getValue());
-		} catch (CannotAccessPropertyException e) {
-			BootDashActivator.log(e);
-		}
+		super.setPassword(password.getValue());
 		return (CloudFoundryRunTarget) getRunTargetType().createRunTarget(this);
 	}
 
