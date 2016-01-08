@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
@@ -68,9 +67,6 @@ public class ManifestDescriptorResolver extends DeploymentDescriptorResolver {
 				} else {
 					deploymentProperties = appProperties.get(0);
 				}
-			} else {
-				// if nothing is selected, cancel
-				throw new OperationCanceledException();
 			}
 		}
 

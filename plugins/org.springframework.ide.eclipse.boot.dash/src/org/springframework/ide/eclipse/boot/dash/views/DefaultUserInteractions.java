@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ApplicationDeploymentPropertiesWizard;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestFileDialog;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ApplicationDeploymentPropertiesWizard;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
@@ -245,22 +245,21 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public IPath selectDeploymentManifestFile(final IProject project, final IPath manifestFile) {
-
-		final IPath[] path = new IPath[1];
+		final int[] response = new int[1];
+		final ManifestFileDialog dialog = new ManifestFileDialog(getShell(), project, manifestFile);
 		context.getShell().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				ManifestFileDialog dialog = new ManifestFileDialog(getShell(), project, manifestFile);
-				if (dialog.open() == IDialogConstants.OK_ID) {
-					path[0] = dialog.getManifest();
-				} else {
-					path[0] = manifestFile;
-				}
+				response[0] = dialog.open();
 			}
 
 		});
-		return path[0];
+		if (response[0] == IDialogConstants.OK_ID) {
+			return dialog.getManifest();
+		} else {
+			throw new OperationCanceledException("Canceled selecting manifest file");
+		}
 	}
 
 	@Override

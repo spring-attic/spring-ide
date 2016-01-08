@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
@@ -37,14 +36,7 @@ public class SelectManifestOp extends CloudOperation {
 		if (cde == null || project == null) {
 			return;
 		}
-		IPath path = ui.selectDeploymentManifestFile(project, cde.getDeploymentManifestFile());
-
-		if (path != null) {
-			cde.setDeploymentManifestFile(path);
-		} else {
-			// if nothing is selected, cancel
-			throw new OperationCanceledException();
-		}
+		cde.setDeploymentManifestFile(ui.selectDeploymentManifestFile(project, cde.getDeploymentManifestFile()));
 	}
 
 }
