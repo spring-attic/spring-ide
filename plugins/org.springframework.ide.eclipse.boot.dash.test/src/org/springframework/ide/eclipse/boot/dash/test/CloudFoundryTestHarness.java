@@ -13,22 +13,29 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.resources.IProject;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -154,6 +161,25 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			when(ui.confirmOperation(anyString(), anyString())).thenReturn(true);
 			cfModel.delete(toDelete, ui);
 		}
+	}
+
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) {
+		when(ui.promptApplicationDeploymentProperties(any(IProject.class), anyListOf(CloudDomain.class)))
+		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+			@Override
+			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
+				Object[] args = invocation.getArguments();
+				@SuppressWarnings("unchecked")
+				List<CloudDomain> domains = (List<CloudDomain>) args[1];
+				IProject project = (IProject) args[0];
+				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
+				deploymentProperties.setProject(project.getProject());
+				deploymentProperties.setAppName(appName);
+				String url = hostName + "." + domains.get(0).getName();
+				deploymentProperties.setUrls(ImmutableList.of(url));
+				return deploymentProperties;
+			}
+		});
 	}
 
 }

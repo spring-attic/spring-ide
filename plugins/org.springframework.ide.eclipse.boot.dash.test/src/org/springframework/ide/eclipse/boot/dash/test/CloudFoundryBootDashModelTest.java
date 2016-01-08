@@ -104,22 +104,7 @@ public class CloudFoundryBootDashModelTest {
 		final BootProjectDashElement project = harness.getElementFor(projects.createBootWebProject("to-deploy"));
 		final String appName = harness.randomAppName();
 
-		when(ui.promptApplicationDeploymentProperties(eq(project.getProject()), anyListOf(CloudDomain.class)))
-			.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
-				@Override
-				public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-					Object[] args = invocation.getArguments();
-					@SuppressWarnings("unchecked")
-					List<CloudDomain> domains = (List<CloudDomain>) args[1];
-					CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
-					deploymentProperties.setProject(project.getProject());
-					deploymentProperties.setAppName(appName);
-					String url = appName+"."+domains.get(0).getName();
-					deploymentProperties.setUrls(ImmutableList.of(url));
-					return deploymentProperties;
-				}
-			});
-
+		harness.answerDeploymentPrompt(ui, appName, appName);
 		model.add(ImmutableList.<Object>of(project), ui);
 
 		//The resulting deploy is asynchronous
@@ -180,21 +165,7 @@ public class CloudFoundryBootDashModelTest {
 		final String newAppName = harness.randomAppName();
 
 		// Create a new one too
-		when(ui.promptApplicationDeploymentProperties(eq(project.getProject()), anyListOf(CloudDomain.class)))
-				.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
-					@Override
-					public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-						Object[] args = invocation.getArguments();
-						@SuppressWarnings("unchecked")
-						List<CloudDomain> domains = (List<CloudDomain>) args[1];
-						CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
-						deploymentProperties.setProject(project.getProject());
-						deploymentProperties.setAppName(newAppName);
-						String url = newAppName + "." + domains.get(0).getName();
-						deploymentProperties.setUrls(ImmutableList.of(url));
-						return deploymentProperties;
-					}
-				});
+		harness.answerDeploymentPrompt(ui, newAppName, newAppName);
 
 		model.add(ImmutableList.<Object> of(project), ui);
 
