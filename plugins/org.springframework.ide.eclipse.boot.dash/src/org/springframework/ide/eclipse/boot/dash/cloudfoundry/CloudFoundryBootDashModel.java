@@ -265,7 +265,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	@Override
 	public CloudFoundryRunTarget getRunTarget() {
-		return (CloudFoundryRunTarget) getRunTarget();
+		return (CloudFoundryRunTarget) super.getRunTarget();
 	}
 
 	@Override
