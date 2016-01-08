@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -88,6 +88,11 @@ public class CloudFoundryBootDashModelTest {
 	 */
 	private static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 
+	/**
+	 * How long to wait for runtarget to become 'connected'.
+	 */
+	private static final long CONNECT_TARGET_TIMEOUT = 10_000;
+
 	private CloudFoundryClientFactory clientFactory;
 	private CloudFoundryRunTargetType cfTargetType;
 
@@ -155,6 +160,7 @@ public class CloudFoundryBootDashModelTest {
 			}
 		};
 
+		System.out.println("breakpoint"); // this line is here only because eclipse won't let me put a line breakpoint on the line below.
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
 				CloudDashElement element = model.getElement(appName);
@@ -180,10 +186,18 @@ public class CloudFoundryBootDashModelTest {
 		wizard.resolveSpaces(new MockRunnableContext());
 		wizard.setSpace(getSpace(wizard, params.getOrg(), params.getSpace()));
 		assertOk(wizard.getValidator());
-		CloudFoundryRunTarget newTarget = wizard.finish();
+		final CloudFoundryRunTarget newTarget = wizard.finish();
 		if (newTarget!=null) {
 			harness.model.getRunTargets().add(newTarget);
 		}
+
+		//The created target is automatically connected, but this happens asynchly so we must wait for it.
+		new ACondition("Wait for connected state", CONNECT_TARGET_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertTrue(newTarget.isConnected());
+				return true;
+			}
+		};
 		return newTarget;
 	}
 

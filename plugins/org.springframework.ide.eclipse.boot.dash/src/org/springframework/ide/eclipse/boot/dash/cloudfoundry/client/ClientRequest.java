@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
@@ -48,6 +49,7 @@ public abstract class ClientRequest<T> {
 	 */
 	public ClientRequest(CloudFoundryOperations client, String appName, String requestName,
 			RequestErrorHandler errorHandler) {
+		Assert.isLegal(client!=null, "ClientRequest needs a non-null client");
 		this.client = client;
 		this.appName = appName;
 		this.requestName = requestName;

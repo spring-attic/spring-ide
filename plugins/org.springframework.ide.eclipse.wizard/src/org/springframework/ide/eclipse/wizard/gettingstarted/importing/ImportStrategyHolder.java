@@ -41,10 +41,14 @@ public class ImportStrategyHolder {
 		if (instance == null) {
 			try {
 				this.instance = factory.create(buildType, name, notInstalledMessage);
-			} catch (Throwable e) {
-				//THe most likely cause of this error is that optional dependencies needed to support
-				// this import strategy are not installed.
+			} catch (ClassNotFoundException e) {
+				//ignore: happens when optional dependencies for strategy support are not installed
+			} catch (Exception e) {
+				//Somewhat unexpected, so log it.
 				WizardPlugin.log(e);
+			}
+			if (this.instance==null) {
+				//Something prevented the creation of the import strategy.
 				this.instance = new NullImportStrategy(buildType, name, notInstalledMessage);
 			}
 		}

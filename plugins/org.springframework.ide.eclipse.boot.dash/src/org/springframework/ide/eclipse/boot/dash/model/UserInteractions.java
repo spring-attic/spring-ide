@@ -39,9 +39,9 @@ public interface UserInteractions {
 	boolean confirmOperation(String title, String message);
 	String updatePassword(String userName, String targetId);
 	void openDialog(ToggleFiltersDialogModel model);
+	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
 	/**
-	 *
 	 * @param project that is being deployed
 	 * @param list of domains available in the Cloud target. This is used to create an application URL
 	 * @return deployment properties for the project that at the very least should contain an application name
@@ -58,21 +58,12 @@ public interface UserInteractions {
 	IPath selectDeploymentManifestFile(IProject project, IPath manifestFile);
 
 	/**
-	 * select a file
+	 * Ask the user to select a file.
 	 * @param title The title of the open file dialog
 	 * @param file The default path/file that should be used when opening the dialog
 	 * @return The full path of the selected file
 	 */
 	String chooseFile(String title, String file);
-
-	/**
-	 * @param title
-	 * @param message
-	 * @param initialValue
-	 * @param validator
-	 * @return
-	 */
-	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
 	/**
 	 * Ask the user to confirm or cancel an operation, with a toggle option.

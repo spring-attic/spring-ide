@@ -22,6 +22,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -30,12 +31,10 @@ public class ClientRequests {
 
 	protected final CloudFoundryOperations client;
 
-
 	public ClientRequests(CloudFoundryOperations client) {
+		Assert.isNotNull(client, "ClientRequests needs a non-null client");
 		this.client = client;
 	}
-
-
 
 	public void createApplication(final CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
 		new BasicRequest(this.client, deploymentProperties.getAppName(), "Creating application") {
@@ -219,9 +218,7 @@ public class ClientRequests {
 	}
 
 	public void updateApplicationMemory(final String appName, final int memory) throws Exception {
-
 		new BasicRequest(this.client, appName, "Updating application memory") {
-
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationMemory(appName, memory);
@@ -230,7 +227,6 @@ public class ClientRequests {
 	}
 
 	public void updateApplicationInstances(final String appName, final int instances) throws Exception {
-
 		new BasicRequest(this.client, appName, "Updating application instances") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
@@ -269,7 +265,6 @@ public class ClientRequests {
 
 	public List<CloudSpace> getSpaces() throws Exception {
 		return new ClientRequest<List<CloudSpace>>(this.client, "Getting Cloud spaces") {
-
 			@Override
 			protected List<CloudSpace> doRun(CloudFoundryOperations client) throws Exception {
 				return client.getSpaces();
@@ -286,7 +281,6 @@ public class ClientRequests {
 	 * @throws Exception
 	 */
 	public CloudAppInstances getExistingAppInstances(final UUID guid) throws Exception {
-
 		return new ClientRequest<CloudAppInstances>(this.client, "Getting application instances") {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
@@ -301,7 +295,6 @@ public class ClientRequests {
 	}
 
 	public CloudAppInstances getExistingAppInstances(final String appName) throws Exception {
-
 		return new ClientRequest<CloudAppInstances>(this.client, appName, "Getting application instances", null) {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
@@ -315,5 +308,4 @@ public class ClientRequests {
 			}
 		}.run();
 	}
-
 }

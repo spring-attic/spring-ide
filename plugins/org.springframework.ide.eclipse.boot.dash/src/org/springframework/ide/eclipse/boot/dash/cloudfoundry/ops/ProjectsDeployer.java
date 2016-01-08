@@ -70,14 +70,13 @@ public class ProjectsDeployer extends CloudOperation {
 				model.getOperationsExecution(ui).runOpAsynch(op);
 			} catch (Exception e) {
 				if (!(e instanceof OperationCanceledException)) {
+					BootDashActivator.log(e);
 					if (ui != null) {
 						String message = e.getMessage() != null && e.getMessage().trim().length() > 0 ? e.getMessage()
 								: "Error type: " + e.getClass().getName()
 										+ ". Check Error Log view for further details.";
 						ui.errorPopup("Operation Failure", message);
-
 					}
-					BootDashActivator.log(e);
 				}
 			}
 		}
