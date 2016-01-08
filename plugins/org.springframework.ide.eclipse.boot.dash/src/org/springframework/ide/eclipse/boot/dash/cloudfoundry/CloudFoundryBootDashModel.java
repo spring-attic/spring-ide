@@ -51,7 +51,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeploy
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -144,7 +143,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				 * Update ProjectAppStore
 				 */
 				if (!appsToRefresh.isEmpty()) {
-					projectAppStore.storeProjectToAppMapping(elements.getValue());
+					projectAppStore.storeProjectToAppMapping(getElements().getValue());
 				}
 
 				/*
@@ -198,10 +197,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	@Override
-	public ObservableSet<BootDashElement> getElements() {
+	public LiveSetVariable<BootDashElement> getElements() {
 		if (elements == null) {
 			elements = new LiveSetVariable<BootDashElement>();
-			refresh(null);
 		}
 		return elements;
 	}
@@ -261,9 +259,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	@Override
 	public void refresh(UserInteractions ui) {
-		if (elements == null) {
-			return;
-		}
 		Operation<Void> op = new TargetApplicationsRefreshOperation(this, ui);
 		getOperationsExecution(ui).runOpAsynch(op);
 	}
@@ -346,7 +341,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		synchronized (this) {
 
 			// Safe iterate via getValues(); a copy, instead of getValue()
-			ImmutableSet<BootDashElement> existing = elements.getValues();
+			ImmutableSet<BootDashElement> existing = getElements().getValues();
 
 			addedElement = elementFactory.create(appInstances.getApplication().getName());
 
@@ -370,7 +365,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 		// These trigger events, therefore be sure to call them outside of the
 		// synch block to avoid deadlock
-		elements.replaceAll(updated);
+		getElements().replaceAll(updated);
 
 		if (changed) {
 			notifyElementChanged(addedElement);
@@ -380,21 +375,21 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	public CloudDashElement getElement(String appName) {
-		synchronized (this) {
-			if (elements!=null) {
-				Set<BootDashElement> existing = elements.getValue();
 
-				// Add any existing ones that weren't replaced by the new ones
-				// Replace the existing one with a new one for the given Cloud
-				// Application
-				for (BootDashElement element : existing) {
-					if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
-						return (CloudDashElement) element;
-					}
+		synchronized (this) {
+			Set<BootDashElement> existing = getElements().getValue();
+
+			// Add any existing ones that weren't replaced by the new ones
+			// Replace the existing one with a new one for the given Cloud
+			// Application
+			for (BootDashElement element : existing) {
+				if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
+					return (CloudDashElement) element;
 				}
 			}
 			return null;
 		}
+
 	}
 
 	public void updateElements(Map<CloudAppInstances, IProject> apps) throws Exception {
@@ -403,7 +398,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			/*
 			 * Error case: set empty list of BDEs don't modify state of local to CF artifacts mappings
 			 */
-			elements.replaceAll(Collections.<BootDashElement>emptyList());
+			getElements().replaceAll(Collections.<BootDashElement>emptyList());
 		} else {
 
 			Map<String, BootDashElement> updated = new HashMap<String, BootDashElement>();
@@ -545,7 +540,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				synchronized (CloudFoundryBootDashModel.this) {
 					// Safe iterate via getValues(); a copy, instead of
 					// getValue()
-					ImmutableSet<BootDashElement> existing = elements.getValues();
+					ImmutableSet<BootDashElement> existing = getElements().getValues();
 
 					// Be sure it is removed from the cache as well as
 					// elements
@@ -574,7 +569,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 				// do this outside the synch block
 
-				elements.replaceAll(updatedElements);
+				getElements().replaceAll(updatedElements);
 			}
 		};
 
