@@ -66,10 +66,12 @@ public class LaunchConfDashElementFactory implements Disposable {
 	}
 
 	private synchronized void deleted(ILaunchConfiguration configuration) {
-		LaunchConfDashElement element = this.cache.remove(configuration);
-		if (element!=null) {
-			debug("deleted from factory: "+element);
-			element.dispose();
+		if (this.cache!=null) {
+			LaunchConfDashElement element = this.cache.remove(configuration);
+			if (element!=null) {
+				debug("deleted from factory: "+element);
+				element.dispose();
+			}
 		}
 	}
 
