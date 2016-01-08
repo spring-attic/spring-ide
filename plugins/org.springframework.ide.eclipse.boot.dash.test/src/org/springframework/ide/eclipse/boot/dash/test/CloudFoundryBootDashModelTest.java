@@ -162,12 +162,13 @@ public class CloudFoundryBootDashModelTest {
 		CloudFoundryOperations externalClient = clientFactory.getClient(
 				new CloudCredentials(params.getUser(), params.getPassword()), new URL(params.getApiUrl()),
 				params.getOrg(), params.getSpace(), params.isSelfsigned());
+		List<CloudDomain> domains = externalClient.getDomains();
 
 		List<String> services = new ArrayList<String>();
-		List<String> envVars = new ArrayList<String>();
 		int memory = 1024;
 		final String preexistingAppName = harness.randomAppName();
-		externalClient.createApplication(preexistingAppName, new Staging(), memory, services, envVars);
+		externalClient.createApplication(preexistingAppName, new Staging(), memory,
+				ImmutableList.of(preexistingAppName + "." + domains.get(0).getName()), services);
 
 		// Create the boot dash target and model
 		harness.createCfTarget(CfTestTargetParams.fromEnv());

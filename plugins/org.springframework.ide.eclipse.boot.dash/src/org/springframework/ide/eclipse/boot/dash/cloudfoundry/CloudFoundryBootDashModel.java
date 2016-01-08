@@ -430,7 +430,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			// (runstate, instances, project) in the cache. The latter is handled
 			// separately
 			// below.
-			elements.replaceAll(updated.values());
+			getElements().replaceAll(updated.values());
 
 			// Fire app state change based on changes to the app cache
 			if (toNotify != null) {
