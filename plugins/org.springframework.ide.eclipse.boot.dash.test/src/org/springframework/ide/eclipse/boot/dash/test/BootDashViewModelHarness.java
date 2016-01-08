@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertySt
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class BootDashViewModelHarness {
@@ -187,6 +189,13 @@ public class BootDashViewModelHarness {
 	public BootProjectDashElement getElementFor(IProject project) {
 		LocalBootDashModel localSection = (LocalBootDashModel) model.getSectionByTargetId(RunTargets.LOCAL.getId());
 		return (BootProjectDashElement) localSection.getProjectElementFactory().createOrGet(project);
+	}
+
+	public static void assertOk(LiveExpression<ValidationResult> validator) {
+		ValidationResult status = validator.getValue();
+		if (!status.isOk()) {
+			fail(status.toString());
+		}
 	}
 
 }

@@ -643,4 +643,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		CloudApplication app = getAppCache().getApp(project);
 		return app != null ? app.getName() : project.getName();
 	}
+
+	public boolean isConnected() {
+		return getCloudTarget().isConnected();
+	}
 }
