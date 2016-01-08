@@ -380,21 +380,21 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	public CloudDashElement getElement(String appName) {
-
 		synchronized (this) {
-			Set<BootDashElement> existing = elements.getValue();
+			if (elements!=null) {
+				Set<BootDashElement> existing = elements.getValue();
 
-			// Add any existing ones that weren't replaced by the new ones
-			// Replace the existing one with a new one for the given Cloud
-			// Application
-			for (BootDashElement element : existing) {
-				if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
-					return (CloudDashElement) element;
+				// Add any existing ones that weren't replaced by the new ones
+				// Replace the existing one with a new one for the given Cloud
+				// Application
+				for (BootDashElement element : existing) {
+					if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
+						return (CloudDashElement) element;
+					}
 				}
 			}
 			return null;
 		}
-
 	}
 
 	public void updateElements(Map<CloudAppInstances, IProject> apps) throws Exception {

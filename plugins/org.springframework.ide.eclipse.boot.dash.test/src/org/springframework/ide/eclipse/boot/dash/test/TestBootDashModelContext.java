@@ -36,6 +36,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private File stateLoc;
 	private ILaunchManager launchManager;
 	private IWorkspace workspace;
+	SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
 	private IScopedPropertyStore<IProject> projectProperties;
 	private IScopedPropertyStore<RunTargetType> runTargetProperties;
 	private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
@@ -85,7 +86,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 
 	@Override
 	public SecuredCredentialsStore getSecuredCredentialsStore() {
-		return new MockSecuredCredentialStore();
+		return secureStore;
 	}
 
 	@Override

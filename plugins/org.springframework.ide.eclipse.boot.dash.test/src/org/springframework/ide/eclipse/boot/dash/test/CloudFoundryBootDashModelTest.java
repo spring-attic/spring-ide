@@ -33,6 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
@@ -60,6 +62,10 @@ import com.google.common.collect.ImmutableList;
  */
 public class CloudFoundryBootDashModelTest {
 
+	/**
+	 * Setting this to true will bump some timeouts to 'practical infinity' so
+	 * the stuff doesn't bail out on running a the test while you are debugging it.
+	 */
 	private static final boolean DEBUG = false;
 
 	private TestBootDashModelContext context;
@@ -118,19 +124,29 @@ public class CloudFoundryBootDashModelTest {
 
 	@Test
 	public void testDeployApp() throws Exception {
-		BootProjectDashElement project = harness.getElementFor(projects.createBootWebProject("to-deploy"));
+		final BootProjectDashElement project = harness.getElementFor(projects.createBootWebProject("to-deploy"));
 		createCfTarget(CfTestTargetParams.fromEnv());
 		final CloudFoundryBootDashModel model = getCfTargetModel();
 
 		final String appName = randomAlphabetic(15);
-		CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
-		deploymentProperties.setProject(project.getProject());
-		deploymentProperties.setAppName(appName);
-		deploymentProperties.setUrls(ImmutableList.of(appName));
 		when(ui.promptApplicationDeploymentProperties(eq(project.getProject()), anyListOf(CloudDomain.class)))
-			.thenReturn(deploymentProperties);
+			.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+				@Override
+				public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
+					Object[] args = invocation.getArguments();
+					@SuppressWarnings("unchecked")
+					List<CloudDomain> domains = (List<CloudDomain>) args[1];
+					CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
+					deploymentProperties.setProject(project.getProject());
+					deploymentProperties.setAppName(appName);
+					String url = appName+"."+domains.get(0).getName();
+					deploymentProperties.setUrls(ImmutableList.of(url));
+					return deploymentProperties;
+				}
+			});
 
 		model.add(ImmutableList.<Object>of(project), ui);
+
 		//The resulting deploy is asynchronous
 		new ACondition("wait for app '"+ appName +"'to appear", APP_IS_VISIBLE_TIMEOUT) {
 			public boolean test() throws Exception {
