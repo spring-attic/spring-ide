@@ -35,7 +35,7 @@ public class ManifestDescriptorResolver extends DeploymentDescriptorResolver {
 	@Override
 	public CloudApplicationDeploymentProperties getProperties(IProject project, String appName,
 			CloudFoundryBootDashModel model, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		List<CloudDomain> domains = model.getCloudTarget().getDomains(monitor);
+		List<CloudDomain> domains = model.getRunTarget().getDomains(monitor);
 
 		// NOTE: Element may not yet exist at this stage. Be sure to do null
 		// checks where appropriate

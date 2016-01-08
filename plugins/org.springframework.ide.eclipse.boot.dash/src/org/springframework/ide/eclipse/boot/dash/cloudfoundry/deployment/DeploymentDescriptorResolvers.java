@@ -36,7 +36,7 @@ public class DeploymentDescriptorResolvers {
 		// Set any default buildpack that may be defined for the target, if the
 		// buildpack is not set already
 		if (deploymentProperties != null && deploymentProperties.getBuildpack() == null) {
-			String buildpack = model.getCloudTarget().getBuildpack(project);
+			String buildpack = model.getRunTarget().getBuildpack(project);
 			if (buildpack != null) {
 				deploymentProperties.setBuildpack(buildpack);
 			}

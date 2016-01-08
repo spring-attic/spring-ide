@@ -50,7 +50,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
-		if (model.getCloudTarget().isConnected()) {
+		if (model.getRunTarget().isConnected()) {
 			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
 			try {
 
@@ -58,7 +58,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// the
 				// two refresh operations
 
-				List<CloudApplication> apps = model.getCloudTarget().getClientRequests().getApplicationsWithBasicInfo();
+				List<CloudApplication> apps = model.getRunTarget().getClientRequests().getApplicationsWithBasicInfo();
 
 				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 				if (apps != null) {

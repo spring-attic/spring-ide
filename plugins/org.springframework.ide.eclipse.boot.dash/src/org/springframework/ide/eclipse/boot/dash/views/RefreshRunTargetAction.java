@@ -37,7 +37,7 @@ public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 	public void updateEnablement() {
 		super.updateEnablement();
 		if (sectionSelection.getValue() instanceof CloudFoundryBootDashModel) {
-			setEnabled(((CloudFoundryBootDashModel)sectionSelection.getValue()).getCloudTarget().isConnected());
+			setEnabled(((CloudFoundryBootDashModel)sectionSelection.getValue()).getRunTarget().isConnected());
 		}
 	}
 

@@ -185,9 +185,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 		this.deploymentDescriptorResolvers = new DeploymentDescriptorResolvers();
 		this.appDeploymentOperations = new ApplicationDeploymentOperations(this);
-		getCloudTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
+		getRunTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
-		if (getCloudTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
+		if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
 			getOperationsExecution().runOpAsynch(new ConnectOperation(this, true));
 		}
 	}
@@ -247,7 +247,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	@Override
 	public void dispose() {
-		getCloudTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
+		getRunTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		elements = null;
 		if (debugTargetDisconnector!=null) {
 			debugTargetDisconnector.dispose();
@@ -263,13 +263,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		getOperationsExecution(ui).runOpAsynch(op);
 	}
 
-	public CloudFoundryRunTarget getCloudTarget() {
+	@Override
+	public CloudFoundryRunTarget getRunTarget() {
 		return (CloudFoundryRunTarget) getRunTarget();
 	}
 
 	@Override
 	public boolean canBeAdded(List<Object> sources) {
-		if (sources != null && !sources.isEmpty() && getCloudTarget().isConnected()) {
+		if (sources != null && !sources.isEmpty() && getRunTarget().isConnected()) {
 			for (Object obj : sources) {
 				// IMPORTANT: to avoid drag/drop into the SAME target, be
 				// sure
@@ -534,7 +535,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
-				model.getCloudTarget().getClientRequests().deleteApplication(appName);
+				model.getRunTarget().getClientRequests().deleteApplication(appName);
 				Set<BootDashElement> updatedElements = new HashSet<BootDashElement>();
 
 				synchronized (CloudFoundryBootDashModel.this) {

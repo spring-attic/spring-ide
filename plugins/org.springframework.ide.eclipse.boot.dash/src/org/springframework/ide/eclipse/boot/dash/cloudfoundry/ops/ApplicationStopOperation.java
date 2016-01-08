@@ -42,14 +42,14 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		model.getCloudTarget().getClientRequests().stopApplication(this.appName);
+		model.getRunTarget().getClientRequests().stopApplication(this.appName);
 
 		// If the element run state in the model needs to be updated (i.e. the
 		// "view" needs to show the app to be stopped)
 		if (updateElementRunState) {
 			model.getElementConsoleManager().terminateConsole(this.appName);
 
-			CloudAppInstances updatedInstances = model.getCloudTarget().getClientRequests().getExistingAppInstances(this.appName);
+			CloudAppInstances updatedInstances = model.getRunTarget().getClientRequests().getExistingAppInstances(this.appName);
 
 			boolean checkTermination = false;
 			this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(),

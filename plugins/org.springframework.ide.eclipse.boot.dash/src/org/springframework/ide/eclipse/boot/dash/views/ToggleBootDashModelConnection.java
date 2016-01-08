@@ -36,7 +36,7 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 		BootDashModel model = sectionSelection.getValue();
 		if (model instanceof CloudFoundryBootDashModel) {
 			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
-			if (connectable.getCloudTarget().isConnected()) {
+			if (connectable.getRunTarget().isConnected()) {
 				setText("Disconnect");
 				setDescription("Disconnect Run Target");
 				setImageDescriptor(BootDashActivator.getImageDescriptor("icons/cloud-inactive.png"));
@@ -63,7 +63,7 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 		BootDashModel model = sectionSelection.getValue();
 		if (model  instanceof CloudFoundryBootDashModel) {
 			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
-			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getCloudTarget().isConnected(), ui));
+			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getRunTarget().isConnected(), ui));
 			connectable.getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(connectable, ui));
 		}
 	}

@@ -50,7 +50,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				}
 			}
 			if (!appsToLookUp.isEmpty()) {
-				Map<CloudApplication, ApplicationStats> stats = model.getCloudTarget().getClientRequests().getApplicationStats(appsToLookUp);
+				Map<CloudApplication, ApplicationStats> stats = model.getRunTarget().getClientRequests().getApplicationStats(appsToLookUp);
 				for (Entry<CloudApplication, ApplicationStats> entry : stats.entrySet()) {
 					CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
 					this.model.updateApplication(instances);

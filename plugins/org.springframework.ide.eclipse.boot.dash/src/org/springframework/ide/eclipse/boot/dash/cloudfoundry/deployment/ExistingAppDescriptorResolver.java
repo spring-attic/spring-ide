@@ -22,7 +22,7 @@ public class ExistingAppDescriptorResolver extends DeploymentDescriptorResolver 
 	public CloudApplicationDeploymentProperties getProperties(IProject project, String appName,
 			CloudFoundryBootDashModel model, UserInteractions ui, IProgressMonitor monitor) throws Exception {
 
-		CloudApplication app = model.getCloudTarget().getClientRequests().getApplication(appName);
+		CloudApplication app = model.getRunTarget().getClientRequests().getApplication(appName);
 		if (app != null) {
 			return CloudApplicationDeploymentProperties.getFor(app, project);
 		}

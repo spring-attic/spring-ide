@@ -33,7 +33,7 @@ public class ConnectOperation extends CloudOperation {
 	private UserInteractions ui;
 
 	public ConnectOperation(CloudFoundryBootDashModel model, boolean connect) {
-		super("Connecting run target " + model.getCloudTarget().getName(), model);
+		super("Connecting run target " + model.getRunTarget().getName(), model);
 		this.connect = connect;
 	}
 
@@ -44,12 +44,12 @@ public class ConnectOperation extends CloudOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		if (model.getCloudTarget() != null) {
-			if (connect && !model.getCloudTarget().isConnected()) {
+		if (model.getRunTarget() != null) {
+			if (connect && !model.getRunTarget().isConnected()) {
 				try {
 					model.setRefreshState(RefreshState.loading("Connecting..."));
-					model.getCloudTarget().connect();
-					model.getCloudTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
+					model.getRunTarget().connect();
+					model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
 					model.getViewModel().updateTargetPropertiesInStore();
 					model.setRefreshState(RefreshState.READY);
 				} catch (CannotAccessPropertyException e) {
@@ -60,9 +60,9 @@ public class ConnectOperation extends CloudOperation {
 					if (ui == null) {
 						BootDashActivator.log(e);
 					} else {
-						String password = ui.updatePassword(model.getCloudTarget().getTargetProperties().getUsername(), model.getCloudTarget().getId());
+						String password = ui.updatePassword(model.getRunTarget().getTargetProperties().getUsername(), model.getRunTarget().getId());
 						if (password != null) {
-							model.getCloudTarget().getTargetProperties().setPassword(password);
+							model.getRunTarget().getTargetProperties().setPassword(password);
 							// At this point the password must be set otherwise an exception from the call above would be thrown
 							doCloudOp(monitor);
 						}
@@ -71,10 +71,10 @@ public class ConnectOperation extends CloudOperation {
 					model.setRefreshState(RefreshState.error(e));
 					throw e;
 				}
-			} else if (!connect && model.getCloudTarget().isConnected()) {
+			} else if (!connect && model.getRunTarget().isConnected()) {
 				model.setRefreshState(RefreshState.loading("Disconnecting..."));
-				model.getCloudTarget().disconnect();
-				model.getCloudTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
+				model.getRunTarget().disconnect();
+				model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
 				model.getViewModel().updateTargetPropertiesInStore();
 				model.setRefreshState(RefreshState.READY);
 			}

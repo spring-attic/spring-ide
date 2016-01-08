@@ -27,7 +27,7 @@ public class UserDefinedDescriptorResolver extends DeploymentDescriptorResolver 
 	@Override
 	public CloudApplicationDeploymentProperties getProperties(IProject project, String appName,
 			CloudFoundryBootDashModel model, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		CloudFoundryRunTarget runTarget = model.getCloudTarget();
+		CloudFoundryRunTarget runTarget = model.getRunTarget();
 		List<CloudDomain> domains = runTarget.getDomains(monitor);
 		CloudApplicationDeploymentProperties deploymentProperties = ui.promptApplicationDeploymentProperties(project,
 				domains);

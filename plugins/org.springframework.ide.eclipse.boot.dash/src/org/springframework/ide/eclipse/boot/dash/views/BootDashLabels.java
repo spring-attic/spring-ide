@@ -154,7 +154,7 @@ public class BootDashLabels implements Disposable {
 	private ImageDescriptor getIcon(BootDashModel element) {
 		if (element instanceof CloudFoundryBootDashModel) {
 			CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) element;
-			if (cfModel.getCloudTarget().isConnected()) {
+			if (cfModel.getRunTarget().isConnected()) {
 				return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
 			} else {
 				return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
