@@ -16,9 +16,9 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.*;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -96,7 +97,7 @@ public class CloudFoundryBootDashModelTest {
 	}
 
 	@Test
-	public void testDeployApp() throws Exception {
+	public void testDeployAppAndDelete() throws Exception {
 		harness.createCfTarget(CfTestTargetParams.fromEnv());
 		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
 
@@ -137,8 +138,23 @@ public class CloudFoundryBootDashModelTest {
 			}
 		};
 
+		//Try to delete the app...
+		reset(ui);
+		when(ui.confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
+
+		CloudDashElement app = model.getElement(appName);
+		app.getCloudModel().delete(ImmutableList.<BootDashElement>of(app), ui);
+
+		new ACondition("wait for app to be deleted", APP_DELETE_TIMEOUT) {
+
+			@Override
+			public boolean test() throws Exception {
+				assertNull(model.getElement(appName));
+				return true;
+			}
+		};
 	}
-	
+
 	@Test
 	public void testPreexistingApplicationInModel() throws Exception {
 		// Create external client and deploy app "externally"
@@ -191,7 +207,7 @@ public class CloudFoundryBootDashModelTest {
 				// check project mapping
 				assertEquals("Expected new element in model to have workspace project mapping",
 						model.getElement(newAppName).getProject().equals(project));
-				
+
 				// No project mapping for the "external" app
 				assertNull(model.getElement(preexistingAppName).getProject());
 

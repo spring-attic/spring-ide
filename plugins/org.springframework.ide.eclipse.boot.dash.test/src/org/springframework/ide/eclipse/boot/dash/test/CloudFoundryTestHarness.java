@@ -45,6 +45,11 @@ import com.google.common.collect.ImmutableList;
 public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	/**
+	 * How long to wait for deleted app to disapear from the model.
+	 */
+	public static final long APP_DELETE_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
+
+	/**
 	 * How long to wait for a deployed app to show up in the model? This should
 	 * be relatively short.
 	 */
@@ -82,7 +87,6 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		wizard.setSpace(getSpace(wizard, params.getOrg(), params.getSpace()));
 		assertOk(wizard.getValidator());
 		final CloudFoundryRunTarget newTarget = wizard.finish();
-		newTarget.connect();
 		if (newTarget!=null) {
 			model.getRunTargets().add(newTarget);
 		}
@@ -151,4 +155,5 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			cfModel.delete(toDelete, ui);
 		}
 	}
+
 }
