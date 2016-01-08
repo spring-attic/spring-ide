@@ -646,6 +646,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	public boolean isConnected() {
-		return getCloudTarget().isConnected();
+		return getRunTarget().isConnected();
 	}
 }
