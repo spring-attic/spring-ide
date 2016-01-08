@@ -53,7 +53,14 @@ public class CloudFoundryClientFactory {
 	}
 
 	public CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
-		checkPassword(targetProperties.getPassword(), targetProperties.getUsername());
+		return getClient(new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
+				new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
+				targetProperties.getSpaceName(), targetProperties.isSelfsigned());
+	}
+
+	public CloudFoundryOperations getClient(CloudCredentials credentials, URL apiUrl, String orgName, String spaceName,
+			boolean isSelfsigned) throws Exception {
+		checkPassword(credentials.getPassword(), credentials.getEmail());
 
 		Properties properties = System.getProperties();
 		// By default disable connection pool (i.e. flag is set to true) unless
@@ -63,14 +70,9 @@ public class CloudFoundryClientFactory {
 		boolean disableConnectionPool = properties == null || !properties.containsKey(BOOT_DASH_CONNECTION_POOL)
 				|| !"true".equals(properties.getProperty(BOOT_DASH_CONNECTION_POOL));
 
-		return targetProperties.getSpaceName() != null
-				? new CloudFoundryClient(
-						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
-						targetProperties.getSpaceName(), targetProperties.isSelfsigned(), disableConnectionPool)
-				: new CloudFoundryClient(
-						new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-						new URL(targetProperties.getUrl()), targetProperties.isSelfsigned(), disableConnectionPool);
+		return spaceName != null
+				? new CloudFoundryClient(credentials, apiUrl, orgName, spaceName, isSelfsigned, disableConnectionPool)
+				: new CloudFoundryClient(credentials, apiUrl, isSelfsigned, disableConnectionPool);
 
 	}
 
@@ -106,7 +108,7 @@ public class CloudFoundryClientFactory {
 	 *
 	 * @return
 	 */
-	public ClientRequests getClientRequests(CloudFoundryOperations client)  {
+	public ClientRequests getClientRequests(CloudFoundryOperations client) {
 		return new ClientRequests(client);
 	}
 

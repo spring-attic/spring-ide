@@ -23,6 +23,7 @@ public class CfTestTargetParams {
 	private String password;
 	private String org;
 	private String space;
+	private boolean isSelfsigned = false;
 
 	public CfTestTargetParams() {
 	}
@@ -65,6 +66,14 @@ public class CfTestTargetParams {
 
 	public void setSpace(String space) {
 		this.space = space;
+	}
+	
+	public boolean isSelfsigned() {
+		return this.isSelfsigned;
+	}
+
+	public void setSelfsigned(boolean isSelfsigned) {
+		this.isSelfsigned = isSelfsigned;
 	}
 
 	public static CfTestTargetParams fromEnv() {
