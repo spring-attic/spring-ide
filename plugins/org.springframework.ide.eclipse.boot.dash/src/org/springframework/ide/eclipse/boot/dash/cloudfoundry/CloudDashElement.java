@@ -59,7 +59,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	public CloudDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudElementIdentity(appName, model.getRunTarget()));
-		this.cloudTarget = model.getCloudTarget();
+		this.cloudTarget = model.getRunTarget();
 		this.cloudModel = model;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);

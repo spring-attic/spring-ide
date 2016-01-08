@@ -52,7 +52,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
-		CloudAppInstances appInstances = model.getCloudTarget().getClientRequests().getExistingAppInstances(appName);
+		CloudAppInstances appInstances = model.getRunTarget().getClientRequests().getExistingAppInstances(appName);
 
 		monitor.worked(3);
 
@@ -82,7 +82,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 
 				logAndUpdateMonitor("Uploading archive to Cloud Foundry for application: " + appName, monitor);
 
-				model.getCloudTarget().getClientRequests().uploadApplication(appName, archive);
+				model.getRunTarget().getClientRequests().uploadApplication(appName, archive);
 
 				monitor.worked(5);
 
@@ -123,7 +123,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 		IProject project = deploymentProperties.getProject();
 
 		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
-				this.model.getCloudTarget().getDomains(mon));
+				this.model.getRunTarget().getDomains(mon));
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),

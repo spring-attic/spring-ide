@@ -45,7 +45,7 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		monitor.beginTask(getName(), 2);
 		try {
-			HealthCheckSupport hc = app.getCloudModel().getCloudTarget().getHealthCheckSupport();
+			HealthCheckSupport hc = app.getCloudModel().getRunTarget().getHealthCheckSupport();
 			UUID guid = app.getAppGuid();
 			String current = hc.getHealthCheck(guid);
 			//When current==null it means that there's no 'health-check' info in the info returned by

@@ -37,7 +37,7 @@ public class HealthCheckRefreshOperation extends CloudOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		for (BootDashElement e : model.getElements().getValues()) {
 			CloudDashElement cde = (CloudDashElement) e;
-			HealthCheckSupport client = model.getCloudTarget().getHealthCheckSupport();
+			HealthCheckSupport client = model.getRunTarget().getHealthCheckSupport();
 			CloudAppCache cache = model.getAppCache();
 			UUID guid = cde.getAppGuid();
 			if (guid!=null) {

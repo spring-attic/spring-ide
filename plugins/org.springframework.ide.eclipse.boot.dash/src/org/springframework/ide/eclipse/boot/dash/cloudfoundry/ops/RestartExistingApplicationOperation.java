@@ -53,7 +53,7 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		CloudApplication application = model.getCloudTarget().getClientRequests().getApplication(appName);
+		CloudApplication application = model.getRunTarget().getClientRequests().getApplication(appName);
 		// Check that the application actually exists in Cloud Foundry
 		if (application == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
