@@ -143,10 +143,8 @@ public class CloudFoundryBootDashModelTest {
 	@Test
 	public void testPreexistingApplicationInModel() throws Exception {
 		// Create external client and deploy app "externally"
-		CfTestTargetParams params = CfTestTargetParams.fromEnv();
-		CloudFoundryOperations externalClient = clientFactory.getClient(
-				new CloudCredentials(params.getUser(), params.getPassword()), new URL(params.getApiUrl()),
-				params.getOrg(), params.getSpace(), params.isSelfsigned());
+		CloudFoundryOperations externalClient = harness.createExternalClient(CfTestTargetParams.fromEnv());
+
 		List<CloudDomain> domains = externalClient.getDomains();
 
 		List<String> services = new ArrayList<String>();
@@ -178,7 +176,7 @@ public class CloudFoundryBootDashModelTest {
 
 				// check project mapping
 				assertEquals("Expected new element in model to have workspace project mapping",
-						model.getElement(newAppName).getProject().equals(project));
+						model.getElement(newAppName).getProject(), project.getProject());
 
 				// No project mapping for the "external" app
 				assertNull(model.getElement(preexistingAppName).getProject());

@@ -11,32 +11,30 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.cloudfoundry.client.lib.CloudCredentials;
+import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.resources.IProject;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -143,23 +141,29 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		super.dispose();
 	}
 
+	public CloudFoundryOperations createExternalClient(CfTestTargetParams params) throws Exception {
+		return clientFactory.getClient(new CloudCredentials(params.getUser(), params.getPassword()),
+				new URL(params.getApiUrl()), params.getOrg(), params.getSpace(), params.isSelfsigned());
+	}
+
 	protected void deleteOwnedApps() {
 		if (!ownedAppNames.isEmpty()) {
-			CloudFoundryBootDashModel cfModel = getCfTargetModel();
-			//TODO: A potential issue with this cleanup code is that it won't work if the test disconnected
-			// the model, but it is good enough for now, let's just make sure it fails loudly when its not
-			// good enough anymore.
-			assertTrue("Cleanup not (yet) supported when model is disconnected", cfModel.isConnected());
-			Set<BootDashElement> toDelete = new HashSet<>();
-			for (String appName : ownedAppNames) {
-				CloudDashElement app = cfModel.getElement(appName);
-				if (app!=null) {
-					toDelete.add(app);
+
+			try {
+				CloudFoundryOperations externalClient = createExternalClient(CfTestTargetParams.fromEnv());
+				for (String appName : ownedAppNames) {
+					try {
+						externalClient.deleteApplication(appName);
+					} catch (Exception e) {
+						// May get 404 or other 400 errors if it is alrready
+						// gone so don't prevent other owned apps from being
+						// deleted
+					}
 				}
+
+			} catch (Exception e) {
+				fail("failed to cleanup owned apps: " + e.getMessage());
 			}
-			UserInteractions ui = mock(UserInteractions.class);
-			when(ui.confirmOperation(anyString(), anyString())).thenReturn(true);
-			cfModel.delete(toDelete, ui);
 		}
 	}
 
