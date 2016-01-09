@@ -13,18 +13,18 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyListOf;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.*;
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.*;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
@@ -35,17 +35,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -96,12 +94,20 @@ public class CloudFoundryBootDashModelTest {
 		assertEquals(1, harness.getRunTargetModels(cfTargetType).size());
 	}
 
+	/**
+	 * Test that tests a bunch of things.
+	 * TODO: It isn't good practice to create 'test everything' tests...
+	 * but we do it anyway because ramping up a test that deploys an app takes about 90 seconds...
+	 * Maybe we can factor this better somehow so we have separate tests, but only deploy app once?
+	 */
 	@Test
-	public void testDeployAppAndDelete() throws Exception {
+	public void testDeployAppAndDeleteAndStuff() throws Exception {
 		harness.createCfTarget(CfTestTargetParams.fromEnv());
 		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
 
-		final BootProjectDashElement project = harness.getElementFor(projects.createBootWebProject("to-deploy"));
+		final BootProjectDashElement project = harness.getElementFor(
+				projects.createBootProject("to-deploy", withStarters("actuator", "web"))
+		);
 		final String appName = harness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
@@ -119,6 +125,18 @@ public class CloudFoundryBootDashModelTest {
 			public boolean test() throws Exception {
 				CloudDashElement element = model.getElement(appName);
 				assertEquals(RunState.RUNNING, element.getRunState());
+				return true;
+			}
+		};
+
+		//Try to get request mappings
+		new ACondition("wait for request mappings", FETCH_REQUEST_MAPPINGS_TIMEOUT) {
+			public boolean test() throws Exception {
+				CloudDashElement element = model.getElement(appName);
+				List<RequestMapping> mappings = element.getLiveRequestMappings();
+				assertNotNull(mappings); //Why is the test sometimes failing here?
+				assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
+				                                 // for example an 'error' page.
 				return true;
 			}
 		};

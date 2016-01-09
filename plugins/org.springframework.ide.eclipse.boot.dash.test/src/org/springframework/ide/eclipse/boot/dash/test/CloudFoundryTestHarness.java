@@ -66,6 +66,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 
 	/**
+	 * How long to wait on retrieving request mappings from a CF app.
+	 */
+	public static final long FETCH_REQUEST_MAPPINGS_TIMEOUT = 5_000;
+	/**
 	 * How long to wait for runtarget to become 'connected'.
 	 */
 	public static final long CONNECT_TARGET_TIMEOUT = 10_000;
