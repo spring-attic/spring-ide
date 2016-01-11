@@ -71,11 +71,6 @@ public interface BootDashElement extends Nameable, Taggable {
 	String getDefaultRequestMappingPath();
 	void setDefaultRequestMappingPath(String defaultPath);
 
-	/**
-	 * A 'summary' of getDefaultRequestMappingPath results for each child.
-	 */
-	ImmutableSet<String> getDefaultRequestMappingPaths();
-
 	BootDashModel getBootDashModel();
 
 	void stopAsync(UserInteractions ui) throws Exception;

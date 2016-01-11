@@ -164,19 +164,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		return null;
 	}
 
-	/**
-	 * This default implementation only computes a 'fake' summary and is
-	 * suitable only for nodes that do not have any children.
-	 */
-	@Override
-	public ImmutableSet<String> getDefaultRequestMappingPaths() {
-		String path = getDefaultRequestMappingPath();
-		if (StringUtil.hasText(path)) {
-			return ImmutableSet.of(path);
-		}
-		return ImmutableSet.of();
-	}
-
 	@Override
 	public final void setDefaultRequestMappingPath(String defaultPath) {
 		try {

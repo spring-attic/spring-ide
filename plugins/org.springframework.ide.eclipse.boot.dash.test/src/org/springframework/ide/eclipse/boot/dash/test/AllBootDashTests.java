@@ -17,7 +17,6 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	CloudFoundryBootDashModelTest.class,
 	BootDashViewModelTest.class,
 	JarNameGeneratorTest.class,
 	BootJarPackagingTest.class,
@@ -28,7 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 	JLRMethodParserTest.class,
 	ActuatorClientTest.class,
 	ToggleFiltersModelTest.class,
-
+	CloudFoundryBootDashModelTest.class,
 	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
 	// (the test should also move then!)
 	OrderBasedComparatorTest.class

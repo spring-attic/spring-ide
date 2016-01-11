@@ -355,12 +355,10 @@ public class BootDashLabels implements Disposable {
 				}
 				break;
 			case DEFAULT_PATH:
-				String path = commaSeparated(element.getDefaultRequestMappingPaths());
-
+				String path = element.getDefaultRequestMappingPath();
 				if (stylers == null) {
 					label = path == null ? "" : path;
-				}
-				else {
+				} else {
 					styledLabel = new StyledString(path == null ? "" : path, stylers.darkGrey());
 				}
 				break;

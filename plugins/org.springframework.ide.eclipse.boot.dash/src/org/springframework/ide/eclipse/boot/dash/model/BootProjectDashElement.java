@@ -43,7 +43,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private LaunchConfDashElementFactory childFactory;
 	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
-	private ObservableSet<String> defaultRequestMappingPaths;
 	private ObservableSet<Integer> ports;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
@@ -95,27 +94,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			addDisposableChild(children);
 		}
 		return children;
-	}
-
-	@Override
-	public ImmutableSet<String> getDefaultRequestMappingPaths() {
-		return getDefaultRequestMappingPathsExp().getValues();
-	}
-
-	private ObservableSet<String> getDefaultRequestMappingPathsExp() {
-		if (defaultRequestMappingPaths==null) {
-			defaultRequestMappingPaths = createSortedLiveSummary(new Function<BootDashElement, String>() {
-				@Override public String apply(BootDashElement element) {
-					String path = element.getDefaultRequestMappingPath();
-					if (StringUtil.hasText(path)) {
-						return path;
-					}
-					return null;
-				}
-			});
-			this.dependsOn(defaultRequestMappingPaths);
-		}
-		return defaultRequestMappingPaths;
 	}
 
 	@Override
