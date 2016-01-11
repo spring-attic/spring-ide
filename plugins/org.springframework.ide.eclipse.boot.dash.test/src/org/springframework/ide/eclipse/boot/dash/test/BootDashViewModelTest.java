@@ -37,6 +37,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -410,7 +411,7 @@ public class BootDashViewModelTest {
 				RunTargetTypes.LOCAL
 		);
 
-		LiveSet<FilterChoice> toggleFilters = harness.model.getToggleFilters().getSelectedFilters();
+		LiveSetVariable<FilterChoice> toggleFilters = harness.model.getToggleFilters().getSelectedFilters();
 		LiveExpression<Filter<BootDashElement>> filter = harness.model.getFilter();
 
 		assertTrue(toggleFilters.getValue().isEmpty());

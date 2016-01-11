@@ -158,10 +158,7 @@ public class BootDashModelTest {
 
 		//When there is only one child (i.e. launch config), then it is not shown in the model (the parent subsumes all the
 		// child's functionality and we don't show the child to avoid cluttering the view)
-		assertEquals(0, projectEl.getCurrentChildren().size());
-
-		assertEquals(1, ((BootProjectDashElement)projectEl).getAllChildren().getValues().size());
-
+		assertEquals(1, projectEl.getCurrentChildren().size());
 	}
 
 
@@ -208,7 +205,16 @@ public class BootDashModelTest {
 		};
 
 		hide(conf[1]);
-		new ACondition("Wait for all children to disapear", MODEL_UPDATE_TIMEOUT) {
+		new ACondition("Wait for another child to disapear", MODEL_UPDATE_TIMEOUT) {
+			public boolean test() throws Exception {
+				//since there's just one conf left it is not shown as a child
+				assertEquals(ImmutableSet.of(el[0]), projectEl.getCurrentChildren());
+				return true;
+			}
+		};
+
+		hide(conf[0]);
+		new ACondition("Wait for last child to disapear", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
 				//since there's just one conf left it is not shown as a child
 				assertEquals(ImmutableSet.of(), projectEl.getCurrentChildren());
@@ -280,7 +286,7 @@ public class BootDashModelTest {
 		element.openConfig(ui); //Ensure that at least one launch config exists.
 		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
 		verifyNoMoreInteractions(ui);
-		BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
+		BootDashElement childElement = getSingleValue(element.getCurrentChildren());
 
 		ElementStateListener listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
@@ -603,7 +609,7 @@ public class BootDashModelTest {
 					new PropVal("server.port", "6789", true)
 			));
 			wc.doSave();
-			final BootDashElement childElement = getSingleValue(element.getAllChildren().getValues());
+			final BootDashElement childElement = getSingleValue(element.getCurrentChildren());
 
 			new ACondition(4000) {
 				public boolean test() throws Exception {
@@ -1005,31 +1011,22 @@ public class BootDashModelTest {
 	}
 
 	public void waitModelElements(final String... expectedElementNames) throws Exception {
-		new ACondition("Model update") {
+		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertModelElements(expectedElementNames);
 				return true;
 			}
-		}.waitFor(MODEL_UPDATE_TIMEOUT);
-	}
-
-	private void assertWorkspaceProjects(String... expectedProjectNames) {
-		IProject[] projects = context.getWorkspace().getRoot().getProjects();
-		String[] names = new String[projects.length];
-		for (int i = 0; i < names.length; i++) {
-			names[i] = projects[i].getName();
-		}
-		assertElements(names, expectedProjectNames);
+		};
 	}
 
 	private void waitForJobsToComplete() throws Exception {
-		new ACondition("Wait for Jobs") {
+		new ACondition("Wait for Jobs", 3 * 60 * 1000) {
 			@Override
 			public boolean test() throws Exception {
 				assertJobManagerIdle();
 				return true;
 			}
-		}.waitFor(3 * 60 * 1000);
+		};
 	}
 
 	private void setPort(ILaunchConfiguration conf, int port) throws Exception {

@@ -11,33 +11,40 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.hasToString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import org.eclipse.core.resources.IProject;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
-import static org.mockito.Mockito.*;
-
-import org.eclipse.core.resources.IProject;
+import com.google.common.collect.ImmutableSet;
 
 @SuppressWarnings("unchecked")
 public class ToggleFiltersModelTest {
 
 	private static final String HIDE_NON_WORKSPACE_ELEMENTS = "Hide non-workspace elements";
-
+	private static final String HIDE_SOLITARY_CONF = "Hide solitary launch configs";
 
 	@Test
 	public void testAvailableFilters() throws Exception {
 		ToggleFiltersModel model = new ToggleFiltersModel();
 		assertThat(model.getAvailableFilters(),
 			arrayContaining(
-					hasToString("FilterChoice("+HIDE_NON_WORKSPACE_ELEMENTS+")")
+					hasToString("FilterChoice("+HIDE_NON_WORKSPACE_ELEMENTS+")"),
+					hasToString("FilterChoice("+HIDE_SOLITARY_CONF+")")
 			)
 		);
 	}
@@ -94,10 +101,50 @@ public class ToggleFiltersModelTest {
 		assertEquals(true, f.accept(e));
 	}
 
+	@Test
+	public void testHideSolitaryConfEnabledByDefault() throws Exception {
+		ToggleFiltersModel model = new ToggleFiltersModel();
+		assertThat(model.getAvailableFilters(),
+				hasItemInArray(
+						hasToString("FilterChoice("+HIDE_SOLITARY_CONF+")")
+				)
+		);
+	}
+
+	@Test
+	public void testHideSolitaryConf() throws Exception {
+		Filter<BootDashElement> filter = getFilter(HIDE_SOLITARY_CONF);
+		BootProjectDashElement project = mock(BootProjectDashElement.class);
+		LaunchConfDashElement conf1 = mock(LaunchConfDashElement.class);
+
+		when(conf1.getParent()).thenReturn(project);
+		when(project.getCurrentChildren()).thenReturn(ImmutableSet.<BootDashElement>of(conf1));
+
+		assertTrue(filter.accept(project));
+		assertFalse(filter.accept(conf1));
+	}
+
+	@Test
+	public void testShowNonSolitaryConf() throws Exception {
+		Filter<BootDashElement> filter = getFilter(HIDE_SOLITARY_CONF);
+		BootProjectDashElement project = mock(BootProjectDashElement.class);
+		LaunchConfDashElement conf1 = mock(LaunchConfDashElement.class);
+		LaunchConfDashElement conf2 = mock(LaunchConfDashElement.class);
+
+		when(conf1.getParent()).thenReturn(project);
+		when(conf2.getParent()).thenReturn(project);
+
+		when(project.getCurrentChildren()).thenReturn(ImmutableSet.<BootDashElement>of(conf1, conf2));
+
+		assertTrue(filter.accept(project));
+		assertTrue(filter.accept(conf1));
+		assertTrue(filter.accept(conf2));
+	}
+
 	private Filter<BootDashElement> getFilter(String withLabel) {
 		ToggleFiltersModel model = new ToggleFiltersModel();
 		FilterChoice selectFilter = getFilter(model, withLabel);
-		model.getSelectedFilters().add(selectFilter);
+		model.getSelectedFilters().replaceAll(ImmutableSet.of(selectFilter));
 		Filter<BootDashElement> effectiveFilter = model.getFilter().getValue();
 		return effectiveFilter;
 	}

@@ -163,7 +163,7 @@ public class BootDashActionTests {
 			public boolean test() throws Exception {
 				assertEquals(ImmutableSet.of(conf2), element.getLaunchConfigs());
 				assertFalse(conf1.exists());
-				assertTrue(element.getCurrentChildren().isEmpty()); //becomes empty because a single launch conf is hidden from the model.
+				assertTrue(element.getCurrentChildren().size()==1);
 				return true;
 			}
 		};
