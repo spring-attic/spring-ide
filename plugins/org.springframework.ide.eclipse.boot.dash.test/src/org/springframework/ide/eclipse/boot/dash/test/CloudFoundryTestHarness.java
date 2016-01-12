@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -172,14 +173,14 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) {
-		when(ui.promptApplicationDeploymentProperties(any(IProject.class), anyListOf(CloudDomain.class)))
+		when(ui.promptApplicationDeploymentProperties(anyListOf(CloudDomain.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
 				@SuppressWarnings("unchecked")
-				List<CloudDomain> domains = (List<CloudDomain>) args[1];
-				IProject project = (IProject) args[0];
+				List<CloudDomain> domains = (List<CloudDomain>) args[0];
+				IProject project = (IProject) args[1];
 				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 				deploymentProperties.setProject(project.getProject());
 				deploymentProperties.setAppName(appName);

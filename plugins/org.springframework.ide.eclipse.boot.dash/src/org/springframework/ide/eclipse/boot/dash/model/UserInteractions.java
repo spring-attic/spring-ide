@@ -14,8 +14,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
@@ -42,20 +42,19 @@ public interface UserInteractions {
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
 	/**
-	 * @param project that is being deployed
-	 * @param list of domains available in the Cloud target. This is used to create an application URL
-	 * @return deployment properties for the project that at the very least should contain an application name
-	 * @throws OperationCanceledException if deployment is canceled.
+	 * Brings up the UI to enter application deployment manifest
+	 * @param domains
+	 * @param project
+	 * @param manifest
+	 * @param defaultYaml
+	 * @param readOnly
+	 * @param noModeSwicth
+	 * @return
+	 * @throws OperationCanceledException
 	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(IProject project, List<CloudDomain> domains) throws OperationCanceledException;
-
-	/**
-	 * Brings up the UI allowing user to select deployment manifest YAML file
-	 * @param project eclipse project
-	 * @param manifestFile current manifest deployment file selected
-	 * @return new manifest deployment file
-	 */
-	IPath selectDeploymentManifestFile(IProject project, IPath manifestFile);
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(List<CloudDomain> domains,
+			IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwicth)
+					throws OperationCanceledException;
 
 	/**
 	 * Ask the user to select a file.
