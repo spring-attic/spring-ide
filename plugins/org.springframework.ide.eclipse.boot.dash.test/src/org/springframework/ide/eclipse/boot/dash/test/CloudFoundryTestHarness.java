@@ -179,8 +179,8 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
 				@SuppressWarnings("unchecked")
-				List<CloudDomain> domains = (List<CloudDomain>) args[1];
-				IProject project = (IProject) args[0];
+				List<CloudDomain> domains = (List<CloudDomain>) args[0];
+				IProject project = (IProject) args[1];
 				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 				deploymentProperties.setProject(project.getProject());
 				deploymentProperties.setAppName(appName);

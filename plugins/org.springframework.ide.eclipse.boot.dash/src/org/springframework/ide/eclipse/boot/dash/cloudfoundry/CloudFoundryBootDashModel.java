@@ -609,9 +609,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             properties
 	 */
 	public CloudApplicationDeploymentProperties resolveDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		String appName = getAppName(project);
-		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(getRunTarget().getClientRequests().getApplication(appName), project);
-		CloudDashElement element = getElement(appName);
+		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(this, project);
+		CloudDashElement element = getElement(deploymentProperties.getAppName());
 		IFile manifestFile = element.getDeploymentManifestFile();
 		if (manifestFile != null) {
 			if (manifestFile.exists()) {
@@ -624,14 +623,19 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	}
 
+	/**
+	 * Creates deployment properties either based on user inout via the UI if UI context is available or generates default deployment properties
+	 * @param project the workspace project
+	 * @param ui UI context
+	 * @param monitor progress monitor
+	 * @return deployment properties
+	 * @throws Exception
+	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		String appName = getAppName(project);
-		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(getRunTarget().getClientRequests().getApplication(appName), project);
-		CloudDashElement element = getElement(appName);
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(this, project);
+		CloudDashElement element = getElement(props.getAppName());
 		if (ui != null) {
-			CloudApplication app = getRunTarget().getClientRequests().getApplication(element.getName());
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(
-					CloudApplicationDeploymentProperties.getFor(app, project), getRunTarget().getDomains(monitor));
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, getRunTarget().getDomains(monitor));
 			DumperOptions options = new DumperOptions();
 			options.setExplicitStart(true);
 			options.setCanonical(false);
@@ -641,8 +645,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			String defaultManifest = new Yaml(options).dump(yaml);
 
 			props = ui.promptApplicationDeploymentProperties(getRunTarget().getDomains(monitor), project,
-					element.getDeploymentManifestFile(), defaultManifest, false, false);
-			element.setDeploymentManifestFile(props.getManifestFile());
+					element == null ? null : element.getDeploymentManifestFile(), defaultManifest, false, false);
 		}
 		return props;
 	}

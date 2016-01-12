@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 import java.util.Collections;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,10 +49,8 @@ public class SelectManifestOp extends CloudOperation {
 		IFile manifest = cde.getDeploymentManifestFile();
 
 		Map<Object, Object> yaml = Collections.emptyMap();
-		CloudApplication app;
 		try {
-			app = model.getRunTarget().getClientRequests().getApplication(cde.getName());
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(app, project), cde.getTarget().getDomains(monitor));
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(model, project), cde.getTarget().getDomains(monitor));
 		} catch (Exception e) {
 			// ignore
 		}

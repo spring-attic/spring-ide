@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +20,10 @@ import java.util.Map;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -231,18 +235,23 @@ public class CloudApplicationDeploymentProperties {
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(CloudApplication app, IProject project) throws Exception {
+	public static CloudApplicationDeploymentProperties getFor(CloudFoundryBootDashModel model, IProject project) throws Exception {
+
+		CloudApplication app = model.getAppCache().getApp(project);
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
-		properties.setAppName(app.getName());
+		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
-		properties.setBuildpack(app.getStaging() != null ? app.getStaging().getBuildpackUrl() : null);
-		properties.setEnvironmentVariables(app.getEnvAsMap());
-		properties.setInstances(app.getInstances());
-		properties.setMemory(app.getMemory());
-		properties.setServices(app.getServices());
-		properties.setUrls(app.getUris());
+		properties.setBuildpack(app == null || app.getStaging() == null ? null : app.getStaging().getBuildpackUrl());
+		properties.setEnvironmentVariables(app == null ? Collections.<String, String>emptyMap() : app.getEnvAsMap());
+		properties.setInstances(app == null ? 1 : app.getInstances());
+		properties.setMemory(app == null ? 1024 : app.getMemory());
+		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
+		properties.setUrls(app == null
+				? Collections.singletonList(new CloudApplicationURL(project.getName(),
+						model.getRunTarget().getDomains(new NullProgressMonitor()).get(0).getName()).getUrl())
+				: app.getUris());
 		Validator validator = properties.getValidator();
 
 		ValidationResult result = validator.getValue();
