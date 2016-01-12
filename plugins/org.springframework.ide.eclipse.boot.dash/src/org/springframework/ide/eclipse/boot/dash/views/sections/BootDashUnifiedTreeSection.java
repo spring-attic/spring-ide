@@ -268,7 +268,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	@Override
 	public void createContents(Composite page) {
 		tv = new CustomTreeViewer(page, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-
+		tv.setExpandPreCheckFilters(true);
 		tv.setContentProvider(new BootDashTreeContentProvider());
 		tv.setSorter(new BootModelViewerSorter(this.model));
 		tv.setInput(model);
