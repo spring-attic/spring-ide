@@ -87,6 +87,7 @@ public class ToggleFiltersModel {
 	}
 
 	private LiveSetVariable<FilterChoice> selectedFilters = new LiveSetVariable<FilterChoice>(getDefaultFilters());
+
 	private LiveExpression<Filter<BootDashElement>> compositeFilter;
 	{
 		final Filter<BootDashElement> initial = Filters.acceptAll();
