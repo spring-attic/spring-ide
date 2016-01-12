@@ -14,8 +14,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
@@ -29,13 +29,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ManifestFileDialog;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ApplicationDeploymentPropertiesWizard;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
@@ -218,49 +216,31 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
-			final List<CloudDomain> domains) throws OperationCanceledException {
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final List<CloudDomain> domains,
+			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth)
+					throws OperationCanceledException {
 		final Shell shell = getShell();
-		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[1];
+		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[] { null };
 
 		if (shell != null) {
 			shell.getDisplay().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
-					ApplicationDeploymentPropertiesWizard wizard = new ApplicationDeploymentPropertiesWizard(project,
-							domains);
-					WizardDialog dialog = new WizardDialog(getShell(), wizard);
-					if (dialog.open() == Window.OK) {
-						props[0] = wizard.getProperties();
+					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, domains, project, manifest, defaultYaml, readOnly, noModeSwicth);
+					if (dialog.open() == IDialogConstants.OK_ID) {
+						props[0] = dialog.getCloudApplicationDeploymentProperties();
 					}
 				}
 			});
 		}
 		if (props[0] == null) {
 			throw new OperationCanceledException();
-		}
-		return props[0];
-	}
-
-	@Override
-	public IPath selectDeploymentManifestFile(final IProject project, final IPath manifestFile) {
-		final int[] response = new int[1];
-		final ManifestFileDialog dialog = new ManifestFileDialog(getShell(), project, manifestFile);
-		context.getShell().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				response[0] = dialog.open();
-			}
-
-		});
-		if (response[0] == IDialogConstants.OK_ID) {
-			return dialog.getManifest();
 		} else {
-			throw new OperationCanceledException("Canceled selecting manifest file");
+			 return props[0];
 		}
 	}
+
 
 	@Override
 	public boolean yesNoWithToggle(final String propertyKey, final String title, final String message, final String toggleMessage) {

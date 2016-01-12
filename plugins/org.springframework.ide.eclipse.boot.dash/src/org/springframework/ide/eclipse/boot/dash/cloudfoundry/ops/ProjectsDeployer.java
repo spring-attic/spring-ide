@@ -64,7 +64,7 @@ public class ProjectsDeployer extends CloudOperation {
 
 			try {
 				IProject project = entry.getKey();
-				CloudApplicationDeploymentProperties properties = model.resolveDeploymentProperties(project, ui, monitor);
+				CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 
 				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, runOrDebug, ui, monitor);
 				model.getOperationsExecution(ui).runOpAsynch(op);

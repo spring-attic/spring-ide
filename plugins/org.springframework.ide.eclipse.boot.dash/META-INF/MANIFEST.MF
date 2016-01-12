@@ -38,7 +38,8 @@ Require-Bundle: org.eclipse.ui,
  com.jcraft.jsch,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
- org.dadacoalition.yedit
+ org.dadacoalition.yedit,
+ org.eclipse.ui.workbench
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

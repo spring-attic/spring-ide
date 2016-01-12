@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -51,7 +51,7 @@ public class CloudApplicationDeploymentProperties {
 
 	protected final LiveVariable<Integer> memory = new LiveVariable<Integer>(DEFAULT_MEMORY);
 
-	protected final LiveVariable<IPath> manifestPath = new LiveVariable<IPath>();
+	protected final LiveVariable<IFile> manifestFile = new LiveVariable<IFile>();
 
 	protected Validator validator;
 
@@ -81,12 +81,12 @@ public class CloudApplicationDeploymentProperties {
 		return memory.getValue();
 	}
 
-	public void setManifestPath(IPath path) {
-		this.manifestPath.setValue(path);
+	public void setManifestFile(IFile file) {
+		this.manifestFile.setValue(file);
 	}
 
-	public IPath getManifestPath() {
-		return this.manifestPath.getValue();
+	public IFile getManifestFile() {
+		return this.manifestFile.getValue();
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class CloudApplicationDeploymentProperties {
 			validator.dependsOn(urls);
 			validator.dependsOn(appName);
 			validator.dependsOn(project);
-			validator.dependsOn(manifestPath);
+			validator.dependsOn(manifestFile);
 		}
 	}
 
