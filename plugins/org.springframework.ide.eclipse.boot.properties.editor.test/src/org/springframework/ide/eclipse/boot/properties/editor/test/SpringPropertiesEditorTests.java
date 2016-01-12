@@ -192,15 +192,9 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		//Check some assumptions about the initial state of the test project (if these checks fail then
 		// the test may be 'vacuous' since the things we are testing for already exist beforehand.
-		assertFalse(AptUtils.isAptEnabled(jp));
-		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
-		assertFalse(metadataFile.exists());
-
-		AptUtils.configureApt(jp);
-		buildProject(jp);
-
 		assertTrue(AptUtils.isAptEnabled(jp));
-		assertTrue(metadataFile.exists()); //apt should create the json metadata file during project build.
+		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
+		assertTrue(metadataFile.exists());
 		assertContains("\"name\": \"foo.counter\"", getContents(metadataFile));
 	}
 
