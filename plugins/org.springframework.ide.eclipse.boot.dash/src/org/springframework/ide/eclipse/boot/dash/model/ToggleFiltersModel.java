@@ -20,8 +20,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
-import com.google.common.collect.ImmutableSet;
-
 /**
  * The 'toggle filters' are fixed set of view filters that can be toggled on/off by the user.
  * This model element tracks the currently selected 'toggle' filters and the corresponding composite
