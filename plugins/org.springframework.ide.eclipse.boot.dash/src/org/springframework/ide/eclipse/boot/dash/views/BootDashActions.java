@@ -414,6 +414,12 @@ public class BootDashActions {
 			duplicateConfigAction.dispose();
 			duplicateConfigAction = null;
 		}
+		if (toggleFilterActions!=null) {
+			for (ToggleFilterAction a : toggleFilterActions) {
+				a.dispose();
+			}
+			toggleFilterActions = null;
+		}
 	}
 
 	public IAction getToggleFiltersDialogAction() {
