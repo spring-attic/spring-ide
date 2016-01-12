@@ -173,7 +173,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) {
-		when(ui.promptApplicationDeploymentProperties(anyListOf(CloudDomain.class), any(IProject.class), any(IFile.class), any(String.class), false, false))
+		when(ui.promptApplicationDeploymentProperties(anyListOf(CloudDomain.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
