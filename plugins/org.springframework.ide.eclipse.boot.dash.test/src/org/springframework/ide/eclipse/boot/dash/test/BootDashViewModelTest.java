@@ -412,6 +412,7 @@ public class BootDashViewModelTest {
 		);
 
 		LiveSetVariable<FilterChoice> toggleFilters = harness.model.getToggleFilters().getSelectedFilters();
+		toggleFilters.replaceAll(ImmutableSet.<FilterChoice>of());
 		LiveExpression<Filter<BootDashElement>> filter = harness.model.getFilter();
 
 		assertTrue(toggleFilters.getValue().isEmpty());
