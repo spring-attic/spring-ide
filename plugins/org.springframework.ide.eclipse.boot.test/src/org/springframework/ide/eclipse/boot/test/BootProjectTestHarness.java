@@ -193,16 +193,19 @@ public class BootProjectTestHarness {
 		//job.setRule(workspace.getRuleFactory().buildRule());
 		job.schedule();
 
-		new ACondition() {
+		waitForImportJob(getProject(projectName), job);
+		return getProject(projectName);
+	}
+
+	public static void waitForImportJob(final IProject project, final Job job) throws Exception {
+		new ACondition("Wait for import of "+project.getName(), BOOT_PROJECT_CREATION_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
 				assertOk(job.getResult());
-				StsTestUtil.assertNoErrors(getProject(projectName));
+				StsTestUtil.assertNoErrors(project);
 				return true;
 			}
-
-		}.waitFor(BOOT_PROJECT_CREATION_TIMEOUT);
-		return getProject(projectName);
+		};
 	}
 
 	public IProject getProject(String projectName) {

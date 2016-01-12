@@ -37,7 +37,7 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 	}
 
 	public void testGetProperties() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -80,7 +80,7 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 	}
 
 	public void testGetEnumKeyedProperties() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -103,7 +103,7 @@ public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 	}
 
 	public void testTypeFromSignature() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
