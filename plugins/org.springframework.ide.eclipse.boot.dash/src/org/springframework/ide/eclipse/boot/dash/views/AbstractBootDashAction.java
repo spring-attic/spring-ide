@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -22,8 +23,13 @@ public class AbstractBootDashAction extends Action implements Disposable {
 	protected final UserInteractions ui;
 	private boolean isVisible = true;
 
-	protected AbstractBootDashAction(UserInteractions ui) {
+	protected AbstractBootDashAction(UserInteractions ui, int style) {
+		super("", style);
 		this.ui = ui;
+	}
+
+	protected AbstractBootDashAction(UserInteractions ui) {
+		this(ui, IAction.AS_UNSPECIFIED);
 	}
 
 	public void dispose() {

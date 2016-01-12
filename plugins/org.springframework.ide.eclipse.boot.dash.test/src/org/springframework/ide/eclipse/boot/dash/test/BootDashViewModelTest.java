@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -64,6 +65,9 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
 
+/**
+ * @author Kris De Volder
+ */
 public class BootDashViewModelTest {
 
 	private BootDashViewModelHarness harness = null;
@@ -410,7 +414,8 @@ public class BootDashViewModelTest {
 				RunTargetTypes.LOCAL
 		);
 
-		LiveSet<FilterChoice> toggleFilters = harness.model.getToggleFilters().getSelectedFilters();
+		LiveSetVariable<FilterChoice> toggleFilters = harness.model.getToggleFilters().getSelectedFilters();
+		toggleFilters.replaceAll(ImmutableSet.<FilterChoice>of());
 		LiveExpression<Filter<BootDashElement>> filter = harness.model.getFilter();
 
 		assertTrue(toggleFilters.getValue().isEmpty());

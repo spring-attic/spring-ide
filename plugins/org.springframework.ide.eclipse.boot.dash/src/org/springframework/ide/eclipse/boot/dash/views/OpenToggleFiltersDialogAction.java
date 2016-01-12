@@ -20,14 +20,14 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 /**
  * @author Kris De Volder
  */
-public class ToggleFiltersAction extends AbstractBootDashElementsAction {
+public class OpenToggleFiltersDialogAction extends AbstractBootDashElementsAction {
 
 	/**
 	 * Represents the filters in the view (i.e. the ones currently in effect when dlg opens).
 	 */
 	private ToggleFiltersModel viewModel;
 
-	public ToggleFiltersAction(ToggleFiltersModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public OpenToggleFiltersDialogAction(ToggleFiltersModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(selection, ui);
 		this.viewModel = model;
 		setText("Filters...");

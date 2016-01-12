@@ -69,13 +69,13 @@ public class BootDashViewModel extends AbstractDisposable {
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(orderedRunTargetTypes);
 		filterBox = new BootDashElementsFilterBoxModel();
 		toggleFiltersModel = new ToggleFiltersModel();
-		LiveExpression<Filter<BootDashElement>> baseFilter = Filters.compose(filterBox.getFilter(), toggleFiltersModel.getFilter());
-		addDisposableChild(baseFilter);
-		filter = baseFilter.apply(new Function<Filter<BootDashElement>, Filter<BootDashElement>>() {
+		LiveExpression<Filter<BootDashElement>> baseFilter = filterBox.getFilter();
+		LiveExpression<Filter<BootDashElement>> treeAwarefilter = baseFilter.apply(new Function<Filter<BootDashElement>, Filter<BootDashElement>>() {
 			public Filter<BootDashElement> apply(Filter<BootDashElement> input) {
 				return new TreeAwareFilter(input);
 			}
 		});
+		filter = Filters.compose(treeAwarefilter, toggleFiltersModel.getFilter());
 		addDisposableChild(filter);
 
 		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
@@ -95,6 +95,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		models.dispose();
 		devtoolsProcessTracker.dispose();
 		cfDebugStrategies.dispose();
+		filterBox.dispose();
 	}
 
 	public void addElementStateListener(ElementStateListener l) {

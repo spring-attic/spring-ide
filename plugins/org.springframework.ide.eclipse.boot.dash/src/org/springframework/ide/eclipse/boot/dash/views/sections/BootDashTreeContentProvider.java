@@ -51,6 +51,8 @@ public class BootDashTreeContentProvider implements ITreeContentProvider {
 	public Object getParent(Object e) {
 		if (e instanceof BootDashElement) {
 			return ((BootDashElement) e).getParent();
+		} else if (e instanceof BootDashModel) {
+			return ((BootDashModel) e).getViewModel();
 		}
 		return null;
 	}

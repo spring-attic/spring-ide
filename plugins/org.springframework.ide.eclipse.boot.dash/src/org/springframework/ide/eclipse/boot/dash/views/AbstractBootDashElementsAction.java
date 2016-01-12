@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -49,7 +50,11 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 	}
 
 	public AbstractBootDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui) {
-		super(ui);
+		this(model, _selection, ui, IAction.AS_UNSPECIFIED);
+	}
+
+	public AbstractBootDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui, int style) {
+		super(ui, style);
 		this.model = model;
 		this.selection = _selection;
 		if (model!=null) {

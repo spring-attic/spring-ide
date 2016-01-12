@@ -64,7 +64,6 @@ public class BootDashActions {
 	private ToggleBootDashModelConnection toggleTargetConnectionAction;
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
-	private ToggleFiltersAction toggleFiltersAction;
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
 
@@ -72,6 +71,9 @@ public class BootDashActions {
 
 	private DeleteElementsAction<CloudFoundryRunTargetType> deleteAppsAction;
 	private DeleteElementsAction<LocalRunTargetType> deleteConfigsAction;
+
+	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
+	private ToggleFilterAction[] toggleFilterActions;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -165,7 +167,11 @@ public class BootDashActions {
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
 
-		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), elementsSelection, ui);
+		toggleFiltersDialogAction = new OpenToggleFiltersDialogAction(model.getToggleFilters(), elementsSelection, ui);
+		toggleFilterActions = new ToggleFilterAction[model.getToggleFilters().getAvailableFilters().length];
+		for (int i = 0; i < toggleFilterActions.length; i++) {
+			toggleFilterActions[i] = new ToggleFilterAction(model, model.getToggleFilters().getAvailableFilters()[i], ui);
+		}
 
 		exposeRunAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
 		exposeRunAppAction.setText("(Re)start and Expose via ngrok");
@@ -390,9 +396,9 @@ public class BootDashActions {
 			}
 			addTargetActions = null;
 		}
-		if (toggleFiltersAction != null) {
-			toggleFiltersAction.dispose();
-			toggleFiltersAction = null;
+		if (toggleFiltersDialogAction != null) {
+			toggleFiltersDialogAction.dispose();
+			toggleFiltersDialogAction = null;
 		}
 
 		if (exposeRunAppAction != null) {
@@ -408,10 +414,16 @@ public class BootDashActions {
 			duplicateConfigAction.dispose();
 			duplicateConfigAction = null;
 		}
+		if (toggleFilterActions!=null) {
+			for (ToggleFilterAction a : toggleFilterActions) {
+				a.dispose();
+			}
+			toggleFilterActions = null;
+		}
 	}
 
-	public IAction getToggleFiltersAction() {
-		return toggleFiltersAction;
+	public IAction getToggleFiltersDialogAction() {
+		return toggleFiltersDialogAction;
 	}
 
 	public RestartWithRemoteDevClientAction getRestartWithRemoteDevClientAction() {
@@ -422,4 +434,7 @@ public class BootDashActions {
 		return duplicateConfigAction;
 	}
 
+	public ToggleFilterAction[] getToggleFilterActions() {
+		return toggleFilterActions;
+	}
 }

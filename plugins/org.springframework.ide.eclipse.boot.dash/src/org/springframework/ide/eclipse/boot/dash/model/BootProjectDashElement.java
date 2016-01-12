@@ -41,7 +41,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private IScopedPropertyStore<IProject> projectProperties;
 
 	private LaunchConfDashElementFactory childFactory;
-	private ObservableSet<BootDashElement> rawChildren;
 	private ObservableSet<BootDashElement> children;
 	private ObservableSet<Integer> ports;
 
@@ -70,30 +69,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
 		return getLaunchConfigsExp().getValues();
-	}
-
-	@Override
-	public ObservableSet<BootDashElement> getChildren() {
-		if (this.children==null) {
-			final ObservableSet<BootDashElement> all = getAllChildren();
-			children = new ObservableSet<BootDashElement>() {
-				{
-					dependsOn(all);
-				}
-
-				@Override
-				protected ImmutableSet<BootDashElement> compute() {
-					ImmutableSet<BootDashElement> elements = all.getValues();
-					if (elements.size()>1) {
-						return elements;
-					} else {
-						return ImmutableSet.of();
-					}
-				}
-			};
-			addDisposableChild(children);
-		}
-		return children;
 	}
 
 	@Override
@@ -137,7 +112,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			protected ImmutableSet<T> compute() {
 				Builder<T> builder = ImmutableSortedSet.naturalOrder();
 				add(builder, BootProjectDashElement.this);
-				for (BootDashElement child : getAllChildren().getValues()) {
+				for (BootDashElement child : getCurrentChildren()) {
 					add(builder, child);
 				}
 				return builder.build();
@@ -173,23 +148,24 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	 * All children including 'invisible ones' that may be hidden from the children returned
 	 * by getChildren.
 	 */
-	public ObservableSet<BootDashElement> getAllChildren() {
-		if (rawChildren==null) {
-			rawChildren = LiveSets.map(getBootDashModel().launchConfTracker.getConfigs(delegate),
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+		if (children==null) {
+			children = LiveSets.map(getBootDashModel().launchConfTracker.getConfigs(delegate),
 					new Function<ILaunchConfiguration, BootDashElement>() {
 						public BootDashElement apply(ILaunchConfiguration input) {
 							return childFactory.createOrGet(input);
 						}
 					}
 			);
-			rawChildren.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
+			children.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
 				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 					getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
 				}
 			});
-			addDisposableChild(rawChildren);
+			addDisposableChild(children);
 		}
-		return this.rawChildren;
+		return this.children;
 	}
 
 	@Override

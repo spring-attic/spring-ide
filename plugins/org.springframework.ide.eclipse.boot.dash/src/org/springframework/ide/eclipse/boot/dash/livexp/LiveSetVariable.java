@@ -51,6 +51,7 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 	 */
 	public LiveSetVariable(Set<T> backingCollection) {
 		this.backingCollection = backingCollection;
+		this.value = compute();
 	}
 
 	@Override

@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
@@ -26,6 +29,16 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filters;
  */
 public class ToggleFiltersModel {
 
+	private static final Filter<BootDashElement> HIDE_SOLITARY_CONFS = new Filter<BootDashElement>() {
+		public boolean accept(BootDashElement e) {
+			if (e instanceof LaunchConfDashElement) {
+				LaunchConfDashElement conf = (LaunchConfDashElement) e;
+				return conf.getParent().getCurrentChildren().size()!=1;
+			}
+			return true;
+		}
+	};
+
 	private static final Filter<BootDashElement> HIDE_NON_WORKSPACE_ELEMENTS = new Filter<BootDashElement>() {
 		public boolean accept(BootDashElement t) {
 			if (t!=null) {
@@ -36,16 +49,23 @@ public class ToggleFiltersModel {
 		}
 	};
 	private static final FilterChoice[] FILTERS = {
-			new FilterChoice("Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS)
+			new FilterChoice("Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS),
+			new FilterChoice("Hide solitary launch configs", HIDE_SOLITARY_CONFS, true)
 	};
 
 	public static class FilterChoice implements Ilabelable {
 		private final String label;
 		private final Filter<BootDashElement> filter;
+		private final boolean defaultEnable;
 
 		public FilterChoice(String label, Filter<BootDashElement> filter) {
+			this(label, filter, false);
+		}
+
+		public FilterChoice(String label, Filter<BootDashElement> filter, boolean defaultEnable) {
 			this.label = label;
 			this.filter = filter;
+			this.defaultEnable = defaultEnable;
 		}
 
 		@Override
@@ -64,7 +84,8 @@ public class ToggleFiltersModel {
 
 	}
 
-	private LiveSet<FilterChoice> selectedFilters = new LiveSet<FilterChoice>();
+	private LiveSetVariable<FilterChoice> selectedFilters = new LiveSetVariable<FilterChoice>(getDefaultFilters());
+
 	private LiveExpression<Filter<BootDashElement>> compositeFilter;
 	{
 		final Filter<BootDashElement> initial = Filters.acceptAll();
@@ -91,8 +112,17 @@ public class ToggleFiltersModel {
 	public FilterChoice[] getAvailableFilters() {
 		return FILTERS;
 	}
-	public LiveSet<FilterChoice> getSelectedFilters() {
+	public LiveSetVariable<FilterChoice> getSelectedFilters() {
 		return selectedFilters;
 	}
 
+	private Set<FilterChoice> getDefaultFilters() {
+		Set<FilterChoice> builder = new HashSet<>();
+		for (FilterChoice f : FILTERS) {
+			if (f.defaultEnable) {
+				builder.add(f);
+			}
+		}
+		return builder;
+	}
 }

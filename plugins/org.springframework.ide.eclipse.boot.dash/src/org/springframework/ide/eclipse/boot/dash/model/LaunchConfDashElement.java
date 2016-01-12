@@ -72,7 +72,7 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 	}
 
 	@Override
-	public Object getParent() {
+	public BootProjectDashElement getParent() {
 		IProject p = getProject();
 		if (p!=null) {
 			return getBootDashModel().getProjectElementFactory().createOrGet(p);

@@ -184,7 +184,10 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		addAddRunTargetMenuActions(manager);
 
 		manager.add(new Separator());
-		manager.add(actions.getToggleFiltersAction());
+		//manager.add(actions.getToggleFiltersDialogAction());
+		for (ToggleFilterAction a : actions.getToggleFilterActions()) {
+			manager.add(a);
+		}
 		// manager.add(refreshAction);
 		// manager.add(new Separator());
 		// manager.add(action2);
@@ -198,7 +201,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
-		manager.add(actions.getToggleFiltersAction());
+		manager.add(actions.getToggleFiltersDialogAction());
 
 // This ought to work, but it doesn't.
 //		manager.add(createAddRunTargetMenuManager());
