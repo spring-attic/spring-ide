@@ -70,7 +70,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
 		YamlEditor editor = new YamlEditor(
 				"#A comment at the start\n" +
@@ -97,7 +97,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testHyperlinkTargets() throws Exception {
 		System.out.println(">>> testHyperlinkTargets");
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -312,7 +312,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testReconcileCamelCaseBeanProp() throws Exception {
 		MockEditor editor;
 
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -369,7 +369,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testContentAssistCamelCaseBeanProp() throws Exception {
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -421,7 +421,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 
 	public void testReconcileBeanPropName() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
@@ -454,7 +454,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testReconcilePojoArray() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
@@ -532,7 +532,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumPropertyReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -895,7 +895,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testContentAssistPropertyWithPojoType() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		//Try in-place completion
 		assertCompletion(
@@ -922,7 +922,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testContentAssistPropertyWithEnumType() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		//Try in-place completion
 		assertCompletion(
@@ -982,7 +982,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testCompletionForExistingBeanPropertiesAreDemoted() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		assertCompletions(
 				"foo:\n" +
 				"  data:\n" +
@@ -1423,7 +1423,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumValueCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.color", "demo.Color", null, "A foonky colour");
 
 		assertCompletion("foo.c<*>",
@@ -1445,7 +1445,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumMapValueCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		assertCompletions(
 				"foo:\n" +
@@ -1478,7 +1478,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumMapValueReconciling() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
 
 		MockEditor editor;
@@ -1510,7 +1510,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumMapKeyCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
 		data("foo.color-data", "java.util.Map<demo.Color,demo.ColorData>", null, "Map with colors in its keys, and pojo in values");
@@ -1624,7 +1624,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testPojoReconciling() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		MockEditor editor = new MockEditor(
 			"foo:\n" +
@@ -1656,7 +1656,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
 
@@ -1706,7 +1706,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumsInLowerCaseContentAssist() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.ClothingSize"));
@@ -1787,7 +1787,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testPojoInListCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		assertCompletion(
 				"foo:\n" +
@@ -2042,7 +2042,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 //		);
 
 		//For more robust test use predefined project which is not so much a moving target:
-		IProject project = createPredefinedProject("sts-4231");
+		IProject project = createPredefinedMavenProject("sts-4231");
 		useProject(project);
 
 		assertCompletionsDisplayString(

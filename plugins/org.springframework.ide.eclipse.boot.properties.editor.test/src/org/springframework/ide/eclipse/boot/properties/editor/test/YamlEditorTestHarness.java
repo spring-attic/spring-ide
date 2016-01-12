@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.*;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
 
 import java.util.Arrays;

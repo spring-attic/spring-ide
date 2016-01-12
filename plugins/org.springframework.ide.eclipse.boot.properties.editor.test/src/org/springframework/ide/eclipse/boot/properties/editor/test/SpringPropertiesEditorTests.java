@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -179,32 +181,26 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 
 	public void testPredefinedProject() throws Exception {
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IType type = JavaCore.create(p).findType("demo.DemoApplication");
 		assertNotNull(type);
 	}
 
 	public void testEnableApt() throws Throwable {
-		IProject p = createPredefinedProject("demo-live-metadata", false);
+		IProject p = createPredefinedMavenProject("demo-live-metadata");
 		IJavaProject jp = JavaCore.create(p);
 
 		//Check some assumptions about the initial state of the test project (if these checks fail then
 		// the test may be 'vacuous' since the things we are testing for already exist beforehand.
-		assertFalse(AptUtils.isAptEnabled(jp));
-		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
-		assertFalse(metadataFile.exists());
-
-		AptUtils.configureApt(jp);
-		buildProject(jp);
-
 		assertTrue(AptUtils.isAptEnabled(jp));
-		assertTrue(metadataFile.exists()); //apt should create the json metadata file during project build.
+		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
+		assertTrue(metadataFile.exists());
 		assertContains("\"name\": \"foo.counter\"", getContents(metadataFile));
 	}
 
 	public void testHyperlinkTargets() throws Exception {
 		System.out.println(">>> testHyperlinkTargets");
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -229,7 +225,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testHyperlinkTargetsLoggingLevel() throws Exception {
 		System.out.println(">>> testHyperlinkTargetsLoggingLevel");
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -260,7 +256,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testReconcilePojoArray() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
@@ -285,7 +281,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoArrayCompletions() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
@@ -430,7 +426,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumPropertyCompletion() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -448,7 +444,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumPropertyReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -469,7 +465,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapValueCompletion() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -486,7 +482,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapValueReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
@@ -505,7 +501,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapKeyCompletion() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
@@ -543,7 +539,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapKeyReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -563,7 +559,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoCompletions() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -591,7 +587,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -625,7 +621,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Interpretation of '.' changes depending on the domain type (i.e. when domain type is
 		//is a simple type got which '.' navigation is invalid then the '.' is 'eaten' by the key.
 
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -665,7 +661,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Similar to testMapKeyDotInterpretation but this time maps are not attached to property
 		// directly but via a pojo property
 
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -691,7 +687,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.ClothingSize"));
@@ -734,7 +730,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumsInLowerCaseContentAssist() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.ClothingSize"));
@@ -777,7 +773,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testNavigationProposalAfterRelaxedPropertyName() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -786,7 +782,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testValueProposalAssignedToRelaxedPropertyName() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 

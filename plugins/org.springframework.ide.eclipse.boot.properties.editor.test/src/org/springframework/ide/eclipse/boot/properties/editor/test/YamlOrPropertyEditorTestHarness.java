@@ -10,21 +10,32 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
+
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.properties.editor.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
@@ -35,14 +46,19 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Severi
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import junit.framework.TestCase;
 
 /**
  * @author Kris De Volder
  */
-public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
+public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	protected static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
@@ -81,10 +97,8 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		public void accept(SpringPropertyProblem e) {
 			problems.add(e);
 		}
-
 	}
 
-	@Override
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
 	}
@@ -521,17 +535,46 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		data("spring.view.suffix", "java.lang.String", null, "Spring MVC view suffix.");
 	}
 
-	protected IProject createPredefinedProject(String projectName) throws CoreException, IOException {
-		return createPredefinedProject(projectName, true);
-	}
-
-	protected IProject createPredefinedProject(String projectName, boolean mavenUpdate) throws CoreException, IOException {
+	protected IProject createPredefinedMavenProject(final String projectName) throws Exception {
 		StsTestUtil.setAutoBuilding(false);
-		IProject p = super.createPredefinedProject(projectName);
-		if (mavenUpdate) {
-			BootProjectTestHarness.assertNoErrors(p);
-		}
-		return p;
+		ImportConfiguration importConf = new ImportConfiguration() {
+
+			@Override
+			public String getProjectName() {
+				return projectName;
+			}
+
+			@Override
+			public String getLocation() {
+				return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(projectName).toString();
+			}
+
+			@Override
+			public CodeSet getCodeSet() {
+				File sourceWorkspace = new File(StsTestUtil.getSourceWorkspacePath(getBundleName()));
+				File sourceProject = new File(sourceWorkspace, projectName);
+				return new CopyFromFolder(projectName, sourceProject);
+			}
+		};
+		final IRunnableWithProgress importOp = BuildType.MAVEN.getDefaultStrategy().createOperation(importConf);
+		Job runner = new Job("Import "+projectName) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					importOp.run(monitor);
+				} catch (Throwable e) {
+					return ExceptionUtil.status(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		runner.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		runner.schedule();
+
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		waitForImportJob(project, runner);
+//		BootProjectTestHarness.assertNoErrors(project);
+		return project;
 	}
 
 	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
