@@ -225,19 +225,6 @@ public class BootProjectTestHarness {
 		bp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 	}
 
-	public static void assertNoErrors(IProject p) throws CoreException {
-		ISpringBootProject bp = SpringBootCore.create(p);
-		Job job = bp.updateProjectConfiguration();
-		if (job!=null) {
-			try {
-				job.join();
-			} catch (InterruptedException e) {
-				throw ExceptionUtil.coreException(e);
-			}
-		}
-		StsTestUtil.assertNoErrors(p);
-	}
-
 	public static void assertOk(IStatus result) throws Exception {
 		if (result==null || !result.isOK()) {
 			throw ExceptionUtil.coreException(result);
