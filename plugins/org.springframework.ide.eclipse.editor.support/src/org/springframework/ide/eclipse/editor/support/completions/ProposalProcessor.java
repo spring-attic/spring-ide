@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin, me@genady.org - #getSuggestions implementation copied from HippieCompleteAction
  *     Kris De Volder - Copied and modified HippieCompletionProcessor to become 'SpringPropertiesCompletionProcessor'.
- *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+ *                    - later on modified some more to make it more reusable as a 'general' wrapper around
+ *                      a ICompletionEngine
+ ********************************************************************************/
+package org.springframework.ide.eclipse.editor.support.completions;
 
 import java.util.Collection;
 
@@ -19,9 +21,14 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 
-public class SpringPropertiesProposalProcessor implements IContentAssistProcessor {
+/**
+ * Wraps a {@link ICompletionEngine} so it can be use as a {@link IContentAssistProcessor}
+ *
+ * @author Kris De Volder
+ */
+public class ProposalProcessor implements IContentAssistProcessor {
 
 	private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 	private static final IContextInformation[] NO_CONTEXTS= new IContextInformation[0];
@@ -29,7 +36,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 
 	private final ICompletionEngine fEngine;
 
-	public SpringPropertiesProposalProcessor(ICompletionEngine engine) {
+	public ProposalProcessor(ICompletionEngine engine) {
 		this.fEngine = engine;
 	}
 
@@ -45,7 +52,7 @@ public class SpringPropertiesProposalProcessor implements IContentAssistProcesso
 				return proposals.toArray(new ICompletionProposal[proposals.size()]);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			EditorSupportActivator.log(e);
 			return NO_PROPOSALS;
 		}
 	}

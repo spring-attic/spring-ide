@@ -26,11 +26,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory.ScoreableProposal;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.TypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
@@ -51,6 +48,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 
 /**
  * Represents a context relative to which we can provide content assistance.

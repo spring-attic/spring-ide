@@ -43,7 +43,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinders;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
@@ -51,7 +50,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesAnnotationHover;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
@@ -69,6 +67,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTPr
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.yaml.snakeyaml.Yaml;
 
 @SuppressWarnings("restriction")
@@ -106,11 +106,12 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 	}
 
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
-		IDialogSettings existing = YamlEditorPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		IDialogSettings dialogSettings = YamlEditorPlugin.getDefault().getDialogSettings();
+		IDialogSettings existing = dialogSettings.getSection(DIALOG_SETTINGS_KEY);
 		if (existing!=null) {
 			return existing;
 		}
-		IDialogSettings created = SpringPropertiesEditorPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+		IDialogSettings created = dialogSettings.addNewSection(DIALOG_SETTINGS_KEY);
 		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
 		int suggestW = (int)(windowBounds.width*0.35);
 		int suggestH = (int)(suggestW*0.6);
@@ -253,7 +254,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 		    a.enableAutoInsert(true);
 		    a.enableAutoActivation(true);
 			a.setRestoreCompletionProposalSize(getDialogSettings(viewer, DIALOG_SETTINGS_KEY));
-			SpringPropertiesProposalProcessor processor = new SpringPropertiesProposalProcessor(completionEngine);
+			ProposalProcessor processor = new ProposalProcessor(completionEngine);
 			a.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 			a.setSorter(PropertyCompletionFactory.SORTER);
 		}

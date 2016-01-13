@@ -45,12 +45,12 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -84,7 +84,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 					 new PropertyNameContentProposalProvider(project);
 				this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(),
 						proposalProvider, CTRL_SPACE,
-						SpringPropertiesProposalProcessor.AUTO_ACTIVATION_CHARS
+						ProposalProcessor.AUTO_ACTIVATION_CHARS
 				).setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 			} else {
 				this.editor = new TextCellEditor(tableViewer.getTable());

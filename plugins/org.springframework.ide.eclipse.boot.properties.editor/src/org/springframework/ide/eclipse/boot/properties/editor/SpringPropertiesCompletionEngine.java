@@ -33,10 +33,8 @@ import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
@@ -48,6 +46,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 
 /**
  * @author Kris De Volder

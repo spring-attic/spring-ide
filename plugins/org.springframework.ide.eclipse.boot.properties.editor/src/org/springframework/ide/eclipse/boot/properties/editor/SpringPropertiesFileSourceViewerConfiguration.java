@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IRecon
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
@@ -79,8 +80,8 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 			if (engine!=null) {
 				ContentAssistant a = new ContentAssistant();
 				a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
-				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
-				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
+				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
+				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
 				a.enableColoredLabels(true);
 				a.enableAutoActivation(true);
 				a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));

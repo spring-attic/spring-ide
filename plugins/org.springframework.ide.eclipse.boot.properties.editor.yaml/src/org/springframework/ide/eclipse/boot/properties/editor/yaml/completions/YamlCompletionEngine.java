@@ -17,7 +17,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
@@ -30,6 +29,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNodeType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SSeqNode;
+import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 

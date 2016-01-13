@@ -24,6 +24,7 @@ Require-Bundle: org.eclipse.ui,
  org.mockito,
  org.hamcrest,
  org.hamcrest.library,
- org.springframework.ide.eclipse.wizard
+ org.springframework.ide.eclipse.wizard,
+ org.springframework.ide.eclipse.editor.support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

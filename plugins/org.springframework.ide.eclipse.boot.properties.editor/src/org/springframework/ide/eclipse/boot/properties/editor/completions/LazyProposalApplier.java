@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 
 /**
  * When creating the edits for a propoal is too expensive to repeat a few hundred times,

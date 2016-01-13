@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
@@ -23,6 +22,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNodeType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 
 /**
  * Helper class that provides methods for creating the edits in a YamlDocument that

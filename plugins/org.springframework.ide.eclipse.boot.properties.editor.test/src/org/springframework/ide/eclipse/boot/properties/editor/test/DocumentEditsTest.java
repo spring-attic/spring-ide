@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import junit.framework.TestCase;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
+import junit.framework.TestCase;
 
 /**
  * @author Kris De Volder

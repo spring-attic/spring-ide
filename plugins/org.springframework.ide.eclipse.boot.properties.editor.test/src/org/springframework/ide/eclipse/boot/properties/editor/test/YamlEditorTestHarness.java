@@ -26,7 +26,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
@@ -42,6 +41,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.Spr
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;

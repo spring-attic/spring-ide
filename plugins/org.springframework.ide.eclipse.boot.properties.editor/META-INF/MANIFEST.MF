@@ -28,7 +28,8 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springsource.ide.eclipse.commons.core,
  org.springsource.ide.eclipse.commons.ui,
- org.springsource.ide.eclipse.commons.livexp
+ org.springsource.ide.eclipse.commons.livexp,
+ org.springframework.ide.eclipse.editor.support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
