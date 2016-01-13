@@ -88,7 +88,7 @@ public class DocumentEdits implements ProposalApplier {
 	//   So... edit operations could be sorted based on their position
 	//   and executed in decreasing order of their 'start'.
 	//
-	//   The tricky part would be to preserve the order-dependen
+	//   The tricky part would be to preserve the order-dependent semantics.
 
 	private class Insertion extends Edit {
 		private int offset;
