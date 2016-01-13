@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -80,6 +81,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	final static private String NO_MANIFEST_SELECETED_LABEL = "Deployment manifest file not selected"; //$NON-NLS-1$
 	final static private String YML_EXTENSION = "yml"; //$NON-NLS-1$
 	final static private String[] FILE_FILTER_NAMES = new String[] {"YAML files - *.yml", "All files - *.*"};
+	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
 
 	private IProject project;
 	private boolean readOnly;
@@ -186,9 +188,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				gridData = GridDataFactory.copyData((GridData) fileYamlComposite.getLayoutData());
 				gridData.exclude = !value;
 				fileYamlComposite.setLayoutData(gridData);
+				manualYamlComposite.setVisible(!value);
 				gridData = GridDataFactory.copyData((GridData) manualYamlComposite.getLayoutData());
 				gridData.exclude = value;
-				manualYamlComposite.setVisible(!value);
 				manualYamlComposite.setLayoutData(gridData);
 				yamlGroup.layout();
 				yamlGroup.getParent().layout();
@@ -208,9 +210,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				validate();
 			}
 		});
-
-		manifestTypeModel.refresh();
-		fileModel.refresh();
 
 		return container;
 	}
@@ -247,7 +246,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileGroup = new Group(composite, SWT.NONE);
 		fileGroup.setText("Workspace File");
 		fileGroup.setLayout(new GridLayout(2, false));
-		int height = 200;
+		int height = DEFAULT_WORKSPACE_GROUP_HEIGHT;
 		try {
 			height = getDialogBoundsSettings().getInt(DIALOG_LIST_HEIGHT_SETTING);
 		} catch (NumberFormatException e) {
@@ -326,7 +325,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					newHeight = listLayoutData.minimumHeight;
 					e.doit = false;
 				}
-				fileGroup.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, newHeight).create());
+				listLayoutData.heightHint = newHeight;
+				fileGroup.setLayoutData(listLayoutData);
 				fileGroup.getParent().layout();
 			}
 		});
@@ -350,8 +350,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		fileYamlViewer = new SourceViewer(fileYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		fileYamlViewer.configure(new YEditSourceViewerConfiguration());
-		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		fileYamlViewer.setEditable(false);
+		fileYamlViewer.getTextWidget().setBackground(composite.getBackground());
 
 		manualYamlComposite = new Composite(yamlGroup, SWT.NONE);
 		manualYamlComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -365,8 +366,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		manualYamlViewer = new SourceViewer(manualYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		manualYamlViewer.configure(new YEditSourceViewerConfiguration());
-		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		manualYamlViewer.setEditable(!readOnly);
+		if (readOnly) {
+			manualYamlViewer.getTextWidget().setBackground(composite.getBackground());
+		}
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml));
 	}
 
@@ -507,6 +511,38 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	public CloudApplicationDeploymentProperties getCloudApplicationDeploymentProperties() {
 		return deploymentProperties;
+	}
+
+	@Override
+	protected int getDialogBoundsStrategy() {
+		return DIALOG_PERSISTSIZE;
+	}
+
+	@Override
+	protected Point getInitialSize() {
+		Point size = super.getInitialSize();
+		/*
+		 * If manual mode is selected fileGroup is missing and not accounted in
+		 * the size of the dialog shell. Add its height here manually if dialog
+		 * size was not persisted previously
+		 */
+		GridData fileGroupLayoutData = (GridData)fileGroup.getLayoutData();
+		if (fileGroupLayoutData.exclude) {
+			try {
+				/*
+				 * Hack: check if dialog width/height was persisted. If
+				 * persisted then no need to calculate dialog size
+				 */
+				getDialogBoundsSettings().getInt("DIALOG_WIDTH");
+			} catch (NumberFormatException e) {
+				/*
+				 * Exception is thrown if dialog width/height cannot be read
+				 * from storage
+				 */
+				size.y += ((GridData) fileGroup.getLayoutData()).heightHint;
+			}
+		}
+		return size;
 	}
 
 }
