@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentDescriptorResolvers;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationDeploymentOperations;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
@@ -67,6 +67,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -85,8 +88,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	private LiveSetVariable<BootDashElement> elements;
 
 	private BootDashModelConsoleManager consoleManager;
-
-	private DeploymentDescriptorResolvers deploymentDescriptorResolvers;
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
 
@@ -183,7 +184,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
-		this.deploymentDescriptorResolvers = new DeploymentDescriptorResolvers();
 		this.appDeploymentOperations = new ApplicationDeploymentOperations(this);
 		getRunTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
@@ -609,22 +609,45 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             properties
 	 */
 	public CloudApplicationDeploymentProperties resolveDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-
-		String appName = getAppName(project);
-
-		monitor.setTaskName("Resolving deployment properties for: " + appName);
-
-		CloudApplicationDeploymentProperties deploymentProperties = this.deploymentDescriptorResolvers
-				.getProperties(project, appName, this, ui, monitor);
-
-		if (deploymentProperties == null) {
-			throw BootDashActivator.asCoreException(
-					"Unable to deploy the application. Unable to resolve a deployment descriptor from registered list of deployment descriptor resolvers.");
+		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(this, project);
+		CloudDashElement element = getElement(deploymentProperties.getAppName());
+		IFile manifestFile = element.getDeploymentManifestFile();
+		if (manifestFile != null) {
+			if (manifestFile.exists()) {
+				// TODO: check for differences between deployment properties on CF and in local YAML file. Merge if necessary.
+			} else {
+				deploymentProperties = createDeploymentProperties(project, ui, monitor);
+			}
 		}
-
-		monitor.worked(20);
-
 		return deploymentProperties;
+
+	}
+
+	/**
+	 * Creates deployment properties either based on user inout via the UI if UI context is available or generates default deployment properties
+	 * @param project the workspace project
+	 * @param ui UI context
+	 * @param monitor progress monitor
+	 * @return deployment properties
+	 * @throws Exception
+	 */
+	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(this, project);
+		CloudDashElement element = getElement(props.getAppName());
+		if (ui != null) {
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, getRunTarget().getDomains(monitor));
+			DumperOptions options = new DumperOptions();
+			options.setExplicitStart(true);
+			options.setCanonical(false);
+			options.setPrettyFlow(true);
+			options.setDefaultFlowStyle(FlowStyle.BLOCK);
+
+			String defaultManifest = new Yaml(options).dump(yaml);
+
+			props = ui.promptApplicationDeploymentProperties(getRunTarget().getDomains(monitor), project,
+					element == null ? null : element.getDeploymentManifestFile(), defaultManifest, false, false);
+		}
+		return props;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -319,18 +320,22 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 		return LiveExpression.constant(null);
 	}
 
-	public IPath getDeploymentManifestFile() {
+	public IFile getDeploymentManifestFile() {
 		String text = getPersistentProperties().get(DEPLOYMENT_MANIFEST_FILE_PATH);
-		return text == null ? null : new Path(text).makeRelative();
+		try {
+			return text == null ? null : ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(text));
+		} catch (IllegalArgumentException e) {
+			BootDashActivator.log(e);
+			return null;
+		}
 	}
 
-	public void setDeploymentManifestFile(IPath path) {
+	public void setDeploymentManifestFile(IFile file) {
 		try {
-			if (path == null) {
+			if (file == null) {
 				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, (String) null);
 			} else {
-				String text = path.toString();
-				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, text.isEmpty() ? null : text);
+				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, file.getFullPath().toString());
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);

@@ -31,9 +31,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -79,29 +77,19 @@ public class ApplicationManifestHandler {
 
 	private final IProject project;
 
-	private final String manifestPath;
+	private final IFile manifestFile;
 
 	private final List<CloudDomain> domains;
 
-	public static final String DEFAULT_PATH = "manifest.yml";
-
 	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains) {
-		this(project, domains, DEFAULT_PATH);
+		this(project, domains, null);
 	}
 
-	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, String manifestPath) {
+	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IFile manifestFile) {
 		Assert.isNotNull(project);
 
 		this.project = project;
-		this.manifestPath = manifestPath != null ? manifestPath : DEFAULT_PATH;
-		this.domains = domains;
-	}
-
-	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IPath manifestPath) {
-		Assert.isNotNull(project);
-
-		this.project = project;
-		this.manifestPath = manifestPath != null ? manifestPath.toString() : DEFAULT_PATH;
+		this.manifestFile = manifestFile;
 		this.domains = domains;
 	}
 
@@ -120,13 +108,10 @@ public class ApplicationManifestHandler {
 	 * @return manifest file if it exists. Null otherwise
 	 */
 	protected File getManifestFile() {
-
-		IResource resource = project.getFile(manifestPath);
-		if (resource != null) {
-			URI locationURI = resource.getLocationURI();
+		if (manifestFile != null) {
+			URI locationURI = manifestFile.getLocationURI();
 			File file = new File(locationURI);
 			return file.exists() ? file : null;
-
 		}
 		return null;
 	}
@@ -225,7 +210,8 @@ public class ApplicationManifestHandler {
 
 		Object applicationsObj = results.get(APPLICATIONS_PROP);
 		if (!(applicationsObj instanceof List<?>)) {
-			throw BootDashActivator.asCoreException("Expected a top-level list of applications in: " + manifestPath
+			String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
+			throw BootDashActivator.asCoreException("Expected a top-level list of applications in " + source
 					+ ". Unable to continue parsing manifest values. No manifest values will be loaded into the application deployment info.");
 		}
 
@@ -255,6 +241,7 @@ public class ApplicationManifestHandler {
 
 		properties.setAppName(appName);
 		properties.setProject(project);
+		properties.setManifestFile(manifestFile);
 
 		readMemory(appMap, allResults, properties);
 
@@ -330,12 +317,30 @@ public class ApplicationManifestHandler {
 		File file = getManifestFile();
 		if (file != null) {
 			BootDashActivator.logWarning(
-					"Manifest.yml file already found at: " + manifestPath + ". New content will not be written.");
+					"Manifest.yml file already found at: " + manifestFile.getFullPath() + ". New content will not be written.");
 			return false;
 		}
 
-		String appName = properties.getAppName();
+		Map<Object, Object> deploymentInfoYaml = toYaml(properties, domains);
+		DumperOptions options = new DumperOptions();
+		options.setExplicitStart(true);
+		options.setCanonical(false);
+		options.setPrettyFlow(true);
+		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+		Yaml yaml = new Yaml(options);
+		String manifestValue = yaml.dump(deploymentInfoYaml);
 
+		if (manifestValue == null) {
+			throw BootDashActivator.asCoreException("Failed to generate manifesty.yml for: " + properties.getAppName()
+					+ " Unknown problem trying to serialise content of manifest into: " + deploymentInfoYaml);
+		}
+
+		createFile(project, manifestFile, manifestValue, monitor);
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<Object, Object> toYaml(CloudApplicationDeploymentProperties properties, List<CloudDomain> domains) throws Exception {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -350,7 +355,7 @@ public class ApplicationManifestHandler {
 		Map<Object, Object> application = new LinkedHashMap<Object, Object>();
 		applicationsList.add(application);
 
-		application.put(NAME_PROP, appName);
+		application.put(NAME_PROP, properties.getAppName());
 
 		String memory = getMemoryAsString(properties.getMemory());
 		if (memory != null) {
@@ -379,29 +384,10 @@ public class ApplicationManifestHandler {
 			application.remove(DOMAIN_PROP);
 		}
 
-		if (deploymentInfoYaml.isEmpty()) {
-			return false;
-		}
-
-		DumperOptions options = new DumperOptions();
-		options.setExplicitStart(true);
-		options.setCanonical(false);
-		options.setPrettyFlow(true);
-		options.setDefaultFlowStyle(FlowStyle.BLOCK);
-		Yaml yaml = new Yaml(options);
-		String manifestValue = yaml.dump(deploymentInfoYaml);
-
-		if (manifestValue == null) {
-			throw BootDashActivator.asCoreException("Failed to generate manifesty.yml for: " + appName
-					+ " Unknown problem trying to serialise content of manifest into: " + deploymentInfoYaml);
-		}
-
-		createFile(project, manifestPath, manifestValue, monitor);
-		return true;
+		return deploymentInfoYaml;
 	}
 
-	public void createFile(IProject project, String path, String data, IProgressMonitor monitor) throws CoreException {
-		IFile file = project.getFile(new Path(path));
+	public void createFile(IProject project, IFile file, String data, IProgressMonitor monitor) throws CoreException {
 		file.create(new ByteArrayInputStream(data.getBytes()), true, monitor);
 		project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 	}
@@ -568,14 +554,16 @@ public class ApplicationManifestHandler {
 				if (gIndex > 0) {
 					memoryStringVal = memoryStringVal.substring(0, gIndex);
 				} else if (gIndex == 0) {
-					throw BootDashActivator.asCoreException("Failed to read memory value in manifest file: "
-							+ manifestPath + ". Invalid memory: " + memoryStringVal);
+					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
+					throw BootDashActivator.asCoreException("Failed to read memory value from " + source
+							+ ". Invalid memory: " + memoryStringVal);
 				}
 
 				try {
 					memoryVal = Integer.valueOf(memoryStringVal);
 				} catch (NumberFormatException e) {
-					throw BootDashActivator.asCoreException("Failed to parse memory from manifest file: " + manifestPath
+					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
+					throw BootDashActivator.asCoreException("Failed to parse memory from " + source
 							+ " due to: " + e.getMessage());
 				}
 			}
@@ -621,8 +609,9 @@ public class ApplicationManifestHandler {
 				if (results instanceof Map<?, ?>) {
 					return (Map<Object, Object>) results;
 				} else {
-					throw BootDashActivator.asCoreException("Expected a map of values for manifest file: "
-							+ manifestPath + ". Unable to load manifest content.  Actual results: " + results);
+					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
+					throw BootDashActivator.asCoreException("Expected a map of values for "
+							+ source + ". Unable to load manifest content.  Actual results: " + results);
 				}
 
 			} finally {
@@ -637,7 +626,7 @@ public class ApplicationManifestHandler {
 		return null;
 	}
 
-	protected String getMemoryAsString(int memory) {
+	static protected String getMemoryAsString(int memory) {
 		if (memory < 1) {
 			return null;
 		}
