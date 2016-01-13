@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public class BootDashViewModel extends AbstractDisposable {
 
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(orderedRunTargetTypes);
 		filterBox = new BootDashElementsFilterBoxModel();
-		toggleFiltersModel = new ToggleFiltersModel();
+		toggleFiltersModel = new ToggleFiltersModel(context);
 		LiveExpression<Filter<BootDashElement>> baseFilter = filterBox.getFilter();
 		LiveExpression<Filter<BootDashElement>> treeAwarefilter = baseFilter.apply(new Function<Filter<BootDashElement>, Filter<BootDashElement>>() {
 			public Filter<BootDashElement> apply(Filter<BootDashElement> input) {

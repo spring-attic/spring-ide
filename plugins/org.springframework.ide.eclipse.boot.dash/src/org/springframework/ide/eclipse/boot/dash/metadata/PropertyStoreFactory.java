@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
@@ -110,6 +111,26 @@ public class PropertyStoreFactory {
 				} catch (Exception e) {
 					BootDashActivator.log(e);
 				};
+				return null;
+			}
+		};
+	}
+
+	public static IPropertyStore backedBy(final IPreferenceStore preferenceStore) {
+		return new IPropertyStore() {
+			@Override
+			public void put(String key, String value) throws Exception {
+				if (value==null) {
+					preferenceStore.setToDefault(key);
+				} else {
+					preferenceStore.setValue(key, value);
+				}
+			}
+			@Override
+			public String get(String key) {
+				if (preferenceStore.contains(key)) {
+					return preferenceStore.getString(key);
+				}
 				return null;
 			}
 		};

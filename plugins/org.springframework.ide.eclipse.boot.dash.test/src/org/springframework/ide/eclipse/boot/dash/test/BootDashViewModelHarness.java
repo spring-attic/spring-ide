@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -42,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -77,6 +79,7 @@ public class BootDashViewModelHarness {
 
 	public static class MockContext implements BootDashModelContext {
 
+		private IPropertyStore viewProperties = new MockPropertyStore();
 		private IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
 		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockScopedPropertyStore<RunTargetType>();
 		private SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
@@ -124,6 +127,11 @@ public class BootDashViewModelHarness {
 		@Override
 		public LiveExpression<Pattern> getBootProjectExclusion() {
 			return bootProjectExclusion;
+		}
+
+		@Override
+		public IPropertyStore getViewProperties() {
+			return viewProperties;
 		}
 	}
 
@@ -188,7 +196,7 @@ public class BootDashViewModelHarness {
 
 	public BootProjectDashElement getElementFor(IProject project) {
 		LocalBootDashModel localSection = (LocalBootDashModel) model.getSectionByTargetId(RunTargets.LOCAL.getId());
-		return (BootProjectDashElement) localSection.getProjectElementFactory().createOrGet(project);
+		return localSection.getProjectElementFactory().createOrGet(project);
 	}
 
 	public static void assertOk(LiveExpression<ValidationResult> validator) {

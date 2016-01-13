@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.metadata;
 
-import java.util.LinkedHashSet;
-
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 
 /**
@@ -67,8 +67,25 @@ public class PropertyStoreApi {
 		}
 	}
 
+	public boolean get(String key, boolean dflt) {
+		String string = get(key);
+		if (StringUtil.hasText(string)) {
+			try {
+				return Boolean.parseBoolean(string);
+			} catch (Exception e) {
+				BootDashActivator.log(e);
+			}
+		}
+		return dflt;
+	}
+
+	public void put(String id, boolean enable) throws Exception {
+		put(id, Boolean.toString(enable));
+	}
+
 	public IPropertyStore getBackingStore() {
 		return backingStore;
 	}
+
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import com.google.common.collect.ImmutableSet;
@@ -38,9 +39,11 @@ public class ToggleFiltersModelTest {
 	private static final String HIDE_NON_WORKSPACE_ELEMENTS = "Hide non-workspace elements";
 	private static final String HIDE_SOLITARY_CONF = "Hide solitary launch configs";
 
+	private MockPropertyStore propertyStore = new MockPropertyStore();
+
 	@Test
 	public void testAvailableFilters() throws Exception {
-		ToggleFiltersModel model = new ToggleFiltersModel();
+		ToggleFiltersModel model = new ToggleFiltersModel(propertyStore);
 		assertThat(model.getAvailableFilters(),
 			arrayContaining(
 					hasToString("FilterChoice("+HIDE_NON_WORKSPACE_ELEMENTS+")"),
@@ -103,7 +106,7 @@ public class ToggleFiltersModelTest {
 
 	@Test
 	public void testHideSolitaryConfEnabledByDefault() throws Exception {
-		ToggleFiltersModel model = new ToggleFiltersModel();
+		ToggleFiltersModel model = new ToggleFiltersModel(propertyStore);
 		assertThat(model.getAvailableFilters(),
 				hasItemInArray(
 						hasToString("FilterChoice("+HIDE_SOLITARY_CONF+")")
@@ -141,8 +144,27 @@ public class ToggleFiltersModelTest {
 		assertTrue(filter.accept(conf2));
 	}
 
+	@Test
+	public void testToggleFiltersPersistAndRestore() throws Exception {
+		ToggleFiltersModel model = new ToggleFiltersModel(propertyStore);
+
+		FilterChoice nonWorkspace = getFilter(model, HIDE_NON_WORKSPACE_ELEMENTS);
+		FilterChoice solitaryConf = getFilter(model, HIDE_SOLITARY_CONF);
+
+		//initially the defaults should be set.
+		assertEquals(ImmutableSet.of(solitaryConf), model.getSelectedFilters().getValues());
+
+		model.getSelectedFilters().remove(solitaryConf);
+		model.getSelectedFilters().add(nonWorkspace);
+
+		//Simulate model reload (i.e. just instantiate it with the same property store).
+		model = new ToggleFiltersModel(propertyStore);
+
+		assertEquals(ImmutableSet.of(nonWorkspace), model.getSelectedFilters().getValues());
+	}
+
 	private Filter<BootDashElement> getFilter(String withLabel) {
-		ToggleFiltersModel model = new ToggleFiltersModel();
+		ToggleFiltersModel model = new ToggleFiltersModel(propertyStore);
 		FilterChoice selectFilter = getFilter(model, withLabel);
 		model.getSelectedFilters().replaceAll(ImmutableSet.of(selectFilter));
 		Filter<BootDashElement> effectiveFilter = model.getFilter().getValue();
