@@ -80,7 +80,26 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	final static private String DIALOG_LIST_HEIGHT_SETTING = "ManifestFileDialog.listHeight"; //$NON-NLS-1$
 	final static private String NO_MANIFEST_SELECETED_LABEL = "Deployment manifest file not selected"; //$NON-NLS-1$
 	final static private String YML_EXTENSION = "yml"; //$NON-NLS-1$
-	final static private String[] FILE_FILTER_NAMES = new String[] {"YAML files - *.yml", "All files - *.*"};
+	final static private String[] FILE_FILTER_NAMES = new String[] {"Manifest YAML files - *manifest*.yml", "YAML files - *.yml", "All files - *.*"};
+
+	final static private ViewerFilter YAML_FILE_FILTER = new ViewerFilter() {
+		@Override
+		public boolean select(Viewer viewer,Object parent,Object element) {
+			return !(element instanceof IFile) || YML_EXTENSION.equals(((IFile)element).getFileExtension());
+		}
+	};
+	final static private ViewerFilter MANIFEST_IN_FILENAME_FILTER = new ViewerFilter() {
+		@Override
+		public boolean select(Viewer viewer,Object parent,Object element) {
+			return !(element instanceof IFile) || ((IFile)element).getName().toLowerCase().contains("manifest");
+		}
+	};
+	final static private ViewerFilter[][] RESOURCE_FILTERS = new ViewerFilter[][] {
+		{YAML_FILE_FILTER, MANIFEST_IN_FILENAME_FILTER},
+		{YAML_FILE_FILTER},
+		{}
+	};
+
 	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
 
 	private IProject project;
@@ -97,7 +116,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Sash resizeSash;
 	private SourceViewer fileYamlViewer;
 	private SourceViewer manualYamlViewer;
-	private TreeViewer workpsaceViewer;
+	private TreeViewer workspaceViewer;
 	private Button refreshButton;
 	private Button buttonFileManifest;
 	private Button buttonManualManifest;
@@ -107,19 +126,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Composite manualYamlComposite;
 	private Combo fileFilterCombo;
 
-	private ViewerFilter yamlFileFilter = new ViewerFilter() {
-		@Override
-		public boolean select(Viewer viewer, Object parent, Object element) {
-			return !(element instanceof IFile) || YML_EXTENSION.equals(((IFile)element).getFileExtension());
-		}
-	};
-
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
 		@Override
 		public void selectionChanged(SelectionChangedEvent e) {
 			IResource resource = e.getSelection().isEmpty() ? null : (IResource) ((IStructuredSelection) e.getSelection()).toArray()[0];
 			fileModel.setValue(resource instanceof IFile ? (IFile) resource : null);
-			refreshButton.setEnabled(manifestTypeModel.getValue() && !workpsaceViewer.getSelection().isEmpty());
+			refreshButton.setEnabled(manifestTypeModel.getValue() && !workspaceViewer.getSelection().isEmpty());
 		}
 	};
 
@@ -168,8 +180,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				buttonFileManifest.setSelection(value);
 				buttonManualManifest.setSelection(!value);
 
-				refreshButton.setEnabled(value && !workpsaceViewer.getSelection().isEmpty());
-				workpsaceViewer.getControl().setEnabled(value);
+				refreshButton.setEnabled(value && !workspaceViewer.getSelection().isEmpty());
+				workspaceViewer.getControl().setEnabled(value);
 				fileLabel.setEnabled(value);
 
 //				if (!readOnly) {
@@ -257,18 +269,18 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileLabel = new Label(fileGroup, SWT.NONE);
 		fileLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER).span(2, SWT.DEFAULT).create());
 
-		workpsaceViewer = new TreeViewer(fileGroup);
-		workpsaceViewer.setContentProvider(new BaseWorkbenchContentProvider());
-		workpsaceViewer.setLabelProvider(new WorkbenchLabelProvider());
-		workpsaceViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
-		workpsaceViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		workspaceViewer = new TreeViewer(fileGroup);
+		workspaceViewer.setContentProvider(new BaseWorkbenchContentProvider());
+		workspaceViewer.setLabelProvider(new WorkbenchLabelProvider());
+		workspaceViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
+		workspaceViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		if (fileModel.getValue() == null) {
-			workpsaceViewer.reveal(project.getFile("manifest.yml"));
+			workspaceViewer.reveal(project.getFile("manifest.yml"));
 		} else {
-			workpsaceViewer.reveal(fileModel.getValue());
-			workpsaceViewer.setSelection(new StructuredSelection(new IResource[] { fileModel.getValue() }), false);
+			workspaceViewer.reveal(fileModel.getValue());
+			workspaceViewer.setSelection(new StructuredSelection(new IResource[] { fileModel.getValue() }), false);
 		}
-		workpsaceViewer.addSelectionChangedListener(selectionListener);
+		workspaceViewer.addSelectionChangedListener(selectionListener);
 
 		Composite fileButtonsComposite = new Composite(fileGroup, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -292,23 +304,34 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		fileFilterCombo = new Combo(fileGroup, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		fileFilterCombo.setItems(FILE_FILTER_NAMES);
-		int slectionIndex = fileModel.getValue() == null || YML_EXTENSION.equals(fileModel.getValue().getFileExtension()) ? 0 : 1;
-		if (slectionIndex == 0) {
-			workpsaceViewer.addFilter(yamlFileFilter);
+		int selectionIndex = 0;
+		IFile manifestFile = fileModel.getValue();
+		if (manifestFile != null) {
+			selectionIndex = RESOURCE_FILTERS.length - 1;
+			for (int i = 0; i < RESOURCE_FILTERS.length; i++) {
+				boolean accept = true;
+				for (ViewerFilter filter : RESOURCE_FILTERS[i]) {
+					accept = filter.select(null, null, fileModel.getValue());
+					if (!accept) {
+						break;
+					}
+				}
+				if (accept) {
+					selectionIndex = i;
+					break;
+				}
+			}
 		}
-		fileFilterCombo.select(slectionIndex);
+		workspaceViewer.setFilters(RESOURCE_FILTERS[selectionIndex]);
+		fileFilterCombo.select(selectionIndex);
 		fileFilterCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Remove selection listener to set selection from current pathModel value
-				workpsaceViewer.removeSelectionChangedListener(selectionListener);
-				if (fileFilterCombo.getSelectionIndex() == 0) {
-					workpsaceViewer.addFilter(yamlFileFilter);
-				} else {
-					workpsaceViewer.removeFilter(yamlFileFilter);
-				}
+				workspaceViewer.removeSelectionChangedListener(selectionListener);
+				workspaceViewer.setFilters(RESOURCE_FILTERS[fileFilterCombo.getSelectionIndex()]);
 				// Add the selection listener back after the initial value has been set
-				workpsaceViewer.addSelectionChangedListener(selectionListener);
+				workspaceViewer.addSelectionChangedListener(selectionListener);
 			}
 		});
 	}
@@ -375,7 +398,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	}
 
 	private void refreshManifests() {
-		IResource selectedResource = (IResource) ((IStructuredSelection) workpsaceViewer.getSelection()).getFirstElement();
+		IResource selectedResource = (IResource) ((IStructuredSelection) workspaceViewer.getSelection()).getFirstElement();
 		final IResource resourceToRefresh = selectedResource instanceof IFile ? selectedResource.getParent() : selectedResource;
 		Job job = new Job("Find all YAML files for project '" + project.getName() + "'") {
 			@Override
@@ -390,11 +413,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					@Override
 					public void run() {
 						// Remove selection listener to set selection from current pathModel value
-						workpsaceViewer.removeSelectionChangedListener(selectionListener);
-						workpsaceViewer.refresh(resourceToRefresh);
+						workspaceViewer.removeSelectionChangedListener(selectionListener);
+						workspaceViewer.refresh(resourceToRefresh);
 						updateManifestFile();
 						// Add the selection listener back after the initial value has been set
-						workpsaceViewer.addSelectionChangedListener(selectionListener);
+						workspaceViewer.addSelectionChangedListener(selectionListener);
 					}
 				});
 				return status;
