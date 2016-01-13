@@ -15,7 +15,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
 
 /**
- * Different types of things (e.g. {@link YamlAssistContext}, {@link SNode} ...) can
+ * Different types of things (e.g. {@link ApplicationYamlAssistContext}, {@link SNode} ...) can
  * be traversed interpeting {@link YamlPath} as 'navigation operations'. To faciliate
  * 'reusable' traversal code, they can implement this interface.
  */

@@ -11,4 +11,5 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.editor.support.completions
+Export-Package: org.springframework.ide.eclipse.editor.support.completions,
+ org.springframework.ide.eclipse.editor.support.yaml

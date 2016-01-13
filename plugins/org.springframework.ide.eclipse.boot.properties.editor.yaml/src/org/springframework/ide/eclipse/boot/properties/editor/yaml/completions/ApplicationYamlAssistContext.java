@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,9 +53,10 @@ import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 
 /**
- * Represents a context relative to which we can provide content assistance.
+ * Represents a context insied a "application.yml" file relative to which we can provide
+ * content assistance.
  */
-public abstract class YamlAssistContext {
+public abstract class ApplicationYamlAssistContext {
 
 	protected final RelaxedNameConfig conf;
 
@@ -76,7 +77,7 @@ public abstract class YamlAssistContext {
 	protected final YamlPath contextPath;
 	protected final TypeUtil typeUtil;
 
-	public YamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil, RelaxedNameConfig conf) {
+	public ApplicationYamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		this.documentSelector = documentSelector;
 		this.contextPath = contextPath;
 		this.typeUtil = typeUtil;
@@ -118,15 +119,15 @@ public abstract class YamlAssistContext {
 
 	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
 
-	public static YamlAssistContext global(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+	public static ApplicationYamlAssistContext global(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil, conf);
 	}
 
-	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+	public static ApplicationYamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		YamlPathSegment documentSelector = contextPath.getSegment(0);
 		if (documentSelector!=null) {
 			contextPath = contextPath.dropFirst(1);
-			YamlAssistContext context = YamlAssistContext.global(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
+			ApplicationYamlAssistContext context = ApplicationYamlAssistContext.global(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
 			for (YamlPathSegment s : contextPath.getSegments()) {
 				if (context==null) return null;
 				context = context.navigate(s);
@@ -136,7 +137,7 @@ public abstract class YamlAssistContext {
 		return null;
 	}
 
-	protected abstract YamlAssistContext navigate(YamlPathSegment s);
+	protected abstract ApplicationYamlAssistContext navigate(YamlPathSegment s);
 
 	/**
 	 * Delete a content assist query from the document, and also the line of
@@ -151,13 +152,13 @@ public abstract class YamlAssistContext {
 		}
 	}
 
-	public class TypeContext extends YamlAssistContext {
+	public class TypeContext extends ApplicationYamlAssistContext {
 
 		private PropertyCompletionFactory completionFactory;
 		private Type type;
-		private YamlAssistContext parent;
+		private ApplicationYamlAssistContext parent;
 
-		public TypeContext(YamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+		public TypeContext(ApplicationYamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 			super(parent.documentSelector, contextPath, typeUtil, conf);
 			this.parent = parent;
 			this.completionFactory = completionFactory;
@@ -266,7 +267,7 @@ public abstract class YamlAssistContext {
 		}
 
 		@Override
-		protected YamlAssistContext navigate(YamlPathSegment s) {
+		protected ApplicationYamlAssistContext navigate(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				if (TypeUtil.isSequencable(type) || TypeUtil.isMap(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
@@ -284,7 +285,7 @@ public abstract class YamlAssistContext {
 			return null;
 		}
 
-		private YamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
+		private ApplicationYamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
 			if (nextType!=null) {
 				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil, conf);
 			}
@@ -316,7 +317,7 @@ public abstract class YamlAssistContext {
 		}
 	}
 
-	private static class IndexContext extends YamlAssistContext {
+	private static class IndexContext extends ApplicationYamlAssistContext {
 
 		private IndexNavigator indexNav;
 		PropertyCompletionFactory completionFactory;
@@ -387,7 +388,7 @@ public abstract class YamlAssistContext {
 		}
 
 		@Override
-		protected YamlAssistContext navigate(YamlPathSegment s) {
+		protected ApplicationYamlAssistContext navigate(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				String key = s.toPropString();
 				IndexNavigator subIndex = indexNav.selectSubProperty(key);

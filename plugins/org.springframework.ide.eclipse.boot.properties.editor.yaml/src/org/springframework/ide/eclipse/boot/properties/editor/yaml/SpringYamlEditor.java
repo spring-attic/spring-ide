@@ -21,11 +21,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropert
 
 public class SpringYamlEditor extends YEdit implements Listener<SpringPropertiesIndexManager>, IPropertyChangeListener {
 
-	private SpringYeditSourceViewerConfiguration sourceViewerConf;
+	private ApplicationYamlSourceViewerConfiguration sourceViewerConf;
 
 	@Override
 	protected YEditSourceViewerConfiguration createSourceViewerConfiguration() {
-		return this.sourceViewerConf = new SpringYeditSourceViewerConfiguration(this);
+		return this.sourceViewerConf = new ApplicationYamlSourceViewerConfiguration(this);
 	}
 
 	@Override

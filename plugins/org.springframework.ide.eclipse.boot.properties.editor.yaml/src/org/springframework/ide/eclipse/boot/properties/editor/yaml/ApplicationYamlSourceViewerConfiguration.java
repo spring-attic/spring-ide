@@ -64,7 +64,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropert
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlCompletionEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
@@ -72,9 +72,9 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalProces
 import org.yaml.snakeyaml.Yaml;
 
 @SuppressWarnings("restriction")
-public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfiguration implements IReconcileTrigger {
+public class ApplicationYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration implements IReconcileTrigger {
 
-	private static final String DIALOG_SETTINGS_KEY = SpringYeditSourceViewerConfiguration.class.getName();
+	private static final String DIALOG_SETTINGS_KEY = ApplicationYamlSourceViewerConfiguration.class.getName();
 
 	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.YAML_DEFAULT;
 	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
@@ -100,7 +100,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 
 	private ITextEditor editor;
 
-	public SpringYeditSourceViewerConfiguration(ITextEditor editor) {
+	public ApplicationYamlSourceViewerConfiguration(ITextEditor editor) {
 		super();
 		this.editor = editor;
 	}
@@ -157,7 +157,7 @@ public class SpringYeditSourceViewerConfiguration extends YEditSourceViewerConfi
 
 	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
 
-	private ICompletionEngine completionEngine = new YamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
+	private ICompletionEngine completionEngine = new ApplicationYamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
 			RelaxedNameConfig.COMPLETION_DEFAULTS);
 
 	@Override

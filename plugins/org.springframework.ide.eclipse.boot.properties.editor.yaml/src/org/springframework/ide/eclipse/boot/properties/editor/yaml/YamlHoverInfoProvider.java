@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlAssistContext;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContext;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
 import org.yaml.snakeyaml.nodes.Node;
@@ -67,7 +67,7 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 						String key = path.getLastSegment().toPropString();
 						path = path.dropLast().append(YamlPathSegment.valueAt(key));
 					}
-					YamlAssistContext assistContext = YamlAssistContext.forPath(path, index, null, new TypeUtil(jp), RelaxedNameConfig.ALIASSED);
+					ApplicationYamlAssistContext assistContext = ApplicationYamlAssistContext.forPath(path, index, null, new TypeUtil(jp), RelaxedNameConfig.ALIASSED);
 					if (assistContext!=null) {
 						return assistContext.getHoverInfo();
 					}

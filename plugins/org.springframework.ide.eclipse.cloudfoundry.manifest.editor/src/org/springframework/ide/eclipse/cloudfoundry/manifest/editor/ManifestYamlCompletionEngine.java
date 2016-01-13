@@ -16,12 +16,13 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
-import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
-public class DummyCompletionEngine implements ICompletionEngine {
+import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+
+public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 
 	private CompletionFactory proposalFactory;
 
@@ -29,7 +30,7 @@ public class DummyCompletionEngine implements ICompletionEngine {
 			"foo", "bar", "fun"
 	};
 
-	public DummyCompletionEngine() {
+	public ManifestYamlCompletionEngine() {
 		proposalFactory = new CompletionFactory();
 	}
 

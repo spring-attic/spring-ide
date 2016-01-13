@@ -29,11 +29,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.Yam
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNodeType;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SSeqNode;
-import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.yaml.snakeyaml.Yaml;
 
-public class YamlCompletionEngine implements ICompletionEngine {
+public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 
 	//private Yaml yaml;
 	private SpringPropertyIndexProvider indexProvider;
@@ -43,7 +43,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 	private TypeUtilProvider typeUtilProvider;
 	private RelaxedNameConfig conf;
 
-	public YamlCompletionEngine(Yaml yaml,
+	public ApplicationYamlCompletionEngine(Yaml yaml,
 			SpringPropertyIndexProvider indexProvider,
 			DocumentContextFinder documentContextFinder,
 			YamlStructureProvider structureProvider,
@@ -67,7 +67,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			if (index!=null && !index.isEmpty()) {
 				SRootNode root = doc.getStructure();
 				SNode current = root.find(offset);
-				YamlAssistContext context = getContext(doc, current, offset, index);
+				ApplicationYamlAssistContext context = getContext(doc, current, offset, index);
 				if (context!=null) {
 					return context.getCompletions(doc, offset);
 				}
@@ -76,19 +76,19 @@ public class YamlCompletionEngine implements ICompletionEngine {
 		return Collections.emptyList();
 	}
 
-	private YamlAssistContext getContext(YamlDocument doc, SNode node, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
+	private ApplicationYamlAssistContext getContext(YamlDocument doc, SNode node, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
 		TypeUtil typeUtil = typeUtilProvider.getTypeUtil(doc.getDocument());
 		if (node==null) {
-			return YamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory, typeUtil, conf);
+			return ApplicationYamlAssistContext.forPath(YamlPath.EMPTY, index, completionFactory, typeUtil, conf);
 		}
 		if (node.getNodeType()==SNodeType.KEY) {
 			//slight complication. The area in the key and value of a key node represent different
 			// contexts for content assistance
 			SKeyNode keyNode = (SKeyNode)node;
 			if (keyNode.isInValue(offset)) {
-				return YamlAssistContext.forPath(keyNode.getPath(), index, completionFactory, typeUtil, conf);
+				return ApplicationYamlAssistContext.forPath(keyNode.getPath(), index, completionFactory, typeUtil, conf);
 			} else {
-				return YamlAssistContext.forPath(keyNode.getParent().getPath(), index, completionFactory, typeUtil, conf);
+				return ApplicationYamlAssistContext.forPath(keyNode.getParent().getPath(), index, completionFactory, typeUtil, conf);
 			}
 		} else if (node.getNodeType()==SNodeType.RAW) {
 			//Treat raw node as a 'key node'. This is basically assuming that is misclasified
@@ -105,16 +105,16 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getNodeType()!=SNodeType.DOC)) {
 				node = node.getParent();
 			}
-			return YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil, conf);
+			return ApplicationYamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil, conf);
 		} else if (node.getNodeType()==SNodeType.SEQ) {
 			SSeqNode seqNode = (SSeqNode)node;
 			if (seqNode.isInValue(offset)) {
-				return YamlAssistContext.forPath(seqNode.getPath(), index, completionFactory, typeUtil, conf);
+				return ApplicationYamlAssistContext.forPath(seqNode.getPath(), index, completionFactory, typeUtil, conf);
 			} else {
-				return YamlAssistContext.forPath(seqNode.getParent().getPath(), index, completionFactory, typeUtil, conf);
+				return ApplicationYamlAssistContext.forPath(seqNode.getParent().getPath(), index, completionFactory, typeUtil, conf);
 			}
 		} else if (node.getNodeType()==SNodeType.DOC) {
-			return  YamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil, conf);
+			return  ApplicationYamlAssistContext.forPath(node.getPath(), index, completionFactory, typeUtil, conf);
 		} else {
 			throw new IllegalStateException("Missing case");
 		}

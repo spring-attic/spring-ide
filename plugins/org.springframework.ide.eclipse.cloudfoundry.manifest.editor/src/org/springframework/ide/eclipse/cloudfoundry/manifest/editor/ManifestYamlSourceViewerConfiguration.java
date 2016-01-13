@@ -57,7 +57,7 @@ public class ManifestYamlSourceViewerConfiguration extends YEditSourceViewerConf
 
 	protected ICompletionEngine getCompletionEngine() {
 		if (completionEngine==null) {
-			completionEngine = new DummyCompletionEngine();
+			completionEngine = new ManifestYamlCompletionEngine();
 		}
 		return completionEngine;
 	}
