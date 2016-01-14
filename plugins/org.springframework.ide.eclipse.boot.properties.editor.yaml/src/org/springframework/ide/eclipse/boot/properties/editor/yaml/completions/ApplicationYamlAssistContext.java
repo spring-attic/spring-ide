@@ -40,6 +40,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlPathEdits;
@@ -51,8 +53,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
-import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
-import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 
 /**
  * Represents a context insied a "application.yml" file relative to which we can provide

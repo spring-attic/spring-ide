@@ -24,6 +24,7 @@ import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.path.KeyAliases;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
@@ -95,6 +96,7 @@ public class YamlStructureParser {
 	}
 
 	private YamlLineReader input;
+	private final KeyAliases keyAliases;
 
 	public static class YamlLine {
 
@@ -185,8 +187,9 @@ public class YamlStructureParser {
 		}
 	}
 
-	public YamlStructureParser(YamlDocument doc) {
+	public YamlStructureParser(YamlDocument doc, KeyAliases keyAliases) {
 		this.input = new YamlLineReader(doc);
+		this.keyAliases = keyAliases;
 	}
 
 	private static void indent(Writer out, int indent) throws Exception {
@@ -295,7 +298,7 @@ public class YamlStructureParser {
 
 	}
 
-	public static class SRootNode extends SChildBearingNode {
+	public class SRootNode extends SChildBearingNode {
 
 		public SRootNode(YamlDocument doc) {
 			super(null, doc, 0,0,0);
@@ -325,7 +328,7 @@ public class YamlStructureParser {
 		}
 	}
 
-	public static class SDocNode extends SChildBearingNode {
+	public class SDocNode extends SChildBearingNode {
 
 		private int index;
 
@@ -356,7 +359,7 @@ public class YamlStructureParser {
 
 	}
 
-	public static abstract class SChildBearingNode extends SNode {
+	public abstract class SChildBearingNode extends SNode {
 		private List<SNode> children = null;
 		private Map<String, SKeyNode> keyMap = null; //lazily constructed index of children children.
 
@@ -448,7 +451,7 @@ public class YamlStructureParser {
 			if (CollectionUtil.hasElements(children)) {
 				SKeyNode child = keyMap().get(key);
 				if (child==null) {
-					Iterable<String> keyAliases = getKeyAliasses(key);
+					Iterable<String> keyAliases = getKeyAliases(key);
 					if (keyAliases!=null) {
 						for (String keyAlias : keyAliases) {
 							child = keyMap().get(keyAlias);
@@ -461,15 +464,6 @@ public class YamlStructureParser {
 				return child;
 			}
 			return null;
-		}
-
-		private Iterable<String> getKeyAliasses(String key) {
-			//TODO: This used to do this: StringUtil.camelCaseToHyphens(key)
-			// But that does not belong in here. The parse tree should be a dumb tree.
-			// It is who-ever is accessing the tree that should do this kind of 'aliassing'.
-			// Why? The aliassing has nothing to do with parsing. And different aliassings
-			// might be used in traversing parse-trees.
-			return Collections.emptyList();
 		}
 
 		private Map<String, SKeyNode> keyMap() throws Exception {
@@ -686,4 +680,10 @@ public class YamlStructureParser {
 		}
 
 	}
+
+	private Iterable<String> getKeyAliases(String key) {
+		return keyAliases.getKeyAliases(key);
+	}
+
+
 }

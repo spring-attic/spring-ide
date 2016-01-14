@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlStructureProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.YamlHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
@@ -40,7 +41,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.Spr
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
@@ -52,7 +52,7 @@ import org.yaml.snakeyaml.nodes.Node;
  */
 public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
-	protected YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
+	protected YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 	protected Yaml yaml = new Yaml();
 	protected YamlASTProvider parser = new YamlASTProvider(yaml);
 	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
@@ -87,7 +87,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		}
 
 		public SRootNode parseStructure() throws Exception {
-			return new YamlStructureParser(ymlDoc).parse();
+			return structureProvider.getStructure(ymlDoc);
 		}
 
 		public int startOf(String nodeText) {
