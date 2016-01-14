@@ -11,25 +11,22 @@
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 
 	private CompletionFactory proposalFactory;
-
-	private String WORDS[] = {
-			"foo", "bar", "fun"
-	};
 
 	public ManifestYamlCompletionEngine() {
 		super(YamlStructureProvider.DEFAULT);
@@ -37,14 +34,22 @@ public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 	}
 
 	@Override
-	public Collection<ICompletionProposal> getCompletions(IDocument document, int offset) throws Exception {
-		Builder<ICompletionProposal> builder = ImmutableSet.builder();
-		int order = 0;
-		for (String word : WORDS) {
-			order++;
-			builder.add(insert(document, offset, word, order));
+	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
+		YamlDocument doc = new YamlDocument(_doc, structureProvider);
+		if (!doc.isCommented(offset)) {
+			SRootNode root = doc.getStructure();
+			SNode current = root.find(offset);
+			YamlPath path = getContextPath(doc, current, offset);
+			if (path!=null) {
+				return getCompletions(doc, offset, path);
+			}
 		}
-		return builder.build();
+		return Collections.emptyList();
+	}
+
+	private Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset, YamlPath path) {
+		System.out.println("CA path: "+path.toPropString());
+		return Collections.emptyList();
 	}
 
 	private ICompletionProposal insert(IDocument doc, int offset, String word, int order) {
@@ -52,5 +57,4 @@ public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 		edits.insert(offset, word);
 		return proposalFactory.simpleProposal(word, -order, edits);
 	}
-
 }

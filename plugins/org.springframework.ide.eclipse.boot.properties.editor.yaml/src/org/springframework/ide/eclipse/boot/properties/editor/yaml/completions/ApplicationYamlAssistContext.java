@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyPr
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.TypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -43,6 +42,7 @@ import org.springframework.ide.eclipse.editor.support.completions.CompletionFact
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlPathEdits;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
