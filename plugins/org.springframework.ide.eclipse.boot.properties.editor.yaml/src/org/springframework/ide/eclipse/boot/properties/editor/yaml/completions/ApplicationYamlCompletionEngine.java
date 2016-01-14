@@ -23,14 +23,16 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.Proper
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SSeqNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SSeqNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 
 public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
@@ -38,7 +40,6 @@ public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 	//private Yaml yaml;
 	private SpringPropertyIndexProvider indexProvider;
 	private DocumentContextFinder contextFinder;
-	private YamlStructureProvider structureProvider;
 	private PropertyCompletionFactory completionFactory;
 	private TypeUtilProvider typeUtilProvider;
 	private RelaxedNameConfig conf;
@@ -50,10 +51,10 @@ public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 			TypeUtilProvider typeUtilProvider,
 			RelaxedNameConfig conf
 	) {
+		super(structureProvider);
 		//this.yaml = yaml;
 		this.indexProvider = indexProvider;
 		this.contextFinder = documentContextFinder;
-		this.structureProvider = structureProvider;
 		this.completionFactory = new PropertyCompletionFactory(contextFinder);
 		this.typeUtilProvider = typeUtilProvider;
 		this.conf = conf;
@@ -101,7 +102,7 @@ public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 			// rather than the structur-tree to determine the 'context' node.
 			int cursorIndent = doc.getColumn(offset);
 			int nodeIndent = node.getIndent();
-			int currentIndent = IndentUtil.minIndent(cursorIndent, nodeIndent);
+			int currentIndent = YamlIndentUtil.minIndent(cursorIndent, nodeIndent);
 			while (node.getIndent()==-1 || (node.getIndent()>=currentIndent && node.getNodeType()!=SNodeType.DOC)) {
 				node = node.getParent();
 			}

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.editor.support.yaml;
 
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
  * Abstratc superclass to make it easier to define {@link ICompletionEngine} implementation
@@ -19,5 +20,11 @@ import org.springframework.ide.eclipse.editor.support.completions.ICompletionEng
  * @author Kris De Volder
  */
 public abstract class YamlCompletionEngine implements ICompletionEngine {
+
+	public YamlCompletionEngine(YamlStructureProvider structureProvider) {
+		this.structureProvider= structureProvider;
+	}
+
+	protected YamlStructureProvider structureProvider;
 
 }

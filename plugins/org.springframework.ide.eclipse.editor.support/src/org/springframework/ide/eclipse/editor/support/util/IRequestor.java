@@ -8,17 +8,8 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.utils;
+package org.springframework.ide.eclipse.editor.support.util;
 
-import java.util.Collection;
-
-/**
- * @author Kris De Volder
- */
-public class CollectionUtil {
-
-	public static <E> boolean hasElements(Collection<E> c) {
-		return c!=null && !c.isEmpty();
-	}
-
+public interface IRequestor<T> {
+	void accept(T node);
 }

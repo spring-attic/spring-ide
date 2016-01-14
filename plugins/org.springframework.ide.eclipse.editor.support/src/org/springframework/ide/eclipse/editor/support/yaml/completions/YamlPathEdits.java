@@ -8,21 +8,23 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
+package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SDocNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 
 /**
  * Helper class that provides methods for creating the edits in a YamlDocument that
@@ -33,12 +35,12 @@ import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 public class YamlPathEdits extends DocumentEdits {
 
 	private YamlDocument doc;
-	private IndentUtil indentUtil;
+	private YamlIndentUtil indentUtil;
 
 	public YamlPathEdits(YamlDocument doc) {
 		super(doc.getDocument());
 		this.doc = doc;
-		this.indentUtil = new IndentUtil(doc);
+		this.indentUtil = new YamlIndentUtil(doc);
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class YamlPathEdits extends DocumentEdits {
 			String key = path.getSegment(i).toPropString();
 			buf.append(key);
 			buf.append(":");
-			indent += IndentUtil.INDENT_BY;
+			indent += YamlIndentUtil.INDENT_BY;
 		}
 		buf.append(indentUtil.applyIndentation(appendText, indent));
 		return buf.toString();
@@ -113,7 +115,7 @@ public class YamlPathEdits extends DocumentEdits {
 		if (parent.getNodeType()==SNodeType.DOC) {
 			return parent.getIndent();
 		} else {
-			return parent.getIndent()+IndentUtil.INDENT_BY;
+			return parent.getIndent()+YamlIndentUtil.INDENT_BY;
 		}
 	}
 

@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import java.util.List;
 
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**

@@ -8,27 +8,17 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.ast;
+package org.springframework.ide.eclipse.editor.support.util;
+
+import java.util.Collection;
 
 /**
- * Requestor that remembers only the last item received.
- *
  * @author Kris De Volder
  */
-public class RememberLast<T> implements IRequestor<T> {
+public class CollectionUtil {
 
-	private T last = null;
-
-	@Override
-	public void accept(T node) {
-		this.last = node;
-	}
-
-	/**
-	 * @return the last received item, may return null if no items where received.
-	 */
-	public T get() {
-		return last;
+	public static <E> boolean hasElements(Collection<E> c) {
+		return c!=null && !c.isEmpty();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.structure;
+package org.springframework.ide.eclipse.editor.support.yaml.structure;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -21,14 +21,12 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IRegion;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.IndentUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.utils.CollectionUtil;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 
 /**
  * A robust, coarse-grained parser that guesses the structure of a
@@ -450,12 +448,28 @@ public class YamlStructureParser {
 			if (CollectionUtil.hasElements(children)) {
 				SKeyNode child = keyMap().get(key);
 				if (child==null) {
-					String keyAlias = StringUtil.hyphensToCamelCase(key, false);
-					child = keyMap().get(keyAlias);
+					Iterable<String> keyAliases = getKeyAliasses(key);
+					if (keyAliases!=null) {
+						for (String keyAlias : keyAliases) {
+							child = keyMap().get(keyAlias);
+							if (child!=null) {
+								return child;
+							}
+						}
+					}
 				}
 				return child;
 			}
 			return null;
+		}
+
+		private Iterable<String> getKeyAliasses(String key) {
+			//TODO: This used to do this: StringUtil.camelCaseToHyphens(key)
+			// But that does not belong in here. The parse tree should be a dumb tree.
+			// It is who-ever is accessing the tree that should do this kind of 'aliassing'.
+			// Why? The aliassing has nothing to do with parsing. And different aliassings
+			// might be used in traversing parse-trees.
+			return Collections.emptyList();
 		}
 
 		private Map<String, SKeyNode> keyMap() throws Exception {
@@ -594,7 +608,7 @@ public class YamlStructureParser {
 
 	private SRawNode createRawNode(SChildBearingNode parent, YamlLine line) {
 		int indent = line.getIndent();
-		int start = IndentUtil.addToOffset(line.getStart(), indent);
+		int start = YamlIndentUtil.addToOffset(line.getStart(), indent);
 		int end = line.getEnd();
 		return new SRawNode(parent, line.getDocument(), indent, start, end);
 	}

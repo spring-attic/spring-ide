@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.*;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,15 +35,15 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.YamlHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
 

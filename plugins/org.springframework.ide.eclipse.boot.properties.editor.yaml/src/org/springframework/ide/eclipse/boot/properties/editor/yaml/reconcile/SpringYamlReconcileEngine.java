@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;

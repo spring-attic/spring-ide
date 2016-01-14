@@ -8,8 +8,14 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.text,
  org.eclipse.jface.text,
- org.springsource.ide.eclipse.commons.frameworks.core
+ org.springsource.ide.eclipse.commons.frameworks.core,
+ org.yaml.snakeyaml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.editor.support.completions,
- org.springframework.ide.eclipse.editor.support.yaml
+ org.springframework.ide.eclipse.editor.support.util,
+ org.springframework.ide.eclipse.editor.support.yaml,
+ org.springframework.ide.eclipse.editor.support.yaml.ast,
+ org.springframework.ide.eclipse.editor.support.yaml.completions,
+ org.springframework.ide.eclipse.editor.support.yaml.path,
+ org.springframework.ide.eclipse.editor.support.yaml.structure

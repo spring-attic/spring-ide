@@ -8,17 +8,18 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 
 /**
  * Helper methods to mainpulate indentation levels.
  *
  * @author Kris De Volder
  */
-public class IndentUtil {
+public class YamlIndentUtil {
 
 	/**
 	 * Number of indentation levels (spaces) added between a child and parent.
@@ -32,11 +33,11 @@ public class IndentUtil {
 	 */
 	public final String NEWLINE;
 
-	public IndentUtil(String newline) {
+	public YamlIndentUtil(String newline) {
 		this.NEWLINE = newline;
 	}
 
-	public IndentUtil(YamlDocument doc) {
+	public YamlIndentUtil(YamlDocument doc) {
 		IDocument d = doc.getDocument();
 		if (d instanceof IDocumentExtension4) {
 			this.NEWLINE = ((IDocumentExtension4) d).getDefaultLineDelimiter();

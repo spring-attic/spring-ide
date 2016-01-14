@@ -8,19 +8,18 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.path;
+package org.springframework.ide.eclipse.editor.support.yaml.path;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.RootRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.SeqRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.YamlNavigable;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment.YamlPathSegmentType;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.RootRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.SeqRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValueRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
 
 /**
  * @author Kris De Volder

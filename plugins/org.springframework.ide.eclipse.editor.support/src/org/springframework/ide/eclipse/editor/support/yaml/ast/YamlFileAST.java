@@ -8,18 +8,21 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.ast;
+package org.springframework.ide.eclipse.editor.support.yaml.ast;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil.contains;
+import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.contains;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.RootRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.SeqRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleKeyRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
+import org.springframework.ide.eclipse.editor.support.util.Collector;
+import org.springframework.ide.eclipse.editor.support.util.IRequestor;
+import org.springframework.ide.eclipse.editor.support.util.RememberLast;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.RootRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.SeqRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleKeyRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValueRef;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.SequenceNode;

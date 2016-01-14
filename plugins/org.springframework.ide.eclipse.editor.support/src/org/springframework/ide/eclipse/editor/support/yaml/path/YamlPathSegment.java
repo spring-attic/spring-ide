@@ -8,8 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.path;
-
+package org.springframework.ide.eclipse.editor.support.yaml.path;
 
 /**
  * A YamlPathSegment is a 'primitive' NodeNavigator operation.

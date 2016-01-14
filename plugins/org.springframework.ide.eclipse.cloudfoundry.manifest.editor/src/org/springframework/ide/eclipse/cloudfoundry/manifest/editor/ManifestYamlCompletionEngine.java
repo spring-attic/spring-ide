@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 
@@ -31,6 +32,7 @@ public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 	};
 
 	public ManifestYamlCompletionEngine() {
+		super(YamlStructureProvider.DEFAULT);
 		proposalFactory = new CompletionFactory();
 	}
 

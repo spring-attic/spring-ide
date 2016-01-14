@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.ast;
+package org.springframework.ide.eclipse.editor.support.yaml.ast;
 
 import org.eclipse.jface.text.IRegion;
 import org.yaml.snakeyaml.nodes.Node;

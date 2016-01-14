@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil.asScalar;
-
 import java.security.KeyStore.Entry;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +25,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.Kind;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef.TupleValueRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.Kind;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValueRef;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
@@ -40,7 +38,8 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST.getChildren;
+import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.asScalar;
+import static org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST.getChildren;
 
 /**
  * @author Kris De Volder
