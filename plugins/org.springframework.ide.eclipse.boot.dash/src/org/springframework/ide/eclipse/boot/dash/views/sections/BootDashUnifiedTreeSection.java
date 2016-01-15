@@ -75,7 +75,6 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
-import org.springframework.ide.eclipse.boot.dash.views.ToggleFilterAction;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
