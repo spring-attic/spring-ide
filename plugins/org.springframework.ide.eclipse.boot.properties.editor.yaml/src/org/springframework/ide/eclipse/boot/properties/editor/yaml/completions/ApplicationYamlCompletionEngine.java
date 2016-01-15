@@ -10,25 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
-import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
