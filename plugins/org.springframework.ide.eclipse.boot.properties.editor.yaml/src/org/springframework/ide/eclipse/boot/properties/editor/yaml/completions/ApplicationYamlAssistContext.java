@@ -154,7 +154,7 @@ public abstract class ApplicationYamlAssistContext {
 		}
 	}
 
-	public class TypeContext extends ApplicationYamlAssistContext {
+	private static class TypeContext extends ApplicationYamlAssistContext {
 
 		private PropertyCompletionFactory completionFactory;
 		private Type type;

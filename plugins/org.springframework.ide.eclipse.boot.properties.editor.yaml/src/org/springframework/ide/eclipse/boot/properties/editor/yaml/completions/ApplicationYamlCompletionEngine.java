@@ -25,30 +25,27 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
-import org.yaml.snakeyaml.Yaml;
 
 public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 
-	//private Yaml yaml;
 	private SpringPropertyIndexProvider indexProvider;
 	private DocumentContextFinder contextFinder;
 	private PropertyCompletionFactory completionFactory;
 	private TypeUtilProvider typeUtilProvider;
 	private RelaxedNameConfig conf;
 
-	public ApplicationYamlCompletionEngine(Yaml yaml,
-			SpringPropertyIndexProvider indexProvider,
+	public ApplicationYamlCompletionEngine(SpringPropertyIndexProvider indexProvider,
 			DocumentContextFinder documentContextFinder,
 			YamlStructureProvider structureProvider,
 			TypeUtilProvider typeUtilProvider,
 			RelaxedNameConfig conf
 	) {
 		super(structureProvider);
-		//this.yaml = yaml;
 		this.indexProvider = indexProvider;
 		this.contextFinder = documentContextFinder;
 		this.completionFactory = new PropertyCompletionFactory(contextFinder);
@@ -77,6 +74,11 @@ public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 	private ApplicationYamlAssistContext getContext(YamlDocument doc, YamlPath contextPath, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
 		TypeUtil typeUtil = typeUtilProvider.getTypeUtil(doc.getDocument());
 		return ApplicationYamlAssistContext.forPath(contextPath, index, completionFactory, typeUtil, conf);
+	}
+
+	@Override
+	protected YamlAssistContext getGlobalContext() {
+		return null;
 	}
 
 

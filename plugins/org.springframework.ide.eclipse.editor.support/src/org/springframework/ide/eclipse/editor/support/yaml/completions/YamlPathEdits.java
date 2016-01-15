@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
@@ -20,11 +19,9 @@ import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNodeType;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 
 /**
  * Helper class that provides methods for creating the edits in a YamlDocument that
@@ -138,20 +135,6 @@ public class YamlPathEdits extends DocumentEdits {
 			IRegion r = doc.getLineInformation(insertAfterLine);
 			return r.getOffset() + r.getLength();
 		}
-	}
-
-	private SKeyNode findChildForKey(SChildBearingNode node, String key) throws Exception {
-		return (SKeyNode) node.traverse(YamlPathSegment.valueAt(key));
-//		for (SNode c : node.getChildren()) {
-//			if (c.getNodeType()==SNodeType.KEY) {
-//				String nodeKey = ((SKeyNode)c).getKey();
-//				//TODO: relax matching camel-case -> hyphens
-//				if (key.equals(nodeKey)) {
-//					return (SKeyNode)c;
-//				}
-//			}
-//		}
-//		return null;
 	}
 
 	public void createPathInPlace(SNode contextNode, YamlPath relativePath, int insertionPoint, String appendText) throws Exception {

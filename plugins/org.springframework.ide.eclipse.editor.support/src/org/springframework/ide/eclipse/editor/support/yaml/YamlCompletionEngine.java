@@ -10,17 +10,25 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNodeType;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SSeqNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
- * Abstratc superclass to make it easier to define {@link ICompletionEngine} implementation
+ * Abstract superclass to make it easier to define {@link ICompletionEngine} implementation
  * for .yml file.
  *
  * @author Kris De Volder
@@ -32,6 +40,31 @@ public abstract class YamlCompletionEngine implements ICompletionEngine {
 	}
 
 	protected YamlStructureProvider structureProvider;
+
+	protected abstract YamlAssistContext getGlobalContext();
+
+	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
+		YamlDocument doc = new YamlDocument(_doc, structureProvider);
+		if (!doc.isCommented(offset)) {
+			SRootNode root = doc.getStructure();
+			SNode current = root.find(offset);
+			YamlPath contextPath = getContextPath(doc, current, offset);
+			YamlAssistContext context = getContext(doc, offset, current, contextPath);
+			if (context!=null) {
+				return context.getCompletions(doc, offset, current);
+			}
+		}
+		return Collections.emptyList();
+	}
+
+	protected YamlAssistContext getContext(YamlDocument doc, int offset, SNode node, YamlPath contextPath) {
+		try {
+			return contextPath.traverse(getGlobalContext());
+		} catch (Exception e) {
+			EditorSupportActivator.log(e);
+			return null;
+		}
+	}
 
 	protected YamlPath getContextPath(YamlDocument doc, SNode node, int offset) throws Exception {
 		if (node==null) {
@@ -48,7 +81,7 @@ public abstract class YamlCompletionEngine implements ICompletionEngine {
 		} else if (node.getNodeType()==SNodeType.RAW) {
 			//Treat raw node as a 'key node'. This is basically assuming that is misclasified
 			// by structure parser because the ':' was not yet typed into the document.
-	
+
 			//Complication: if line with cursor is empty or the cursor is inside the indentation
 			// area then the structure may not reflect correctly the context. This is because
 			// the correct context depends on text the user has not typed yet.(which will change the

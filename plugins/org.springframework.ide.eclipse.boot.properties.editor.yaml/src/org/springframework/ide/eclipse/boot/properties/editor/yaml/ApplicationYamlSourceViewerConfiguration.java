@@ -157,7 +157,7 @@ public class ApplicationYamlSourceViewerConfiguration extends YEditSourceViewerC
 
 	private YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 
-	private ICompletionEngine completionEngine = new ApplicationYamlCompletionEngine(yaml, indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
+	private ICompletionEngine completionEngine = new ApplicationYamlCompletionEngine(indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
 			RelaxedNameConfig.COMPLETION_DEFAULTS);
 
 	@Override

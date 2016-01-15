@@ -69,7 +69,7 @@ public class ManifestYamlSourceViewerConfiguration extends YEditSourceViewerConf
 			return existing;
 		}
 		IDialogSettings created = dialogSettings.addNewSection(DIALOG_SETTINGS_KEY);
-		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
+//		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
 //		int suggestW = (int)(windowBounds.width*0.35);
 //		int suggestH = (int)(suggestW*0.6);
 //		if (suggestW>300) {
