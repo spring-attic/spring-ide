@@ -509,14 +509,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, reconnectConsole);
 		}
 
-		ToggleFilterAction[] toggleFilterActions = actions.getToggleFilterActions();
-		if (ArrayUtils.hasElements(toggleFilterActions)) {
-			manager.add(new Separator());
-			for (ToggleFilterAction a : toggleFilterActions) {
-				addVisible(manager, a);
-			}
-		}
-
 //		manager.add
 //		addVisible(manager, new Separator());
 //		addVisible(manager, refreshAction);
