@@ -44,6 +44,8 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalApplie
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlPathEdits;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
@@ -58,7 +60,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
  * Represents a context insied a "application.yml" file relative to which we can provide
  * content assistance.
  */
-public abstract class ApplicationYamlAssistContext {
+public abstract class ApplicationYamlAssistContext implements YamlAssistContext {
 
 	protected final RelaxedNameConfig conf;
 
@@ -119,27 +121,30 @@ public abstract class ApplicationYamlAssistContext {
 	 */
 	protected abstract Type getType();
 
-	public abstract Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
-
-	public static ApplicationYamlAssistContext global(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+	public static ApplicationYamlAssistContext subdocument(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil, conf);
 	}
 
 	public static ApplicationYamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
-		YamlPathSegment documentSelector = contextPath.getSegment(0);
-		if (documentSelector!=null) {
-			contextPath = contextPath.dropFirst(1);
-			ApplicationYamlAssistContext context = ApplicationYamlAssistContext.global(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
-			for (YamlPathSegment s : contextPath.getSegments()) {
-				if (context==null) return null;
-				context = context.navigate(s);
+		try {
+			YamlPathSegment documentSelector = contextPath.getSegment(0);
+			if (documentSelector!=null) {
+				contextPath = contextPath.dropFirst(1);
+				ApplicationYamlAssistContext context = ApplicationYamlAssistContext.subdocument(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
+				for (YamlPathSegment s : contextPath.getSegments()) {
+					if (context==null) return null;
+					context = context.traverse(s);
+				}
+				return context;
 			}
-			return context;
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
 		return null;
 	}
 
-	protected abstract ApplicationYamlAssistContext navigate(YamlPathSegment s);
+	@Override
+	abstract public ApplicationYamlAssistContext traverse(YamlPathSegment s) throws Exception;
 
 	/**
 	 * Delete a content assist query from the document, and also the line of
@@ -269,7 +274,7 @@ public abstract class ApplicationYamlAssistContext {
 		}
 
 		@Override
-		protected ApplicationYamlAssistContext navigate(YamlPathSegment s) {
+		public ApplicationYamlAssistContext traverse(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				if (TypeUtil.isSequencable(type) || TypeUtil.isMap(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
@@ -390,7 +395,7 @@ public abstract class ApplicationYamlAssistContext {
 		}
 
 		@Override
-		protected ApplicationYamlAssistContext navigate(YamlPathSegment s) {
+		public ApplicationYamlAssistContext traverse(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				String key = s.toPropString();
 				IndexNavigator subIndex = indexNav.selectSubProperty(key);
@@ -449,6 +454,15 @@ public abstract class ApplicationYamlAssistContext {
 	protected SDocNode getContextRoot(YamlDocument file) throws Exception {
 		SRootNode root = file.getStructure();
 		return (SDocNode) root.getChildren().get(documentSelector);
+	}
+
+	public static YamlAssistContext global(final FuzzyMap<PropertyInfo> index, final PropertyCompletionFactory completionFactory, final TypeUtil typeUtil, final RelaxedNameConfig conf) {
+		return new TopLevelAssistContext() {
+			@Override
+			protected YamlAssistContext getDocumentContext(int documentSelector) {
+				return subdocument(documentSelector, index, completionFactory, typeUtil, conf);
+			}
+		};
 	}
 
 

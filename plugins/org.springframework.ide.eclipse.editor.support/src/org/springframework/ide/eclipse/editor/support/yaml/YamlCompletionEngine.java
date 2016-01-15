@@ -41,7 +41,7 @@ public abstract class YamlCompletionEngine implements ICompletionEngine {
 
 	protected YamlStructureProvider structureProvider;
 
-	protected abstract YamlAssistContext getGlobalContext();
+	protected abstract YamlAssistContext getGlobalContext(YamlDocument doc);
 
 	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
 		YamlDocument doc = new YamlDocument(_doc, structureProvider);
@@ -51,7 +51,7 @@ public abstract class YamlCompletionEngine implements ICompletionEngine {
 			YamlPath contextPath = getContextPath(doc, current, offset);
 			YamlAssistContext context = getContext(doc, offset, current, contextPath);
 			if (context!=null) {
-				return context.getCompletions(doc, offset, current);
+				return context.getCompletions(doc, offset);
 			}
 		}
 		return Collections.emptyList();
@@ -59,7 +59,7 @@ public abstract class YamlCompletionEngine implements ICompletionEngine {
 
 	protected YamlAssistContext getContext(YamlDocument doc, int offset, SNode node, YamlPath contextPath) {
 		try {
-			return contextPath.traverse(getGlobalContext());
+			return contextPath.traverse(getGlobalContext(doc));
 		} catch (Exception e) {
 			EditorSupportActivator.log(e);
 			return null;

@@ -15,6 +15,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
@@ -34,7 +35,7 @@ public class ManifestYamlCompletionEngine extends YamlCompletionEngine {
 	}
 
 	@Override
-	protected YamlAssistContext getGlobalContext() {
+	protected YamlAssistContext getGlobalContext(YamlDocument doc) {
 		//TODO: implement
 		return null;
 	}

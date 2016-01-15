@@ -15,8 +15,6 @@ import java.util.Collection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
-import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 
 /**
  * @author Kris De Volder
@@ -26,5 +24,5 @@ public interface YamlAssistContext extends YamlNavigable<YamlAssistContext> {
 	/**
 	 * Create context sensitive completions.
 	 */
-	Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset, SNode node);
+	Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
 }

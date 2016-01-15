@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -120,15 +120,19 @@ public class YamlPath {
 		return new YamlPath(newPath);
 	}
 
-	public <T extends YamlNavigable<T>> T traverse(T startNode) throws Exception {
-		T node = startNode;
-		for (YamlPathSegment s : segments) {
-			if (node==null) {
-				return null;
+	public <T extends YamlNavigable<T>> T traverse(T startNode) {
+		try {
+			T node = startNode;
+			for (YamlPathSegment s : segments) {
+				if (node==null) {
+					return null;
+				}
+				node = node.traverse(s);
 			}
-			node = node.traverse(s);
+			return node;
+		} catch (Exception e) {
+			return null;
 		}
-		return node;
 	}
 
 	public YamlPath dropFirst(int dropCount) {

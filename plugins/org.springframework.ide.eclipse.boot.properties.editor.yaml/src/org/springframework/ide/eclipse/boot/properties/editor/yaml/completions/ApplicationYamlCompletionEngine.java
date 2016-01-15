@@ -31,6 +31,9 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
+/**
+ * @author Kris De Volder
+ */
 public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 
 	private SpringPropertyIndexProvider indexProvider;
@@ -54,31 +57,10 @@ public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
 	}
 
 	@Override
-	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
-		YamlDocument doc = new YamlDocument(_doc, structureProvider);
-		if (!doc.isCommented(offset)) {
-			FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc.getDocument());
-			if (index!=null && !index.isEmpty()) {
-				SRootNode root = doc.getStructure();
-				SNode current = root.find(offset);
-				YamlPath contextPath = getContextPath(doc, current, offset);
-				ApplicationYamlAssistContext context = getContext(doc, contextPath, offset, index);
-				if (context!=null) {
-					return context.getCompletions(doc, offset);
-				}
-			}
-		}
-		return Collections.emptyList();
-	}
-
-	private ApplicationYamlAssistContext getContext(YamlDocument doc, YamlPath contextPath, int offset, FuzzyMap<PropertyInfo> index) throws Exception {
-		TypeUtil typeUtil = typeUtilProvider.getTypeUtil(doc.getDocument());
-		return ApplicationYamlAssistContext.forPath(contextPath, index, completionFactory, typeUtil, conf);
-	}
-
-	@Override
-	protected YamlAssistContext getGlobalContext() {
-		return null;
+	protected YamlAssistContext getGlobalContext(YamlDocument ydoc) {
+		IDocument doc = ydoc.getDocument();
+		FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
+		return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), conf);
 	}
 
 
