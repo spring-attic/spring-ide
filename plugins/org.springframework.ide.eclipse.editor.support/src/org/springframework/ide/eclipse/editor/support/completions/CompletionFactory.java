@@ -23,11 +23,11 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 
 /**
- * Provides methods for creating completion proposals.
- *
  * @author Kris De Volder
  */
 public class CompletionFactory {
+
+	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
 	public ScoreableProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
 		return simpleProposal(name, -(1.0+sortingOrder), applier);

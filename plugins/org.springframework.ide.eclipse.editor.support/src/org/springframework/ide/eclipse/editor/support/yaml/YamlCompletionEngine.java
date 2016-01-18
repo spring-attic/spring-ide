@@ -16,6 +16,7 @@ import java.util.Collections;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
@@ -42,6 +43,10 @@ public abstract class YamlCompletionEngine implements ICompletionEngine {
 	protected YamlStructureProvider structureProvider;
 
 	protected abstract YamlAssistContext getGlobalContext(YamlDocument doc);
+
+	protected CompletionFactory proposalFactory() {
+		return CompletionFactory.DEFAULT;
+	}
 
 	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
 		YamlDocument doc = new YamlDocument(_doc, structureProvider);

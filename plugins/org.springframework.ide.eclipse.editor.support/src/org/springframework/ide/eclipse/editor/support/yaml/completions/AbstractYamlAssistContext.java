@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SDocNode;
@@ -49,6 +50,10 @@ public abstract class AbstractYamlAssistContext implements YamlAssistContext {
 	protected SDocNode getContextRoot(YamlDocument file) throws Exception {
 		SRootNode root = file.getStructure();
 		return (SDocNode) root.getChildren().get(documentSelector);
+	}
+
+	protected CompletionFactory completionFactory() {
+		return CompletionFactory.DEFAULT;
 	}
 
 

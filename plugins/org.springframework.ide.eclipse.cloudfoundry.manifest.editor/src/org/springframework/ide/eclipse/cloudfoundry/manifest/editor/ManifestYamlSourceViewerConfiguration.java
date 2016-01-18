@@ -16,16 +16,17 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 public class ManifestYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration {
 
 	private final String DIALOG_SETTINGS_KEY = this.getClass().getName();
 	private ICompletionEngine completionEngine;
+	private ManifestYmlSchema schema = new ManifestYmlSchema();
+	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
 
 	public ManifestYamlSourceViewerConfiguration() {
 	}
@@ -57,7 +58,7 @@ public class ManifestYamlSourceViewerConfiguration extends YEditSourceViewerConf
 
 	protected ICompletionEngine getCompletionEngine() {
 		if (completionEngine==null) {
-			completionEngine = new ManifestYamlCompletionEngine();
+			completionEngine = new ManifestYamlCompletionEngine(structureProvider, schema);
 		}
 		return completionEngine;
 	}

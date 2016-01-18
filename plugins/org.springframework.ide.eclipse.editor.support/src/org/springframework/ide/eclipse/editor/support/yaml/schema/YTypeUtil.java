@@ -13,6 +13,14 @@ package org.springframework.ide.eclipse.editor.support.yaml.schema;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An implementation of YTypeUtil provides implementations of various
+ * methods operating on YTypes and interpreting them in some context
+ * (e.g. the meaning of YType objects may depend on types resolved
+ * from the current project's classpath).
+ *
+ * @author Kris De Volder
+ */
 public interface YTypeUtil {
 	boolean isAtomic(YType type);
 	boolean isMap(YType type);

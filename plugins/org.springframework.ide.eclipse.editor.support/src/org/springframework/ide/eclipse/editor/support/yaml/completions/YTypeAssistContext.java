@@ -39,17 +39,22 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 
 public class YTypeAssistContext extends AbstractYamlAssistContext {
 
-	private CompletionFactory completionFactory;
-	private YTypeUtil typeUtil;
-	private YType YType;
-	private YamlAssistContext parent;
+	final private YTypeUtil typeUtil;
+	final private YType type;
+	final private YamlAssistContext parent;
 
-	public YTypeAssistContext(AbstractYamlAssistContext parent, YamlPath contextPath, YType YType, CompletionFactory completionFactory, YTypeUtil typeUtil) {
+	public YTypeAssistContext(YTypeAssistContext parent, YamlPath contextPath, YType YType, YTypeUtil typeUtil) {
 		super(parent.documentSelector, contextPath);
 		this.parent = parent;
-		this.completionFactory = completionFactory;
-		this.YType = YType;
+		this.type = YType;
 		this.typeUtil = typeUtil;
+	}
+
+	public YTypeAssistContext(TopLevelAssistContext parent, int documentSelector, YType type, YTypeUtil typeUtil) {
+		super(documentSelector, YamlPath.EMPTY);
+		this.type = type;
+		this.typeUtil = typeUtil;
+		this.parent = parent;
 	}
 
 	@Override
@@ -74,7 +79,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 
 	public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query) throws Exception {
 		int queryOffset = offset - query.length();
-		List<YTypedProperty> properties = typeUtil.getProperties(YType);
+		List<YTypedProperty> properties = typeUtil.getProperties(type);
 		if (CollectionUtil.hasElements(properties)) {
 			ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
 			SNode contextNode = getContextNode(doc);
@@ -90,7 +95,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 						YType YType = p.getType();
 						edits.delete(queryOffset, query);
 						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(YType));
-						proposals.add(completionFactory.beanProperty(doc.getDocument(),
+						proposals.add(completionFactory().beanProperty(doc.getDocument(),
 								contextPath.toPropString(), getType(),
 								query, p, score, edits, typeUtil)
 						);
@@ -101,7 +106,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 						//Cast to SChildBearingNode cannot fail because otherwise definedProps would be the empty set.
 						edits.createPath((SChildBearingNode) contextNode, relativePath, "");
 						proposals.add(
-							completionFactory.beanProperty(doc.getDocument(),
+							completionFactory().beanProperty(doc.getDocument(),
 								contextPath.toPropString(), getType(),
 								query, p, score, edits, typeUtil)
 							.deemphasize() //deemphasize because it already exists
@@ -157,7 +162,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	}
 
 	private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query) {
-		String[] values = typeUtil.getHintValues(YType);
+		String[] values = typeUtil.getHintValues(type);
 		if (values!=null) {
 			ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 			for (String value : values) {
@@ -166,7 +171,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 					DocumentEdits edits = new DocumentEdits(doc.getDocument());
 					edits.delete(offset-query.length(), offset);
 					edits.insert(offset, value);
-					completions.add(completionFactory.valueProposal(value, YType, score, edits));
+					completions.add(completionFactory().valueProposal(value, type, score, edits));
 				}
 			}
 			return completions;
@@ -177,17 +182,17 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	@Override
 	public YamlAssistContext traverse(YamlPathSegment s) {
 		if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
-			if (typeUtil.isSequencable(YType) || typeUtil.isMap(YType)) {
-				return contextWith(s, typeUtil.getDomainType(YType));
+			if (typeUtil.isSequencable(type) || typeUtil.isMap(type)) {
+				return contextWith(s, typeUtil.getDomainType(type));
 			}
 			String key = s.toPropString();
-			Map<String, YType> subproperties = typeUtil.getPropertiesMap(YType);
+			Map<String, YType> subproperties = typeUtil.getPropertiesMap(type);
 			if (subproperties!=null) {
 				return contextWith(s, subproperties.get(key));
 			}
 		} else if (s.getType()==YamlPathSegmentType.VAL_AT_INDEX) {
-			if (typeUtil.isSequencable(YType)) {
-				return contextWith(s, typeUtil.getDomainType(YType));
+			if (typeUtil.isSequencable(type)) {
+				return contextWith(s, typeUtil.getDomainType(type));
 			}
 		}
 		return null;
@@ -195,7 +200,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 
 	private YamlAssistContext contextWith(YamlPathSegment s, YType nextType) {
 		if (nextType!=null) {
-			return new YTypeAssistContext(this, contextPath.append(s), nextType, completionFactory, typeUtil);
+			return new YTypeAssistContext(this, contextPath.append(s), nextType, typeUtil);
 		}
 		return null;
 	}
@@ -203,7 +208,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 
 	@Override
 	public String toString() {
-		return "TypeContext("+contextPath.toPropString()+"::"+YType+")";
+		return "TypeContext("+contextPath.toPropString()+"::"+type+")";
 	}
 
 
@@ -219,7 +224,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 //		}
 //	}
 
-	protected YType getType() {
-		return YType;
+	public YType getType() {
+		return type;
 	}
 }

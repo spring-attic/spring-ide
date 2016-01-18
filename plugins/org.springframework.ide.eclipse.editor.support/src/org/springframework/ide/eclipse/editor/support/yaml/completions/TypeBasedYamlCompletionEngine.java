@@ -8,25 +8,34 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
+package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
+import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.TypeBasedYamlCompletionEngine;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.YTypeAssistContext;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
-public class ManifestYamlCompletionEngine extends TypeBasedYamlCompletionEngine {
+/**
+ * A Yaml completion engine that creates proposals based on a single 'YType' which defines the
+ * expected structure of the yaml document's contents.
+ *
+ * @author Kris De Volder
+ */
+public class TypeBasedYamlCompletionEngine extends YamlCompletionEngine {
 
-	public ManifestYamlCompletionEngine(YamlStructureProvider structureProvider, ManifestYmlSchema schema) {
-		super(structureProvider, schema.TOPLEVEL_TYPE, schema.TYPE_UTIL);
+	protected final YType topLevelType;
+	protected final YTypeUtil typeUtil;
+
+	public TypeBasedYamlCompletionEngine(YamlStructureProvider structureProvider, YType topLevelType, YTypeUtil typeUtil) {
+		super(structureProvider);
+		this.topLevelType = topLevelType;
+		this.typeUtil = typeUtil;
 	}
 
 	@Override
 	protected YamlAssistContext getGlobalContext(YamlDocument doc) {
 		return new TopLevelAssistContext() {
-
 			@Override
 			protected YamlAssistContext getDocumentContext(int documentSelector) {
 				return new YTypeAssistContext(this, documentSelector, topLevelType, typeUtil);
