@@ -67,7 +67,7 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 						String key = path.getLastSegment().toPropString();
 						path = path.dropLast().append(YamlPathSegment.valueAt(key));
 					}
-					ApplicationYamlAssistContext assistContext = ApplicationYamlAssistContext.forPath(path, index, null, new TypeUtil(jp), RelaxedNameConfig.ALIASSED);
+					ApplicationYamlAssistContext assistContext = (ApplicationYamlAssistContext) ApplicationYamlAssistContext.forPath(path, index, null, new TypeUtil(jp), RelaxedNameConfig.ALIASSED);
 					if (assistContext!=null) {
 						return assistContext.getHoverInfo();
 					}
@@ -95,9 +95,7 @@ public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
 	private YamlFileAST getAst(IDocument doc) {
 		try {
 			return astProvider.getAST(doc);
-		} catch (ParserException e) {
-			//ignore, the user just typed some crap
-		} catch (ScannerException e) {
+		} catch (ParserException|ScannerException e) {
 			//ignore, the user just typed some crap
 		}
 		return null;

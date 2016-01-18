@@ -39,7 +39,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
  org.dadacoalition.yedit,
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ org.springframework.ide.eclipse.editor.support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

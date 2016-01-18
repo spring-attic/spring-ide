@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.util;
+package org.springframework.ide.eclipse.editor.support.util;
 
 /**
  * @author Kris De Volder

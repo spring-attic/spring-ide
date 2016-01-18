@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHove
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.TypeNavigationHoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -42,8 +41,10 @@ import org.springframework.ide.eclipse.editor.support.completions.CompletionFact
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlPathEdits;
@@ -51,16 +52,14 @@ import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SDocNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 
 /**
  * Represents a context insied a "application.yml" file relative to which we can provide
  * content assistance.
  */
-public abstract class ApplicationYamlAssistContext implements YamlAssistContext {
+public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistContext {
 
 	protected final RelaxedNameConfig conf;
 
@@ -76,14 +75,10 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 	//	}
 	//	protected final Kind contextKind;
 
-	protected int documentSelector; // Yaml file can contain multiple document. The idx indicates which
-								// document this context is in.
-	protected final YamlPath contextPath;
-	protected final TypeUtil typeUtil;
+	public final TypeUtil typeUtil;
 
 	public ApplicationYamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil, RelaxedNameConfig conf) {
-		this.documentSelector = documentSelector;
-		this.contextPath = contextPath;
+		super(documentSelector, contextPath);
 		this.typeUtil = typeUtil;
 		this.conf = conf;
 	}
@@ -125,12 +120,12 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil, conf);
 	}
 
-	public static ApplicationYamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		try {
 			YamlPathSegment documentSelector = contextPath.getSegment(0);
 			if (documentSelector!=null) {
 				contextPath = contextPath.dropFirst(1);
-				ApplicationYamlAssistContext context = ApplicationYamlAssistContext.subdocument(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
+				YamlAssistContext context = ApplicationYamlAssistContext.subdocument(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
 				for (YamlPathSegment s : contextPath.getSegments()) {
 					if (context==null) return null;
 					context = context.traverse(s);
@@ -144,20 +139,7 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 	}
 
 	@Override
-	abstract public ApplicationYamlAssistContext traverse(YamlPathSegment s) throws Exception;
-
-	/**
-	 * Delete a content assist query from the document, and also the line of
-	 * text in the document that contains it, if that line of text contains just the
-	 * query surrounded by whitespace.
-	 */
-	private static void deleteQueryAndLine(YamlDocument doc, String query, int queryOffset, YamlPathEdits edits) throws Exception {
-		edits.delete(queryOffset, query);
-		String wholeLine = doc.getLineTextAtOffset(queryOffset);
-		if (wholeLine.trim().equals(query.trim())) {
-			edits.deleteLineBackwardAtOffset(queryOffset);
-		}
-	}
+	abstract public YamlAssistContext traverse(YamlPathSegment s) throws Exception;
 
 	private static class TypeContext extends ApplicationYamlAssistContext {
 
@@ -274,7 +256,7 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 		}
 
 		@Override
-		public ApplicationYamlAssistContext traverse(YamlPathSegment s) {
+		public YamlAssistContext traverse(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				if (TypeUtil.isSequencable(type) || TypeUtil.isMap(type)) {
 					return contextWith(s, TypeUtil.getDomainType(type));
@@ -292,7 +274,7 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 			return null;
 		}
 
-		private ApplicationYamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
+		private AbstractYamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
 			if (nextType!=null) {
 				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil, conf);
 			}
@@ -395,7 +377,7 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 		}
 
 		@Override
-		public ApplicationYamlAssistContext traverse(YamlPathSegment s) {
+		public AbstractYamlAssistContext traverse(YamlPathSegment s) {
 			if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 				String key = s.toPropString();
 				IndexNavigator subIndex = indexNav.selectSubProperty(key);
@@ -446,15 +428,6 @@ public abstract class ApplicationYamlAssistContext implements YamlAssistContext 
 	}
 
 	public abstract HoverInfo getHoverInfo();
-
-	protected SNode getContextNode(YamlDocument file) throws Exception {
-		return contextPath.traverse((SNode)getContextRoot(file));
-	}
-
-	protected SDocNode getContextRoot(YamlDocument file) throws Exception {
-		SRootNode root = file.getStructure();
-		return (SDocNode) root.getChildren().get(documentSelector);
-	}
 
 	public static YamlAssistContext global(final FuzzyMap<PropertyInfo> index, final PropertyCompletionFactory completionFactory, final TypeUtil typeUtil, final RelaxedNameConfig conf) {
 		return new TopLevelAssistContext() {

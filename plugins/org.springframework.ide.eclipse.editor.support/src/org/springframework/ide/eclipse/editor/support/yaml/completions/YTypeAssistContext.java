@@ -1,0 +1,225 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.editor.support.yaml.completions;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+
+public class YTypeAssistContext extends AbstractYamlAssistContext {
+
+	private CompletionFactory completionFactory;
+	private YTypeUtil typeUtil;
+	private YType YType;
+	private YamlAssistContext parent;
+
+	public YTypeAssistContext(AbstractYamlAssistContext parent, YamlPath contextPath, YType YType, CompletionFactory completionFactory, YTypeUtil typeUtil) {
+		super(parent.documentSelector, contextPath);
+		this.parent = parent;
+		this.completionFactory = completionFactory;
+		this.YType = YType;
+		this.typeUtil = typeUtil;
+	}
+
+	@Override
+	public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
+		String query = getPrefix(doc.getDocument(), offset);
+		List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query);
+		if (!valueCompletions.isEmpty()) {
+			return valueCompletions;
+		}
+		return getKeyCompletions(doc, offset, query);
+	}
+
+	private static PrefixFinder prefixfinder = new PrefixFinder() {
+		protected boolean isPrefixChar(char c) {
+			return !Character.isWhitespace(c) && c!=':';
+		}
+	};
+
+	private String getPrefix(IDocument doc, int offset) {
+		return prefixfinder.getPrefix(doc, offset);
+	}
+
+	public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query) throws Exception {
+		int queryOffset = offset - query.length();
+		List<YTypedProperty> properties = typeUtil.getProperties(YType);
+		if (CollectionUtil.hasElements(properties)) {
+			ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
+			SNode contextNode = getContextNode(doc);
+			Set<String> definedProps = getDefinedProperties(contextNode);
+			for (YTypedProperty p : properties) {
+				String name = p.getName();
+				double score = FuzzyMatcher.matchScore(query, name);
+				if (score!=0) {
+					YamlPath relativePath = YamlPath.fromSimpleProperty(name);
+					YamlPathEdits edits = new YamlPathEdits(doc);
+					if (!definedProps.contains(name)) {
+						//property not yet defined
+						YType YType = p.getType();
+						edits.delete(queryOffset, query);
+						edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(YType));
+						proposals.add(completionFactory.beanProperty(doc.getDocument(),
+								contextPath.toPropString(), getType(),
+								query, p, score, edits, typeUtil)
+						);
+					} else {
+						//property already defined
+						// instead of filtering, navigate to the place where its defined.
+						deleteQueryAndLine(doc, query, queryOffset, edits);
+						//Cast to SChildBearingNode cannot fail because otherwise definedProps would be the empty set.
+						edits.createPath((SChildBearingNode) contextNode, relativePath, "");
+						proposals.add(
+							completionFactory.beanProperty(doc.getDocument(),
+								contextPath.toPropString(), getType(),
+								query, p, score, edits, typeUtil)
+							.deemphasize() //deemphasize because it already exists
+						);
+					}
+				}
+			}
+			return proposals;
+		}
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Computes the text that should be appended at the end of a completion
+	 * proposal depending on what type of value is expected.
+	 */
+	protected String appendTextFor(YType type) {
+		//Note that proper indentation after each \n" is added automatically
+		//so the strings created here do not need to contain indentation spaces.
+		if (typeUtil.isMap(type)) {
+			//ready to enter nested map key on next line
+			return "\n";
+		} if (typeUtil.isSequencable(type)) {
+			//ready to enter sequence element on next line
+			return "\n- ";
+		} else if (typeUtil.isAtomic(type)) {
+			//ready to enter whatever on the same line
+			return " ";
+		} else {
+			//Assume its some kind of pojo bean
+			return "\n";
+		}
+	}
+
+	private Set<String> getDefinedProperties(SNode contextNode) {
+		try {
+			if (contextNode instanceof SChildBearingNode) {
+				List<SNode> children = ((SChildBearingNode)contextNode).getChildren();
+				if (CollectionUtil.hasElements(children)) {
+					Set<String> keys = new HashSet<String>(children.size());
+					for (SNode c : children) {
+						if (c instanceof SKeyNode) {
+							keys.add(((SKeyNode) c).getKey());
+						}
+					}
+					return keys;
+				}
+			}
+		} catch (Exception e) {
+			EditorSupportActivator.log(e);
+		}
+		return Collections.emptySet();
+	}
+
+	private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query) {
+		String[] values = typeUtil.getHintValues(YType);
+		if (values!=null) {
+			ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
+			for (String value : values) {
+				double score = FuzzyMatcher.matchScore(query, value);
+				if (score!=0 && !value.equals(query)) {
+					DocumentEdits edits = new DocumentEdits(doc.getDocument());
+					edits.delete(offset-query.length(), offset);
+					edits.insert(offset, value);
+					completions.add(completionFactory.valueProposal(value, YType, score, edits));
+				}
+			}
+			return completions;
+		}
+		return Collections.emptyList();
+	}
+
+	@Override
+	public YamlAssistContext traverse(YamlPathSegment s) {
+		if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
+			if (typeUtil.isSequencable(YType) || typeUtil.isMap(YType)) {
+				return contextWith(s, typeUtil.getDomainType(YType));
+			}
+			String key = s.toPropString();
+			Map<String, YType> subproperties = typeUtil.getPropertiesMap(YType);
+			if (subproperties!=null) {
+				return contextWith(s, subproperties.get(key));
+			}
+		} else if (s.getType()==YamlPathSegmentType.VAL_AT_INDEX) {
+			if (typeUtil.isSequencable(YType)) {
+				return contextWith(s, typeUtil.getDomainType(YType));
+			}
+		}
+		return null;
+	}
+
+	private YamlAssistContext contextWith(YamlPathSegment s, YType nextType) {
+		if (nextType!=null) {
+			return new YTypeAssistContext(this, contextPath.append(s), nextType, completionFactory, typeUtil);
+		}
+		return null;
+	}
+
+
+	@Override
+	public String toString() {
+		return "TypeContext("+contextPath.toPropString()+"::"+YType+")";
+	}
+
+
+//	@Override
+//	public HoverInfo getHoverInfo() {
+//		if (parent instanceof IndexContext) {
+//			//this context is in fact an 'alias' of its parent, representing the
+//			// point in the context hierarchy where a we transition from navigating
+//			// the index to navigating YType/bean properties
+//			return parent.getHoverInfo();
+//		} else {
+//			return new TypeNavigationHoverInfo(contextPath.toPropString(), contextPath.getBeanPropertyName(), parent.getType(), getType(), typeUtil);
+//		}
+//	}
+
+	protected YType getType() {
+		return YType;
+	}
+}

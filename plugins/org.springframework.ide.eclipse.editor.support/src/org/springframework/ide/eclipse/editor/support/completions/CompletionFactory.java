@@ -18,6 +18,9 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 
 /**
  * Provides methods for creating completion proposals.
@@ -132,5 +135,15 @@ public class CompletionFactory {
 			return 0;
 		}
 	};
+
+	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final YType contextType, final String pattern, final YTypedProperty p, final double score, ProposalApplier applier, final YTypeUtil typeUtil) {
+		//TODO; pull up the fancy implementation from PropertyCompletionProposalFactory. The method here now is a 'stub' which uses 'simpleProposal.
+		return simpleProposal(p.toString(), score, applier);
+	}
+
+	public ICompletionProposal valueProposal(String value, YType yType, double score, ProposalApplier applier) {
+		//TODO; sort out the alternate implementation in super class. Should not be needed.
+		return simpleProposal(value, score, applier);
+	}
 
 }

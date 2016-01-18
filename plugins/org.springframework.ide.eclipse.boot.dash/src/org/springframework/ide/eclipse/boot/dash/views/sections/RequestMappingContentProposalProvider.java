@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -18,9 +17,8 @@ import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-
-import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 
 public class RequestMappingContentProposalProvider implements IContentProposalProvider {
 
