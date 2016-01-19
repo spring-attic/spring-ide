@@ -13,7 +13,6 @@ Require-Bundle: org.eclipse.core.runtime,
  com.google.guava,
  org.eclipse.jdt.core,
  org.springframework.ide.eclipse.editor.support,
- org.springframework.ide.eclipse.editor.support,
  org.dadacoalition.yedit,
  org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
