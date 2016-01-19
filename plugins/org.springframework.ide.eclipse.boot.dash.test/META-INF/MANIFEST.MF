@@ -7,7 +7,6 @@ Bundle-Version: 3.7.3.qualifier
 Bundle-Vendor: Pivotal Inc
 Require-Bundle: org.eclipse.core.runtime,
  org.junit,
- org.springframework.ide.eclipse.boot.dash,
  org.eclipse.core.resources,
  org.springsource.ide.eclipse.commons.tests.util,
  org.apache.commons.io,
