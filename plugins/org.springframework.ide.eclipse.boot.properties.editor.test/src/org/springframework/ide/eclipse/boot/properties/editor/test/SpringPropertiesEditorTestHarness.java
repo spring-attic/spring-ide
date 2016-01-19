@@ -68,7 +68,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	 * Compute hover text when mouse hovers at the end of the first occurence of
 	 * a given String in the editor contents.
 	 */
-	public String getHoverText(MockEditor editor, String atString) {
+	public String getHoverText(MockPropertiesEditor editor, String atString) {
 		int pos = editor.getText().indexOf(atString);
 		if (pos>=0) {
 			pos += atString.length();
@@ -80,7 +80,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		return null;
 	}
 
-	public ICompletionProposal[] getCompletions(MockEditor editor)
+	public ICompletionProposal[] getCompletions(MockPropertiesEditor editor)
 			throws BadLocationException {
 		Collection<ICompletionProposal> _completions = engine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
@@ -93,13 +93,13 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	 * computed when hovering mouse at position at the end of first occurence of
 	 * a given string in the editor.
 	 */
-	public void assertHoverText(MockEditor editor, String afterString, String expectSnippet) {
+	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
 		String hoverText = getHoverText(editor, afterString);
 		assertContains(expectSnippet, hoverText);
 	}
 
 	public void assertCompletionDisplayString(String editorContents, String expected) throws Exception {
-		MockEditor editor = new MockEditor(editorContents);
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorContents);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		assertEquals(expected, completion.getDisplayString());
 	}
@@ -141,7 +141,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	}
 
 
-	public void assertLinkTargets(MockEditor editor, String hoverAtEndOf, String... expecteds) {
+	public void assertLinkTargets(MockPropertiesEditor editor, String hoverAtEndOf, String... expecteds) {
 		int pos = editor.getText().indexOf(hoverAtEndOf);
 		assertTrue("Not found in editor: '"+hoverAtEndOf+"'", pos>=0);
 		pos += hoverAtEndOf.length();
@@ -164,7 +164,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		}
 	}
 
-	private List<PropertySource> getRawLinkTargets(MockEditor editor, int pos) {
+	private List<PropertySource> getRawLinkTargets(MockPropertiesEditor editor, int pos) {
 		IRegion region = engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
 			SpringPropertyHoverInfo hover = engine.getHoverInfo(editor.document, region);
@@ -175,7 +175,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		return Collections.emptyList();
 	}
 
-	protected List<IJavaElement> getLinkTargets(MockEditor editor, int pos) {
+	protected List<IJavaElement> getLinkTargets(MockPropertiesEditor editor, int pos) {
 		IRegion region = engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
 			HoverInfo info = engine.getHoverInfo(editor.document, region);

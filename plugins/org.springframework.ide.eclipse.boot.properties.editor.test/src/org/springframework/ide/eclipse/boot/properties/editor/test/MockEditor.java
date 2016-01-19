@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -20,10 +19,9 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalApplie
 /**
  * Basic 'simulated' editor. Contains text and a cursor position / selection.
  */
-@SuppressWarnings("restriction")
 public class MockEditor {
 
-	int selectionStart;
+	protected int selectionStart;
 	private int selectionEnd;
 	Document document;
 	public static final String CURSOR = "<*>";
@@ -32,27 +30,13 @@ public class MockEditor {
 		return document;
 	}
 
-	/**
-	 * Create mock editor. Selection position is initialized by looking for the CURSOR string.
-	 * <p>
-	 * THe cursor string is not actually considered part of the text, but only a marker for
-	 * the cursor position.
-	 * <p>
-	 * If one 'cursor' marker is present in the text the selection
-	 * is length 0 and starts at the marker.
-	 * <p>
-	 * If two markers are present the selection is between the two
-	 * markers.
-	 * <p>
-	 * If no markers are present the cursor is placed at the very end of the document.
-	 */
 	public MockEditor(String text) {
-		selectionStart = text.indexOf(MockEditor.CURSOR);
+		selectionStart = text.indexOf(MockPropertiesEditor.CURSOR);
 		if (selectionStart>=0) {
-			text = text.substring(0,selectionStart) + text.substring(selectionStart+MockEditor.CURSOR.length());
-			selectionEnd = text.indexOf(MockEditor.CURSOR, selectionStart);
+			text = text.substring(0,selectionStart) + text.substring(selectionStart+MockPropertiesEditor.CURSOR.length());
+			selectionEnd = text.indexOf(MockPropertiesEditor.CURSOR, selectionStart);
 			if (selectionEnd>=0) {
-				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+MockEditor.CURSOR.length());
+				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+MockPropertiesEditor.CURSOR.length());
 			} else {
 				selectionEnd = selectionStart;
 			}
@@ -62,7 +46,6 @@ public class MockEditor {
 			selectionEnd = text.length();
 		}
 		this.document = new Document(text);
-		PropertiesFileDocumentSetupParticipant.setupDocument(document);
 	}
 
 	/**
@@ -71,9 +54,9 @@ public class MockEditor {
 	 */
 	public String getText() {
 		String text = document.get();
-		text = text.substring(0, selectionEnd) + MockEditor.CURSOR + text.substring(selectionEnd);
+		text = text.substring(0, selectionEnd) + MockPropertiesEditor.CURSOR + text.substring(selectionEnd);
 		if (selectionStart<selectionEnd) {
-			text = text.substring(0,selectionStart) + MockEditor.CURSOR + text.substring(selectionStart);
+			text = text.substring(0,selectionStart) + MockPropertiesEditor.CURSOR + text.substring(selectionStart);
 		}
 		return deWindowsify(text);
 	}
@@ -123,5 +106,4 @@ public class MockEditor {
 	public String toString() {
 		return "===== editor ====\n"+getText()+"\n===============\n";
 	}
-
 }

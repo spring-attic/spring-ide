@@ -29,7 +29,9 @@ public class ManifestYmlSchema {
 	public final YBeanType TOPLEVEL_TYPE;
 	public final YTypeUtil TYPE_UTIL;
 
-	private static final Set<String> TOPLEVEL_EXCLUDED = ImmutableSet.of("name", "host");
+	private static final Set<String> TOPLEVEL_EXCLUDED = ImmutableSet.of(
+		"name", "host", "hosts"
+	);
 
 	public ManifestYmlSchema() {
 		YTypeFactory f = new YTypeFactory();
@@ -56,23 +58,23 @@ public class ManifestYmlSchema {
 		TOPLEVEL_TYPE.addProperty("applications", f.yseq(application));
 
 		YTypedProperty[] props = {
-			f.yprop("name", t_string),
-			f.yprop("memory", t_memory),
-			f.yprop("host", t_string),
-			f.yprop("hosts", t_strings),
 			f.yprop("buildpack", t_string),
 			f.yprop("command", t_string),
 			f.yprop("disk_quota", t_memory),
 			f.yprop("domain", t_string),
-			f.yprop("stack", t_string),
+			f.yprop("env", t_env),
+			f.yprop("host", t_string),
+			f.yprop("hosts", t_strings),
 			f.yprop("instances", t_integer),
+			f.yprop("memory", t_memory),
+			f.yprop("name", t_string),
 			f.yprop("no-hostname", t_boolean),
 			f.yprop("no-route", t_boolean),
-			f.yprop("random-route", t_boolean),
 			f.yprop("path", t_path),
-			f.yprop("timeout", t_integer),
-			f.yprop("env", t_env),
-			f.yprop("services", t_strings)
+			f.yprop("random-route", t_boolean),
+			f.yprop("services", t_strings),
+			f.yprop("stack", t_string),
+			f.yprop("timeout", t_integer)
 		};
 
 		for (YTypedProperty prop : props) {

@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 public class DocumentEditsTest extends TestCase {
 
 	class TestSubject {
-		private MockEditor editor;
+		private MockPropertiesEditor editor;
 		private DocumentEdits edits;
 		private String orgText;
 
@@ -30,7 +30,7 @@ public class DocumentEditsTest extends TestCase {
 		}
 
 		public void reset() {
-			this.editor = new MockEditor(orgText);
+			this.editor = new MockPropertiesEditor(orgText);
 			this.edits = new DocumentEdits(editor.document);
 		}
 

@@ -571,7 +571,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return project;
 	}
 
-	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
+	public List<SpringPropertyProblem> reconcile(MockPropertiesEditor editor) {
 		IReconcileEngine reconciler = createReconcileEngine();
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
@@ -593,7 +593,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * @param expectedProblems
 	 * @throws BadLocationException
 	 */
-	public void assertProblems(MockEditor editor, String... expectedProblems)
+	public void assertProblems(MockPropertiesEditor editor, String... expectedProblems)
 			throws BadLocationException {
 		List<SpringPropertyProblem> actualProblems = reconcile(editor);
 		String bad = null;
@@ -611,7 +611,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			fail(bad+problemSumary(editor, actualProblems));
 		}
 	}
-	private String problemSumary(MockEditor editor, List<SpringPropertyProblem> actualProblems)
+	private String problemSumary(MockPropertiesEditor editor, List<SpringPropertyProblem> actualProblems)
 			throws BadLocationException {
 				StringBuilder buf = new StringBuilder();
 				for (SpringPropertyProblem p : actualProblems) {
@@ -624,7 +624,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 				return buf.toString();
 			}
 
-	private boolean matchProblem(MockEditor editor, SpringPropertyProblem actual, String expect) {
+	private boolean matchProblem(MockPropertiesEditor editor, SpringPropertyProblem actual, String expect) {
 		String[] parts = expect.split("\\|");
 		assertEquals(2, parts.length);
 		String badSnippet = parts[0];
@@ -638,17 +638,17 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		}
 	}
 
-	public ICompletionProposal getFirstCompletion(MockEditor editor) throws Exception {
+	public ICompletionProposal getFirstCompletion(MockPropertiesEditor editor) throws Exception {
 		return getCompletions(editor)[0];
 	}
 
-	public abstract ICompletionProposal[] getCompletions(MockEditor editor) throws Exception;
+	public abstract ICompletionProposal[] getCompletions(MockPropertiesEditor editor) throws Exception;
 
 	/**
 	 * Simulates applying the first completion to a text buffer and checks the result.
 	 */
 	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
+		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
@@ -659,7 +659,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * expected results.
 	 */
 	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
+		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		StringBuilder expect = new StringBuilder();
 		StringBuilder actual = new StringBuilder();
 		for (String after : expectTextAfter) {
@@ -669,7 +669,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 		ICompletionProposal[] completions = getCompletions(editor);
 		for (int i = 0; i < completions.length; i++) {
-			editor = new MockEditor(textBefore);
+			editor = new MockPropertiesEditor(textBefore);
 			editor.apply(completions[i]);
 			actual.append(editor.getText());
 			actual.append("\n-------------------\n");
@@ -679,7 +679,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels)
 			throws Exception {
-				MockEditor editor = new MockEditor(editorText);
+				MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
 				ICompletionProposal[] completions = getCompletions(editor);
 				String[] actualLabels = new String[completions.length];
 				for (int i = 0; i < actualLabels.length; i++) {

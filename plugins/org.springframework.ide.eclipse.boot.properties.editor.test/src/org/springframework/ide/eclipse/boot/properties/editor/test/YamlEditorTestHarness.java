@@ -74,7 +74,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
 	}
 
-	public class YamlEditor extends MockEditor {
+	public class YamlEditor extends MockPropertiesEditor {
 		private YamlDocument ymlDoc;
 
 		public YamlEditor(String string) {
@@ -169,7 +169,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
 	//TODO: the link targets bits are almost dupiclates from the SpringProperties editor test harness.
 	//  should be able to pull up with some reworking of the SpringProperties harness (i.e. add required
-	//  abstract methods to MockEditor and make a subclass for SpringProperties harness.
+	//  abstract methods to MockPropertiesEditor and make a subclass for SpringProperties harness.
 	protected List<IJavaElement> getLinkTargets(YamlEditor editor, int pos) {
 		HoverInfo info = editor.getHoverInfo(pos);
 		if (info!=null) {
@@ -201,7 +201,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 //	}
 
 	@Override
-	public ICompletionProposal[] getCompletions(MockEditor editor) throws Exception {
+	public ICompletionProposal[] getCompletions(MockPropertiesEditor editor) throws Exception {
 		Collection<ICompletionProposal> _completions = completionEngine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
 		Arrays.sort(completions, COMPARATOR);
@@ -209,7 +209,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	}
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
-		MockEditor editor = new MockEditor(editorText);
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		String[] actualLabels = new String[completions.length];
 		for (int i = 0; i < actualLabels.length; i++) {
@@ -225,12 +225,12 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 			}
 
 	public void assertNoCompletions(String text) throws Exception {
-		MockEditor editor = new MockEditor(text);
+		MockPropertiesEditor editor = new MockPropertiesEditor(text);
 		assertEquals(0, getCompletions(editor).length);
 	}
 
 	public void assertCompletion(String before, String after) throws Exception {
-		MockEditor editor = new MockEditor(before);
+		MockPropertiesEditor editor = new MockPropertiesEditor(before);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		String actual = editor.getText();
