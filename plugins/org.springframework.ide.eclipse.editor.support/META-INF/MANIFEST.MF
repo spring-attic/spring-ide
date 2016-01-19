@@ -12,11 +12,15 @@ Require-Bundle: org.eclipse.ui,
  org.yaml.snakeyaml,
  com.google.guava,
  org.eclipse.core.resources,
- org.eclipse.ui.ide
+ org.eclipse.ui.ide,
+ org.eclipse.jdt.ui,
+ org.eclipse.jdt.core,
+ org.springframework.ide.eclipse.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.completions,
+ org.springframework.ide.eclipse.editor.support.hover,
  org.springframework.ide.eclipse.editor.support.util,
  org.springframework.ide.eclipse.editor.support.yaml,
  org.springframework.ide.eclipse.editor.support.yaml.ast,

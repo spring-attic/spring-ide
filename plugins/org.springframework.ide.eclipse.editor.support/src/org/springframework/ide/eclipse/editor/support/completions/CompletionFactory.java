@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.completions;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.ColorManager;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractPropertyProposal;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
@@ -26,6 +32,31 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty
  * @author Kris De Volder
  */
 public class CompletionFactory {
+
+	public static final Styler UNDERLINE = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.underline = true;
+		};
+	};
+
+	public static final Styler GREY_UNDERLINE = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.GREY);
+			textStyle.underline = true;
+		};
+	};
+
+	public static final Styler GREY = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.GREY);
+		};
+	};
+
+	public static final Styler NULL_STYLER = new Styler() {
+		public void applyStyles(TextStyle textStyle) {
+		};
+	};
+
 
 	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
@@ -137,8 +168,42 @@ public class CompletionFactory {
 	};
 
 	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final YType contextType, final String pattern, final YTypedProperty p, final double score, ProposalApplier applier, final YTypeUtil typeUtil) {
-		//TODO; pull up the fancy implementation from PropertyCompletionProposalFactory. The method here now is a 'stub' which uses 'simpleProposal.
-		return simpleProposal(p.toString(), score, applier);
+		return new AbstractPropertyProposal(doc, applier) {
+
+			//TODO: pull up the implementaton of getAdditionalProposalInfo from
+			// org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory.beanProperty(IDocument, String, Type, String, TypedProperty, double, ProposalApplier, TypeUtil)
+			// Then delete the overridden method in subclass.
+
+			@Override
+			public double getBaseScore() {
+				return score;
+			}
+
+			@Override
+			protected String niceTypeName(YType type) {
+				return typeUtil.niceTypeName(type);
+			}
+
+			@Override
+			protected YType getType() {
+				return p.getType();
+			}
+
+			@Override
+			protected String getHighlightPattern() {
+				return pattern;
+			}
+
+			@Override
+			protected String getBaseDisplayString() {
+				return p.getName();
+			}
+
+			@Override
+			public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
+				return null;
+			}
+		};
 	}
 
 	public ICompletionProposal valueProposal(String value, YType yType, double score, ProposalApplier applier) {

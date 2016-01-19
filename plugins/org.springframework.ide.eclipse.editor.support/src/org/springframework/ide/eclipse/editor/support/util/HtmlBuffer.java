@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.util;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +20,6 @@ import java.net.URLEncoder;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -28,7 +27,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.swt.graphics.FontData;
 import org.osgi.framework.Bundle;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 
 /**
  * Helper class to make it a little easier to create simple html page (for display in
@@ -71,7 +70,7 @@ public class HtmlBuffer {
 		try {
 			raw(URLEncoder.encode(string, "utf8"));
 		} catch (UnsupportedEncodingException e) {
-			SpringPropertiesEditorPlugin.log(e);
+			EditorSupportActivator.log(e);
 		}
 	}
 

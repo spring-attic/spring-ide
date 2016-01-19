@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
  * @author Kris De Volder
@@ -67,7 +67,7 @@ public class CfTestTargetParams {
 	public void setSpace(String space) {
 		this.space = space;
 	}
-	
+
 	public boolean isSelfsigned() {
 		return this.isSelfsigned;
 	}
@@ -88,7 +88,7 @@ public class CfTestTargetParams {
 
 	private static String fromEnv(String name) {
 		String value = System.getenv(name);
-		Assert.isLegal(StringUtil.hasText(value), "The environment varable '"+name+"' must be set");
+		Assert.isLegal(StringUtils.hasText(value), "The environment varable '"+name+"' must be set");
 		return value;
 	}
 

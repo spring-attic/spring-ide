@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.DEFAULT_ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_HIDE_FROM_BOOT_DASH;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.HIDE_FROM_BOOT_DASH;
+
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
 
 /**
  * Model for the 'main type' selection widgetry on a launchconfiguration tab.

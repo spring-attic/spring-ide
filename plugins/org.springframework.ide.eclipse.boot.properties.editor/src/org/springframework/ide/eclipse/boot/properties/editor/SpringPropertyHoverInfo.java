@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.arrayToCommaDelimitedString;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.collectionToCommaDelimitedString;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +22,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
+import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
+
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information
@@ -57,6 +58,7 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 
 	@Override
 	protected String renderAsHtml() {
+		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
 		HtmlBuffer html = new HtmlBuffer();
 
 		html.raw("<b>");
@@ -68,7 +70,7 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 		if (type==null) {
 			type = Object.class.getName();
 		}
-		javaTypeLink(html, javaProject, type);
+		jtLinks.javaTypeLink(html, javaProject, type);
 
 		String deflt = formatDefaultValue(data.getDefaultValue());
 		if (deflt!=null) {

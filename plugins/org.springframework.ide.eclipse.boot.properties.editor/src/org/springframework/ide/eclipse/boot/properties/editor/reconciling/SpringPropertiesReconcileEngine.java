@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.*;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;

@@ -19,11 +19,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 
 /**
  * @author Kris De Volder
  */
-public class Type {
+public class Type implements YType {
 
 	private final String erasure;
 	private final Type[] params;

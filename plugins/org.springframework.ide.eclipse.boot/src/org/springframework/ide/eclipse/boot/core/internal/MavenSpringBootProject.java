@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -488,7 +489,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	private void createElementWithTextMaybe(Element parent, String name, String text) {
-		if (StringUtil.hasText(text)) {
+		if (StringUtils.hasText(text)) {
 			createElementWithText(parent, name, text);
 		}
 	}

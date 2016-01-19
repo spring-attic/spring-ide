@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
@@ -25,6 +24,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 
 public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
@@ -71,7 +71,7 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 
 	@Override
 	public IInformationControlCreator getHoverControlCreator() {
-		return new SpringPropertiesInformationControlCreator(false, "F2 for focus");
+		return new HoverInformationControlCreator(false, "F2 for focus");
 	}
 
 	/////////////////////////////////////////////////////////////////////

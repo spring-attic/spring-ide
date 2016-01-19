@@ -31,4 +31,5 @@ public interface YTypeUtil {
 	//TODO: only one of these two should be enough?
 	List<YTypedProperty> getProperties(YType type);
 	Map<String, YType> getPropertiesMap(YType yType);
+	String niceTypeName(YType type);
 }

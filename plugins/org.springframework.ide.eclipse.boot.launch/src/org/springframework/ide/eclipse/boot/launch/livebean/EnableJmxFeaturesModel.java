@@ -10,7 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIFE_CYCLE;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setEnableLifeCycle;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setEnableLiveBeanSupport;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setJMXPort;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setTerminationTimeout;
+import static org.springsource.ide.eclipse.commons.livexp.core.ValidationResult.error;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -23,8 +30,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.OrExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-
-import static org.springsource.ide.eclipse.commons.livexp.core.ValidationResult.error;
 
 /**
  * Model for 'enable live bean support' widgetry on a launchconfiguration tab.

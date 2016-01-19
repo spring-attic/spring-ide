@@ -28,6 +28,7 @@ import java.util.Set;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
@@ -209,7 +210,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		Dependency bitronix = getDependencyById(model, "jta-bitronix");
 		Dependency thymeleaf = getDependencyById(model, "thymeleaf");
 		assertEquals("1.2.0.M1", bitronix.getVersionRange());
-		assertFalse(StringUtil.hasText(thymeleaf.getVersionRange()));
+		assertFalse(StringUtils.hasText(thymeleaf.getVersionRange()));
 
 		RadioGroup bootVersion = model.getBootVersion();
 		assertNotNull(bootVersion);

@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.*;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.*;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
+import static org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.isBracketable;
 
 import java.util.List;
 
@@ -23,6 +22,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCo
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
@@ -26,7 +25,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
@@ -39,6 +37,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTPr
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
@@ -46,6 +45,8 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
+
+import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * @author Kris De Volder

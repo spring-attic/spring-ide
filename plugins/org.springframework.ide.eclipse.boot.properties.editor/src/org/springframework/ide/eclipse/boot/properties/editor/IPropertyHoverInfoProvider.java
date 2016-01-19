@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 
 /**
  * @author Kris De Volder

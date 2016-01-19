@@ -30,7 +30,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.equinox.security,
  org.springframework.ide.eclipse.boot.properties.editor.test,
- org.springframework.ide.eclipse.cloudfoundry.manifest.editor
+ org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
+ org.springframework.ide.eclipse.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jface.resource

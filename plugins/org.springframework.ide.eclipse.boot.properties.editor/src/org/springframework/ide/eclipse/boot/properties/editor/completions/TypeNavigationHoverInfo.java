@@ -19,10 +19,11 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.properties.editor.HoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
+import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
 
 /** Example used as reference for explaingin the meaning of the instance variables:
@@ -72,6 +73,7 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 
 	@Override
 	protected String renderAsHtml() {
+		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
 		HtmlBuffer html = new HtmlBuffer();
 
 		html.raw("<b>");
@@ -79,14 +81,11 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 		html.raw("</b>");
 		html.raw("<br>");
 
-		String typeStr = type==null ?  Object.class.getName() : type.toString();
-
-		javaTypeLink(html, typeUtil, type);
-		html.raw("<a href=\"");
-		html.url("type/"+type);
-		html.raw("\">");
-		html.text(typeStr);
-		html.raw("</a>");
+		if (type!=null) {
+			jtLinks.javaTypeLink(html, typeUtil, type);
+		} else {
+			jtLinks.javaTypeLink(html, typeUtil.getJavaProject(), Object.class.toString());
+		}
 
 		//				String deflt = formatDefaultValue(data.getDefaultValue());
 		//				if (deflt!=null) {

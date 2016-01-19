@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.launch;
 
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +34,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
@@ -216,7 +216,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		for (PropVal p : props) {
 			//Don't store stuff with 'empty keys'. These are likely just
 			// 'empty' entries user added but never filled in.
-			if (hasText(p.name)) {
+			if (StringUtil.hasText(p.name)) {
 				String prefixed = PROPS_PREFIX+p.name+OID_SEPERATOR+(oid++);
 				String valueEnabled = (p.isChecked?'1':'0')+p.value;
 				conf.setAttribute(prefixed, valueEnabled);
@@ -264,7 +264,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	public static IProject getProject(ILaunchConfiguration conf) {
 		try {
 			String pname = getProjectName(conf);
-			if (hasText(pname)) {
+			if (StringUtil.hasText(pname)) {
 				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
 				//debug(conf, "getProject => "+p);
 				return p;

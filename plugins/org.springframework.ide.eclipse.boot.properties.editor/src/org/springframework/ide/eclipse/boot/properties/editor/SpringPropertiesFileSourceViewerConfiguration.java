@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
@@ -84,7 +85,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
 				a.enableColoredLabels(true);
 				a.enableAutoActivation(true);
-				a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
+				a.setInformationControlCreator(new HoverInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
 				setSorter(a);
 				a.setRestoreCompletionProposalSize(getDialogSettings(sourceViewer, DIALOG_SETTINGS_KEY));
 				return a;

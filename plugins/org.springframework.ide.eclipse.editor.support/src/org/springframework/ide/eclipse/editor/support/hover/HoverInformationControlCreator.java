@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.editor.support.hover;
 
 import java.util.List;
 
@@ -25,16 +25,17 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 
 /**
- * IInformationControlCreator for 'hover information' associated with Spring properties. This control is
+ * IInformationControlCreator for 'hover information' associated with editor contents. This control is
  * used in two different contexts.
  *
- *    - tooltip info shown when hovering over a property
- *    - side view for content assist that proposes property completions.
+ *    - tooltip info shown when hovering over something
+ *    - side view for content assist.
  */
 @SuppressWarnings("restriction")
-public class SpringPropertiesInformationControlCreator implements IInformationControlCreator {
+public class HoverInformationControlCreator implements IInformationControlCreator {
 
 	/**
 	 * Status text shown in the bottom 'status' area of the control (but it is only shown on the
@@ -50,11 +51,11 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 	 */
 	private boolean enriched;
 
-	public SpringPropertiesInformationControlCreator(String statusText) {
+	public HoverInformationControlCreator(String statusText) {
 		this(false, statusText);
 	}
 
-	public SpringPropertiesInformationControlCreator(boolean enriched, String statusText) {
+	public HoverInformationControlCreator(boolean enriched, String statusText) {
 		this.enriched = enriched;
 		this.statusText = statusText;
 	}
@@ -63,18 +64,18 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 	public IInformationControl createInformationControl(Shell parent) {
 		if (BrowserInformationControl.isAvailable(parent)) {
 			if (!enriched) {
-				return new SpringPropertiesInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, statusText) {
+				return new HoverInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, statusText) {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
-						return new SpringPropertiesInformationControlCreator(true, null);
+						return new HoverInformationControlCreator(true, null);
 					}
 				};
 			} else {
 				ToolBarManager toolbar= new ToolBarManager(SWT.FLAT);
-				BrowserInformationControl control = new SpringPropertiesInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, toolbar) {
+				BrowserInformationControl control = new HoverInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, toolbar) {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
-						return new SpringPropertiesInformationControlCreator(true, null);
+						return new HoverInformationControlCreator(true, null);
 					}
 				};
 				fillToolbar(toolbar, control);
@@ -127,7 +128,7 @@ public class SpringPropertiesInformationControlCreator implements IInformationCo
 					}
 				}
 			} catch (Exception e) {
-				SpringPropertiesEditorPlugin.log(e);
+				EditorSupportActivator.log(e);
 			}
 		}
 	}

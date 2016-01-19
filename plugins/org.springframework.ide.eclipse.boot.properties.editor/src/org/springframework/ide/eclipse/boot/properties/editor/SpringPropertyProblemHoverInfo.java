@@ -15,7 +15,8 @@ import java.util.List;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
-import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
 /**
  * @author Kris De Volder

@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. and others - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import java.util.HashMap;
 import java.util.Map;

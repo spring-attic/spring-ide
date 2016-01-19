@@ -21,7 +21,9 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlUtil;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
+import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 
 public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
@@ -76,7 +78,7 @@ public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtensio
 
 	@Override
 	public IInformationControlCreator getHoverControlCreator() {
-		return new SpringPropertiesInformationControlCreator(EditorsUI.getTooltipAffordanceString());
+		return new HoverInformationControlCreator(EditorsUI.getTooltipAffordanceString());
 	}
 
 

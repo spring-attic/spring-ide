@@ -81,6 +81,11 @@ public class YTypeFactory {
 		public YType getDomainType(YType type) {
 			return ((AbstractType)type).getDomainType();
 		}
+
+		@Override
+		public String niceTypeName(YType type) {
+			return type.toString();
+		}
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////

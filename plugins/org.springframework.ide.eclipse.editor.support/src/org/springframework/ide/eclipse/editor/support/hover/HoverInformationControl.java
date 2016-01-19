@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.editor.support.hover;
 
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
@@ -19,13 +19,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 @SuppressWarnings("restriction")
-public class SpringPropertiesInformationControl extends BrowserInformationControl {
+public class HoverInformationControl extends BrowserInformationControl {
 
-	public SpringPropertiesInformationControl(Shell parent, String appearanceJavadocFont, ToolBarManager toolbar) {
+	public HoverInformationControl(Shell parent, String appearanceJavadocFont, ToolBarManager toolbar) {
 		super(parent, appearanceJavadocFont, toolbar);
 	}
 
-	public SpringPropertiesInformationControl(Shell parent, String appearanceJavadocFont, String statusText) {
+	public HoverInformationControl(Shell parent, String appearanceJavadocFont, String statusText) {
 		super(parent, appearanceJavadocFont, statusText);
 	}
 
