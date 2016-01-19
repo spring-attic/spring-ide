@@ -73,7 +73,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:enable,org.springframework.ide.eclipse.applicationProperties"
+            class="org.springframework.ide.eclipse.editor.support.util.ContentTypeEnablerDisabler:enable,org.springframework.ide.eclipse.applicationProperties"
             commandId="org.springframework.ide.eclipse.boot.properties.editor.enable">
             <enabledWhen>
               <and>
@@ -88,7 +88,7 @@
             </enabledWhen>
       </handler>
       <handler
-            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:disable,org.springframework.ide.eclipse.applicationProperties"
+            class="org.springframework.ide.eclipse.editor.support.util.ContentTypeEnablerDisabler:disable,org.springframework.ide.eclipse.applicationProperties"
             commandId="org.springframework.ide.eclipse.boot.properties.editor.disable">
             <enabledWhen>
               <and>

@@ -8,14 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.ui;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -27,11 +26,16 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+
+import com.google.common.collect.ImmutableSet;
 
 public class ContentTypeEnablerDisabler extends AbstractHandler implements IExecutableExtension {
 
@@ -42,21 +46,33 @@ public class ContentTypeEnablerDisabler extends AbstractHandler implements IExec
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IResource rsrc = getResource(event);
 		if (rsrc!=null) {
-			execute(rsrc);
+			execute(rsrc, HandlerUtil.getActiveShell(event));
 		}
 		return null;
 	}
 
-	protected void execute(IResource rsrc) throws ExecutionException {
+	protected void execute(IResource rsrc, Shell shell) throws ExecutionException {
 		try {
 			IContentType ctype = Platform.getContentTypeManager().getContentType(contentTypeId);
 			if (enable) {
 				ctype.addFileSpec(rsrc.getName(), IContentType.FILE_NAME_SPEC);
 			} else {
+				String fileName = rsrc.getName();
+				String[] predefineds = ctype.getFileSpecs(IContentType.FILE_NAME_SPEC | IContentType.IGNORE_USER_DEFINED);
+				if (predefineds!=null && ImmutableSet.copyOf(predefineds).contains(fileName)) {
+					MessageDialog.openError(shell, "Can not change predefined content type binding!",
+							"The content-type binding for file name '"+fileName+"' is a predefined binding. " +
+							"\n\n" +
+							"Unfortunately, predefined bindings are read-only."+
+							"\n\n" +
+							"Tip: you can still choose to open this file with another editor by using " +
+							"the 'Open With' context menu."
+					);
+				}
 				ctype.removeFileSpec(rsrc.getName(), IContentType.FILE_NAME_SPEC);
 			}
 		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
+			EditorSupportActivator.log(e);
 		}
 	}
 
@@ -80,7 +96,7 @@ public class ContentTypeEnablerDisabler extends AbstractHandler implements IExec
 					if (obj instanceof IResource) {
 						resource = (IResource) obj;
 					} else if (obj instanceof IAdaptable) {
-						resource = (IResource) ((IAdaptable) obj)
+						resource = ((IAdaptable) obj)
 						.getAdapter(IResource.class);
 					}
 					if (resource != null) {
