@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -321,7 +322,7 @@ public class ApplicationManifestHandler {
 			return false;
 		}
 
-		Map<Object, Object> deploymentInfoYaml = toYaml(properties, domains);
+		Map<Object, Object> deploymentInfoYaml = toYaml(properties);
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);
 		options.setCanonical(false);
@@ -340,7 +341,7 @@ public class ApplicationManifestHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<Object, Object> toYaml(CloudApplicationDeploymentProperties properties, List<CloudDomain> domains) throws Exception {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -362,26 +363,13 @@ public class ApplicationManifestHandler {
 			application.put(MEMORY_PROP, memory);
 		}
 
-		List<String> urls = properties.getUrls();
-		if (urls != null && !urls.isEmpty()) {
-			// Persist only the first URL
-			String url = urls.get(0);
-
-			CloudApplicationURL cloudUrl = CloudApplicationURL.getCloudApplicationURL(url, domains);
-			String subdomain = cloudUrl.getSubdomain();
-			String domain = cloudUrl.getDomain();
-
-			if (subdomain != null) {
-				application.put(SUB_DOMAIN_PROP, subdomain);
-			}
-
-			if (domain != null) {
-				application.put(DOMAIN_PROP, domain);
-			}
-		} else {
-			// If URL is not present, remove any exiting ones
-			application.remove(SUB_DOMAIN_PROP);
-			application.remove(DOMAIN_PROP);
+		application.put(SUB_DOMAIN_PROP, properties.getHost());
+		application.put(DOMAIN_PROP, properties.getDomain());
+		if (properties.getServices() != null && !properties.getServices().isEmpty()) {
+			application.put(SERVICES_PROP, properties.getServices());
+		}
+		if (properties.getEnvironmentVariables() != null && !properties.getEnvironmentVariables().isEmpty()) {
+			application.put(ENV_PROP, properties.getEnvironmentVariables());
 		}
 
 		return deploymentInfoYaml;
@@ -482,7 +470,10 @@ public class ApplicationManifestHandler {
 			domain = getStringValue(application, DOMAIN_PROP);
 		}
 
+		properties.setDomain(domain);
+
 		String subdomain = getStringValue(application, SUB_DOMAIN_PROP);
+		properties.setDomain(subdomain);
 
 		// A URL can only be constructed from the manifest if either a domain or
 		// a subdomain is specified. If neither is specified, but the app name
@@ -537,35 +528,7 @@ public class ApplicationManifestHandler {
 				memoryStringVal = getStringValue(application, MEMORY_PROP);
 			}
 			if (memoryStringVal != null && memoryStringVal.length() > 0) {
-
-				char memoryIndicator[] = { 'M', 'G', 'm', 'g' };
-				int gIndex = -1;
-
-				for (char indicator : memoryIndicator) {
-					gIndex = memoryStringVal.indexOf(indicator);
-					if (gIndex >= 0) {
-						break;
-					}
-				}
-
-				// There has to be a number before the 'G' or 'M', if 'G' or 'M'
-				// is used, or its not a valid
-				// memory
-				if (gIndex > 0) {
-					memoryStringVal = memoryStringVal.substring(0, gIndex);
-				} else if (gIndex == 0) {
-					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
-					throw BootDashActivator.asCoreException("Failed to read memory value from " + source
-							+ ". Invalid memory: " + memoryStringVal);
-				}
-
-				try {
-					memoryVal = Integer.valueOf(memoryStringVal);
-				} catch (NumberFormatException e) {
-					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
-					throw BootDashActivator.asCoreException("Failed to parse memory from " + source
-							+ " due to: " + e.getMessage());
-				}
+				memoryVal = convertMemory(memoryStringVal);
 			}
 		}
 
@@ -585,6 +548,33 @@ public class ApplicationManifestHandler {
 			if (actualMemory > 0) {
 				properties.setMemory(actualMemory);
 			}
+		}
+	}
+
+	public static int convertMemory(String memoryStringVal) throws CoreException {
+		char memoryIndicator[] = { 'M', 'G', 'm', 'g' };
+		int gIndex = -1;
+
+		for (char indicator : memoryIndicator) {
+			gIndex = memoryStringVal.indexOf(indicator);
+			if (gIndex >= 0) {
+				break;
+			}
+		}
+
+		// There has to be a number before the 'G' or 'M', if 'G' or 'M'
+		// is used, or its not a valid
+		// memory
+		if (gIndex > 0) {
+			memoryStringVal = memoryStringVal.substring(0, gIndex);
+		} else if (gIndex == 0) {
+			throw BootDashActivator.asCoreException("Failed to read memory value. Invalid memory: " + memoryStringVal);
+		}
+
+		try {
+			return Integer.valueOf(memoryStringVal);
+		} catch (NumberFormatException e) {
+			throw BootDashActivator.asCoreException("Failed to parse memory due to: " + e.getMessage());
 		}
 	}
 
