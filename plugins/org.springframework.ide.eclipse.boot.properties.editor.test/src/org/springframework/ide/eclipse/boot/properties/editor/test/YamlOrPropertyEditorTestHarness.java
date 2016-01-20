@@ -36,11 +36,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.DefaultSeverityPro
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
@@ -56,7 +56,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	protected static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			return PropertyCompletionFactory.SORTER.compare(p1, p2);
+			return CompletionFactory.SORTER.compare(p1, p2);
 		}
 	};
 

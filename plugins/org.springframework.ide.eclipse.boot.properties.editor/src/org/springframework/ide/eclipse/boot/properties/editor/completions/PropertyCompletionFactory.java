@@ -32,14 +32,6 @@ public class PropertyCompletionFactory extends CompletionFactory {
 		return new PropertyProposal(doc, applier, prop, typeUtil);
 	}
 
-	public ScoreableProposal valueProposal(String value, Type type, int order, ProposalApplier applier) {
-		return valueProposal(value, type, -(1.0+order), applier);
-	}
-
-	public ScoreableProposal valueProposal(String value, Type type, double score, ProposalApplier applier) {
-		return simpleProposal(value, score, applier);
-	}
-
 	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty p, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
 		return new AbstractPropertyProposal(doc, applier) {
 

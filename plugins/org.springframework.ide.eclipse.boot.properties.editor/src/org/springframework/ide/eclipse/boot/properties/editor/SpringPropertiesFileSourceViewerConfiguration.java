@@ -40,7 +40,6 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
@@ -48,6 +47,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IRecon
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 
@@ -159,7 +159,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 		try {
 			Class<?> sorterInterface = Class.forName("org.eclipse.jface.text.contentassist.ICompletionProposalSorter");
 			Method m = ContentAssistant.class.getMethod("setSorter", sorterInterface);
-			m.invoke(a, PropertyCompletionFactory.SORTER);
+			m.invoke(a, CompletionFactory.SORTER);
 		} catch (Throwable e) {
 			//ignore, sorter not supported with Eclipse 3.7 API
 		}
