@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -29,7 +30,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
-public class CloudApplicationDeploymentProperties {
+public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
 	public static final int DEFAULT_INSTANCES = 1;
 
@@ -48,6 +49,10 @@ public class CloudApplicationDeploymentProperties {
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
 	protected final LiveSet<String> urls = new LiveSet<String>();
+
+	protected final LiveVariable<String> host = new LiveVariable<>();
+
+	protected final LiveVariable<String> domain = new LiveVariable<>();
 
 	protected final LiveVariable<String> appName = new LiveVariable<>();
 
@@ -107,6 +112,22 @@ public class CloudApplicationDeploymentProperties {
 			urls = new ArrayList<String>();
 		}
 		this.urls.addAll(urls);
+	}
+
+	public String getHost() {
+		return host.getValue();
+	}
+
+	public void setHost(String value) {
+		host.setValue(value);
+	}
+
+	public String getDomain() {
+		return domain.getValue();
+	}
+
+	public void setDomain(String value) {
+		domain.setValue(value);
 	}
 
 	public void setAppName(String appName) {
@@ -181,7 +202,6 @@ public class CloudApplicationDeploymentProperties {
 			validator.dependsOn(buildpack);
 			validator.dependsOn(memory);
 			validator.dependsOn(memory);
-			validator.dependsOn(urls);
 			validator.dependsOn(appName);
 			validator.dependsOn(project);
 			validator.dependsOn(manifestFile);
@@ -222,6 +242,8 @@ public class CloudApplicationDeploymentProperties {
 
 		target.setAppName(this.getAppName());
 		target.setProject(this.getProject());
+		target.setHost(getHost());
+		target.setDomain(getDomain());
 
 		// Instead of replacing URLs, merge them
 		List<String> targetUrls = target.getUrls();
@@ -244,14 +266,42 @@ public class CloudApplicationDeploymentProperties {
 		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
 		properties.setBuildpack(app == null || app.getStaging() == null ? null : app.getStaging().getBuildpackUrl());
-		properties.setEnvironmentVariables(app == null ? Collections.<String, String>emptyMap() : app.getEnvAsMap());
+		/*
+		 * TODO: Re-evaluate whether JAVA_OPTS need to be treated differently
+		 * Boot Dash Tooling adds staff to JAVA-OPTS behind the scenes. Consider
+		 * JAVA_OPTS env variable as the one not exposed to users
+		 */
+		Map<String, String> env = Collections.emptyMap();
+		if (app != null) {
+			env = app.getEnvAsMap();
+			env.remove("JAVA_OPTS");
+		}
+		properties.setEnvironmentVariables(env);
+
 		properties.setInstances(app == null ? 1 : app.getInstances());
 		properties.setMemory(app == null ? 1024 : app.getMemory());
 		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
-		properties.setUrls(app == null
-				? Collections.singletonList(new CloudApplicationURL(project.getName(),
-						model.getRunTarget().getDomains(new NullProgressMonitor()).get(0).getName()).getUrl())
-				: app.getUris());
+
+		List<CloudDomain> domains = model.getRunTarget().getDomains(new NullProgressMonitor());
+		if (app == null) {
+			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), model.getRunTarget().getDomains(new NullProgressMonitor()).get(0).getName());
+			properties.setUrls(Collections.singletonList(cloudAppUrl.getUrl()));
+			properties.setHost(cloudAppUrl.getSubdomain());
+			properties.setDomain(cloudAppUrl.getDomain());
+		} else {
+			properties.setUrls(app.getUris());
+			for (String url : properties.getUrls()) {
+				try {
+					// Find the first valid URL
+					CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(url, domains);
+					properties.setHost(cloudAppUrl.getSubdomain());
+					properties.setDomain(cloudAppUrl.getDomain());
+					break;
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+		}
 		Validator validator = properties.getValidator();
 
 		ValidationResult result = validator.getValue();

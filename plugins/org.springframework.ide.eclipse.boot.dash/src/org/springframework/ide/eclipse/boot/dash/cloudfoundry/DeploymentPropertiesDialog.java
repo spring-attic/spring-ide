@@ -49,7 +49,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -231,7 +230,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		typeGroup.setVisible(!noModeSwitch);
 		typeGroup.setText("Manifest Type");
 		typeGroup.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).exclude(noModeSwitch).create());
-		typeGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+		typeGroup.setLayout(new GridLayout(2, true));
 
 		buttonFileManifest = new Button(typeGroup, SWT.RADIO);
 		buttonFileManifest.setText("File");
@@ -242,6 +241,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				manifestTypeModel.setValue(buttonFileManifest.getSelection());;
 			}
 		});
+		buttonFileManifest.setLayoutData(GridDataFactory.fillDefaults().create());
 
 		buttonManualManifest = new Button(typeGroup, SWT.RADIO);
 		buttonManualManifest.setText("Manual");
@@ -252,6 +252,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				manifestTypeModel.setValue(!buttonManualManifest.getSelection());;
 			}
 		});
+		buttonManualManifest.setLayoutData(GridDataFactory.fillDefaults().create());
 	}
 
 	private void createFileGroup(Composite composite) {

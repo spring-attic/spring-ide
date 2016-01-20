@@ -14,8 +14,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.compare.CompareEditorInput;
+import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
@@ -35,6 +38,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.MergeManifestDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -50,6 +54,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  *
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class DefaultUserInteractions implements UserInteractions {
 
 	public interface UIContext {
@@ -289,5 +294,22 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	protected IPreferenceStore getPreferencesStore() {
 		return BootDashActivator.getDefault().getPreferenceStore();
+	}
+
+	@Override
+	public int openManifestCompareDialog(final CompareEditorInput input) throws CoreException {
+		final int[] result = new int[] { -1 };
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (CompareUIPlugin.getDefault().compareResultOK(input, null)) {
+					result[0] = new MergeManifestDialog(getShell(), input).open();
+				}
+			}
+		});
+		if (result[0] == -1) {
+			throw BootDashActivator.asCoreException("Failed to compare deployment manifest file and deployment propeties");
+		}
+		return result[0];
 	}
 }

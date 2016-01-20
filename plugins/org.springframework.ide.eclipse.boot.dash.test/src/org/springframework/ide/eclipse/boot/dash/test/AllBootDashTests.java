@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
+import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeTests;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -32,8 +33,11 @@ import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorCl
 	CloudFoundryBootDashModelTest.class,
 	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
 	// (the test should also move then!)
-	OrderBasedComparatorTest.class
+	OrderBasedComparatorTest.class,
+	ManifestCompareMergeTests.class
 })
 public class AllBootDashTests {
+	
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash.test";
 
 }

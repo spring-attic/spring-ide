@@ -12,6 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import static org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement.READY_STATES;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -27,6 +30,9 @@ import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareEditorInput;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -39,9 +45,16 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.text.edits.MultiTextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationDeploymentOperations;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
@@ -63,6 +76,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -611,10 +625,86 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	public CloudApplicationDeploymentProperties resolveDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(this, project);
 		CloudDashElement element = getElement(deploymentProperties.getAppName());
-		IFile manifestFile = element.getDeploymentManifestFile();
+		final IFile manifestFile = element.getDeploymentManifestFile();
 		if (manifestFile != null) {
 			if (manifestFile.exists()) {
-				// TODO: check for differences between deployment properties on CF and in local YAML file. Merge if necessary.
+				final String yamlContents = IOUtil.toString(manifestFile.getContents());
+				MultiTextEdit edit = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), getRunTarget().getDomains(monitor))
+						.getDifferences(deploymentProperties);
+
+				/*
+				 * If UI is available and there differences between manifest and
+				 * current deployment properties on CF then prompt the user to
+				 * perform the merge
+				 */
+				if (edit.hasChildren() && ui != null) {
+					final IDocument doc = new Document(yamlContents);
+					edit.apply(doc);
+
+					final YamlFileInput left = new YamlFileInput(manifestFile,
+							BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON));
+					final YamlInput right = new YamlInput("Current deployment properties from Cloud Foundry",
+							BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON),
+							doc.get());
+
+					CompareConfiguration config = new CompareConfiguration();
+					config.setLeftLabel(left.getName());
+					config.setLeftImage(left.getImage());
+					config.setRightLabel(right.getName());
+					config.setRightImage(right.getImage());
+					config.setLeftEditable(true);
+
+					final CompareEditorInput input = new CompareEditorInput(config) {
+						@Override
+						protected Object prepareInput(IProgressMonitor arg0)
+								throws InvocationTargetException, InterruptedException {
+							return new DiffNode(left, right);
+						}
+					};
+					input.setTitle("Merge Local Deployment Manifest File");
+
+					int result = ui.openManifestCompareDialog(input);
+					switch (result) {
+					case IDialogConstants.CANCEL_ID:
+						throw new OperationCanceledException();
+					case IDialogConstants.NO_ID:
+						element.setDeploymentManifestFile(null);
+						/*
+						 * Use the current CF deployment properties, hence just break out of the switch
+						 */
+						break;
+					case IDialogConstants.YES_ID:
+						/*
+						 * Load deployment properties from YAML text content
+						 */
+						final byte[] yamlBytes = left.getContent();
+						List<CloudApplicationDeploymentProperties> props = new ApplicationManifestHandler(project,
+								getRunTarget().getDomains(monitor), manifestFile) {
+							@Override
+							protected InputStream getInputStream() throws Exception {
+								return new ByteArrayInputStream(yamlBytes);
+							}
+						}.load(monitor);
+						CloudApplicationDeploymentProperties found = null;
+						for (CloudApplicationDeploymentProperties p : props) {
+							if (deploymentProperties.getAppName().equals(p.getAppName())) {
+								found = p;
+								break;
+							}
+						}
+						if (found == null) {
+							throw new OperationCanceledException(
+									"Cannot load deployment properties for application '" + deploymentProperties.getAppName()
+											+ "' from the manifest file '" + manifestFile.getFullPath() + "'");
+						} else {
+							deploymentProperties = found;
+						}
+						break;
+						default:
+					}
+
+
+				}
 			} else {
 				deploymentProperties = createDeploymentProperties(project, ui, monitor);
 			}
@@ -635,7 +725,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(this, project);
 		CloudDashElement element = getElement(props.getAppName());
 		if (ui != null) {
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, getRunTarget().getDomains(monitor));
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props);
 			DumperOptions options = new DumperOptions();
 			options.setExplicitStart(true);
 			options.setCanonical(false);

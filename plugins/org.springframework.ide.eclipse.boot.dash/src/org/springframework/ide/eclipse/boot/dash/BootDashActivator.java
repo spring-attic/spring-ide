@@ -31,7 +31,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash"; //$NON-NLS-1$
 
-	public static final String DT_ICON_ID = "dt-icon";
+	public static final String DT_ICON_ID = "devttools";
+	public static final String MANIFEST_ICON = "manifest";
+	public static final String CLOUD_ICON = "cloud";
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -136,6 +138,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 		reg.put(DT_ICON_ID, getImageDescriptor("/icons/DT.png"));
+		reg.put(CLOUD_ICON, getImageDescriptor("/icons/cloud_obj.png"));
+		reg.put(MANIFEST_ICON, getImageDescriptor("icons/selectmanifest.gif"));
 	}
 
 }

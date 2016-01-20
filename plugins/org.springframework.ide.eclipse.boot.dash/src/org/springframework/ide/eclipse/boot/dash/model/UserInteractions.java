@@ -14,8 +14,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
@@ -84,4 +86,11 @@ public interface UserInteractions {
 	 *  @param toggleMessage Message for the 'togle switch'.
 	 */
 	boolean yesNoWithToggle(String propertyKey, String title, String message, String toggleMessage);
+
+	/**
+	 * Opens manifest compare dialog based on the supplied input
+	 * @param the input for the compare dialog
+	 * @return yes/no/cancel ids yes - use updated manifest, no - stop using manifest
+	 */
+	int openManifestCompareDialog(CompareEditorInput input) throws CoreException;
 }
