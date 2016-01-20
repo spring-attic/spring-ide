@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,12 +26,13 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
 
-/** Example used as reference for explaingin the meaning of the instance variables:
+/**
+ * Example used as reference for explaingin the meaning of the instance variables:
  *
  * foo.bar[0].children.wavelen
  */
 @SuppressWarnings("restriction")
-public class TypeNavigationHoverInfo extends HoverInfo {
+public class JavaTypeNavigationHoverInfo extends HoverInfo {
 
 
 	/**
@@ -63,7 +64,7 @@ public class TypeNavigationHoverInfo extends HoverInfo {
 
 	private TypeUtil typeUtil;
 
-	public TypeNavigationHoverInfo(String id,  String propName, Type fromType, Type toType, TypeUtil typeUtil) {
+	public JavaTypeNavigationHoverInfo(String id,  String propName, Type fromType, Type toType, TypeUtil typeUtil) {
 		this.id = id;
 		this.propName = propName;
 		this.parentType = fromType;

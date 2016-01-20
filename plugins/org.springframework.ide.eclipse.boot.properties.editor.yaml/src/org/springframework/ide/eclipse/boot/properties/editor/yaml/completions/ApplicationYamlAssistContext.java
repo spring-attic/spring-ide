@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.TypeNavigationHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.JavaTypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -296,7 +296,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				// the index to navigating type/bean properties
 				return parent.getHoverInfo();
 			} else {
-				return new TypeNavigationHoverInfo(contextPath.toPropString(), contextPath.getBeanPropertyName(), parent.getType(), getType(), typeUtil);
+				return new JavaTypeNavigationHoverInfo(contextPath.toPropString(), contextPath.getBeanPropertyName(), parent.getType(), getType(), typeUtil);
 			}
 		}
 

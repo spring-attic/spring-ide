@@ -48,7 +48,7 @@ public class PropertyCompletionFactory extends CompletionFactory {
 			@Override
 			public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
 				if (hoverInfo==null) {
-					hoverInfo = new TypeNavigationHoverInfo(contextProperty+"."+p.getName(), p.getName(), contextType, p.getType(), typeUtil);
+					hoverInfo = new JavaTypeNavigationHoverInfo(contextProperty+"."+p.getName(), p.getName(), contextType, p.getType(), typeUtil);
 				}
 				return hoverInfo;
 			}

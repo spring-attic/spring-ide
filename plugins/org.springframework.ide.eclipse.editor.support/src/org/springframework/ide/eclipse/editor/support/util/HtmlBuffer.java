@@ -140,4 +140,8 @@ public class HtmlBuffer {
 		raw("</p>");
 	}
 
+	public void snippet(HtmlSnippet snippet) {
+		snippet.render(this);
+	}
+
 }

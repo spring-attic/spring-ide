@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.ColorManager;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractPropertyProposal;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
@@ -170,10 +171,6 @@ public class CompletionFactory {
 	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final YType contextType, final String pattern, final YTypedProperty p, final double score, ProposalApplier applier, final YTypeUtil typeUtil) {
 		return new AbstractPropertyProposal(doc, applier) {
 
-			//TODO: pull up the implementaton of getAdditionalProposalInfo from
-			// org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory.beanProperty(IDocument, String, Type, String, TypedProperty, double, ProposalApplier, TypeUtil)
-			// Then delete the overridden method in subclass.
-
 			@Override
 			public double getBaseScore() {
 				return score;
@@ -201,7 +198,7 @@ public class CompletionFactory {
 
 			@Override
 			public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return null;
+				return new YPropertyHoverInfo(contextProperty, contextType, p);
 			}
 		};
 	}
