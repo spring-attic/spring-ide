@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.schema;
 
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+
+/**
+ * @author Kris De Volder
+ */
 public interface YTypedProperty {
 	String getName();
 	YType getType();
+	HtmlSnippet getDescription();
 }

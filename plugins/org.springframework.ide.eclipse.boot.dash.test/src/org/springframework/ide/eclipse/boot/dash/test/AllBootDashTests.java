@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeT
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	ManifestYmlSchemaTest.class,
 	ManifestYamlEditorTest.class,
 	BootDashViewModelTest.class,
 	JarNameGeneratorTest.class,

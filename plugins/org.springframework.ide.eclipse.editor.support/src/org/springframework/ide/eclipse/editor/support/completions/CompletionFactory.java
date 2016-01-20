@@ -203,9 +203,12 @@ public class CompletionFactory {
 		};
 	}
 
-	public ICompletionProposal valueProposal(String value, YType yType, double score, ProposalApplier applier) {
-		//TODO; sort out the alternate implementation in super class. Should not be needed.
+	public ScoreableProposal valueProposal(String value, YType yType, double score, ProposalApplier applier) {
 		return simpleProposal(value, score, applier);
+	}
+
+	public ScoreableProposal valueProposal(String value, YType type, int order, ProposalApplier applier) {
+		return valueProposal(value, type, -(1.0+order), applier);
 	}
 
 }

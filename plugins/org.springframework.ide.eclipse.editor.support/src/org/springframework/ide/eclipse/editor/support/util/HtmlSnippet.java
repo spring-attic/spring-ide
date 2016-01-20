@@ -18,6 +18,12 @@ package org.springframework.ide.eclipse.editor.support.util;
 public abstract class HtmlSnippet {
 	public abstract void render(HtmlBuffer html);
 
+	public String toHtml() {
+		HtmlBuffer buf = new HtmlBuffer();
+		render(buf);
+		return buf.toString();
+	}
+
 	// Create snippets:
 
 	public static HtmlSnippet text(final String text) {
@@ -52,7 +58,6 @@ public abstract class HtmlSnippet {
 			}
 		};
 	}
-
 
 	// add more as needed ...
 }

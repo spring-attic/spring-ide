@@ -53,7 +53,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHy
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
@@ -66,6 +65,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvi
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
@@ -256,7 +256,7 @@ public class ApplicationYamlSourceViewerConfiguration extends YEditSourceViewerC
 			a.setRestoreCompletionProposalSize(getDialogSettings(viewer, DIALOG_SETTINGS_KEY));
 			ProposalProcessor processor = new ProposalProcessor(completionEngine);
 			a.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-			a.setSorter(PropertyCompletionFactory.SORTER);
+			a.setSorter(CompletionFactory.SORTER);
 		}
 		return _a;
 	}
