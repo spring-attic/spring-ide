@@ -66,6 +66,7 @@ public class ManifestYmlSchema {
 			f.yprop("command", t_string),
 			f.yprop("disk_quota", t_memory),
 			f.yprop("domain", t_string),
+			f.yprop("domains", t_strings),
 			f.yprop("env", t_env),
 			f.yprop("host", t_string),
 			f.yprop("hosts", t_strings),
