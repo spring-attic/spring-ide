@@ -94,8 +94,7 @@ public class ContentTypeEnablerDisabler extends AbstractHandler implements IExec
 					if (obj instanceof IResource) {
 						resource = (IResource) obj;
 					} else if (obj instanceof IAdaptable) {
-						resource = ((IAdaptable) obj)
-						.getAdapter(IResource.class);
+						resource = (IResource)((IAdaptable) obj).getAdapter(IResource.class);
 					}
 					if (resource != null) {
 						selected.add(resource);
