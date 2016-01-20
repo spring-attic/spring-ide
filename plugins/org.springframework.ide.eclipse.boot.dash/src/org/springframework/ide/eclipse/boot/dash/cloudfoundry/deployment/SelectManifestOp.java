@@ -50,7 +50,7 @@ public class SelectManifestOp extends CloudOperation {
 
 		Map<Object, Object> yaml = Collections.emptyMap();
 		try {
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(model, project), cde.getTarget().getDomains(monitor));
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(model, project));
 		} catch (Exception e) {
 			// ignore
 		}

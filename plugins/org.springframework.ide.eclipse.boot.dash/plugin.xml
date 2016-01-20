@@ -165,5 +165,18 @@
         id="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationTabGroup">
     </launchConfigurationTabGroup>
 </extension>
+<extension
+      point="org.eclipse.compare.contentMergeViewers">
+   <contentTypeBinding
+         contentMergeViewerId="org.springframework.ide.eclipse.boot.dash.yamlMergeViewer"
+         contentTypeId="org.dadacoalition.yedit.yamlsource">
+   </contentTypeBinding>
+   <viewer
+         class="org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlMergeViewerCreator"
+         extensions="yml"
+         id="org.springframework.ide.eclipse.boot.dash.yamlMergeViewer"
+         label="YAML Text Merge">
+   </viewer>
+</extension>
 
 </plugin>
