@@ -12,12 +12,16 @@ package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
 import java.util.Set;
 
+import javax.inject.Provider;
+
+import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YAtomicType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YBeanType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YTypedPropertyImpl;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -57,7 +61,7 @@ public class ManifestYmlSchema {
 		// define schema structure...
 		TOPLEVEL_TYPE.addProperty("applications", f.yseq(application));
 
-		YTypedProperty[] props = {
+		YTypedPropertyImpl[] props = {
 			f.yprop("buildpack", t_string),
 			f.yprop("command", t_string),
 			f.yprop("disk_quota", t_memory),
@@ -77,12 +81,17 @@ public class ManifestYmlSchema {
 			f.yprop("timeout", t_integer)
 		};
 
-		for (YTypedProperty prop : props) {
+		for (YTypedPropertyImpl prop : props) {
+			prop.setDescriptionProvider(descriptionFor(prop));
 			if (!TOPLEVEL_EXCLUDED.contains(prop.getName())) {
 				TOPLEVEL_TYPE.addProperty(prop);
 			}
 			application.addProperty(prop);
 		}
+	}
+
+	private Provider<HtmlSnippet> descriptionFor(YTypedPropertyImpl prop) {
+		return DescriptionProviders.fromClasspath(this.getClass(), "/description-by-prop-name/"+prop.getName()+".html");
 	}
 
 }

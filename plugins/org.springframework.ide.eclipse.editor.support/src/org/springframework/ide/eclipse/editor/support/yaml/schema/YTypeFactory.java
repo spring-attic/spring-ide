@@ -18,6 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.inject.Provider;
+
+import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -91,15 +96,15 @@ public class YTypeFactory {
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Provides default implementations for all YType methods, some of which
-	 * should be overridden by each concrete subtype.
+	 * Provides default implementations for all YType methods.
 	 */
 	public static abstract class AbstractType implements YType {
 
-		private final Map<String, YType> propertyMap = new LinkedHashMap<>();
-		private List<YTypedProperty> cachedPropertyList = null;
+		private List<YTypedProperty> propertyList = new ArrayList<>();
 
 		private final List<String> hints = new ArrayList<>();
+
+		private Map<String, YType> cachedPropertyMap;
 
 		public boolean isSequenceable() {
 			return false;
@@ -114,18 +119,17 @@ public class YTypeFactory {
 		}
 
 		public final List<YTypedProperty> getProperties() {
-			if (cachedPropertyList==null) {
-				ImmutableList.Builder<YTypedProperty> builder = ImmutableList.builder();
-				for (Entry<String, YType> e : getPropertiesMap().entrySet()) {
-					builder.add(new YTypedPropertyImpl(e.getKey(), e.getValue()));
-				}
-				cachedPropertyList = builder.build();
-			}
-			return cachedPropertyList;
+			return Collections.unmodifiableList(propertyList);
 		}
 
 		public final Map<String, YType> getPropertiesMap() {
-			return Collections.unmodifiableMap(propertyMap);
+			if (cachedPropertyMap==null) {
+				cachedPropertyMap = new LinkedHashMap<>();
+				for (YTypedProperty p : propertyList) {
+					cachedPropertyMap.put(p.getName(), p.getType());
+				}
+			}
+			return Collections.unmodifiableMap(cachedPropertyMap);
 		}
 
 		public boolean isAtomic() {
@@ -139,8 +143,8 @@ public class YTypeFactory {
 		public abstract String toString(); // force each sublcass to implement a (nice) toString method.
 
 		public void addProperty(YTypedProperty p) {
-			cachedPropertyList = null;
-			propertyMap.put(p.getName(), p.getType());
+			cachedPropertyMap = null;
+			propertyList.add(p);
 		}
 
 		public void addProperty(String name, YType type) {
@@ -164,7 +168,7 @@ public class YTypeFactory {
 
 		@Override
 		public String toString() {
-			return "Map<"+key.toString()+"->"+val.toString()+">";
+			return "Map<"+key.toString()+", "+val.toString()+">";
 		}
 
 		@Override
@@ -237,6 +241,7 @@ public class YTypeFactory {
 
 		final private String name;
 		final private YType type;
+		private Provider<HtmlSnippet> descriptionProvider = DescriptionProviders.NO_DESCRIPTION;
 
 		private YTypedPropertyImpl(String name, YType type) {
 			this.name = name;
@@ -258,13 +263,22 @@ public class YTypeFactory {
 			return name + ":" + type;
 		}
 
+		@Override
+		public HtmlSnippet getDescription() {
+			return descriptionProvider.get();
+		}
+
+		public void setDescriptionProvider(Provider<HtmlSnippet> descriptionProvider) {
+			this.descriptionProvider = descriptionProvider;
+		}
+
 	}
 
 	public YAtomicType yatomic(String name) {
 		return new YAtomicType(name);
 	}
 
-	public YTypedProperty yprop(String name, YType type) {
+	public YTypedPropertyImpl yprop(String name, YType type) {
 		return new YTypedPropertyImpl(name, type);
 	}
 

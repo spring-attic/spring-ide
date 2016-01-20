@@ -70,8 +70,6 @@ public class YPropertyHoverInfo extends HoverInfo {
 	}
 
 	protected HtmlSnippet getDescription() {
-		return italic("No description");
+		return prop.getDescription();
 	}
-
-
 }
