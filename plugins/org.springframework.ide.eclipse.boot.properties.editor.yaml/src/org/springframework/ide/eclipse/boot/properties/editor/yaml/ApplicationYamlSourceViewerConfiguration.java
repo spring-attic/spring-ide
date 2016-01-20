@@ -15,7 +15,6 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.Hyperl
 import java.util.HashSet;
 import java.util.Set;
 
-import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -25,8 +24,6 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
@@ -35,6 +32,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.DefaultAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -65,16 +63,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvi
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
-import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
-import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 
 @SuppressWarnings("restriction")
-public class ApplicationYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration implements IReconcileTrigger {
-
-	private static final String DIALOG_SETTINGS_KEY = ApplicationYamlSourceViewerConfiguration.class.getName();
+public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration implements IReconcileTrigger {
 
 	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.YAML_DEFAULT;
 	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
@@ -105,21 +100,15 @@ public class ApplicationYamlSourceViewerConfiguration extends YEditSourceViewerC
 		this.editor = editor;
 	}
 
-	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
-		IDialogSettings dialogSettings = YamlEditorPlugin.getDefault().getDialogSettings();
-		IDialogSettings existing = dialogSettings.getSection(DIALOG_SETTINGS_KEY);
-		if (existing!=null) {
-			return existing;
-		}
-		IDialogSettings created = dialogSettings.addNewSection(DIALOG_SETTINGS_KEY);
+	@Override
+	protected Point getDefaultPopupSize() {
 		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
 		int suggestW = (int)(windowBounds.width*0.35);
 		int suggestH = (int)(suggestW*0.6);
 		if (suggestW>300) {
-			created.put(ContentAssistant.STORE_SIZE_X, suggestW);
-			created.put(ContentAssistant.STORE_SIZE_Y, suggestH);
+			return new Point(suggestW, suggestH);
 		}
-		return created;
+		return null;
 	}
 
 	@Override
@@ -236,35 +225,20 @@ public class ApplicationYamlSourceViewerConfiguration extends YEditSourceViewerC
 		);
 	}
 
-
-	public IContentAssistant getContentAssistant(ISourceViewer viewer) {
-		IContentAssistant _a = super.getContentAssistant(viewer);
-
-		if (_a instanceof ContentAssistant) {
-			ContentAssistant a = (ContentAssistant)_a;
-			//IContentAssistProcessor processor = assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
-			//if (processor!=null) {
-			//TODO: don't overwrite existing processor but wrap it so
-			// we combine our proposals with existing propopals
-			//}
-
-		    a.setInformationControlCreator(getInformationControlCreator(viewer));
-		    a.enableColoredLabels(true);
-		    a.enablePrefixCompletion(false);
-		    a.enableAutoInsert(true);
-		    a.enableAutoActivation(true);
-			a.setRestoreCompletionProposalSize(getDialogSettings(viewer, DIALOG_SETTINGS_KEY));
-			ProposalProcessor processor = new ProposalProcessor(completionEngine);
-			a.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-			a.setSorter(CompletionFactory.SORTER);
-		}
-		return _a;
-	}
-
 	public void forceReconcile() {
 		if (fReconciler!=null) {
 			fReconciler.forceReconcile();
 		}
+	}
+
+	@Override
+	protected IDialogSettings getPluginDialogSettings() {
+		return YamlEditorPlugin.getDefault().getDialogSettings();
+	}
+
+	@Override
+	public ICompletionEngine getCompletionEngine() {
+		return completionEngine;
 	}
 
 

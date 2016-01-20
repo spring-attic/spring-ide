@@ -12,11 +12,12 @@ package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
 import org.dadacoalition.yedit.editor.YEdit;
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
+import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 
 
 public class ManifestYamlEditor extends YEdit {
 
-	private ManifestYamlSourceViewerConfiguration sourceViewerConf;
+	private AbstractYamlSourceViewerConfiguration sourceViewerConf;
 
 	@Override
 	protected YEditSourceViewerConfiguration createSourceViewerConfiguration() {

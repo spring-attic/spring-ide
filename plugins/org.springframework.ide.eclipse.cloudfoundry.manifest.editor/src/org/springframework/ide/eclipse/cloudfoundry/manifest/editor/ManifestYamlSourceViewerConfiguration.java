@@ -10,20 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
-import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
-import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
-public class ManifestYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration {
+public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
 
-	private final String DIALOG_SETTINGS_KEY = this.getClass().getName();
 	private ICompletionEngine completionEngine;
 	private ManifestYmlSchema schema = new ManifestYmlSchema();
 	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
@@ -32,52 +25,16 @@ public class ManifestYamlSourceViewerConfiguration extends YEditSourceViewerConf
 	}
 
 	@Override
-	public IContentAssistant getContentAssistant(ISourceViewer viewer) {
-		IContentAssistant _a = super.getContentAssistant(viewer);
-
-		if (_a instanceof ContentAssistant) {
-			ContentAssistant a = (ContentAssistant)_a;
-			//IContentAssistProcessor processor = assistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
-			//if (processor!=null) {
-			//TODO: don't overwrite existing processor but wrap it so
-			// we combine our proposals with existing propopals
-			//}
-
-		    a.setInformationControlCreator(getInformationControlCreator(viewer));
-		    a.enableColoredLabels(true);
-		    a.enablePrefixCompletion(false);
-		    a.enableAutoInsert(true);
-		    a.enableAutoActivation(true);
-			a.setRestoreCompletionProposalSize(getDialogSettings(viewer, DIALOG_SETTINGS_KEY));
-			ProposalProcessor processor = new ProposalProcessor(getCompletionEngine());
-			a.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-			a.setSorter(CompletionFactory.SORTER);
-		}
-		return _a;
-	}
-
-	protected ICompletionEngine getCompletionEngine() {
+	public ICompletionEngine getCompletionEngine() {
 		if (completionEngine==null) {
 			completionEngine = new ManifestYamlCompletionEngine(structureProvider, schema);
 		}
 		return completionEngine;
 	}
 
-	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
-		IDialogSettings dialogSettings = ManifestEditorActivator.getDefault().getDialogSettings();
-		IDialogSettings existing = dialogSettings.getSection(DIALOG_SETTINGS_KEY);
-		if (existing!=null) {
-			return existing;
-		}
-		IDialogSettings created = dialogSettings.addNewSection(DIALOG_SETTINGS_KEY);
-//		Rectangle windowBounds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getBounds();
-//		int suggestW = (int)(windowBounds.width*0.35);
-//		int suggestH = (int)(suggestW*0.6);
-//		if (suggestW>300) {
-//			created.put(ContentAssistant.STORE_SIZE_X, suggestW);
-//			created.put(ContentAssistant.STORE_SIZE_Y, suggestH);
-//		}
-		return created;
+	@Override
+	protected IDialogSettings getPluginDialogSettings() {
+		return ManifestEditorActivator.getDefault().getDialogSettings();
 	}
 
 }
