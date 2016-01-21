@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.editor.support.hover;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -17,12 +17,8 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 
 public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {

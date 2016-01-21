@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDete
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
+import org.springframework.ide.eclipse.editor.support.hover.SpringPropertiesTextHover;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration

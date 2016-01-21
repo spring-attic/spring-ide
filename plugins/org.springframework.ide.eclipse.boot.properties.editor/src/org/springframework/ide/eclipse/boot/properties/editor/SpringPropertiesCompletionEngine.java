@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
+import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 

@@ -13,13 +13,18 @@ package org.springframework.ide.eclipse.editor.support.yaml;
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.hover.SpringPropertiesTextHover;
 
 /**
  * @author Kris De Volder
@@ -77,5 +82,27 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 	}
 
 	public abstract ICompletionEngine getCompletionEngine();
+
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
+			ITextHover delegate = getTextAnnotationHover(sourceViewer);
+			try {
+				IPropertyHoverInfoProvider hoverProvider = getHoverProvider();
+				if (hoverProvider!=null) {
+					return new SpringPropertiesTextHover(sourceViewer, getHoverProvider(), delegate);
+				}
+			} catch (Exception e) {
+				EditorSupportActivator.log(e);
+			}
+			return delegate;
+		} else {
+			return super.getTextHover(sourceViewer, contentType, stateMask);
+		}
+	}
+
+	protected abstract ITextHover getTextAnnotationHover(ISourceViewer sourceViewer);
+
+	protected abstract IPropertyHoverInfoProvider getHoverProvider();
 
 }

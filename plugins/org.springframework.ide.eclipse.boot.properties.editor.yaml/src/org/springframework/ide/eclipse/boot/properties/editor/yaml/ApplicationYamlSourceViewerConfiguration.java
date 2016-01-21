@@ -23,7 +23,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
-import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
@@ -41,7 +40,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinders;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
@@ -50,7 +48,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesTextHover;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
@@ -64,6 +61,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTPr
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
+import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
@@ -136,7 +134,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		}
 	};
 
-	private IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
+	public IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		protected IReconcileEngine createEngine() throws Exception {
@@ -149,22 +147,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	private ICompletionEngine completionEngine = new ApplicationYamlCompletionEngine(indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
 			RelaxedNameConfig.COMPLETION_DEFAULTS);
 
-	@Override
-	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
-			ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
-			try {
-				return new SpringPropertiesTextHover(sourceViewer, hoverProvider, delegate);
-			} catch (Exception e) {
-				SpringPropertiesEditorPlugin.log(e);
-			}
-			return delegate;
-		} else {
-			return super.getTextHover(sourceViewer, contentType, stateMask);
-		}
-	}
-
-	protected QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
+	public QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
 		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
 	}
 
@@ -241,5 +224,14 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		return completionEngine;
 	}
 
+	@Override
+	protected ITextHover getTextAnnotationHover(ISourceViewer sourceViewer) {
+		return new SpringPropertiesAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
+	}
+
+	@Override
+	protected IPropertyHoverInfoProvider getHoverProvider() {
+		return hoverProvider;
+	}
 
 }

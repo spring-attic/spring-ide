@@ -25,6 +25,7 @@ import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.PartInitException;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
 
 /**
  * @author Kris De Volder
