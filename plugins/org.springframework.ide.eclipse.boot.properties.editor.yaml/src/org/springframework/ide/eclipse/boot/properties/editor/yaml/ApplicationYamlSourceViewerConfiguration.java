@@ -134,7 +134,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		}
 	};
 
-	public HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
+	public HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		protected IReconcileEngine createEngine() throws Exception {

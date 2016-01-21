@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropert
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlStructureProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.YamlHoverInfoProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlHoverInfoProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
@@ -68,7 +68,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		}
 	};
 
-	private HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
+	private HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
 	private ICompletionEngine completionEngine = new ApplicationYamlCompletionEngine(indexProvider, documentContextFinder, structureProvider, typeUtilProvider, RelaxedNameConfig.COMPLETION_DEFAULTS);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {

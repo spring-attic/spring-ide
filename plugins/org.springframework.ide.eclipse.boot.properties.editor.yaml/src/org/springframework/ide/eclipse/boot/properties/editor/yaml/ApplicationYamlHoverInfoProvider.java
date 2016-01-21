@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,9 +25,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.yaml.snakeyaml.nodes.Node;
@@ -38,13 +38,13 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 /**
  * @author Kris De Volder
  */
-public class YamlHoverInfoProvider implements HoverInfoProvider {
+public class ApplicationYamlHoverInfoProvider extends YamlHoverInfoProvider {
 
 	private YamlASTProvider astProvider;
 	private SpringPropertyIndexProvider indexProvider;
 	private DocumentContextFinder contextFinder;
 
-	public YamlHoverInfoProvider(YamlASTProvider astProvider, SpringPropertyIndexProvider indexProvider, DocumentContextFinder contextFinder) {
+	public ApplicationYamlHoverInfoProvider(YamlASTProvider astProvider, SpringPropertyIndexProvider indexProvider, DocumentContextFinder contextFinder) {
 		this.astProvider = astProvider;
 		this.indexProvider = indexProvider;
 		this.contextFinder = contextFinder;

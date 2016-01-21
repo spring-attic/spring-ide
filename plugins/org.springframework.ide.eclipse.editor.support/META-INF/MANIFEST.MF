@@ -27,6 +27,7 @@ Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.yaml,
  org.springframework.ide.eclipse.editor.support.yaml.ast,
  org.springframework.ide.eclipse.editor.support.yaml.completions,
+ org.springframework.ide.eclipse.editor.support.yaml.hover,
  org.springframework.ide.eclipse.editor.support.yaml.path,
  org.springframework.ide.eclipse.editor.support.yaml.schema,
  org.springframework.ide.eclipse.editor.support.yaml.structure
