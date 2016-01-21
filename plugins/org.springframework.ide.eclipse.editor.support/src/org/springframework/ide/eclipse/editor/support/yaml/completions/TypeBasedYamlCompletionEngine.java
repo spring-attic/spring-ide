@@ -14,6 +14,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
@@ -24,13 +25,19 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
  */
 public class TypeBasedYamlCompletionEngine extends YamlCompletionEngine {
 
-	protected final YType topLevelType;
-	protected final YTypeUtil typeUtil;
+	private YamlSchema schema;
 
-	public TypeBasedYamlCompletionEngine(YamlStructureProvider structureProvider, YType topLevelType, YTypeUtil typeUtil) {
+	public TypeBasedYamlCompletionEngine(YamlStructureProvider structureProvider, YamlSchema schema) {
 		super(structureProvider);
-		this.topLevelType = topLevelType;
-		this.typeUtil = typeUtil;
+		this.schema = schema;
+	}
+
+	protected YType getTopLevelType() {
+		return schema.getToplevelType();
+	}
+
+	protected YTypeUtil getTypeUtil() {
+		return schema.getTypeUtil();
 	}
 
 	@Override
@@ -38,7 +45,7 @@ public class TypeBasedYamlCompletionEngine extends YamlCompletionEngine {
 		return new TopLevelAssistContext() {
 			@Override
 			protected YamlAssistContext getDocumentContext(int documentSelector) {
-				return new YTypeAssistContext(this, documentSelector, topLevelType, typeUtil);
+				return new YTypeAssistContext(this, documentSelector, getTopLevelType(), getTypeUtil());
 			}
 		};
 	}

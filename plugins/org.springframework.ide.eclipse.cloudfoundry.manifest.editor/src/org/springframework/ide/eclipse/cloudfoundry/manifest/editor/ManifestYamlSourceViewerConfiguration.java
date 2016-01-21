@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.TypeBasedYamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
@@ -32,7 +33,6 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 
 	private ICompletionEngine completionEngine;
 	private ManifestYmlSchema schema = new ManifestYmlSchema();
-	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
 
 	public ManifestYamlSourceViewerConfiguration() {
 	}
@@ -40,9 +40,14 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	@Override
 	public ICompletionEngine getCompletionEngine() {
 		if (completionEngine==null) {
-			completionEngine = new ManifestYamlCompletionEngine(structureProvider, schema);
+			completionEngine = new TypeBasedYamlCompletionEngine(getStructureProvider(), schema);
 		}
 		return completionEngine;
+	}
+
+	protected YamlStructureProvider getStructureProvider() {
+		//pull up?
+		return YamlStructureProvider.DEFAULT;
 	}
 
 	@Override

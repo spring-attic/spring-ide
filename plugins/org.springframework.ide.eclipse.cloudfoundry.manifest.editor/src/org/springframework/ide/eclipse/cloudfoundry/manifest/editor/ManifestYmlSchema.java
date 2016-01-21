@@ -22,16 +22,17 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.Y
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YBeanType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YTypedPropertyImpl;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 
 import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
  */
-public class ManifestYmlSchema {
+public class ManifestYmlSchema implements YamlSchema {
 
-	public final YBeanType TOPLEVEL_TYPE;
-	public final YTypeUtil TYPE_UTIL;
+	private final YBeanType TOPLEVEL_TYPE;
+	private final YTypeUtil TYPE_UTIL;
 
 	private static final Set<String> TOPLEVEL_EXCLUDED = ImmutableSet.of(
 		"name", "host", "hosts"
@@ -95,4 +96,13 @@ public class ManifestYmlSchema {
 		return DescriptionProviders.fromClasspath(this.getClass(), "/description-by-prop-name/"+prop.getName()+".html");
 	}
 
+	@Override
+	public YBeanType getToplevelType() {
+		return TOPLEVEL_TYPE;
+	}
+
+	@Override
+	public YTypeUtil getTypeUtil() {
+		return TYPE_UTIL;
+	}
 }
