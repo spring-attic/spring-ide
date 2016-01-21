@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
-import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.hover.SpringPropertiesTextHover;
 
 /**
@@ -88,7 +88,7 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
 			ITextHover delegate = getTextAnnotationHover(sourceViewer);
 			try {
-				IPropertyHoverInfoProvider hoverProvider = getHoverProvider();
+				HoverInfoProvider hoverProvider = getHoverProvider();
 				if (hoverProvider!=null) {
 					return new SpringPropertiesTextHover(sourceViewer, getHoverProvider(), delegate);
 				}
@@ -103,6 +103,6 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 
 	protected abstract ITextHover getTextAnnotationHover(ISourceViewer sourceViewer);
 
-	protected abstract IPropertyHoverInfoProvider getHoverProvider();
+	protected abstract HoverInfoProvider getHoverProvider();
 
 }

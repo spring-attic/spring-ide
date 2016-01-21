@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
@@ -38,7 +38,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 /**
  * @author Kris De Volder
  */
-public class YamlHoverInfoProvider implements IPropertyHoverInfoProvider {
+public class YamlHoverInfoProvider implements HoverInfoProvider {
 
 	private YamlASTProvider astProvider;
 	private SpringPropertyIndexProvider indexProvider;

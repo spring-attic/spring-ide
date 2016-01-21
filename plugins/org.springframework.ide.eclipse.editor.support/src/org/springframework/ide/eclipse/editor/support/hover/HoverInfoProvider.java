@@ -14,9 +14,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 /**
+ * A simple interface to implement for a component that provides HoverInfo based on
+ * editor contents.
+ *
  * @author Kris De Volder
  */
-public interface IPropertyHoverInfoProvider {
+public interface HoverInfoProvider {
 	HoverInfo getHoverInfo(IDocument doc, IRegion r);
 	IRegion getHoverRegion(IDocument document, int offset);
 }

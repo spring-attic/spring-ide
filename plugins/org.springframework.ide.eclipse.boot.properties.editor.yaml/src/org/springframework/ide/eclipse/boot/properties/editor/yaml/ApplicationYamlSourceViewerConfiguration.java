@@ -61,7 +61,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTPr
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
-import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
@@ -134,7 +134,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		}
 	};
 
-	public IPropertyHoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
+	public HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
 	private SpringPropertiesReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		protected IReconcileEngine createEngine() throws Exception {
@@ -230,7 +230,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	}
 
 	@Override
-	protected IPropertyHoverInfoProvider getHoverProvider() {
+	protected HoverInfoProvider getHoverProvider() {
 		return hoverProvider;
 	}
 

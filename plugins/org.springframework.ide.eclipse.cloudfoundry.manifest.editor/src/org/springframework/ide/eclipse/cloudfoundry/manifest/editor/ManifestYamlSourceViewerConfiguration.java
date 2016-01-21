@@ -20,11 +20,14 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.hover.IPropertyHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
+/**
+ * @author Kris De Volder
+ */
 public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
 
 	private ICompletionEngine completionEngine;
@@ -52,8 +55,8 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 		return null;
 	}
 
-	protected IPropertyHoverInfoProvider getHoverProvider() {
-		return new IPropertyHoverInfoProvider() {
+	protected HoverInfoProvider getHoverProvider() {
+		return new HoverInfoProvider() {
 
 			@Override
 			public IRegion getHoverRegion(IDocument document, int offset) {

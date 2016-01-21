@@ -23,10 +23,10 @@ import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 
 public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
-	private IPropertyHoverInfoProvider _hovers;
+	private HoverInfoProvider _hovers;
 	private ITextHover delegate;
 
-	public SpringPropertiesTextHover(ISourceViewer sourceViewer, IPropertyHoverInfoProvider hoverInfoProvider, ITextHover delegate) {
+	public SpringPropertiesTextHover(ISourceViewer sourceViewer, HoverInfoProvider hoverInfoProvider, ITextHover delegate) {
 		this._hovers = hoverInfoProvider;
 		this.delegate = delegate;
 	}
