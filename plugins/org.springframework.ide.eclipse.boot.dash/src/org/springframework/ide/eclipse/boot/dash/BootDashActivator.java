@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -90,8 +91,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns a new <code>IStatus</code> for this plug-in
+	 * Deprecated use {@link ExceptionUtil} methods instead.
 	 */
+	@Deprecated
 	public static IStatus createErrorStatus(Throwable exception) {
 		String message = exception.getMessage();
 		if (message == null) {
@@ -100,6 +102,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
+	/**
+	 * Deprecated use {@link ExceptionUtil} methods instead.
+	 */
+	@Deprecated
 	public static IStatus createErrorStatus(Throwable exception, String message) {
 		if (message == null) {
 			message = "";
@@ -107,6 +113,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
+	/**
+	 * Deprecated. Use {@link ExceptionUtil}.coreException instead.
+	 */
+	@Deprecated
 	public static CoreException asCoreException(String message) {
 		return new CoreException(createErrorStatus(null, message));
 	}
