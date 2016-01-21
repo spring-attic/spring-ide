@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -62,6 +61,7 @@ import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -401,7 +401,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().create());
 
 		fileYamlViewer = new SourceViewer(fileYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		fileYamlViewer.configure(new YEditSourceViewerConfiguration());
+		fileYamlViewer.configure(new ManifestYamlSourceViewerConfiguration());
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		fileYamlViewer.setEditable(false);
 		fileYamlViewer.getTextWidget().setBackground(composite.getBackground());
@@ -417,7 +417,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().create());
 
 		manualYamlViewer = new SourceViewer(manualYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		manualYamlViewer.configure(new YEditSourceViewerConfiguration());
+		manualYamlViewer.configure(new ManifestYamlSourceViewerConfiguration());
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		manualYamlViewer.setEditable(!readOnly);
 		if (readOnly) {
