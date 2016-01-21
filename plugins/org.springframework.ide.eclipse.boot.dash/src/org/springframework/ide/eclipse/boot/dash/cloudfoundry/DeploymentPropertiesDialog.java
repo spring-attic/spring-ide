@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -81,16 +82,43 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	final static private String YML_EXTENSION = "yml"; //$NON-NLS-1$
 	final static private String[] FILE_FILTER_NAMES = new String[] {"Manifest YAML files - *manifest*.yml", "YAML files - *.yml", "All files - *.*"};
 
-	final static private ViewerFilter YAML_FILE_FILTER = new ViewerFilter() {
+	private static abstract class DeepFileFilter extends ViewerFilter {
+
 		@Override
-		public boolean select(Viewer viewer,Object parent,Object element) {
-			return !(element instanceof IFile) || YML_EXTENSION.equals(((IFile)element).getFileExtension());
+		public boolean select(Viewer viewer, Object parent, Object element) {
+			if (element instanceof IFile) {
+				return acceptFile((IFile)element);
+			}
+			if (element instanceof IContainer) {
+				try {
+					IContainer container = (IContainer) element;
+					for (IResource resource : container.members()) {
+						boolean select = select(viewer, container, resource);
+						if (select) {
+							return true;
+						}
+					}
+				} catch (CoreException e) {
+					// ignore
+				}
+			}
+			return false;
+		}
+
+		abstract protected boolean acceptFile(IFile file);
+
+	}
+
+	final static private ViewerFilter YAML_FILE_FILTER = new DeepFileFilter() {
+		@Override
+		protected boolean acceptFile(IFile file) {
+			return YML_EXTENSION.equals(file.getFileExtension());
 		}
 	};
-	final static private ViewerFilter MANIFEST_IN_FILENAME_FILTER = new ViewerFilter() {
+	final static private ViewerFilter MANIFEST_IN_FILENAME_FILTER = new DeepFileFilter() {
 		@Override
-		public boolean select(Viewer viewer,Object parent,Object element) {
-			return !(element instanceof IFile) || ((IFile)element).getName().toLowerCase().contains("manifest");
+		protected boolean acceptFile(IFile file) {
+			return file.getName().toLowerCase().contains("manifest");
 		}
 	};
 	final static private ViewerFilter[][] RESOURCE_FILTERS = new ViewerFilter[][] {
