@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.editor.support.completions.CompletionFact
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
-import org.springframework.ide.eclipse.editor.support.hover.SpringPropertiesTextHover;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 
 /**
  * @author Kris De Volder
@@ -90,7 +90,7 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 			try {
 				HoverInfoProvider hoverProvider = getHoverProvider();
 				if (hoverProvider!=null) {
-					return new SpringPropertiesTextHover(sourceViewer, getHoverProvider(), delegate);
+					return new HoverInfoTextHover(sourceViewer, getHoverProvider(), delegate);
 				}
 			} catch (Exception e) {
 				EditorSupportActivator.log(e);

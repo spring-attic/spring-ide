@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.hover;
 
+import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
@@ -21,12 +22,30 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 
-public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
+/**
+ * An implementation of Eclipse's {@link ITextHover} and some of its clunky 'extension'
+ * interfaces, that wraps a simple 'HoverInfoProvider' (so that implementing something
+ * to provide hover infos based on an editor's contents doesn't have to be horribly
+ * complicated).
+ *
+ * @author Kris De Volder
+ */
+@SuppressWarnings("restriction")
+public class HoverInfoTextHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
 	private HoverInfoProvider _hovers;
 	private ITextHover delegate;
 
-	public SpringPropertiesTextHover(ISourceViewer sourceViewer, HoverInfoProvider hoverInfoProvider, ITextHover delegate) {
+	/**
+	 * Create a {@link HoverInfoTextHover} based on a given {@link HoverInfoProvider}. It is also possible
+	 * to provide an optioanl {@link ITextHover} delegate. This 'wrapper' will try to delegate hover info
+	 * requests to the delegate and combine its results with our own {@link HoverInfoProvider} in some
+	 * sensible way. Note however that for this to work the delegate must produce hover informations
+	 * that can be properly displayed by our own {@link HoverInformationControl}, essentially this
+	 * means they must be based on {@link BrowserInformationControlInput}. If that is not the
+	 * case then our {@link HoverInformationControl} will not be able to display them correctly.
+	 */
+	public HoverInfoTextHover(ISourceViewer sourceViewer, HoverInfoProvider hoverInfoProvider, ITextHover delegate) {
 		this._hovers = hoverInfoProvider;
 		this.delegate = delegate;
 	}
@@ -76,7 +95,6 @@ public class SpringPropertiesTextHover implements ITextHover, ITextHoverExtensio
 	public IInformationControlCreator getHoverControlCreator() {
 		return new HoverInformationControlCreator(EditorsUI.getTooltipAffordanceString());
 	}
-
 
 	private IRegion hovers_getHoverRegion(IDocument document, int offset) {
 		IRegion r = _hovers.getHoverRegion(document, offset);

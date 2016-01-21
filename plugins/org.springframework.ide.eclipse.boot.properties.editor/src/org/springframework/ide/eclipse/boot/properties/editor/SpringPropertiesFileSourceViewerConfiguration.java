@@ -50,7 +50,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDete
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
-import org.springframework.ide.eclipse.editor.support.hover.SpringPropertiesTextHover;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
@@ -122,7 +122,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
 				if (engine!=null) {
-					return new SpringPropertiesTextHover(sourceViewer, engine, delegate);
+					return new HoverInfoTextHover(sourceViewer, engine, delegate);
 				}
 			}
 		} catch (Exception e) {
