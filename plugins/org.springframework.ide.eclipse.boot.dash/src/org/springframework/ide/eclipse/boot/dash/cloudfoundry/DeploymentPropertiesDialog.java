@@ -86,20 +86,22 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		@Override
 		public boolean select(Viewer viewer, Object parent, Object element) {
-			if (element instanceof IFile) {
-				return acceptFile((IFile)element);
-			}
-			if (element instanceof IContainer) {
-				try {
-					IContainer container = (IContainer) element;
-					for (IResource resource : container.members()) {
-						boolean select = select(viewer, container, resource);
-						if (select) {
-							return true;
+			if (element instanceof IResource && !((IResource)element).isDerived()) {
+				if (element instanceof IFile) {
+					return acceptFile((IFile)element);
+				}
+				if (element instanceof IContainer) {
+					try {
+						IContainer container = (IContainer) element;
+						for (IResource resource : container.members()) {
+							boolean select = select(viewer, container, resource);
+							if (select) {
+								return true;
+							}
 						}
+					} catch (CoreException e) {
+						// ignore
 					}
-				} catch (CoreException e) {
-					// ignore
 				}
 			}
 			return false;
@@ -121,10 +123,16 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			return file.getName().toLowerCase().contains("manifest") && YML_EXTENSION.equals(file.getFileExtension());
 		}
 	};
+	final static private ViewerFilter ALL_FILES = new ViewerFilter() {
+		@Override
+		public boolean select(Viewer viewer, Object parent, Object element) {
+			return (element instanceof IResource) && !((IResource)element).isDerived();
+		}
+	};
 	final static private ViewerFilter[][] RESOURCE_FILTERS = new ViewerFilter[][] {
 		{MANIFEST_YAML_FILE_FILTER},
 		{YAML_FILE_FILTER},
-		{}
+		{ALL_FILES}
 	};
 
 	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
