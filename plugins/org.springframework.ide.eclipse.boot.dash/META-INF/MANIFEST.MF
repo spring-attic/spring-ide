@@ -42,7 +42,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench,
  org.springframework.ide.eclipse.editor.support,
  org.yaml.snakeyaml,
- org.eclipse.compare
+ org.eclipse.compare,
+ org.springframework.ide.eclipse.cloudfoundry.manifest.editor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

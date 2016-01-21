@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
-import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.IViewerCreator;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
@@ -19,6 +18,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
 
 /**
  * Create compare and merge viewer for YAML content
@@ -35,7 +35,7 @@ public class YamlMergeViewerCreator implements IViewerCreator {
 			@Override
 			protected SourceViewer createSourceViewer(Composite parent, int textOrientation) {
 				SourceViewer viewer = new SourceViewer(parent, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);;
-				viewer.configure(new YEditSourceViewerConfiguration());
+				viewer.configure(new ManifestYamlSourceViewerConfiguration());
 				return viewer;
 			}
 
