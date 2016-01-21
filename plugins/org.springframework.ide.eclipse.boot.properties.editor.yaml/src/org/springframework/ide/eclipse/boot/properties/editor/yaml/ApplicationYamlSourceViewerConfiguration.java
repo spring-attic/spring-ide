@@ -58,14 +58,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContext;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContextProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 
@@ -119,7 +117,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 
 	private Yaml yaml = new Yaml();
 	private YamlASTProvider astProvider = new YamlASTProvider(yaml);
-	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
+	SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
 		@Override
 		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
 			IJavaProject jp = DocumentUtil.getJavaProject(doc);
@@ -130,32 +128,24 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		}
 
 	};
-	private TypeUtilProvider typeUtilProvider = new TypeUtilProvider() {
+	TypeUtilProvider typeUtilProvider = new TypeUtilProvider() {
 		@Override
 		public TypeUtil getTypeUtil(IDocument doc) {
 			return new TypeUtil(DocumentUtil.getJavaProject(doc));
 		}
 	};
 
-	public HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(astProvider, indexProvider, documentContextFinder);
-	private SpringPropertiesReconciler fReconciler;
-	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
+	private final YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
+	private final YamlAssistContextProvider assistContextProvider = new ApplicationYamlAssistContextProvider(indexProvider, typeUtilProvider, RelaxedNameConfig.COMPLETION_DEFAULTS, documentContextFinder);
+	private final HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(astProvider, structureProvider, assistContextProvider);
+	private final SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		protected IReconcileEngine createEngine() throws Exception {
 			return new SpringYamlReconcileEngine(astProvider, indexProvider, typeUtilProvider);
 		}
 	};
 
-	private YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
-
 	final PropertyCompletionFactory completionFactory = new PropertyCompletionFactory(documentContextFinder);
-	private YamlAssistContextProvider assistContextProvider = new YamlAssistContextProvider() {
-		@Override
-		public YamlAssistContext getGlobalAssistContext(YamlDocument ydoc) {
-			IDocument doc = ydoc.getDocument();
-			FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
-			return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), RelaxedNameConfig.COMPLETION_DEFAULTS);
-		}
-	};
+	private SpringPropertiesReconciler fReconciler;
 
 	public QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
 		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));

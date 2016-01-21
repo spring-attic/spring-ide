@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.editor.support.yaml.completions;
 import java.util.Collection;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 
@@ -25,4 +26,5 @@ public interface YamlAssistContext extends YamlNavigable<YamlAssistContext> {
 	 * Create context sensitive completions.
 	 */
 	Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
+	HoverInfo getHoverInfo();
 }

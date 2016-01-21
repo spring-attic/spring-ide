@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 
@@ -48,5 +49,9 @@ public abstract class TopLevelAssistContext implements YamlAssistContext {
 		return Collections.emptyList();
 	}
 
+	@Override
+	public HoverInfo getHoverInfo() {
+		return null;
+	}
 	protected abstract YamlAssistContext getDocumentContext(int documentSelector);
 }

@@ -32,13 +32,16 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlStructureProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlHoverInfoProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContextProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
@@ -53,6 +56,7 @@ import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
  */
 public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
+	private static final RelaxedNameConfig relaxedNameConfig = RelaxedNameConfig.COMPLETION_DEFAULTS;
 	protected YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 	protected Yaml yaml = new Yaml();
 	protected YamlASTProvider parser = new YamlASTProvider(yaml);
@@ -68,8 +72,11 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		}
 	};
 
-	private HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(parser, indexProvider, documentContextFinder);
-	private ICompletionEngine completionEngine = ApplicationYamlCompletionEngine.create(indexProvider, documentContextFinder, structureProvider, typeUtilProvider, RelaxedNameConfig.COMPLETION_DEFAULTS);
+	private YamlAssistContextProvider assistContextProvider = new ApplicationYamlAssistContextProvider(
+			indexProvider, typeUtilProvider, relaxedNameConfig, documentContextFinder
+	);
+	private HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(parser, structureProvider, assistContextProvider);
+	private ICompletionEngine completionEngine = new YamlCompletionEngine(structureProvider, assistContextProvider);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);

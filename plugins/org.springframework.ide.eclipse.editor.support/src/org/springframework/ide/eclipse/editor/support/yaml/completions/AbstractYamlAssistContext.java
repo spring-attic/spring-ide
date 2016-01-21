@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SDocNode;
@@ -54,6 +55,11 @@ public abstract class AbstractYamlAssistContext implements YamlAssistContext {
 
 	protected CompletionFactory completionFactory() {
 		return CompletionFactory.DEFAULT;
+	}
+
+	@Override
+	public HoverInfo getHoverInfo() {
+		return null;
 	}
 
 
