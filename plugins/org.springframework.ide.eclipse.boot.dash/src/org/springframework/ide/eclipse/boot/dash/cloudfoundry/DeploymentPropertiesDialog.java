@@ -115,14 +115,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			return YML_EXTENSION.equals(file.getFileExtension());
 		}
 	};
-	final static private ViewerFilter MANIFEST_IN_FILENAME_FILTER = new DeepFileFilter() {
+	final static private ViewerFilter MANIFEST_YAML_FILE_FILTER = new DeepFileFilter() {
 		@Override
 		protected boolean acceptFile(IFile file) {
-			return file.getName().toLowerCase().contains("manifest");
+			return file.getName().toLowerCase().contains("manifest") && YML_EXTENSION.equals(file.getFileExtension());
 		}
 	};
 	final static private ViewerFilter[][] RESOURCE_FILTERS = new ViewerFilter[][] {
-		{YAML_FILE_FILTER, MANIFEST_IN_FILENAME_FILTER},
+		{MANIFEST_YAML_FILE_FILTER},
 		{YAML_FILE_FILTER},
 		{}
 	};
