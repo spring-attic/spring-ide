@@ -31,6 +31,9 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"domain: <*>",
 				// ---------------
+				"domains:\n"+
+				"  - <*>",
+				// ---------------
 				"env:\n"+
 				"  <*>",
 				// ---------------
@@ -87,6 +90,10 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"applications:\n" +
 				"  - domain: <*>",
+				// ---------------
+				"applications:\n" +
+				"  - domains:\n"+
+				"      - <*>",
 				// ---------------
 				"applications:\n" +
 				"  - env:\n"+
