@@ -61,6 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshApplications;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
@@ -623,7 +624,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             properties
 	 */
 	public CloudApplicationDeploymentProperties resolveDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(this, project);
+		/*
+		 * Refresh the cloud application first to get the latest deployment properties changes
+		 */
+		new RefreshApplications(this, Collections.singletonList(getAppCache().getApp(project)), ui).run(monitor);
+		/*
+		 * Now construct deployment properties object
+		 */
+		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, getRunTarget().getDomains(monitor), getAppCache().getApp(project));
 		CloudDashElement element = getElement(deploymentProperties.getAppName());
 		final IFile manifestFile = element.getDeploymentManifestFile();
 		if (manifestFile != null) {
@@ -722,7 +730,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(this, project);
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, getRunTarget().getDomains(monitor), null);
 		CloudDashElement element = getElement(props.getAppName());
 		if (ui != null) {
 			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props);

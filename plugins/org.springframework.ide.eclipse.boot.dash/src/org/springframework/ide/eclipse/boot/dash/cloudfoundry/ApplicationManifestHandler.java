@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -100,7 +101,7 @@ public class ApplicationManifestHandler {
 		if (file != null && file.exists()) {
 			return new FileInputStream(file);
 		} else {
-			throw BootDashActivator.asCoreException("No manifest.yml file found in project: " + project.getName());
+			throw ExceptionUtil.coreException("No manifest.yml file found in project: " + project.getName());
 		}
 	}
 
@@ -212,7 +213,7 @@ public class ApplicationManifestHandler {
 		Object applicationsObj = results.get(APPLICATIONS_PROP);
 		if (!(applicationsObj instanceof List<?>)) {
 			String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
-			throw BootDashActivator.asCoreException("Expected a top-level list of applications in " + source
+			throw ExceptionUtil.coreException("Expected a top-level list of applications in " + source
 					+ ". Unable to continue parsing manifest values. No manifest values will be loaded into the application deployment info.");
 		}
 
@@ -258,7 +259,7 @@ public class ApplicationManifestHandler {
 
 		ValidationResult validation = properties.getValidator().getValue();
 		if (validation != null && !validation.isOk()) {
-			throw BootDashActivator.asCoreException(validation.msg);
+			throw ExceptionUtil.coreException(validation.msg);
 		}
 
 		return properties;
@@ -273,15 +274,15 @@ public class ApplicationManifestHandler {
 			Map<Object, Object> allResults = parseManifestFromFile();
 
 			if (allResults == null || allResults.isEmpty()) {
-				throw BootDashActivator
-						.asCoreException("No content found in manifest.yml. Make sure the manifest is valid.");
+				throw ExceptionUtil
+						.coreException("No content found in manifest.yml. Make sure the manifest is valid.");
 
 			}
 
 			List<Map<?, ?>> appMaps = getApplications(allResults);
 
 			if (appMaps == null || appMaps.isEmpty()) {
-				throw BootDashActivator.asCoreException(
+				throw ExceptionUtil.coreException(
 						"No application definition found in manifest.yml. Make sure at least one application is defined");
 			}
 			List<CloudApplicationDeploymentProperties> properties = new ArrayList<CloudApplicationDeploymentProperties>();
@@ -332,7 +333,7 @@ public class ApplicationManifestHandler {
 		String manifestValue = yaml.dump(deploymentInfoYaml);
 
 		if (manifestValue == null) {
-			throw BootDashActivator.asCoreException("Failed to generate manifesty.yml for: " + properties.getAppName()
+			throw ExceptionUtil.coreException("Failed to generate manifesty.yml for: " + properties.getAppName()
 					+ " Unknown problem trying to serialise content of manifest into: " + deploymentInfoYaml);
 		}
 
@@ -362,9 +363,15 @@ public class ApplicationManifestHandler {
 		if (memory != null) {
 			application.put(MEMORY_PROP, memory);
 		}
-
-		application.put(SUB_DOMAIN_PROP, properties.getHost());
-		application.put(DOMAIN_PROP, properties.getDomain());
+		if (properties.getInstances() != CloudApplicationDeploymentProperties.DEFAULT_INSTANCES) {
+			application.put(ApplicationManifestHandler.INSTANCES_PROP, properties.getInstances());
+		}
+		if (properties.getHost() != null) {
+			application.put(SUB_DOMAIN_PROP, properties.getHost());
+		}
+		if (properties.getDomain() != null) {
+			application.put(DOMAIN_PROP, properties.getDomain());
+		}
 		if (properties.getServices() != null && !properties.getServices().isEmpty()) {
 			application.put(SERVICES_PROP, properties.getServices());
 		}
@@ -568,13 +575,13 @@ public class ApplicationManifestHandler {
 		if (gIndex > 0) {
 			memoryStringVal = memoryStringVal.substring(0, gIndex);
 		} else if (gIndex == 0) {
-			throw BootDashActivator.asCoreException("Failed to read memory value. Invalid memory: " + memoryStringVal);
+			throw ExceptionUtil.coreException("Failed to read memory value. Invalid memory: " + memoryStringVal);
 		}
 
 		try {
 			return Integer.valueOf(memoryStringVal);
 		} catch (NumberFormatException e) {
-			throw BootDashActivator.asCoreException("Failed to parse memory due to: " + e.getMessage());
+			throw ExceptionUtil.coreException("Failed to parse memory due to: " + e.getMessage());
 		}
 	}
 
@@ -600,7 +607,7 @@ public class ApplicationManifestHandler {
 					return (Map<Object, Object>) results;
 				} else {
 					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
-					throw BootDashActivator.asCoreException("Expected a map of values for "
+					throw ExceptionUtil.coreException("Expected a map of values for "
 							+ source + ". Unable to load manifest content.  Actual results: " + results);
 				}
 

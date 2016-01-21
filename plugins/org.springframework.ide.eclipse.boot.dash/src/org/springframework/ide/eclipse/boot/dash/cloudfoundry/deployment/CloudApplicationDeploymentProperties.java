@@ -21,10 +21,8 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -257,9 +255,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(CloudFoundryBootDashModel model, IProject project) throws Exception {
-
-		CloudApplication app = model.getAppCache().getApp(project);
+	public static CloudApplicationDeploymentProperties getFor(IProject project, List<CloudDomain> domains, CloudApplication app) throws Exception {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
@@ -282,9 +278,8 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setMemory(app == null ? 1024 : app.getMemory());
 		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
 
-		List<CloudDomain> domains = model.getRunTarget().getDomains(new NullProgressMonitor());
 		if (app == null) {
-			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), model.getRunTarget().getDomains(new NullProgressMonitor()).get(0).getName());
+			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), domains.get(0).getName());
 			properties.setUrls(Collections.singletonList(cloudAppUrl.getUrl()));
 			properties.setHost(cloudAppUrl.getSubdomain());
 			properties.setDomain(cloudAppUrl.getDomain());
@@ -306,7 +301,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 		ValidationResult result = validator.getValue();
 		if (!result.isOk()) {
-			throw BootDashActivator.asCoreException(result.msg);
+			throw ExceptionUtil.coreException(result.msg);
 		}
 
 		return properties;

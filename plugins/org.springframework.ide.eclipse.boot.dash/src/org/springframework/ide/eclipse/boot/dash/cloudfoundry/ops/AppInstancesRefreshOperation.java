@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,23 +31,17 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
  */
 public class AppInstancesRefreshOperation extends CloudOperation {
 
-	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model) {
+	private List<CloudApplication> appsToLookUp;
+
+	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model, List<CloudApplication> appsToLookUp) {
 		super("Refreshing running state of applications in: " + model.getRunTarget().getName(), model);
+		this.appsToLookUp = appsToLookUp;
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception {
 		this.model.setRefreshState(RefreshState.loading("Fetching App Instances..."));
 		try {
-			List<CloudAppInstances> appInstances = this.model.getAppCache().getAppInstances();
-
-			List<CloudApplication> appsToLookUp = new ArrayList<CloudApplication>();
-			for (CloudAppInstances instances : appInstances) {
-				CloudApplication app = instances.getApplication();
-				if (app != null) {
-					appsToLookUp.add(app);
-				}
-			}
 			if (!appsToLookUp.isEmpty()) {
 				Map<CloudApplication, ApplicationStats> stats = model.getRunTarget().getClientRequests().getApplicationStats(appsToLookUp);
 				for (Entry<CloudApplication, ApplicationStats> entry : stats.entrySet()) {
