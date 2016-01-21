@@ -8,18 +8,17 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.editor.support.yaml.schema;
+package org.springframework.ide.eclipse.editor.support.yaml;
+
+import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 
 /**
- * A 'schema' provides a toplevel type, which dictates the valid structure of a
- * YamlDocument and a {@link YTypeUtil} which provides the means to 'interpret'
- * the types.
+ * Defines a way to obtain a 'toplevel' {@link YamlAssistContext} for a given {@link YamlDocument}
  *
  * @author Kris De Volder
  */
-public interface YamlSchema {
+public interface YamlAssistContextProvider {
 
-	YType getTopLevelType();
-	YTypeUtil getTypeUtil();
+	YamlAssistContext getGlobalAssistContext(YamlDocument doc);
 
 }

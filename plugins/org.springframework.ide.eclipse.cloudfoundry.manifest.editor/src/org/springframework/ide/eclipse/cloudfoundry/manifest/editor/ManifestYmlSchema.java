@@ -97,7 +97,7 @@ public class ManifestYmlSchema implements YamlSchema {
 	}
 
 	@Override
-	public YBeanType getToplevelType() {
+	public YBeanType getTopLevelType() {
 		return TOPLEVEL_TYPE;
 	}
 

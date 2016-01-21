@@ -20,7 +20,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockEditor;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYmlSchema;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.TypeBasedYamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
@@ -30,7 +31,7 @@ public class MockManifestEditor extends MockEditor {
 
 	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
 	private ManifestYmlSchema schema = new ManifestYmlSchema();
-	private TypeBasedYamlCompletionEngine completionEngine = new TypeBasedYamlCompletionEngine(structureProvider, schema);
+	private YamlCompletionEngine completionEngine = new YamlCompletionEngine(structureProvider, new SchemaBasedYamlAssistContextProvider(schema));
 	private Comparator<ICompletionProposal> PROPOSAL_COMPARATOR = new Comparator<ICompletionProposal>() {
 		private final ICompletionProposalSorter SORTER = CompletionFactory.SORTER;
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {

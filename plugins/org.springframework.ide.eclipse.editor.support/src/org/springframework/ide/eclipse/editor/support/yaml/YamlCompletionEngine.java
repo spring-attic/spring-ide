@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.editor.support.yaml;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
@@ -34,15 +35,21 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
  *
  * @author Kris De Volder
  */
-public abstract class YamlCompletionEngine implements ICompletionEngine {
+public class YamlCompletionEngine implements ICompletionEngine {
 
-	public YamlCompletionEngine(YamlStructureProvider structureProvider) {
+	private final YamlAssistContextProvider contextProvider;
+	protected final YamlStructureProvider structureProvider;
+
+	public YamlCompletionEngine(YamlStructureProvider structureProvider, YamlAssistContextProvider contextProvider) {
+		Assert.isNotNull(structureProvider);
+		Assert.isNotNull(contextProvider);
 		this.structureProvider= structureProvider;
+		this.contextProvider = contextProvider;
 	}
 
-	protected YamlStructureProvider structureProvider;
-
-	protected abstract YamlAssistContext getGlobalContext(YamlDocument doc);
+	protected final YamlAssistContext getGlobalContext(YamlDocument doc) {
+		return contextProvider.getGlobalAssistContext(doc);
+	}
 
 	protected CompletionFactory proposalFactory() {
 		return CompletionFactory.DEFAULT;

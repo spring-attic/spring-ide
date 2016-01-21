@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
@@ -26,34 +27,23 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 /**
  * @author Kris De Volder
  */
-public class ApplicationYamlCompletionEngine extends YamlCompletionEngine {
-
-	private SpringPropertyIndexProvider indexProvider;
-	private DocumentContextFinder contextFinder;
-	private PropertyCompletionFactory completionFactory;
-	private TypeUtilProvider typeUtilProvider;
-	private RelaxedNameConfig conf;
-
-	public ApplicationYamlCompletionEngine(SpringPropertyIndexProvider indexProvider,
-			DocumentContextFinder documentContextFinder,
-			YamlStructureProvider structureProvider,
-			TypeUtilProvider typeUtilProvider,
-			RelaxedNameConfig conf
+public class ApplicationYamlCompletionEngine {
+	public static YamlCompletionEngine create(
+			final SpringPropertyIndexProvider indexProvider,
+			final DocumentContextFinder documentContextFinder,
+			final YamlStructureProvider structureProvider,
+			final TypeUtilProvider typeUtilProvider,
+			final RelaxedNameConfig conf
 	) {
-		super(structureProvider);
-		this.indexProvider = indexProvider;
-		this.contextFinder = documentContextFinder;
-		this.completionFactory = new PropertyCompletionFactory(contextFinder);
-		this.typeUtilProvider = typeUtilProvider;
-		this.conf = conf;
+		final PropertyCompletionFactory completionFactory = new PropertyCompletionFactory(documentContextFinder);
+		YamlAssistContextProvider contextProvider = new YamlAssistContextProvider() {
+			@Override
+			public YamlAssistContext getGlobalAssistContext(YamlDocument ydoc) {
+				IDocument doc = ydoc.getDocument();
+				FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
+				return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), conf);
+			}
+		};
+		return new YamlCompletionEngine(structureProvider, contextProvider);
 	}
-
-	@Override
-	protected YamlAssistContext getGlobalContext(YamlDocument ydoc) {
-		IDocument doc = ydoc.getDocument();
-		FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
-		return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), conf);
-	}
-
-
 }

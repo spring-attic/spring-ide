@@ -82,8 +82,8 @@ public class ManifestYmlSchemaTest {
 
 	@Test
 	public void toplevelProperties() throws Exception {
-		assertPropNames(schema.getToplevelType().getProperties(), TOPLEVEL_PROP_NAMES);
-		assertPropNames(schema.getToplevelType().getPropertiesMap(), TOPLEVEL_PROP_NAMES);
+		assertPropNames(schema.getTopLevelType().getProperties(), TOPLEVEL_PROP_NAMES);
+		assertPropNames(schema.getTopLevelType().getPropertiesMap(), TOPLEVEL_PROP_NAMES);
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class ManifestYmlSchemaTest {
 
 	@Test
 	public void toplevelPropertiesHaveDescriptions() {
-		for (YTypedProperty p : schema.getToplevelType().getProperties()) {
+		for (YTypedProperty p : schema.getTopLevelType().getProperties()) {
 			if (!p.getName().equals("applications")) {
 				assertHasRealDescription(p);
 			}
@@ -118,7 +118,7 @@ public class ManifestYmlSchemaTest {
 	}
 
 	private List<YTypedProperty> getNestedProps() {
-		YSeqType applications = (YSeqType) schema.getToplevelType().getPropertiesMap().get("applications");
+		YSeqType applications = (YSeqType) schema.getTopLevelType().getPropertiesMap().get("applications");
 		YBeanType application = (YBeanType) applications.getDomainType();
 		return application.getProperties();
 	}

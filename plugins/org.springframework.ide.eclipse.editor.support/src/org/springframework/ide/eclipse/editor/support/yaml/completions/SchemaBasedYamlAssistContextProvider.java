@@ -10,42 +10,29 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
-import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
- * A Yaml completion engine that creates proposals based on a single 'YType' which defines the
- * expected structure of the yaml document's contents.
+ * A {@link YamlAssistContextProvider} that creates {@link YamlAssistContext}s from {@link YamlSchema}
  *
  * @author Kris De Volder
  */
-public class TypeBasedYamlCompletionEngine extends YamlCompletionEngine {
+public class SchemaBasedYamlAssistContextProvider implements YamlAssistContextProvider {
 
 	private YamlSchema schema;
 
-	public TypeBasedYamlCompletionEngine(YamlStructureProvider structureProvider, YamlSchema schema) {
-		super(structureProvider);
+	public SchemaBasedYamlAssistContextProvider(YamlSchema schema) {
 		this.schema = schema;
 	}
 
-	protected YType getTopLevelType() {
-		return schema.getToplevelType();
-	}
-
-	protected YTypeUtil getTypeUtil() {
-		return schema.getTypeUtil();
-	}
-
 	@Override
-	protected YamlAssistContext getGlobalContext(YamlDocument doc) {
+	public YamlAssistContext getGlobalAssistContext(YamlDocument doc) {
 		return new TopLevelAssistContext() {
 			@Override
 			protected YamlAssistContext getDocumentContext(int documentSelector) {
-				return new YTypeAssistContext(this, documentSelector, getTopLevelType(), getTypeUtil());
+				return new YTypeAssistContext(this, documentSelector, schema.getTopLevelType(), schema.getTypeUtil());
 			}
 		};
 	}

@@ -144,7 +144,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 
 	private YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 
-	private ICompletionEngine completionEngine = new ApplicationYamlCompletionEngine(indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
+	private ICompletionEngine completionEngine = ApplicationYamlCompletionEngine.create(indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
 			RelaxedNameConfig.COMPLETION_DEFAULTS);
 
 	public QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
