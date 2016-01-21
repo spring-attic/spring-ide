@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
@@ -58,11 +59,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropert
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlCompletionEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContext;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
-import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 
@@ -144,8 +147,15 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 
 	private YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 
-	private ICompletionEngine completionEngine = ApplicationYamlCompletionEngine.create(indexProvider, documentContextFinder, structureProvider, typeUtilProvider,
-			RelaxedNameConfig.COMPLETION_DEFAULTS);
+	final PropertyCompletionFactory completionFactory = new PropertyCompletionFactory(documentContextFinder);
+	private YamlAssistContextProvider assistContextProvider = new YamlAssistContextProvider() {
+		@Override
+		public YamlAssistContext getGlobalAssistContext(YamlDocument ydoc) {
+			IDocument doc = ydoc.getDocument();
+			FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
+			return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), RelaxedNameConfig.COMPLETION_DEFAULTS);
+		}
+	};
 
 	public QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
 		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
@@ -220,11 +230,6 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	}
 
 	@Override
-	public ICompletionEngine getCompletionEngine() {
-		return completionEngine;
-	}
-
-	@Override
 	protected ITextHover getTextAnnotationHover(ISourceViewer sourceViewer) {
 		return new SpringPropertiesAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
 	}
@@ -232,6 +237,16 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	@Override
 	protected HoverInfoProvider getHoverProvider() {
 		return hoverProvider;
+	}
+
+	@Override
+	protected YamlStructureProvider getStructureProvider() {
+		return structureProvider;
+	}
+
+	@Override
+	protected YamlAssistContextProvider getAssistContextProvider() {
+		return assistContextProvider;
 	}
 
 }

@@ -18,13 +18,11 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
@@ -33,7 +31,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
  */
 public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
 
-	private ICompletionEngine completionEngine;
 	private ManifestYmlSchema schema = new ManifestYmlSchema();
 	private YamlAssistContextProvider assistContextProvider = new SchemaBasedYamlAssistContextProvider(schema);
 
@@ -41,17 +38,11 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	}
 
 	@Override
-	public ICompletionEngine getCompletionEngine() {
-		if (completionEngine==null) {
-			completionEngine = new YamlCompletionEngine(getStructureProvider(), getAssistContextProvider());
-		}
-		return completionEngine;
-	}
-
 	protected YamlAssistContextProvider getAssistContextProvider() {
 		return assistContextProvider;
 	}
 
+	@Override
 	protected YamlStructureProvider getStructureProvider() {
 		return YamlStructureProvider.DEFAULT;
 	}
@@ -66,6 +57,7 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 		return null;
 	}
 
+	@Override
 	protected HoverInfoProvider getHoverProvider() {
 		return new HoverInfoProvider() {
 

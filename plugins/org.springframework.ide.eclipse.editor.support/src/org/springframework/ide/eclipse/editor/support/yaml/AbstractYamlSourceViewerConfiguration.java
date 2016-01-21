@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.editor.support.completions.ICompletionEng
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
  * @author Kris De Volder
@@ -32,6 +33,7 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration {
 
 	private final String DIALOG_SETTINGS_KEY = this.getClass().getName();
+	private YamlCompletionEngine completionEngine;
 
 	protected final IDialogSettings getDialogSettings() {
 		IDialogSettings dialogSettings = getPluginDialogSettings();
@@ -81,8 +83,6 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		return _a;
 	}
 
-	public abstract ICompletionEngine getCompletionEngine();
-
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
@@ -101,8 +101,15 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		}
 	}
 
+	public final ICompletionEngine getCompletionEngine() {
+		if (completionEngine==null) {
+			completionEngine = new YamlCompletionEngine(getStructureProvider(), getAssistContextProvider());
+		}
+		return completionEngine;
+	}
+
 	protected abstract ITextHover getTextAnnotationHover(ISourceViewer sourceViewer);
-
 	protected abstract HoverInfoProvider getHoverProvider();
-
+	protected abstract YamlStructureProvider getStructureProvider();
+	protected abstract YamlAssistContextProvider getAssistContextProvider();
 }
