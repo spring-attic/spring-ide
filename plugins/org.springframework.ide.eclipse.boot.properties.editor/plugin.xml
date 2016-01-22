@@ -27,6 +27,9 @@
             <contentTypeBinding
                contentTypeId="org.springframework.ide.eclipse.applicationProperties"
             /> 
+            <contentTypeBinding
+               contentTypeId="org.eclipse.jdt.core.javaProperties"
+            />
       </editor>
    </extension>
    
@@ -40,86 +43,7 @@
               secondaryTo="org.eclipse.m2e.jdt.javaConfigurator">
         </configurator>
      </extension>
-     
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-<!--            <menu
-                  id="org.springframework.ide.eclipse.boot.properties.file.menu"
-                  label="Spring Properties"> -->
-	            <command
-	                  commandId="org.springframework.ide.eclipse.boot.properties.editor.enable"
-	                  id="org.springframework.ide.eclipse.boot.properties.editor.enable"
-	                  label="Enable Spring Properties Editor"
-	                  mnemonic="E">
-	                  <visibleWhen
-	                        checkEnabled="true">
-	                  </visibleWhen>
-	            </command>
-	            <command
-	                  commandId="org.springframework.ide.eclipse.boot.properties.editor.disable"
-	                  id="org.springframework.ide.eclipse.boot.properties.editor.disable"
-	                  label="Disable Spring Properties Editor"
-	                  mnemonic="D">
-	                  <visibleWhen
-	                        checkEnabled="true">
-	                  </visibleWhen>
-	            </command>
-<!--            </menu> -->
-      </menuContribution>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="org.springframework.ide.eclipse.editor.support.util.ContentTypeEnablerDisabler:enable,org.springframework.ide.eclipse.applicationProperties"
-            commandId="org.springframework.ide.eclipse.boot.properties.editor.enable">
-            <enabledWhen>
-              <and>
-	             <count value="1"/>
-	             <iterate>
-	           	   <adapt type="org.eclipse.core.resources.IResource">
-	           	      <test property="org.eclipse.core.resources.contentTypeId" 
-   	        			value="org.eclipse.jdt.core.javaProperties"/>"
-	           	   </adapt>
-	             </iterate>
-              </and>
-            </enabledWhen>
-      </handler>
-      <handler
-            class="org.springframework.ide.eclipse.editor.support.util.ContentTypeEnablerDisabler:disable,org.springframework.ide.eclipse.applicationProperties"
-            commandId="org.springframework.ide.eclipse.boot.properties.editor.disable">
-            <enabledWhen>
-              <and>
-	             <count value="1"/>
-	             <iterate>
-	           	   <adapt type="org.eclipse.core.resources.IResource">
-	           	      <test property="org.eclipse.core.resources.contentTypeId" 
-   	        			value="org.springframework.ide.eclipse.applicationProperties"/>"
-	           	   </adapt>
-	             </iterate>
-              </and>
-            </enabledWhen>
-      </handler>
-   </extension>
-     
-  <extension
-        point="org.eclipse.ui.commands">
-        <category
-              id="org.springframework.ide.eclipse.boot.properties.editor.category"
-              name="Spring Properties Editor">
-        </category>
-     <command
-           id="org.springframework.ide.eclipse.boot.properties.editor.enable"
-           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Enable Spring Properties Editor"/>
-     <command
-           id="org.springframework.ide.eclipse.boot.properties.editor.disable"
-           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Disable Spring Properties Editor"/>
-  </extension>
-  
+             
   <extension
 	      point="org.eclipse.ui.preferencePages">
 	   <page

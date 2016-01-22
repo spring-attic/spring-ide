@@ -20,85 +20,17 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="CF Manifest Editor"
+            name="Cloud Foundry Manifest Editor"
             icon="icons/cloud_obj.png"
             class="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlEditor"
             id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlEditor">
             <contentTypeBinding
                contentTypeId="org.springframework.ide.eclipse.manifest.yml"
             /> 
+            <contentTypeBinding
+               contentTypeId="org.dadacoalition.yedit.yamlsource"
+            />
       </editor>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-            <command
-                  commandId="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.enable"
-                  id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.enable"
-                  label="Enable Cloudfoundry Manifest Yaml Editor"
-                  mnemonic="E">
-                  <visibleWhen
-                        checkEnabled="true">
-                  </visibleWhen>
-            </command>
-            <command
-                  commandId="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.disable"
-                  id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.disable"
-                  label="Disable Cloudfoundry Manifest Yaml Editor"
-                  mnemonic="D">
-                  <visibleWhen
-                        checkEnabled="true">
-                  </visibleWhen>
-            </command>
-      </menuContribution>
-   </extension>
-   
-   <extension
-        point="org.eclipse.ui.commands">
-     <command
-           id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.enable"
-           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Enable Cloudfoundry Manifest Yaml Editor"/>
-     <command
-           id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.disable"
-           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Disable Cloudfoundry Manifest Yaml Editor"/>
-  </extension>
-
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="org.springframework.ide.eclipse.editor.support.util.ContentTypeEnablerDisabler:enable,org.springframework.ide.eclipse.manifest.yml"
-            commandId="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.enable">
-            <enabledWhen>
-              <and>
-	             <count value="1"/>
-	             <iterate>
-	           	   <adapt type="org.eclipse.core.resources.IResource">
-	           	      <test property="org.eclipse.core.resources.contentTypeId" 
-   	        			value="org.dadacoalition.yedit.yamlsource"/>"
-	           	   </adapt>
-	             </iterate>
-              </and>
-            </enabledWhen>
-      </handler>
-      <handler
-            class="org.springframework.ide.eclipse.editor.support.util.ContentTypeEnablerDisabler:disable,org.springframework.ide.eclipse.manifest.yml"
-            commandId="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.disable">
-            <enabledWhen>
-              <and>
-	             <count value="1"/>
-	             <iterate>
-	           	   <adapt type="org.eclipse.core.resources.IResource">
-	           	      <test property="org.eclipse.core.resources.contentTypeId" 
-   	        			value="org.springframework.ide.eclipse.manifest.yml"/>"
-	           	   </adapt>
-	             </iterate>
-              </and>
-            </enabledWhen>
-      </handler>
    </extension>
    
 </plugin>
