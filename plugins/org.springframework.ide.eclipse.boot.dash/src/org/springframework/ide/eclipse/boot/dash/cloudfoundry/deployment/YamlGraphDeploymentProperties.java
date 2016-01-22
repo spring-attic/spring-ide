@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.Composer;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -108,6 +109,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		options.setCanonical(false);
 		options.setPrettyFlow(true);
 		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+		options.setLineBreak(LineBreak.getPlatformLineBreak());
 		return options;
 	}
 
@@ -233,7 +235,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		int i = index - 1;
 		for (; i >= 0 && Character.isWhitespace(content.charAt(i)) && content.charAt(i) != '\n'; i--);
 		if (i > 0 && content.charAt(i) != '\n') {
-			return new ReplaceEdit(index, 0, "\n");
+			return new ReplaceEdit(index, 0, System.lineSeparator());
 		}
 		return null;
 	}
@@ -251,6 +253,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				options.setCanonical(false);
 				options.setPrettyFlow(true);
 				options.setDefaultFlowStyle(FlowStyle.BLOCK);
+				options.setLineBreak(LineBreak.getPlatformLineBreak());
 				edits.addChild(new ReplaceEdit(0, content.length(), new Yaml(options).dump(obj)));
 			} else {
 				edit = addLineBreakIfMissing(applicationsValueNode.getEndMark().getIndex());
@@ -293,7 +296,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				/*
 				 * Value == null if number of instances is 1, i.e. remove instances from YAML
 				 */
-				String newValue = props.getInstances() == CloudApplicationDeploymentProperties.DEFAULT_INSTANCES ? null : String.valueOf(props.getInstances());
+				Integer newValue = props.getInstances() == CloudApplicationDeploymentProperties.DEFAULT_INSTANCES ? null : new Integer(props.getInstances());
 				edit = createEdit(appNode, newValue, ApplicationManifestHandler.INSTANCES_PROP);
 				if (edit != null) {
 					edits.addChild(edit);
@@ -357,13 +360,25 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		if (!_lineAddedAtTheEndOfAppNode) {
 			ReplaceEdit edit = addLineBreakIfMissing(position);
 			if (edit != null) {
-				serializedValue.insert(0, '\n');
+				serializedValue.insert(0, System.lineSeparator());
 			}
 			_lineAddedAtTheEndOfAppNode = true;
 		}
 	}
 
-	private TextEdit createEdit(MappingNode parent, String otherValue, String property) {
+	/**
+	 * Creates text edit for mapping node tuples where property and value are
+	 * scalars (i.e. value is either string or some primitive type)
+	 *
+	 * @param parent
+	 *            the parent MappingNode
+	 * @param otherValue
+	 *            the new value for the tuple
+	 * @param property
+	 *            tuple's key
+	 * @return the text edit
+	 */
+	private TextEdit createEdit(MappingNode parent, Object otherValue, String property) {
 		NodeTuple tuple = findNodeTuple(parent, property);
 		if (tuple == null) {
 			if (otherValue != null) {
@@ -375,15 +390,28 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		} else {
 			if (otherValue == null) {
 				/*
-				 * Delete the tuple including the line if possible
+				 * Delete the tuple including the line break if possible
 				 */
-				return createDeleteEditIncludingLine(tuple.getKeyNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex());
+				int start = tuple.getKeyNode().getStartMark().getIndex();
+				int end = tuple.getValueNode().getEndMark().getIndex();
+				for (; start > 0 && Character.isWhitespace(content.charAt(start - 1)) && content.charAt(start - 1) != '\n'; start--);
+				for (; end > 0 && end < content.length() && Character.isWhitespace(content.charAt(end)) && content.charAt(end - 1) != '\n'; end++);
+				/*
+				 * HACK!
+				 * See if the tuple is first in the application mapping node and application is within application list.
+				 * In this case indent for the next value should jump up next to '-', which takes one char from the indent
+				 */
+				if ( applicationsValueNode != null && parent.getValue().get(0) == tuple) {
+					end++;
+				}
+				return new DeleteEdit(start, end - start);
+//				return createDeleteEditIncludingLine(tuple.getKeyNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex());
 			} else {
 				/*
 				 * Replace the current value (whether it's a scalr value or anything else without affecting the white space
 				 */
 				return createReplaceEditWithoutWhiteSpace(tuple.getValueNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex() - 1,
-						otherValue);
+						String.valueOf(otherValue));
 			}
 		}
 		return null;
@@ -494,7 +522,8 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				/*
 				 * Delete the found tuple since other value is null or empty
 				 */
-				return createDeleteEditIncludingLine(tuple.getKeyNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex());
+				return new DeleteEdit(tuple.getKeyNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex() - tuple.getKeyNode().getStartMark().getIndex());
+//				return createDeleteEditIncludingLine(tuple.getKeyNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex());
 			} else {
 				/*
 				 * Tuple is found, so the key node is there, check the value node
