@@ -187,4 +187,105 @@ public class ManifestCompareMergeTests {
 		peroformMergeTest(getTestFile("mergeTestsData/map-2.yml"), props, getTestFile("mergeTestsData/map-2-expected.yml"));
 	}
 	
+	@Test
+	public void test_map_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/map-3.yml"), props, getTestFile("mergeTestsData/map-3-expected.yml"));
+	}
+
+	@Test
+	public void test_map_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/map-4.yml"), props, getTestFile("mergeTestsData/map-4-expected.yml"));
+	}
+
+	@Test
+	public void test_instances_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/instances-1.yml"), props, getTestFile("mergeTestsData/instances-1-expected.yml"));
+	}
+
+	@Test
+	public void test_instances_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/instances-2.yml"), props, getTestFile("mergeTestsData/instances-2-expected.yml"));
+	}
+
+	@Test
+	public void test_instances_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/instances-3.yml"), props, getTestFile("mergeTestsData/instances-3-expected.yml"));
+	}
+
+	@Test
+	public void test_instances_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/instances-4.yml"), props, getTestFile("mergeTestsData/instances-4-expected.yml"));
+	}
+
+	@Test
+	public void test_root_comment_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(512);
+		peroformMergeTest(getTestFile("mergeTestsData/root-comment-1.yml"), props, getTestFile("mergeTestsData/root-comment-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_comment_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(512);
+		peroformMergeTest(getTestFile("mergeTestsData/root-comment-2.yml"), props, getTestFile("mergeTestsData/root-comment-2-expected.yml"));
+	}
+
+	@Test
+	public void test_root_comment_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(512);
+		props.setInstances(2);
+		peroformMergeTest(getTestFile("mergeTestsData/root-comment-3.yml"), props, getTestFile("mergeTestsData/root-comment-3-expected.yml"));
+	}
+
+	@Test
+	public void test_root_comment_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(512);
+		peroformMergeTest(getTestFile("mergeTestsData/root-comment-4.yml"), props, getTestFile("mergeTestsData/root-comment-4-expected.yml"));
+	}
 }
+
