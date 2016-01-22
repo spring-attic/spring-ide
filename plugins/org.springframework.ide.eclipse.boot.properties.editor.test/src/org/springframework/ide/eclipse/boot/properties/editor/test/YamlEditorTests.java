@@ -18,11 +18,11 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 /**
  * @author Kris De Volder
  */
-public class YamlEditorTests extends YamlEditorTestHarness {
+public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testHovers() throws Exception {
 		defaultTestData();
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"spring:\n" +
 				"  application:\n" +
 				"    name: foofoo\n" +
@@ -67,7 +67,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"#A comment at the start\n" +
 				"foo:\n" +
 				"  data:\n" +
@@ -96,7 +96,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"server:\n"+
 				"  port: 888\n" +
 				"spring:\n" +

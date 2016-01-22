@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
 
-public class IndexNavigatorTest extends YamlEditorTestHarness {
+public class IndexNavigatorTest extends ApplicationYamlEditorTestHarness {
 
 	public void testSimple() throws Exception {
 		defaultTestData();
