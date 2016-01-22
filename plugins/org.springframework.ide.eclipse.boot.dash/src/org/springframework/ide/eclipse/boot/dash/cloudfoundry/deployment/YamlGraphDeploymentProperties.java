@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.Composer;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -108,6 +109,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		options.setCanonical(false);
 		options.setPrettyFlow(true);
 		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+		options.setLineBreak(LineBreak.getPlatformLineBreak());
 		return options;
 	}
 
@@ -233,7 +235,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		int i = index - 1;
 		for (; i >= 0 && Character.isWhitespace(content.charAt(i)) && content.charAt(i) != '\n'; i--);
 		if (i > 0 && content.charAt(i) != '\n') {
-			return new ReplaceEdit(index, 0, "\n");
+			return new ReplaceEdit(index, 0, System.lineSeparator());
 		}
 		return null;
 	}
@@ -251,6 +253,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				options.setCanonical(false);
 				options.setPrettyFlow(true);
 				options.setDefaultFlowStyle(FlowStyle.BLOCK);
+				options.setLineBreak(LineBreak.getPlatformLineBreak());
 				edits.addChild(new ReplaceEdit(0, content.length(), new Yaml(options).dump(obj)));
 			} else {
 				edit = addLineBreakIfMissing(applicationsValueNode.getEndMark().getIndex());
@@ -357,7 +360,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		if (!_lineAddedAtTheEndOfAppNode) {
 			ReplaceEdit edit = addLineBreakIfMissing(position);
 			if (edit != null) {
-				serializedValue.insert(0, '\n');
+				serializedValue.insert(0, System.lineSeparator());
 			}
 			_lineAddedAtTheEndOfAppNode = true;
 		}
