@@ -17,11 +17,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshApplications;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
@@ -49,8 +50,14 @@ public class SelectManifestOp extends CloudOperation {
 		IFile manifest = cde.getDeploymentManifestFile();
 
 		Map<Object, Object> yaml = Collections.emptyMap();
+
+		/*
+		 * Refresh the latest cloud application
+		 */
+		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project)), ui).run(monitor);
+
 		try {
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(model, project));
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, model.getRunTarget().getDomains(monitor), model.getAppCache().getApp(project)));
 		} catch (Exception e) {
 			// ignore
 		}
@@ -68,7 +75,7 @@ public class SelectManifestOp extends CloudOperation {
 				true, false);
 
 		if (props == null) {
-			throw BootDashActivator.asCoreException("Error loading deployment properties from the manifest YAML");
+			throw ExceptionUtil.coreException("Error loading deployment properties from the manifest YAML");
 		}
 
 		cde.setDeploymentManifestFile(props.getManifestFile());

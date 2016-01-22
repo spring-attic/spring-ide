@@ -12,10 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -34,6 +38,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -57,8 +62,13 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Sash;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
@@ -160,6 +170,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Composite fileYamlComposite;
 	private Composite manualYamlComposite;
 	private Combo fileFilterCombo;
+	private IHandlerService service;
+	private List<IHandlerActivation> activations;
+	private EditorActionHandler[] handlers = new EditorActionHandler[] {
+			new EditorActionHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, SourceViewer.CONTENTASSIST_PROPOSALS),
+			new EditorActionHandler(IWorkbenchCommandConstants.EDIT_UNDO, SourceViewer.UNDO),
+			new EditorActionHandler(IWorkbenchCommandConstants.EDIT_REDO, SourceViewer.REDO),
+	};
+
 
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
 		@Override
@@ -177,6 +195,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		this.defaultYaml = defaultYaml;
 		this.readOnly = readOnly;
 		this.noModeSwitch = noModeSwitch;
+		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
+		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
@@ -199,6 +219,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		createResizeSash(composite);
 
 		createYamlContentsGroup(composite);
+
+		activateHanlders();
 
 		fileModel.addListener(new ValueListener<IFile>() {
 			@Override
@@ -432,6 +454,29 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			manualYamlViewer.getTextWidget().setBackground(composite.getBackground());
 		}
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml));
+
+		/*
+		 * Set the proper Font on the YAML viewers
+		 */
+		fileYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
+		manualYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
+	}
+
+	private void activateHanlders() {
+		if (service != null) {
+			for (EditorActionHandler handler : handlers) {
+				activations.add(service.activateHandler(handler.getActionId(), handler));
+			}
+		}
+	}
+
+	private void deactivateHandlers() {
+		if (service != null) {
+			for (IHandlerActivation activation : activations) {
+				service.deactivateHandler(activation);
+			}
+			activations.clear();
+		}
 	}
 
 	private void refreshManifests() {
@@ -550,6 +595,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	@Override
 	public boolean close() {
+		deactivateHandlers();
 		getDialogBoundsSettings().put(DIALOG_LIST_HEIGHT_SETTING, ((GridData)fileGroup.getLayoutData()).heightHint);
 		return super.close();
 	}
@@ -603,6 +649,34 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			}
 		}
 		return size;
+	}
+
+	private class EditorActionHandler extends AbstractHandler {
+
+		private String actionId;
+		private int operationId;
+
+		public EditorActionHandler(String actionId, int operationId) {
+			super();
+			this.actionId = actionId;
+			this.operationId = operationId;
+		}
+
+		public String getActionId() {
+			return actionId;
+		}
+
+		@Override
+		public Object execute(ExecutionEvent arg0) throws ExecutionException {
+			if (manualYamlViewer.isEditable() && manualYamlViewer.getControl().isVisible()
+					&& manualYamlViewer.getControl().isFocusControl()) {
+				manualYamlViewer.doOperation(operationId);
+			} else if (fileYamlViewer.isEditable() && fileYamlViewer.getControl().isVisible()
+					&& fileYamlViewer.getControl().isFocusControl()) {
+				fileYamlViewer.doOperation(operationId);
+			}
+			return null;
+		}
 	}
 
 }
