@@ -21,7 +21,7 @@
          point="org.eclipse.ui.editors">
       <editor
             name="Spring Yaml Properties Editor"
-            icon="icons/spring_obj.gif"
+            icon="icons/spring_yml.png"
             class="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor"
             id="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor">
             <contentTypeBinding

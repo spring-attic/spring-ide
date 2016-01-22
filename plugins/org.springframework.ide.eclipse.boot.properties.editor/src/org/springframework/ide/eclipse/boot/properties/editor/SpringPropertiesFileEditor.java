@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IEditorInput;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
@@ -75,6 +77,19 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 				fSourceViewerConf.forceReconcile();
 			}
 		}
+	}
+
+	@Override
+	protected boolean canHandleMove(IEditorInput originalElement, IEditorInput movedElement) {
+		//See https://issuetracker.springsource.com/browse/STS-4299
+		IFile file = (IFile)movedElement.getAdapter(IFile.class);
+		if (file!=null) {
+			String extension = file.getFileExtension();
+			if (extension!=null) {
+				return extension.equals(".properties");
+			}
+		}
+		return false;
 	}
 
 }
