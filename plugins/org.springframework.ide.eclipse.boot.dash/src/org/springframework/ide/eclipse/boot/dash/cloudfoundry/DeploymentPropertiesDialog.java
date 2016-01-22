@@ -38,6 +38,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -453,6 +454,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			manualYamlViewer.getTextWidget().setBackground(composite.getBackground());
 		}
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml));
+
+		/*
+		 * Set the proper Font on the YAML viewers
+		 */
+		fileYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
+		manualYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
 	}
 
 	private void activateHanlders() {
