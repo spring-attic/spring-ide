@@ -16,15 +16,16 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 
 /**
  * @author Kris De Volder
  */
 public interface YamlAssistContext extends YamlNavigable<YamlAssistContext> {
-
-	/**
-	 * Create context sensitive completions.
-	 */
 	Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
+
+	//TODO: conceptually... the right thing would be to only implement the second of these
+	// two methods and get rid of the first one.
 	HoverInfo getHoverInfo();
+	HoverInfo getHoverInfo(YamlPathSegment lastSegment);
 }

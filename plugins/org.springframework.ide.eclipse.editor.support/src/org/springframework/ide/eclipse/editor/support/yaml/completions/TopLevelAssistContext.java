@@ -53,5 +53,10 @@ public abstract class TopLevelAssistContext implements YamlAssistContext {
 	public HoverInfo getHoverInfo() {
 		return null;
 	}
+
+	public HoverInfo getHoverInfo(YamlPathSegment lastSegment) {
+		return null;
+	}
+
 	protected abstract YamlAssistContext getDocumentContext(int documentSelector);
 }

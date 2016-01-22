@@ -127,7 +127,7 @@ public class ManifestYmlSchemaTest {
 		assertEquals(ImmutableSet.copyOf(expectedNames), getNames(properties));
 	}
 
-	private void assertPropNames(Map<String, YType> propertiesMap, String[] toplevelPropNames) {
+	private void assertPropNames(Map<String, YTypedProperty> propertiesMap, String[] toplevelPropNames) {
 		assertEquals(ImmutableSet.copyOf(toplevelPropNames), ImmutableSet.copyOf(propertiesMap.keySet()));
 	}
 

@@ -22,6 +22,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
@@ -185,14 +187,21 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 				return contextWith(s, typeUtil.getDomainType(type));
 			}
 			String key = s.toPropString();
-			Map<String, YType> subproperties = typeUtil.getPropertiesMap(type);
+			Map<String, YTypedProperty> subproperties = typeUtil.getPropertiesMap(type);
 			if (subproperties!=null) {
-				return contextWith(s, subproperties.get(key));
+				return contextWith(s, getType(subproperties.get(key)));
 			}
 		} else if (s.getType()==YamlPathSegmentType.VAL_AT_INDEX) {
 			if (typeUtil.isSequencable(type)) {
 				return contextWith(s, typeUtil.getDomainType(type));
 			}
+		}
+		return null;
+	}
+
+	private YType getType(YTypedProperty prop) {
+		if (prop!=null) {
+			return prop.getType();
 		}
 		return null;
 	}
@@ -211,19 +220,35 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	}
 
 
-//	@Override
-//	public HoverInfo getHoverInfo() {
-//		if (parent instanceof IndexContext) {
-//			//this context is in fact an 'alias' of its parent, representing the
-//			// point in the context hierarchy where a we transition from navigating
-//			// the index to navigating YType/bean properties
-//			return parent.getHoverInfo();
-//		} else {
-//			return new TypeNavigationHoverInfo(contextPath.toPropString(), contextPath.getBeanPropertyName(), parent.getType(), getType(), typeUtil);
-//		}
-//	}
+	@Override
+	public HoverInfo getHoverInfo() {
+		if (parent!=null) {
+			return parent.getHoverInfo(contextPath.getLastSegment());
+		}
+		return null;
+	}
 
 	public YType getType() {
 		return type;
+	}
+
+	@Override
+	public HoverInfo getHoverInfo(YamlPathSegment lastSegment) {
+		//Hoverinfo is only attached to YTypedProperties so...
+		switch (lastSegment.getType()) {
+		case VAL_AT_KEY:
+		case KEY_AT_KEY:
+			YTypedProperty prop = getProperty(lastSegment.toPropString());
+			if (prop!=null) {
+				return new YPropertyHoverInfo(contextPath.toPropString(), getType(), prop);
+			}
+			break;
+		default:
+		}
+		return null;
+	}
+
+	private YTypedProperty getProperty(String name) {
+		return typeUtil.getPropertiesMap(getType()).get(name);
 	}
 }

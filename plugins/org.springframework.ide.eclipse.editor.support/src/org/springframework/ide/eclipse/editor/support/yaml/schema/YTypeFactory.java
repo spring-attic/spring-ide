@@ -16,14 +16,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.inject.Provider;
 
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Static utility method for creating YType objects representing either
@@ -68,7 +65,7 @@ public class YTypeFactory {
 		}
 
 		@Override
-		public Map<String, YType> getPropertiesMap(YType type) {
+		public Map<String, YTypedProperty> getPropertiesMap(YType type) {
 			return ((AbstractType)type).getPropertiesMap();
 		}
 
@@ -104,7 +101,7 @@ public class YTypeFactory {
 
 		private final List<String> hints = new ArrayList<>();
 
-		private Map<String, YType> cachedPropertyMap;
+		private Map<String, YTypedProperty> cachedPropertyMap;
 
 		public boolean isSequenceable() {
 			return false;
@@ -122,11 +119,11 @@ public class YTypeFactory {
 			return Collections.unmodifiableList(propertyList);
 		}
 
-		public final Map<String, YType> getPropertiesMap() {
+		public final Map<String, YTypedProperty> getPropertiesMap() {
 			if (cachedPropertyMap==null) {
 				cachedPropertyMap = new LinkedHashMap<>();
 				for (YTypedProperty p : propertyList) {
-					cachedPropertyMap.put(p.getName(), p.getType());
+					cachedPropertyMap.put(p.getName(), p);
 				}
 			}
 			return Collections.unmodifiableMap(cachedPropertyMap);

@@ -428,6 +428,10 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 	}
 
 	public abstract HoverInfo getHoverInfo();
+	public HoverInfo getHoverInfo(YamlPathSegment s) {
+		//ApplicationYamlAssistContext implements getHoverInfo directly. so this is not needed.
+		return null;
+	}
 
 	public static YamlAssistContext global(final FuzzyMap<PropertyInfo> index, final PropertyCompletionFactory completionFactory, final TypeUtil typeUtil, final RelaxedNameConfig conf) {
 		return new TopLevelAssistContext() {
