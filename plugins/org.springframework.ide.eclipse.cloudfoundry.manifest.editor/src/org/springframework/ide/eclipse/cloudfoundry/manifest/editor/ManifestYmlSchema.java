@@ -61,6 +61,7 @@ public class ManifestYmlSchema implements YamlSchema {
 
 		// define schema structure...
 		TOPLEVEL_TYPE.addProperty("applications", f.yseq(application));
+		TOPLEVEL_TYPE.addProperty("inherit", t_string, descriptionFor("inherit"));
 
 		YTypedPropertyImpl[] props = {
 			f.yprop("buildpack", t_string),
@@ -92,8 +93,12 @@ public class ManifestYmlSchema implements YamlSchema {
 		}
 	}
 
+	private Provider<HtmlSnippet> descriptionFor(String propName) {
+		return DescriptionProviders.fromClasspath(this.getClass(), "/description-by-prop-name/"+propName+".html");
+	}
+
 	private Provider<HtmlSnippet> descriptionFor(YTypedPropertyImpl prop) {
-		return DescriptionProviders.fromClasspath(this.getClass(), "/description-by-prop-name/"+prop.getName()+".html");
+		return descriptionFor(prop.getName());
 	}
 
 	@Override

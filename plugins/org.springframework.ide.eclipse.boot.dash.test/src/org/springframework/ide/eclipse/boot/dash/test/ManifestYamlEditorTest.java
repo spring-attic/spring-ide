@@ -43,6 +43,8 @@ public class ManifestYamlEditorTest {
 //				"hosts: \n"+
 //				"  - <*>",
 				// ---------------
+				"inherit: <*>",
+				// ---------------
 				"instances: <*>",
 				// ---------------
 				"memory: <*>",

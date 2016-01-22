@@ -144,6 +144,12 @@ public class YTypeFactory {
 			propertyList.add(p);
 		}
 
+		public void addProperty(String name, YType type, Provider<HtmlSnippet> description) {
+			YTypedPropertyImpl prop;
+			addProperty(prop = new YTypedPropertyImpl(name, type));
+			prop.setDescriptionProvider(description);
+		}
+
 		public void addProperty(String name, YType type) {
 			addProperty(new YTypedPropertyImpl(name, type));
 		}
