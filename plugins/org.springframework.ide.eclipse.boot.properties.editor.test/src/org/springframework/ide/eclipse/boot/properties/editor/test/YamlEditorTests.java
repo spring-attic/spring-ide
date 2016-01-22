@@ -33,26 +33,26 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  port: 8888"
 		);
 
-		assertIsHoverRegion(editor, "spring");
-		assertIsHoverRegion(editor, "application");
-		assertIsHoverRegion(editor, "name");
+		editor.assertIsHoverRegion("spring");
+		editor.assertIsHoverRegion("application");
+		editor.assertIsHoverRegion("name");
 
-		assertIsHoverRegion(editor, "server");
-		assertIsHoverRegion(editor, "port");
+		editor.assertIsHoverRegion("server");
+		editor.assertIsHoverRegion("port");
 
-		assertHoverContains(editor, "name", "<b>spring.application.name</b>");
-		assertHoverContains(editor, "port", "<b>server.port</b>");
-		assertHoverContains(editor, "8888", "<b>server.port</b>"); // hover over value show info about corresponding key. Is this logical?
+		editor.assertHoverContains("name", "<b>spring.application.name</b>");
+		editor.assertHoverContains("port", "<b>server.port</b>");
+		editor.assertHoverContains("8888", "<b>server.port</b>"); // hover over value show info about corresponding key. Is this logical?
 
-		assertNoHover(editor, "beyond");
-		assertNoHover(editor, "the-valid");
-		assertNoHover(editor, "range");
+		editor.assertNoHover("beyond");
+		editor.assertNoHover("the-valid");
+		editor.assertNoHover("range");
 
 		//TODO: these provide no hovers now, but maybe (some of them) should if we index proprty sources and not just the
 		// properties themselves.
-		assertNoHover(editor, "spring");
-		assertNoHover(editor, "application");
-		assertNoHover(editor, "server");
+		editor.assertNoHover("spring");
+		editor.assertNoHover("application");
+		editor.assertNoHover("server");
 
 
 		//Test for the case where we can't produc an AST for editor text
@@ -60,8 +60,8 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"- syntax\n" +
 				"error:\n"
 		);
-		assertNoHover(editor, "syntax");
-		assertNoHover(editor, "error");
+		editor.assertNoHover("syntax");
+		editor.assertNoHover("error");
 	}
 
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
@@ -80,10 +80,10 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"    getter-only: getme\n"
 		);
 
-		assertHoverContains(editor, "data", "Pojo"); // description from json metadata
-		assertHoverContains(editor, "wavelen", "JavaDoc from field"); // javadoc from field
-		assertHoverContains(editor, "name", "Set the name"); // javadoc from setter
-		assertHoverContains(editor, "next", "Get the next"); // javadoc from getter
+		editor.assertHoverContains("data", "Pojo"); // description from json metadata
+		editor.assertHoverContains("wavelen", "JavaDoc from field"); // javadoc from field
+		editor.assertHoverContains("name", "Set the name"); // javadoc from setter
+		editor.assertHoverContains("next", "Get the next"); // javadoc from getter
 
 		assertLinkTargets(editor, "data", "demo.FooProperties.setData(ColorData)");
 		assertLinkTargets(editor, "wavelen", "demo.ColorData.setWavelen(double)");

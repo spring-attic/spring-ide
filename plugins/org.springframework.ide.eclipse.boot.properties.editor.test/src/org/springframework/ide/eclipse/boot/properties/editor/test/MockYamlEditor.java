@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
@@ -17,9 +22,9 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.nodes.Node;
 
 public class MockYamlEditor extends MockEditor {
@@ -97,5 +102,28 @@ public class MockYamlEditor extends MockEditor {
 
 	public String textBetween(int start, int end) throws Exception {
 		return ymlDoc.textBetween(start, end);
+	}
+
+	public void assertNoHover(String hoverOver) {
+		HoverInfo info = getHoverInfo(middleOf(hoverOver));
+		assertNull(info);
+	}
+
+	public void assertIsHoverRegion(String string) throws BadLocationException {
+		assertHoverRegionCovers(middleOf(string), string);
+		assertHoverRegionCovers(startOf(string), string);
+		assertHoverRegionCovers(endOf(string)-1, string);
+	}
+
+	public void assertHoverRegionCovers(int offset, String expect) throws BadLocationException {
+		IRegion r = getHoverRegion(offset);
+		String actual = textUnder(r);
+		assertEquals(expect, actual);
+	}
+
+	public void assertHoverContains(String hoverOver, String expect) {
+		HoverInfo info = getHoverInfo(middleOf(hoverOver));
+		assertNotNull("No hover info for '"+ hoverOver +"'", info);
+		assertContains(expect, info.getHtml());
 	}
 }

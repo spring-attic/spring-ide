@@ -76,29 +76,6 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
 	}
 
-	public void assertNoHover(MockYamlEditor editor, String hoverOver) {
-		HoverInfo info = editor.getHoverInfo(editor.middleOf(hoverOver));
-		assertNull(info);
-	}
-
-	public void assertIsHoverRegion(MockYamlEditor editor, String string) throws BadLocationException {
-		assertHoverRegionCovers(editor, editor.middleOf(string), string);
-		assertHoverRegionCovers(editor, editor.startOf(string), string);
-		assertHoverRegionCovers(editor, editor.endOf(string)-1, string);
-	}
-
-	public void assertHoverRegionCovers(MockYamlEditor editor, int offset, String expect) throws BadLocationException {
-		IRegion r = editor.getHoverRegion(offset);
-		String actual = editor.textUnder(r);
-		assertEquals(expect, actual);
-	}
-
-	public void assertHoverContains(MockYamlEditor editor, String hoverOver, String expect) {
-		HoverInfo info = editor.getHoverInfo(editor.middleOf(hoverOver));
-		assertNotNull("No hover info for '"+ hoverOver +"'", info);
-		assertContains(expect, info.getHtml());
-	}
-
 	//TODO: the link targets bits are almost dupiclates from the SpringProperties editor test harness.
 	//  should be able to pull up with some reworking of the SpringProperties harness (i.e. add required
 	//  abstract methods to MockPropertiesEditor and make a subclass for SpringProperties harness.
