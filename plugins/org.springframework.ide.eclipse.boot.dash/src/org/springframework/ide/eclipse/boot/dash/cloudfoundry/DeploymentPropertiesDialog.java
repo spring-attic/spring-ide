@@ -149,7 +149,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	private IProject project;
 	private boolean readOnly;
-	private boolean noModeSwitch;
+	private final boolean noModeSwitch;
 	private List<CloudDomain> domains;
 	private CloudApplicationDeploymentProperties deploymentProperties;
 	private String defaultYaml;
@@ -279,7 +279,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				validate();
 			}
 		});
-
+		parent.pack(true);
 		return container;
 	}
 
