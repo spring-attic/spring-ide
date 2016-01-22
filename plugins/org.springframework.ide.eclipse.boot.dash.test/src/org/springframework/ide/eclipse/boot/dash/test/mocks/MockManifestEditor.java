@@ -18,29 +18,48 @@ import java.util.Comparator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockEditor;
+import org.springframework.ide.eclipse.boot.properties.editor.test.MockYamlEditor;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYmlSchema;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * @author Kris De Volder
  */
-public class MockManifestEditor extends MockEditor {
+public class MockManifestEditor extends MockYamlEditor {
 
-	private YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
-	private ManifestYmlSchema schema = new ManifestYmlSchema();
-	private YamlCompletionEngine completionEngine = new YamlCompletionEngine(structureProvider, new SchemaBasedYamlAssistContextProvider(schema));
+	private static class Config {
+		Yaml yaml = new Yaml();
+		YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
+		YamlASTProvider astProvider = new YamlASTProvider(yaml);
+		YamlSchema schema = new ManifestYmlSchema();
+		YamlAssistContextProvider assistContextProvider = new SchemaBasedYamlAssistContextProvider(schema);
+		HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, structureProvider, assistContextProvider);
+	}
+
 	private Comparator<ICompletionProposal> PROPOSAL_COMPARATOR = new Comparator<ICompletionProposal>() {
 		private final ICompletionProposalSorter SORTER = CompletionFactory.SORTER;
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			return SORTER.compare(p1, p2);
 		};
 	};
+	private YamlCompletionEngine completionEngine;
 
 	public MockManifestEditor(String text) {
-		super(text);
+		this(text, new Config());
+	}
+
+	private MockManifestEditor(String text, Config config) {
+		super(text, config.structureProvider, config.astProvider, config.hoverProvider);
+		this.completionEngine = new YamlCompletionEngine(config.structureProvider, config.assistContextProvider);
 	}
 
 	public void assertCompletions(String... expectTextAfter) throws Exception {

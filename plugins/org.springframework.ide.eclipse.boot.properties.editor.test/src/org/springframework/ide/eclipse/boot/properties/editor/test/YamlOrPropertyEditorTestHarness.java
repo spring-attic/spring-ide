@@ -642,7 +642,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return getCompletions(editor)[0];
 	}
 
-	public abstract ICompletionProposal[] getCompletions(MockPropertiesEditor editor) throws Exception;
+	public abstract ICompletionProposal[] getCompletions(MockEditor editor) throws Exception;
 
 	/**
 	 * Simulates applying the first completion to a text buffer and checks the result.

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockManifestEditor;
 
@@ -163,6 +164,26 @@ public class ManifestYamlEditorTest {
 				"random-route: false<*>",
 				"random-route: true<*>"
 		);
+	}
+
+	@Test
+	public void hoverInfos() throws Exception {
+		MockManifestEditor editor = new MockManifestEditor(
+				"memory: 1G\n" +
+				"applications:\n" +
+				"  - buildpack: zbuildpack\n" +
+				"    domain: zdomain\n" +
+				"    name: foo"
+		);
+		editor.assertIsHoverRegion("memory");
+		editor.assertIsHoverRegion("applications");
+		editor.assertIsHoverRegion("buildpack");
+		editor.assertIsHoverRegion("domain");
+		editor.assertIsHoverRegion("name");
+
+		editor.assertHoverContains("memory", "Use the <code>memory</code> attribute to specify the memory limit");
+		editor.assertHoverContains("1G", "Use the <code>memory</code> attribute to specify the memory limit");
+		editor.assertHoverContains("buildpack", "use the <code>buildpack</code> attribute to specify its URL or name");
 	}
 
 	private void assertCompletions(String textBefore, String... textAfter) throws Exception {

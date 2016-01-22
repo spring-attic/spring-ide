@@ -28,6 +28,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
+import org.springframework.ide.eclipse.boot.properties.editor.test.ApplicationYamlEditorTestHarness.YamlEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
@@ -39,20 +40,15 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
-import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.Node;
 
 /**
  * @author Kris De Volder
  */
-public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
+public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 
 	private static final RelaxedNameConfig relaxedNameConfig = RelaxedNameConfig.COMPLETION_DEFAULTS;
 	protected YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
@@ -73,110 +69,17 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 	private YamlAssistContextProvider assistContextProvider = new ApplicationYamlAssistContextProvider(
 			indexProvider, typeUtilProvider, relaxedNameConfig, documentContextFinder
 	);
-	private HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, structureProvider, assistContextProvider);
+	HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, structureProvider, assistContextProvider);
 	private ICompletionEngine completionEngine = new YamlCompletionEngine(structureProvider, assistContextProvider);
 
 	protected SpringYamlReconcileEngine createReconcileEngine() {
 		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
 	}
 
-	public class YamlEditor extends MockPropertiesEditor {
-		private YamlDocument ymlDoc;
-
-		public YamlEditor(String string) {
-			super(string);
-			ymlDoc = new YamlDocument(document, structureProvider);
-		}
-
-		public YamlFileAST parse() {
-			return parser.getAST(this.document);
-		}
-
-		public SRootNode parseStructure() throws Exception {
-			return structureProvider.getStructure(ymlDoc);
-		}
-
-		public int startOf(String nodeText) {
-			return document.get().indexOf(nodeText);
-		}
-
-		public int endOf(String nodeText) {
-			int start = startOf(nodeText);
-			if (start>=0) {
-				return start+nodeText.length();
-			}
-			return -1;
-		}
-
-		public int middleOf(String nodeText) {
-			int start = startOf(nodeText);
-			if (start>=0) {
-				return start + nodeText.length()/2;
-			}
-			return -1;
-		}
-
-		public String textUnder(Node node) throws Exception {
-			int start = node.getStartMark().getIndex();
-			int end = node.getEndMark().getIndex();
-			return document.get(start, end-start);
-		}
-
-		public String textUnder(SNode node) throws Exception {
-			int start = node.getStart();
-			int end = node.getTreeEnd();
-			return document.get(start, end-start);
-		}
-
-		public String textUnder(IRegion r) throws BadLocationException {
-			return document.get(r.getOffset(), r.getLength());
-		}
-
-		public IRegion getHoverRegion(int offset) {
-			return hoverProvider.getHoverRegion(document, offset);
-		}
-
-		public HoverInfo getHoverInfo(int offset) {
-			IRegion r = getHoverRegion(offset);
-			if (r!=null) {
-				return hoverProvider.getHoverInfo(document, r);
-			}
-			return null;
-		}
-
-		public String textBetween(int start, int end) throws Exception {
-			return ymlDoc.textBetween(start, end);
-		}
-	}
-
-
-	public void assertNoHover(YamlEditor editor, String hoverOver) {
-		HoverInfo info = editor.getHoverInfo(editor.middleOf(hoverOver));
-		assertNull(info);
-	}
-
-	public void assertIsHoverRegion(YamlEditor editor, String string) throws BadLocationException {
-		assertHoverRegionCovers(editor, editor.middleOf(string), string);
-		assertHoverRegionCovers(editor, editor.startOf(string), string);
-		assertHoverRegionCovers(editor, editor.endOf(string)-1, string);
-	}
-
-	public void assertHoverRegionCovers(YamlEditor editor, int offset, String expect) throws BadLocationException {
-		IRegion r = editor.getHoverRegion(offset);
-		String actual = editor.textUnder(r);
-		assertEquals(expect, actual);
-	}
-
-	public void assertHoverContains(YamlEditor editor, String hoverOver, String expect) {
-		HoverInfo info = editor.getHoverInfo(editor.middleOf(hoverOver));
-		assertNotNull("No hover info for '"+ hoverOver +"'", info);
-		assertContains(expect, info.getHtml());
-	}
-
 	//TODO: the link targets bits are almost dupiclates from the SpringProperties editor test harness.
 	//  should be able to pull up with some reworking of the SpringProperties harness (i.e. add required
 	//  abstract methods to MockPropertiesEditor and make a subclass for SpringProperties harness.
-	protected List<IJavaElement> getLinkTargets(YamlEditor editor, int pos) {
+	protected List<IJavaElement> getLinkTargets(MockYamlEditor editor, int pos) {
 		HoverInfo info = editor.getHoverInfo(pos);
 		if (info!=null) {
 			return info.getJavaElements();
@@ -184,7 +87,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		return Collections.emptyList();
 	}
 
-	public void assertLinkTargets(YamlEditor editor, String hoverOver, String... expecteds) {
+	public void assertLinkTargets(MockYamlEditor editor, String hoverOver, String... expecteds) {
 		int pos = editor.middleOf(hoverOver);
 		assertTrue("Not found in editor: '"+hoverOver+"'", pos>=0);
 
@@ -207,7 +110,7 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 //	}
 
 	@Override
-	public ICompletionProposal[] getCompletions(MockPropertiesEditor editor) throws Exception {
+	public ICompletionProposal[] getCompletions(MockEditor editor) throws Exception {
 		Collection<ICompletionProposal> _completions = completionEngine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
 		Arrays.sort(completions, COMPARATOR);
@@ -242,5 +145,13 @@ public class YamlEditorTestHarness extends YamlOrPropertyEditorTestHarness {
 		String actual = editor.getText();
 		assertEquals(trimEnd(after), trimEnd(actual));
 	}
+
+	public class YamlEditor extends MockYamlEditor {
+		public YamlEditor(String string) {
+			super(string, structureProvider, parser, hoverProvider);
+		}
+	}
+
+
 
 }

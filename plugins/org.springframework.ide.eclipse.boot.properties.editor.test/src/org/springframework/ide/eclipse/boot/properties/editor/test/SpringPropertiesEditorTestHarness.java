@@ -80,7 +80,8 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		return null;
 	}
 
-	public ICompletionProposal[] getCompletions(MockPropertiesEditor editor)
+	@Override
+	public ICompletionProposal[] getCompletions(MockEditor editor)
 			throws BadLocationException {
 		Collection<ICompletionProposal> _completions = engine.getCompletions(editor.document, editor.selectionStart);
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
@@ -153,14 +154,6 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		assertEquals(expecteds.length, targets.size());
 		for (int i = 0; i < expecteds.length; i++) {
 			assertEquals(expecteds[i], JavaElementLabels.getElementLabel(targets.get(i), JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES));
-		}
-	}
-
-	private String label(PropertySource propertySource) {
-		if (propertySource.getSourceMethod()==null) {
-			return propertySource.getSourceType();
-		} else {
-			return propertySource.getSourceType()+"."+propertySource.getSourceMethod();
 		}
 	}
 
