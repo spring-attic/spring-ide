@@ -118,7 +118,7 @@ public class ManifestYmlSchemaTest {
 	}
 
 	private List<YTypedProperty> getNestedProps() {
-		YSeqType applications = (YSeqType) schema.getTopLevelType().getPropertiesMap().get("applications");
+		YSeqType applications = (YSeqType) schema.getTopLevelType().getPropertiesMap().get("applications").getType();
 		YBeanType application = (YBeanType) applications.getDomainType();
 		return application.getProperties();
 	}
