@@ -10,30 +10,76 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.hover;
 
+import java.util.List;
+
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlAssistContext;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
- * Abstract superclass that implements {@link HoverInfoProvider} for Yaml files
- * using the {@link YamlAssistContext}.
+ * Implements {@link HoverInfoProvider} for Yaml files based on {@link YamlAssistContext}.
  *
  * @author Kris De Volder
  */
-public abstract class YamlHoverInfoProvider implements HoverInfoProvider {
+public class YamlHoverInfoProvider implements HoverInfoProvider {
 
 	private YamlASTProvider astProvider;
+	private YamlAssistContextProvider assistContextProvider;
+	private YamlStructureProvider structureProvider;
 
-	protected YamlHoverInfoProvider(YamlASTProvider astProvider) {
+	public YamlHoverInfoProvider	(
+			YamlASTProvider astProvider,
+			YamlStructureProvider structureProvider,
+			YamlAssistContextProvider assistContextProvider
+	) {
+		Assert.isNotNull(astProvider);
+		Assert.isNotNull(structureProvider);
+		Assert.isNotNull(assistContextProvider);
 		this.astProvider = astProvider;
+		this.structureProvider = structureProvider;
+		this.assistContextProvider = assistContextProvider;
+	}
+
+	@Override
+	public HoverInfo getHoverInfo(IDocument doc, IRegion r) {
+		YamlFileAST ast = getAst(doc);
+		if (ast!=null) {
+			YamlAssistContext assistContext = assistContextProvider.getGlobalAssistContext(new YamlDocument(doc, structureProvider));
+			if (assistContext!=null) {
+				List<NodeRef<?>> astPath = ast.findPath(r.getOffset());
+				YamlPath path = YamlPath.fromASTPath(astPath);
+				if (path!=null) {
+					if (path.pointsAtKey()) {
+						//When a path points at a key we must tramsform it to a 'value-terminating path'
+						// to be able to reuse the 'getHoverInfo' method on YamlAssistContext (as navigation
+						// into 'key' is not defined for YamlAssistContext.
+						String key = path.getLastSegment().toPropString();
+						path = path.dropLast().append(YamlPathSegment.valueAt(key));
+					}
+					assistContext = path.traverse(assistContext);
+					if (assistContext!=null) {
+						return assistContext.getHoverInfo();
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -50,7 +96,7 @@ public abstract class YamlHoverInfoProvider implements HoverInfoProvider {
 		return null;
 	}
 
-	public YamlFileAST getAst(IDocument doc) {
+	private YamlFileAST getAst(IDocument doc) {
 		try {
 			return astProvider.getAST(doc);
 		} catch (ParserException|ScannerException e) {
@@ -58,7 +104,4 @@ public abstract class YamlHoverInfoProvider implements HoverInfoProvider {
 		}
 		return null;
 	}
-
-	//TODO: Nothing in here yet. Must pull up stuff from subclasss
-
 }

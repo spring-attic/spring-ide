@@ -60,7 +60,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContextProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
@@ -115,8 +114,6 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		return getTextHover(sourceViewer, contentType, 0);
 	}
 
-	private Yaml yaml = new Yaml();
-	private YamlASTProvider astProvider = new YamlASTProvider(yaml);
 	SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
 		@Override
 		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
@@ -137,10 +134,9 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 
 	private final YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 	private final YamlAssistContextProvider assistContextProvider = new ApplicationYamlAssistContextProvider(indexProvider, typeUtilProvider, RelaxedNameConfig.COMPLETION_DEFAULTS, documentContextFinder);
-	private final HoverInfoProvider hoverProvider = new ApplicationYamlHoverInfoProvider(astProvider, structureProvider, assistContextProvider);
 	private final SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		protected IReconcileEngine createEngine() throws Exception {
-			return new SpringYamlReconcileEngine(astProvider, indexProvider, typeUtilProvider);
+			return new SpringYamlReconcileEngine(getAstProvider(), indexProvider, typeUtilProvider);
 		}
 	};
 
@@ -198,7 +194,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		SpringPropertiesHyperlinkDetector myDetector = null;
 		try {
-			myDetector = new SpringPropertiesHyperlinkDetector(hoverProvider);
+			myDetector = new SpringPropertiesHyperlinkDetector(getHoverProvider());
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
@@ -225,17 +221,12 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	}
 
 	@Override
-	protected HoverInfoProvider getHoverProvider() {
-		return hoverProvider;
-	}
-
-	@Override
-	protected YamlStructureProvider getStructureProvider() {
+	public YamlStructureProvider getStructureProvider() {
 		return structureProvider;
 	}
 
 	@Override
-	protected YamlAssistContextProvider getAssistContextProvider() {
+	public YamlAssistContextProvider getAssistContextProvider() {
 		return assistContextProvider;
 	}
 
