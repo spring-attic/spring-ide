@@ -463,7 +463,8 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 							if (others.contains(scalar.getValue())) {
 								// Entry exists, do nothing, just update the end position to append the missing entries
 								others.remove(scalar.getValue());
-								appendIndex  = scalar.getEndMark().getIndex() + 1;
+								appendIndex  = scalar.getEndMark().getIndex();
+								for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
 							} else {
 								/*
 								 * skip "- " prefix for the start position
@@ -555,14 +556,16 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 								 */
 								e.addChild(new ReplaceEdit(value.getStartMark().getIndex(), value.getEndMark().getIndex() - value.getStartMark().getIndex(), newValue));
 								/*
-								 * +1 to jump over spacing char (line break most likely)
+								 * jump over spacing and line break
 								 */
-								appendIndex = value.getEndMark().getIndex() + 1;
+								appendIndex = value.getEndMark().getIndex();
+								for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
 							} else {
 								/*
-								 * +1 to jump over spacing char (line break most likely)
+								 * jump over spacing and line break
 								 */
-								appendIndex = value.getEndMark().getIndex() + 1;
+								appendIndex = value.getEndMark().getIndex();
+								for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
 							}
 							leftOver.remove(key.getValue());
 						}
