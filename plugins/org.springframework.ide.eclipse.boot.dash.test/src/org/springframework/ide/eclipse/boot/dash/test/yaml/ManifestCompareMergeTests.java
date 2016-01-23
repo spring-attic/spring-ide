@@ -208,6 +208,64 @@ public class ManifestCompareMergeTests {
 	}
 
 	@Test
+	public void test_map_5() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		Map<String, String> env = new LinkedHashMap<>();
+		env.put("KEY1", "value1");
+		env.put("KEY2", "value2");
+		env.put("KEY3", "value3");
+		env.put("KEY4", "value4");
+		props.setEnvironmentVariables(env);
+		peroformMergeTest(getTestFile("mergeTestsData/map-5.yml"), props, getTestFile("mergeTestsData/map-5-expected.yml"));
+	}
+
+	@Test
+	public void test_map_6() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		Map<String, String> env = new LinkedHashMap<>();
+		env.put("KEY1", "value1");
+		env.put("KEY2", "value2");
+		env.put("KEY3", "value3");
+		env.put("KEY4", "value4");
+		props.setEnvironmentVariables(env);
+		peroformMergeTest(getTestFile("mergeTestsData/map-6.yml"), props, getTestFile("mergeTestsData/map-6-expected.yml"));
+	}
+
+	@Test
+	public void test_map_7() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		Map<String, String> env = new LinkedHashMap<>();
+		env.put("KEY1", "value1");
+		env.put("KEY2", "value2");
+		env.put("KEY3", "value3");
+		env.put("KEY4", "value4");
+		props.setEnvironmentVariables(env);
+		peroformMergeTest(getTestFile("mergeTestsData/map-7.yml"), props, getTestFile("mergeTestsData/map-7-expected.yml"));
+	}
+
+	@Test
+	public void test_map_8() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHost("test-app");
+		props.setDomain("springsource.org");
+		props.setMemory(2048);
+		peroformMergeTest(getTestFile("mergeTestsData/map-8.yml"), props, getTestFile("mergeTestsData/map-8-expected.yml"));
+	}
+
+	@Test
 	public void test_instances_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app");

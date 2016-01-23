@@ -393,6 +393,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				workspaceViewer.addSelectionChangedListener(selectionListener);
 			}
 		});
+//		fileFilterCombo.setLayoutData(GridDataFactory.fillDefaults().grab(false, false).minSize(0, 0).create());
 	}
 
 	private void createResizeSash(Composite composite) {
