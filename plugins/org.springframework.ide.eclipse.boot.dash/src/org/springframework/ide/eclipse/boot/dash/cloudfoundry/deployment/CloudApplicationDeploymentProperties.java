@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -267,9 +268,9 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		 * Boot Dash Tooling adds staff to JAVA-OPTS behind the scenes. Consider
 		 * JAVA_OPTS env variable as the one not exposed to users
 		 */
-		Map<String, String> env = Collections.emptyMap();
+		Map<String, String> env = new LinkedHashMap<>();
 		if (app != null) {
-			env = app.getEnvAsMap();
+			env.putAll(app.getEnvAsMap());
 			env.remove("JAVA_OPTS");
 		}
 		properties.setEnvironmentVariables(env);

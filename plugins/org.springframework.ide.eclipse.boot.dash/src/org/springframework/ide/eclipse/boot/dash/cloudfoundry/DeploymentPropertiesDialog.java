@@ -325,7 +325,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 		fileGroup.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, height).create());
 
-		fileLabel = new Label(fileGroup, SWT.NONE);
+		fileLabel = new Label(fileGroup, SWT.WRAP);
 		fileLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER).span(2, SWT.DEFAULT).create());
 
 		workspaceViewer = new TreeViewer(fileGroup);
@@ -393,6 +393,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				workspaceViewer.addSelectionChangedListener(selectionListener);
 			}
 		});
+//		fileFilterCombo.setLayoutData(GridDataFactory.fillDefaults().grab(false, false).minSize(0, 0).create());
 	}
 
 	private void createResizeSash(Composite composite) {
@@ -426,9 +427,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		layout.marginWidth = 0;
 		fileYamlComposite.setLayout(layout);
 
-		Label fileYamlDescriptionLabel = new Label(fileYamlComposite, SWT.NONE);
+		Label fileYamlDescriptionLabel = new Label(fileYamlComposite, SWT.WRAP);
 		fileYamlDescriptionLabel.setText("Preview of the contents of selected deployment manifest YAML file:");
-		fileYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().create());
+		fileYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
 		fileYamlViewer = new SourceViewer(fileYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		fileYamlViewer.configure(new ManifestYamlSourceViewerConfiguration());
@@ -442,9 +443,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		layout.marginWidth = 0;
 		manualYamlComposite.setLayout(layout);
 
-		Label manualYamlDescriptionLabel = new Label(manualYamlComposite, SWT.NONE);
+		Label manualYamlDescriptionLabel = new Label(manualYamlComposite, SWT.WRAP);
 		manualYamlDescriptionLabel.setText(readOnly ? "Preview of the contents of the auto-generated deployment manifest:" : "Edit deployment manifest contents:");
-		manualYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().create());
+		manualYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
 		manualYamlViewer = new SourceViewer(manualYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		manualYamlViewer.configure(new ManifestYamlSourceViewerConfiguration());

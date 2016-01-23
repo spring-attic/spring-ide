@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -535,7 +536,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 					 */
 					MappingNode mapValue = (MappingNode) tuple.getValueNode();
 					MultiTextEdit e = new MultiTextEdit();
-					Map<String, String> leftOver = new HashMap<>();
+					Map<String, String> leftOver = new LinkedHashMap<>();
 					leftOver.putAll(otherValue);
 					int appendIndex = positionToAppendAt(mapValue);
 					for (NodeTuple t : mapValue.getValue()) {
