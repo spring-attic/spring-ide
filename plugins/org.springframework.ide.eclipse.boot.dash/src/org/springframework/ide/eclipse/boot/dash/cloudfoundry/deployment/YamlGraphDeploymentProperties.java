@@ -464,7 +464,6 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 								// Entry exists, do nothing, just update the end position to append the missing entries
 								others.remove(scalar.getValue());
 								appendIndex  = scalar.getEndMark().getIndex();
-								for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
 							} else {
 								/*
 								 * skip "- " prefix for the start position
@@ -478,6 +477,16 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 								me.addChild(createDeleteEditIncludingLine(start, end));
 							}
 						}
+					}
+					/*
+					 * Offset appendIndex to leave the line break for the previous entry in place. jump over spacing and line break.
+					 */
+					for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
+					/*
+					 * Add a line break if append index is not starting right after line break.
+					 */
+					if (!others.isEmpty() && content.charAt(appendIndex - 1) != '\n') {
+						me.addChild(new ReplaceEdit(appendIndex, 0, System.lineSeparator()));
 					}
 					/*
 					 * Add missing entries
@@ -555,20 +564,22 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 								 * Key is there but value is different, so edit the value
 								 */
 								e.addChild(new ReplaceEdit(value.getStartMark().getIndex(), value.getEndMark().getIndex() - value.getStartMark().getIndex(), newValue));
-								/*
-								 * jump over spacing and line break
-								 */
 								appendIndex = value.getEndMark().getIndex();
-								for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
 							} else {
-								/*
-								 * jump over spacing and line break
-								 */
 								appendIndex = value.getEndMark().getIndex();
-								for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
 							}
 							leftOver.remove(key.getValue());
 						}
+					}
+					/*
+					 * Offset appendIndex to leave the line break for the previous entry in place. jump over spacing and line break.
+					 */
+					for (; appendIndex > 0 && appendIndex < content.length() && Character.isWhitespace(content.charAt(appendIndex)) && content.charAt(appendIndex - 1) != '\n'; appendIndex++);
+					/*
+					 * Add a line break if append index is not starting right after line break.
+					 */
+					if (!leftOver.isEmpty() && content.charAt(appendIndex - 1) != '\n') {
+						e.addChild(new ReplaceEdit(appendIndex, 0, System.lineSeparator()));
 					}
 					/*
 					 * Add remaining unmatched entries
