@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -70,7 +70,7 @@ import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -200,7 +200,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
-		fileModel.setValue(manifest);
+		fileModel.setValue(manifest == null ? findManifestYamlFile(project) : manifest);
 		fileYamlContents = new LiveVariable<>();
 	}
 
@@ -678,6 +678,32 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			}
 			return null;
 		}
+	}
+
+	public static IFile findManifestYamlFile(IProject project) {
+		if (project == null) {
+			return null;
+		}
+		IFile file = project.getFile("manifest.yml");
+		if (file.exists()) {
+			return file;
+		}
+		IFile yamlFile = null;
+		try {
+			for (IResource r : project.members()) {
+				if (r instanceof IFile) {
+					file = (IFile) r;
+					if (MANIFEST_YAML_FILE_FILTER.select(null, project, file)) {
+						return file;
+					} else if (YAML_FILE_FILTER.select(null, project, file)) {
+						yamlFile = file;
+					}
+				}
+			}
+		} catch (CoreException e) {
+			// ignore
+		}
+		return yamlFile;
 	}
 
 }
