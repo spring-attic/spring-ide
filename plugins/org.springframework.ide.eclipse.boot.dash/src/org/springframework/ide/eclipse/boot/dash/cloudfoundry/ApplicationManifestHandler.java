@@ -389,12 +389,17 @@ public class ApplicationManifestHandler {
 
 	protected void readEnvVars(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
-		Map<?, ?> propertiesMap = getContainingPropertiesMap(allResults, ENV_PROP);
-		if (propertiesMap == null) {
-			propertiesMap = getContainingPropertiesMap(application, ENV_PROP);
+		Map<Object, Object> propertiesMap = new LinkedHashMap<>();
+		Map<?, ?> map = getContainingPropertiesMap(allResults, ENV_PROP);
+		if (map != null) {
+			propertiesMap.putAll(map);
+		}
+		map = getContainingPropertiesMap(application, ENV_PROP);
+		if (map != null) {
+			propertiesMap.putAll(map);
 		}
 
-		if (propertiesMap == null) {
+		if (propertiesMap.isEmpty()) {
 			return;
 		}
 
@@ -448,9 +453,9 @@ public class ApplicationManifestHandler {
 	protected void readInstances(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 
-		Integer instances = getIntegerValue(allResults, INSTANCES_PROP);
+		Integer instances = getIntegerValue(application, INSTANCES_PROP);
 		if (instances == null) {
-			instances = getIntegerValue(application, INSTANCES_PROP);
+			instances = getIntegerValue(allResults, INSTANCES_PROP);
 		}
 		if (instances != null) {
 			properties.setInstances(instances);
@@ -460,9 +465,9 @@ public class ApplicationManifestHandler {
 	protected void readBuildpack(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 
-		String buildpack = getStringValue(allResults, BUILDPACK_PROP);
+		String buildpack = getStringValue(application, BUILDPACK_PROP);
 		if (buildpack == null) {
-			buildpack = getStringValue(application, BUILDPACK_PROP);
+			buildpack = getStringValue(allResults, BUILDPACK_PROP);
 		}
 		if (buildpack != null) {
 			properties.setBuildpack(buildpack);
@@ -472,9 +477,9 @@ public class ApplicationManifestHandler {
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 		// See if there is a common domain defined for all apps
-		String domain = getStringValue(allResults, DOMAIN_PROP);
+		String domain = getStringValue(application, DOMAIN_PROP);
 		if (domain == null) {
-			domain = getStringValue(application, DOMAIN_PROP);
+			domain = getStringValue(allResults, DOMAIN_PROP);
 		}
 
 		properties.setDomain(domain);
@@ -522,17 +527,17 @@ public class ApplicationManifestHandler {
 		// First see if there is a "common" memory value that applies to all
 		// applications:
 
-		Integer memoryVal = getIntegerValue(allResults, MEMORY_PROP);
+		Integer memoryVal = getIntegerValue(application, MEMORY_PROP);
 		if (memoryVal == null) {
-			memoryVal = getIntegerValue(application, MEMORY_PROP);
+			memoryVal = getIntegerValue(allResults, MEMORY_PROP);
 		}
 
 		// If not in Integer form, try String as the memory may end in with a
 		// 'G' or 'M'
 		if (memoryVal == null) {
-			String memoryStringVal = getStringValue(allResults, MEMORY_PROP);
+			String memoryStringVal = getStringValue(application, MEMORY_PROP);
 			if (memoryStringVal == null) {
-				memoryStringVal = getStringValue(application, MEMORY_PROP);
+				memoryStringVal = getStringValue(allResults, MEMORY_PROP);
 			}
 			if (memoryStringVal != null && memoryStringVal.length() > 0) {
 				memoryVal = convertMemory(memoryStringVal);
