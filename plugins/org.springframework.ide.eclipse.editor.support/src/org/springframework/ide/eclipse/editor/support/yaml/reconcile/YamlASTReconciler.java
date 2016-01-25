@@ -10,17 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.reconcile;
 
-import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 
-public class TypeBasedYamlASTReconciler {
-
-	private final IProblemCollector problems;
-	private final YTypeUtil typeUtil;
-
-	public TypeBasedYamlASTReconciler(IProblemCollector problems, YTypeUtil typeUtil) {
-		this.problems = problems;
-		this.typeUtil = typeUtil;
-	}
-
+public interface YamlASTReconciler {
+	void reconcile(YamlFileAST ast, IProgressMonitor mon);
 }

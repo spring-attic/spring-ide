@@ -43,13 +43,13 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 
 @SuppressWarnings("restriction")

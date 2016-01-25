@@ -36,11 +36,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.DefaultSeverityPro
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;

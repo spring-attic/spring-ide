@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.

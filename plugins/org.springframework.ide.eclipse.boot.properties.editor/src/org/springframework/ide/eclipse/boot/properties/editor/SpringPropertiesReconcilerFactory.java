@@ -16,9 +16,9 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ReconcilingUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 
 public abstract class SpringPropertiesReconcilerFactory {
 

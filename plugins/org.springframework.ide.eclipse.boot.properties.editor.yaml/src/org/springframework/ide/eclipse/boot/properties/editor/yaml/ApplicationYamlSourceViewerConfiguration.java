@@ -52,7 +52,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.Proper
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
@@ -60,11 +59,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContextProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.ApplicationYamlReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
-import org.yaml.snakeyaml.Yaml;
 
 @SuppressWarnings("restriction")
 public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration implements IReconcileTrigger {
@@ -164,9 +162,13 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (fReconciler==null) {
-			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
+			fReconciler = createReconciler(sourceViewer);
 		}
 		return fReconciler;
+	}
+
+	protected SpringPropertiesReconciler createReconciler(ISourceViewer sourceViewer) {
+		return fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
 	}
 
 	@Override

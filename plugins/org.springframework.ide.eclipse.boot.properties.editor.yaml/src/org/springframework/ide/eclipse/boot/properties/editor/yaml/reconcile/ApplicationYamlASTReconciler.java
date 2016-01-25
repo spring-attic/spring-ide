@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Valu
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.TypeBasedYamlASTReconciler;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlASTReconciler;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.Kind;
@@ -45,18 +46,24 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 /**
  * @author Kris De Volder
  */
-public class ApplicationYamlASTReconciler extends TypeBasedYamlASTReconciler {
+public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 
-	private IProblemCollector problems;
-	private TypeUtil typeUtil;
+	private final IProblemCollector problems;
+	private final TypeUtil typeUtil;
+	private final IndexNavigator nav;
 
-	public ApplicationYamlASTReconciler(IProblemCollector problems, TypeUtil typeUtil) {
-		super(problems, typeUtil);
+	public ApplicationYamlASTReconciler(IProblemCollector problems, IndexNavigator nav, TypeUtil typeUtil) {
 		this.problems = problems;
 		this.typeUtil = typeUtil;
+		this.nav = nav;
 	}
 
-	public void reconcile(YamlFileAST ast, IndexNavigator nav, IProgressMonitor mon) {
+	@Override
+	public void reconcile(YamlFileAST ast, IProgressMonitor mon) {
+		reconcile(ast, nav, mon);
+	}
+
+	protected void reconcile(YamlFileAST ast, IndexNavigator nav, IProgressMonitor mon) {
 		List<Node> nodes = ast.getNodes();
 		if (nodes!=null && !nodes.isEmpty()) {
 			mon.beginTask("Reconcile", nodes.size());

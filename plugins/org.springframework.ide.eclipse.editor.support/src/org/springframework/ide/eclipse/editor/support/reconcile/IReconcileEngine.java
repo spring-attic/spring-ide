@@ -8,11 +8,10 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
-import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 
 public interface IReconcileEngine {
 	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon);

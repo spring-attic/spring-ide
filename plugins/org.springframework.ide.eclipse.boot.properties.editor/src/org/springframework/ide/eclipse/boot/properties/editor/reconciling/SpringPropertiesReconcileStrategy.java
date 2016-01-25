@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
