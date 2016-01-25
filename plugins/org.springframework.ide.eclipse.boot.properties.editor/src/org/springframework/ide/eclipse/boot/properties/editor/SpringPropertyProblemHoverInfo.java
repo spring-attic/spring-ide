@@ -45,7 +45,7 @@ public class SpringPropertyProblemHoverInfo extends HoverInfo {
 
 	private List<ICompletionProposal> getQuickfixes(ReconcileProblem problem) {
 		if (problem instanceof SpringPropertyProblem) {
-			((SpringPropertyProblem)problem).getQuickfixes(context);
+			return ((SpringPropertyProblem)problem).getQuickfixes(context);
 		}
 		return ImmutableList.of();
 	}

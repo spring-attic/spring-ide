@@ -15,9 +15,9 @@ import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 

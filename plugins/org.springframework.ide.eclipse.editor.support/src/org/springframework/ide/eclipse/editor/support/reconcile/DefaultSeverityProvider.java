@@ -8,12 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
-
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
-import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 /**
  * Implementation {@link SeverityProvider} that simplies returns the hard-coded 'default severity' based

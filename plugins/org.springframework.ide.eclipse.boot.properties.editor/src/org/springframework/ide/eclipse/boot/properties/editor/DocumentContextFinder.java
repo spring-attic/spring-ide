@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
+import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 
 /**
  * Provides a method to find context information for IDocument instances.
