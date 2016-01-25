@@ -10,15 +10,13 @@
  *     Kris De Volder - copied from SpellingAnnotation to become
  *     					'SpringPropertyAnnotation'.
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jface.text.quickassist.IQuickFixableAnnotation;
 import org.eclipse.jface.text.source.Annotation;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
-import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
  * Spelling annotation.
@@ -26,7 +24,7 @@ import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
  * @since 3.3
  */
 @SuppressWarnings("restriction")
-public class SpringPropertyAnnotation extends Annotation implements IQuickFixableAnnotation {
+public class ReconcileProblemAnnotation extends Annotation implements IQuickFixableAnnotation {
 
 	/** Annotation type for error and warnings*/
 	public static final String ERROR_ANNOTATION_TYPE = org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE;
@@ -57,7 +55,7 @@ public class SpringPropertyAnnotation extends Annotation implements IQuickFixabl
 	/**
 	 * Creates a new annotation of given type.
 	 */
-	public SpringPropertyAnnotation(String annotationType, ReconcileProblem problem) {
+	public ReconcileProblemAnnotation(String annotationType, ReconcileProblem problem) {
 		super(annotationType, false, problem.getMessage());
 		fProblem = problem;
 	}

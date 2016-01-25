@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnorePro
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 
 /**
  * @author Kris De Volder
@@ -50,7 +51,7 @@ public class SpringPropertyProblem implements ReconcileProblem {
 	/**
 	 * Create a SpringProperty file annotation with a given severity.
 	 * The severity should be one of the XXX_TYPE constants defined in
-	 * {@link SpringPropertyAnnotation}.
+	 * {@link ReconcileProblemAnnotation}.
 	 */
 	private SpringPropertyProblem(SpringPropertiesProblemType type, String msg, int offset, int length) {
 		this.msg = msg;

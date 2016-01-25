@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Kris De Volder - copied from org.eclipse.ui.texteditor.spelling.SpellingReconcileStrategy and modified
- *                      from for spring properties reconciling
+ *                      into an adapter/wrapper for a more abstract ReconcileEngine
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -48,19 +47,21 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 
 /**
- * Reconcile strategy for spring appication.properties and application.yml editors.
+ * Eclipse {@link IReconcilingStrategy} which wraps out own (simpler) abstraction {@link IReconcileEngine} so that implementing
+ * a reconciling engine is not so horribly complicated.
  */
-public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension, IPropertyChangeListener {
+public class ReconcileEngineWrapper implements IReconcilingStrategy, IReconcilingStrategyExtension, IPropertyChangeListener {
 
 
 	/**
-	 * Spelling problem collector.
+	 * Problem collector.
 	 */
 	private class SeverityAwareProblemCollector implements IProblemCollector {
 
@@ -68,7 +69,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 		private IAnnotationModel fAnnotationModel;
 
 		/** Annotations to add. */
-		private Map<SpringPropertyAnnotation, Position> fAddAnnotations;
+		private Map<ReconcileProblemAnnotation, Position> fAddAnnotations;
 
 		/** Lock object for modifying the annotations. */
 		private Object fLockObject;
@@ -89,14 +90,14 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 		public void accept(ReconcileProblem problem) {
 			ProblemSeverity severity = fSeverities.getSeverity(problem);
-			String annotationType = SpringPropertyAnnotation.getAnnotationType(severity);
+			String annotationType = ReconcileProblemAnnotation.getAnnotationType(severity);
 			if (annotationType!=null) {
-				fAddAnnotations.put(new SpringPropertyAnnotation(annotationType, problem), new Position(problem.getOffset(), problem.getLength()));
+				fAddAnnotations.put(new ReconcileProblemAnnotation(annotationType, problem), new Position(problem.getOffset(), problem.getLength()));
 			}
 		}
 
 		public void beginCollecting() {
-			fAddAnnotations= new HashMap<SpringPropertyAnnotation, Position>();
+			fAddAnnotations= new HashMap<ReconcileProblemAnnotation, Position>();
 		}
 
 		public void endCollecting() {
@@ -105,10 +106,10 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 			synchronized (fLockObject) {
 				@SuppressWarnings("unchecked")
-				Iterator<SpringPropertyAnnotation> iter= fAnnotationModel.getAnnotationIterator();
+				Iterator<ReconcileProblemAnnotation> iter= fAnnotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
 					Annotation annotation= iter.next();
-					if (SpringPropertyAnnotation.TYPES.contains(annotation.getType()))
+					if (ReconcileProblemAnnotation.TYPES.contains(annotation.getType()))
 						toRemove.add(annotation);
 				}
 				Annotation[] annotationsToRemove= toRemove.toArray(new Annotation[toRemove.size()]);
@@ -152,7 +153,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 
 	private IReconcileTrigger fReconcileTrigger;
 
-	public SpringPropertiesReconcileStrategy(ISourceViewer viewer, IReconcileEngine engine, DocumentContextFinder documentContextFinder, IReconcileTrigger reconcileTrigger) {
+	public ReconcileEngineWrapper(ISourceViewer viewer, IReconcileEngine engine, DocumentContextFinder documentContextFinder, IReconcileTrigger reconcileTrigger) {
 		Assert.isNotNull(viewer);
 		fDocumentContextFinder = documentContextFinder;
 		fViewer= viewer;

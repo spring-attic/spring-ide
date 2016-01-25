@@ -17,9 +17,11 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
@@ -38,6 +40,7 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 	private final String DIALOG_SETTINGS_KEY = this.getClass().getName();
 	private final YamlASTProvider astProvider = new YamlASTProvider(new Yaml());
 	private YamlCompletionEngine completionEngine;
+	protected ForceableReconciler fReconciler;
 
 	protected final IDialogSettings getDialogSettings() {
 		IDialogSettings dialogSettings = getPluginDialogSettings();
@@ -120,9 +123,19 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		return astProvider;
 	}
 
+	@Override
+	public final IReconciler getReconciler(ISourceViewer sourceViewer) {
+		if (fReconciler==null) {
+			fReconciler = createReconciler(sourceViewer);
+		}
+		return fReconciler;
+	}
+
 	protected abstract ITextHover getTextAnnotationHover(ISourceViewer sourceViewer);
 	protected abstract YamlStructureProvider getStructureProvider();
 	protected abstract YamlAssistContextProvider getAssistContextProvider();
+
+	protected abstract ForceableReconciler createReconciler(ISourceViewer sourceViewer);
 
 
 }

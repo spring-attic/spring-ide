@@ -23,8 +23,8 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 
 public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
@@ -39,7 +39,7 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		IAnnotationModel model = sourceViewer.getAnnotationModel();
-		SpringPropertyAnnotation annot = getAnnotationAt(model, hoverRegion.getOffset());
+		ReconcileProblemAnnotation annot = getAnnotationAt(model, hoverRegion.getOffset());
 		if (annot!=null) {
 			return annot.getText();
 		}
@@ -49,7 +49,7 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		IAnnotationModel model = sourceViewer.getAnnotationModel();
-		SpringPropertyAnnotation annot = getAnnotationAt(model, offset);
+		ReconcileProblemAnnotation annot = getAnnotationAt(model, offset);
 		if (annot!=null) {
 			Position pos = model.getPosition(annot);
 			if (pos!=null) {
@@ -62,7 +62,7 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		IAnnotationModel model = sourceViewer.getAnnotationModel();
-		SpringPropertyAnnotation annot = getAnnotationAt(model, hoverRegion.getOffset());
+		ReconcileProblemAnnotation annot = getAnnotationAt(model, hoverRegion.getOffset());
 		if (annot!=null) {
 			return new SpringPropertyProblemHoverInfo(annot.getSpringPropertyProblem(), context);
 		}
@@ -76,16 +76,16 @@ public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverEx
 
 	/////////////////////////////////////////////////////////////////////
 
-	private SpringPropertyAnnotation getAnnotationAt(IAnnotationModel model, int offset) {
+	private ReconcileProblemAnnotation getAnnotationAt(IAnnotationModel model, int offset) {
 		if (model!=null) {
 			@SuppressWarnings("rawtypes")
 			Iterator iter= model.getAnnotationIterator();
-			SpringPropertyAnnotation found = null;
+			ReconcileProblemAnnotation found = null;
 			Position foundPos = null;
 			while (iter.hasNext()) {
 				Object _annotation= iter.next();
-				if (_annotation instanceof SpringPropertyAnnotation) {
-					SpringPropertyAnnotation annotation = (SpringPropertyAnnotation) _annotation;
+				if (_annotation instanceof ReconcileProblemAnnotation) {
+					ReconcileProblemAnnotation annotation = (ReconcileProblemAnnotation) _annotation;
 					Position pos= model.getPosition(annotation);
 					if (isAtPosition(offset, pos)) {
 						if (foundPos==null || pos.length<foundPos.length) {

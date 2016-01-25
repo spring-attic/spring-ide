@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesAnnotationHover;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconciler;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
@@ -59,6 +58,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContextProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.ApplicationYamlReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
@@ -67,7 +67,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 @SuppressWarnings("restriction")
 public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration implements IReconcileTrigger {
 
-	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.YAML_DEFAULT;
+	public static final DocumentContextFinder documentContextFinder = DocumentContextFinders.YAML_DEFAULT;
 	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
 	static {
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");
@@ -132,14 +132,13 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 
 	private final YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 	private final YamlAssistContextProvider assistContextProvider = new ApplicationYamlAssistContextProvider(indexProvider, typeUtilProvider, RelaxedNameConfig.COMPLETION_DEFAULTS, documentContextFinder);
-	private final SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
+	public final SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		protected IReconcileEngine createEngine() throws Exception {
 			return new ApplicationYamlReconcileEngine(getAstProvider(), indexProvider, typeUtilProvider);
 		}
 	};
 
 	final PropertyCompletionFactory completionFactory = new PropertyCompletionFactory(documentContextFinder);
-	private SpringPropertiesReconciler fReconciler;
 
 	public QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
 		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
@@ -157,18 +156,6 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 				return ANNOTIONS_SHOWN_IN_OVERVIEW_BAR.contains(annotation.getType());
 			}
 		};
-	}
-
-	@Override
-	public IReconciler getReconciler(ISourceViewer sourceViewer) {
-		if (fReconciler==null) {
-			fReconciler = createReconciler(sourceViewer);
-		}
-		return fReconciler;
-	}
-
-	protected SpringPropertiesReconciler createReconciler(ISourceViewer sourceViewer) {
-		return fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
 	}
 
 	@Override
@@ -230,6 +217,11 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	@Override
 	public YamlAssistContextProvider getAssistContextProvider() {
 		return assistContextProvider;
+	}
+
+	@Override
+	protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
+		return fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
 	}
 
 }

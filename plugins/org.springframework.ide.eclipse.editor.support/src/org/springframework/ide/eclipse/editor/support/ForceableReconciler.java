@@ -8,20 +8,21 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.editor.support;
 
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 
 /**
- * WE unforytunately must subclass this just to make it possible to call non
+ * We unforytunately must subclass this just to make it possible to call non
  * public method 'forceReconcile'.
- *
- * We need this to trigger a reconcile when live metadata has changed.
+ * <p>
+ * We need this to be able to force a reconcile at certain times (e.g. when
+ * some underlying data defining the schema has changed).
  */
-public class SpringPropertiesReconciler extends MonoReconciler {
+public class ForceableReconciler extends MonoReconciler {
 
-	public SpringPropertiesReconciler(IReconcilingStrategy strategy) {
+	public ForceableReconciler(IReconcilingStrategy strategy) {
 		super(strategy, false);
 	}
 

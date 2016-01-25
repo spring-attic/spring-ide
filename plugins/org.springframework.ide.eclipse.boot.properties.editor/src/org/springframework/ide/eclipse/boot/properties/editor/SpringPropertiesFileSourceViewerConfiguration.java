@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPro
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
+import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
@@ -59,7 +60,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	private static final String DIALOG_SETTINGS_KEY = PropertiesFileSourceViewerConfiguration.class.getName();
 	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.PROPS_DEFAULT;
 	private SpringPropertiesCompletionEngine engine;
-	private SpringPropertiesReconciler fReconciler;
+	private ForceableReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		@Override
 		protected IReconcileEngine createEngine() throws Exception {

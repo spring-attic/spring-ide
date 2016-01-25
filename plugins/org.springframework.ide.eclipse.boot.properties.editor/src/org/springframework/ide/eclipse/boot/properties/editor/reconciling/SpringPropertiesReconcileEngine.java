@@ -38,9 +38,9 @@ import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollecto
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 
 /**
- * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
+ * Implements reconciling algorithm for {@link ReconcileEngineWrapper}.
  * <p>
- * The code in here could have been also part of the {@link SpringPropertiesReconcileStrategy}
+ * The code in here could have been also part of the {@link ReconcileEngineWrapper}
  * itself, however isolating it here allows it to me more easily unit tested (no dependencies
  * on ISourceViewer which is difficult to 'mock' in testing harness.
  *
