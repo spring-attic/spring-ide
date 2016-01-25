@@ -34,7 +34,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlStructureProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.ApplicationYamlAssistContextProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.SpringYamlReconcileEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.ApplicationYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
@@ -72,8 +72,8 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 	HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(parser, structureProvider, assistContextProvider);
 	private ICompletionEngine completionEngine = new YamlCompletionEngine(structureProvider, assistContextProvider);
 
-	protected SpringYamlReconcileEngine createReconcileEngine() {
-		return new SpringYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
+	protected ApplicationYamlReconcileEngine createReconcileEngine() {
+		return new ApplicationYamlReconcileEngine(parser, indexProvider, typeUtilProvider);
 	}
 
 	//TODO: the link targets bits are almost dupiclates from the SpringProperties editor test harness.

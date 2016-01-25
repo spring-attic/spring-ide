@@ -20,8 +20,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.*;
 
@@ -34,12 +34,12 @@ import static org.springframework.ide.eclipse.boot.properties.editor.preferences
 @SuppressWarnings("restriction")
 public class IgnoreProblemTypeInProjectQuickfix implements ICompletionProposal {
 
-	private ProblemType problemType;
+	private SpringPropertiesProblemType problemType;
 	private IPreferenceStore workspacePrefs;
 	private IPreferenceStore projectPrefs;
 	private IProject project;
 
-	public IgnoreProblemTypeInProjectQuickfix(QuickfixContext context, ProblemType type) {
+	public IgnoreProblemTypeInProjectQuickfix(QuickfixContext context, SpringPropertiesProblemType type) {
 		this.project = context.getProject();
 		this.workspacePrefs = context.getWorkspacePreferences();
 		this.projectPrefs = context.getProjectPreferences();
@@ -53,7 +53,7 @@ public class IgnoreProblemTypeInProjectQuickfix implements ICompletionProposal {
 			//Tricky: if project preferences are not yet enabled, enabling them may 'revert' some
 			//globally changed preferences back to their default values.
 			//Avoid that confusing behavior by copying the preferences that would change from workspace to project level.
-			for (ProblemType problemType : ProblemType.FOR(et)) {
+			for (SpringPropertiesProblemType problemType : SpringPropertiesProblemType.FOR(et)) {
 				ProblemSeverity currentEffectiveValue = getSeverity(workspacePrefs, problemType);
 				ProblemSeverity currentProjectValue = getSeverity(projectPrefs, problemType);
 				if (!currentEffectiveValue.equals(currentProjectValue)) {

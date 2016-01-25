@@ -262,9 +262,9 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 					return contextWith(s, TypeUtil.getDomainType(type));
 				}
 				String key = s.toPropString();
-				Map<String, Type> subproperties = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+				Map<String, TypedProperty> subproperties = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 				if (subproperties!=null) {
-					return contextWith(s, subproperties.get(key));
+					return contextWith(s, TypedProperty.typeOf(subproperties.get(key)));
 				}
 			} else if (s.getType()==YamlPathSegmentType.VAL_AT_INDEX) {
 				if (TypeUtil.isSequencable(type)) {
@@ -441,6 +441,4 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			}
 		};
 	}
-
-
 }

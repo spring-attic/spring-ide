@@ -25,7 +25,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
@@ -42,24 +42,24 @@ import junit.framework.TestCase;
  */
 public class QuickfixCreationTests extends TestCase {
 
-	private static final EnumSet<ProblemType> UNKNOWN_PROPERTY_PROBLEMS = EnumSet.of(ProblemType.YAML_UNKNOWN_PROPERTY, ProblemType.PROP_UNKNOWN_PROPERTY);
+	private static final EnumSet<SpringPropertiesProblemType> UNKNOWN_PROPERTY_PROBLEMS = EnumSet.of(SpringPropertiesProblemType.YAML_UNKNOWN_PROPERTY, SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY);
 
 	/**
 	 * Checks that an 'unknown property' problem returns the expected quickfixes.
 	 */
 	public void testUnknownPropertyQuickfixes() throws Exception {
-		for (ProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
+		for (SpringPropertiesProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
 			doTestUnkownPropertyQuickfixes(problemType);
 		}
 	}
 
 	public void testOtherProblemQuickfixes() throws Exception {
-		for (ProblemType problemType : EnumSet.complementOf(UNKNOWN_PROPERTY_PROBLEMS)) {
+		for (SpringPropertiesProblemType problemType : EnumSet.complementOf(UNKNOWN_PROPERTY_PROBLEMS)) {
 			doTestOtherProblemQuickfixes(problemType);
 		}
 	}
 
-	public void doTestOtherProblemQuickfixes(ProblemType problemType) {
+	public void doTestOtherProblemQuickfixes(SpringPropertiesProblemType problemType) {
 		SpringPropertyProblem problem = problem(problemType, "Some kind of a message", 15, 9);
 		IPreferenceStore workspacePrefs = new MockPrefsStore();
 		IPreferenceStore projectPrefs = new MockPrefsStore();
@@ -76,7 +76,7 @@ public class QuickfixCreationTests extends TestCase {
 		verifyZeroInteractions(ui);
 	}
 
-	public void doTestUnkownPropertyQuickfixes(ProblemType problemType) {
+	public void doTestUnkownPropertyQuickfixes(SpringPropertiesProblemType problemType) {
 		SpringPropertyProblem problem = problem(problemType, "The property 'yada.yada' is unknown", 15, 9);
 		problem.setPropertyName("yada.yada");
 		IPreferenceStore workspacePrefs = new MockPrefsStore();
@@ -99,12 +99,12 @@ public class QuickfixCreationTests extends TestCase {
 	 * already been enabled.
 	 */
 	public void testWorkspaceIgnoreDisabledWhenProjectSettingsEnabled() throws Exception {
-		for (ProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
+		for (SpringPropertiesProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
 			doTestWorkspaceIgnoreDisabledWhenProjectSettingsEnabled(problemType);
 		}
 	}
 
-	public void doTestWorkspaceIgnoreDisabledWhenProjectSettingsEnabled(ProblemType problemType) throws Exception {
+	public void doTestWorkspaceIgnoreDisabledWhenProjectSettingsEnabled(SpringPropertiesProblemType problemType) throws Exception {
 		EditorType editorType = problemType.getEditorType();
 		SpringPropertyProblem problem = problem(problemType, "The property 'yada.yada' is unknown", 15, 9);
 		problem.setPropertyName("yada.yada");

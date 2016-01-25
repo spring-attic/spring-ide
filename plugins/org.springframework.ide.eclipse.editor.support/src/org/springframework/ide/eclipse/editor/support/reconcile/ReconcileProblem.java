@@ -1,22 +1,24 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Pivotal, Inc. - initial API and implementation
+ *    Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 /**
+ * Minamal interface that objects representing a reconciler problem must
+ * implement.
+ *
  * @author Kris De Volder
  */
-public enum ProblemSeverity {
-
-	IGNORE,
-	WARNING,
-	ERROR;
-
+public interface ReconcileProblem {
+	ProblemType getType();
+	String getMessage();
+	int getOffset();
+	int getLength();
 }

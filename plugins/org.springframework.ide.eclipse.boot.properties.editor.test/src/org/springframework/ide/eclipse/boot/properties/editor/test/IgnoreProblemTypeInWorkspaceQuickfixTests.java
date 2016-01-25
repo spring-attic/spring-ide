@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.*;
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getPreferenceName;
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getSeverity;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity.*;
+import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.*;
 
 import java.util.EnumSet;
 
@@ -27,17 +27,17 @@ import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
 
 import junit.framework.TestCase;
 
 public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 
-	private static final EnumSet<ProblemType> UNKNOWN_PROPERTY_PROBLEMS = EnumSet.of(ProblemType.YAML_UNKNOWN_PROPERTY, ProblemType.PROP_UNKNOWN_PROPERTY);
+	private static final EnumSet<SpringPropertiesProblemType> UNKNOWN_PROPERTY_PROBLEMS = EnumSet.of(SpringPropertiesProblemType.YAML_UNKNOWN_PROPERTY, SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY);
 
 	public void testApplyWhenProjectPrefsEnabled() throws Exception {
-		for (ProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
+		for (SpringPropertiesProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
 			EditorType editorType = problemType.getEditorType();
 
 			//stuff we need:
@@ -65,7 +65,7 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 
 			//Verify expectations
 			assertEquals(IGNORE, getSeverity(projectPrefs, problemType));
-			for (ProblemType pt : ProblemType.FOR(editorType)) {
+			for (SpringPropertiesProblemType pt : SpringPropertiesProblemType.FOR(editorType)) {
 				if (pt==problemType) {
 					assertEquals(IGNORE, getSeverity(projectPrefs, pt));
 				} else {
@@ -80,7 +80,7 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 	}
 
 	public void testApplyWhenProjectPrefsDisabled() throws Exception {
-		for (ProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
+		for (SpringPropertiesProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
 			EditorType editorType = problemType.getEditorType();
 
 			//stuff we need:
@@ -88,7 +88,7 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 			MockPrefsStore workspacePrefs = new MockPrefsStore();
 
 			// The thing that matters is... if workspacePrefs are no longer at default.
-			for (ProblemType pt : ProblemType.FOR(editorType)) {
+			for (SpringPropertiesProblemType pt : SpringPropertiesProblemType.FOR(editorType)) {
 				setSeverity(workspacePrefs, pt, WARNING);
 			}
 
@@ -115,7 +115,7 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 			//Verify expectations
 			assertTrue(projectPreferencesEnabled(projectPrefs, editorType));
 			assertEquals(IGNORE, getSeverity(projectPrefs, problemType));
-			for (ProblemType pt : ProblemType.FOR(editorType)) {
+			for (SpringPropertiesProblemType pt : SpringPropertiesProblemType.FOR(editorType)) {
 				if (pt==problemType) {
 					assertEquals(IGNORE, getSeverity(projectPrefs, pt));
 				} else {

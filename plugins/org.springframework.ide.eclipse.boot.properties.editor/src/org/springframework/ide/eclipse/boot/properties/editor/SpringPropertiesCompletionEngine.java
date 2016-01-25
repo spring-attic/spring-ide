@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
+import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.inject.Provider;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -34,7 +38,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -48,8 +51,6 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalApplie
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
-
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 /**
  * @author Kris De Volder

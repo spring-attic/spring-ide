@@ -29,9 +29,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.util.CheckboxWidget;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
@@ -52,8 +52,8 @@ public abstract class AbstractPropertiesEditorPreferencesPage extends FieldEdito
 	private LiveVariable<Boolean> enablePreferences = new LiveVariable<Boolean>(true);
 
 
-	private static final Comparator<ProblemType> PROBLEM_TYPE_COMPARATOR = new Comparator<ProblemType>() {
-		public int compare(ProblemType o1, ProblemType o2) {
+	private static final Comparator<SpringPropertiesProblemType> PROBLEM_TYPE_COMPARATOR = new Comparator<SpringPropertiesProblemType>() {
+		public int compare(SpringPropertiesProblemType o1, SpringPropertiesProblemType o2) {
 			return o1.getLabel().compareTo(o2.getLabel());
 		}
 	};
@@ -75,10 +75,10 @@ public abstract class AbstractPropertiesEditorPreferencesPage extends FieldEdito
 
 	@Override
 	protected void createFieldEditors() {
-		ProblemType[] problemTypes = getProblemTypes();
+		SpringPropertiesProblemType[] problemTypes = getProblemTypes();
 		Arrays.sort(problemTypes, PROBLEM_TYPE_COMPARATOR);
 
-		for (ProblemType problemType : problemTypes) {
+		for (SpringPropertiesProblemType problemType : problemTypes) {
 			ComboFieldEditor field = new ComboFieldEditor(
 					ProblemSeverityPreferencesUtil.getPreferenceName(problemType),
 					problemType.getLabel(),
@@ -140,7 +140,7 @@ public abstract class AbstractPropertiesEditorPreferencesPage extends FieldEdito
 		return project!=null;
 	}
 
-	protected abstract ProblemType[] getProblemTypes();
+	protected abstract SpringPropertiesProblemType[] getProblemTypes();
 
 	protected void setTooltip(ComboFieldEditor field, String tooltip) {
 		field.getLabelControl(getFieldEditorParent()).setToolTipText(tooltip);

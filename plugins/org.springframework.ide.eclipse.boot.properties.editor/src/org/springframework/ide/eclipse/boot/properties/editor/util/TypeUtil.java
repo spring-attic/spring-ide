@@ -36,6 +36,9 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -43,8 +46,7 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  *
  * @author Kris De Volder
  */
-public class TypeUtil {
-
+public class TypeUtil implements YTypeUtil {
 
 	private static abstract class RadixableParser implements ValueParser {
 
@@ -609,14 +611,14 @@ public class TypeUtil {
 		return null;
 	}
 
-	public Map<String,Type> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
+	public Map<String, TypedProperty> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		//TODO: optimize, produce directly as a map instead of
 		// first creating list and then coverting it.
 		List<TypedProperty> list = getProperties(type, enumMode, beanMode);
 		if (list!=null) {
-			Map<String, Type> map = new HashMap<String, Type>();
+			Map<String, TypedProperty> map = new HashMap<>();
 			for (TypedProperty p : list) {
-				map.put(p.getName(), p.getType());
+				map.put(p.getName(), p);
 			}
 			return map;
 		}
@@ -664,6 +666,66 @@ public class TypeUtil {
 			return m;
 		}
 		return null;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Addapting our interface so it is compatible with YTypeUtil
+	//
+	// This allows our types to be used by the more generic stuff from the 'editor.support' plugin.
+	//
+	// Note, it may be possible to avoid having these 'adaptor' methods by making YTypeUtil a paramerized
+	// type. I.e something like "interface YTypeUtil<T extends YType>.
+	// Paramterizations like that tend to propagate fire and wide in the code and make for complicated
+	// signatures. For now using these bredging methods is simpler if perhaps a bit more error prone.
+
+	@Override
+	public boolean isAtomic(YType type) {
+		return isAtomic((Type)type);
+	}
+
+	@Override
+	public boolean isMap(YType type) {
+		return isMap((Type)type);
+	}
+
+	@Override
+	public boolean isSequencable(YType type) {
+		return isSequencable((Type)type);
+	}
+
+	@Override
+	public YType getDomainType(YType type) {
+		return getDomainType((Type)type);
+	}
+
+	@Override
+	public String[] getHintValues(YType type) {
+		return getAllowedValues((Type) type, EnumCaseMode.ALIASED);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<YTypedProperty> getProperties(YType type) {
+		//Dirty hack, passing this through a raw type to bypass the java type system
+		//complaining the List<TypedProperty> is not compatible with List<YTypedProperty>
+		//This dirty and 'illegal' conversion is okay because the list is only used for reading.
+		@SuppressWarnings("rawtypes")
+		List props = getProperties((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+		return Collections.unmodifiableList(props);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, YTypedProperty> getPropertiesMap(YType type) {
+		//Dirty hack, see comment in getProperties(YType)
+		@SuppressWarnings("rawtypes")
+		Map map = getPropertiesMap((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+		return Collections.unmodifiableMap(map);
+	}
+
+	@Override
+	public String niceTypeName(YType type) {
+		return niceTypeName((Type)type);
 	}
 
 }

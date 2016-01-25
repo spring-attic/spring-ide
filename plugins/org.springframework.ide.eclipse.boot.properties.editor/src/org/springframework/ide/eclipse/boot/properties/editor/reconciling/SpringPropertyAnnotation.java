@@ -17,6 +17,8 @@ import java.util.Set;
 
 import org.eclipse.jface.text.quickassist.IQuickFixableAnnotation;
 import org.eclipse.jface.text.source.Annotation;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
  * Spelling annotation.
@@ -50,12 +52,12 @@ public class SpringPropertyAnnotation extends Annotation implements IQuickFixabl
 		}
 	}
 
-	private SpringPropertyProblem fProblem;
+	private ReconcileProblem fProblem;
 
 	/**
 	 * Creates a new annotation of given type.
 	 */
-	public SpringPropertyAnnotation(String annotationType, SpringPropertyProblem problem) {
+	public SpringPropertyAnnotation(String annotationType, ReconcileProblem problem) {
 		super(annotationType, false, problem.getMessage());
 		fProblem = problem;
 	}
@@ -81,7 +83,7 @@ public class SpringPropertyAnnotation extends Annotation implements IQuickFixabl
 		// always true
 	}
 
-	public SpringPropertyProblem getSpringPropertyProblem() {
+	public ReconcileProblem getSpringPropertyProblem() {
 		return fProblem;
 	}
 

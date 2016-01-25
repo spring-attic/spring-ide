@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -27,7 +26,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.TypeBasedYamlASTReconciler;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.Kind;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValueRef;
@@ -43,12 +45,13 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 /**
  * @author Kris De Volder
  */
-public class YamlASTReconciler {
+public class ApplicationYamlASTReconciler extends TypeBasedYamlASTReconciler {
 
 	private IProblemCollector problems;
 	private TypeUtil typeUtil;
 
-	public YamlASTReconciler(IProblemCollector problems, TypeUtil typeUtil) {
+	public ApplicationYamlASTReconciler(IProblemCollector problems, TypeUtil typeUtil) {
+		super(problems, typeUtil);
 		this.problems = problems;
 		this.typeUtil = typeUtil;
 	}
@@ -184,7 +187,7 @@ public class YamlASTReconciler {
 			}
 		} else {
 			// Neither atomic, map or sequence-like => bean-like
-			Map<String, Type> props = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+			Map<String, TypedProperty> props = typeUtil.getPropertiesMap(type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 			if (props!=null) {
 				for (NodeTuple entry : mapping.getValue()) {
 					Node keyNode = entry.getKeyNode();
@@ -197,7 +200,7 @@ public class YamlASTReconciler {
 
 					if (key!=null) {
 						Node valNode = entry.getValueNode();
-						reconcile(valNode, props.get(key));
+						reconcile(valNode, TypedProperty.typeOf(props.get(key)));
 					}
 				}
 			}
@@ -240,19 +243,19 @@ public class YamlASTReconciler {
 	}
 
 	private void expectTypeFoundMapping(Type type, MappingNode node) {
-		expectType(ProblemType.YAML_EXPECT_TYPE_FOUND_MAPPING, type, node);
+		expectType(SpringPropertiesProblemType.YAML_EXPECT_TYPE_FOUND_MAPPING, type, node);
 	}
 
 	private void expectTypeFoundSequence(Type type, SequenceNode seq) {
-		expectType(ProblemType.YAML_EXPECT_TYPE_FOUND_SEQUENCE, type, seq);
+		expectType(SpringPropertiesProblemType.YAML_EXPECT_TYPE_FOUND_SEQUENCE, type, seq);
 	}
 
 	private void valueTypeMismatch(Type type, ScalarNode scalar) {
-		expectType(ProblemType.YAML_VALUE_TYPE_MISMATCH, type, scalar);
+		expectType(SpringPropertiesProblemType.YAML_VALUE_TYPE_MISMATCH, type, scalar);
 	}
 
 	private void unkownProperty(Node node, String name, NodeTuple entry) {
-		SpringPropertyProblem p = problem(ProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
+		SpringPropertyProblem p = problem(SpringPropertiesProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
 		p.setPropertyName(extendForQuickfix(StringUtil.camelCaseToHyphens(name), entry.getValueNode()));
 		problems.accept(p);
 	}
@@ -282,27 +285,27 @@ public class YamlASTReconciler {
 	}
 
 	private void expectScalar(Node node) {
-		problems.accept(problem(ProblemType.YAML_EXPECT_SCALAR, node, "Expecting a 'Scalar' node but got "+describe(node)));
+		problems.accept(problem(SpringPropertiesProblemType.YAML_EXPECT_SCALAR, node, "Expecting a 'Scalar' node but got "+describe(node)));
 	}
 
 	protected void expectMapping(Node node) {
-		problems.accept(problem(ProblemType.YAML_EXPECT_MAPPING, node, "Expecting a 'Mapping' node but got "+describe(node)));
+		problems.accept(problem(SpringPropertiesProblemType.YAML_EXPECT_MAPPING, node, "Expecting a 'Mapping' node but got "+describe(node)));
 	}
 
 	private void expectBeanPropertyName(Node keyNode, Type type) {
-		problems.accept(problem(ProblemType.YAML_EXPECT_BEAN_PROPERTY_NAME, keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
+		problems.accept(problem(SpringPropertiesProblemType.YAML_EXPECT_BEAN_PROPERTY_NAME, keyNode, "Expecting a bean-property name for object of type '"+typeUtil.niceTypeName(type)+"' "
 				+ "but got "+describe(keyNode)));
 	}
 
 	private void unknownBeanProperty(Node keyNode, Type type, String name) {
-		problems.accept(problem(ProblemType.YAML_INVALID_BEAN_PROPERTY, keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'"));
+		problems.accept(problem(SpringPropertiesProblemType.YAML_INVALID_BEAN_PROPERTY, keyNode, "Unknown property '"+name+"' for type '"+typeUtil.niceTypeName(type)+"'"));
 	}
 
-	private void expectType(ProblemType problemType, Type type, Node node) {
+	private void expectType(SpringPropertiesProblemType problemType, Type type, Node node) {
 		problems.accept(problem(problemType, node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node)));
 	}
 
-	protected SpringPropertyProblem problem(ProblemType type, Node node, String msg) {
+	protected SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {
 		int start = node.getStartMark().getIndex();
 		int end = node.getEndMark().getIndex();
 		return SpringPropertyProblem.problem(type, msg, start, end-start);

@@ -11,8 +11,9 @@
 package org.springframework.ide.eclipse.boot.properties.editor;
 
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
  * Implementation {@link SeverityProvider} that simplies returns the hard-coded 'default severity' based
@@ -23,7 +24,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
 public class DefaultSeverityProvider implements SeverityProvider {
 
 	@Override
-	public ProblemSeverity getSeverity(SpringPropertyProblem problem) {
+	public ProblemSeverity getSeverity(ReconcileProblem problem) {
 		return problem.getType().getDefaultSeverity();
 	}
 

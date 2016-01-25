@@ -8,12 +8,19 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.editor.support.yaml.reconcile;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 
-public interface IReconcileEngine {
-	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon);
+public class TypeBasedYamlASTReconciler {
+
+	private final IProblemCollector problems;
+	private final YTypeUtil typeUtil;
+
+	public TypeBasedYamlASTReconciler(IProblemCollector problems, YTypeUtil typeUtil) {
+		this.problems = problems;
+		this.typeUtil = typeUtil;
+	}
+
 }

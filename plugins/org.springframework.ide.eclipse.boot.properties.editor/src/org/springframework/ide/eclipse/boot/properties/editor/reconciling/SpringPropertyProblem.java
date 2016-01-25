@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType.PROP_UNKNOWN_PROPERTY;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType.YAML_UNKNOWN_PROPERTY;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_UNKNOWN_PROPERTY;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.maven.building.Problem;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -27,13 +26,14 @@ import org.springframework.ide.eclipse.boot.properties.editor.preferences.Proble
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 
 /**
  * @author Kris De Volder
  */
-public class SpringPropertyProblem {
+public class SpringPropertyProblem implements ReconcileProblem {
 
-	private static final EnumSet<ProblemType> FIXABLE_UNKNOWN_PROPERTY_PROBLEM_TYPES = EnumSet.of(
+	private static final EnumSet<SpringPropertiesProblemType> FIXABLE_UNKNOWN_PROPERTY_PROBLEM_TYPES = EnumSet.of(
 			PROP_UNKNOWN_PROPERTY,
 			YAML_UNKNOWN_PROPERTY
 	);
@@ -42,7 +42,7 @@ public class SpringPropertyProblem {
 	private String msg;
 	private int length;
 	private int offset;
-	private ProblemType type;
+	private SpringPropertiesProblemType type;
 
 	//Optional properties (only some problems or problemtypes may set them, so they might be null)
 	private String propertyName;
@@ -52,7 +52,7 @@ public class SpringPropertyProblem {
 	 * The severity should be one of the XXX_TYPE constants defined in
 	 * {@link SpringPropertyAnnotation}.
 	 */
-	private SpringPropertyProblem(ProblemType type, String msg, int offset, int length) {
+	private SpringPropertyProblem(SpringPropertiesProblemType type, String msg, int offset, int length) {
 		this.msg = msg;
 		this.offset = offset;
 		this.length = length;
@@ -76,11 +76,11 @@ public class SpringPropertyProblem {
 		return "@["+offset+","+length+"]: "+msg;
 	}
 
-	public ProblemType getType() {
+	public SpringPropertiesProblemType getType() {
 		return type;
 	}
 
-	public static SpringPropertyProblem problem(ProblemType problemType, String message, int offset, int len) {
+	public static SpringPropertyProblem problem(SpringPropertiesProblemType problemType, String message, int offset, int len) {
 		return new SpringPropertyProblem(problemType, message , offset, len);
 	}
 
@@ -94,7 +94,7 @@ public class SpringPropertyProblem {
 			}
 		}
 		IPreferenceStore projectPrefs = context.getProjectPreferences();
-		ProblemType problemType = getType();
+		SpringPropertiesProblemType problemType = getType();
 		EditorType editorType = problemType.getEditorType();
 
 		proposals.add(new IgnoreProblemTypeInProjectQuickfix(context, problemType));

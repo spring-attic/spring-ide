@@ -10,17 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity.ERROR;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity.WARNING;
+import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.ERROR;
+import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.WARNING;
 
 import java.util.ArrayList;
 
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
  * @author Kris De Volder
  */
-public enum ProblemType {
+public enum SpringPropertiesProblemType implements ProblemType {
 
 	// Naming:
 	//   YAML_* for all problems in .yml files.
@@ -50,17 +52,17 @@ public enum ProblemType {
 	private String description;
 	private String label;
 
-	private ProblemType(ProblemSeverity defaultSeverity, String description, String label) {
+	private SpringPropertiesProblemType(ProblemSeverity defaultSeverity, String description, String label) {
 		this.description = description;
 		this.defaultSeverity = defaultSeverity;
 		this.label = label;
 	}
 
-	private ProblemType(ProblemSeverity defaultSeverity, String description) {
+	private SpringPropertiesProblemType(ProblemSeverity defaultSeverity, String description) {
 		this(defaultSeverity, description, null);
 	}
 
-	private ProblemType(String description) {
+	private SpringPropertiesProblemType(String description) {
 		this(ERROR, description);
 	}
 
@@ -68,26 +70,26 @@ public enum ProblemType {
 		return defaultSeverity;
 	}
 
-	public static final ProblemType[] FOR_YAML = FOR(EditorType.YAML);
-	public static final ProblemType[] FOR_PROPERTIES = FOR(EditorType.PROP);
+	public static final SpringPropertiesProblemType[] FOR_YAML = FOR(EditorType.YAML);
+	public static final SpringPropertiesProblemType[] FOR_PROPERTIES = FOR(EditorType.PROP);
 
-	public static ProblemType[] forProperties() {
+	public static SpringPropertiesProblemType[] forProperties() {
 		return withPrefix("PROP_");
 	}
 
-	public static ProblemType[] FOR(EditorType et) {
+	public static SpringPropertiesProblemType[] FOR(EditorType et) {
 		return withPrefix(et.getProblemTypePrefix());
 	}
 
-	private static ProblemType[] withPrefix(String prefix) {
-		ProblemType[] allValues = values();
-		ArrayList<ProblemType> values = new ArrayList<ProblemType>(allValues.length);
-		for (ProblemType v : allValues) {
+	private static SpringPropertiesProblemType[] withPrefix(String prefix) {
+		SpringPropertiesProblemType[] allValues = values();
+		ArrayList<SpringPropertiesProblemType> values = new ArrayList<SpringPropertiesProblemType>(allValues.length);
+		for (SpringPropertiesProblemType v : allValues) {
 			if (v.toString().startsWith(prefix)) {
 				values.add(v);
 			}
 		}
-		return values.toArray(new ProblemType[values.size()]);
+		return values.toArray(new SpringPropertiesProblemType[values.size()]);
 	}
 
 	public String getLabel() {

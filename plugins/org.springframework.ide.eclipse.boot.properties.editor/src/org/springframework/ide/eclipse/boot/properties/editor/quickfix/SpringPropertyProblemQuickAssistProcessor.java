@@ -27,6 +27,7 @@ import org.eclipse.ui.internal.texteditor.spelling.NoCompletionsProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 
 @SuppressWarnings("restriction")
 public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistProcessor {
@@ -72,7 +73,7 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 
 	private List<ICompletionProposal> computeProposals(IQuickAssistInvocationContext context, IAnnotationModel model) {
 		int offset= context.getOffset();
-		ArrayList<SpringPropertyProblem> annotationList= new ArrayList<SpringPropertyProblem>();
+		ArrayList<ReconcileProblem> annotationList= new ArrayList<>();
 		@SuppressWarnings("rawtypes")
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
@@ -88,7 +89,7 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 		return computeProposals(context, problems);
 	}
 
-	private void collectionProblems(Annotation annotation, ArrayList<SpringPropertyProblem> annotationList) {
+	private void collectionProblems(Annotation annotation, ArrayList<ReconcileProblem> annotationList) {
 		if (annotation instanceof SpringPropertyAnnotation) {
 			annotationList.add(((SpringPropertyAnnotation)annotation).getSpringPropertyProblem());
 		}

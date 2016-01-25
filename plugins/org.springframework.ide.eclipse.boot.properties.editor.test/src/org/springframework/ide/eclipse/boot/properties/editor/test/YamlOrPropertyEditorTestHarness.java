@@ -38,9 +38,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
@@ -75,20 +76,20 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	public class MockProblemCollector implements IProblemCollector {
 
-		private List<SpringPropertyProblem> problems = null;
+		private List<ReconcileProblem> problems = null;
 
-		public List<SpringPropertyProblem> getAllProblems() {
+		public List<ReconcileProblem> getAllProblems() {
 			return problems;
 		}
 
 		public void beginCollecting() {
-			problems = new ArrayList<SpringPropertyProblem>();
+			problems = new ArrayList<>();
 		}
 
 		public void endCollecting() {
 		}
 
-		public void accept(SpringPropertyProblem e) {
+		public void accept(ReconcileProblem e) {
 			problems.add(e);
 		}
 	}
@@ -571,7 +572,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return project;
 	}
 
-	public List<SpringPropertyProblem> reconcile(MockPropertiesEditor editor) {
+	public List<ReconcileProblem> reconcile(MockPropertiesEditor editor) {
 		IReconcileEngine reconciler = createReconcileEngine();
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
@@ -595,7 +596,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 */
 	public void assertProblems(MockPropertiesEditor editor, String... expectedProblems)
 			throws BadLocationException {
-		List<SpringPropertyProblem> actualProblems = reconcile(editor);
+		List<ReconcileProblem> actualProblems = reconcile(editor);
 		String bad = null;
 		if (actualProblems.size()!=expectedProblems.length) {
 			bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
@@ -611,10 +612,10 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			fail(bad+problemSumary(editor, actualProblems));
 		}
 	}
-	private String problemSumary(MockPropertiesEditor editor, List<SpringPropertyProblem> actualProblems)
+	private String problemSumary(MockPropertiesEditor editor, List<ReconcileProblem> actualProblems)
 			throws BadLocationException {
 				StringBuilder buf = new StringBuilder();
-				for (SpringPropertyProblem p : actualProblems) {
+				for (ReconcileProblem p : actualProblems) {
 					buf.append("\n----------------------\n");
 
 					String snippet = editor.getText(p.getOffset(), p.getLength());
@@ -624,15 +625,15 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 				return buf.toString();
 			}
 
-	private boolean matchProblem(MockPropertiesEditor editor, SpringPropertyProblem actual, String expect) {
+	private boolean matchProblem(MockPropertiesEditor editor, ReconcileProblem problem, String expect) {
 		String[] parts = expect.split("\\|");
 		assertEquals(2, parts.length);
 		String badSnippet = parts[0];
 		String messageSnippet = parts[1];
 		try {
-			String actualBadSnippet = editor.getText(actual.getOffset(), actual.getLength()).trim();
+			String actualBadSnippet = editor.getText(problem.getOffset(), problem.getLength()).trim();
 			return actualBadSnippet.equals(badSnippet)
-					&& actual.getMessage().contains(messageSnippet);
+					&& problem.getMessage().contains(messageSnippet);
 		} catch (BadLocationException e) {
 			return false;
 		}

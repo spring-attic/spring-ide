@@ -48,7 +48,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
  * Reconcile strategy for spring appication.properties and application.yml editors.
@@ -84,7 +86,7 @@ public class SpringPropertiesReconcileStrategy implements IReconcilingStrategy, 
 				fLockObject= fAnnotationModel;
 		}
 
-		public void accept(SpringPropertyProblem problem) {
+		public void accept(ReconcileProblem problem) {
 			ProblemSeverity severity = fSeverities.getSeverity(problem);
 			String annotationType = SpringPropertyAnnotation.getAnnotationType(severity);
 			if (annotationType!=null) {

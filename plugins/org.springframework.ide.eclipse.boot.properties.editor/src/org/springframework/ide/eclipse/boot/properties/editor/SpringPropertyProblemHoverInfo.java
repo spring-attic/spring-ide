@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import java.util.List;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.gradle.jarjar.com.google.common.collect.ImmutableList;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
 /**
@@ -23,10 +25,10 @@ import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
  */
 public class SpringPropertyProblemHoverInfo extends HoverInfo {
 
-	private SpringPropertyProblem problem;
+	private ReconcileProblem problem;
 	private QuickfixContext context;
 
-	public SpringPropertyProblemHoverInfo(SpringPropertyProblem problem, QuickfixContext context) {
+	public SpringPropertyProblemHoverInfo(ReconcileProblem problem, QuickfixContext context) {
 		this.problem = problem;
 		this.context = context;
 	}
@@ -36,11 +38,16 @@ public class SpringPropertyProblemHoverInfo extends HoverInfo {
 		HtmlBuffer html = new HtmlBuffer();
 
 		html.text(problem.getMessage());
-		problem.getQuickfixes(context);
-
-		renderQuickfixes(html, problem.getQuickfixes(context));
+		renderQuickfixes(html, getQuickfixes(problem));
 
 		return html.toString();
+	}
+
+	private List<ICompletionProposal> getQuickfixes(ReconcileProblem problem) {
+		if (problem instanceof SpringPropertyProblem) {
+			((SpringPropertyProblem)problem).getQuickfixes(context);
+		}
+		return ImmutableList.of();
 	}
 
 	private void renderQuickfixes(HtmlBuffer html, List<ICompletionProposal> quickfixes) {

@@ -18,9 +18,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 
 /**
  * @author Kris De Volder
@@ -41,7 +42,7 @@ public class ProblemSeverityPreferencesUtil {
 	 */
 	public static void initializeDefaults() {
 		IEclipsePreferences defaults = SpringPropertiesEditorPlugin.getDefault().getDefaultPreferences();
-		for (ProblemType problemType : ProblemType.values()) {
+		for (SpringPropertiesProblemType problemType : SpringPropertiesProblemType.values()) {
 			defaults.put(getPreferenceName(problemType), problemType.getDefaultSeverity().toString());
 		}
 		try {

@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
+
 /**
  * Provides a means to map {@link SpringPropertyProblem} to a {@link ProblemSeverity}. Problems mapped to 'IGNORE'
  * severity will suppressed.
@@ -18,7 +21,12 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
  */
 public interface SeverityProvider {
 
-	ProblemSeverity getSeverity(SpringPropertyProblem problem);
+	ProblemSeverity getSeverity(ReconcileProblem problem);
+
+	/**
+	 * Why is this here? So that SeverityProvider's that cache severities may clear the cache prior to
+	 * reconciling to ensure that up-to-date severities are provided during the session.
+	 */
 	void startReconciling();
 
 }

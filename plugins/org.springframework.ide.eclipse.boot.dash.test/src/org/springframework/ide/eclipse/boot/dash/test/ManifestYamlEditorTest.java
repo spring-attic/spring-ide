@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockManifestEditor;
 

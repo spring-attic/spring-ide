@@ -23,11 +23,13 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.completions,
  org.springframework.ide.eclipse.editor.support.hover,
+ org.springframework.ide.eclipse.editor.support.reconcile,
  org.springframework.ide.eclipse.editor.support.util,
  org.springframework.ide.eclipse.editor.support.yaml,
  org.springframework.ide.eclipse.editor.support.yaml.ast,
  org.springframework.ide.eclipse.editor.support.yaml.completions,
  org.springframework.ide.eclipse.editor.support.yaml.hover,
  org.springframework.ide.eclipse.editor.support.yaml.path,
+ org.springframework.ide.eclipse.editor.support.yaml.reconcile,
  org.springframework.ide.eclipse.editor.support.yaml.schema,
  org.springframework.ide.eclipse.editor.support.yaml.structure

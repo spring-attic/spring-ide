@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Provider;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,7 +35,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.Prope
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;

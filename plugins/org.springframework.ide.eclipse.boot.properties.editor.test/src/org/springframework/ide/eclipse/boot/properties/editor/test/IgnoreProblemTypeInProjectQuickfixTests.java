@@ -16,23 +16,23 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getSeverity;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity.IGNORE;
+import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.IGNORE;
 
 import java.util.EnumSet;
 
 import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
 
 import junit.framework.TestCase;
 
 public class IgnoreProblemTypeInProjectQuickfixTests extends TestCase {
 
-	private static final EnumSet<ProblemType> UNKNOWN_PROPERTY_PROBLEMS = EnumSet.of(ProblemType.YAML_UNKNOWN_PROPERTY, ProblemType.PROP_UNKNOWN_PROPERTY);
+	private static final EnumSet<SpringPropertiesProblemType> UNKNOWN_PROPERTY_PROBLEMS = EnumSet.of(SpringPropertiesProblemType.YAML_UNKNOWN_PROPERTY, SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY);
 
 	public void testApply() throws Exception {
-		for (ProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
+		for (SpringPropertiesProblemType problemType : UNKNOWN_PROPERTY_PROBLEMS) {
 			//stuff we need:
 			MockPrefsStore prefs = spy(new MockPrefsStore());
 			IDocument document = mock(IDocument.class);

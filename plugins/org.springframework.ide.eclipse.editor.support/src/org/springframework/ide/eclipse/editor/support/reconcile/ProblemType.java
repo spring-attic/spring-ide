@@ -8,22 +8,20 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.preferences;
-
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 /**
+ * Besides the methods below, the only hard requirement for a 'problem type' is
+ * that it is a unique object that is not 'equals' to any other object.
+ * <p>
+ * It is probably nice if you implement a good toString however.
+ * <p>
+ * A good way to implement a discrete set of problemType objects is as an enum
+ * that implements this interace.
+ *
  * @author Kris De Volder
  */
-public class SpringYamlEditorPreferencesPage extends AbstractPropertiesEditorPreferencesPage {
-
-	protected SpringPropertiesProblemType[] getProblemTypes() {
-		return SpringPropertiesProblemType.FOR_YAML;
-	}
-
-	@Override
-	protected String getEnableProjectPreferencesKey() {
-		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
-	}
-
+public interface ProblemType {
+	ProblemSeverity getDefaultSeverity();
+	String toString();
 }

@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
+import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
+
+import javax.inject.Provider;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -28,11 +30,11 @@ import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
@@ -48,26 +50,6 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
-
-	public interface IProblemCollector {
-
-		void beginCollecting();
-		void endCollecting();
-		void accept(SpringPropertyProblem springPropertyProblem);
-
-		/**
-		 * Problem collector that simply ignores/discards anything passed to it.
-		 */
-		IProblemCollector NULL = new IProblemCollector() {
-			public void beginCollecting() {
-			}
-			public void endCollecting() {
-			}
-			public void accept(SpringPropertyProblem springPropertyProblem) {
-			}
-		};
-	}
-
 
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		this.fIndexProvider = provider;
@@ -135,7 +117,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	protected SpringPropertyProblem problemUnkownProperty(String fullName, IRegion trimmedRegion,
 			PropertyInfo similarEntry, String validPrefix) {
-		SpringPropertyProblem p = problem(ProblemType.PROP_UNKNOWN_PROPERTY,
+		SpringPropertyProblem p = problem(SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY,
 				"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
 				trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length());
 		p.setPropertyName(fullName);
@@ -186,7 +168,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 				}
 			}
 			if (errorRegion!=null) {
-				problems.accept(problem(ProblemType.PROP_VALUE_TYPE_MISMATCH,
+				problems.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}

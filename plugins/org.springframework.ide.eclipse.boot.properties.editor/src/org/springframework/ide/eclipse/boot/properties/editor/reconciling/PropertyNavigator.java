@@ -19,7 +19,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
@@ -27,6 +26,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 
 /**
  * Helper class for {@link SpringPropertiesReconcileEngine} and {@link SpringPropertiesCompletionEngine}.
@@ -81,7 +81,7 @@ public class PropertyNavigator {
 					if (typeUtil.isDotable(type)) {
 						return dotNavigate(offset, type);
 					} else {
-						problemCollector.accept(problem(ProblemType.PROP_INVALID_BEAN_NAVIGATION,
+						problemCollector.accept(problem(SpringPropertiesProblemType.PROP_INVALID_BEAN_NAVIGATION,
 								"Can't use '.' navigation for property '"+textBetween(region.getOffset(), offset)+"' of type "+type,
 								offset, getEnd(region)-offset));
 					}
@@ -89,12 +89,12 @@ public class PropertyNavigator {
 					if (isBracketable(type)) {
 						return bracketNavigate(offset, type);
 					} else {
-						problemCollector.accept(problem(ProblemType.PROP_INVALID_INDEXED_NAVIGATION,
+						problemCollector.accept(problem(SpringPropertiesProblemType.PROP_INVALID_INDEXED_NAVIGATION,
 								"Can't use '[..]' navigation for property '"+textBetween(region.getOffset(), offset)+"' of type "+type,
 								offset, getEnd(region)-offset));
 					}
 				} else {
-					problemCollector.accept(problem(ProblemType.PROP_EXPECTED_DOT_OR_LBRACK, "Expecting either a '.' or '['", offset, getEnd(region)-offset));
+					problemCollector.accept(problem(SpringPropertiesProblemType.PROP_EXPECTED_DOT_OR_LBRACK, "Expecting either a '.' or '['", offset, getEnd(region)-offset));
 				}
 			} else {
 				//end of nav chain
@@ -134,7 +134,7 @@ public class PropertyNavigator {
 		int lbrack = offset;
 		int rbrack = indexOf(']', lbrack);
 		if (rbrack<0) {
-			problemCollector.accept(problem(ProblemType.PROP_NO_MATCHING_RBRACK,
+			problemCollector.accept(problem(SpringPropertiesProblemType.PROP_NO_MATCHING_RBRACK,
 					"No matching ']'",
 					offset, 1));
 		} else {
@@ -143,7 +143,7 @@ public class PropertyNavigator {
 				try {
 					Integer.parseInt(indexStr);
 				} catch (Exception e) {
-					problemCollector.accept(problem(ProblemType.PROP_NON_INTEGER_IN_BRACKETS,
+					problemCollector.accept(problem(SpringPropertiesProblemType.PROP_NON_INTEGER_IN_BRACKETS,
 						"Expecting 'Integer' for '[...]' notation '"+textBetween(region.getOffset(), lbrack)+"'",
 						lbrack+1, rbrack-lbrack-1
 					));
@@ -181,7 +181,7 @@ public class PropertyNavigator {
 					try {
 						keyParser.parse(key);
 					} catch (Exception e) {
-						problemCollector.accept(problem(ProblemType.PROP_VALUE_TYPE_MISMATCH,
+						problemCollector.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
 								"Expecting "+typeUtil.niceTypeName(keyType),
 								keyStart, keyEnd-keyStart));
 					}
@@ -207,7 +207,7 @@ public class PropertyNavigator {
 					}
 				}
 				if (prop==null) {
-					problemCollector.accept(problem(ProblemType.PROP_INVALID_BEAN_PROPERTY,
+					problemCollector.accept(problem(SpringPropertiesProblemType.PROP_INVALID_BEAN_PROPERTY,
 							"Type '"+typeUtil.niceTypeName(type)+"' has no property '"+key+"'",
 							keyStart, keyEnd-keyStart));
 				} else {

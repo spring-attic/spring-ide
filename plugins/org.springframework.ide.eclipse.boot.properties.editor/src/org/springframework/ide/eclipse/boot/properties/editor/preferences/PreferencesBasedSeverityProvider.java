@@ -14,10 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SeverityProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 
 /**
  * Implementation of {@link SeverityProvider} that determines the severity of a problem
@@ -40,13 +42,13 @@ public class PreferencesBasedSeverityProvider implements SeverityProvider {
 	}
 
 	@Override
-	public ProblemSeverity getSeverity(SpringPropertyProblem problem) {
+	public ProblemSeverity getSeverity(ReconcileProblem problem) {
 		return getSeverity(problem.getType());
 	}
 
 	private synchronized ProblemSeverity getSeverity(ProblemType problemType) {
 		if (cache==null) {
-			cache = new HashMap<ProblemType, ProblemSeverity>();
+			cache = new HashMap<>();
 		}
 		ProblemSeverity existing = cache.get(problemType);
 		if (existing==null) {

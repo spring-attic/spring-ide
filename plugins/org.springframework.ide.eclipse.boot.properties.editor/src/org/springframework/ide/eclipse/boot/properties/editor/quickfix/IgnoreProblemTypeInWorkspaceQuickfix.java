@@ -18,8 +18,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemSeverity;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**
  * Quickfix proposal to change a particular problem type's severity to 'Ignore' in the
@@ -30,10 +30,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Proble
 @SuppressWarnings("restriction")
 public class IgnoreProblemTypeInWorkspaceQuickfix implements ICompletionProposal {
 
-	private ProblemType problemType;
+	private SpringPropertiesProblemType problemType;
 	private IPreferenceStore preferences;
 
-	public IgnoreProblemTypeInWorkspaceQuickfix(IPreferenceStore preferences, ProblemType type) {
+	public IgnoreProblemTypeInWorkspaceQuickfix(IPreferenceStore preferences, SpringPropertiesProblemType type) {
 		this.preferences = preferences;
 		this.problemType = type;
 	}
