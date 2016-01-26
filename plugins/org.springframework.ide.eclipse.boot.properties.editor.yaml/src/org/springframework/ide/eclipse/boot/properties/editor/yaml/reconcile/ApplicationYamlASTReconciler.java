@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.TypeBasedYamlASTReconciler;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.SchemaBasedYamlASTReconciler;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlASTReconciler;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
@@ -172,7 +172,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		if (typeUtil.isAtomic(type)) {
 			expectTypeFoundMapping(type, mapping);
 		} else if (TypeUtil.isMap(type) || TypeUtil.isSequencable(type)) {
-			Type keyType = TypeUtil.getKeyType(type);
+			Type keyType = typeUtil.getKeyType(type);
 			Type valueType = TypeUtil.getDomainType(type);
 			if (keyType!=null) {
 				for (NodeTuple entry : mapping.getValue()) {

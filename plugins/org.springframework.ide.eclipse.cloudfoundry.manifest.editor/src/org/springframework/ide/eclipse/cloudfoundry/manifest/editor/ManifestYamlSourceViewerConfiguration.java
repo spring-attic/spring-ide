@@ -10,18 +10,22 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
-import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileStrategy;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.SchemaBasedYamlASTReconciler;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlASTReconciler;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaProblems;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
@@ -56,30 +60,24 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	}
 
 	@Override
-	protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
-//		IReconcilingStrategy strategy = null;
-//		if (!DISABLE_SPELL_CHECKER && EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
-//			IReconcilingStrategy spellcheck = new SpellingReconcileStrategy(sourceViewer, EditorsUI.getSpellingService()) {
-//				@Override
-//				protected IContentType getContentType() {
-//					return SpringPropertiesFileEditor.CONTENT_TYPE;
-//				}
-//			};
-//			strategy = ReconcilingUtil.compose(strategy, spellcheck);
-//		}
-//		try {
-//			IReconcileEngine reconcileEngine = createEngine();
-//			IReconcilingStrategy propertyChecker = new SpringPropertiesReconcileStrategy(sourceViewer, reconcileEngine, documentContextFinder, reconcileTigger);
-//			IReconcilingStrategy strategy = ReconcilingUtil.compose(strategy, propertyChecker);
-//		} catch (Exception e) {
-//			SpringPropertiesEditorPlugin.log(e);
-//		}
-//		if (strategy!=null) {
-//			ForceableReconciler reconciler = new ForceableReconciler(strategy);
-//			reconciler.setDelay(500);
-//			return reconciler;
-//		}
-		return null;
+	protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+		IReconcileEngine engine = createReconcileEngine(viewer);
+		return new ReconcileStrategy(viewer, engine);
+	}
+
+	private IReconcileEngine createReconcileEngine(ISourceViewer viewer) {
+		return new YamlReconcileEngine(getAstProvider()) {
+
+			@Override
+			protected ReconcileProblem syntaxError(String msg, int offset, int length) {
+				return YamlSchemaProblems.syntaxProblem(msg, offset, length);
+			}
+
+			@Override
+			protected YamlASTReconciler getASTReconciler(IDocument doc, IProblemCollector problems) {
+				return new SchemaBasedYamlASTReconciler(problems, schema);
+			}
+		};
 	}
 
 }

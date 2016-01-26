@@ -88,6 +88,16 @@ public class YTypeFactory {
 		public String niceTypeName(YType type) {
 			return type.toString();
 		}
+
+		@Override
+		public YType getKeyType(YType type) {
+			return ((AbstractType)type).getKeyType();
+		}
+
+		@Override
+		public boolean isBean(YType type) {
+			return ((AbstractType)type).isBean();
+		}
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -105,6 +115,14 @@ public class YTypeFactory {
 
 		public boolean isSequenceable() {
 			return false;
+		}
+
+		public boolean isBean() {
+			return false;
+		}
+
+		public YType getKeyType() {
+			return null;
 		}
 
 		public YType getDomainType() {
@@ -180,6 +198,11 @@ public class YTypeFactory {
 		}
 
 		@Override
+		public YType getKeyType() {
+			return key;
+		}
+
+		@Override
 		public YType getDomainType() {
 			return val;
 		}
@@ -222,6 +245,10 @@ public class YTypeFactory {
 		@Override
 		public String toString() {
 			return name;
+		}
+
+		public boolean isBean() {
+			return true;
 		}
 	}
 

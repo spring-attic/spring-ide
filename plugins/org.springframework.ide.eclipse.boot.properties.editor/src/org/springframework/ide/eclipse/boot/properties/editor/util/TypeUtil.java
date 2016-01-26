@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty
  *
  * @author Kris De Volder
  */
-public class TypeUtil implements YTypeUtil {
+public class TypeUtil {
 
 	private static abstract class RadixableParser implements ValueParser {
 
@@ -459,7 +459,7 @@ public class TypeUtil implements YTypeUtil {
 		return null;
 	}
 
-	public static Type getKeyType(Type mapOrArrayType) {
+	public Type getKeyType(Type mapOrArrayType) {
 		if (isSequencable(mapOrArrayType)) {
 			return INTEGER_TYPE;
 		} else {
@@ -678,54 +678,59 @@ public class TypeUtil implements YTypeUtil {
 	// Paramterizations like that tend to propagate fire and wide in the code and make for complicated
 	// signatures. For now using these bredging methods is simpler if perhaps a bit more error prone.
 
-	@Override
-	public boolean isAtomic(YType type) {
-		return isAtomic((Type)type);
-	}
-
-	@Override
-	public boolean isMap(YType type) {
-		return isMap((Type)type);
-	}
-
-	@Override
-	public boolean isSequencable(YType type) {
-		return isSequencable((Type)type);
-	}
-
-	@Override
-	public YType getDomainType(YType type) {
-		return getDomainType((Type)type);
-	}
-
-	@Override
-	public String[] getHintValues(YType type) {
-		return getAllowedValues((Type) type, EnumCaseMode.ALIASED);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<YTypedProperty> getProperties(YType type) {
-		//Dirty hack, passing this through a raw type to bypass the java type system
-		//complaining the List<TypedProperty> is not compatible with List<YTypedProperty>
-		//This dirty and 'illegal' conversion is okay because the list is only used for reading.
-		@SuppressWarnings("rawtypes")
-		List props = getProperties((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
-		return Collections.unmodifiableList(props);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Map<String, YTypedProperty> getPropertiesMap(YType type) {
-		//Dirty hack, see comment in getProperties(YType)
-		@SuppressWarnings("rawtypes")
-		Map map = getPropertiesMap((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
-		return Collections.unmodifiableMap(map);
-	}
-
-	@Override
-	public String niceTypeName(YType type) {
-		return niceTypeName((Type)type);
-	}
+//	@Override
+//	public boolean isAtomic(YType type) {
+//		return isAtomic((Type)type);
+//	}
+//
+//	@Override
+//	public boolean isMap(YType type) {
+//		return isMap((Type)type);
+//	}
+//
+//	@Override
+//	public boolean isSequencable(YType type) {
+//		return isSequencable((Type)type);
+//	}
+//
+//	@Override
+//	public YType getDomainType(YType type) {
+//		return getDomainType((Type)type);
+//	}
+//
+//	@Override
+//	public String[] getHintValues(YType type) {
+//		return getAllowedValues((Type) type, EnumCaseMode.ALIASED);
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	@Override
+//	public List<YTypedProperty> getProperties(YType type) {
+//		//Dirty hack, passing this through a raw type to bypass the java type system
+//		//complaining the List<TypedProperty> is not compatible with List<YTypedProperty>
+//		//This dirty and 'illegal' conversion is okay because the list is only used for reading.
+//		@SuppressWarnings("rawtypes")
+//		List props = getProperties((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+//		return Collections.unmodifiableList(props);
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	@Override
+//	public Map<String, YTypedProperty> getPropertiesMap(YType type) {
+//		//Dirty hack, see comment in getProperties(YType)
+//		@SuppressWarnings("rawtypes")
+//		Map map = getPropertiesMap((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+//		return Collections.unmodifiableMap(map);
+//	}
+//
+//	@Override
+//	public String niceTypeName(YType type) {
+//		return niceTypeName((Type)type);
+//	}
+//
+//	@Override
+//	public YType getKeyType(YType type) {
+//		return getKeyType((Type)type);
+//	}
 
 }

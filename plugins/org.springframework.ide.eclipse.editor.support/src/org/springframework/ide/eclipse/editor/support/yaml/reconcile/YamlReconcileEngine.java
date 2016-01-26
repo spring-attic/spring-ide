@@ -29,7 +29,7 @@ public abstract class YamlReconcileEngine implements IReconcileEngine {
 
 	protected final YamlASTProvider parser;
 
-	protected YamlReconcileEngine(YamlASTProvider parser) {
+	public YamlReconcileEngine(YamlASTProvider parser) {
 		this.parser = parser;
 	}
 

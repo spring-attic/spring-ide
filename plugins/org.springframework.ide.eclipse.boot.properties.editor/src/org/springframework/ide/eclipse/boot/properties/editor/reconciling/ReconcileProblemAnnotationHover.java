@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import java.util.Iterator;
 
@@ -22,16 +22,17 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyProblemHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 
-public class SpringPropertiesAnnotationHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
+public class ReconcileProblemAnnotationHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 
 	private ISourceViewer sourceViewer;
 	private QuickfixContext context;
 
-	public SpringPropertiesAnnotationHover(ISourceViewer sourceViewer, QuickfixContext context) {
+	public ReconcileProblemAnnotationHover(ISourceViewer sourceViewer, QuickfixContext context) {
 		this.sourceViewer = sourceViewer;
 		this.context = context;
 	}

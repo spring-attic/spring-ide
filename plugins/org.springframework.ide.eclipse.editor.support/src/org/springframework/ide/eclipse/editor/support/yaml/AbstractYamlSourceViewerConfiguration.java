@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.IDocument;
@@ -18,6 +21,10 @@ import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
@@ -36,6 +43,25 @@ import org.yaml.snakeyaml.Yaml;
  * @author Kris De Volder
  */
 public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration {
+
+	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
+	static {
+		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");
+		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.error");
+	}
+	private static final Set<String> ANNOTIONS_SHOWN_IN_OVERVIEW_BAR = ANNOTIONS_SHOWN_IN_TEXT;
+
+	//TODO: the ANNOTIONS_SHOWN_IN_TEXT and ANNOTIONS_SHOWN_IN_OVERVIEW_BAR should be replaced with
+	// properly using preferences. An example of how to set this up can be found in the code
+	// of the Java properties file editor. Roughly these things need to happen:
+	//   1) use methods like 'isShownIntext' and 'isShownInOverviewRuler' which are defined in
+	//     our super class.
+	//   2) initialize the super class with a preference store (simialr to how java properties file does it)
+	//   3) To be able to do 2) it is necessary to add a constructor to YEditSourceViewerConfiguration which
+	//      accepts preference store and passes it to its super class. So this requires a patch to
+	//      YEdit source code.
+
+
 
 	private final String DIALOG_SETTINGS_KEY = this.getClass().getName();
 	private final YamlASTProvider astProvider = new YamlASTProvider(new Yaml());
@@ -131,11 +157,32 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		return fReconciler;
 	}
 
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover() {
+			@Override
+			protected boolean isIncluded(Annotation annotation) {
+				return ANNOTIONS_SHOWN_IN_OVERVIEW_BAR.contains(annotation.getType());
+			}
+		};
+	}
+
 	protected abstract ITextHover getTextAnnotationHover(ISourceViewer sourceViewer);
 	protected abstract YamlStructureProvider getStructureProvider();
 	protected abstract YamlAssistContextProvider getAssistContextProvider();
 
-	protected abstract ForceableReconciler createReconciler(ISourceViewer sourceViewer);
+	protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer sourceViewer) {
+		return null;
+	}
 
-
+	protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
+		//TODO: aplication.properties|yaml editors are overriding this. That should not be necessary.
+		IReconcilingStrategy strategy = createReconcilerStrategy(sourceViewer);
+		if (strategy!=null) {
+			ForceableReconciler reconciler = new ForceableReconciler(strategy);
+			reconciler.setDelay(500);
+			return reconciler;
+		}
+		return null;
+	}
 }

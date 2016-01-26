@@ -174,7 +174,7 @@ public class PropertyNavigator {
 				keyEnd = nextNavOp("[", offset+1);
 			}
 			String key = textBetween(keyStart, keyEnd);
-			Type keyType = TypeUtil.getKeyType(type);
+			Type keyType = typeUtil.getKeyType(type);
 			if (keyType!=null) {
 				ValueParser keyParser = typeUtil.getValueParser(keyType);
 				if (keyParser!=null) {
