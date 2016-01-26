@@ -21,7 +21,7 @@ public abstract class ApplicationRequest<T> extends ClientRequest<T> {
 
 	static class ApplicationRequestErrorHandler extends RequestErrorHandler {
 		@Override
-		public boolean handleError(Throwable e) {
+		public boolean throwError(Throwable e) {
 			// App doesn't exist anymore.
 			return e instanceof Exception && !CloudErrors.isNotFoundException((Exception) e);
 		}

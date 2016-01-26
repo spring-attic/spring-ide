@@ -15,10 +15,10 @@ public class RequestErrorHandler {
 	/**
 	 *
 	 * @param e
-	 * @return true if request error should be treated as an error. False error
+	 * @return true if request error should be treated as an error and thrown. False error
 	 *         should be ignored.
 	 */
-	public boolean handleError(Throwable e) {
+	public boolean throwError(Throwable e) {
 		return true;
 	}
 
