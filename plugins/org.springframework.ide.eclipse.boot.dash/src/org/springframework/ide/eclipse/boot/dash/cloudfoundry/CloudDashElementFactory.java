@@ -25,7 +25,7 @@ public class CloudDashElementFactory {
 		this.model = model;
 	}
 
-	public CloudAppDashElement create(String appName) {
+	public CloudAppDashElement createApp(String appName) {
 		return new CloudAppDashElement(model, appName, modelStore);
 	}
 }

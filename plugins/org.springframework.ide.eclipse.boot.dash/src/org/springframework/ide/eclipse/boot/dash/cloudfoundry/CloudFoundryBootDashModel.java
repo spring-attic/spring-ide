@@ -360,7 +360,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			// Safe iterate via getValues(); a copy, instead of getValue()
 			ImmutableSet<BootDashElement> existing = getElements().getValues();
 
-			addedElement = elementFactory.create(appInstances.getApplication().getName());
+			addedElement = elementFactory.createApp(appInstances.getApplication().getName());
 
 			updated.add(addedElement);
 
@@ -431,7 +431,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				// should be updated first before creating elements
 				// as elements are handles to state in the cache
 				for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
-					BootDashElement addedElement = elementFactory.create(entry.getKey().getApplication().getName());
+					BootDashElement addedElement = elementFactory.createApp(entry.getKey().getApplication().getName());
 					updated.put(addedElement.getName(), addedElement);
 				}
 
