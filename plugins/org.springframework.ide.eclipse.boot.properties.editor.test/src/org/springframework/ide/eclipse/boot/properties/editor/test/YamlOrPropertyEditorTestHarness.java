@@ -14,7 +14,6 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.w
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -38,7 +37,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyInde
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
-import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
@@ -73,26 +71,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			return new DefaultSeverityProvider();
 		}
 	};
-
-	public class MockProblemCollector implements IProblemCollector {
-
-		private List<ReconcileProblem> problems = null;
-
-		public List<ReconcileProblem> getAllProblems() {
-			return problems;
-		}
-
-		public void beginCollecting() {
-			problems = new ArrayList<>();
-		}
-
-		public void endCollecting() {
-		}
-
-		public void accept(ReconcileProblem e) {
-			problems.add(e);
-		}
-	}
 
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
@@ -572,7 +550,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return project;
 	}
 
-	public List<ReconcileProblem> reconcile(MockPropertiesEditor editor) {
+	public List<ReconcileProblem> reconcile(MockEditor editor) {
 		IReconcileEngine reconciler = createReconcileEngine();
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
@@ -594,7 +572,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * @param expectedProblems
 	 * @throws BadLocationException
 	 */
-	public void assertProblems(MockPropertiesEditor editor, String... expectedProblems)
+	public void assertProblems(MockEditor editor, String... expectedProblems)
 			throws BadLocationException {
 		List<ReconcileProblem> actualProblems = reconcile(editor);
 		String bad = null;
@@ -612,7 +590,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			fail(bad+problemSumary(editor, actualProblems));
 		}
 	}
-	private String problemSumary(MockPropertiesEditor editor, List<ReconcileProblem> actualProblems)
+	private String problemSumary(MockEditor editor, List<ReconcileProblem> actualProblems)
 			throws BadLocationException {
 				StringBuilder buf = new StringBuilder();
 				for (ReconcileProblem p : actualProblems) {
@@ -625,7 +603,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 				return buf.toString();
 			}
 
-	private boolean matchProblem(MockPropertiesEditor editor, ReconcileProblem problem, String expect) {
+	private boolean matchProblem(MockEditor editor, ReconcileProblem problem, String expect) {
 		String[] parts = expect.split("\\|");
 		assertEquals(2, parts.length);
 		String badSnippet = parts[0];

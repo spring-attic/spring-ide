@@ -15,8 +15,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
@@ -30,7 +33,7 @@ import org.yaml.snakeyaml.nodes.Node;
 public class MockYamlEditor extends MockEditor {
 
 	private YamlDocument ymlDoc;
-	private YamlASTProvider astProvider;
+	protected final YamlASTProvider astProvider;
 	private HoverInfoProvider hoverProvider;
 
 	public MockYamlEditor(String string, YamlStructureProvider structureProvider, YamlASTProvider astProvider, HoverInfoProvider hoverProvider) {
@@ -126,4 +129,5 @@ public class MockYamlEditor extends MockEditor {
 		assertNotNull("No hover info for '"+ hoverOver +"'", info);
 		assertContains(expect, info.getHtml());
 	}
+
 }

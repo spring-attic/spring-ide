@@ -187,9 +187,77 @@ public class ManifestYamlEditorTest {
 		editor.assertHoverContains("buildpack", "use the <code>buildpack</code> attribute to specify its URL or name");
 	}
 
+	@Test
+	public void reconcileMisSpelledPropertyNames() throws Exception {
+		MockManifestEditor editor;
+
+		editor = new MockManifestEditor(
+				"memory: 1G\n" +
+				"aplications:\n" +
+				"  - buildpack: zbuildpack\n" +
+				"    domain: zdomain\n" +
+				"    name: foo"
+		);
+		editor.assertProblems("aplications|Unknown property");
+
+		//mispelled or not allowed at toplevel
+		editor = new MockManifestEditor(
+				"name: foo\n" +
+				"buildpeck: yahah\n" +
+				"memory: 1G\n" +
+				"memori: 1G\n"
+		);
+		editor.assertProblems(
+				"name|Unknown property",
+				"buildpeck|Unknown property",
+				"memori|Unknown property"
+		);
+
+		//mispelled or not allowed as nested
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: fine\n" +
+				"  buildpeck: yahah\n" +
+				"  memory: 1G\n" +
+				"  memori: 1G\n" +
+				"  applications: bad\n"
+		);
+		editor.assertProblems(
+				"buildpeck|Unknown property",
+				"memori|Unknown property",
+				"applications|Unknown property"
+		);
+	}
+
+	@Test
+	public void reconcileStructuralProblems() throws Exception {
+		MockManifestEditor editor;
+
+		//forgot the 'applications:' heading
+		editor = new MockManifestEditor(
+				"- name: foo"
+		);
+		editor.assertProblems(
+				"- name: foo|Expecting a 'Map' but found a 'Sequence'"
+		);
+
+		//forgot to make the '-' after applications
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"  name: foo"
+		);
+		editor.assertProblems(
+				"name: foo|Expecting a 'Sequence' but found a 'Map'"
+		);
+	}
+
+	//TODO: checking for certain value types. E.g 'integer' and 'Memory'
+	// But we haven't implemented that yet.
+
+	//////////////////////////////////////////////////////////////////////////////
+
 	private void assertCompletions(String textBefore, String... textAfter) throws Exception {
 		MockManifestEditor editor = new MockManifestEditor(textBefore);
 		editor.assertCompletions(textAfter);
 	}
-
 }
