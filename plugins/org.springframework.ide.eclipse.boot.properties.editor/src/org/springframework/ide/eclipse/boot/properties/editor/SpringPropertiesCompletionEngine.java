@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 
@@ -340,13 +341,13 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private int findValueStart(IDocument doc, int pos) {
 		try {
-			pos = skipWhiteSpace(doc, pos);
+			pos = DocumentUtil.skipWhiteSpace(doc, pos);
 			if (pos>=0) {
 				char assign = doc.getChar(pos);
 				if (!isAssign(assign)) {
 					return pos; //For the case where key and value are separated by whitespace instead of assignment
 				}
-				pos = skipWhiteSpace(doc, pos+1);
+				pos = DocumentUtil.skipWhiteSpace(doc, pos+1);
 				if (pos>=0) {
 					return pos;
 				}
@@ -500,21 +501,6 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	public Provider<FuzzyMap<PropertyInfo>> getIndexProvider() {
 		return indexProvider;
-	}
-
-	public static int skipWhiteSpace(IDocument doc, int pos) {
-		try {
-			int end = doc.getLength();
-			while (pos<end&&Character.isWhitespace(doc.getChar(pos))) {
-				pos++;
-			}
-			if (pos<end) {
-				return pos;
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
 	}
 
 	public void setDocumentContextFinder(DocumentContextFinder it) {

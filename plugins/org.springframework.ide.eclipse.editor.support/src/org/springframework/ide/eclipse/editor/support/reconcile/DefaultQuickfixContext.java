@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.quickfix;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -18,10 +18,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
-import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 /**
  * Default implementation of {@link QuickfixContext} that derives context information for
@@ -31,11 +31,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
  */
 public class DefaultQuickfixContext implements QuickfixContext {
 
+	private final String PLUGIN_ID;
 	private IPreferenceStore workspacePreferences;
 	private ISourceViewer sourceViever;
 	private UserInteractions ui;
 
-	public DefaultQuickfixContext(IPreferenceStore workspacePreferences, ISourceViewer sourceViewer, UserInteractions ui) {
+	public DefaultQuickfixContext(String hostPluginId, IPreferenceStore workspacePreferences, ISourceViewer sourceViewer, UserInteractions ui) {
+		this.PLUGIN_ID = hostPluginId;
 		this.workspacePreferences = workspacePreferences;
 		this.sourceViever = sourceViewer;
 		this.ui = ui;
@@ -61,7 +63,7 @@ public class DefaultQuickfixContext implements QuickfixContext {
 				return JavaCore.create(p);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			EditorSupportActivator.log(e);
 		}
 		return null;
 	}
@@ -80,7 +82,7 @@ public class DefaultQuickfixContext implements QuickfixContext {
 	public IPreferenceStore getProjectPreferences() {
 		IProject project = getProject();
 		if (project!=null) {
-			return new ScopedPreferenceStore(new ProjectScope(project), SpringPropertiesEditorPlugin.PLUGIN_ID);
+			return new ScopedPreferenceStore(new ProjectScope(project), PLUGIN_ID);
 		}
 		return null;
 	}

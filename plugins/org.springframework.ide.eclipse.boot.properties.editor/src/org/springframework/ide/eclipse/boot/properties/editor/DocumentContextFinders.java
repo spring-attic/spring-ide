@@ -18,8 +18,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferencesBasedSeverityProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 
 /**
  * @author Kris De Volder

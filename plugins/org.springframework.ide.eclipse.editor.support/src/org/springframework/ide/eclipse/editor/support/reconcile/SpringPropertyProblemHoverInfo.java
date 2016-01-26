@@ -8,17 +8,16 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.editor.support.reconcile;
 
 import java.util.List;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.gradle.jarjar.com.google.common.collect.ImmutableList;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * @author Kris De Volder
@@ -44,8 +43,8 @@ public class SpringPropertyProblemHoverInfo extends HoverInfo {
 	}
 
 	private List<ICompletionProposal> getQuickfixes(ReconcileProblem problem) {
-		if (problem instanceof SpringPropertyProblem) {
-			return ((SpringPropertyProblem)problem).getQuickfixes(context);
+		if (problem instanceof FixableProblem) {
+			return ((FixableProblem)problem).getQuickfixes(context);
 		}
 		return ImmutableList.of();
 	}

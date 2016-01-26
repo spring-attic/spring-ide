@@ -40,18 +40,18 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ReconcileProblemAnnotationHover;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
 import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
+import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotationHover;
+import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 
 @SuppressWarnings("restriction")
@@ -134,7 +134,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	}
 
 	protected QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
-		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer,
+		return new DefaultQuickfixContext(SpringPropertiesEditorPlugin.PLUGIN_ID, getPreferencesStore(), sourceViewer,
 				new DefaultUserInteractions(getShell()));
 	}
 

@@ -25,14 +25,15 @@ import org.springframework.ide.eclipse.boot.properties.editor.preferences.Editor
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.FixableProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 /**
  * @author Kris De Volder
  */
-public class SpringPropertyProblem implements ReconcileProblem {
+public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	private static final EnumSet<SpringPropertiesProblemType> FIXABLE_UNKNOWN_PROPERTY_PROBLEM_TYPES = EnumSet.of(
 			PROP_UNKNOWN_PROPERTY,

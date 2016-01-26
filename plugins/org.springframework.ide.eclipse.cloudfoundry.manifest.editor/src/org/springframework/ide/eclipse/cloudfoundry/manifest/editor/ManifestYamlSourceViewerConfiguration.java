@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
+import javax.inject.Provider;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileStrategy;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
@@ -30,7 +33,8 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	private ManifestYmlSchema schema = new ManifestYmlSchema();
 	private YamlAssistContextProvider assistContextProvider = new SchemaBasedYamlAssistContextProvider(schema);
 
-	public ManifestYamlSourceViewerConfiguration() {
+	public ManifestYamlSourceViewerConfiguration(Provider<Shell> shellProvider) {
+		super(shellProvider);
 	}
 
 	@Override
@@ -49,11 +53,6 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	}
 
 	@Override
-	protected ITextHover getTextAnnotationHover(ISourceViewer sourceViewer) {
-		return null;
-	}
-
-	@Override
 	protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
 		IReconcileEngine engine = createReconcileEngine();
 		return new ReconcileStrategy(viewer, engine);
@@ -63,4 +62,13 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 		return new YamlSchemaBasedReconcileEngine(getAstProvider(), schema);
 	}
 
+	@Override
+	protected IPreferenceStore getPreferencesStore() {
+		return ManifestEditorActivator.getDefault().getPreferenceStore();
+	}
+
+	@Override
+	protected String getPluginId() {
+		return ManifestEditorActivator.PLUGIN_ID;
+	}
 }

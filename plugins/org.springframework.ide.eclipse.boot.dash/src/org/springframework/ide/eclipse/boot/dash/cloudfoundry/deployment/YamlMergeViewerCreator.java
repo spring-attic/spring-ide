@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
+import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 
 /**
  * Create compare and merge viewer for YAML content
@@ -35,7 +36,7 @@ public class YamlMergeViewerCreator implements IViewerCreator {
 			@Override
 			protected SourceViewer createSourceViewer(Composite parent, int textOrientation) {
 				SourceViewer viewer = new SourceViewer(parent, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);;
-				viewer.configure(new ManifestYamlSourceViewerConfiguration());
+				viewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(parent)));
 				return viewer;
 			}
 

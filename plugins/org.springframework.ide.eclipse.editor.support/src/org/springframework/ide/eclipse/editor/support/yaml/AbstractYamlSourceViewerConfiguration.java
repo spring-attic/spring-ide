@@ -13,8 +13,11 @@ package org.springframework.ide.eclipse.editor.support.yaml;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Provider;
+
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
@@ -27,6 +30,7 @@ import org.eclipse.jface.text.source.DefaultAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
@@ -34,8 +38,12 @@ import org.springframework.ide.eclipse.editor.support.completions.ICompletionEng
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
+import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotationHover;
+import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 
@@ -63,10 +71,15 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 
 
 
+	private Provider<Shell> shellProvider;
 	private final String DIALOG_SETTINGS_KEY = this.getClass().getName();
 	private final YamlASTProvider astProvider = new YamlASTProvider(new Yaml());
 	private YamlCompletionEngine completionEngine;
 	protected ForceableReconciler fReconciler;
+
+	public AbstractYamlSourceViewerConfiguration(Provider<Shell> shellProvider) {
+		this.shellProvider = shellProvider;
+	}
 
 	protected final IDialogSettings getDialogSettings() {
 		IDialogSettings dialogSettings = getPluginDialogSettings();
@@ -167,7 +180,20 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		};
 	}
 
-	protected abstract ITextHover getTextAnnotationHover(ISourceViewer sourceViewer);
+	protected ITextHover getTextAnnotationHover(ISourceViewer sourceViewer) {
+		return new ReconcileProblemAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
+	}
+
+	protected Shell getShell() {
+		return shellProvider.get();
+	}
+
+	protected final QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
+		return new DefaultQuickfixContext(getPluginId(), getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
+	}
+
+	protected abstract String getPluginId();
+	protected abstract IPreferenceStore getPreferencesStore();
 	protected abstract YamlStructureProvider getStructureProvider();
 	protected abstract YamlAssistContextProvider getAssistContextProvider();
 

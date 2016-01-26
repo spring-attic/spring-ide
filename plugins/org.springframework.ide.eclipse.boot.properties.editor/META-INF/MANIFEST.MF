@@ -41,6 +41,5 @@ Export-Package: org.springframework.configurationmetadata,
  org.springframework.ide.eclipse.boot.properties.editor.preferences,
  org.springframework.ide.eclipse.boot.properties.editor.quickfix,
  org.springframework.ide.eclipse.boot.properties.editor.reconciling,
- org.springframework.ide.eclipse.boot.properties.editor.ui,
  org.springframework.ide.eclipse.boot.properties.editor.util
 Bundle-Vendor: %providerName

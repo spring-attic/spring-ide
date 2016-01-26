@@ -40,12 +40,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ReconcileProblemAnnotationHover;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
-import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
@@ -53,6 +48,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.completions.A
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.ApplicationYamlReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
@@ -66,11 +64,9 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		System.out.println(string);
 	}
 
-	private ITextEditor editor;
 
 	public ApplicationYamlSourceViewerConfiguration(ITextEditor editor) {
-		super();
-		this.editor = editor;
+		super(ShellProviders.from(editor));
 	}
 
 	@Override
@@ -117,14 +113,6 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 
 	final PropertyCompletionFactory completionFactory = new PropertyCompletionFactory(documentContextFinder);
 
-	public QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
-		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
-	}
-
-	private Shell getShell() {
-		return editor.getSite().getShell();
-	}
-
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		QuickAssistAssistant assistant= new QuickAssistAssistant();
@@ -134,8 +122,14 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 		return assistant;
 	}
 
+	@Override
 	protected IPreferenceStore getPreferencesStore() {
 		return SpringPropertiesEditorPlugin.getDefault().getPreferenceStore();
+	}
+
+	@Override
+	protected String getPluginId() {
+		return SpringPropertiesEditorPlugin.PLUGIN_ID;
 	}
 
 	private IInformationControlCreator getQuickAssistAssistantInformationControlCreator() {
@@ -169,11 +163,6 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	@Override
 	protected IDialogSettings getPluginDialogSettings() {
 		return YamlEditorPlugin.getDefault().getDialogSettings();
-	}
-
-	@Override
-	protected ITextHover getTextAnnotationHover(ISourceViewer sourceViewer) {
-		return new ReconcileProblemAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
 	}
 
 	@Override

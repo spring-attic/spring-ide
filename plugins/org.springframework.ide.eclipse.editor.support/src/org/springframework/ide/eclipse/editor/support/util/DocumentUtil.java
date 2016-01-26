@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.util;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -20,9 +20,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 
 public class DocumentUtil {
 
@@ -61,19 +59,19 @@ public class DocumentUtil {
 				}
 			}
 		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
+			EditorSupportActivator.log(e);
 		}
 		return null;
 	}
 
 	public static int firstNonWhitespaceCharOfRegion(IDocument doc, IRegion region) {
 		try {
-			int pos = SpringPropertiesCompletionEngine.skipWhiteSpace(doc, region.getOffset());
+			int pos = skipWhiteSpace(doc, region.getOffset());
 			if (pos<region.getOffset()+region.getLength()) {
 				return pos;
 			}
 		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
+			EditorSupportActivator.log(e);
 		}
 		return -1;
 	}
@@ -91,7 +89,22 @@ public class DocumentUtil {
 				return pos;
 			}
 		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
+			EditorSupportActivator.log(e);
+		}
+		return -1;
+	}
+
+	public static int skipWhiteSpace(IDocument doc, int pos) {
+		try {
+			int end = doc.getLength();
+			while (pos<end&&Character.isWhitespace(doc.getChar(pos))) {
+				pos++;
+			}
+			if (pos<end) {
+				return pos;
+			}
+		} catch (Exception e) {
+			EditorSupportActivator.log(e);
 		}
 		return -1;
 	}

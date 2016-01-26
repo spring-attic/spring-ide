@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.ui;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.jface.dialogs.MessageDialog;

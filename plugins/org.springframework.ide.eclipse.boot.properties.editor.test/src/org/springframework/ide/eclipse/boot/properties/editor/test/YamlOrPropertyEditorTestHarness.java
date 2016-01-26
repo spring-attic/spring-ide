@@ -34,7 +34,6 @@ import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
@@ -590,18 +589,17 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			fail(bad+problemSumary(editor, actualProblems));
 		}
 	}
-	private String problemSumary(MockEditor editor, List<ReconcileProblem> actualProblems)
-			throws BadLocationException {
-				StringBuilder buf = new StringBuilder();
-				for (ReconcileProblem p : actualProblems) {
-					buf.append("\n----------------------\n");
+	private String problemSumary(MockEditor editor, List<ReconcileProblem> actualProblems) throws BadLocationException {
+		StringBuilder buf = new StringBuilder();
+		for (ReconcileProblem p : actualProblems) {
+			buf.append("\n----------------------\n");
 
-					String snippet = editor.getText(p.getOffset(), p.getLength());
-					buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
-					buf.append("   "+p.getMessage());
-				}
-				return buf.toString();
-			}
+			String snippet = editor.getText(p.getOffset(), p.getLength());
+			buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
+			buf.append("   "+p.getMessage());
+		}
+		return buf.toString();
+	}
 
 	private boolean matchProblem(MockEditor editor, ReconcileProblem problem, String expect) {
 		String[] parts = expect.split("\\|");

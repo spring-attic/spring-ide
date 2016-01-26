@@ -8,12 +8,12 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.quickfix;
+package org.springframework.ide.eclipse.editor.support.yaml.reconcile;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 
 /**
  * Provides access to additional context info and objects that quickfixes might
