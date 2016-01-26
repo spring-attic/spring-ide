@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 
 public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 
@@ -87,6 +88,14 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 				}
 				break;
 			case sequence:
+				SequenceNode seq = (SequenceNode) node;
+				if (typeUtil.isSequencable(type)) {
+					for (Node el : seq.getValue()) {
+						reconcile(el, typeUtil.getDomainType(type));
+					}
+				} else {
+					expectTypeButFoundSequence(type, node);
+				}
 				break;
 			case scalar:
 				break;
@@ -117,6 +126,10 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 		default:
 			throw new IllegalStateException("Missing switch case");
 		}
+	}
+
+	private void expectTypeButFoundSequence(YType type, Node node) {
+		problem(node, "Expecting a '"+describe(type)+"' but found a 'Sequence'");
 	}
 
 	private void expectTypeButFoundMap(YType type, Node node) {

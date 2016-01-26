@@ -12,9 +12,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil.merge;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -26,9 +23,6 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.DefaultAnnotationHover;
-import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
