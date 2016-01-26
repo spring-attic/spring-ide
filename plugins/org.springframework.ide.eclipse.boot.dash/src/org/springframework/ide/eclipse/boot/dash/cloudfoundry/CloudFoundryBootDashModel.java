@@ -52,6 +52,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
@@ -743,7 +744,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			String defaultManifest = new Yaml(options).dump(yaml);
 
 			props = ui.promptApplicationDeploymentProperties(getRunTarget().getDomains(monitor), project,
-					element == null ? null : element.getDeploymentManifestFile(), defaultManifest, false, false);
+					element == null ? DeploymentPropertiesDialog.findManifestYamlFile(project)
+							: element.getDeploymentManifestFile(),
+					defaultManifest, false, false);
 		}
 		return props;
 	}
