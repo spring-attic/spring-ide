@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -88,8 +88,8 @@ public class AddElementOperation extends CloudApplicationOperation {
 			if (localElement != null) {
 				copyTags(localElement, bde);
 			}
-			if (bde instanceof CloudDashElement) {
-				CloudDashElement cde = (CloudDashElement) bde;
+			if (bde instanceof CloudAppDashElement) {
+				CloudAppDashElement cde = (CloudAppDashElement) bde;
 				// Persist the manifest path when creating the bde
 				cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
 				String hc = cde.getTarget().getHealthCheckSupport().getHealthCheck(cde.getAppGuid());

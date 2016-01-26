@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -39,9 +39,9 @@ public class RestartApplicationOnlyAction extends AbstractBootDashElementsAction
 			protected IStatus run(IProgressMonitor monitor) {
 				for (BootDashElement el : getSelectedElements()) {
 
-					if (el instanceof CloudDashElement) {
+					if (el instanceof CloudAppDashElement) {
 						try {
-							((CloudDashElement) el).restartOnly(RunState.RUNNING, ui);
+							((CloudAppDashElement) el).restartOnly(RunState.RUNNING, ui);
 						} catch (Exception e) {
 							ui.errorPopup("Error restarting application", e.getMessage());
 						}
@@ -60,7 +60,7 @@ public class RestartApplicationOnlyAction extends AbstractBootDashElementsAction
 		if (!getSelectedElements().isEmpty()) {
 			enable = true;
 			for (BootDashElement e : getSelectedElements()) {
-				if (!(e instanceof CloudDashElement)) {
+				if (!(e instanceof CloudAppDashElement)) {
 					enable = false;
 					break;
 				}

@@ -35,7 +35,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -84,7 +84,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 			CloudFoundryRunTarget target = getRunTarget(conf, context);
 			SshDebugSupport debugSupport = getDebugSupport(conf, context);
 
-			CloudDashElement app = getApp(conf, context);
+			CloudAppDashElement app = getApp(conf, context);
 
 			if (app!=null && target!=null && debugSupport.isSupported(app)) {
 				//1: determine SSH tunnel parameters
@@ -128,7 +128,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	}
 
 	private SshDebugSupport getDebugSupport(ILaunchConfiguration conf, BootDashViewModel context) {
-		CloudDashElement app = getApp(conf, context);
+		CloudAppDashElement app = getApp(conf, context);
 		if (app!=null) {
 			DebugSupport ds = app.getDebugSupport();
 			if (ds instanceof DebugSupport) {
@@ -143,7 +143,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		return getString(conf, APP_NAME);
 	}
 
-	public static CloudDashElement getApp(ILaunchConfiguration conf, BootDashViewModel context) {
+	public static CloudAppDashElement getApp(ILaunchConfiguration conf, BootDashViewModel context) {
 		String appName = getAppName(conf);
 		if (appName!=null) {
 			BootDashModel section = context.getSectionByTargetId(getRunTargetId(conf));
@@ -316,7 +316,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	}
 
 
-	public static ILaunchConfiguration getOrCreateLaunchConfig(CloudDashElement app) throws CoreException {
+	public static ILaunchConfiguration getOrCreateLaunchConfig(CloudAppDashElement app) throws CoreException {
 		IProject project = app.getProject();
 		String appName = app.getName();
 		CloudFoundryRunTarget target = app.getTarget();
@@ -341,7 +341,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		return wc;
 	}
 
-	public static ILaunchConfiguration findConfig(CloudDashElement app) {
+	public static ILaunchConfiguration findConfig(CloudAppDashElement app) {
 		IProject project = app.getProject();
 		String appName = app.getName();
 		CloudFoundryRunTarget target = app.getTarget();
@@ -372,7 +372,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	}
 
 
-	public static void doLaunch(CloudDashElement app, IProgressMonitor monitor) throws CoreException {
+	public static void doLaunch(CloudAppDashElement app, IProgressMonitor monitor) throws CoreException {
 		ILaunchConfiguration conf = SshDebugLaunchConfigurationDelegate.getOrCreateLaunchConfig(app);
 		conf.launch(ILaunchManager.DEBUG_MODE, monitor);
 	}

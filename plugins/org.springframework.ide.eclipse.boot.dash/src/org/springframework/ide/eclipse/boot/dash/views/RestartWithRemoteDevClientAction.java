@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartWithRemoteClientOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -68,7 +68,7 @@ public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAc
 		if (!getSelectedElements().isEmpty()) {
 			enable = true;
 			for (BootDashElement e : getSelectedElements()) {
-				if (!(e instanceof CloudDashElement) || e.getProject() == null) {
+				if (!(e instanceof CloudAppDashElement) || e.getProject() == null) {
 					enable = false;
 				}
 			}
@@ -79,8 +79,8 @@ public class RestartWithRemoteDevClientAction extends AbstractBootDashElementsAc
 	@Override
 	public void run() {
 		for (BootDashElement _e : getSelectedElements()) {
-			if (_e instanceof CloudDashElement && _e.getBootDashModel() instanceof CloudFoundryBootDashModel && _e.getProject() != null) {
-				CloudDashElement e = (CloudDashElement) _e;
+			if (_e instanceof CloudAppDashElement && _e.getBootDashModel() instanceof CloudFoundryBootDashModel && _e.getProject() != null) {
+				CloudAppDashElement e = (CloudAppDashElement) _e;
 				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getBootDashModel();
 				String opName = "Restart Remote DevTools Client for application '" + e.getName() + "'";
 				model.getOperationsExecution().runOpAsynch(new ApplicationStartWithRemoteClientOperation(opName, e,

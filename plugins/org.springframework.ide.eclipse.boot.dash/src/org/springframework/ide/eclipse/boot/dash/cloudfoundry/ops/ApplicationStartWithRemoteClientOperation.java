@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -40,10 +40,10 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 	final private RunState runOrDebug;
 	final private DebugSupport debugSupport;
 	final private UserInteractions ui;
-	private CloudDashElement app;
+	private CloudAppDashElement app;
 	private ApplicationDeploymentOperations operations;
 
-	public ApplicationStartWithRemoteClientOperation(String opName, CloudDashElement app, RunState runOrDebug,
+	public ApplicationStartWithRemoteClientOperation(String opName, CloudAppDashElement app, RunState runOrDebug,
 			ApplicationDeploymentOperations operations, UserInteractions ui) {
 		super(opName, app.getCloudModel(), app.getName());
 		this.app = app;
@@ -60,7 +60,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 		CloudAppInstances instances = getCachedApplicationInstances();
 		Map<String, String> envVars = instances.getApplication().getEnvAsMap();
 
-		CloudDashElement cde = model.getElement(appName);
+		CloudAppDashElement cde = model.getElement(appName);
 		if (cde == null || cde.getProject() == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"Local project not associated to CF app '" + appName + "'"));

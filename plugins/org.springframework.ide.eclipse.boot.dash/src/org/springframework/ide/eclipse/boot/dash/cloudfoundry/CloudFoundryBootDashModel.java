@@ -167,7 +167,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				 * Update BDEs
 				 */
 				for (String app : appsToRefresh) {
-					CloudDashElement element = getElement(app);
+					CloudAppDashElement element = getElement(app);
 					if (element != null) {
 						notifyElementChanged(element);
 					}
@@ -391,7 +391,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return addedElement;
 	}
 
-	public CloudDashElement getElement(String appName) {
+	public CloudAppDashElement getElement(String appName) {
 
 		synchronized (this) {
 			Set<BootDashElement> existing = getElements().getValue();
@@ -400,8 +400,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			// Replace the existing one with a new one for the given Cloud
 			// Application
 			for (BootDashElement element : existing) {
-				if (appName.equals(element.getName()) && element instanceof CloudDashElement) {
-					return (CloudDashElement) element;
+				if (appName.equals(element.getName()) && element instanceof CloudAppDashElement) {
+					return (CloudAppDashElement) element;
 				}
 			}
 			return null;
@@ -472,7 +472,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return new OperationsExecution(null);
 	}
 
-	public void updateElementRunState(CloudDashElement element, RunState runState) {
+	public void updateElementRunState(CloudAppDashElement element, RunState runState) {
 
 		if (element != null && element.getRunState() != runState) {
 			if (runState == null) {
@@ -488,7 +488,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public void updateApplication(String appName, RunState runState) {
 
-		CloudDashElement element = getElement(appName);
+		CloudAppDashElement element = getElement(appName);
 		updateElementRunState(element, runState);
 	}
 
@@ -505,7 +505,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 		RunState updatedRunState = runState != null ? runState
 				: ApplicationRunningStateTracker.getRunState(appInstance);
-		CloudDashElement element = getElement(appInstance.getApplication().getName());
+		CloudAppDashElement element = getElement(appInstance.getApplication().getName());
 
 		boolean notifyChanged = getAppCache().updateCache(appInstance, updatedRunState);
 		if (notifyChanged && element != null) {
@@ -525,9 +525,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 
 		for (BootDashElement element : toRemove) {
-			if (element instanceof CloudDashElement) {
+			if (element instanceof CloudAppDashElement) {
 				try {
-					delete((CloudDashElement) element, ui);
+					delete((CloudAppDashElement) element, ui);
 				} catch (Exception e) {
 					BootDashActivator.log(e);
 				}
@@ -542,7 +542,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @return
 	 * @throws Exception
 	 */
-	protected void delete(final CloudDashElement cloudElement, final UserInteractions ui) throws Exception {
+	protected void delete(final CloudAppDashElement cloudElement, final UserInteractions ui) throws Exception {
 
 		CloudApplicationOperation operation = new CloudApplicationOperation("Deleting: " + cloudElement.getName(), this,
 				cloudElement.getName()) {
@@ -633,7 +633,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		 * Now construct deployment properties object
 		 */
 		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, getRunTarget().getDomains(monitor), getAppCache().getApp(project));
-		CloudDashElement element = getElement(deploymentProperties.getAppName());
+		CloudAppDashElement element = getElement(deploymentProperties.getAppName());
 		final IFile manifestFile = element.getDeploymentManifestFile();
 		if (manifestFile != null) {
 			if (manifestFile.exists()) {
@@ -732,7 +732,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, getRunTarget().getDomains(monitor), null);
-		CloudDashElement element = getElement(props.getAppName());
+		CloudAppDashElement element = getElement(props.getAppName());
 		if (ui != null) {
 			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props);
 			DumperOptions options = new DumperOptions();

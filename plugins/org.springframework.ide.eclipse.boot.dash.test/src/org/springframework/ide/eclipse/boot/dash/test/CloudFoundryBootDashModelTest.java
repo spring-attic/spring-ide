@@ -35,7 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
@@ -123,7 +123,7 @@ public class CloudFoundryBootDashModelTest {
 
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
-				CloudDashElement element = model.getElement(appName);
+				CloudAppDashElement element = model.getElement(appName);
 				assertEquals(RunState.RUNNING, element.getRunState());
 				return true;
 			}
@@ -132,7 +132,7 @@ public class CloudFoundryBootDashModelTest {
 		//Try to get request mappings
 		new ACondition("wait for request mappings", FETCH_REQUEST_MAPPINGS_TIMEOUT) {
 			public boolean test() throws Exception {
-				CloudDashElement element = model.getElement(appName);
+				CloudAppDashElement element = model.getElement(appName);
 				List<RequestMapping> mappings = element.getLiveRequestMappings();
 				assertNotNull(mappings); //Why is the test sometimes failing here?
 				assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
@@ -145,7 +145,7 @@ public class CloudFoundryBootDashModelTest {
 		reset(ui);
 		when(ui.confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
 
-		CloudDashElement app = model.getElement(appName);
+		CloudAppDashElement app = model.getElement(appName);
 		app.getCloudModel().delete(ImmutableList.<BootDashElement>of(app), ui);
 
 		new ACondition("wait for app to be deleted", APP_DELETE_TIMEOUT) {

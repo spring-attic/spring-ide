@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.SelectManifestOp;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -31,7 +31,7 @@ public class SelectManifestAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void run() {
-		CloudDashElement element = getSelectedCloudElementWithProject();
+		CloudAppDashElement element = getSelectedCloudElementWithProject();
 		if (element != null) {
 			CloudFoundryBootDashModel model = element.getCloudModel();
 			model.getOperationsExecution().runOpAsynch(new SelectManifestOp(element, ui));
@@ -43,12 +43,12 @@ public class SelectManifestAction extends AbstractBootDashElementsAction {
 		this.setEnabled(getSelectedCloudElementWithProject() != null);
 	}
 
-	protected CloudDashElement getSelectedCloudElementWithProject() {
+	protected CloudAppDashElement getSelectedCloudElementWithProject() {
 		if (getSelectedElements().size() == 1) {
 
 			for (BootDashElement e : getSelectedElements()) {
-				if (e instanceof CloudDashElement) {
-					CloudDashElement cde = (CloudDashElement) e;
+				if (e instanceof CloudAppDashElement) {
+					CloudAppDashElement cde = (CloudAppDashElement) e;
 					if (cde.getProject() != null && cde.getProject().isAccessible()) {
 						return cde;
 					}

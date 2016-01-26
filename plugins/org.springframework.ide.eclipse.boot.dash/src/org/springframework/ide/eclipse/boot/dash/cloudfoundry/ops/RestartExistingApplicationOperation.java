@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -59,7 +59,7 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"No Cloud Application found for '" + appName + "'"));
 		}
-		CloudDashElement cde = model.getElement(appName);
+		CloudAppDashElement cde = model.getElement(appName);
 		if (cde == null || cde.getProject() == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"Local project not associated to CF app '" + appName + "'"));

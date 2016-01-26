@@ -24,7 +24,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -450,8 +450,8 @@ public class BootDashLabels implements Disposable {
 
 	private Image[] decorateRunStateImages(BootDashElement bde) throws Exception {
 		Image[] decoratedImages = getRunStateAnimation(bde.getRunState());
-		if (bde.getTarget() != null && bde instanceof CloudDashElement && bde.getRunState() == RunState.RUNNING) {
-			if (DevtoolsUtil.isDevClientAttached((CloudDashElement)bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
+		if (bde.getTarget() != null && bde instanceof CloudAppDashElement && bde.getRunState() == RunState.RUNNING) {
+			if (DevtoolsUtil.isDevClientAttached((CloudAppDashElement)bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
 				ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
 				decoratedImages = runStateImages.getDecoratedImages(bde.getRunState(), decorDesc, IDecoration.BOTTOM_RIGHT);
 			}

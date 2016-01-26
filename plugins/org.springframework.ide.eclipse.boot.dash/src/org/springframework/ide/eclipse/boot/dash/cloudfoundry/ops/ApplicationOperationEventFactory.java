@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -38,7 +38,7 @@ public class ApplicationOperationEventFactory {
 	 * @return
 	 *
 	 */
-	public ApplicationOperationEvent getUpdateRunStateEvent(CloudAppInstances appInstances, CloudDashElement element,
+	public ApplicationOperationEvent getUpdateRunStateEvent(CloudAppInstances appInstances, CloudAppDashElement element,
 			RunState runState) {
 		// If no runstate specified retain the existing runstate in the element
 		if (runState == null) {
@@ -47,7 +47,7 @@ public class ApplicationOperationEventFactory {
 		return new UpdateRunStateEvent(appInstances, model, runState);
 	}
 
-	public ApplicationOperationEvent getUpdateRunStateEvent(CloudDashElement element, RunState runState) {
+	public ApplicationOperationEvent getUpdateRunStateEvent(CloudAppDashElement element, RunState runState) {
 		// Dont fire anything if the element is not specified
 		if (element != null) {
 			// If no runstate specified retain the existing runstate in the
@@ -90,13 +90,13 @@ public class ApplicationOperationEventFactory {
 
 	class UpdateElementRunStateEvent implements ApplicationOperationEvent {
 
-		protected final CloudDashElement element;
+		protected final CloudAppDashElement element;
 
 		protected final CloudFoundryBootDashModel model;
 
 		protected final RunState runState;
 
-		UpdateElementRunStateEvent(CloudDashElement element, CloudFoundryBootDashModel model, RunState runState) {
+		UpdateElementRunStateEvent(CloudAppDashElement element, CloudFoundryBootDashModel model, RunState runState) {
 			this.element = element;
 			this.model = model;
 			this.runState = runState;

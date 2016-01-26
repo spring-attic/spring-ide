@@ -48,11 +48,11 @@ public class CloudAppCache {
 	}
 
 
-	public synchronized String getHealthCheck(CloudDashElement e) {
+	public synchronized String getHealthCheck(CloudAppDashElement e) {
 		return healthChecks.get(e.getName());
 	}
 
-	public synchronized void setHealthCheck(CloudDashElement e, String healthCheck) {
+	public synchronized void setHealthCheck(CloudAppDashElement e, String healthCheck) {
 		healthChecks.put(e.getName(), healthCheck);
 	}
 

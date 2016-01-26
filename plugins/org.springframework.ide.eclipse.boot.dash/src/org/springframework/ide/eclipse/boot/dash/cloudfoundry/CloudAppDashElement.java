@@ -21,7 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement.CloudElementIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudElementIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -48,7 +48,7 @@ import com.google.common.base.Objects;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
+public class CloudAppDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
 
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 
@@ -58,7 +58,7 @@ public class CloudDashElement extends WrappingBootDashElement<CloudElementIdenti
 
 	private PropertyStoreApi persistentProperties;
 
-	public CloudDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
+	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudElementIdentity(appName, model.getRunTarget()));
 		this.cloudTarget = model.getRunTarget();
 		this.cloudModel = model;

@@ -15,7 +15,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -26,7 +26,7 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthChec
  */
 public class HealthCheckPropertyControl extends AbstractBdePropertyControl {
 
-	private CloudDashElement app;
+	private CloudAppDashElement app;
 	private CCombo selection;
 
 	@Override
@@ -72,7 +72,7 @@ public class HealthCheckPropertyControl extends AbstractBdePropertyControl {
 	@Override
 	public void setInput(BootDashElement bde) {
 		super.setInput(bde);
-		app = (CloudDashElement)bde;
+		app = (CloudAppDashElement)bde;
 	}
 
 }

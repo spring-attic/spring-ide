@@ -54,7 +54,7 @@ public class DevtoolsDebugTargetDisconnector implements Disposable {
 		if (NON_CONNECTABLE.contains(newState) && newState!=oldState) {
 			//Cast should be safe because we are connected to CloudFoundryBootDashModel so all elements
 			// should be CloudDashElement
-			DevtoolsUtil.disconnectDevtoolsClientsFor((CloudDashElement) e);
+			DevtoolsUtil.disconnectDevtoolsClientsFor((CloudAppDashElement) e);
 		}
 	}
 

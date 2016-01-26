@@ -2,7 +2,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -26,7 +26,7 @@ public class StartingOperationHandler extends ApplicationOperationEventHandler {
 			return;
 		}
 
-		CloudDashElement element = model.getElement(appInstances.getApplication().getName());
+		CloudAppDashElement element = model.getElement(appInstances.getApplication().getName());
 		RunState runState = element != null ? element.getRunState() : RunState.UNKNOWN;
 		if (runState != RunState.STARTING) {
 			throw new OperationCanceledException();

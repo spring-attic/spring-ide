@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -77,7 +77,7 @@ public class ReconnectCloudConsoleAction extends AbstractBootDashElementsAction 
 		if (!getSelectedElements().isEmpty()) {
 			enable = true;
 			for (BootDashElement e : getSelectedElements()) {
-				if (!(e instanceof CloudDashElement)) {
+				if (!(e instanceof CloudAppDashElement)) {
 					enable = false;
 					break;
 				}

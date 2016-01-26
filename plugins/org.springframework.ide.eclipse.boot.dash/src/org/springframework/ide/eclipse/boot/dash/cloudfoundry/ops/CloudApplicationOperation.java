@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 
@@ -43,7 +43,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 		setSchedulingRule(new StartApplicationSchedulingRule(model.getRunTarget(), appName));
 	}
 
-	protected CloudDashElement getDashElement() {
+	protected CloudAppDashElement getDashElement() {
 		return model.getElement(appName);
 	}
 

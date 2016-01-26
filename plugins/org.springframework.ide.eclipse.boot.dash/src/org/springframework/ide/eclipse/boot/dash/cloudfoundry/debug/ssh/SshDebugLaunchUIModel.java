@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -85,7 +85,7 @@ public class SshDebugLaunchUIModel {
 					BootDashModel section = context.getSectionByTargetId(target.getId());
 					if (section instanceof CloudFoundryBootDashModel) {
 						CloudFoundryBootDashModel cfSection = (CloudFoundryBootDashModel) section;
-						CloudDashElement app = cfSection.getElement(name);
+						CloudAppDashElement app = cfSection.getElement(name);
 						if (app==null) {
 							return ValidationResult.error("There is no app '"+name+"' in '"+target+"'");
 						}

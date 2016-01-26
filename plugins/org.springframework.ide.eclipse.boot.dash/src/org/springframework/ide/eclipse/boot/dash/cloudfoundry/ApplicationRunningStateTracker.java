@@ -41,7 +41,7 @@ public class ApplicationRunningStateTracker {
 
 	private final ApplicationOperationEventHandler eventHandler;
 
-	public ApplicationRunningStateTracker(CloudDashElement element, ClientRequests requests,
+	public ApplicationRunningStateTracker(CloudAppDashElement element, ClientRequests requests,
 			CloudFoundryBootDashModel model, ApplicationOperationEventHandler eventHandler) {
 		this.requests = requests;
 		this.appName = element.getName();

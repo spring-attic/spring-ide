@@ -78,7 +78,7 @@ public class DevtoolsUtil {
 		return "http://"+host;
 	}
 
-	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {
+	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudAppDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {
 		if (host==null) {
 			throw ExceptionUtil.coreException("Can not launch devtools client: Host not specified");
 		}
@@ -86,7 +86,7 @@ public class DevtoolsUtil {
 		return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
 	}
 
-	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, CloudDashElement cde) throws CoreException {
+	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, CloudAppDashElement cde) throws CoreException {
 		ILaunchConfiguration existing = findConfig(project, host);
 		ILaunchConfigurationWorkingCopy wc;
 		if (existing!=null) {
@@ -134,7 +134,7 @@ public class DevtoolsUtil {
 	}
 
 
-	public static boolean isDevClientAttached(CloudDashElement cde, String launchMode) {
+	public static boolean isDevClientAttached(CloudAppDashElement cde, String launchMode) {
 		IProject project = cde.getProject();
 		if (project!=null) { // else not associated with a local project... can't really attach debugger then
 			String host = cde.getLiveHost();
@@ -169,17 +169,17 @@ public class DevtoolsUtil {
 		return false;
 	}
 
-	public static void launchDevtools(CloudDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
+	public static void launchDevtools(CloudAppDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
 		launchDevtools(cde.getProject(), cde.getLiveHost(), debugSecret, cde, mode, monitor);
 	}
 
-	public static void setElement(ILaunchConfigurationWorkingCopy l, CloudDashElement cde) {
+	public static void setElement(ILaunchConfigurationWorkingCopy l, CloudAppDashElement cde) {
 		//Tag the launch so we can easily determine what CDE it belongs to later.
 		l.setAttribute(TARGET_ID, cde.getTarget().getId());
 		l.setAttribute(APP_NAME, cde.getName());
 	}
 
-	public static boolean isLaunchFor(ILaunch l, CloudDashElement cde) {
+	public static boolean isLaunchFor(ILaunch l, CloudAppDashElement cde) {
 		String targetId = getAttribute(l, TARGET_ID);
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
@@ -192,7 +192,7 @@ public class DevtoolsUtil {
 	/**
 	 * Retreive corresponding CDE for a given launch.
 	 */
-	public static CloudDashElement getElement(ILaunchConfiguration l, BootDashViewModel model) {
+	public static CloudAppDashElement getElement(ILaunchConfiguration l, BootDashViewModel model) {
 		String targetId = getAttribute(l, TARGET_ID);
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
@@ -205,7 +205,7 @@ public class DevtoolsUtil {
 		return null;
 	}
 
-	public static CloudDashElement getElement(ILaunch l, BootDashViewModel viewModel) {
+	public static CloudAppDashElement getElement(ILaunch l, BootDashViewModel viewModel) {
 		ILaunchConfiguration conf = l.getLaunchConfiguration();
 		if (conf!=null) {
 			return getElement(conf, viewModel);
@@ -255,7 +255,7 @@ public class DevtoolsUtil {
 				handleStateChange(process.getLaunch());
 			}
 			private void handleStateChange(ILaunch l) {
-				CloudDashElement e = DevtoolsUtil.getElement(l, viewModel);
+				CloudAppDashElement e = DevtoolsUtil.getElement(l, viewModel);
 				if (e!=null) {
 					BootDashModel model = e.getBootDashModel();
 					model.notifyElementChanged(e);
@@ -268,7 +268,7 @@ public class DevtoolsUtil {
 		return new DevtoolsDebugTargetDisconnector(model);
 	}
 
-	public static void disconnectDevtoolsClientsFor(CloudDashElement e) {
+	public static void disconnectDevtoolsClientsFor(CloudAppDashElement e) {
 		ILaunchManager lm = getLaunchManager();
 		for (ILaunch l : lm.getLaunches()) {
 			if (!l.isTerminated() && isLaunchFor(l, e)) {

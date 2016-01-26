@@ -16,7 +16,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppCache;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
@@ -36,7 +36,7 @@ public class HealthCheckRefreshOperation extends CloudOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		for (BootDashElement e : model.getElements().getValues()) {
-			CloudDashElement cde = (CloudDashElement) e;
+			CloudAppDashElement cde = (CloudAppDashElement) e;
 			HealthCheckSupport client = model.getRunTarget().getHealthCheckSupport();
 			CloudAppCache cache = model.getAppCache();
 			UUID guid = cde.getAppGuid();

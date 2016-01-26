@@ -23,7 +23,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -53,13 +53,13 @@ public class SshDebugSupport extends DebugSupport {
 	private SshDebugSupport() {}
 
 	@Override
-	public boolean isSupported(CloudDashElement app) {
+	public boolean isSupported(CloudAppDashElement app) {
 		String notSupportedMessage = getNotSupportedMessage(app);
 		return notSupportedMessage==null;
 	}
 
 	@Override
-	public String getNotSupportedMessage(CloudDashElement app) {
+	public String getNotSupportedMessage(CloudAppDashElement app) {
 		//TODO: There are a number of different ways that ssh and/or diego might be disabled for
 		//  an app. e.g. it can be disabled on the app itself, on the space, on the org or
 		//  on the whole CF installation. This check should recognize these situation.
@@ -83,7 +83,7 @@ public class SshDebugSupport extends DebugSupport {
 	}
 
 	@Override
-	public boolean isDebuggerAttached(CloudDashElement app) {
+	public boolean isDebuggerAttached(CloudAppDashElement app) {
 		ILaunchConfiguration conf = SshDebugLaunchConfigurationDelegate.findConfig(app);
 		if (conf!=null) {
 			for (ILaunch l : LaunchUtils.getLaunches(conf)) {
@@ -103,7 +103,7 @@ public class SshDebugSupport extends DebugSupport {
 	}
 
 	@Override
-	public Operation<?> createOperation(CloudDashElement app, String opName, UserInteractions ui) {
+	public Operation<?> createOperation(CloudAppDashElement app, String opName, UserInteractions ui) {
 		CloudFoundryBootDashModel cloudModel = app.getCloudModel();
 		return new CompositeApplicationOperation(opName, cloudModel, app.getName(),
 				Arrays.asList(new CloudApplicationOperation[] {
@@ -151,7 +151,7 @@ public class SshDebugSupport extends DebugSupport {
 	}
 
 	@Override
-	public CloudDashElement getElementFor(ILaunch l, BootDashViewModel context) {
+	public CloudAppDashElement getElementFor(ILaunch l, BootDashViewModel context) {
 		try {
 			ILaunchConfigurationType interestingType = getLaunchType();
 			ILaunchConfiguration conf = l.getLaunchConfiguration();

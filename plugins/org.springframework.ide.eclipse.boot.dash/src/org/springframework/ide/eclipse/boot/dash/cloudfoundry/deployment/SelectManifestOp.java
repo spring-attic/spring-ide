@@ -18,7 +18,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshApplications;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -29,10 +29,10 @@ import org.yaml.snakeyaml.Yaml;
 
 public class SelectManifestOp extends CloudOperation {
 
-	protected final CloudDashElement cde;
+	protected final CloudAppDashElement cde;
 	protected final UserInteractions ui;
 
-	public SelectManifestOp(CloudDashElement cde, UserInteractions ui) {
+	public SelectManifestOp(CloudAppDashElement cde, UserInteractions ui) {
 		super("Select a manifest file", cde.getCloudModel());
 		this.cde = cde;
 		this.ui = ui;
