@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import java.util.concurrent.Callable;
+
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
-public abstract class ClientRequest<T> {
+public abstract class ClientRequest<T> implements Callable<T> {
 
 	protected final CloudFoundryOperations client;
 
@@ -49,7 +50,7 @@ public abstract class ClientRequest<T> {
 	 */
 	public ClientRequest(CloudFoundryOperations client, String appName, String requestName,
 			RequestErrorHandler errorHandler) {
-		Assert.isLegal(client!=null, "ClientRequest needs a non-null client");
+		Assert.isLegal(client != null, "ClientRequest needs a non-null client");
 		this.client = client;
 		this.appName = appName;
 		this.requestName = requestName;
@@ -65,17 +66,18 @@ public abstract class ClientRequest<T> {
 		return this.appName;
 	}
 
-	public T run() throws Exception {
+	public T call() throws Exception {
 
 		try {
 			return doRun(this.client);
 		} catch (Throwable e) {
-			// Some CF/REST exceptions are Throwable
-			if (errorHandler.handleError(e)) {
+			// Some CF/REST exceptions are Throwable so catch Throwable rather
+			// than Exception
+			if (errorHandler.throwError(e)) {
 				if (e instanceof Exception) {
 					throw (Exception) e;
 				} else {
-					throw new CoreException(BootDashActivator.createErrorStatus(e));
+					throw ExceptionUtil.coreException(e);
 				}
 			}
 		}

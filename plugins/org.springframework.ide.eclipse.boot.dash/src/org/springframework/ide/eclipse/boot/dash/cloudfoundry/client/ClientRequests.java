@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 
 public class ClientRequests {
 
@@ -44,7 +45,7 @@ public class ClientRequests {
 						new Staging(null, deploymentProperties.getBuildpack()), deploymentProperties.getMemory(),
 						deploymentProperties.getUrls(), deploymentProperties.getServices());
 			}
-		}.run();
+		}.call();
 	}
 
 	public CloudApplication getApplication(final String appName) throws Exception {
@@ -74,7 +75,7 @@ public class ClientRequests {
 					}
 				}
 			}
-		}.run();
+		}.call();
 	}
 
 	public CloudApplication getApplication(final UUID appUUID) throws Exception {
@@ -104,48 +105,18 @@ public class ClientRequests {
 					}
 				}
 			}
-		}.run();
+		}.call();
 	}
 
 	public ApplicationStats getApplicationStats(final String appName) throws Exception {
-		return new ApplicationRequest<ApplicationStats>(this.client, appName) {
-			@Override
-			protected ApplicationStats doRun(CloudFoundryOperations client) throws Exception {
-				return client.getApplicationStats(appName);
-			}
-		}.run();
+		return new ApplicationInstanceRequest(this.client, appName).call();
 	}
 
-	public Map<CloudApplication, ApplicationStats> getApplicationStats(final List<CloudApplication> appsToLookUp)
-			throws Exception {
-		return new ClientRequest<Map<CloudApplication, ApplicationStats>>(this.client,
-				"Getting stats for instances of all applications") {
-			@Override
-			protected Map<CloudApplication, ApplicationStats> doRun(CloudFoundryOperations client) throws Exception {
-				try {
-					return client.getApplicationStats(appsToLookUp);
-				} catch (Exception e) {
-
-					if (CloudErrors.is503Error(e)) {
-						// Fetch each stat individually even though this is more
-						// inefficient, as to avoid the case where failure
-						// fetching
-						// stats for one app
-						// fails the entire operation
-						Map<CloudApplication, ApplicationStats> allStats = new HashMap<CloudApplication, ApplicationStats>();
-
-						for (CloudApplication app : appsToLookUp) {
-							ApplicationStats stats = getApplicationStats(app.getName());
-							allStats.put(app, stats);
-						}
-
-						return allStats;
-					} else {
-						throw e;
-					}
-				}
-			}
-		}.run();
+	public Map<CloudApplication, ApplicationStats> waitForApplicationStats(final List<CloudApplication> appsToLookUp,
+			final long timeout) throws Exception {
+		Callable<Map<CloudApplication, ApplicationStats>> task = new AllApplicationInstancesRequest(this.client,
+				appsToLookUp);
+		return RetryUtil.retry(2000, timeout, task);
 	}
 
 	public List<CloudApplication> getApplicationsWithBasicInfo() throws Exception {
@@ -154,7 +125,7 @@ public class ClientRequests {
 			protected List<CloudApplication> doRun(CloudFoundryOperations client) throws Exception {
 				return client.getApplicationsWithBasicInfo();
 			}
-		}.run();
+		}.call();
 	}
 
 	public void uploadApplication(final String appName, final ApplicationArchive archive) throws Exception {
@@ -164,7 +135,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.uploadApplication(appName, archive);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void stopApplication(final String appName) throws Exception {
@@ -174,7 +145,7 @@ public class ClientRequests {
 				client.stopApplication(appName);
 				return null;
 			}
-		}.run();
+		}.call();
 	}
 
 	public void restartApplication(final String appName) throws Exception {
@@ -183,7 +154,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.restartApplication(appName);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void updateApplicationEnvironment(final String appName, final Map<String, String> varsToUpdate)
@@ -193,7 +164,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationEnv(appName, varsToUpdate);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void updateApplicationStaging(final String appName, final Staging staging) throws Exception {
@@ -203,7 +174,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationStaging(appName, staging);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void updateApplicationServices(final String appName, final List<String> services) throws Exception {
@@ -214,7 +185,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationServices(appName, services);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void updateApplicationMemory(final String appName, final int memory) throws Exception {
@@ -223,7 +194,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationMemory(appName, memory);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void updateApplicationInstances(final String appName, final int instances) throws Exception {
@@ -232,7 +203,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationInstances(appName, instances);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void updateApplicationUris(final String appName, final List<String> urls) throws Exception {
@@ -241,7 +212,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationUris(appName, urls);
 			}
-		}.run();
+		}.call();
 	}
 
 	public void deleteApplication(final String appName) throws Exception {
@@ -250,7 +221,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.deleteApplication(appName);
 			}
-		}.run();
+		}.call();
 	}
 
 	public List<CloudDomain> getDomains() throws Exception {
@@ -260,7 +231,7 @@ public class ClientRequests {
 			protected List<CloudDomain> doRun(CloudFoundryOperations client) throws Exception {
 				return client.getDomains();
 			}
-		}.run();
+		}.call();
 	}
 
 	public List<CloudSpace> getSpaces() throws Exception {
@@ -269,7 +240,7 @@ public class ClientRequests {
 			protected List<CloudSpace> doRun(CloudFoundryOperations client) throws Exception {
 				return client.getSpaces();
 			}
-		}.run();
+		}.call();
 	}
 
 	/**
@@ -291,7 +262,7 @@ public class ClientRequests {
 				}
 				return null;
 			}
-		}.run();
+		}.call();
 	}
 
 	public CloudAppInstances getExistingAppInstances(final String appName) throws Exception {
@@ -306,6 +277,6 @@ public class ClientRequests {
 				return null;
 
 			}
-		}.run();
+		}.call();
 	}
 }
