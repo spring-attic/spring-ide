@@ -59,7 +59,7 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"No Cloud Application found for '" + appName + "'"));
 		}
-		CloudAppDashElement cde = model.getElement(appName);
+		CloudAppDashElement cde = model.getApplication(appName);
 		if (cde == null || cde.getProject() == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"Local project not associated to CF app '" + appName + "'"));

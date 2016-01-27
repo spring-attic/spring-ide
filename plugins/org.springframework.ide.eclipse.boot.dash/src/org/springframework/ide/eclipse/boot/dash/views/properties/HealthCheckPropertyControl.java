@@ -71,8 +71,10 @@ public class HealthCheckPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void setInput(BootDashElement bde) {
-		super.setInput(bde);
-		app = (CloudAppDashElement)bde;
+		if (bde instanceof CloudAppDashElement) {
+			super.setInput(bde);
+			app = (CloudAppDashElement)bde;
+		}
 	}
 
 }

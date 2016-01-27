@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * Adds an element to the Cloud Foundry boot dash model for a give
@@ -72,7 +73,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		monitor.worked(20);
 
 		if (existingInstances == null) {
-			throw BootDashActivator.asCoreException("Failed to create a Cloud application for : "
+			throw ExceptionUtil.coreException("Failed to create a Cloud application for : "
 					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
 		}
 
@@ -82,19 +83,16 @@ public class AddElementOperation extends CloudApplicationOperation {
 			preferedRunState = ApplicationRunningStateTracker.getRunState(existingInstances);
 		}
 
-		BootDashElement bde = this.model.addElement(existingInstances, project, preferedRunState);
-		if (project != null && bde != null) {
+		CloudAppDashElement cde = this.model.addElement(existingInstances, project, preferedRunState);
+		if (project != null && cde != null) {
 			BootDashElement localElement = findLocalBdeForProject(project);
 			if (localElement != null) {
-				copyTags(localElement, bde);
+				copyTags(localElement, cde);
 			}
-			if (bde instanceof CloudAppDashElement) {
-				CloudAppDashElement cde = (CloudAppDashElement) bde;
-				// Persist the manifest path when creating the bde
-				cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
-				String hc = cde.getTarget().getHealthCheckSupport().getHealthCheck(cde.getAppGuid());
-				cde.setHealthCheck(hc);
-			}
+			// Persist the manifest path when creating the bde
+			cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
+			String hc = cde.getTarget().getHealthCheckSupport().getHealthCheck(cde.getAppGuid());
+			cde.setHealthCheck(hc);
 		}
 	}
 

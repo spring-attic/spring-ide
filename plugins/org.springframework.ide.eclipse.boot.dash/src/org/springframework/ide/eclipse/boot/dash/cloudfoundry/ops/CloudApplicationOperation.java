@@ -44,7 +44,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 	}
 
 	protected CloudAppDashElement getDashElement() {
-		return model.getElement(appName);
+		return model.getApplication(appName);
 	}
 
 	protected CloudAppInstances getCachedApplicationInstances() {

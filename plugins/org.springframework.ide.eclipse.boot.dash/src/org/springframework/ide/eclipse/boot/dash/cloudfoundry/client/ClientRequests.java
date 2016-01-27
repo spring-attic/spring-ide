@@ -20,6 +20,7 @@ import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.Assert;
@@ -234,6 +235,17 @@ public class ClientRequests {
 		}.call();
 	}
 
+	public List<CloudService> getServices() throws Exception {
+		return new ClientRequest<List<CloudService>>(this.client, "Getting Cloud Services") {
+
+			@Override
+			protected List<CloudService> doRun(CloudFoundryOperations client) throws Exception {
+				return client.getServices();
+			}
+		}.call();
+	}
+
+
 	public List<CloudSpace> getSpaces() throws Exception {
 		return new ClientRequest<List<CloudSpace>>(this.client, "Getting Cloud spaces") {
 			@Override
@@ -279,4 +291,5 @@ public class ClientRequests {
 			}
 		}.call();
 	}
+
 }

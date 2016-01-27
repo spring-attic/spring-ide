@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
@@ -46,7 +46,7 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 		this.requiresCredentials = requiresCredentials;
 	}
 
-	private final BootDashColumn[] defaultColumns = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
+	private final BootDashColumn[] defaultColumns = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {

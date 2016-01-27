@@ -48,13 +48,15 @@ public class DevtoolsDebugTargetDisconnector implements Disposable {
 	}
 
 	private void handleStateChange(BootDashElement e) {
-		RunState newState = e.getRunState();
-		RunState oldState = lastKnownState.get(e);
-		//Careful 'oldState' may be null (meaning we have not yet seen a 'previous' event for that element)
-		if (NON_CONNECTABLE.contains(newState) && newState!=oldState) {
-			//Cast should be safe because we are connected to CloudFoundryBootDashModel so all elements
-			// should be CloudDashElement
-			DevtoolsUtil.disconnectDevtoolsClientsFor((CloudAppDashElement) e);
+		if (e instanceof CloudAppDashElement) {
+			RunState newState = e.getRunState();
+			RunState oldState = lastKnownState.get(e);
+			//Careful 'oldState' may be null (meaning we have not yet seen a 'previous' event for that element)
+			if (NON_CONNECTABLE.contains(newState) && newState!=oldState) {
+				//Cast should be safe because we are connected to CloudFoundryBootDashModel so all elements
+				// should be CloudDashElement
+				DevtoolsUtil.disconnectDevtoolsClientsFor((CloudAppDashElement) e);
+			}
 		}
 	}
 

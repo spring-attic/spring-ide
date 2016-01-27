@@ -21,7 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudElementIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -48,7 +48,7 @@ import com.google.common.base.Objects;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudAppDashElement extends WrappingBootDashElement<CloudElementIdentity> implements LogSink {
+public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements LogSink {
 
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 
@@ -59,10 +59,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudElementIde
 	private PropertyStoreApi persistentProperties;
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
-		super(model, new CloudElementIdentity(appName, model.getRunTarget()));
+		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
 		this.cloudTarget = model.getRunTarget();
 		this.cloudModel = model;
-		IPropertyStore backingStore = PropertyStoreFactory.createSubStore(getName(), modelStore);
+		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 	}
 
@@ -242,7 +242,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudElementIde
 		return persistentProperties;
 	}
 
-	static class CloudElementIdentity {
+	static class CloudAppIdentity {
 
 		private final String appName;
 		private final RunTarget runTarget;
@@ -251,7 +251,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudElementIde
 			return appName + "@" + runTarget;
 		};
 
-		CloudElementIdentity(String appName, RunTarget runTarget) {
+		CloudAppIdentity(String appName, RunTarget runTarget) {
 			this.appName = appName;
 			this.runTarget = runTarget;
 		}
@@ -277,7 +277,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudElementIde
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			CloudElementIdentity other = (CloudElementIdentity) obj;
+			CloudAppIdentity other = (CloudAppIdentity) obj;
 			if (appName == null) {
 				if (other.appName != null)
 					return false;

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Comparator;
+
 import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -47,6 +49,11 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 		for (Object l : modelStateListeners.getListeners()) {
 			((BootDashModel.ModelStateListener) l).stateChanged(this);
 		}
+	}
+
+	@Override
+	public Comparator<BootDashElement> getElementComparator() {
+		return null;
 	}
 
 	abstract public ObservableSet<BootDashElement> getElements();

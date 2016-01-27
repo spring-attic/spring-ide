@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -61,6 +62,11 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 			getBootDashModel().notifyElementChanged(WrappingBootDashElement.this);
 		}
 	};
+
+	@Override
+	public BootDashColumn[] getColumns() {
+		return getTarget().getDefaultColumns();
+	}
 
 	public WrappingBootDashElement(BootDashModel bootDashModel, T delegate) {
 		this.bootDashModel = bootDashModel;

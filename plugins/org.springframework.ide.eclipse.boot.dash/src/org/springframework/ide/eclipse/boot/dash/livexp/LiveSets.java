@@ -32,24 +32,25 @@ public class LiveSets {
 		return EMPTY_SET;
 	}
 
-	public static <T> ObservableSet<T> union(ObservableSet<T> e1, ObservableSet<T> e2) {
+	@SuppressWarnings("unchecked")
+	public static <R, A extends R, B extends R> ObservableSet<R> union(ObservableSet<A> e1, ObservableSet<B> e2) {
 		if (e1==EMPTY_SET) {
-			return e2;
+			return (ObservableSet<R>) e2;
 		} else if (e2==EMPTY_SET) {
-			return e1;
+			return (ObservableSet<R>) e1;
 		} else {
-			return new LiveUnion<T>(e1, e2);
+			return new LiveUnion<R, A, B>(e1, e2);
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////
 
-	private static class LiveUnion<T> extends ObservableSet<T> {
+	private static class LiveUnion<T, A extends T, B extends T> extends ObservableSet<T> {
 
-		private ObservableSet<T> e1;
-		private ObservableSet<T> e2;
+		private ObservableSet<A> e1;
+		private ObservableSet<B> e2;
 
-		public LiveUnion(ObservableSet<T> e1, ObservableSet<T> e2) {
+		public LiveUnion(ObservableSet<A> e1, ObservableSet<B> e2) {
 			this.e1 = e1;
 			this.e2 = e2;
 			this.dependsOn(e1);

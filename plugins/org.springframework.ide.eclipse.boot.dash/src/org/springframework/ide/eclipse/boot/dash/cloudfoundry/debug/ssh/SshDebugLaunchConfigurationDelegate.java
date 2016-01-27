@@ -149,7 +149,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 			BootDashModel section = context.getSectionByTargetId(getRunTargetId(conf));
 			if (section instanceof CloudFoundryBootDashModel) {
 				CloudFoundryBootDashModel cfmodel = (CloudFoundryBootDashModel) section;
-				return cfmodel.getElement(appName);
+				return cfmodel.getApplication(appName);
 			}
 		}
 		return null;

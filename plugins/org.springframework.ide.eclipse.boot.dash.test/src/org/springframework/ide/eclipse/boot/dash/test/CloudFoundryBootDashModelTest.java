@@ -116,14 +116,14 @@ public class CloudFoundryBootDashModelTest {
 		//The resulting deploy is asynchronous
 		new ACondition("wait for app '"+ appName +"'to appear", APP_IS_VISIBLE_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertNotNull(model.getElement(appName));
+				assertNotNull(model.getApplication(appName));
 				return true;
 			}
 		};
 
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
-				CloudAppDashElement element = model.getElement(appName);
+				CloudAppDashElement element = model.getApplication(appName);
 				assertEquals(RunState.RUNNING, element.getRunState());
 				return true;
 			}
@@ -132,7 +132,7 @@ public class CloudFoundryBootDashModelTest {
 		//Try to get request mappings
 		new ACondition("wait for request mappings", FETCH_REQUEST_MAPPINGS_TIMEOUT) {
 			public boolean test() throws Exception {
-				CloudAppDashElement element = model.getElement(appName);
+				CloudAppDashElement element = model.getApplication(appName);
 				List<RequestMapping> mappings = element.getLiveRequestMappings();
 				assertNotNull(mappings); //Why is the test sometimes failing here?
 				assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
@@ -145,14 +145,14 @@ public class CloudFoundryBootDashModelTest {
 		reset(ui);
 		when(ui.confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
 
-		CloudAppDashElement app = model.getElement(appName);
+		CloudAppDashElement app = model.getApplication(appName);
 		app.getCloudModel().delete(ImmutableList.<BootDashElement>of(app), ui);
 
 		new ACondition("wait for app to be deleted", APP_DELETE_TIMEOUT) {
 
 			@Override
 			public boolean test() throws Exception {
-				assertNull(model.getElement(appName));
+				assertNull(model.getApplication(appName));
 				return true;
 			}
 		};
@@ -189,22 +189,22 @@ public class CloudFoundryBootDashModelTest {
 		new ACondition("wait for apps '" + newAppName + "' and '" + preexistingAppName + "' to appear",
 				APP_IS_VISIBLE_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertNotNull(model.getElement(newAppName));
-				assertNotNull(model.getElement(preexistingAppName));
+				assertNotNull(model.getApplication(newAppName));
+				assertNotNull(model.getApplication(preexistingAppName));
 
 				// check project mapping
 				assertEquals("Expected new element in model to have workspace project mapping",
-						model.getElement(newAppName).getProject(), project.getProject());
+						model.getApplication(newAppName).getProject(), project.getProject());
 
 				// No project mapping for the "external" app
-				assertNull(model.getElement(preexistingAppName).getProject());
+				assertNull(model.getApplication(preexistingAppName).getProject());
 
 				// check the actual CloudApplication
-				CloudApplication actualNewApp = model.getElement(newAppName).getCloudModel().getAppCache()
+				CloudApplication actualNewApp = model.getApplication(newAppName).getCloudModel().getAppCache()
 						.getApp(newAppName);
 				assertEquals("No CloudApplication mapping found", actualNewApp.getName(), newAppName);
 
-				CloudApplication actualPreexistingApp = model.getElement(preexistingAppName).getCloudModel()
+				CloudApplication actualPreexistingApp = model.getApplication(preexistingAppName).getCloudModel()
 						.getAppCache().getApp(preexistingAppName);
 				assertEquals("No CloudApplication mapping found", actualPreexistingApp.getName(), preexistingAppName);
 

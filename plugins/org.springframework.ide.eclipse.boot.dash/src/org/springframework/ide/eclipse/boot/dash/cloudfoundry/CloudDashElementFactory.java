@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import org.cloudfoundry.client.lib.domain.CloudService;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 
@@ -27,5 +28,9 @@ public class CloudDashElementFactory {
 
 	public CloudAppDashElement createApp(String appName) {
 		return new CloudAppDashElement(model, appName, modelStore);
+	}
+
+	public CloudServiceDashElement createService(CloudService service) {
+		return new CloudServiceDashElement(model, service, modelStore);
 	}
 }

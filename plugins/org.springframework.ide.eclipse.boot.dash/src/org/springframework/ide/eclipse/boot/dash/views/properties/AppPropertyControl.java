@@ -39,7 +39,7 @@ public class AppPropertyControl extends AbstractBdePropertyControl {
 	public void refreshControl() {
 		if (app != null && !app.isDisposed()) {
 			BootDashElement element = getBootDashElement();
-			app.setText(getLabels().getStyledText(element, BootDashColumn.APP).getString());
+			app.setText(getLabels().getStyledText(element, BootDashColumn.NAME).getString());
 		}
 	}
 

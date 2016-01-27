@@ -17,6 +17,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -58,6 +59,8 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * If more than one configuration exists then the 'preferred config' is used to decide which one
 	 * of the existing elements should be considered as 'active'.
 	 *
+	 * TODO: isn't this supposed to be obsolete? Remove?
+	 *
 	 * @return active configuration or null.
 	 */
 	ILaunchConfiguration getActiveConfig();
@@ -90,4 +93,5 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * {@link BootDashModel} then the parent is that model.
 	 */
 	Object getParent();
+	BootDashColumn[] getColumns();
 }

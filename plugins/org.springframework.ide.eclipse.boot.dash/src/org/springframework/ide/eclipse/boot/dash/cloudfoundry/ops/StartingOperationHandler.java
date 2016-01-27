@@ -26,7 +26,7 @@ public class StartingOperationHandler extends ApplicationOperationEventHandler {
 			return;
 		}
 
-		CloudAppDashElement element = model.getElement(appInstances.getApplication().getName());
+		CloudAppDashElement element = model.getApplication(appInstances.getApplication().getName());
 		RunState runState = element != null ? element.getRunState() : RunState.UNKNOWN;
 		if (runState != RunState.STARTING) {
 			throw new OperationCanceledException();

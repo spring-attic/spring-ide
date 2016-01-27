@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,12 +18,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppCache;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
  * TODO: when we use v2 java client then this should probably be removed as the
- * healthcheck information will be integrated with the basi summary of an element.
+ * healthcheck information will be integrated with the basic summary of an element.
  *
  * @author Kris De Volder
  */
@@ -35,8 +34,7 @@ public class HealthCheckRefreshOperation extends CloudOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		for (BootDashElement e : model.getElements().getValues()) {
-			CloudAppDashElement cde = (CloudAppDashElement) e;
+		for (CloudAppDashElement cde : model.getApplications().getValues()) {
 			HealthCheckSupport client = model.getRunTarget().getHealthCheckSupport();
 			CloudAppCache cache = model.getAppCache();
 			UUID guid = cde.getAppGuid();

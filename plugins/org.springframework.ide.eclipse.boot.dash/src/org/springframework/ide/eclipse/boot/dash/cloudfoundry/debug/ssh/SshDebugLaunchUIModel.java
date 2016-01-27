@@ -85,7 +85,7 @@ public class SshDebugLaunchUIModel {
 					BootDashModel section = context.getSectionByTargetId(target.getId());
 					if (section instanceof CloudFoundryBootDashModel) {
 						CloudFoundryBootDashModel cfSection = (CloudFoundryBootDashModel) section;
-						CloudAppDashElement app = cfSection.getElement(name);
+						CloudAppDashElement app = cfSection.getApplication(name);
 						if (app==null) {
 							return ValidationResult.error("There is no app '"+name+"' in '"+target+"'");
 						}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,20 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import org.eclipse.jface.viewers.IFilter;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 
-/**
- * Cloud Foundry app elements filter for the properties view
- *
- * @author Alex Boyko
- *
- */
-public class CloudFoundryElementFilter implements IFilter {
+public class RequestMappingPropertiesFilter implements IFilter {
 
 	@Override
 	public boolean select(Object toTest) {
-		return toTest instanceof BootDashElement && ((BootDashElement)toTest).getTarget() instanceof CloudFoundryRunTarget;
+		return toTest instanceof BootProjectDashElement || toTest instanceof CloudAppDashElement;
 	}
 
 }

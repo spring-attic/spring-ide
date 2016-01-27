@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
@@ -33,7 +33,7 @@ public class LocalRunTarget extends AbstractRunTarget {
 	public static final RunTarget INSTANCE = new LocalRunTarget();
 	private static final BootDashColumn[] DEFAULT_COLUMNS = {
 			RUN_STATE_ICN,
-			APP,
+			NAME,
 			LIVE_PORT,
 			INSTANCES,
 			DEFAULT_PATH,

@@ -14,6 +14,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 
 public abstract class CloudOperation extends Operation<Void> {
 
@@ -42,5 +44,17 @@ public abstract class CloudOperation extends Operation<Void> {
 
 	String getOpErrorPrefix() {
 		return "Error in target: " + model.getRunTarget().getName();
+	}
+
+	protected CloudFoundryRunTarget getRunTarget() {
+		return model.getRunTarget();
+	}
+
+	protected ClientRequests getClientRequests() {
+		CloudFoundryRunTarget target = getRunTarget();
+		if (target.isConnected()) {
+			return target.getClientRequests();
+		}
+		return null;
 	}
 }

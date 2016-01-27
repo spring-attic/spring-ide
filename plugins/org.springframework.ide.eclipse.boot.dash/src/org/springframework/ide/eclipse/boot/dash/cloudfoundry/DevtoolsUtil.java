@@ -199,7 +199,7 @@ public class DevtoolsUtil {
 			BootDashModel section = model.getSectionByTargetId(targetId);
 			if (section instanceof CloudFoundryBootDashModel) {
 				CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) section;
-				return cfModel.getElement(appName);
+				return cfModel.getApplication(appName);
 			}
 		}
 		return null;

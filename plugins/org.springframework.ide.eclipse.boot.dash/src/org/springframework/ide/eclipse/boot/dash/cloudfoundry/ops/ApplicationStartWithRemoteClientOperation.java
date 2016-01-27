@@ -60,7 +60,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 		CloudAppInstances instances = getCachedApplicationInstances();
 		Map<String, String> envVars = instances.getApplication().getEnvAsMap();
 
-		CloudAppDashElement cde = model.getElement(appName);
+		CloudAppDashElement cde = model.getApplication(appName);
 		if (cde == null || cde.getProject() == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 					"Local project not associated to CF app '" + appName + "'"));

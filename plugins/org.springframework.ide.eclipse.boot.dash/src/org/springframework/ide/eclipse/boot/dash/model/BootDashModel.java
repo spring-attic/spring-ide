@@ -1,5 +1,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Comparator;
+
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 
@@ -55,5 +57,7 @@ public interface BootDashModel {
 	void notifyElementChanged(BootDashElement element);
 
 	RefreshState getRefreshState();
+
+	Comparator<BootDashElement> getElementComparator();
 
 }

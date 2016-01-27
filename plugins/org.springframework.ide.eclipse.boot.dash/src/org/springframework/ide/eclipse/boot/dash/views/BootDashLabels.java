@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -174,6 +175,10 @@ public class BootDashLabels implements Disposable {
 
 	private Image[] toAnimation(ImageDescriptor icon, ImageDescriptor decoration) {
 		Image img = images.get(icon, decoration);
+		return toAnimation(img);
+	}
+
+	private Image[] toAnimation(Image img) {
 		if (img!=null) {
 			return new Image[]{img};
 		}
@@ -181,6 +186,10 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
+		if (element instanceof CloudServiceDashElement) {
+			ImageDescriptor img = BootDashActivator.getImageDescriptor("icons/service.gif");
+			return toAnimation(img, null);
+		}
 		try {
 			if (element != null) {
 				switch (column) {
@@ -234,14 +243,14 @@ public class BootDashLabels implements Disposable {
 			return stylers.darkGreen();
 		case INSTANCES:
 			return stylers.darkBlue();
-		case APP:
+		case NAME:
 		case PROJECT:
 //			return null;
 		case HOST:
 		case RUN_STATE_ICN:
 		case DEFAULT_PATH:
 		default:
-			return stylers.NULL;
+			return Stylers.NULL;
 		}
 	}
 
@@ -287,7 +296,7 @@ public class BootDashLabels implements Disposable {
 				label = host == null ? UNKNOWN_LABEL : host;
 				break;
 			case TREE_VIEWER_MAIN:
-				BootDashColumn[] cols = element.getBootDashModel().getRunTarget().getDefaultColumns();
+				BootDashColumn[] cols = element.getColumns();
 				styledLabel = new StyledString();
 				for (BootDashColumn col : cols) {
 					//Ignore RUN_STATE_ICN because its already represented in the label's icon.
@@ -314,7 +323,7 @@ public class BootDashLabels implements Disposable {
 					}
 				}
 				break;
-			case APP:
+			case NAME:
 				styledLabel = new StyledString();
 
 				if (element.getName() != null) {
