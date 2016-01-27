@@ -76,7 +76,6 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
-import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -136,7 +135,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				return this.viewModel.getModelComparator().compare((BootDashModel) e1, (BootDashModel) e2);
 			} else if (e1 instanceof BootDashElement && e2 instanceof BootDashElement) {
 				BootDashElement bde1 = (BootDashElement) e1;
-				BootDashElement bde2 = (BootDashElement) e1;
+				BootDashElement bde2 = (BootDashElement) e2;
 				if (bde1.getBootDashModel()==bde2.getBootDashModel()) {
 					Comparator<BootDashElement> comparator = bde1.getBootDashModel().getElementComparator();
 					if (comparator!=null) {
