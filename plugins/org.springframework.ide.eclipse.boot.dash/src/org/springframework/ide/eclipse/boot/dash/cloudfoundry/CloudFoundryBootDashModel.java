@@ -659,7 +659,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		/*
 		 * Refresh the cloud application first to get the latest deployment properties changes
 		 */
-		new RefreshApplications(this, Collections.singletonList(getAppCache().getApp(project)), ui).run(monitor);
+		new RefreshApplications(this, Collections.singletonList(getAppCache().getApp(project))).run(monitor);
 		/*
 		 * Now construct deployment properties object
 		 */

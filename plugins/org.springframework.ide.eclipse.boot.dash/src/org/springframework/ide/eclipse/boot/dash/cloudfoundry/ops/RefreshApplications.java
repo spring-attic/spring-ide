@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * Operation for refreshing existing cloud applications.
@@ -34,12 +33,10 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 public class RefreshApplications extends CloudOperation {
 
 	private Collection<CloudApplication> apps;
-	private UserInteractions ui;
 
-	public RefreshApplications(CloudFoundryBootDashModel model, Collection<CloudApplication> apps, UserInteractions ui) {
+	public RefreshApplications(CloudFoundryBootDashModel model, Collection<CloudApplication> apps) {
 		super("Refreshing applications", model);
 		this.apps = apps;
-		this.ui = ui;
 	}
 
 	@Override
@@ -70,7 +67,7 @@ public class RefreshApplications extends CloudOperation {
 
 			model.updateElements(updatedApplications);
 
-			model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(model, toUpdateStats));
+			new AppInstancesRefreshOperation(model, toUpdateStats).run(monitor);
 		}
 	}
 

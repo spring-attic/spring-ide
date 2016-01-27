@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshApplications;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
@@ -52,9 +51,14 @@ public class SelectManifestOp extends CloudOperation {
 		Map<Object, Object> yaml = Collections.emptyMap();
 
 		/*
-		 * Refresh the latest cloud application
+		 * Commented out because manual manifest contents based on current
+		 * deployment props from CF don't need to be the latest since they are
+		 * not editable
 		 */
-		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project)), ui).run(monitor);
+		//		/*
+//		 * Refresh the latest cloud application
+//		 */
+//		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
 		try {
 			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, model.getRunTarget().getDomains(monitor), model.getAppCache().getApp(project)));
