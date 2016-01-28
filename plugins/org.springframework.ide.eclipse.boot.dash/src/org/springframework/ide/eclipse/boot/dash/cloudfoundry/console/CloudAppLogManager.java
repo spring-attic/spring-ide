@@ -22,6 +22,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -141,7 +142,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 
 			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 			try {
-				CloudFoundryOperations client = runTarget.getClient();
+				ClientRequests client = runTarget.getClient();
 				Thread.currentThread().setContextClassLoader(client.getClass().getClassLoader());
 
 				// Must verify that the application exists before attaching

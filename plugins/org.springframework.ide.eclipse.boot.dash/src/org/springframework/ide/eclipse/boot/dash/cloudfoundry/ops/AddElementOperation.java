@@ -67,7 +67,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		if (existingApplication == null) {
 			existingInstances = createApplication(monitor);
 		} else {
-			existingInstances = model.getRunTarget().getClientRequests().getExistingAppInstances(existingApplication.getMeta().getGuid());
+			existingInstances = model.getRunTarget().getClient().getExistingAppInstances(existingApplication.getMeta().getGuid());
 		}
 
 		monitor.worked(20);
@@ -126,16 +126,16 @@ public class AddElementOperation extends CloudApplicationOperation {
 		try {
 
 			logAndUpdateMonitor("Creating application: " + deploymentProperties.getAppName(), monitor);
-			model.getRunTarget().getClientRequests().createApplication(deploymentProperties);
+			model.getRunTarget().getClient().createApplication(deploymentProperties);
 			monitor.worked(5);
 
 		} catch (Exception e) {
 			// Clean-up: If app creation failed, check if the app was created
 			// anyway
 			// and delete it to allow users to redeploy
-			CloudApplication toCleanUp = model.getRunTarget().getClientRequests().getApplication(deploymentProperties.getAppName());
+			CloudApplication toCleanUp = model.getRunTarget().getClient().getApplication(deploymentProperties.getAppName());
 			if (toCleanUp != null) {
-				model.getRunTarget().getClientRequests().deleteApplication(toCleanUp.getName());
+				model.getRunTarget().getClient().deleteApplication(toCleanUp.getName());
 			}
 			throw e;
 		}
@@ -143,7 +143,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		logAndUpdateMonitor(
 				"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
 				monitor);
-		CloudAppInstances instances = model.getRunTarget().getClientRequests().getExistingAppInstances(deploymentProperties.getAppName());
+		CloudAppInstances instances = model.getRunTarget().getClient().getExistingAppInstances(deploymentProperties.getAppName());
 		monitor.worked(5);
 
 		return instances;

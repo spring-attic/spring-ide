@@ -53,7 +53,7 @@ public abstract class CloudOperation extends Operation<Void> {
 	protected ClientRequests getClientRequests() {
 		CloudFoundryRunTarget target = getRunTarget();
 		if (target.isConnected()) {
-			return target.getClientRequests();
+			return target.getClient();
 		}
 		return null;
 	}

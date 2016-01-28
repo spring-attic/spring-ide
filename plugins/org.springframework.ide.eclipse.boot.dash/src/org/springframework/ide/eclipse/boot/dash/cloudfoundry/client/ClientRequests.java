@@ -15,27 +15,46 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
+import org.cloudfoundry.client.lib.HttpProxyConfiguration;
+import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.Assert;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 public class ClientRequests {
 
 	protected final CloudFoundryOperations client;
+	private CloudInfoV2 cachedCloudInfo;
+	private CloudFoundryTargetProperties targetProperties;
 
-	public ClientRequests(CloudFoundryOperations client) {
+	public ClientRequests(CloudFoundryOperations client, CloudFoundryTargetProperties targetProperties) {
 		Assert.isNotNull(client, "ClientRequests needs a non-null client");
 		this.client = client;
+		this.targetProperties = targetProperties;
+	}
+
+	public void logout() {
+		client.logout();
 	}
 
 	public void createApplication(final CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
@@ -47,6 +66,21 @@ public class ClientRequests {
 						deploymentProperties.getUrls(), deploymentProperties.getServices());
 			}
 		}.call();
+	}
+
+	protected HttpProxyConfiguration getProxyConf() {
+		//TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
+		return null;
+	}
+
+	private CloudInfoV2 getCloudInfoV2() throws Exception {
+		//cached cloudInfo as it doesn't really change and is more like a bunch of static info about how a target is configured.
+		if (this.cachedCloudInfo==null) {
+			CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
+			HttpProxyConfiguration proxyConf = getProxyConf();
+			this.cachedCloudInfo = new CloudInfoV2(creds, client.getCloudControllerUrl(), proxyConf, targetProperties.isSelfsigned());
+		}
+		return this.cachedCloudInfo;
 	}
 
 	public CloudApplication getApplication(final String appName) throws Exception {
@@ -292,4 +326,35 @@ public class ClientRequests {
 		}.call();
 	}
 
+	public Version getApiVersion() {
+		CloudInfo info = client.getCloudInfo();
+		if (info!=null) {
+			String versionString = info.getApiVersion();
+			if (versionString!=null) {
+				return new Version(versionString);
+			}
+		}
+		return null;
+	}
+
+	public HealthCheckSupport getHealthCheckSupport() throws Exception {
+		return new HealthCheckSupport(client, getCloudInfoV2(), targetProperties.isSelfsigned(), getProxyConf());
+	}
+
+	public SshClientSupport getSshClientSupport() throws Exception {
+		HttpProxyConfiguration proxyConf = getProxyConf();
+		return new SshClientSupport(client, getCloudInfoV2(), targetProperties.isSelfsigned(), proxyConf);
+	}
+
+	public BuildpackSupport getBuildpackSupport() throws Exception {
+		CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(),
+				targetProperties.getPassword());
+		HttpProxyConfiguration proxyConf = getProxyConf();
+		return BuildpackSupport.create(client, creds, proxyConf,
+				targetProperties.isSelfsigned());
+	}
+
+	public StreamingLogToken streamLogs(String appName, ApplicationLogConsole logConsole) {
+		return client.streamLogs(appName, logConsole);
+	}
 }

@@ -56,7 +56,7 @@ public class RefreshApplications extends CloudOperation {
 					}
 				}
 				if (apps.contains(instances.getApplication())) {
-					CloudApplication newApplication = model.getRunTarget().getClientRequests()
+					CloudApplication newApplication = model.getRunTarget().getClient()
 							.getApplication(instances.getApplication().getName());
 					updatedApplications.put(new CloudAppInstances(newApplication, instances.getStats()), project);
 					toUpdateStats.add(newApplication);

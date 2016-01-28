@@ -49,7 +49,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 		if (updateExistingApplicationInCloud(deploymentProperties, monitor)) {
 			boolean checkTermination = true;
 			this.eventHandler.fireEvent(
-					eventFactory.getUpdateRunStateEvent(model.getRunTarget().getClientRequests().getExistingAppInstances(appName), getDashElement(), null),
+					eventFactory.getUpdateRunStateEvent(model.getRunTarget().getClient().getExistingAppInstances(appName), getDashElement(), null),
 					checkTermination);
 		}
 	}
@@ -57,7 +57,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	protected boolean updateExistingApplicationInCloud(CloudApplicationDeploymentProperties properties,
 			IProgressMonitor monitor) throws Exception {
 
-		CloudApplication app = model.getRunTarget().getClientRequests().getApplication(appName);
+		CloudApplication app = model.getRunTarget().getClient().getApplication(appName);
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		boolean updated = false;
 
@@ -67,7 +67,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 					&& !properties.getEnvironmentVariables().equals(app.getEnvAsMap())) {
 				subMonitor.setTaskName("Updating " + appName + " environment variables.");
 
-				model.getRunTarget().getClientRequests().updateApplicationEnvironment(appName, properties.getEnvironmentVariables());
+				model.getRunTarget().getClient().updateApplicationEnvironment(appName, properties.getEnvironmentVariables());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -77,7 +77,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 					&& !properties.getBuildpack().equals(app.getStaging().getDetectedBuildpack())) {
 				subMonitor.setTaskName("Updating " + appName + " buildpack.");
 
-				model.getRunTarget().getClientRequests().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack()));
+				model.getRunTarget().getClient().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack()));
 				updated = true;
 
 				subMonitor.worked(1);
@@ -86,7 +86,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			if (properties.getServices() != null && !properties.getServices().equals(app.getServices())) {
 				subMonitor.setTaskName("Updating " + appName + " bound services.");
 
-				model.getRunTarget().getClientRequests().updateApplicationServices(appName, properties.getServices());
+				model.getRunTarget().getClient().updateApplicationServices(appName, properties.getServices());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -95,7 +95,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			if (properties.getMemory() > 0 && properties.getMemory() != app.getMemory()) {
 				subMonitor.setTaskName("Updating " + appName + " memory.");
 
-				model.getRunTarget().getClientRequests().updateApplicationMemory(appName, properties.getMemory());
+				model.getRunTarget().getClient().updateApplicationMemory(appName, properties.getMemory());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -104,7 +104,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			if (properties.getInstances() > 0 && properties.getInstances() != app.getInstances()) {
 				subMonitor.setTaskName("Updating " + appName + " instances.");
 
-				model.getRunTarget().getClientRequests().updateApplicationInstances(appName, properties.getInstances());
+				model.getRunTarget().getClient().updateApplicationInstances(appName, properties.getInstances());
 				updated = true;
 
 				subMonitor.worked(1);
@@ -114,7 +114,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 
 				subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
 
-				model.getRunTarget().getClientRequests().updateApplicationUris(appName, properties.getUrls());
+				model.getRunTarget().getClient().updateApplicationUris(appName, properties.getUrls());
 				updated = true;
 
 				subMonitor.worked(1);

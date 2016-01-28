@@ -44,28 +44,34 @@ public abstract class CloudFoundryClientFactory {
 	 *             if there was an error connecting, including if password is
 	 *             not set or invalid.
 	 */
-	public CloudFoundryOperations getClient(CloudFoundryRunTarget runTarget) throws Exception {
-
+	public ClientRequests getClient(CloudFoundryRunTarget runTarget) throws Exception {
 		CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) runTarget.getTargetProperties();
-
 		return getClient(targetProperties);
 	}
 
-	public CloudFoundryOperations getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
-		return getClient(new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-				new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
-				targetProperties.getSpaceName(), targetProperties.isSelfsigned());
+	public ClientRequests getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
+		return wrap(getClient(
+				new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
+					new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
+					targetProperties.getSpaceName(), targetProperties.isSelfsigned()
+				),
+				targetProperties
+		);
 	}
 
-
 	/**
-	 * Wrapper around the client. API used by CF support in boot dash
+	 * Wrapper around the client. API used by CF support in boot dash.
+	 * <p>
+	 * Note: this method is private for a a reason. Anyhting outside this class should have
+	 * no reason to have a reference to an 'unwrapped' CloudFoundryOperations and so therefore they should also
+	 * never need to wrap one.
+	 * <p>
+	 * All interactions with the CF client should be done through ClientRequests.
+	 *
+	 * @param targetProperties
 	 */
-	public static ClientRequests getClientRequests(CloudFoundryOperations client) {
-		//TODO: really this method shouldn't be here. The factory should only ever need to
-		// return a 'ClientRequests' wrapper. If some code is directly using an unwrapped
-		// CloudFoundryOperations somewhere then that should be changed.
-		return new ClientRequests(client);
+	private static ClientRequests wrap(CloudFoundryOperations client, CloudFoundryTargetProperties targetProperties) {
+		return new ClientRequests(client, targetProperties);
 	}
 
 	public OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
@@ -89,7 +95,4 @@ public abstract class CloudFoundryClientFactory {
 
 		return spaces;
 	}
-
-
-
 }

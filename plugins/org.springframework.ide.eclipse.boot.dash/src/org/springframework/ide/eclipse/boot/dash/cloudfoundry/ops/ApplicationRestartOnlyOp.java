@@ -40,7 +40,7 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		CloudAppInstances appInstances = model.getRunTarget().getClientRequests().getExistingAppInstances(appName);
+		CloudAppInstances appInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
 		if (appInstances == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to start the application. Application does not exist anymore in Cloud Foundry: " + appName);
@@ -59,11 +59,11 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 		// completes
 		logAndUpdateMonitor("Starting application: " + appName, monitor);
 
-		model.getRunTarget().getClientRequests().restartApplication(appName);
+		model.getRunTarget().getClient().restartApplication(appName);
 
-		RunState runState = new ApplicationRunningStateTracker(getDashElement(), model.getRunTarget().getClientRequests(), model, eventHandler)
+		RunState runState = new ApplicationRunningStateTracker(getDashElement(), model.getRunTarget().getClient(), model, eventHandler)
 				.startTracking(monitor);
-		CloudAppInstances updatedInstances = model.getRunTarget().getClientRequests().getExistingAppInstances(appGuid);
+		CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(appGuid);
 
 		checkTermination = false;
 		this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(), runState),

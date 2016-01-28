@@ -67,10 +67,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private List<CloudSpace> spaces;
 	private List<Buildpack> buildpacks;
 
-	private CloudInfoV2 cachedCloudInfo;
-	private LiveVariable<CloudFoundryOperations> cachedClient;
+	private LiveVariable<ClientRequests> cachedClient;
 	private CloudFoundryClientFactory clientFactory;
-	private ClientRequests clientRequests;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
@@ -94,13 +92,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return null;
 	}
 
-	public CloudFoundryOperations getClient() {
+	public ClientRequests getClient() {
 		return cachedClient.getValue();
 	}
 
 	public void connect() throws Exception {
 		try {
-			this.cachedCloudInfo = null;
 			this.domains = null;
 			this.spaces = null;
 			this.buildpacks = null;
@@ -112,11 +109,9 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	public void disconnect() {
-		this.cachedCloudInfo = null;
 		this.domains = null;
 		this.spaces = null;
 		this.buildpacks = null;
-		this.clientRequests = null;
 		if (getClient() != null) {
 			getClient().logout();
 			cachedClient.setValue(null);
@@ -127,25 +122,19 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return cachedClient.getValue() != null;
 	}
 
-	public void addConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
+	public void addConnectionStateListener(ValueListener<ClientRequests> l) {
 		cachedClient.addListener(l);
 	}
 
-	public void removeConnectionStateListener(ValueListener<CloudFoundryOperations> l) {
+	public void removeConnectionStateListener(ValueListener<ClientRequests> l) {
 		cachedClient.removeListener(l);
 	}
 
 	public Version getCCApiVersion() {
 		try {
-			CloudFoundryOperations client = getClient();
+			ClientRequests client = getClient();
 			if (client!=null) {
-				CloudInfo info = client.getCloudInfo();
-				if (info!=null) {
-					String versionString = info.getApiVersion();
-					if (versionString!=null) {
-						return new Version(versionString);
-					}
-				}
+				return client.getApiVersion();
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);
@@ -153,15 +142,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return null;
 	}
 
-	protected CloudFoundryOperations createClient() throws Exception {
+	protected ClientRequests createClient() throws Exception {
 		return clientFactory.getClient(this);
-	}
-
-	public ClientRequests getClientRequests() {
-		if (this.clientRequests == null) {
-			this.clientRequests = clientFactory.getClientRequests(getClient());
-		}
-		return this.clientRequests;
 	}
 
 	@Override
@@ -217,7 +199,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 			subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
 
-			domains = getClientRequests().getDomains();
+			domains = getClient().getDomains();
 
 			subMonitor.worked(5);
 		}
@@ -248,31 +230,13 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	public HealthCheckSupport getHealthCheckSupport() throws Exception {
-		CloudFoundryOperations client = getClient();
-		HttpProxyConfiguration proxyConf = getProxyConf();
-		return new HealthCheckSupport(client, getCloudInfoV2(), targetProperties.isSelfsigned(), proxyConf);
-	}
-
-	public HttpProxyConfiguration getProxyConf() {
-		//TODO: get this right!!! (But the client in the rest of boot dahs also doesn't do this.
-		return null;
+		ClientRequests client = getClient();
+		return client.getHealthCheckSupport();
 	}
 
 	public SshClientSupport getSshClientSupport() throws Exception {
-		CloudFoundryOperations client = getClient();
-		HttpProxyConfiguration proxyConf = getProxyConf();
-		return new SshClientSupport(client, getCloudInfoV2(), targetProperties.isSelfsigned(), proxyConf);
-	}
-
-	private CloudInfoV2 getCloudInfoV2() throws Exception {
-		//cached cloudInfo as it doesn't really change and is more like a bunch of static info about how a target is configured.
-		if (this.cachedCloudInfo==null) {
-			CloudFoundryOperations client = getClient();
-			CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword());
-			HttpProxyConfiguration proxyConf = getProxyConf();
-			this.cachedCloudInfo = new CloudInfoV2(creds, client.getCloudControllerUrl(), proxyConf, targetProperties.isSelfsigned());
-		}
-		return this.cachedCloudInfo;
+		ClientRequests client = getClient();
+		return client.getSshClientSupport();
 	}
 
 	public String getBuildpack(IProject project) {
@@ -282,12 +246,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		if (javaProject != null) {
 			try {
 				if (this.buildpacks == null) {
-					CloudCredentials creds = new CloudCredentials(targetProperties.getUsername(),
-							targetProperties.getPassword());
-					HttpProxyConfiguration proxyConf = getProxyConf();
-					BuildpackSupport support = BuildpackSupport.create(getClient(), creds, proxyConf,
-							targetProperties.isSelfsigned());
-
+					BuildpackSupport support = getClient().getBuildpackSupport();
 					// Cache it to avoid frequent calls to CF
 					this.buildpacks = support.getBuildpacks();
 				}

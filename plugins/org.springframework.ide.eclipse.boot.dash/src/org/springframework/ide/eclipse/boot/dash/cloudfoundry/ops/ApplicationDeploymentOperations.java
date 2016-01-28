@@ -52,7 +52,7 @@ public class ApplicationDeploymentOperations {
 			IProgressMonitor monitor) throws Exception {
 		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
 
-		CloudApplication existingApp = model.getRunTarget().getClientRequests().getApplication(properties.getAppName());
+		CloudApplication existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
 
 		if (existingApp != null && !ui.confirmOperation(APP_FOUND_TITLE,
 				NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(), properties.getProject().getName()))) {

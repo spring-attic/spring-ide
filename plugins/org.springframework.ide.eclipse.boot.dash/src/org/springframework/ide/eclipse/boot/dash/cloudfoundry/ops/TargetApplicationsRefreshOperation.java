@@ -58,7 +58,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// the
 				// two refresh operations
 
-				List<CloudApplication> apps = model.getRunTarget().getClientRequests().getApplicationsWithBasicInfo();
+				List<CloudApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
 
 				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 				if (apps != null) {

@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
-import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
@@ -27,13 +28,15 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthChec
 public class HealthCheckPropertyControl extends AbstractBdePropertyControl {
 
 	private CloudAppDashElement app;
-	private CCombo selection;
+	private Combo selection;
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
 		super.createControl(composite, page);
 		page.getWidgetFactory().createLabel(composite, "Healthcheck:");
-		selection = page.getWidgetFactory().createCCombo(composite);
+		selection = new Combo(composite, SWT.READ_ONLY);
+//		Don't use the 'CCombo' it looks really bad on linux. Doesn't properly size itself and so contents is 'chopped'.
+//		selection = page.getWidgetFactory().createCCombo(composite, SWT.READ_ONLY);
 		selection.setItems(HealthCheckSupport.HC_ALL);
 		refreshControl();
 		selection.addSelectionListener(new SelectionAdapter() {

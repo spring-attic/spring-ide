@@ -51,6 +51,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
@@ -210,9 +211,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 	};
 
-	final private ValueListener<CloudFoundryOperations> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<CloudFoundryOperations>() {
+	final private ValueListener<ClientRequests> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<ClientRequests>() {
 		@Override
-		public void gotValue(LiveExpression<CloudFoundryOperations> exp, CloudFoundryOperations value) {
+		public void gotValue(LiveExpression<ClientRequests> exp, ClientRequests value) {
 			CloudFoundryBootDashModel.this.notifyModelStateChanged();
 		}
 	};
@@ -582,7 +583,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
-				model.getRunTarget().getClientRequests().deleteApplication(appName);
+				model.getRunTarget().getClient().deleteApplication(appName);
 				Set<CloudAppDashElement> updatedElements = new HashSet<>();
 
 				synchronized (CloudFoundryBootDashModel.this) {
