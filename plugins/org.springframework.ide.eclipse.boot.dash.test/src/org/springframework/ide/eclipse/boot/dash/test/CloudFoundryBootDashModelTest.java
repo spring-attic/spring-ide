@@ -79,7 +79,7 @@ public class CloudFoundryBootDashModelTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.clientFactory = new CloudFoundryClientFactory();
+		this.clientFactory = CloudFoundryClientFactory.DEFAULT;
 		this.cfTargetType = new CloudFoundryRunTargetType(context, clientFactory);
 		this.harness = CloudFoundryTestHarness.create(context);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());

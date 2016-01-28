@@ -76,7 +76,12 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public static final long CONNECT_TARGET_TIMEOUT = 10_000;
 
 	public static CloudFoundryTestHarness create(BootDashModelContext context) throws Exception {
-		CloudFoundryClientFactory clientFactory = new CloudFoundryClientFactory();
+		CloudFoundryClientFactory clientFactory = CloudFoundryClientFactory.DEFAULT;
+		return create(context, clientFactory);
+	}
+
+	protected static CloudFoundryTestHarness create(BootDashModelContext context,
+			CloudFoundryClientFactory clientFactory) throws Exception {
 		CloudFoundryRunTargetType cfTargetType = new CloudFoundryRunTargetType(context, clientFactory);
 		return new CloudFoundryTestHarness(context, clientFactory, cfTargetType);
 	}

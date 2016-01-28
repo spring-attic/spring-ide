@@ -12,10 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Properties;
 
 import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,17 +21,18 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OrgsAndSpaces;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
-public class CloudFoundryClientFactory {
+public abstract class CloudFoundryClientFactory {
 
-	/*
-	 * System property. Set to "true" if connection pool is to be used. "false"
-	 * otherwise or omit as a system property
-	 */
-	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
+	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactory();
+
+	public abstract CloudFoundryOperations getClient(
+			CloudCredentials credentials,
+			URL apiUrl, String orgName, String spaceName,
+			boolean isSelfsigned
+	) throws Exception;
 
 	/**
 	 * Get the client for an existing {@link CloudFoundryRunTarget}. Note that
@@ -58,26 +57,23 @@ public class CloudFoundryClientFactory {
 				targetProperties.getSpaceName(), targetProperties.isSelfsigned());
 	}
 
-	public CloudFoundryOperations getClient(CloudCredentials credentials, URL apiUrl, String orgName, String spaceName,
-			boolean isSelfsigned) throws Exception {
-		checkPassword(credentials.getPassword(), credentials.getEmail());
 
-		Properties properties = System.getProperties();
-		// By default disable connection pool (i.e. flag is set to true) unless
-		// a property exists that sets
-		// USING connection pool to "true" (so, i.e., disable connection pool is
-		// false)
-		boolean disableConnectionPool = properties == null || !properties.containsKey(BOOT_DASH_CONNECTION_POOL)
-				|| !"true".equals(properties.getProperty(BOOT_DASH_CONNECTION_POOL));
-
-		return spaceName != null
-				? new CloudFoundryClient(credentials, apiUrl, orgName, spaceName, isSelfsigned, disableConnectionPool)
-				: new CloudFoundryClient(credentials, apiUrl, isSelfsigned, disableConnectionPool);
-
+	/**
+	 * Wrapper around the client. API used by CF support in boot dash
+	 *
+	 * @return
+	 */
+	public static ClientRequests getClientRequests(CloudFoundryOperations client) {
+		//TODO: really this method shouldn't be here. The factory should only ever need to
+		// return a 'ClientRequests' wrapper. If some code is directly using an unwrapped
+		// CloudFoundryOperations somewhere then that should be changed.
+		return new ClientRequests(client);
 	}
 
 	public OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
 			throws Exception {
+
+		//TODO: this doesn't belong in a 'factory'. Where should/can it go?
 
 		OrgsAndSpaces spaces = null;
 
@@ -96,20 +92,6 @@ public class CloudFoundryClientFactory {
 		return spaces;
 	}
 
-	public static void checkPassword(String password, String id) throws MissingPasswordException {
-		if (password == null) {
-			throw new MissingPasswordException("No password stored or set for: " + id
-					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
-		}
-	}
 
-	/**
-	 * Wrapper around the client. API used by CF support in boot dash
-	 *
-	 * @return
-	 */
-	public ClientRequests getClientRequests(CloudFoundryOperations client) {
-		return new ClientRequests(client);
-	}
 
 }
