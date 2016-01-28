@@ -14,10 +14,10 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.DEBUGGING
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.STARTING;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
@@ -25,12 +25,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import java.util.EnumSet;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.cloudfoundry.client.lib.domain.CloudInfo;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -40,6 +35,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
@@ -52,7 +48,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProp
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -64,7 +59,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	// Cache these to avoid frequent client calls
 	private List<CloudDomain> domains;
-	private List<CloudSpace> spaces;
+	private List<CFSpace> spaces;
 	private List<Buildpack> buildpacks;
 
 	private LiveVariable<ClientRequests> cachedClient;
@@ -206,7 +201,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return domains;
 	}
 
-	public synchronized List<CloudSpace> getSpaces(ClientRequests requests, IProgressMonitor monitor) throws Exception {
+	public synchronized List<CFSpace> getSpaces(ClientRequests requests, IProgressMonitor monitor) throws Exception {
 		if (spaces == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 

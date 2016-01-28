@@ -16,17 +16,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.when;
 
-import java.net.URL;
-import java.util.AbstractCollection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.mockito.invocation.InvocationOnMock;
@@ -36,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -140,8 +136,8 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		this.cfTargetType = cfTargetType;
 	}
 
-	private CloudSpace getSpace(CloudFoundryTargetWizardModel wizard, String orgName, String spaceName) {
-		for (CloudSpace space : wizard.getSpaces().getOrgSpaces(orgName)) {
+	private CFSpace getSpace(CloudFoundryTargetWizardModel wizard, String orgName, String spaceName) {
+		for (CFSpace space : wizard.getSpaces().getOrgSpaces(orgName)) {
 			if (space.getName().equals(spaceName)) {
 				return space;
 			}

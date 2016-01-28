@@ -53,14 +53,14 @@ public abstract class CloudFoundryClientFactory {
 
 		OrgsAndSpaces spaces = null;
 
-		Operation<List<CloudSpace>> op = new Operation<List<CloudSpace>>(
+		Operation<List<CFSpace>> op = new Operation<List<CFSpace>>(
 				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
-			protected List<CloudSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+			protected List<CFSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				return CloudFoundryClientFactory.this.getClient(targetProperties).getSpaces();
 			}
 		};
 
-		List<CloudSpace> actualSpaces = op.run(context, true);
+		List<CFSpace> actualSpaces = op.run(context, true);
 		if (actualSpaces != null && !actualSpaces.isEmpty()) {
 			spaces = new OrgsAndSpaces(actualSpaces);
 		}

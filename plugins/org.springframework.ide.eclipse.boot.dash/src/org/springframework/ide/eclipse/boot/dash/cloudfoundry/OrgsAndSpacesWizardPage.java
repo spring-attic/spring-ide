@@ -12,9 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudEntity;
-import org.cloudfoundry.client.lib.domain.CloudOrganization;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -32,6 +29,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFEntity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -104,9 +104,9 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 	}
 
 	public void setInput() {
-		List<CloudOrganization> orgInput = spaces.getOrgs();
+		List<CFOrganization> orgInput = spaces.getOrgs();
 
-		CloudOrganization[] organizationInput = orgInput.toArray(new CloudOrganization[orgInput.size()]);
+		CFOrganization[] organizationInput = orgInput.toArray(new CFOrganization[orgInput.size()]);
 		orgsSpacesViewer.setInput(organizationInput);
 
 		// Expand all first, so that child elements can be selected
@@ -117,7 +117,7 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 
 	protected void setInitialSelectionInViewer() {
 
-		CloudSpace selectedSpace = spaces.getAllSpaces().get(0);
+		CFSpace selectedSpace = spaces.getAllSpaces().get(0);
 
 		if (selectedSpace != null) {
 			setSpaceInProperties(selectedSpace);
@@ -125,7 +125,7 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 		}
 	}
 
-	protected void setSelectionInViewer(CloudSpace selectedSpace) {
+	protected void setSelectionInViewer(CFSpace selectedSpace) {
 		// Now set the cloud space in the tree
 		Tree tree = orgsSpacesViewer.getTree();
 		TreeItem[] orgItems = tree.getItems();
@@ -136,8 +136,8 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 			// org
 			for (TreeItem item : orgItems) {
 				Object treeObj = item.getData();
-				if (treeObj instanceof CloudOrganization
-						&& ((CloudOrganization) treeObj).getName().equals(selectedSpace.getOrganization().getName())) {
+				if (treeObj instanceof CFOrganization
+						&& ((CFOrganization) treeObj).getName().equals(selectedSpace.getOrganization().getName())) {
 					orgItem = item;
 					break;
 
@@ -149,8 +149,8 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 				if (children != null) {
 					for (TreeItem childItem : children) {
 						Object treeObj = childItem.getData();
-						if (treeObj instanceof CloudSpace
-								&& ((CloudSpace) treeObj).getName().equals(selectedSpace.getName())) {
+						if (treeObj instanceof CFSpace
+								&& ((CFSpace) treeObj).getName().equals(selectedSpace.getName())) {
 							tree.select(childItem);
 							break;
 						}
@@ -168,14 +168,14 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 			if (selectedItems != null && selectedItems.length > 0) {
 				// It's a single selection tree, so only get the first selection
 				Object selectedObj = selectedItems[0].getData();
-				setSpaceInProperties(selectedObj instanceof CloudSpace ? (CloudSpace) selectedObj : null);
+				setSpaceInProperties(selectedObj instanceof CFSpace ? (CFSpace) selectedObj : null);
 			}
 		}
 		refreshWizardUI();
 	}
 
-	protected void setSpaceInProperties(CloudSpace space) {
-		targetProperties.setSpace(space);
+	protected void setSpaceInProperties(CFSpace selectedSpace) {
+		targetProperties.setSpace(selectedSpace);
 	}
 
 	private void refreshWizardUI() {
@@ -193,9 +193,9 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 		}
 
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			if (e1 instanceof CloudEntity && e2 instanceof CloudEntity) {
-				String name1 = ((CloudEntity) e1).getName();
-				String name2 = ((CloudEntity) e2).getName();
+			if (e1 instanceof CFEntity && e2 instanceof CFEntity) {
+				String name1 = ((CFEntity) e1).getName();
+				String name2 = ((CFEntity) e2).getName();
 				return name1.compareTo(name2);
 			}
 
@@ -214,10 +214,10 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 		}
 
 		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof CloudOrganization) {
-				List<CloudSpace> children = spaces.getOrgSpaces(((CloudOrganization) parentElement).getName());
+			if (parentElement instanceof CFOrganization) {
+				List<CFSpace> children = spaces.getOrgSpaces(((CFOrganization) parentElement).getName());
 				if (children != null) {
-					return children.toArray(new CloudSpace[children.size()]);
+					return children.toArray(new CFSpace[children.size()]);
 				}
 			}
 			return null;
@@ -249,8 +249,8 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 		}
 
 		public String getText(Object element) {
-			if (element instanceof CloudEntity) {
-				CloudEntity cloudEntity = (CloudEntity) element;
+			if (element instanceof CFEntity) {
+				CFEntity cloudEntity = (CFEntity) element;
 				return cloudEntity.getName();
 			}
 			return super.getText(element);

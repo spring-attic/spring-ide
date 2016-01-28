@@ -25,13 +25,10 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;

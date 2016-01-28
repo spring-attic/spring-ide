@@ -277,11 +277,11 @@ public class ClientRequests {
 	}
 
 
-	public List<CloudSpace> getSpaces() throws Exception {
-		return new ClientRequest<List<CloudSpace>>(this.client, "Getting Cloud spaces") {
+	public List<CFSpace> getSpaces() throws Exception {
+		return new ClientRequest<List<CFSpace>>(this.client, "Getting Cloud spaces") {
 			@Override
-			protected List<CloudSpace> doRun(CloudFoundryOperations client) throws Exception {
-				return client.getSpaces();
+			protected List<CFSpace> doRun(CloudFoundryOperations client) throws Exception {
+				return CFWrapping.wrap(client.getSpaces());
 			}
 		}.call();
 	}

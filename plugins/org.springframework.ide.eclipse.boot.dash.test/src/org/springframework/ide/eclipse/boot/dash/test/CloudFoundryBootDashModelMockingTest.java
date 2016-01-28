@@ -21,8 +21,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
@@ -57,6 +57,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
+		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		this.ui = mock(UserInteractions.class);
@@ -71,7 +72,9 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test
 	public void testCreateCfTarget() throws Exception {
-		ClientRequests client = clientFactory.client;
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 
 		CloudFoundryBootDashModel target =  harness.createCfTarget(CfTestTargetParams.fromEnv());
 		assertNotNull(target);

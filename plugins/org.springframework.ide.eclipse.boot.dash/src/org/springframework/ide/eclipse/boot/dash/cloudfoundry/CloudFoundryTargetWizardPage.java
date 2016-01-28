@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -29,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -288,10 +288,10 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		super.dispose();
 	}
 
-	class SetSpaceValListener implements ValueListener<CloudSpace> {
+	class SetSpaceValListener implements ValueListener<CFSpace> {
 
 		@Override
-		public void gotValue(LiveExpression<CloudSpace> exp, CloudSpace value) {
+		public void gotValue(LiveExpression<CFSpace> exp, CFSpace value) {
 			if (spaceValueText != null && !spaceValueText.isDisposed()) {
 				spaceValueText.setText(value != null ? value.getName() : "");
 			}
