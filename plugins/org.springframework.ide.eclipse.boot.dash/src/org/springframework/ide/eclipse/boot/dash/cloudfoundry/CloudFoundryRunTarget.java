@@ -241,9 +241,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		if (javaProject != null) {
 			try {
 				if (this.buildpacks == null) {
-					BuildpackSupport support = getClient().getBuildpackSupport();
 					// Cache it to avoid frequent calls to CF
-					this.buildpacks = support.getBuildpacks();
+					this.buildpacks = getClient().getBuildpacks();
 				}
 
 				if (this.buildpacks != null) {

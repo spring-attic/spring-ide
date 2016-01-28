@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.operation.IRunnableContext;

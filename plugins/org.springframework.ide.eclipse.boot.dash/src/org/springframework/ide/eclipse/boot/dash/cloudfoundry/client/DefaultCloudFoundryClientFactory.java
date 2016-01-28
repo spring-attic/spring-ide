@@ -16,7 +16,6 @@ import java.util.Properties;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
 
 public class DefaultCloudFoundryClientFactory extends CloudFoundryClientFactory {
@@ -30,7 +29,7 @@ public class DefaultCloudFoundryClientFactory extends CloudFoundryClientFactory 
 	@Override
 	public ClientRequests getClient(CFClientParams params) throws Exception {
 		CloudCredentials credentials = new CloudCredentials(params.getUsername(), params.getPassword());
-		return new ClientRequests(
+		return new DefaultClientRequests(
 				getOperations(
 						credentials,
 						new URL(params.getApiUrl()),
