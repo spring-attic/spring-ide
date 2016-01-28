@@ -40,8 +40,7 @@ import com.google.common.collect.ImmutableList;
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	private Map<String, CFOrganization> orgsByName = new HashMap<>();
-	private Map<String, CFSpace> spacesByName = new HashMap<>();
-	private Map<String, CFService> servicesByName = new HashMap<>();
+	private Map<String, MockCFSpace> spacesByName = new HashMap<>();
 
 	/**
 	 * Becomes non-null if notImplementedStub is called, used to check that the tests
@@ -54,12 +53,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		return new MockClient(params);
 	}
 
-	public CFSpace defSpace(String orgName, String spaceName) {
+	public MockCFSpace defSpace(String orgName, String spaceName) {
 		String key = orgName+"/"+spaceName;
-		CFSpace existing = spacesByName.get(key);
+		MockCFSpace existing = spacesByName.get(key);
 		if (existing==null) {
 			CFOrganization org = defOrg(orgName);
-			spacesByName.put(key, existing= new CFSpaceData(
+			spacesByName.put(key, existing= new MockCFSpace(
 					spaceName,
 					UUID.randomUUID(),
 					org
@@ -81,13 +80,16 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	public void assertOnlyImplementedStubsCalled() throws Exception {
 		if (notImplementedStubCalled!=null) {
-			throw new Exception(notImplementedStubCalled);
+			throw notImplementedStubCalled;
 		}
 	}
 
 	private class MockClient implements ClientRequests {
 
+		private CFClientParams params;
+
 		public MockClient(CFClientParams params) {
+			this.params = params;
 		}
 
 		private void notImplementedStub() {
@@ -179,16 +181,22 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			return null;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public List<CFSpace> getSpaces() throws Exception {
-			return ImmutableList.copyOf(spacesByName.values());
+			@SuppressWarnings("rawtypes")
+			List hack = ImmutableList.copyOf(spacesByName.values());
+			return hack;
 		}
 
 		@Override
 		public List<CFService> getServices() throws Exception {
-			return ImmutableList.copyOf(servicesByName.values());
+			return getSpace().getServices();
 		}
 
+		private MockCFSpace getSpace() {
+			return spacesByName.get(params.getOrgName()+"/"+params.getSpaceName());
+		}
 		@Override
 		public HealthCheckSupport getHealthCheckSupport() throws Exception {
 			notImplementedStub();
@@ -221,7 +229,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public List<CloudApplication> getApplicationsWithBasicInfo() throws Exception {
-			notImplementedStub();
 			return null;
 		}
 
