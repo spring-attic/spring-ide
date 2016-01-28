@@ -74,11 +74,7 @@ public abstract class ClientRequest<T> implements Callable<T> {
 			// Some CF/REST exceptions are Throwable so catch Throwable rather
 			// than Exception
 			if (errorHandler.throwError(e)) {
-				if (e instanceof Exception) {
-					throw (Exception) e;
-				} else {
-					throw ExceptionUtil.coreException(e);
-				}
+				throw ExceptionUtil.exception(e);
 			}
 		}
 		return null;
