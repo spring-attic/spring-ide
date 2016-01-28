@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeT
 	JLRMethodParserTest.class,
 	ActuatorClientTest.class,
 	ToggleFiltersModelTest.class,
-	CloudFoundryBootDashModelTest.class,
+	CloudFoundryBootDashModelIntegrationTest.class,
 	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
 	// (the test should also move then!)
 	OrderBasedComparatorTest.class,

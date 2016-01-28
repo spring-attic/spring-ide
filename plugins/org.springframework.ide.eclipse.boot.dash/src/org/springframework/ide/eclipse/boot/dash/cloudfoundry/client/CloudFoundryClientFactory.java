@@ -60,8 +60,6 @@ public abstract class CloudFoundryClientFactory {
 
 	/**
 	 * Wrapper around the client. API used by CF support in boot dash
-	 *
-	 * @return
 	 */
 	public static ClientRequests getClientRequests(CloudFoundryOperations client) {
 		//TODO: really this method shouldn't be here. The factory should only ever need to

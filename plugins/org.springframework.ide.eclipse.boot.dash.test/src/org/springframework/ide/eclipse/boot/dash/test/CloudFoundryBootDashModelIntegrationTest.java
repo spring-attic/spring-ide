@@ -19,7 +19,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.*;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.util.ArrayList;
@@ -37,8 +40,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -54,15 +55,12 @@ import com.google.common.collect.ImmutableList;
 /**
  * @author Kris De Volder
  */
-public class CloudFoundryBootDashModelTest {
+public class CloudFoundryBootDashModelIntegrationTest {
 
 	private TestBootDashModelContext context;
 	private BootProjectTestHarness projects;
 	private UserInteractions ui;
 	private CloudFoundryTestHarness harness;
-
-	private CloudFoundryClientFactory clientFactory;
-	private CloudFoundryRunTargetType cfTargetType;
 
 	////////////////////////////////////////////////////////////
 
@@ -79,19 +77,24 @@ public class CloudFoundryBootDashModelTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.clientFactory = CloudFoundryClientFactory.DEFAULT;
-		this.cfTargetType = new CloudFoundryRunTargetType(context, clientFactory);
 		this.harness = CloudFoundryTestHarness.create(context);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		this.ui = mock(UserInteractions.class);
 	}
+
+	@After
+	public void tearDown() throws Exception {
+		harness.dispose();
+	}
+
+	////////////////////////////////////////////////////////////
 
 	@Test
 	public void testCreateCfTarget() throws Exception {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(CfTestTargetParams.fromEnv());
 		assertNotNull(target);
 		assertNotNull(target.getRunTarget().getTargetProperties().getPassword());
-		assertEquals(1, harness.getRunTargetModels(cfTargetType).size());
+		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 
 	/**
@@ -215,11 +218,6 @@ public class CloudFoundryBootDashModelTest {
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////
-
-	@After
-	public void tearDown() throws Exception {
-		harness.dispose();
-	}
 
 
 }

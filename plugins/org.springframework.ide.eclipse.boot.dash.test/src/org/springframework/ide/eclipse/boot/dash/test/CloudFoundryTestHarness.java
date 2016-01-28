@@ -17,6 +17,7 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.when;
 
 import java.net.URL;
+import java.util.AbstractCollection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -128,7 +130,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	private static final List<RunTarget> NO_TARGETS = ImmutableList.of();
 
 	private CloudFoundryClientFactory clientFactory;
-	private CloudFoundryRunTargetType cfTargetType;
+	public final CloudFoundryRunTargetType cfTargetType;
 
 	private CloudFoundryTestHarness(BootDashModelContext context, CloudFoundryClientFactory clientFactory, CloudFoundryRunTargetType cfTargetType) throws Exception {
 		super(context, RunTargetTypes.LOCAL, cfTargetType);
@@ -194,6 +196,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 				return deploymentProperties;
 			}
 		});
+	}
+
+	public List<BootDashModel> getCfRunTargetModels() {
+		return getRunTargetModels(cfTargetType);
 	}
 
 }
