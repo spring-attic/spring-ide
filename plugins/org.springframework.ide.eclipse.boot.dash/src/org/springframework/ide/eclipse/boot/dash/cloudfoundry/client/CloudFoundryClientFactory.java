@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import java.net.URL;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -28,11 +25,7 @@ public abstract class CloudFoundryClientFactory {
 
 	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactory();
 
-	public abstract CloudFoundryOperations getClient(
-			CloudCredentials credentials,
-			URL apiUrl, String orgName, String spaceName,
-			boolean isSelfsigned
-	) throws Exception;
+	public abstract ClientRequests getClient(CFClientParams params) throws Exception;
 
 	/**
 	 * Get the client for an existing {@link CloudFoundryRunTarget}. Note that
@@ -46,35 +39,14 @@ public abstract class CloudFoundryClientFactory {
 	 */
 	public ClientRequests getClient(CloudFoundryRunTarget runTarget) throws Exception {
 		CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) runTarget.getTargetProperties();
-		return getClient(targetProperties);
+		return getClient(new CFClientParams(targetProperties));
 	}
 
-	public ClientRequests getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
-		return wrap(getClient(
-				new CloudCredentials(targetProperties.getUsername(), targetProperties.getPassword()),
-					new URL(targetProperties.getUrl()), targetProperties.getOrganizationName(),
-					targetProperties.getSpaceName(), targetProperties.isSelfsigned()
-				),
-				targetProperties
-		);
+	public final ClientRequests getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
+		return getClient(new CFClientParams(targetProperties));
 	}
 
-	/**
-	 * Wrapper around the client. API used by CF support in boot dash.
-	 * <p>
-	 * Note: this method is private for a a reason. Anyhting outside this class should have
-	 * no reason to have a reference to an 'unwrapped' CloudFoundryOperations and so therefore they should also
-	 * never need to wrap one.
-	 * <p>
-	 * All interactions with the CF client should be done through ClientRequests.
-	 *
-	 * @param targetProperties
-	 */
-	private static ClientRequests wrap(CloudFoundryOperations client, CloudFoundryTargetProperties targetProperties) {
-		return new ClientRequests(client, targetProperties);
-	}
-
-	public OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
+	public final OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
 			throws Exception {
 
 		//TODO: this doesn't belong in a 'factory'. Where should/can it go?

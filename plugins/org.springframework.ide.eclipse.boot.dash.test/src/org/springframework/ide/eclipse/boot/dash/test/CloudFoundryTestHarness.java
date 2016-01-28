@@ -35,6 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -94,14 +96,14 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return (CloudFoundryBootDashModel) getRunTargetModel(cfTargetType);
 	}
 
-	public CloudFoundryBootDashModel createCfTarget(CfTestTargetParams params) throws Exception {
+	public CloudFoundryBootDashModel createCfTarget(CFClientParams params) throws Exception {
 		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
 		wizard.setUrl(params.getApiUrl());
-		wizard.setUsername(params.getUser());
+		wizard.setUsername(params.getUsername());
 		wizard.setPassword(params.getPassword());
 		wizard.setSelfsigned(false);
 		wizard.resolveSpaces(new MockRunnableContext());
-		wizard.setSpace(getSpace(wizard, params.getOrg(), params.getSpace()));
+		wizard.setSpace(getSpace(wizard, params.getOrgName(), params.getSpaceName()));
 		assertOk(wizard.getValidator());
 		final CloudFoundryRunTarget newTarget = wizard.finish();
 		if (newTarget!=null) {
@@ -153,16 +155,15 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		super.dispose();
 	}
 
-	public CloudFoundryOperations createExternalClient(CfTestTargetParams params) throws Exception {
-		return clientFactory.getClient(new CloudCredentials(params.getUser(), params.getPassword()),
-				new URL(params.getApiUrl()), params.getOrg(), params.getSpace(), params.isSelfsigned());
+	public ClientRequests createExternalClient(CFClientParams params) throws Exception {
+		return clientFactory.getClient(params);
 	}
 
 	protected void deleteOwnedApps() {
 		if (!ownedAppNames.isEmpty()) {
 
 			try {
-				CloudFoundryOperations externalClient = createExternalClient(CfTestTargetParams.fromEnv());
+				ClientRequests externalClient = createExternalClient(CfTestTargetParams.fromEnv());
 				for (String appName : ownedAppNames) {
 					try {
 						externalClient.deleteApplication(appName);
