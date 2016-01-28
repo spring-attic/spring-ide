@@ -268,12 +268,12 @@ public class DefaultClientRequests implements ClientRequests {
 		}.call();
 	}
 
-	public List<CloudService> getServices() throws Exception {
-		return new ClientRequest<List<CloudService>>(this.client, "Getting Cloud Services") {
+	public List<CFService> getServices() throws Exception {
+		return new ClientRequest<List<CFService>>(this.client, "Getting Cloud Services") {
 
 			@Override
-			protected List<CloudService> doRun(CloudFoundryOperations client) throws Exception {
-				return client.getServices();
+			protected List<CFService> doRun(CloudFoundryOperations client) throws Exception {
+				return CFWrapping.wrapServices(client.getServices());
 			}
 		}.call();
 	}
@@ -283,7 +283,7 @@ public class DefaultClientRequests implements ClientRequests {
 		return new ClientRequest<List<CFSpace>>(this.client, "Getting Cloud spaces") {
 			@Override
 			protected List<CFSpace> doRun(CloudFoundryOperations client) throws Exception {
-				return CFWrapping.wrap(client.getSpaces());
+				return CFWrapping.wrapSpaces(client.getSpaces());
 			}
 		}.call();
 	}

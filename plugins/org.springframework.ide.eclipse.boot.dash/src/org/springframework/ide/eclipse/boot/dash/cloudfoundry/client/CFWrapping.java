@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 
 import com.google.common.collect.ImmutableList;
@@ -26,6 +27,9 @@ import com.google.common.collect.ImmutableList.Builder;
  * @author Kris De Volder
  */
 public class CFWrapping {
+
+	//TODO: 'wrapifying' everything is a work in progress. Only things we have needed to mock so
+	// far have been 'wrapified'.
 
 	public static CFOrganization wrap(final CloudOrganization organization) {
 		return new CFOrganization() {
@@ -41,12 +45,29 @@ public class CFWrapping {
 		};
 	}
 
-	public static List<CFSpace> wrap(List<CloudSpace> spaces) {
+	public static List<CFSpace> wrapSpaces(List<CloudSpace> spaces) {
 		Builder<CFSpace> builder = ImmutableList.builder();
 		for (CloudSpace s : spaces) {
 			builder.add(wrap(s));
 		}
 		return builder.build();
+	}
+
+	public static List<CFService> wrapServices(List<CloudService> services) {
+		Builder<CFService> builder = ImmutableList.builder();
+		for (CloudService s : services) {
+			builder.add(wrap(s));
+		}
+		return builder.build();
+	}
+
+	public static CFService wrap(final CloudService s) {
+		return new CFService() {
+			@Override
+			public String getName() {
+				return s.getName();
+			}
+		};
 	}
 
 	private static CFSpace wrap(final CloudSpace s) {
@@ -76,5 +97,6 @@ public class CFWrapping {
 			}
 		};
 	}
+
 
 }

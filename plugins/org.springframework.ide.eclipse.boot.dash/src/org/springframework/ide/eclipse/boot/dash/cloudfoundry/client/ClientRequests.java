@@ -47,7 +47,7 @@ public interface ClientRequests {
 	List<CloudDomain> getDomains() throws Exception;
 	CloudAppInstances getExistingAppInstances(String appName) throws Exception;
 	CloudAppInstances getExistingAppInstances(UUID guid) throws Exception;
-	List<CloudService> getServices() throws Exception;
+	List<CFService> getServices() throws Exception;
 	List<CFSpace> getSpaces() throws Exception;
 	void restartApplication(String appName) throws Exception;
 	void stopApplication(String appName) throws Exception;

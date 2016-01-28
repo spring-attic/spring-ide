@@ -26,7 +26,10 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 
 /**
  * @author Kris De Volder
@@ -64,7 +67,9 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@After
 	public void tearDown() throws Exception {
-		harness.dispose();
+		waitForJobsToComplete();
+//		clientFactory.assertOnlyImplementedStubsCalled();
+//		harness.dispose();
 	}
 
 	////////////////////////////////////////////////////////////

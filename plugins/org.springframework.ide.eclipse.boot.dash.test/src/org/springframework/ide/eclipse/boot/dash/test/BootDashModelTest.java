@@ -1019,7 +1019,7 @@ public class BootDashModelTest {
 		};
 	}
 
-	private void waitForJobsToComplete() throws Exception {
+	public static void waitForJobsToComplete() throws Exception {
 		new ACondition("Wait for Jobs", 3 * 60 * 1000) {
 			@Override
 			public boolean test() throws Exception {
