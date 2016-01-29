@@ -1,7 +1,7 @@
 ---
-key1: value1
-key2: value2
 name: app
 memory: 2048M
 host: test-app
 domain: springsource.org
+key1: value1
+key2: value2

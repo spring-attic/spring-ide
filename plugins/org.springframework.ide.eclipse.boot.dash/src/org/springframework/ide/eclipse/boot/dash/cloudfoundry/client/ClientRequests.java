@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
 						new Staging(null, deploymentProperties.getBuildpack()), deploymentProperties.getMemory(),
-						deploymentProperties.getUrls(), deploymentProperties.getServices());
+						new ArrayList<>(deploymentProperties.getUris()), deploymentProperties.getServices());
 			}
 		}.call();
 	}

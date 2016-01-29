@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.runtime.CoreException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * Application URL that can only be defined by subdomain and domain segments.
@@ -92,7 +92,7 @@ public class CloudApplicationURL {
 		try {
 			newUri = URI.create(url);
 		} catch (IllegalArgumentException e) {
-			throw new CoreException(BootDashActivator.createErrorStatus(e));
+			throw new CoreException(ExceptionUtil.status(e));
 		}
 
 		String authority = newUri.getScheme() != null ? newUri.getAuthority() : newUri.getPath();
@@ -132,13 +132,8 @@ public class CloudApplicationURL {
 		}
 
 		if (parsedDomainName == null || parsedDomainName.trim().length() == 0) {
-			throw BootDashActivator.asCoreException("Unable to parse domain from: " + url
+			throw ExceptionUtil.coreException("Unable to parse domain from: " + url
 					+ ". The domain may not exist in the Cloud Foundry target. Please make sure that the URL uses a valid Cloud domain available in the Cloud Foundry target.");
-		}
-		if (parsedSubdomainName == null || parsedSubdomainName.trim().length() == 0) {
-			throw BootDashActivator
-					.asCoreException("Unable to parse host from: " + url + ". Please verify that the URL is correct.");
-
 		}
 		return new CloudApplicationURL(parsedSubdomainName, parsedDomainName);
 	}

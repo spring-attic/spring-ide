@@ -192,7 +192,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 				deploymentProperties.setProject(project.getProject());
 				deploymentProperties.setAppName(appName);
 				String url = hostName + "." + domains.get(0).getName();
-				deploymentProperties.setUrls(ImmutableList.of(url));
+				deploymentProperties.setUris(ImmutableList.of(url));
 				return deploymentProperties;
 			}
 		});
