@@ -18,26 +18,33 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeT
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	//Tests suites are put in order roughly based on
+	// how long it takes to run them. Faster ones at the top.
+
+	//Really short (less than 2 seconds per suite):
+	JLRMethodParserTest.class,
+	OrderBasedComparatorTest.class,
+	ManifestCompareMergeTests.class,
 	ManifestYmlSchemaTest.class,
 	ManifestYamlEditorTest.class,
-	BootDashViewModelTest.class,
-	JarNameGeneratorTest.class,
-	BootJarPackagingTest.class,
-	BootDashModelTest.class,
-	BootDashActionTests.class,
 	AbstractLaunchConfigurationsDashElementTest.class,
 	BootDashElementTagsTests.class,
-	JLRMethodParserTest.class,
 	ActuatorClientTest.class,
 	ToggleFiltersModelTest.class,
+	CloudFoundryBootDashModelMockingTest.class,
+
+	//Medium length (less than 30 seconds):
+	JarNameGeneratorTest.class,
+	BootJarPackagingTest.class,
+	BootDashViewModelTest.class,
+
+	//Long tests (more than 30 seconds):
+	BootDashActionTests.class,
+	BootDashModelTest.class,
 	CloudFoundryBootDashModelIntegrationTest.class,
-	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
-	// (the test should also move then!)
-	OrderBasedComparatorTest.class,
-	ManifestCompareMergeTests.class
 })
 public class AllBootDashTests {
-	
+
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash.test";
 
 }
