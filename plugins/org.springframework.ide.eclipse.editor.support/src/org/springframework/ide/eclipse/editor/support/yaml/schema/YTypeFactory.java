@@ -20,7 +20,9 @@ import java.util.Map;
 import javax.inject.Provider;
 
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
+import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 /**
  * Static utility method for creating YType objects representing either
@@ -98,6 +100,11 @@ public class YTypeFactory {
 		public boolean isBean(YType type) {
 			return ((AbstractType)type).isBean();
 		}
+
+		@Override
+		public ValueParser getValueParser(YType type) {
+			return ((AbstractType)type).getParser();
+		}
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -107,10 +114,9 @@ public class YTypeFactory {
 	 */
 	public static abstract class AbstractType implements YType {
 
+		private ValueParser parser;
 		private List<YTypedProperty> propertyList = new ArrayList<>();
-
 		private final List<String> hints = new ArrayList<>();
-
 		private Map<String, YTypedProperty> cachedPropertyMap;
 
 		public boolean isSequenceable() {
@@ -171,9 +177,14 @@ public class YTypeFactory {
 		public void addProperty(String name, YType type) {
 			addProperty(new YTypedPropertyImpl(name, type));
 		}
-
 		public void addHints(String... strings) {
 			hints.addAll(Arrays.asList(strings));
+		}
+		public void parseWith(ValueParser parser) {
+			this.parser = parser;
+		}
+		public ValueParser getParser() {
+			return parser;
 		}
 	}
 
@@ -315,6 +326,7 @@ public class YTypeFactory {
 	public YAtomicType yenum(String name, String... values) {
 		YAtomicType t = yatomic(name);
 		t.addHints(values);
+		t.parseWith(new EnumValueParser(name, values));
 		return t;
 	}
 }

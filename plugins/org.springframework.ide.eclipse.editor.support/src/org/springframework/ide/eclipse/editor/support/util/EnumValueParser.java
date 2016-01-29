@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,15 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
-
 /**
- * Parser for checking a 'Enum' type value in the {@link SpringPropertiesReconcileEngine}.
+ * Parser for checking a 'Enum' style values.
  *
  * @author Kris De Volder
  */

@@ -17,12 +17,14 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -98,11 +100,32 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 				}
 				break;
 			case scalar:
+				if (typeUtil.isAtomic(type)) {
+					ValueParser parser = typeUtil.getValueParser(type);
+					if (parser!=null) {
+						try {
+							parser.parse(NodeUtil.asScalar(node));
+						} catch (Exception e) {
+							String msg = ExceptionUtil.getMessage(e);
+							valueParseError(type, node, msg);
+						}
+					}
+				} else {
+					expectTypeButFoundScalar(type, node);
+				}
 				break;
 			default:
 				// other stuff we don't check
 			}
 		}
+	}
+
+	private void valueParseError(YType type, Node node, String parseErrorMsg) {
+		String msg= "Couldn't parse as '"+describe(type)+"'";
+		if (StringUtils.hasText(parseErrorMsg)) {
+			msg += " ("+parseErrorMsg+")";
+		}
+		problem(node, msg);
 	}
 
 	private void unknownBeanProperty(Node keyNode, YType type, String name) {
@@ -126,6 +149,10 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 		default:
 			throw new IllegalStateException("Missing switch case");
 		}
+	}
+
+	private void expectTypeButFoundScalar(YType type, Node node) {
+		problem(node, "Expecting a '"+describe(type)+"' but found a 'Scalar'");
 	}
 
 	private void expectTypeButFoundSequence(YType type, Node node) {
