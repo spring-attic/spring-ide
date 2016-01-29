@@ -30,7 +30,6 @@ public interface ClientRequests {
 
 	//TODO: consider removing the getXXXSupport method and directly adding the apis that these support
 	// objects provide.
-	//HealthCheckSupport getHealthCheckSupport() throws Exception;
 	SshClientSupport getSshClientSupport() throws Exception;
 
 	void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception;

@@ -53,4 +53,14 @@ public class MockCFSpace extends CFSpaceData {
 		return existing;
 	}
 
+	public CFService defService(String name) {
+		CFService existing = servicesByName.get(name);
+		if (existing==null) {
+			servicesByName.put(name, new CFServiceData(
+					name
+			));
+		}
+		return existing;
+	}
+
 }

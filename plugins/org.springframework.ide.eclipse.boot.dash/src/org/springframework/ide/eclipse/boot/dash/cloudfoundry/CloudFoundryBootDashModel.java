@@ -814,4 +814,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return applications;
 	}
 
+	public ObservableSet<CloudServiceDashElement> getServices() {
+		return services;
+	}
+
 }

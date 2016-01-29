@@ -18,7 +18,6 @@ import java.util.UUID;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
@@ -33,7 +32,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
