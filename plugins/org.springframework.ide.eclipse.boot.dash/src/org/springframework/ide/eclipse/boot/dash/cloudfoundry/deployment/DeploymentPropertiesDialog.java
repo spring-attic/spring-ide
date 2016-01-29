@@ -309,6 +309,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		});
 
 		parent.pack(true);
+
+		/*
+		 * Reveal the selected manifest file in the workspace viewer now when
+		 * controls are created and laid out
+		 */
+		if (!workspaceViewer.getSelection().isEmpty()) {
+			workspaceViewer.setSelection(workspaceViewer.getSelection(), true);
+		}
 		return container;
 	}
 
