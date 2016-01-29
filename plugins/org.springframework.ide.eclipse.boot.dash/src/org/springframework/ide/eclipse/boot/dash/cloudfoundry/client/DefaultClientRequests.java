@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -65,7 +66,7 @@ public class DefaultClientRequests implements ClientRequests {
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
 						new Staging(null, deploymentProperties.getBuildpack()), deploymentProperties.getMemory(),
-						deploymentProperties.getUrls(), deploymentProperties.getServices());
+						new ArrayList<>(deploymentProperties.getUris()), deploymentProperties.getServices());
 			}
 		}.call();
 	}
@@ -82,6 +83,15 @@ public class DefaultClientRequests implements ClientRequests {
 			this.cachedCloudInfo = new CloudInfoV2(creds, client.getCloudControllerUrl(), proxyConf, clientParams.isSelfsigned());
 		}
 		return this.cachedCloudInfo;
+	}
+
+	public void updateApplicationDiskQuota(final String appName, final int diskQuota) throws Exception {
+		new BasicRequest(this.client, appName, "Updating application disk quota") {
+			@Override
+			protected void runRequest(CloudFoundryOperations client) throws Exception {
+				client.updateApplicationDiskQuota(appName, diskQuota);
+			}
+		}.call();
 	}
 
 	public CFApplication getApplication(final String appName) throws Exception {

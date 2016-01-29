@@ -11,8 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,7 +63,8 @@ public class SelectManifestOp extends CloudOperation {
 //		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
 		try {
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, model.getRunTarget().getDomains(monitor), model.getAppCache().getApp(project)));
+			List<CloudDomain> domains = model.getRunTarget().getDomains(monitor);
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, domains, model.getAppCache().getApp(project)), domains);
 		} catch (Exception e) {
 			// ignore
 		}

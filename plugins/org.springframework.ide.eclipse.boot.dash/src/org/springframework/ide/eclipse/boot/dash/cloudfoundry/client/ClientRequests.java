@@ -58,4 +58,5 @@ public interface ClientRequests {
 	void uploadApplication(String appName, ApplicationArchive archive) throws Exception;
 	String getHealthCheck(UUID appGuid);
 	void setHealthCheck(UUID guid, String hcType);
+	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
 }

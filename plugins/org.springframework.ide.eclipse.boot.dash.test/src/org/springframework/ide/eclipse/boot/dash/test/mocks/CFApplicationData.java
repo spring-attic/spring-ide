@@ -33,6 +33,7 @@ public class CFApplicationData implements CFApplication {
 	private String buildpackUrl = null;
 	private List<String> uris = new ArrayList<>();
 	private AppState state = AppState.STOPPED;
+	private int diskQuota = 1024;
 
 	@Override
 	public String getName() {
@@ -96,6 +97,11 @@ public class CFApplicationData implements CFApplication {
 	@Override
 	public AppState getState() {
 		return state;
+	}
+
+	@Override
+	public int getDiskQuota() {
+		return diskQuota;
 	}
 
 }

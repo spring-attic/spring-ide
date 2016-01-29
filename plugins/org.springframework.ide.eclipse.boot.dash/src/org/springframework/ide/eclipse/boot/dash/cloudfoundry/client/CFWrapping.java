@@ -179,6 +179,11 @@ public class CFWrapping {
 		public AppState getState() {
 			return a.getState();
 		}
+
+		@Override
+		public int getDiskQuota() {
+			return a.getDiskQuota();
+		}
 	}
 
 	public static CloudApplication unwrap(final CFApplication a) {

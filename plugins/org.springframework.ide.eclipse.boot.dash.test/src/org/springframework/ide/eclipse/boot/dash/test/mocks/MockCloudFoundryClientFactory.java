@@ -245,13 +245,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public void deleteApplication(String name) throws Exception {
 			notImplementedStub();
-
 		}
 
 		@Override
 		public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
 			notImplementedStub();
-
 		}
 
 		@Override
@@ -262,6 +260,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public void setHealthCheck(UUID guid, String hcType) {
+			notImplementedStub();
+		}
+
+		@Override
+		public void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception {
 			notImplementedStub();
 		}
 	};

@@ -173,7 +173,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 		deploymentProperties.setAppName(preexistingAppName);
 		deploymentProperties.setMemory(1024);
-		deploymentProperties.setUrls(ImmutableList.of(preexistingAppName + "." + domains.get(0).getName()));
+		deploymentProperties.setUris(ImmutableList.of(preexistingAppName + "." + domains.get(0).getName()));
 		deploymentProperties.setServices(ImmutableList.<String>of());
 		externalClient.createApplication(deploymentProperties);
 

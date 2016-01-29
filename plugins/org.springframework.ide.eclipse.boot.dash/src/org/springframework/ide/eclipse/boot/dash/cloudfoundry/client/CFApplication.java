@@ -27,4 +27,5 @@ public interface CFApplication extends CFEntity {
 	String getBuildpackUrl();
 	List<String> getUris();
 	AppState getState();
+	int getDiskQuota();
 }

@@ -31,6 +31,8 @@ public abstract class DeploymentPropertiesValidator extends Validator {
 			errorMessage = "Missing application name.";
 		} else if (deploymentProperties.getMemory() <= 0) {
 			errorMessage = "Invalid memory. Memory must be greater than 0.";
+		} else if (deploymentProperties.getDiskQuota() <= 0) {
+			errorMessage = "Invalid disk quota value. Must be greater than 0.";
 		} else if (deploymentProperties.getInstances() < 1) {
 			errorMessage = "Invalid instances. There must be at least one instance for the application.";
 		}

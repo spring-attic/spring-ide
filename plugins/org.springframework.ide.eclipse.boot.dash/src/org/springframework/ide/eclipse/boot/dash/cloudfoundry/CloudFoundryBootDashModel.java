@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
@@ -764,10 +765,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, getRunTarget().getDomains(monitor), null);
+		List<CloudDomain> cloudDomains = getRunTarget().getDomains(monitor);
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudDomains, null);
 		CloudAppDashElement element = getApplication(props.getAppName());
 		if (ui != null) {
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props);
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudDomains);
 			DumperOptions options = new DumperOptions();
 			options.setExplicitStart(true);
 			options.setCanonical(false);
