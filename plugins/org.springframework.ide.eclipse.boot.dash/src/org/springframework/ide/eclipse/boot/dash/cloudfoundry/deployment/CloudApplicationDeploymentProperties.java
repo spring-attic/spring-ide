@@ -11,12 +11,15 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
@@ -31,23 +34,19 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
-	public static final int DEFAULT_INSTANCES = 1;
-
 	protected final LiveSet<String> boundServices = new LiveSet<String>(new HashSet<String>());
 	protected final LiveVariable<Map<String, String>> environmentVariables = new LiveVariable<Map<String, String>>(
 			new HashMap<String, String>());
 	protected final LiveVariable<String> buildpack = new LiveVariable<String>("");
 
-	protected final LiveVariable<Integer> instances = new LiveVariable<Integer>(DEFAULT_INSTANCES);
+	protected final LiveVariable<Integer> instances = new LiveVariable<Integer>(DeploymentProperties.DEFAULT_INSTANCES);
 
 	private LiveVariable<Boolean> writeManifest = new LiveVariable<>(false);
-
-	public static final int DEFAULT_MEMORY = 1024;
 
 	/*
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
-	protected final LiveSet<String> urls = new LiveSet<String>();
+	protected final LiveVariable<LinkedHashSet<String>> urls = new LiveVariable<LinkedHashSet<String>>(new LinkedHashSet<String>());
 
 	protected final LiveVariable<String> host = new LiveVariable<>();
 
@@ -57,7 +56,9 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	protected final LiveVariable<IProject> project = new LiveVariable<>();
 
-	protected final LiveVariable<Integer> memory = new LiveVariable<Integer>(DEFAULT_MEMORY);
+	protected final LiveVariable<Integer> memory = new LiveVariable<Integer>(DeploymentProperties.DEFAULT_MEMORY);
+
+	protected final LiveVariable<Integer> diskQuota = new LiveVariable<Integer>(DeploymentProperties.DEFAULT_MEMORY);
 
 	protected final LiveVariable<IFile> manifestFile = new LiveVariable<IFile>();
 
@@ -89,6 +90,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		return memory.getValue();
 	}
 
+	public void setDiskQuota(int diskQuota) {
+		this.diskQuota.setValue(diskQuota);
+	}
+
+	public int getDiskQuota() {
+		return diskQuota.getValue();
+	}
+
 	public void setManifestFile(IFile file) {
 		this.manifestFile.setValue(file);
 	}
@@ -102,31 +111,12 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 *
 	 * @return never null
 	 */
-	public List<String> getUrls() {
-		return this.urls.getValues();
+	public Set<String> getUris() {
+		return urls.getValue();
 	}
 
-	public void setUrls(List<String> urls) {
-		if (urls == null) {
-			urls = new ArrayList<String>();
-		}
-		this.urls.addAll(urls);
-	}
-
-	public String getHost() {
-		return host.getValue();
-	}
-
-	public void setHost(String value) {
-		host.setValue(value);
-	}
-
-	public String getDomain() {
-		return domain.getValue();
-	}
-
-	public void setDomain(String value) {
-		domain.setValue(value);
+	public void setUris(Collection<String> urls) {
+		this.urls.setValue(urls == null ? new LinkedHashSet<String>() : new LinkedHashSet<>(urls));
 	}
 
 	public void setAppName(String appName) {
@@ -241,17 +231,15 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 		target.setAppName(this.getAppName());
 		target.setProject(this.getProject());
-		target.setHost(getHost());
-		target.setDomain(getDomain());
 
 		// Instead of replacing URLs, merge them
-		List<String> targetUrls = target.getUrls();
-		for (String url : this.getUrls()) {
+		Set<String> targetUrls = target.getUris();
+		for (String url : this.getUris()) {
 			if (!targetUrls.contains(url)) {
 				targetUrls.add(url);
 			}
 		}
-		target.setUrls(targetUrls);
+		target.setUris(targetUrls);
 		return target;
 
 	}
@@ -276,27 +264,15 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setEnvironmentVariables(env);
 
 		properties.setInstances(app == null ? 1 : app.getInstances());
-		properties.setMemory(app == null ? 1024 : app.getMemory());
+		properties.setMemory(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getMemory());
 		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
+		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 
 		if (app == null) {
 			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), domains.get(0).getName());
-			properties.setUrls(Collections.singletonList(cloudAppUrl.getUrl()));
-			properties.setHost(cloudAppUrl.getSubdomain());
-			properties.setDomain(cloudAppUrl.getDomain());
+			properties.setUris(Collections.singletonList(cloudAppUrl.getUrl()));
 		} else {
-			properties.setUrls(app.getUris());
-			for (String url : properties.getUrls()) {
-				try {
-					// Find the first valid URL
-					CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(url, domains);
-					properties.setHost(cloudAppUrl.getSubdomain());
-					properties.setDomain(cloudAppUrl.getDomain());
-					break;
-				} catch (Exception e) {
-					// ignore
-				}
-			}
+			properties.setUris(app.getUris());
 		}
 		Validator validator = properties.getValidator();
 

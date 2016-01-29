@@ -10,14 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.ArrayList;
+
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * Updates deployment properties (e.g. memory, URL, instances) of an existing
@@ -42,7 +44,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		if (deploymentProperties == null) {
-			throw BootDashActivator.asCoreException("No deployment properties for application - " + appName
+			throw ExceptionUtil.coreException("No deployment properties for application - " + appName
 					+ " found. Unable to update the application");
 		}
 
@@ -110,11 +112,11 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 				subMonitor.worked(1);
 			}
 
-			if (properties.getUrls() != null && !properties.getUrls().equals(app.getUris())) {
+			if (properties.getUris() != null && !properties.getUris().equals(app.getUris())) {
 
 				subMonitor.setTaskName("Updating " + appName + " mapped URLs.");
 
-				model.getRunTarget().getClient().updateApplicationUris(appName, properties.getUrls());
+				model.getRunTarget().getClient().updateApplicationUris(appName, new ArrayList<>(properties.getUris()));
 				updated = true;
 
 				subMonitor.worked(1);

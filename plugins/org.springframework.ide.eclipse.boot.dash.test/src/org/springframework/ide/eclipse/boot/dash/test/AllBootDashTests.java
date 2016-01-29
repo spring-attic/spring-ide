@@ -14,7 +14,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
+import org.springframework.ide.eclipse.boot.dash.test.yaml.DeploymentProperties2Yaml;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeTests;
+import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProperties;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -34,6 +36,8 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeT
 	//Test for 'utilities' which may eventually be moved if we reuse them elsewhere
 	// (the test should also move then!)
 	OrderBasedComparatorTest.class,
+	DeploymentProperties2Yaml.class,
+	Yaml2DeploymentProperties.class,
 	ManifestCompareMergeTests.class
 })
 public class AllBootDashTests {

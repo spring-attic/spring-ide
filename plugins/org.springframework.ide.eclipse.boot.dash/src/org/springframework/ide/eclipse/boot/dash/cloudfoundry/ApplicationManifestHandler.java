@@ -17,19 +17,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -49,6 +51,8 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class ApplicationManifestHandler {
 
+	public static final String RANDOM_VAR = "${random}"; //$NON-NLS-1$
+
 	public static final String APPLICATIONS_PROP = "applications";
 
 	public static final String NAME_PROP = "name";
@@ -59,7 +63,17 @@ public class ApplicationManifestHandler {
 
 	public static final String SUB_DOMAIN_PROP = "host";
 
+	public static final String SUB_DOMAINS_PROP = "hosts";
+
 	public static final String DOMAIN_PROP = "domain";
+
+	public static final String DOMAINS_PROP = "domains";
+
+	public static final String NO_ROUTE_PROP = "no-route";
+
+	public static final String NO_HOSTNAME_PROP = "no-hostname";
+
+	public static final String RANDOM_ROUTE_PROP = "random-route";
 
 	public static final String SERVICES_PROP = "services";
 
@@ -77,6 +91,8 @@ public class ApplicationManifestHandler {
 
 	public static final String ENV_PROP = "env";
 
+	public static final String DISK_QUOTA_PROP = "disk_quota";
+
 	private final IProject project;
 
 	private final IFile manifestFile;
@@ -88,8 +104,6 @@ public class ApplicationManifestHandler {
 	}
 
 	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IFile manifestFile) {
-		Assert.isNotNull(project);
-
 		this.project = project;
 		this.manifestFile = manifestFile;
 		this.domains = domains;
@@ -137,7 +151,7 @@ public class ApplicationManifestHandler {
 		try {
 			Map<?, ?> appMap = getApplicationMap(appName, monitor);
 			if (appMap != null) {
-				return getStringValue(appMap, propertyName);
+				return getValue(appMap, propertyName, String.class);
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);
@@ -152,7 +166,7 @@ public class ApplicationManifestHandler {
 
 		for (Map<?, ?> appMap : appMaps) {
 
-			String existingAppName = getStringValue(appMap, NAME_PROP);
+			String existingAppName = getValue(appMap, NAME_PROP, String.class);
 			if (existingAppName != null && existingAppName.equals(appName)) {
 				return appMap;
 			}
@@ -180,30 +194,29 @@ public class ApplicationManifestHandler {
 		}
 	}
 
-	protected String getStringValue(Map<?, ?> containingMap, String propertyName) {
-
+//	protected String getStringValue(Map<?, ?> containingMap, String propertyName) {
+//
+//		if (containingMap == null) {
+//			return null;
+//		}
+//
+//		Object valObj = containingMap.get(propertyName);
+//
+//		if (valObj instanceof String) {
+//			return (String) valObj;
+//		}
+//		return null;
+//	}
+//
+	@SuppressWarnings("unchecked")
+	protected <T> T getValue(Map<?, ?> containingMap, String propertyName, Class<T> type) {
 		if (containingMap == null) {
 			return null;
 		}
-
 		Object valObj = containingMap.get(propertyName);
 
-		if (valObj instanceof String) {
-			return (String) valObj;
-		}
-		return null;
-	}
-
-	protected Integer getIntegerValue(Map<?, ?> containingMap, String propertyName) {
-
-		if (containingMap == null) {
-			return null;
-		}
-
-		Object valObj = containingMap.get(propertyName);
-
-		if (valObj instanceof Integer) {
-			return (Integer) valObj;
+		if (valObj != null && type.isAssignableFrom(valObj.getClass())) {
+			return (T) valObj;
 		}
 		return null;
 	}
@@ -239,13 +252,15 @@ public class ApplicationManifestHandler {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
-		String appName = getStringValue(appMap, NAME_PROP);
+		String appName = getValue(appMap, NAME_PROP, String.class);
 
 		properties.setAppName(appName);
 		properties.setProject(project);
 		properties.setManifestFile(manifestFile);
 
 		readMemory(appMap, allResults, properties);
+
+		readDiskQuota(appMap, allResults, properties);
 
 		readApplicationURL(appMap, allResults, properties);
 
@@ -323,7 +338,7 @@ public class ApplicationManifestHandler {
 			return false;
 		}
 
-		Map<Object, Object> deploymentInfoYaml = toYaml(properties);
+		Map<Object, Object> deploymentInfoYaml = toYaml(properties, domains);
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);
 		options.setCanonical(false);
@@ -342,7 +357,7 @@ public class ApplicationManifestHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<Object, Object> toYaml(DeploymentProperties properties) {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, List<CloudDomain> cloudDomains) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -363,14 +378,14 @@ public class ApplicationManifestHandler {
 		if (memory != null) {
 			application.put(MEMORY_PROP, memory);
 		}
-		if (properties.getInstances() != CloudApplicationDeploymentProperties.DEFAULT_INSTANCES) {
+
+		String diskQuota = getMemoryAsString(properties.getDiskQuota());
+		if (diskQuota != null && properties.getDiskQuota() != DeploymentProperties.DEFAULT_MEMORY) {
+			application.put(DISK_QUOTA_PROP, diskQuota);
+		}
+
+		if (properties.getInstances() != DeploymentProperties.DEFAULT_INSTANCES) {
 			application.put(ApplicationManifestHandler.INSTANCES_PROP, properties.getInstances());
-		}
-		if (properties.getHost() != null) {
-			application.put(SUB_DOMAIN_PROP, properties.getHost());
-		}
-		if (properties.getDomain() != null) {
-			application.put(DOMAIN_PROP, properties.getDomain());
 		}
 		if (properties.getServices() != null && !properties.getServices().isEmpty()) {
 			application.put(SERVICES_PROP, properties.getServices());
@@ -379,7 +394,63 @@ public class ApplicationManifestHandler {
 			application.put(ENV_PROP, properties.getEnvironmentVariables());
 		}
 
+		Set<String> hosts = new LinkedHashSet<>();
+		Set<String> domains = new LinkedHashSet<>();
+
+		extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
+		for (String uri : properties.getUris()) {
+			try {
+				// Find the first valid URL
+				CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(uri, cloudDomains);
+				if (cloudAppUrl.getSubdomain() != null) {
+					hosts.add(cloudAppUrl.getSubdomain());
+				}
+				if (cloudAppUrl.getDomain() != null) {
+					domains.add(cloudAppUrl.getDomain());
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+
+		if (hosts.isEmpty() && domains.isEmpty()) {
+			application.put(NO_ROUTE_PROP, true);
+		} else {
+			if (hosts.isEmpty()) {
+				application.put(NO_HOSTNAME_PROP, true);
+			} else if (hosts.size() == 1) {
+				String host = hosts.iterator().next();
+				if (!properties.getAppName().equals(host)) {
+					application.put(SUB_DOMAIN_PROP, host);
+				}
+			} else {
+				application.put(SUB_DOMAINS_PROP, new ArrayList<>(hosts));
+			}
+			if (domains.size() == 1) {
+				application.put(DOMAIN_PROP, domains.iterator().next());
+			} else if (domains.size() > 1) {
+				application.put(DOMAINS_PROP, new ArrayList<>(domains));
+			}
+		}
+
 		return deploymentInfoYaml;
+	}
+
+	public static void extractHostsAndDomains(Collection<String> uris, List<CloudDomain> cloudDomains, Set<String> hostsSet, Set<String> domainsSet) {
+		for (String uri : uris) {
+			try {
+				// Find the first valid URL
+				CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(uri, cloudDomains);
+				if (cloudAppUrl.getSubdomain() != null) {
+					hostsSet.add(cloudAppUrl.getSubdomain());
+				}
+				if (cloudAppUrl.getDomain() != null) {
+					domainsSet.add(cloudAppUrl.getDomain());
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+		}
 	}
 
 	public void createFile(IProject project, IFile file, String data, IProgressMonitor monitor) throws CoreException {
@@ -453,9 +524,9 @@ public class ApplicationManifestHandler {
 	protected void readInstances(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 
-		Integer instances = getIntegerValue(application, INSTANCES_PROP);
+		Integer instances = getValue(application, INSTANCES_PROP, Integer.class);
 		if (instances == null) {
-			instances = getIntegerValue(allResults, INSTANCES_PROP);
+			instances = getValue(allResults, INSTANCES_PROP, Integer.class);
 		}
 		if (instances != null) {
 			properties.setInstances(instances);
@@ -465,79 +536,187 @@ public class ApplicationManifestHandler {
 	protected void readBuildpack(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 
-		String buildpack = getStringValue(application, BUILDPACK_PROP);
+		String buildpack = getValue(application, BUILDPACK_PROP, String.class);
 		if (buildpack == null) {
-			buildpack = getStringValue(allResults, BUILDPACK_PROP);
+			buildpack = getValue(allResults, BUILDPACK_PROP, String.class);
 		}
 		if (buildpack != null) {
 			properties.setBuildpack(buildpack);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
-		// See if there is a common domain defined for all apps
-		String domain = getStringValue(application, DOMAIN_PROP);
-		if (domain == null) {
-			domain = getStringValue(allResults, DOMAIN_PROP);
+
+		/*
+		 * Check for "no-route: true". If set then uris list should be empty
+		 */
+		Boolean noRoute = getValue(application, NO_ROUTE_PROP, Boolean.class);
+		if (noRoute == null) {
+			noRoute = getValue(allResults, NO_ROUTE_PROP, Boolean.class);
 		}
-
-		properties.setDomain(domain);
-
-		String subdomain = getStringValue(application, SUB_DOMAIN_PROP);
-		properties.setDomain(subdomain);
-
-		// A URL can only be constructed from the manifest if either a domain or
-		// a subdomain is specified. If neither is specified, but the app name
-		// is, the app name is used as the subdomain.Otherwise the
-		// deployment process will generate a URL from the app name, but it is
-		// not necessary to specify that URL here.
-		if (subdomain == null && domain == null && properties.getAppName() == null) {
+		if (Boolean.TRUE.equals(noRoute)) {
 			return;
 		}
-		CloudApplicationURL cloudURL = null;
-		if (subdomain == null) {
-			subdomain = properties.getAppName();
-		} else {
-			// Check for random word
-			int varIndex = subdomain.indexOf('$');
-			int startIndex = subdomain.indexOf('{');
-			int endIndex = subdomain.indexOf('}');
-			int randomIndex = subdomain.indexOf("random");
-			if (varIndex >= 0 && startIndex > varIndex && randomIndex > startIndex && endIndex > randomIndex) {
-				String randomWord = RandomStringUtils.randomAlphabetic(5);
-				subdomain = subdomain.replace(subdomain.substring(varIndex, endIndex + 1), randomWord);
+
+		HashSet<String> hostsSet = new LinkedHashSet<>();
+		HashSet<String> domainsSet = new LinkedHashSet<>();
+
+		/*
+		 * Gather domains from app node and root node from 'domain' and 'domains' attributes
+		 */
+		String domain = getValue(application, DOMAIN_PROP, String.class);
+		if (domain == null) {
+			domain = getValue(allResults, DOMAIN_PROP, String.class);
+		}
+		if (domain != null && isDomainValid(domain, domains)) {
+			domainsSet.add(domain);
+		}
+		List<String> domainList = (List<String>) getValue(allResults, DOMAINS_PROP, List.class);
+		if (domainList != null) {
+			for (String d : domainList) {
+				if (isDomainValid(d, domains)) {
+					domainsSet.add(d);
+				}
+			}
+		}
+		domainList = (List<String>) getValue(application, DOMAINS_PROP, List.class);
+		if (domainList != null) {
+			for (String d : domainList) {
+				if (isDomainValid(d, domains)) {
+					domainsSet.add(d);
+				}
 			}
 		}
 
-		if (domain == null && !domains.isEmpty()) {
-			// If no domain is specified get a URL with a default domain
-			domain = domains.get(0).getName();
+		/*
+		 * Gather domains from app node and root node from 'host' and 'hosts'
+		 * attributes. Account for ${random} in host's name
+		 */
+		String host = getValue(application, SUB_DOMAIN_PROP, String.class);
+		if (host == null) {
+			host = getValue(allResults, SUB_DOMAIN_PROP, String.class);
+		}
+		if (host != null) {
+			hostsSet.add(host);
+		}
+		List<String> hostList = (List<String>) getValue(allResults, SUB_DOMAINS_PROP, List.class);
+		if (hostList != null) {
+			hostsSet.addAll(hostList);
+		}
+		hostList = (List<String>) getValue(application, SUB_DOMAINS_PROP, List.class);
+		if (hostList != null) {
+			hostsSet.addAll(hostList);
 		}
 
-		cloudURL = new CloudApplicationURL(subdomain, domain);
+		/*
+		 * If no host names found check for "random-route: true" and
+		 * "no-hostname: true" otherwise take app name as the host name
+		 */
+		if (hostsSet.isEmpty()) {
+			Boolean randomRoute = getValue(application, RANDOM_ROUTE_PROP, Boolean.class);
+			if (randomRoute == null) {
+				randomRoute = getValue(allResults, RANDOM_ROUTE_PROP, Boolean.class);
+			}
+			if (Boolean.TRUE.equals(randomRoute)) {
+				hostsSet.add(extractHost("${random}", 10));
+				domainsSet.clear();
+				domainsSet.add(domains.get(0).getName());
+			} else {
+				Boolean noHostName = getValue(application, NO_HOSTNAME_PROP, Boolean.class);
+				if (noHostName == null) {
+					noHostName = getValue(allResults, NO_HOSTNAME_PROP, Boolean.class);
+				}
+				if (!Boolean.TRUE.equals(noHostName)) {
+					/*
+					 * Assumes name is set before URIs are processed
+					 */
+					hostsSet.add(properties.getAppName());
+				}
+			}
+		}
 
-		List<String> urls = Arrays.asList(cloudURL.getUrl());
-		properties.setUrls(urls);
+		/*
+		 * Set a domain if they are still empty
+		 */
+		if (domainsSet.isEmpty()) {
+			domainsSet.add(domains.get(0).getName());
+		}
+
+		/*
+		 * Compose URIs for application based on hosts and domains
+		 */
+		List<String> uris = new ArrayList<>(hostsSet.isEmpty() ? 1 : hostsSet.size() * domainsSet.size());
+		for (String d : domainsSet) {
+			if (hostsSet.isEmpty()) {
+				uris.add(new CloudApplicationURL(null, d).getUrl());
+			} else {
+				for (String h : hostsSet) {
+					uris.add(new CloudApplicationURL(h, d).getUrl());
+				}
+			}
+		}
+
+		properties.setUris(uris);
+
+	}
+
+	public static boolean isDomainValid(String domain, List<CloudDomain> domains) {
+		for (CloudDomain cloudDomain : domains) {
+			if (cloudDomain.getName().equals(domain)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String extractHost(String subdomain, int length) {
+		// Check for random word
+		int varIndex = subdomain.indexOf(RANDOM_VAR);
+		while (varIndex >= 0)  {
+			String randomWord = RandomStringUtils.randomAlphabetic(length);
+			subdomain = subdomain.replace(subdomain.substring(varIndex, RANDOM_VAR.length()), randomWord);
+			varIndex = subdomain.indexOf(RANDOM_VAR);
+		}
+		return subdomain;
 	}
 
 	protected void readMemory(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) throws Exception {
+		int memoryValue = readMemoryValue(application, allResults, MEMORY_PROP);
+		if (memoryValue >= 0) {
+			properties.setMemory(memoryValue);
+		}
+	}
+
+	protected void readDiskQuota(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) throws Exception {
+		int memoryValue = readMemoryValue(application, allResults, DISK_QUOTA_PROP);
+		if (memoryValue >= 0) {
+			properties.setDiskQuota(memoryValue);
+		}
+	}
+
+	protected Integer readMemoryValue(Map<?, ?> application, Map<Object, Object> allResults,
+			String propertyKey) throws Exception {
+
+		int result = -1;
 
 		// First see if there is a "common" memory value that applies to all
 		// applications:
 
-		Integer memoryVal = getIntegerValue(application, MEMORY_PROP);
+		Integer memoryVal = getValue(application, MEMORY_PROP, Integer.class);
 		if (memoryVal == null) {
-			memoryVal = getIntegerValue(allResults, MEMORY_PROP);
+			memoryVal = getValue(allResults, MEMORY_PROP, Integer.class);
 		}
 
 		// If not in Integer form, try String as the memory may end in with a
 		// 'G' or 'M'
 		if (memoryVal == null) {
-			String memoryStringVal = getStringValue(application, MEMORY_PROP);
+			String memoryStringVal = getValue(application, MEMORY_PROP, String.class);
 			if (memoryStringVal == null) {
-				memoryStringVal = getStringValue(allResults, MEMORY_PROP);
+				memoryStringVal = getValue(allResults, MEMORY_PROP, String.class);
 			}
 			if (memoryStringVal != null && memoryStringVal.length() > 0) {
 				memoryVal = convertMemory(memoryStringVal);
@@ -545,22 +724,20 @@ public class ApplicationManifestHandler {
 		}
 
 		if (memoryVal != null) {
-			int actualMemory = -1;
 			switch (memoryVal.intValue()) {
 			case 1:
-				actualMemory = 1024;
+				result = 1024;
 				break;
 			case 2:
-				actualMemory = 2048;
+				result = 2048;
 				break;
 			default:
-				actualMemory = memoryVal.intValue();
+				result = memoryVal.intValue();
 				break;
 			}
-			if (actualMemory > 0) {
-				properties.setMemory(actualMemory);
-			}
 		}
+
+		return result;
 	}
 
 	public static int convertMemory(String memoryStringVal) throws CoreException {
