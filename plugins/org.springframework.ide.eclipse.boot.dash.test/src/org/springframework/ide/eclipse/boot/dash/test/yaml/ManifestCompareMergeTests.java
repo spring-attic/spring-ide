@@ -436,6 +436,16 @@ public class ManifestCompareMergeTests {
 	}
 
 	@Test
+	public void test_random_route_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Arrays.asList("app2.springsource.org"));
+		props.setMemory(1024);
+		props.setBuildpack("java_buildpack_offline");
+		performMergeTest(getTestFile("mergeTestsData/random-route-3.yml"), props, getTestFile("mergeTestsData/random-route-3-expected.yml"));
+	}
+
+	@Test
 	public void test_hosts_domains_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app");

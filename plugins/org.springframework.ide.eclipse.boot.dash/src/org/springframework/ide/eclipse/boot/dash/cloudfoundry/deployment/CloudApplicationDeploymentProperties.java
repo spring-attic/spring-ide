@@ -244,13 +244,13 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(IProject project, List<CloudDomain> domains, CloudApplication app) throws Exception {
+	public static CloudApplicationDeploymentProperties getFor(IProject project, List<CloudDomain> domains, String defaultBuildpack, CloudApplication app) throws Exception {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
 		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
-		properties.setBuildpack(app == null || app.getStaging() == null ? null : app.getStaging().getBuildpackUrl());
+		properties.setBuildpack(app == null || app.getStaging() == null ? defaultBuildpack : app.getStaging().getBuildpackUrl());
 		/*
 		 * TODO: Re-evaluate whether JAVA_OPTS need to be treated differently
 		 * Boot Dash Tooling adds staff to JAVA-OPTS behind the scenes. Consider
