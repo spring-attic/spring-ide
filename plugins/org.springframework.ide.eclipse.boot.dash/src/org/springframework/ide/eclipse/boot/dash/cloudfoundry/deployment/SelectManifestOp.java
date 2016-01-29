@@ -64,7 +64,8 @@ public class SelectManifestOp extends CloudOperation {
 
 		try {
 			List<CloudDomain> domains = model.getRunTarget().getDomains(monitor);
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, domains, model.getAppCache().getApp(project)), domains);
+			String buildpack = model.getRunTarget().getBuildpack(project);
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, domains, buildpack, model.getAppCache().getApp(project)), domains);
 		} catch (Exception e) {
 			// ignore
 		}

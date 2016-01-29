@@ -393,6 +393,9 @@ public class ApplicationManifestHandler {
 		if (properties.getEnvironmentVariables() != null && !properties.getEnvironmentVariables().isEmpty()) {
 			application.put(ENV_PROP, properties.getEnvironmentVariables());
 		}
+		if (properties.getBuildpack() != null) {
+			application.put(ApplicationManifestHandler.BUILDPACK_PROP, properties.getBuildpack());
+		}
 
 		Set<String> hosts = new LinkedHashSet<>();
 		Set<String> domains = new LinkedHashSet<>();

@@ -318,17 +318,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			/*
 			 * If any text edits are produced then there are differences in the URIs
 			 */
-			edit = getDifferenceForUris(props.getUris());
-			if (edit != null) {
-				edits.addChild(edit);
-			}
+			getDifferenceForUris(props.getUris(), edits);
 
 		}
 		return edits.hasChildren() ? edits : null;
 	}
 
-	private TextEdit getDifferenceForUris(Collection<String> uris) {
-		MultiTextEdit me = new MultiTextEdit();
+	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
 		SequenceNode sequence;
 		ScalarNode n;
 
@@ -407,7 +403,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 
 			if (randomRouteNode != null && otherHosts.size() == 1 && otherDomains.size() == 1
-					&& String.valueOf(true).equals(randomRouteNode.getValue())) {
+					&& String.valueOf(true).equals(randomRouteNode.getValue()) && currentHosts.isEmpty()) {
 				match = true;
 			}
 
@@ -428,7 +424,6 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			generateEditForHostsAndDomains(me, currentHosts, currentDomains, otherHosts, otherDomains);
 		}
 
-		return me.hasChildren() ? me : null;
 	}
 
 	private void generateEditForHostsAndDomains(MultiTextEdit me, Set<String> currentHosts, Set<String> currentDomains, Set<String> otherHosts, Set<String> otherDomains) {
@@ -521,8 +516,9 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				/*
 				 * Replace the current value (whether it's a scalr value or anything else without affecting the white space
 				 */
-				return createReplaceEditWithoutWhiteSpace(tuple.getValueNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex() - 1,
-						String.valueOf(otherValue));
+				return new ReplaceEdit(tuple.getValueNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex() - tuple.getValueNode().getStartMark().getIndex(), String.valueOf(otherValue));
+//				return createReplaceEditWithoutWhiteSpace(tuple.getValueNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex() - 1,
+//						String.valueOf(otherValue));
 			}
 		}
 		return null;
