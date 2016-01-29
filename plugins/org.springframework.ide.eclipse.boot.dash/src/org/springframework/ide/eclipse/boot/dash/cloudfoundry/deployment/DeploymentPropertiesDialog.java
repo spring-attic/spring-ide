@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,9 @@ import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -40,7 +44,11 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.source.AnnotationModel;
+import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -51,7 +59,9 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -64,17 +74,20 @@ import org.eclipse.swt.widgets.Sash;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
-import org.eclipse.ui.internal.ShellPool;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -157,8 +170,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private String defaultYaml;
 	private LiveVariable<IFile> fileModel;
 	private LiveVariable<Boolean> manifestTypeModel;
-	private LiveVariable<String> fileYamlContents;
 
+	private SourceViewerDecorationSupport fileYamlDecorationSupport;
+	private SourceViewerDecorationSupport manualYamlDecorationSupport;
 	private Label fileLabel;
 	private Sash resizeSash;
 	private SourceViewer fileYamlViewer;
@@ -180,6 +194,31 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			new EditorActionHandler(IWorkbenchCommandConstants.EDIT_REDO, SourceViewer.REDO),
 	};
 
+	private ISharedTextColors colorsCache = new ISharedTextColors() {
+
+		private Map<RGB, Color> colors = new HashMap<RGB, Color>();
+
+		@Override
+		public Color getColor(RGB rgb) {
+			Color color = colors.get(rgb);
+			if (color == null) {
+				color = new Color(getShell().getDisplay(), rgb);
+				colors.put(rgb, color);
+			}
+			return color;
+		}
+
+		@Override
+		public void dispose() {
+			for (Color color : colors.values()) {
+				if (!color.isDisposed()) {
+					color.dispose();
+				}
+			}
+			colors.clear();
+		}
+
+	};
 
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
 		@Override
@@ -203,7 +242,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
 		fileModel.setValue(manifest == null ? findManifestYamlFile(project) : manifest);
-		fileYamlContents = new LiveVariable<>();
 	}
 
 	@Override
@@ -270,17 +308,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			}
 		});
 
-		fileYamlContents.addListener(new ValueListener<String>() {
-			@Override
-			public void gotValue(LiveExpression<String> exp, String value) {
-				if (value == null) {
-					fileYamlViewer.setDocument(new Document(""));
-				} else {
-					fileYamlViewer.setDocument(new Document(value));
-				}
-				validate();
-			}
-		});
 		parent.pack(true);
 		return container;
 	}
@@ -417,6 +444,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	private void createYamlContentsGroup(Composite composite) {
 		yamlGroup = new Group(composite, SWT.NONE);
 		yamlGroup.setText("YAML Content");
@@ -433,11 +461,16 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileYamlDescriptionLabel.setText("Preview of the contents of selected deployment manifest YAML file:");
 		fileYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
-		fileYamlViewer = new SourceViewer(fileYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
+		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 12, colorsCache);
+		VerticalRuler fileVerticalRuler = /*new VerticalRuler(16, mnualMarkerAnnotationAccess)*/null;
+		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
+				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		fileYamlViewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)));
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		fileYamlViewer.setEditable(false);
 		fileYamlViewer.getTextWidget().setBackground(composite.getBackground());
+		fileYamlDecorationSupport = new SourceViewerDecorationSupport(fileYamlViewer, fileOverviewRuler, fileMarkerAnnotationAccess, colorsCache);
 
 		manualYamlComposite = new Composite(yamlGroup, SWT.NONE);
 		manualYamlComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -449,14 +482,31 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlDescriptionLabel.setText(readOnly ? "Preview of the contents of the auto-generated deployment manifest:" : "Edit deployment manifest contents:");
 		manualYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
-		manualYamlViewer = new SourceViewer(manualYamlComposite, null, null, true, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+
+		DefaultMarkerAnnotationAccess manualMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
+		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 12, colorsCache);
+		VerticalRuler manualVerticalRuler = /*new VerticalRuler(16, mnualMarkerAnnotationAccess)*/null;
+		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
+				manualOverviewRuler, true,
+				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		manualYamlViewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)));
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		manualYamlViewer.setEditable(!readOnly);
 		if (readOnly) {
 			manualYamlViewer.getTextWidget().setBackground(composite.getBackground());
 		}
-		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml));
+		manualYamlDecorationSupport = new SourceViewerDecorationSupport(manualYamlViewer, manualOverviewRuler, manualMarkerAnnotationAccess, colorsCache);
+		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml), new AnnotationModel());
+
+		/*
+		 * Set preferences for viewers decoration support
+		 */
+		for (AnnotationPreference preference : (List<AnnotationPreference>) new MarkerAnnotationPreferences().getAnnotationPreferences()) {
+			manualYamlDecorationSupport.setAnnotationPreference(preference);
+			fileYamlDecorationSupport.setAnnotationPreference(preference);
+		}
+		manualYamlDecorationSupport.install(EditorsUI.getPreferenceStore());
+		fileYamlDecorationSupport.install(EditorsUI.getPreferenceStore());
 
 		/*
 		 * Set the proper Font on the YAML viewers
@@ -513,7 +563,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	}
 
 	private void updateManifestFile() {
-		fileYamlContents.setValue(null);
+		fileYamlViewer.setDocument(new Document(""));
+		validate();
 		final IFile file = (IFile) fileModel.getValue();
 		if (file == null) {
 			fileLabel.setText(NO_MANIFEST_SELECETED_LABEL);
@@ -525,18 +576,24 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					try {
 						final Yaml yaml = new Yaml();
 						final Object parsedYaml = yaml.load(file.getContents());
-						final String text = IOUtil.toString(file.getContents());
 						getShell().getDisplay().asyncExec(new Runnable() {
 							@Override
 							public void run() {
-								fileYamlContents.setValue(parsedYaml instanceof Map<?, ?> ? text : null);
+								if (parsedYaml instanceof Map<?, ?>) {
+									ITextFileBuffer buffer = FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
+									fileYamlViewer.setDocument(buffer.getDocument(), buffer.getAnnotationModel());
+								} else {
+									fileYamlViewer.setDocument(new Document(""));
+								}
+								validate();
 							}
 						});
 					} catch (final Throwable t) {
 						getShell().getDisplay().asyncExec(new Runnable() {
 							@Override
 							public void run() {
-								fileYamlContents.setValue(null);
+								fileYamlViewer.setDocument(new Document(""));
+								validate();
 							}
 						});
 					}
@@ -568,7 +625,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		if (manifestTypeModel.getValue()) {
 			if (fileModel.getValue() == null) {
 				error = "Deployment manifest file not selected";
-			} else if (fileYamlContents.getValue() == null) {
+			} else if (fileYamlViewer.getDocument().get().isEmpty()) {
 				error = "Unable to load deployment manifest YAML file";
 			}
 		}
@@ -598,9 +655,21 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	@Override
 	public boolean close() {
-		deactivateHandlers();
 		getDialogBoundsSettings().put(DIALOG_LIST_HEIGHT_SETTING, ((GridData)fileGroup.getLayoutData()).heightHint);
-		return super.close();
+		boolean close = super.close();
+		dispose();
+		return close;
+	}
+
+	protected void dispose() {
+		deactivateHandlers();
+		colorsCache.dispose();
+		if (manualYamlDecorationSupport != null) {
+			manualYamlDecorationSupport.dispose();
+		}
+		if (fileYamlDecorationSupport != null) {
+			fileYamlDecorationSupport.dispose();
+		}
 	}
 
 	@Override
@@ -672,10 +741,10 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		@Override
 		public Object execute(ExecutionEvent arg0) throws ExecutionException {
 			if (manualYamlViewer.isEditable() && manualYamlViewer.getControl().isVisible()
-					&& manualYamlViewer.getControl().isFocusControl()) {
+					&& manualYamlViewer.getTextWidget().isFocusControl()) {
 				manualYamlViewer.doOperation(operationId);
 			} else if (fileYamlViewer.isEditable() && fileYamlViewer.getControl().isVisible()
-					&& fileYamlViewer.getControl().isFocusControl()) {
+					&& fileYamlViewer.getTextWidget().isFocusControl()) {
 				fileYamlViewer.doOperation(operationId);
 			}
 			return null;
