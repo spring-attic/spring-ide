@@ -35,7 +35,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
@@ -229,6 +228,15 @@ public class ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.updateApplicationMemory(appName, memory);
+			}
+		}.call();
+	}
+
+	public void updateApplicationDiskQuota(final String appName, final int diskQuota) throws Exception {
+		new BasicRequest(this.client, appName, "Updating application disk quota") {
+			@Override
+			protected void runRequest(CloudFoundryOperations client) throws Exception {
+				client.updateApplicationDiskQuota(appName, diskQuota);
 			}
 		}.call();
 	}

@@ -287,6 +287,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				}
 			}
 
+			if (getDiskQuota() != props.getDiskQuota()) {
+				edit = createEdit(appNode, String.valueOf(props.getDiskQuota()) + "M", ApplicationManifestHandler.DISK_QUOTA_PROP);
+				if (edit != null) {
+					edits.addChild(edit);
+				}
+			}
+
 			if (!Objects.equal(getBuildpack(), props.getBuildpack())) {
 				edit = createEdit(appNode, props.getBuildpack(), ApplicationManifestHandler.BUILDPACK_PROP);
 				if (edit != null) {

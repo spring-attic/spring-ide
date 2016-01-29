@@ -103,6 +103,15 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 				subMonitor.worked(1);
 			}
 
+			if (properties.getDiskQuota() > 0 && properties.getDiskQuota() != app.getDiskQuota()) {
+				subMonitor.setTaskName("Updating " + appName + " disk quota.");
+
+				model.getRunTarget().getClient().updateApplicationDiskQuota(appName, properties.getDiskQuota());
+				updated = true;
+
+				subMonitor.worked(1);
+			}
+
 			if (properties.getInstances() > 0 && properties.getInstances() != app.getInstances()) {
 				subMonitor.setTaskName("Updating " + appName + " instances.");
 
