@@ -23,6 +23,7 @@ import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
@@ -36,6 +37,8 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthChec
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
@@ -101,12 +104,14 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Map<CloudApplication, ApplicationStats> waitForApplicationStats(List<CloudApplication> appsToLookUp,
+		public Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 				long timeToWait) throws Exception {
-			notImplementedStub();
-			return null;
+			Builder<CFApplication, ApplicationStats> builder = ImmutableMap.builder();
+			for (CFApplication app : appsToLookUp) {
+				builder.put(app, ((MockCFApplication)app).getStats());
+			}
+			return builder.build();
 		}
-
 
 		@Override
 		public void uploadApplication(String appName, ApplicationArchive archive) throws Exception {
@@ -197,11 +202,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		private MockCFSpace getSpace() {
 			return spacesByName.get(params.getOrgName()+"/"+params.getSpaceName());
 		}
-		@Override
-		public HealthCheckSupport getHealthCheckSupport() throws Exception {
-			notImplementedStub();
-			return null;
-		}
 
 		@Override
 		public CloudAppInstances getExistingAppInstances(UUID guid) throws Exception {
@@ -228,12 +228,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public List<CloudApplication> getApplicationsWithBasicInfo() throws Exception {
-			return null;
+		public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
+			return getSpace().getApplicationsWithBasicInfo();
 		}
 
 		@Override
-		public CloudApplication getApplication(String appName) throws Exception {
+		public CFApplication getApplication(String appName) throws Exception {
 			notImplementedStub();
 			return null;
 		}
@@ -254,6 +254,17 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
 			notImplementedStub();
 
+		}
+
+		@Override
+		public String getHealthCheck(UUID appGuid) {
+			//Implemented as if hc is not supported
+			return null;
+		}
+
+		@Override
+		public void setHealthCheck(UUID guid, String hcType) {
+			notImplementedStub();
 		}
 	};
 

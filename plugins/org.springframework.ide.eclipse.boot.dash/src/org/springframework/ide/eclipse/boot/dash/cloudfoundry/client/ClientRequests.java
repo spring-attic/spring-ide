@@ -17,7 +17,6 @@ import java.util.UUID;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
@@ -25,22 +24,21 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 public interface ClientRequests {
 
 	//TODO: consider removing the getXXXSupport method and directly adding the apis that these support
 	// objects provide.
-	HealthCheckSupport getHealthCheckSupport() throws Exception;
+	//HealthCheckSupport getHealthCheckSupport() throws Exception;
 	SshClientSupport getSshClientSupport() throws Exception;
 
 	void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception;
 	void deleteApplication(String name) throws Exception;
 	Version getApiVersion();
 	void logout();
-	CloudApplication getApplication(String appName) throws Exception;
-	List<CloudApplication> getApplicationsWithBasicInfo() throws Exception;
+	CFApplication getApplication(String appName) throws Exception;
+	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
 	List<Buildpack> getBuildpacks() throws Exception;
 	List<CloudDomain> getDomains() throws Exception;
 	CloudAppInstances getExistingAppInstances(String appName) throws Exception;
@@ -56,7 +54,9 @@ public interface ClientRequests {
 	void updateApplicationServices(String appName, List<String> services) throws Exception;
 	void updateApplicationStaging(String appName, Staging staging) throws Exception;
 	void updateApplicationUris(String appName, List<String> urls) throws Exception;
-	Map<CloudApplication, ApplicationStats> waitForApplicationStats(List<CloudApplication> appsToLookUp,
+	Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 			long timeToWait) throws Exception;
 	void uploadApplication(String appName, ApplicationArchive archive) throws Exception;
+	String getHealthCheck(UUID appGuid);
+	void setHealthCheck(UUID guid, String hcType);
 }

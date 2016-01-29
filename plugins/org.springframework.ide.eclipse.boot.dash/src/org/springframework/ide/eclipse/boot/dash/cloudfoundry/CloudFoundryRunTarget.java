@@ -24,6 +24,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
@@ -224,11 +225,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return url;
 	}
 
-	public HealthCheckSupport getHealthCheckSupport() throws Exception {
-		ClientRequests client = getClient();
-		return client.getHealthCheckSupport();
-	}
-
 	public SshClientSupport getSshClientSupport() throws Exception {
 		ClientRequests client = getClient();
 		return client.getSshClientSupport();
@@ -273,6 +269,14 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 
 		return null;
+	}
+
+	public String getHealthCheck(UUID appGuid) {
+		return getClient().getHealthCheck(appGuid);
+	}
+
+	public void setHealthCheck(UUID guid, String hcType) {
+		getClient().setHealthCheck(guid, hcType);
 	}
 
 }

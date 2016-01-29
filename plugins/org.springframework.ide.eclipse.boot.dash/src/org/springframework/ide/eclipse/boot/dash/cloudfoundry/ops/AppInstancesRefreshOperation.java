@@ -15,11 +15,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 
 /**
@@ -31,9 +31,9 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
  */
 public class AppInstancesRefreshOperation extends CloudOperation {
 
-	private List<CloudApplication> appsToLookUp;
+	private List<CFApplication> appsToLookUp;
 
-	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model, List<CloudApplication> appsToLookUp) {
+	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model, List<CFApplication> appsToLookUp) {
 		super("Refreshing running state of applications in: " + model.getRunTarget().getName(), model);
 		this.appsToLookUp = appsToLookUp;
 	}
@@ -44,8 +44,8 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		try {
 			if (!appsToLookUp.isEmpty()) {
 				long timeToWait = 1000*30;
-				Map<CloudApplication, ApplicationStats> stats = model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait);
-				for (Entry<CloudApplication, ApplicationStats> entry : stats.entrySet()) {
+				Map<CFApplication, ApplicationStats> stats = model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait);
+				for (Entry<CFApplication, ApplicationStats> entry : stats.entrySet()) {
 					CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
 					this.model.updateApplication(instances);
 				}

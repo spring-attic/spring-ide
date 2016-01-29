@@ -47,7 +47,7 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 		}
 
 		// Get the guid, as it is more efficient for lookup
-		UUID appGuid = appInstances.getApplication().getMeta().getGuid();
+		UUID appGuid = appInstances.getApplication().getGuid();
 
 		boolean checkTermination = true;
 		this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(appInstances, getDashElement(), preferredState),

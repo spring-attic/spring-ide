@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
@@ -45,7 +46,7 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		monitor.beginTask(getName(), 2);
 		try {
-			HealthCheckSupport hc = app.getCloudModel().getRunTarget().getHealthCheckSupport();
+			CloudFoundryRunTarget hc = app.getCloudModel().getRunTarget();
 			UUID guid = app.getAppGuid();
 			String current = hc.getHealthCheck(guid);
 			//When current==null it means that there's no 'health-check' info in the info returned by

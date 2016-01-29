@@ -29,6 +29,7 @@ import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
@@ -39,6 +40,8 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.*;
 
 public class DefaultClientRequests implements ClientRequests {
 
@@ -81,24 +84,24 @@ public class DefaultClientRequests implements ClientRequests {
 		return this.cachedCloudInfo;
 	}
 
-	public CloudApplication getApplication(final String appName) throws Exception {
+	public CFApplication getApplication(final String appName) throws Exception {
 
-		return new ApplicationRequest<CloudApplication>(this.client, appName) {
+		return new ApplicationRequest<CFApplication>(this.client, appName) {
 			@Override
-			protected CloudApplication doRun(CloudFoundryOperations client) throws Exception {
+			protected CFApplication doRun(CloudFoundryOperations client) throws Exception {
 				try {
-					return client.getApplication(appName);
+					return wrap(client.getApplication(appName));
 				} catch (Exception e) {
 					if (CloudErrors.is503Error(e)) {
 						// Alternate way to fetch applications that does not
 						// fetch instances and
 						// may not throw 503 due to fetching stats on app
 						// instances if app is not running
-						List<CloudApplication> apps = client.getApplicationsWithBasicInfo();
+						List<CloudApplication> apps =client.getApplicationsWithBasicInfo();
 						if (apps != null) {
 							for (CloudApplication app : apps) {
 								if (app.getName().equals(appName)) {
-									return app;
+									return wrap(app);
 								}
 							}
 						}
@@ -111,13 +114,13 @@ public class DefaultClientRequests implements ClientRequests {
 		}.call();
 	}
 
-	public CloudApplication getApplication(final UUID appUUID) throws Exception {
+	public CFApplication getApplication(final UUID appUUID) throws Exception {
 
-		return new ApplicationRequest<CloudApplication>(this.client, appUUID.toString()) {
+		return new ApplicationRequest<CFApplication>(this.client, appUUID.toString()) {
 			@Override
-			protected CloudApplication doRun(CloudFoundryOperations client) throws Exception {
+			protected CFApplication doRun(CloudFoundryOperations client) throws Exception {
 				try {
-					return client.getApplication(appUUID);
+					return wrap(client.getApplication(appUUID));
 				} catch (Exception e) {
 					if (CloudErrors.is503Error(e)) {
 						// Alternate way to fetch applications that does not
@@ -128,7 +131,7 @@ public class DefaultClientRequests implements ClientRequests {
 						if (apps != null) {
 							for (CloudApplication app : apps) {
 								if (app.getMeta().getGuid().equals(appUUID)) {
-									return app;
+									return wrap(app);
 								}
 							}
 						}
@@ -145,18 +148,18 @@ public class DefaultClientRequests implements ClientRequests {
 		return new ApplicationInstanceRequest(this.client, appName).call();
 	}
 
-	public Map<CloudApplication, ApplicationStats> waitForApplicationStats(final List<CloudApplication> appsToLookUp,
+	public Map<CFApplication, ApplicationStats> waitForApplicationStats(final List<CFApplication> appsToLookUp,
 			final long timeout) throws Exception {
-		Callable<Map<CloudApplication, ApplicationStats>> task = new AllApplicationInstancesRequest(this.client,
+		Callable<Map<CFApplication, ApplicationStats>> task = new AllApplicationInstancesRequest(this.client,
 				appsToLookUp);
 		return RetryUtil.retry(2000, timeout, task);
 	}
 
-	public List<CloudApplication> getApplicationsWithBasicInfo() throws Exception {
-		return new ClientRequest<List<CloudApplication>>(this.client, "Getting all Cloud applications") {
+	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
+		return new ClientRequest<List<CFApplication>>(this.client, "Getting all Cloud applications") {
 			@Override
-			protected List<CloudApplication> doRun(CloudFoundryOperations client) throws Exception {
-				return client.getApplicationsWithBasicInfo();
+			protected List<CFApplication> doRun(CloudFoundryOperations client) throws Exception {
+				return wrapApps(client.getApplicationsWithBasicInfo());
 			}
 		}.call();
 	}
@@ -300,7 +303,7 @@ public class DefaultClientRequests implements ClientRequests {
 		return new ClientRequest<CloudAppInstances>(this.client, "Getting application instances") {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
-				CloudApplication app = getApplication(guid);
+				CFApplication app = getApplication(guid);
 				if (app != null) {
 					ApplicationStats stats = getApplicationStats(app.getName());
 					return new CloudAppInstances(app, stats);
@@ -314,7 +317,7 @@ public class DefaultClientRequests implements ClientRequests {
 		return new ClientRequest<CloudAppInstances>(this.client, appName, "Getting application instances", null) {
 			@Override
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
-				CloudApplication app = getApplication(appName);
+				CFApplication app = getApplication(appName);
 				if (app != null) {
 					ApplicationStats stats = getApplicationStats(appName);
 					return new CloudAppInstances(app, stats);
@@ -360,5 +363,24 @@ public class DefaultClientRequests implements ClientRequests {
 	@Override
 	public List<Buildpack> getBuildpacks() throws Exception {
 		return getBuildpackSupport().getBuildpacks();
+	}
+
+	@Override
+	public String getHealthCheck(UUID appGuid) {
+		try {
+			return getHealthCheckSupport().getHealthCheck(appGuid);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	@Override
+	public void setHealthCheck(UUID guid, String hcType) {
+		try {
+			getHealthCheckSupport().setHealthCheck(guid, hcType);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 }

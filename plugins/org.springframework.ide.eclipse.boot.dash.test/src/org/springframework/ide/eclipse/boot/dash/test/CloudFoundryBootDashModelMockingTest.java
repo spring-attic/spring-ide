@@ -21,13 +21,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 /**
  * @author Kris De Volder
@@ -61,6 +67,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		this.ui = mock(UserInteractions.class);
+
 	}
 
 	@After
@@ -75,13 +82,41 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Test
 	public void testCreateCfTarget() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
-
 		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
 
-		CloudFoundryBootDashModel target =  harness.createCfTarget(CfTestTargetParams.fromEnv());
 		assertNotNull(target);
 		assertNotNull(target.getRunTarget().getTargetProperties().getPassword());
 		assertEquals(1, harness.getCfRunTargetModels().size());
+	}
+
+	@Test
+	public void testAppsShownInBootDash() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		space.defApp("foo");
+		space.defApp("bar");
+
+		final CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
+
+		new ACondition("wait for apps to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
+				assertEquals(ImmutableSet.of("foo", "bar"), appNames);
+				return true;
+			}
+		};
+	}
+
+	private ImmutableSet<String> getNames(ImmutableSet<CloudAppDashElement> values) {
+		Builder<String> builder = ImmutableSet.builder();
+		for (CloudAppDashElement e : values) {
+			builder.add(e.getName());
+		}
+		return builder.build();
 	}
 
 //	/**

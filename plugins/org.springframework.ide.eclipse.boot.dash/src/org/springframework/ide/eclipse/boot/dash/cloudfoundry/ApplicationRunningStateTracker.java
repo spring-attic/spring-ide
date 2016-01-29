@@ -19,6 +19,7 @@ import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationEventHandler;
@@ -90,7 +91,7 @@ public class ApplicationRunningStateTracker {
 		}
 
 		// Get the guid, as it is more efficient for lookup
-		UUID appGuid = appInstances.getApplication().getMeta().getGuid();
+		UUID appGuid = appInstances.getApplication().getGuid();
 
 		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && runState != RunState.CRASHED
 				&& currentTime < totalTime) {
@@ -165,7 +166,7 @@ public class ApplicationRunningStateTracker {
 		RunState runState = RunState.UNKNOWN;
 		if (instances != null) {
 			ApplicationStats stats = instances.getStats();
-			CloudApplication app = instances.getApplication();
+			CFApplication app = instances.getApplication();
 			// if app desired state is "Stopped", return inactive
 			if ((stats == null || stats.getRecords() == null || stats.getRecords().isEmpty())
 					&& app.getState() == CloudApplication.AppState.STOPPED) {

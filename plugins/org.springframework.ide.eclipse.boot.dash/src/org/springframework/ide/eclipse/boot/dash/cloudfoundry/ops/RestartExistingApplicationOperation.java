@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -53,7 +54,7 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		CloudApplication application = model.getRunTarget().getClient().getApplication(appName);
+		CFApplication application = model.getRunTarget().getClient().getApplication(appName);
 		// Check that the application actually exists in Cloud Foundry
 		if (application == null) {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,

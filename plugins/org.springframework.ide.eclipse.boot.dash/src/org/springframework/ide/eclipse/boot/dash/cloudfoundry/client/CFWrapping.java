@@ -11,14 +11,21 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.cloudfoundry.client.lib.domain.ApplicationStats;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.cloudfoundry.client.lib.domain.Staging;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Static helper methods to wrap data from the cf clients into our own types (thereby avoiding a direct dependency
@@ -32,71 +39,218 @@ public class CFWrapping {
 	// far have been 'wrapified'.
 
 	public static CFOrganization wrap(final CloudOrganization organization) {
-		return new CFOrganization() {
-			@Override
-			public String getName() {
-				return organization.getName();
-			}
+		if (organization!=null) {
+			return new CFOrganization() {
+				@Override
+				public String getName() {
+					return organization.getName();
+				}
 
-			@Override
-			public UUID getGuid() {
-				return organization.getMeta().getGuid();
-			}
-		};
+				@Override
+				public UUID getGuid() {
+					return organization.getMeta().getGuid();
+				}
+			};
+		}
+		return null;
 	}
 
 	public static List<CFSpace> wrapSpaces(List<CloudSpace> spaces) {
-		Builder<CFSpace> builder = ImmutableList.builder();
-		for (CloudSpace s : spaces) {
-			builder.add(wrap(s));
+		if (spaces!=null) {
+			Builder<CFSpace> builder = ImmutableList.builder();
+			for (CloudSpace s : spaces) {
+				builder.add(wrap(s));
+			}
+			return builder.build();
 		}
-		return builder.build();
+		return null;
 	}
 
 	public static List<CFService> wrapServices(List<CloudService> services) {
-		Builder<CFService> builder = ImmutableList.builder();
-		for (CloudService s : services) {
-			builder.add(wrap(s));
+		if (services!=null) {
+			Builder<CFService> builder = ImmutableList.builder();
+			for (CloudService s : services) {
+				builder.add(wrap(s));
+			}
+			return builder.build();
 		}
-		return builder.build();
+		return null;
+	}
+
+	public static List<CFApplication> wrapApps(List<CloudApplication> apps) {
+		if (apps!=null) {
+			Builder<CFApplication> builder = ImmutableList.builder();
+			for (CloudApplication a : apps) {
+				builder.add(wrap(a));
+			}
+			return builder.build();
+		}
+		return null;
+	}
+
+	public static CFApplication wrap(final CloudApplication a) {
+		if (a!=null) {
+			return new CFApplicationWrapper(a);
+		}
+		return null;
+	}
+	private static class CFApplicationWrapper implements CFApplication {
+		private final CloudApplication a;
+
+		public CFApplicationWrapper(CloudApplication a) {
+			this.a = a;
+		}
+
+		@Override
+		public String getName() {
+			return a.getName();
+		}
+
+		private CloudApplication unwrap() {
+			return a;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof CFApplicationWrapper) {
+				return ((CFApplicationWrapper)obj).unwrap().equals(unwrap());
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return a.hashCode();
+		}
+
+		@Override
+		public int getInstances() {
+			return a.getInstances();
+		}
+
+		@Override
+		public int getRunningInstances() {
+			return a.getRunningInstances();
+		}
+
+		@Override
+		public Map<String, String> getEnvAsMap() {
+			return a.getEnvAsMap();
+		}
+
+		@Override
+		public int getMemory() {
+			return a.getMemory();
+		}
+
+		@Override
+		public UUID getGuid() {
+			return a.getMeta().getGuid();
+		}
+
+		@Override
+		public List<String> getServices() {
+			return a.getServices();
+		}
+
+		@Override
+		public String getBuildpackUrl() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getBuildpackUrl();
+			}
+			return null;
+		}
+
+		@Override
+		public List<String> getUris() {
+			return a.getUris();
+		}
+
+		@Override
+		public String getDetectedBuildpack() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getDetectedBuildpack();
+			}
+			return null;
+		}
+
+		@Override
+		public AppState getState() {
+			return a.getState();
+		}
+	}
+
+	public static CloudApplication unwrap(final CFApplication a) {
+		if (a!=null) {
+			return ((CFApplicationWrapper)a).unwrap();
+		}
+		return null;
+	}
+
+	public static List<CloudApplication> unwrapApps(final List<CFApplication> apps) {
+		if (apps!=null) {
+			Builder<CloudApplication> builder = ImmutableList.builder();
+			for (CFApplication a : apps) {
+				builder.add(unwrap(a));
+			}
+			return builder.build();
+		}
+		return null;
 	}
 
 	public static CFService wrap(final CloudService s) {
-		return new CFService() {
-			@Override
-			public String getName() {
-				return s.getName();
-			}
-		};
+		if (s!=null) {
+			return new CFService() {
+				@Override
+				public String getName() {
+					return s.getName();
+				}
+			};
+		}
+		return null;
 	}
 
 	private static CFSpace wrap(final CloudSpace s) {
-		return new CFSpace() {
-			private final CFOrganization org = wrap(s.getOrganization());
+		if (s!=null) {
+			return new CFSpace() {
+				private final CFOrganization org = wrap(s.getOrganization());
 
-			@Override
-			public String toString() {
-				return getName() + "@" + getOrganization().getName();
-			}
-
-
-			@Override
-			public String getName() {
-				return s.getName();
-			}
-
-			@Override
-			public CFOrganization getOrganization() {
-				return org;
-			}
+				@Override
+				public String toString() {
+					return getName() + "@" + getOrganization().getName();
+				}
 
 
-			@Override
-			public UUID getGuid() {
-				return s.getMeta().getGuid();
-			}
-		};
+				@Override
+				public String getName() {
+					return s.getName();
+				}
+
+				@Override
+				public CFOrganization getOrganization() {
+					return org;
+				}
+
+
+				@Override
+				public UUID getGuid() {
+					return s.getMeta().getGuid();
+				}
+			};
+		}
+		return null;
 	}
 
+	public static Map<CFApplication, ApplicationStats> wrap(Map<CloudApplication, ApplicationStats> stats) {
+		if (stats!=null) {
+			ImmutableMap.Builder<CFApplication, ApplicationStats> builder = ImmutableMap.builder();
+			for (Entry<CloudApplication, ApplicationStats> e : stats.entrySet()) {
+				builder.put(wrap(e.getKey()), e.getValue());
+			}
+			return builder.build();
+		}
+		return null;
+	}
 
 }

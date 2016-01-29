@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 
@@ -23,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 public class MockCFSpace extends CFSpaceData {
 
 	private Map<String, CFService> servicesByName = new HashMap<>();
+	private Map<String, CFApplication> appsByName = new HashMap<>();
 
 	public MockCFSpace(String name, UUID guid, CFOrganization org) {
 		super(name, guid, org);
@@ -30,6 +33,24 @@ public class MockCFSpace extends CFSpaceData {
 
 	public List<CFService> getServices() {
 		return ImmutableList.copyOf(servicesByName.values());
+	}
+
+	public ImmutableList<CFApplication> getApplicationsWithBasicInfo() {
+		return ImmutableList.copyOf(appsByName.values());
+	}
+
+	public CFApplication defApp(String name) {
+		CFApplication existing = appsByName.get(name);
+		if (existing==null) {
+			appsByName.put(name, existing = new MockCFApplication(
+					name,
+					UUID.randomUUID(),
+					1,
+					0,
+					AppState.STOPPED
+			));
+		}
+		return existing;
 	}
 
 }

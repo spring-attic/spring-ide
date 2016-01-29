@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -183,7 +184,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public String getLiveHost() {
-		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
+		CFApplication app = getCloudModel().getAppCache().getApp(getName());
 		if (app != null) {
 			List<String> uris = app.getUris();
 			if (uris != null) {
@@ -230,9 +231,9 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public UUID getAppGuid() {
-		CloudApplication app = getCloudModel().getAppCache().getApp(getName());
+		CFApplication app = getCloudModel().getAppCache().getApp(getName());
 		if (app!=null) {
-			return app.getMeta().getGuid();
+			return app.getGuid();
 		}
 		return null;
 	}

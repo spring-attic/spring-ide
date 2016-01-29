@@ -37,6 +37,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -205,11 +206,11 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				assertNull(model.getApplication(preexistingAppName).getProject());
 
 				// check the actual CloudApplication
-				CloudApplication actualNewApp = model.getApplication(newAppName).getCloudModel().getAppCache()
+				CFApplication actualNewApp = model.getApplication(newAppName).getCloudModel().getAppCache()
 						.getApp(newAppName);
 				assertEquals("No CloudApplication mapping found", actualNewApp.getName(), newAppName);
 
-				CloudApplication actualPreexistingApp = model.getApplication(preexistingAppName).getCloudModel()
+				CFApplication actualPreexistingApp = model.getApplication(preexistingAppName).getCloudModel()
 						.getAppCache().getApp(preexistingAppName);
 				assertEquals("No CloudApplication mapping found", actualPreexistingApp.getName(), preexistingAppName);
 

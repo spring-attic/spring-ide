@@ -13,12 +13,12 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -52,7 +52,7 @@ public class ApplicationDeploymentOperations {
 			IProgressMonitor monitor) throws Exception {
 		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
 
-		CloudApplication existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
+		CFApplication existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
 
 		if (existingApp != null && !ui.confirmOperation(APP_FOUND_TITLE,
 				NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(), properties.getProject().getName()))) {

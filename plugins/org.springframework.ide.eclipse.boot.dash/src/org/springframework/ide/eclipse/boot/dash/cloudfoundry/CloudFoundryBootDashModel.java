@@ -51,6 +51,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -797,7 +798,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	protected String getAppName(IProject project) {
 		// check if there is a project -> app mapping:
-		CloudApplication app = getAppCache().getApp(project);
+		CFApplication app = getAppCache().getApp(project);
 		return app != null ? app.getName() : project.getName();
 	}
 
