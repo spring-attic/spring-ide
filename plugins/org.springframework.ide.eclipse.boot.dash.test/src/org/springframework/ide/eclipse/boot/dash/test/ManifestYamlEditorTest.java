@@ -249,6 +249,18 @@ public class ManifestYamlEditorTest {
 		editor.assertProblems(
 				"name: foo|Expecting a 'Sequence' but found a 'Map'"
 		);
+
+		//Using a 'composite' element where a scalar type is expected
+		editor = new MockManifestEditor(
+				"memory:\n"+
+				"- bad sequence\n" +
+				"buildpack:\n" +
+				"  bad: map\n"
+		);
+		editor.assertProblems(
+				"- bad sequence|Expecting a 'Memory' but found a 'Sequence'",
+				"bad: map|Expecting a 'String' but found a 'Map'"
+		);
 	}
 
 	@Test
