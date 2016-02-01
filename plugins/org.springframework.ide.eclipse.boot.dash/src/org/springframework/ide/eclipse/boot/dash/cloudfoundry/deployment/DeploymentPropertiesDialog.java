@@ -585,7 +585,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					try {
 						final Yaml yaml = new Yaml();
 						final Object parsedYaml = yaml.load(file.getContents());
-						if (parsedYaml instanceof Map<?, ?>) {
+						if (parsedYaml instanceof Map<?, ?> && docProvider.getDocument(file) == null) {
 							docProvider.connect(file);
 						}
 						getShell().getDisplay().asyncExec(new Runnable() {
