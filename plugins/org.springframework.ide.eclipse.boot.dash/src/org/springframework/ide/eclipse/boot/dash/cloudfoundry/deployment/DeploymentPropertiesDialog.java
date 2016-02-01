@@ -267,7 +267,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			@Override
 			public void gotValue(LiveExpression<IFile> exp, final IFile value) {
 				updateManifestFile();
-				validate();
 			}
 		});
 
@@ -573,10 +572,10 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	private void updateManifestFile() {
 		fileYamlViewer.setDocument(new Document(""));
-		validate();
 		final IFile file = (IFile) fileModel.getValue();
 		if (file == null) {
 			fileLabel.setText(NO_MANIFEST_SELECETED_LABEL);
+			validate();
 		} else {
 			fileLabel.setText(file.getFullPath().toOSString());
 			Job job = new Job("Loading YAML manifest file") {
