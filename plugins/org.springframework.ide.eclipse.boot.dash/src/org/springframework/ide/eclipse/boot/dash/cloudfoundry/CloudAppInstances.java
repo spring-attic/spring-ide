@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 
 /**
  * A Cloud application with additional stats and instances information
@@ -21,16 +21,16 @@ import org.eclipse.core.runtime.Assert;
  */
 public class CloudAppInstances {
 
-	private final CloudApplication app;
+	private final CFApplication app;
 	private final ApplicationStats stats;
 
-	public CloudAppInstances(CloudApplication app, ApplicationStats stats) {
+	public CloudAppInstances(CFApplication app, ApplicationStats stats) {
 		Assert.isNotNull(app);
 		this.app = app;
 		this.stats = stats;
 	}
 
-	public CloudApplication getApplication() {
+	public CFApplication getApplication() {
 		return app;
 	}
 

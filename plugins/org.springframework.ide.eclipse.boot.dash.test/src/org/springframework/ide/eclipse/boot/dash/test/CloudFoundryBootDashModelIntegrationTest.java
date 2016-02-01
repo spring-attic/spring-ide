@@ -25,13 +25,10 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;
@@ -40,6 +37,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -164,15 +164,18 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Test
 	public void testPreexistingApplicationInModel() throws Exception {
 		// Create external client and deploy app "externally"
-		CloudFoundryOperations externalClient = harness.createExternalClient(CfTestTargetParams.fromEnv());
+		ClientRequests externalClient = harness.createExternalClient(CfTestTargetParams.fromEnv());
 
 		List<CloudDomain> domains = externalClient.getDomains();
 
-		List<String> services = new ArrayList<String>();
-		int memory = 1024;
 		final String preexistingAppName = harness.randomAppName();
-		externalClient.createApplication(preexistingAppName, new Staging(), memory,
-				ImmutableList.of(preexistingAppName + "." + domains.get(0).getName()), services);
+
+		CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
+		deploymentProperties.setAppName(preexistingAppName);
+		deploymentProperties.setMemory(1024);
+		deploymentProperties.setUris(ImmutableList.of(preexistingAppName + "." + domains.get(0).getName()));
+		deploymentProperties.setServices(ImmutableList.<String>of());
+		externalClient.createApplication(deploymentProperties);
 
 		// Create the boot dash target and model
 		harness.createCfTarget(CfTestTargetParams.fromEnv());
@@ -203,11 +206,11 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				assertNull(model.getApplication(preexistingAppName).getProject());
 
 				// check the actual CloudApplication
-				CloudApplication actualNewApp = model.getApplication(newAppName).getCloudModel().getAppCache()
+				CFApplication actualNewApp = model.getApplication(newAppName).getCloudModel().getAppCache()
 						.getApp(newAppName);
 				assertEquals("No CloudApplication mapping found", actualNewApp.getName(), newAppName);
 
-				CloudApplication actualPreexistingApp = model.getApplication(preexistingAppName).getCloudModel()
+				CFApplication actualPreexistingApp = model.getApplication(preexistingAppName).getCloudModel()
 						.getAppCache().getApp(preexistingAppName);
 				assertEquals("No CloudApplication mapping found", actualPreexistingApp.getName(), preexistingAppName);
 

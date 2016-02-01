@@ -54,8 +54,13 @@ public class ManifestYmlSchema implements YamlSchema {
 
 		YAtomicType t_memory = f.yatomic("Memory");
 		t_memory.addHints("256M", "512M", "1024M");
+		t_memory.parseWith(ManifestYmlValueParsers.MEMORY);
 
-		YType t_integer = f.yatomic("integer");
+		YAtomicType t_strictly_pos_integer = f.yatomic("Strictly Positive Integer");
+		t_strictly_pos_integer.parseWith(ManifestYmlValueParsers.integerAtLeast(1));
+
+		YAtomicType t_pos_integer = f.yatomic("Positive Integer");
+		t_pos_integer.parseWith(ManifestYmlValueParsers.POS_INTEGER);
 
 		YType t_env = f.ymap(t_string, t_string);
 
@@ -72,7 +77,7 @@ public class ManifestYmlSchema implements YamlSchema {
 			f.yprop("env", t_env),
 			f.yprop("host", t_string),
 			f.yprop("hosts", t_strings),
-			f.yprop("instances", t_integer),
+			f.yprop("instances", t_strictly_pos_integer),
 			f.yprop("memory", t_memory),
 			f.yprop("name", t_string),
 			f.yprop("no-hostname", t_boolean),
@@ -81,7 +86,7 @@ public class ManifestYmlSchema implements YamlSchema {
 			f.yprop("random-route", t_boolean),
 			f.yprop("services", t_strings),
 			f.yprop("stack", t_string),
-			f.yprop("timeout", t_integer)
+			f.yprop("timeout", t_pos_integer)
 		};
 
 		for (YTypedPropertyImpl prop : props) {

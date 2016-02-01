@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -58,7 +59,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// the
 				// two refresh operations
 
-				List<CloudApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
+				List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
 
 				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 				if (apps != null) {
@@ -66,7 +67,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 					Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
 							.getMapping();
 
-					for (CloudApplication app : apps) {
+					for (CFApplication app : apps) {
 
 						String projectName = existingProjectToAppMappings.get(app.getName());
 						IProject project = null;

@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.editor.support.yaml.schema;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+
 /**
  * An implementation of YTypeUtil provides implementations of various
  * methods operating on YTypes and interpreting them in some context
@@ -30,6 +32,7 @@ public interface YTypeUtil {
 	String[] getHintValues(YType yType);
 	String niceTypeName(YType type);
 	YType getKeyType(YType type);
+	ValueParser getValueParser(YType type);
 
 	//TODO: only one of these two should be enough?
 	List<YTypedProperty> getProperties(YType type);

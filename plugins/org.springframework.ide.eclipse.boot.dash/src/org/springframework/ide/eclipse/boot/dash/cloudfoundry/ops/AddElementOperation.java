@@ -18,9 +18,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -38,7 +39,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 	private RunState preferedRunState;
-	private CloudApplication existingApplication;
+	private CFApplication existingApplication;
 
 	/**
 	 *
@@ -53,7 +54,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 	 *            exists
 	 */
 	public AddElementOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, CloudApplication existingApplication, RunState preferedRunState) {
+			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState) {
 		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
 		this.existingApplication = existingApplication;
@@ -67,7 +68,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		if (existingApplication == null) {
 			existingInstances = createApplication(monitor);
 		} else {
-			existingInstances = model.getRunTarget().getClient().getExistingAppInstances(existingApplication.getMeta().getGuid());
+			existingInstances = model.getRunTarget().getClient().getExistingAppInstances(existingApplication.getGuid());
 		}
 
 		monitor.worked(20);
@@ -91,7 +92,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 			}
 			// Persist the manifest path when creating the bde
 			cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
-			String hc = cde.getTarget().getHealthCheckSupport().getHealthCheck(cde.getAppGuid());
+			String hc = cde.getTarget().getHealthCheck(cde.getAppGuid());
 			cde.setHealthCheck(hc);
 		}
 	}
@@ -133,7 +134,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 			// Clean-up: If app creation failed, check if the app was created
 			// anyway
 			// and delete it to allow users to redeploy
-			CloudApplication toCleanUp = model.getRunTarget().getClient().getApplication(deploymentProperties.getAppName());
+			CFApplication toCleanUp = model.getRunTarget().getClient().getApplication(deploymentProperties.getAppName());
 			if (toCleanUp != null) {
 				model.getRunTarget().getClient().deleteApplication(toCleanUp.getName());
 			}

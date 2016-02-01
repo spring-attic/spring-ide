@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
@@ -157,7 +157,7 @@ public class CloudAppCache {
 		appCache.remove(appName);
 	}
 
-	public synchronized CloudApplication getApp(String appName) {
+	public synchronized CFApplication getApp(String appName) {
 		CacheItem item = appCache.get(appName);
 		if (item != null) {
 			return item.appInstances.getApplication();
@@ -165,7 +165,7 @@ public class CloudAppCache {
 		return null;
 	}
 
-	public synchronized CloudApplication getApp(IProject project) {
+	public synchronized CFApplication getApp(IProject project) {
 
 		for (Entry<String, CacheItem> entry : appCache.entrySet()) {
 			if (entry.getValue().project != null && entry.getValue().project.equals(project)) {

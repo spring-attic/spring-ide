@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudService;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 
@@ -37,9 +37,9 @@ public class ServicesRefreshOperation extends CloudOperation{
 			ClientRequests client = getClientRequests();
 			monitor.worked(1);
 			if (client!=null) {
-				List<CloudService> serviceInfos = client.getServices();
+				List<CFService> serviceInfos = client.getServices();
 				Builder<CloudServiceDashElement> services = ImmutableSet.builder();
-				for (CloudService service : serviceInfos) {
+				for (CFService service : serviceInfos) {
 					services.add(elementFactory.createService(service));
 				}
 				model.setServices(services.build());

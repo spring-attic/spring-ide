@@ -18,17 +18,19 @@ import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 
-public class AllApplicationInstancesRequest extends ClientRequest<Map<CloudApplication, ApplicationStats>> {
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.*;
 
-	private final List<CloudApplication> appsToLookUp;
+public class AllApplicationInstancesRequest extends ClientRequest<Map<CFApplication, ApplicationStats>> {
 
-	public AllApplicationInstancesRequest(CloudFoundryOperations client, List<CloudApplication> appsToLookUp) {
+	private final List<CFApplication> appsToLookUp;
+
+	public AllApplicationInstancesRequest(CloudFoundryOperations client, List<CFApplication> appsToLookUp) {
 		super(client, "Getting instances for all applications");
 		this.appsToLookUp = appsToLookUp;
 	}
 
-	protected Map<CloudApplication, ApplicationStats> doRun(CloudFoundryOperations client) throws Exception {
-		return client.getApplicationStats(this.appsToLookUp);
+	protected Map<CFApplication, ApplicationStats> doRun(CloudFoundryOperations client) throws Exception {
+		return CFWrapping.wrap(client.getApplicationStats(unwrapApps(this.appsToLookUp)));
 	}
 
 	static class ApplicationInstanceRequestErrorHandler extends RequestErrorHandler {

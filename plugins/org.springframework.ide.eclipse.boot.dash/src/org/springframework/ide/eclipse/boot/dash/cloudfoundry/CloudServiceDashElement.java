@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.cloudfoundry.client.lib.domain.CloudService;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -25,10 +25,10 @@ public class CloudServiceDashElement extends WrappingBootDashElement<String> {
 
 	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME};
 
-	private final CloudService service;
+	private final CFService service;
 	private final PropertyStoreApi persistentProperties;
 
-	public CloudServiceDashElement(CloudFoundryBootDashModel parent, CloudService service, IPropertyStore modelStore) {
+	public CloudServiceDashElement(CloudFoundryBootDashModel parent, CFService service, IPropertyStore modelStore) {
 		super(parent, service.getName()+"@"+parent.getRunTarget().getId());
 		this.service = service;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("S"+getName(), modelStore);

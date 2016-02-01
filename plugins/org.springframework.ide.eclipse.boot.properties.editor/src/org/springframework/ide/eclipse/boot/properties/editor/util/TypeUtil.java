@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,11 +34,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
+import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
+import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -201,10 +199,6 @@ public class TypeUtil {
 				throw new IllegalArgumentException("Value should be 'true' or 'false'");
 			}
 		});
-	}
-
-	public interface ValueParser {
-		Object parse(String str);
 	}
 
 	public ValueParser getValueParser(Type type) {

@@ -249,6 +249,84 @@ public class ManifestYamlEditorTest {
 		editor.assertProblems(
 				"name: foo|Expecting a 'Sequence' but found a 'Map'"
 		);
+
+		//Using a 'composite' element where a scalar type is expected
+		editor = new MockManifestEditor(
+				"memory:\n"+
+				"- bad sequence\n" +
+				"buildpack:\n" +
+				"  bad: map\n"
+		);
+		editor.assertProblems(
+				"- bad sequence|Expecting a 'Memory' but found a 'Sequence'",
+				"bad: map|Expecting a 'String' but found a 'Map'"
+		);
+	}
+
+	@Test
+	public void reconcileSimpleTypes() throws Exception {
+		MockManifestEditor editor;
+
+		//check for 'format' errors:
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  instances: not a number\n" +
+				"  no-route: notBool\n"+
+				"  memory: 1024\n" +
+				"  disk_quota: 2048\n"
+		);
+		editor.assertProblems(
+				"not a number|Positive Integer",
+				"notBool|boolean",
+				"1024|Memory",
+				"2048|Memory"
+		);
+
+		//check for 'range' errors:
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  instances: -3\n" +
+				"  memory: -1024M\n" +
+				"  disk_quota: -2048M\n"
+		);
+		editor.assertProblems(
+				"-3|Positive Integer",
+				"-1024M|Memory",
+				"-2048M|Memory"
+		);
+
+		//check that correct values are indeed accepted
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  instances: 2\n" +
+				"  no-route: true\n"+
+				"  memory: 1024M\n" +
+				"  disk_quota: 2048MB\n"
+		);
+		editor.assertProblems(/*none*/);
+
+		//check that correct values are indeed accepted
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  instances: 2\n" +
+				"  no-route: false\n" +
+				"  memory: 1024m\n" +
+				"  disk_quota: 2048mb\n"
+		);
+		editor.assertProblems(/*none*/);
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  instances: 2\n" +
+				"  memory: 1G\n" +
+				"  disk_quota: 2g\n"
+		);
+		editor.assertProblems(/*none*/);
 	}
 
 	//TODO: checking for certain value types. E.g 'integer' and 'Memory'

@@ -26,8 +26,25 @@ public class DefaultCloudFoundryClientFactory extends CloudFoundryClientFactory 
 	 */
 	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
 
-	public CloudFoundryOperations getClient(CloudCredentials credentials, URL apiUrl, String orgName, String spaceName,
-			boolean isSelfsigned) throws Exception {
+	@Override
+	public ClientRequests getClient(CFClientParams params) throws Exception {
+		CloudCredentials credentials = new CloudCredentials(params.getUsername(), params.getPassword());
+		return new DefaultClientRequests(
+				getOperations(
+						credentials,
+						new URL(params.getApiUrl()),
+						params.getOrgName(),
+						params.getSpaceName(),
+						params.isSelfsigned()),
+				params
+		);
+	}
+
+	private CloudFoundryOperations getOperations(
+			CloudCredentials credentials,
+			URL apiUrl, String orgName, String spaceName,
+			boolean isSelfsigned
+	) throws Exception {
 		checkPassword(credentials.getPassword(), credentials.getEmail());
 
 		Properties properties = System.getProperties();

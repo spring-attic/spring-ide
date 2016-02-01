@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 
 /**
  * Operation for refreshing existing cloud applications.
@@ -32,9 +33,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
  */
 public class RefreshApplications extends CloudOperation {
 
-	private Collection<CloudApplication> apps;
+	private Collection<CFApplication> apps;
 
-	public RefreshApplications(CloudFoundryBootDashModel model, Collection<CloudApplication> apps) {
+	public RefreshApplications(CloudFoundryBootDashModel model, Collection<CFApplication> apps) {
 		super("Refreshing applications", model);
 		this.apps = apps;
 	}
@@ -44,7 +45,7 @@ public class RefreshApplications extends CloudOperation {
 		if (apps != null && !apps.isEmpty()) {
 			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
 			Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore().getMapping();
-			List<CloudApplication> toUpdateStats = new ArrayList<>();
+			List<CFApplication> toUpdateStats = new ArrayList<>();
 
 			for (CloudAppInstances instances : model.getAppCache().getAppInstances()) {
 				String projectName = existingProjectToAppMappings.get(instances.getApplication().getName());
@@ -56,7 +57,7 @@ public class RefreshApplications extends CloudOperation {
 					}
 				}
 				if (apps.contains(instances.getApplication())) {
-					CloudApplication newApplication = model.getRunTarget().getClient()
+					CFApplication newApplication = model.getRunTarget().getClient()
 							.getApplication(instances.getApplication().getName());
 					updatedApplications.put(new CloudAppInstances(newApplication, instances.getStats()), project);
 					toUpdateStats.add(newApplication);

@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -244,13 +244,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(IProject project, List<CloudDomain> domains, String defaultBuildpack, CloudApplication app) throws Exception {
+	public static CloudApplicationDeploymentProperties getFor(IProject project, List<CloudDomain> domains, String defaultBuildpack, CFApplication app) throws Exception {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
 		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
-		properties.setBuildpack(app == null || app.getStaging() == null ? defaultBuildpack : app.getStaging().getBuildpackUrl());
+		properties.setBuildpack(app == null ? null : app.getBuildpackUrl());
+
 		/*
 		 * TODO: Re-evaluate whether JAVA_OPTS need to be treated differently
 		 * Boot Dash Tooling adds staff to JAVA-OPTS behind the scenes. Consider

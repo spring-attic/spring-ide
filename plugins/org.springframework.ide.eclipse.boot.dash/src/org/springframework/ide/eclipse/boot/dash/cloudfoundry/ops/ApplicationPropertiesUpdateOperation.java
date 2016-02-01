@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
@@ -59,7 +60,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	protected boolean updateExistingApplicationInCloud(CloudApplicationDeploymentProperties properties,
 			IProgressMonitor monitor) throws Exception {
 
-		CloudApplication app = model.getRunTarget().getClient().getApplication(appName);
+		CFApplication app = model.getRunTarget().getClient().getApplication(appName);
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		boolean updated = false;
 
@@ -75,8 +76,8 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 				subMonitor.worked(1);
 			}
 
-			if (properties.getBuildpack() != null && app.getStaging() != null
-					&& !properties.getBuildpack().equals(app.getStaging().getDetectedBuildpack())) {
+			if (properties.getBuildpack() != null
+					&& !properties.getBuildpack().equals(app.getDetectedBuildpack())) {
 				subMonitor.setTaskName("Updating " + appName + " buildpack.");
 
 				model.getRunTarget().getClient().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack()));

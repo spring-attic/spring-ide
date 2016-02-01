@@ -18,6 +18,7 @@ import java.util.List;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -41,7 +42,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties {
 
 	private LiveVariable<String> url = new LiveVariable<String>();
-	private LiveVariable<CloudSpace> space = new LiveVariable<CloudSpace>();
+	private LiveVariable<CFSpace> space = new LiveVariable<CFSpace>();
 	private LiveVariable<Boolean> selfsigned = new LiveVariable<Boolean>(false);
 	private LiveVariable<String> userName = new LiveVariable<String>();
 	private LiveVariable<String> password = new LiveVariable<String>();
@@ -101,7 +102,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	 *            listener that is notified when Cloud space is changed
 	 *
 	 */
-	public void addSpaceSelectionListener(ValueListener<CloudSpace> cloudSpaceChangeListener) {
+	public void addSpaceSelectionListener(ValueListener<CFSpace> cloudSpaceChangeListener) {
 		space.addListener(cloudSpaceChangeListener);
 	}
 
@@ -122,7 +123,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		credentialsValidator.removeListener(credentialsValidationListener);
 	}
 
-	public void removeSpaceSelectionListeners(ValueListener<CloudSpace> cloudSpaceChangeListener) {
+	public void removeSpaceSelectionListeners(ValueListener<CFSpace> cloudSpaceChangeListener) {
 		space.removeListener(cloudSpaceChangeListener);
 	}
 
@@ -144,13 +145,13 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		this.url.setValue(url);
 	}
 
-	public void setSpace(CloudSpace space) {
+	public void setSpace(CFSpace space) {
 
 		if (space != null) {
 			put(ORG_PROP, space.getOrganization().getName());
-			put(ORG_GUID, space.getOrganization().getMeta().getGuid().toString());
+			put(ORG_GUID, space.getOrganization().getGuid().toString());
 			put(SPACE_PROP, space.getName());
-			put(SPACE_GUID, space.getMeta().getGuid().toString());
+			put(SPACE_GUID, space.getGuid().toString());
 		} else {
 			put(ORG_PROP, null);
 			put(ORG_GUID, null);
@@ -204,7 +205,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		return allSpaces.getValue();
 	}
 
-	protected RunTarget getExistingRunTarget(CloudSpace space) {
+	protected RunTarget getExistingRunTarget(CFSpace space) {
 		if (space != null) {
 			String targetId = CloudFoundryTargetProperties.getId(getUsername(), getUrl(),
 					space.getOrganization().getName(), space.getName());

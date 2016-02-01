@@ -122,7 +122,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable e) {
-		getDefault().getLog().log(createErrorStatus(e));
+		try {
+			getDefault().getLog().log(createErrorStatus(e));
+		} catch (NullPointerException npe) {
+			//Can happen if errors are trying to be logged during Eclipse's shutdown
+			e.printStackTrace();
+		}
 	}
 
 	public static void logWarning(String message) {

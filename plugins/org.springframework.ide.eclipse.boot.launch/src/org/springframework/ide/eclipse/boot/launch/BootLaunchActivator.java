@@ -29,7 +29,6 @@ public class BootLaunchActivator extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		System.out.println("Activating: "+context.getBundle().getSymbolicName());
 		workspaceListener = new BootLaunchConfDeleter(ResourcesPlugin.getWorkspace(), DebugPlugin.getDefault().getLaunchManager());
 	}
 
