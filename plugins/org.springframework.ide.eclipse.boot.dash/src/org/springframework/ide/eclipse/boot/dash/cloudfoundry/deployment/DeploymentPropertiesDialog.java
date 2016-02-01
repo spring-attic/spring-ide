@@ -21,9 +21,6 @@ import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -44,6 +41,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.OverviewRuler;
@@ -75,6 +73,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
@@ -171,6 +170,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private LiveVariable<IFile> fileModel;
 	private LiveVariable<Boolean> manifestTypeModel;
 
+	private TextFileDocumentProvider docProvider;
 	private SourceViewerDecorationSupport fileYamlDecorationSupport;
 	private SourceViewerDecorationSupport manualYamlDecorationSupport;
 	private Label fileLabel;
@@ -238,6 +238,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		this.noModeSwitch = noModeSwitch;
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
+		this.docProvider = new TextFileDocumentProvider();
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
@@ -584,14 +585,17 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					try {
 						final Yaml yaml = new Yaml();
 						final Object parsedYaml = yaml.load(file.getContents());
+						if (parsedYaml instanceof Map<?, ?>) {
+							docProvider.connect(file);
+						}
 						getShell().getDisplay().asyncExec(new Runnable() {
 							@Override
 							public void run() {
-								if (parsedYaml instanceof Map<?, ?>) {
-									ITextFileBuffer buffer = FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
-									fileYamlViewer.setDocument(buffer.getDocument(), buffer.getAnnotationModel());
-								} else {
+								IDocument doc = docProvider.getDocument(file);
+								if (doc == null) {
 									fileYamlViewer.setDocument(new Document(""));
+								} else {
+									fileYamlViewer.setDocument(doc, docProvider.getAnnotationModel(file));
 								}
 								validate();
 							}
