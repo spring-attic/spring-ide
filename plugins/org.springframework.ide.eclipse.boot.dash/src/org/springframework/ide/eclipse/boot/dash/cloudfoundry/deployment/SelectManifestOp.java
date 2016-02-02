@@ -79,7 +79,7 @@ public class SelectManifestOp extends CloudOperation {
 		String defaultManifest = new Yaml(options).dump(yaml);
 
 		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(
-				cde.getCloudModel().getRunTarget().getDomains(monitor), project, manifest, defaultManifest,
+				cde.getCloudModel().getRunTarget().getDomains(monitor), cde.getName(), project, manifest, defaultManifest,
 				true, false);
 
 		if (props == null) {

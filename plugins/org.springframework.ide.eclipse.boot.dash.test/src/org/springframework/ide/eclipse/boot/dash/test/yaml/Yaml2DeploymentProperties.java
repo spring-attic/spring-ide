@@ -308,4 +308,12 @@ public class Yaml2DeploymentProperties {
 		assertEquals("Uris sets not equal", expected, uris);
 	}
 
+	@Test
+	public void test_root_1() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/root-1.yml");
+		assertEquals("app", props.getAppName());
+		assertEquals(1024, props.getMemory());
+		assertEquals(new HashSet<>(Arrays.asList("app.spring.io")), props.getUris());
+	}
+
 }

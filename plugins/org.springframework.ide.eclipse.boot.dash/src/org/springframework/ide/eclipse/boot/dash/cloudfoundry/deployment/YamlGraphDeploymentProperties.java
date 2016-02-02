@@ -111,7 +111,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	@SuppressWarnings("unchecked")
-	static private <T extends Node> T getNode(Node node, String key, Class<T> type) {
+	static public <T extends Node> T getNode(Node node, String key, Class<T> type) {
 		Node n = findValueNode(node, key);
 		if (n != null && type.isAssignableFrom(n.getClass())) {
 			return (T) n;

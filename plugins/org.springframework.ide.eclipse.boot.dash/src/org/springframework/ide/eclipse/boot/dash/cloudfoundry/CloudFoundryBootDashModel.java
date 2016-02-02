@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -780,7 +779,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 			String defaultManifest = new Yaml(options).dump(yaml);
 
-			props = ui.promptApplicationDeploymentProperties(cloudDomains, project,
+			props = ui.promptApplicationDeploymentProperties(cloudDomains, null, project,
 					element == null ? DeploymentPropertiesDialog.findManifestYamlFile(project)
 							: element.getDeploymentManifestFile(),
 					defaultManifest, false, false);

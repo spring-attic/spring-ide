@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogMode
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -221,7 +222,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final List<CloudDomain> domains,
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final List<CloudDomain> domains, final String appName,
 			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth)
 					throws OperationCanceledException {
 		final Shell shell = getShell();
@@ -232,7 +233,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 				@Override
 				public void run() {
-					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, domains, project, manifest, defaultYaml, readOnly, noModeSwicth);
+					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, domains, appName, project, manifest, defaultYaml, readOnly, noModeSwicth);
 					if (dialog.open() == IDialogConstants.OK_ID) {
 						props[0] = dialog.getCloudApplicationDeploymentProperties();
 					}
@@ -308,7 +309,7 @@ public class DefaultUserInteractions implements UserInteractions {
 			}
 		});
 		if (result[0] == -1) {
-			throw BootDashActivator.asCoreException("Failed to compare deployment manifest file and deployment propeties");
+			throw ExceptionUtil.coreException("Failed to compare deployment manifest file and deployment propeties");
 		}
 		return result[0];
 	}

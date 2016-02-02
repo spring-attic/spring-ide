@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -221,13 +222,11 @@ public class ApplicationManifestHandler {
 		return null;
 	}
 
-	protected List<Map<?, ?>> getApplications(Map<Object, Object> results) throws Exception {
+	public static List<Map<?, ?>> getApplications(Map<?, ?> results) throws CoreException {
 
 		Object applicationsObj = results.get(APPLICATIONS_PROP);
 		if (!(applicationsObj instanceof List<?>)) {
-			String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
-			throw ExceptionUtil.coreException("Expected a top-level list of applications in " + source
-					+ ". Unable to continue parsing manifest values. No manifest values will be loaded into the application deployment info.");
+			return null;
 		}
 
 		List<?> applicationsList = (List<?>) applicationsObj;
@@ -296,16 +295,19 @@ public class ApplicationManifestHandler {
 
 			List<Map<?, ?>> appMaps = getApplications(allResults);
 
-			if (appMaps == null || appMaps.isEmpty()) {
-				throw ExceptionUtil.coreException(
-						"No application definition found in manifest.yml. Make sure at least one application is defined");
-			}
 			List<CloudApplicationDeploymentProperties> properties = new ArrayList<CloudApplicationDeploymentProperties>();
 
-			for (Map<?, ?> app : appMaps) {
-				CloudApplicationDeploymentProperties props = getDeploymentProperties(app, allResults, subMonitor);
+			if (appMaps == null) {
+				CloudApplicationDeploymentProperties props = getDeploymentProperties(allResults, allResults, subMonitor);
 				if (props != null) {
 					properties.add(props);
+				}
+			} else {
+				for (Map<?, ?> app : appMaps) {
+					CloudApplicationDeploymentProperties props = getDeploymentProperties(app, allResults, subMonitor);
+					if (props != null) {
+						properties.add(props);
+					}
 				}
 			}
 
@@ -709,17 +711,17 @@ public class ApplicationManifestHandler {
 		// First see if there is a "common" memory value that applies to all
 		// applications:
 
-		Integer memoryVal = getValue(application, MEMORY_PROP, Integer.class);
+		Integer memoryVal = getValue(application, propertyKey, Integer.class);
 		if (memoryVal == null) {
-			memoryVal = getValue(allResults, MEMORY_PROP, Integer.class);
+			memoryVal = getValue(allResults, propertyKey, Integer.class);
 		}
 
 		// If not in Integer form, try String as the memory may end in with a
 		// 'G' or 'M'
 		if (memoryVal == null) {
-			String memoryStringVal = getValue(application, MEMORY_PROP, String.class);
+			String memoryStringVal = getValue(application, propertyKey, String.class);
 			if (memoryStringVal == null) {
-				memoryStringVal = getValue(allResults, MEMORY_PROP, String.class);
+				memoryStringVal = getValue(allResults, propertyKey, String.class);
 			}
 			if (memoryStringVal != null && memoryStringVal.length() > 0) {
 				memoryVal = convertMemory(memoryStringVal);

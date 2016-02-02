@@ -12,8 +12,10 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +92,13 @@ import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.composer.Composer;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.parser.ParserImpl;
+import org.yaml.snakeyaml.reader.StreamReader;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 /**
  * Cloud Foundry Application deployment properties dialog. Allows user to select
@@ -161,6 +169,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
 
+	final private String appName;
+
 	private IProject project;
 	private boolean readOnly;
 	private final boolean noModeSwitch;
@@ -169,6 +179,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private String defaultYaml;
 	private LiveVariable<IFile> fileModel;
 	private LiveVariable<Boolean> manifestTypeModel;
+	private LiveVariable<LinkedHashMap<String, Node>> appNames;
 
 	private TextFileDocumentProvider docProvider;
 	private SourceViewerDecorationSupport fileYamlDecorationSupport;
@@ -185,6 +196,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Group yamlGroup;
 	private Composite fileYamlComposite;
 	private Composite manualYamlComposite;
+	private Composite appNameComposite;
+	private Combo appNameCombo;
 	private Combo fileFilterCombo;
 	private IHandlerService service;
 	private List<IHandlerActivation> activations;
@@ -229,7 +242,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 	};
 
-	public DeploymentPropertiesDialog(Shell parentShell, List<CloudDomain> domains, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
+	public DeploymentPropertiesDialog(Shell parentShell, List<CloudDomain> domains, String appName, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
 		super(parentShell);
 		this.domains = domains;
 		this.project = project;
@@ -239,10 +252,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
 		this.docProvider = new TextFileDocumentProvider();
+		this.appName = appName;
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
 		fileModel.setValue(manifest == null ? findManifestYamlFile(project) : manifest);
+		appNames = new LiveVariable<>();
 	}
 
 	@Override
@@ -262,6 +277,28 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		createYamlContentsGroup(composite);
 
 		activateHanlders();
+
+		if (appName == null) {
+			appNames.addListener(new ValueListener<LinkedHashMap<String, Node>>() {
+				@Override
+				public void gotValue(LiveExpression<LinkedHashMap<String, Node>> exp, LinkedHashMap<String, Node> names) {
+					GridData gridData = (GridData) appNameComposite.getLayoutData();
+					gridData = GridDataFactory.copyData(gridData);
+					gridData.exclude = names == null || names.size() < 2;
+					appNameComposite.setLayoutData(gridData);
+					appNameComposite.setVisible(names != null && names.size() > 1);
+					if (names == null || names.isEmpty()) {
+						appNameCombo.setItems(new String[0]);
+					} else {
+						appNameCombo.setItems(new ArrayList<>(names.keySet()).toArray(new String[names.size()]));
+						appNameCombo.select(0);
+						revealAppTextInYamlFile();
+					}
+					fileYamlComposite.layout();
+					yamlGroup.layout();
+				}
+			});
+		}
 
 		fileModel.addListener(new ValueListener<IFile>() {
 			@Override
@@ -465,6 +502,23 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		layout.marginWidth = 0;
 		fileYamlComposite.setLayout(layout);
 
+		if (appName == null) {
+			appNameComposite = new Composite(fileYamlComposite, SWT.NONE);
+			appNameComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+			appNameComposite.setLayout(new GridLayout());
+			Label appNameDescription = new Label(appNameComposite, SWT.WRAP);
+			appNameDescription.setText("Multiple applications detected. Select application name:");
+			appNameDescription.setLayoutData(GridDataFactory.fillDefaults().create());
+			appNameCombo = new Combo(appNameComposite, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+			appNameCombo.setLayoutData(GridDataFactory.fillDefaults().create());
+			appNameCombo.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					revealAppTextInYamlFile();
+				}
+			});
+		}
+
 		Label fileYamlDescriptionLabel = new Label(fileYamlComposite, SWT.WRAP);
 		fileYamlDescriptionLabel.setText("Preview of the contents of selected deployment manifest YAML file:");
 		fileYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
@@ -523,6 +577,13 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
 	}
 
+	private void revealAppTextInYamlFile() {
+		Node n = appNames.getValue().get(appNameCombo.getText());
+		if (n != null) {
+			fileYamlViewer.revealRange(n.getStartMark().getIndex(), n.getEndMark().getIndex() - n.getStartMark().getIndex());
+		}
+	}
+
 	private void activateHanlders() {
 		if (service != null) {
 			for (EditorActionHandler handler : handlers) {
@@ -575,6 +636,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		final IFile file = (IFile) fileModel.getValue();
 		if (file == null) {
 			fileLabel.setText(NO_MANIFEST_SELECETED_LABEL);
+			appNames.setValue(null);
 			validate();
 		} else {
 			fileLabel.setText(file.getFullPath().toOSString());
@@ -582,10 +644,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						final Yaml yaml = new Yaml();
-						final Object parsedYaml = yaml.load(file.getContents());
-						if (parsedYaml instanceof Map<?, ?> && docProvider.getDocument(file) == null) {
-							docProvider.connect(file);
+						Composer composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(file.getContents()))), new Resolver());
+						Node root = composer.getSingleNode();
+						final LinkedHashMap<String, Node> newAppNames = new LinkedHashMap<String, Node>();
+						if (root != null) {
+							if (docProvider.getDocument(file) == null) {
+								docProvider.connect(file);
+							}
+							newAppNames.putAll(createAppToNodeMap(root));
 						}
 						getShell().getDisplay().asyncExec(new Runnable() {
 							@Override
@@ -596,6 +662,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 								} else {
 									fileYamlViewer.setDocument(doc, docProvider.getAnnotationModel(file));
 								}
+								appNames.setValue(newAppNames);
 								validate();
 							}
 						});
@@ -604,6 +671,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 							@Override
 							public void run() {
 								fileYamlViewer.setDocument(new Document(""));
+								appNames.setValue(null);
 								validate();
 							}
 						});
@@ -614,6 +682,20 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			job.setRule(file);
 			job.schedule();
 		}
+	}
+
+	private LinkedHashMap<String, Node> createAppToNodeMap(Node root) {
+		LinkedHashMap<String, Node> map = new LinkedHashMap<>();
+		SequenceNode applicationsNode = YamlGraphDeploymentProperties.getNode(root, ApplicationManifestHandler.APPLICATIONS_PROP, SequenceNode.class);
+		if (applicationsNode != null) {
+			for (Node n : applicationsNode.getValue()) {
+				ScalarNode scalar = YamlGraphDeploymentProperties.getNode(n, ApplicationManifestHandler.NAME_PROP, ScalarNode.class);
+				if (scalar != null) {
+					map.put(scalar.getValue(), n);
+				}
+			}
+		}
+		return map;
 	}
 
 	@Override
@@ -686,12 +768,23 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		try {
-			deploymentProperties = new ApplicationManifestHandler(project, domains, getManifest()) {
+			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, domains, getManifest()) {
 				@Override
 				protected InputStream getInputStream() throws Exception {
 					return new ByteArrayInputStream(getManifestContents().getBytes());
 				}
-			}.load(new NullProgressMonitor()).get(0);
+			}.load(new NullProgressMonitor());
+			String applicationName = appName == null ? appNameCombo.getText() : appName;
+			if (applicationName == null) {
+				deploymentProperties = propsList.get(0);
+			} else {
+				for (CloudApplicationDeploymentProperties p : propsList) {
+					if (applicationName.equals(p.getAppName())) {
+						deploymentProperties = p;
+						break;
+					}
+				}
+			}
 			super.okPressed();
 		} catch (Exception e) {
 			MessageDialog.openError(getShell(), "Invalid YAML content", e.getMessage());

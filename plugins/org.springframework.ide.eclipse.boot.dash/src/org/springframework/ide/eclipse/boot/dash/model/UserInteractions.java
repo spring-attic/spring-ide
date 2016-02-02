@@ -46,6 +46,7 @@ public interface UserInteractions {
 	/**
 	 * Brings up the UI to enter application deployment manifest
 	 * @param domains
+	 * @param appName
 	 * @param project
 	 * @param manifest
 	 * @param defaultYaml
@@ -55,8 +56,8 @@ public interface UserInteractions {
 	 * @throws OperationCanceledException
 	 */
 	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(List<CloudDomain> domains,
-			IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwicth)
-					throws OperationCanceledException;
+			String appName, IProject project, IFile manifest, String defaultYaml, boolean readOnly,
+			boolean noModeSwicth) throws OperationCanceledException;
 
 	/**
 	 * Ask the user to select a file.
