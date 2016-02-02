@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -27,6 +26,8 @@ public class BootPreferences implements IPreferenceChangeListener {
 
 	public static final String PREF_BOOT_PROJECT_EXCLUDE = "org.springframework.ide.eclipse.boot.project.exclude";
 	public static final Pattern DEFAULT_BOOT_PROJECT_EXCLUDE = Pattern.compile("^$");
+	public static final String PREF_IGNORE_SILENT_EXIT = "org.springframework.ide.eclipse.boot.ignore.silent.exit";
+	public static final boolean DEFAULT_PREF_IGNORE_SILENT_EXIT = true;
 
 	private static BootPreferences INSTANCE = null;
 	private IEclipsePreferences prefs;
@@ -59,6 +60,15 @@ public class BootPreferences implements IPreferenceChangeListener {
 	public void preferenceChange(PreferenceChangeEvent event) {
 		if (event.getKey().equals(PREF_BOOT_PROJECT_EXCLUDE)) {
 			projectExclude.refresh();
+		}
+	}
+
+	public boolean isIgnoreSilentExit() {
+		try {
+			return prefs.getBoolean(PREF_IGNORE_SILENT_EXIT, DEFAULT_PREF_IGNORE_SILENT_EXIT);
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return DEFAULT_PREF_IGNORE_SILENT_EXIT;
 		}
 	}
 
