@@ -24,6 +24,7 @@ import java.util.Set;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -244,13 +245,13 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(IProject project, List<CloudDomain> domains, String defaultBuildpack, CFApplication app) throws Exception {
+	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> cloudData, CFApplication app) throws Exception {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
 		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
-		properties.setBuildpack(app == null ? null : app.getBuildpackUrl());
+		properties.setBuildpack(app == null ? ApplicationManifestHandler.getDefaultBuildpack(cloudData) : app.getBuildpackUrl());
 
 		/*
 		 * TODO: Re-evaluate whether JAVA_OPTS need to be treated differently
@@ -270,6 +271,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 
 		if (app == null) {
+			List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), domains.get(0).getName());
 			properties.setUris(Collections.singletonList(cloudAppUrl.getUrl()));
 		} else {

@@ -11,10 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -62,10 +60,11 @@ public class SelectManifestOp extends CloudOperation {
 //		 */
 //		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
+		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project, model.getAppCache().getApp(cde.getName()));
+
 		try {
-			List<CloudDomain> domains = model.getRunTarget().getDomains(monitor);
-			String buildpack = model.getRunTarget().getBuildpack(project);
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, domains, buildpack, model.getAppCache().getApp(project)), domains);
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, cloudData,
+					model.getAppCache().getApp(cde.getName())), cloudData);
 		} catch (Exception e) {
 			// ignore
 		}
@@ -78,9 +77,8 @@ public class SelectManifestOp extends CloudOperation {
 
 		String defaultManifest = new Yaml(options).dump(yaml);
 
-		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(
-				cde.getCloudModel().getRunTarget().getDomains(monitor), cde.getName(), project, manifest, defaultManifest,
-				true, false);
+		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(cloudData, project,
+				manifest, defaultManifest, true, false);
 
 		if (props == null) {
 			throw ExceptionUtil.coreException("Error loading deployment properties from the manifest YAML");

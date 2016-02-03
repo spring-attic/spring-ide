@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
@@ -43,15 +45,24 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
  */
 public class ManifestCompareMergeTests {
 	
-	private static final List<CloudDomain> SPRING_CLOUD_DOMAINS = Arrays.asList(
+	public static final String DEFAULT_BUILDPACK = "java_buildpack_offline";
+	
+	public static final List<CloudDomain> SPRING_CLOUD_DOMAINS = Arrays.asList(
 			new CloudDomain(null, "springsource.org", null), new CloudDomain(null, "spring.io", null),
 			new CloudDomain(null, "spring.framework", null));
+	
+	public static Map<String, Object> createCloudDataMap() {
+		Map<String, Object> cloudData = new HashMap<>();
+		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
+		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, DEFAULT_BUILDPACK);
+		return cloudData;
+	}
 	
 	private static void performMergeTest(File manifest, DeploymentProperties props, File expected) throws Exception {
 		FileInputStream manifestStream = null, expectedStream = null;
 		try {
 			String yamlContents = IOUtil.toString(manifestStream = new FileInputStream(manifest));
-			YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(yamlContents, props.getAppName(), SPRING_CLOUD_DOMAINS);
+			YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(yamlContents, props.getAppName(), createCloudDataMap());
 			TextEdit edit = yamlGraphProps.getDifferences(props);
 			if (expected == null) {
 				assertEquals(null, edit);

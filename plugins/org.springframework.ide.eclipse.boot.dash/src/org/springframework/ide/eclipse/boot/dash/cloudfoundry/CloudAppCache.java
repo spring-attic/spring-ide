@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
  * Caches {@link CloudApplication} and associated information, like the project
@@ -162,17 +163,6 @@ public class CloudAppCache {
 		if (item != null) {
 			return item.appInstances.getApplication();
 		}
-		return null;
-	}
-
-	public synchronized CFApplication getApp(IProject project) {
-
-		for (Entry<String, CacheItem> entry : appCache.entrySet()) {
-			if (entry.getValue().project != null && entry.getValue().project.equals(project)) {
-				return entry.getValue().appInstances.getApplication();
-			}
-		}
-
 		return null;
 	}
 

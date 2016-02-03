@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,16 +98,36 @@ public class ApplicationManifestHandler {
 
 	private final IFile manifestFile;
 
-	private final List<CloudDomain> domains;
+	private final Map<String, Object> cloudData;
 
-	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains) {
-		this(project, domains, null);
+	public ApplicationManifestHandler(IProject project, Map<String, Object> cloudData) {
+		this(project, cloudData, null);
 	}
 
-	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IFile manifestFile) {
+	public ApplicationManifestHandler(IProject project, Map<String, Object> cloudData, IFile manifestFile) {
 		this.project = project;
 		this.manifestFile = manifestFile;
-		this.domains = domains;
+		this.cloudData = cloudData;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<CloudDomain> getCloudDomains(Map<String, Object> cloudData) {
+		Object obj = cloudData == null ? null : cloudData.get(DOMAINS_PROP);
+		return obj instanceof List ? (List<CloudDomain>) obj : Collections.<CloudDomain>emptyList();
+	}
+
+	public static String getDefaultBuildpack(Map<String, Object> cloudData) {
+		return getDefaultValue(cloudData, BUILDPACK_PROP, String.class);
+	}
+
+	public static String getDefaultName(Map<String, Object> cloudData) {
+		return getDefaultValue(cloudData, NAME_PROP, String.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getDefaultValue(Map<String, Object> cloudData, String key, Class<T> type) {
+		Object obj = cloudData == null ? null : cloudData.get(key);
+		return obj != null && type.isAssignableFrom(obj.getClass()) ? (T) obj : null;
 	}
 
 	protected InputStream getInputStream() throws Exception {
@@ -182,13 +202,14 @@ public class ApplicationManifestHandler {
 	 * @return map of values for the given property name, or null if it cannot
 	 *         be resolved
 	 */
+	@SuppressWarnings("unchecked")
 	protected Map<?, ?> getContainingPropertiesMap(Map<?, ?> containerMap, String propertyName) {
 		if (containerMap == null || propertyName == null) {
 			return null;
 		}
 		Object yamlElementObj = containerMap.get(propertyName);
 
-		if (yamlElementObj instanceof Map<?, ?>) {
+		if (yamlElementObj instanceof Map) {
 			return (Map<Object, Object>) yamlElementObj;
 		} else {
 			return null;
@@ -340,7 +361,7 @@ public class ApplicationManifestHandler {
 			return false;
 		}
 
-		Map<Object, Object> deploymentInfoYaml = toYaml(properties, domains);
+		Map<Object, Object> deploymentInfoYaml = toYaml(properties, cloudData);
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);
 		options.setCanonical(false);
@@ -359,7 +380,7 @@ public class ApplicationManifestHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<Object, Object> toYaml(DeploymentProperties properties, List<CloudDomain> cloudDomains) {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> cloudData) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -402,6 +423,7 @@ public class ApplicationManifestHandler {
 		Set<String> hosts = new LinkedHashSet<>();
 		Set<String> domains = new LinkedHashSet<>();
 
+		List<CloudDomain> cloudDomains = getCloudDomains(cloudData);
 		extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
 		for (String uri : properties.getUris()) {
 			try {
@@ -553,6 +575,8 @@ public class ApplicationManifestHandler {
 	@SuppressWarnings("unchecked")
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
+
+		List<CloudDomain> domains = getCloudDomains(cloudData);
 
 		/*
 		 * Check for "no-route: true". If set then uris list should be empty
@@ -780,6 +804,7 @@ public class ApplicationManifestHandler {
 	 *             if manifest file exists, but error occurred that prevents a
 	 *             map to be generated.
 	 */
+	@SuppressWarnings("unchecked")
 	protected Map<Object, Object> parseManifestFromFile() throws Exception {
 
 		InputStream inputStream = getInputStream();
@@ -790,7 +815,7 @@ public class ApplicationManifestHandler {
 			try {
 				Object results = yaml.load(inputStream);
 
-				if (results instanceof Map<?, ?>) {
+				if (results instanceof Map) {
 					return (Map<Object, Object>) results;
 				} else {
 					String source = manifestFile == null ? "entered manifest" : "file " + manifestFile.getFullPath();
