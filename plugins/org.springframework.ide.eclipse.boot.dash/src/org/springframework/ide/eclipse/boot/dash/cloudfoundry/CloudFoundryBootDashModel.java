@@ -683,7 +683,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				 * current deployment properties on CF then prompt the user to
 				 * perform the merge
 				 */
-				if (edit.hasChildren() && ui != null) {
+				if (edit != null && edit.hasChildren() && ui != null) {
 					final IDocument doc = new Document(yamlContents);
 					edit.apply(doc);
 
