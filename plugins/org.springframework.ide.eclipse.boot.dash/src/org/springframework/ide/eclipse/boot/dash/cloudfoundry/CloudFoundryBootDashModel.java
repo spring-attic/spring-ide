@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
@@ -660,19 +659,26 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		/*
 		 * Refresh the cloud application first to get the latest deployment properties changes
 		 */
-		new RefreshApplications(this, Collections.singletonList(getAppCache().getApp(project))).run(monitor);
+		CFApplication app = getAppCache().getApp(project);
+
+		new RefreshApplications(this, Collections.singletonList(app)).run(monitor);
 		/*
 		 * Now construct deployment properties object
 		 */
-		List<CloudDomain> domains = getRunTarget().getDomains(monitor);
-		String defaultBuildpack = getRunTarget().getBuildpack(project);
-		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, domains, defaultBuildpack, getAppCache().getApp(project));
-		CloudAppDashElement element = getApplication(deploymentProperties.getAppName());
-		final IFile manifestFile = element.getDeploymentManifestFile();
+		Map<String, Object> defaultData = new HashMap<>();
+		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
+		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
+		if (app != null) {
+			defaultData.put(ApplicationManifestHandler.NAME_PROP, app.getName());
+		}
+
+		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, defaultData, app);
+		CloudAppDashElement element = app == null ? null : getApplication(app.getName());
+		final IFile manifestFile = element == null ? null : element.getDeploymentManifestFile();
 		if (manifestFile != null) {
 			if (manifestFile.exists()) {
 				final String yamlContents = IOUtil.toString(manifestFile.getContents());
-				MultiTextEdit edit = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), domains)
+				MultiTextEdit edit = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), defaultData)
 						.getDifferences(deploymentProperties);
 
 				/*
@@ -722,7 +728,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						 */
 						final byte[] yamlBytes = left.getContent();
 						List<CloudApplicationDeploymentProperties> props = new ApplicationManifestHandler(project,
-								domains, manifestFile) {
+								defaultData, manifestFile) {
 							@Override
 							protected InputStream getInputStream() throws Exception {
 								return new ByteArrayInputStream(yamlBytes);
@@ -765,12 +771,13 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		List<CloudDomain> cloudDomains = getRunTarget().getDomains(monitor);
-		String defaultBuildpack = getRunTarget().getBuildpack(project);
-		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudDomains, defaultBuildpack, null);
+		Map<String, Object> defaultData = new HashMap<>();
+		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
+		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, defaultData, null);
 		CloudAppDashElement element = getApplication(props.getAppName());
 		if (ui != null) {
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudDomains);
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, defaultData);
 			DumperOptions options = new DumperOptions();
 			options.setExplicitStart(true);
 			options.setCanonical(false);
@@ -779,7 +786,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 			String defaultManifest = new Yaml(options).dump(yaml);
 
-			props = ui.promptApplicationDeploymentProperties(cloudDomains, null, project,
+			props = ui.promptApplicationDeploymentProperties(defaultData, project,
 					element == null ? DeploymentPropertiesDialog.findManifestYamlFile(project)
 							: element.getDeploymentManifestFile(),
 					defaultManifest, false, false);

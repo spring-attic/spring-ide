@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IProject;
@@ -122,8 +124,11 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor mon) throws Exception {
 		IProject project = deploymentProperties.getProject();
 
-		ApplicationManifestHandler parser = new ApplicationManifestHandler(project,
-				this.model.getRunTarget().getDomains(mon));
+		Map<String, Object> defaultData = new HashMap<>();
+		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, model.getRunTarget().getDomains(mon));
+		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, model.getRunTarget().getBuildpack(project));
+
+		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, defaultData);
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),

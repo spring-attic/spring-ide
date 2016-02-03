@@ -98,16 +98,36 @@ public class ApplicationManifestHandler {
 
 	private final IFile manifestFile;
 
-	private final List<CloudDomain> domains;
+	private final Map<String, Object> defaultData;
 
-	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains) {
-		this(project, domains, null);
+	public ApplicationManifestHandler(IProject project, Map<String, Object> defaultData) {
+		this(project, defaultData, null);
 	}
 
-	public ApplicationManifestHandler(IProject project, List<CloudDomain> domains, IFile manifestFile) {
+	public ApplicationManifestHandler(IProject project, Map<String, Object> defaultData, IFile manifestFile) {
 		this.project = project;
 		this.manifestFile = manifestFile;
-		this.domains = domains;
+		this.defaultData = defaultData;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<CloudDomain> getCloudDomains(Map<String, Object> defaultData) {
+		Object obj = defaultData == null ? null : defaultData.get(DOMAINS_PROP);
+		return obj instanceof List ? (List<CloudDomain>) obj : Collections.<CloudDomain>emptyList();
+	}
+
+	public static String getDefaultBuildpack(Map<String, Object> defaultData) {
+		return getDefaultValue(defaultData, BUILDPACK_PROP, String.class);
+	}
+
+	public static String getDefaultName(Map<String, Object> defaultData) {
+		return getDefaultValue(defaultData, NAME_PROP, String.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getDefaultValue(Map<String, Object> defaultData, String key, Class<T> type) {
+		Object obj = defaultData == null ? null : defaultData.get(key);
+		return obj != null && type.isAssignableFrom(obj.getClass()) ? (T) obj : null;
 	}
 
 	protected InputStream getInputStream() throws Exception {
@@ -340,7 +360,7 @@ public class ApplicationManifestHandler {
 			return false;
 		}
 
-		Map<Object, Object> deploymentInfoYaml = toYaml(properties, domains);
+		Map<Object, Object> deploymentInfoYaml = toYaml(properties, defaultData);
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);
 		options.setCanonical(false);
@@ -359,7 +379,7 @@ public class ApplicationManifestHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<Object, Object> toYaml(DeploymentProperties properties, List<CloudDomain> cloudDomains) {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> defaultData) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -402,6 +422,7 @@ public class ApplicationManifestHandler {
 		Set<String> hosts = new LinkedHashSet<>();
 		Set<String> domains = new LinkedHashSet<>();
 
+		List<CloudDomain> cloudDomains = getCloudDomains(defaultData);
 		extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
 		for (String uri : properties.getUris()) {
 			try {
@@ -545,6 +566,9 @@ public class ApplicationManifestHandler {
 		if (buildpack == null) {
 			buildpack = getValue(allResults, BUILDPACK_PROP, String.class);
 		}
+		if (buildpack == null) {
+			buildpack = getDefaultBuildpack(defaultData);
+		}
 		if (buildpack != null) {
 			properties.setBuildpack(buildpack);
 		}
@@ -553,6 +577,8 @@ public class ApplicationManifestHandler {
 	@SuppressWarnings("unchecked")
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
+
+		List<CloudDomain> domains = getCloudDomains(defaultData);
 
 		/*
 		 * Check for "no-route: true". If set then uris list should be empty

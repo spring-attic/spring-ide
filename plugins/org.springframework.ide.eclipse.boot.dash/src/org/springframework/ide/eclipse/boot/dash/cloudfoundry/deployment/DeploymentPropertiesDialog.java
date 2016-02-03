@@ -19,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -174,7 +173,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private IProject project;
 	private boolean readOnly;
 	private final boolean noModeSwitch;
-	private List<CloudDomain> domains;
+	private Map<String, Object> defaultData;
 	private CloudApplicationDeploymentProperties deploymentProperties;
 	private String defaultYaml;
 	private LiveVariable<IFile> fileModel;
@@ -242,9 +241,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 	};
 
-	public DeploymentPropertiesDialog(Shell parentShell, List<CloudDomain> domains, String appName, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
+	public DeploymentPropertiesDialog(Shell parentShell, Map<String, Object> defaultData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
 		super(parentShell);
-		this.domains = domains;
+		this.defaultData = defaultData;
 		this.project = project;
 		this.defaultYaml = defaultYaml;
 		this.readOnly = readOnly;
@@ -252,7 +251,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
 		this.docProvider = new TextFileDocumentProvider();
-		this.appName = appName;
+		this.appName = ApplicationManifestHandler.getDefaultName(defaultData);
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
@@ -768,7 +767,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		try {
-			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, domains, getManifest()) {
+			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, defaultData, getManifest()) {
 				@Override
 				protected InputStream getInputStream() throws Exception {
 					return new ByteArrayInputStream(getManifestContents().getBytes());

@@ -62,13 +62,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private MappingNode appNode;
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
-	private List<CloudDomain> domains;
+	private Map<String, Object> defaultData;
 
-	public YamlGraphDeploymentProperties(String content, String appName, List<CloudDomain> domains) {
+	public YamlGraphDeploymentProperties(String content, String appName, Map<String, Object> defaultData) {
 		super();
 		this.appNode = null;
 		this.applicationsValueNode = null;
-		this.domains = domains;
+		this.defaultData = defaultData;
 		this.content = content;
 		initializeYaml(appName);
 	}
@@ -141,7 +141,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	@Override
 	public String getBuildpack() {
 		ScalarNode n = getNode(appNode, ApplicationManifestHandler.BUILDPACK_PROP, ScalarNode.class);
-		return n == null ? null : n.getValue();
+		return n == null ? ApplicationManifestHandler.getDefaultBuildpack(defaultData) : n.getValue();
 	}
 
 	@Override
@@ -230,7 +230,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		TextEdit edit;
 
 		if (appNode == null) {
-			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, domains);
+			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, defaultData);
 			if (applicationsValueNode == null) {
 				DumperOptions options = new DumperOptions();
 				options.setExplicitStart(true);
@@ -327,6 +327,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
 		SequenceNode sequence;
 		ScalarNode n;
+		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(defaultData);
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
@@ -825,6 +826,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			return Collections.emptySet();
 		}
 
+		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(defaultData);
 		LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
 		LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 

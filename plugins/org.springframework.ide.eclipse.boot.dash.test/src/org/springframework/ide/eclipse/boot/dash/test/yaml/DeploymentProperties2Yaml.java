@@ -15,10 +15,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -36,12 +34,8 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class DeploymentProperties2Yaml {
 	
-	private static final List<CloudDomain> SPRING_CLOUD_DOMAINS = Arrays.asList(
-			new CloudDomain(null, "springsource.org", null), new CloudDomain(null, "spring.io", null),
-			new CloudDomain(null, "spring.framework", null));
-
 	private static void testDeploymentProperties(CloudApplicationDeploymentProperties props, String expectedYamlFilePath) throws Exception {
-		Map<Object, Object> map = ApplicationManifestHandler.toYaml(props, SPRING_CLOUD_DOMAINS);
+		Map<Object, Object> map = ApplicationManifestHandler.toYaml(props, ManifestCompareMergeTests.createDefaultDataMap());
 		
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);

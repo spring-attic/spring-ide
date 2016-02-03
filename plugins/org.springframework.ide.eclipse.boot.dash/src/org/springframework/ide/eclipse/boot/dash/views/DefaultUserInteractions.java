@@ -11,9 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.resources.IFile;
@@ -222,7 +221,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final List<CloudDomain> domains, final String appName,
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final Map<String, Object> defaultData,
 			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth)
 					throws OperationCanceledException {
 		final Shell shell = getShell();
@@ -233,7 +232,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 				@Override
 				public void run() {
-					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, domains, appName, project, manifest, defaultYaml, readOnly, noModeSwicth);
+					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, defaultData, project, manifest, defaultYaml, readOnly, noModeSwicth);
 					if (dialog.open() == IDialogConstants.OK_ID) {
 						props[0] = dialog.getCloudApplicationDeploymentProperties();
 					}

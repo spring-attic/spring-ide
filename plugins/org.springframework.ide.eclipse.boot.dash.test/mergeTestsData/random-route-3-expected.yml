@@ -1,7 +1,6 @@
 ---
 applications:
 - name: app
-  buildpack: java_buildpack_offline
   memory: 1024M
   host: app2
   domain: springsource.org

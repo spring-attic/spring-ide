@@ -11,9 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -45,8 +44,7 @@ public interface UserInteractions {
 
 	/**
 	 * Brings up the UI to enter application deployment manifest
-	 * @param domains
-	 * @param appName
+	 * @param defaultData
 	 * @param project
 	 * @param manifest
 	 * @param defaultYaml
@@ -55,8 +53,8 @@ public interface UserInteractions {
 	 * @return
 	 * @throws OperationCanceledException
 	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(List<CloudDomain> domains,
-			String appName, IProject project, IFile manifest, String defaultYaml, boolean readOnly,
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(Map<String, Object> defaultData,
+			IProject project, IFile manifest, String defaultYaml, boolean readOnly,
 			boolean noModeSwicth) throws OperationCanceledException;
 
 	/**
