@@ -81,6 +81,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -736,7 +737,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 							}
 						}
 						if (found == null) {
-							throw new OperationCanceledException(
+							throw ExceptionUtil.coreException(
 									"Cannot load deployment properties for application '" + deploymentProperties.getAppName()
 											+ "' from the manifest file '" + manifestFile.getFullPath() + "'");
 						} else {
