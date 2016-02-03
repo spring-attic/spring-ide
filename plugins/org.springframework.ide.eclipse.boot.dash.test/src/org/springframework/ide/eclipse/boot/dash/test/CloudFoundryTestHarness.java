@@ -13,11 +13,12 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
@@ -177,14 +179,14 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) {
-		when(ui.promptApplicationDeploymentProperties(anyListOf(CloudDomain.class), any(String.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
 				@SuppressWarnings("unchecked")
-				List<CloudDomain> domains = (List<CloudDomain>) args[0];
-				IProject project = (IProject) args[2];
+				List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				IProject project = (IProject) args[1];
 				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 				deploymentProperties.setProject(project.getProject());
 				deploymentProperties.setAppName(appName);
