@@ -12,7 +12,7 @@
       </content-type>
       <file-association
             content-type="org.springframework.ide.eclipse.applicationProperties"
-            file-names="application.properties">
+            file-names="application.properties,application-dev.properties">
       </file-association>
    </extension>
 

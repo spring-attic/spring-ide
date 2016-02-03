@@ -13,7 +13,7 @@
       </content-type>
       <file-association
             content-type="org.springframework.ide.eclipse.application.yml"
-            file-names="application.yml,bootstrap.yml">
+            file-names="application.yml,bootstrap.yml,application-dev.yml">
       </file-association>
    </extension>
 
