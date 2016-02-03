@@ -2,17 +2,28 @@ package demo;
 
 public class Deprecater {
 
-	@Deprecated
-	private String oldName;
+	private String newName;
+	@Deprecated private String name;
+
+	///////////////////
+
 
 	@Deprecated
-	public String getOldName() {
-		return oldName;
+	public String getName() {
+		return name;
 	}
 
 	@Deprecated
-	public void setOldName(String oldName) {
-		this.oldName = oldName;
+	public void setName(String oldName) {
+		this.name = oldName;
+	}
+
+	public String getNewName() {
+		return newName;
+	}
+
+	public void setNewName(String newName) {
+		this.newName = newName;
 	}
 
 }
