@@ -30,6 +30,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.viewers.StyledString;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.Deprecation;
@@ -676,13 +677,22 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		assertElements(actualLabels, completionsLabels);
 	}
 
-	public void assertStyledCompletions(String editorText, StyleMatcher... expectStyles) throws Exception {
+	public void assertStyledCompletions(String editorText, StyledStringMatcher... expectStyles) throws Exception {
 		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
-		StyledString[] actualLabels = new StyledString[completions.length];
-		for (int i = 0; i < actualLabels.length; i++) {
-			fail("Implement please");
+		assertEquals("Wrong number of elements", expectStyles.length, completions.length);
+		for (int i = 0; i < expectStyles.length; i++) {
+			ICompletionProposal completion = completions[i];
+			StyledString actualLabel = getStyledDisplayString(completion);
+			expectStyles[i].match(actualLabel);
 		}
+	}
+
+	private StyledString getStyledDisplayString(ICompletionProposal completion) {
+		if (completion instanceof ICompletionProposalExtension6) {
+			return ((ICompletionProposalExtension6)completion).getStyledDisplayString();
+		}
+		return new StyledString(completion.getDisplayString());
 	}
 
 

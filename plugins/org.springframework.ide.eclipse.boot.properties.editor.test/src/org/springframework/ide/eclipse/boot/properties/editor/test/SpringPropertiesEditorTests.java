@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
@@ -288,7 +287,10 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.Foo"));
 
 		assertCompletionsVariations("volder.foo.l<*>", "volder.foo.list[<*>");
-		assertCompletionsDisplayString("volder.foo.list[0].<*>", "name", "description", "roles");
+		assertCompletionsDisplayString("volder.foo.list[0].<*>",
+				"name : String",
+				"description : String",
+				"roles : List<String>");
 
 		assertCompletionsVariations("volder.foo.list[0].na<*>",
 				"volder.foo.list[0].name=<*>"
@@ -518,7 +520,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"foo.color-names.red=<*>"
 		);
 		assertCompletionsDisplayString("foo.color-names.<*>",
-				"red", "green", "blue"
+				"red : String", "green : String", "blue : String"
 		);
 		assertCompletionsVariations("foo.color-names.B<*>",
 				"foo.color-names.BLUE=<*>"
@@ -535,7 +537,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"foo.color-data.BLUE.<*>"
 		);
 		assertCompletionsDisplayString("foo.color-data.<*>",
-				"blue", "green", "red"
+				"blue : demo.ColorData", "green : demo.ColorData", "red : demo.ColorData"
 		);
 	}
 
@@ -569,8 +571,14 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("foo.dat<*>", "foo.data.<*>");
 
 		assertCompletionsDisplayString("foo.data.",
-				"wavelen", "name", "next", "nested", "children",
-				"mapped-children", "color-children", "tags"
+				"wavelen : double",
+				"name : String",
+				"next : demo.Color[RED, GREEN, BLUE]",
+				"nested : demo.ColorData",
+				"children : List<demo.ColorData>",
+				"mapped-children : Map<String, demo.ColorData>",
+				"color-children : Map<demo.Color[RED, GREEN, BLUE], demo.ColorData>",
+				"tags : List<String>"
 		);
 
 		assertCompletionsVariations("foo.data.wav<*>", "foo.data.wavelen=<*>");
@@ -836,8 +844,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		//TODO: could we check that 'deprecated' completions are formatted with 'strikethrough font?
 		assertStyledCompletions("error.pa<*>",
-				StyleMatcher.plainFont("server.error.path : String"),
-				StyleMatcher.strikeout("server.error")
+				StyledStringMatcher.plainFont("server.error.path : String"),
+				StyledStringMatcher.strikeout("error.path")
 		);
 	}
 
@@ -870,10 +878,22 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"# comment\n" +
-				"foo.old-name=Old faithfull\n"
+				"foo.name=Old faithfull\n" +
+				"foo.new-name=New and fancy\n"
 		);
 		assertProblems(editor,
-				"old-name|Deprecated"
+				"name|Deprecated"
+		);
+	}
+
+	public void testDeprecatedBeanPropertyCompletions() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		assertStyledCompletions("foo.nam<*>",
+				StyledStringMatcher.plainFont("new-name : String"),
+				StyledStringMatcher.strikeout("name")
 		);
 	}
 

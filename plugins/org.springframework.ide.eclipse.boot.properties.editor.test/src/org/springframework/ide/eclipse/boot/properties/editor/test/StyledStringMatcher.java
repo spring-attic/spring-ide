@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.custom.StyleRange;
 
-public abstract class StyleMatcher {
+public abstract class StyledStringMatcher {
 
 	public abstract void match(StyledString styledString) throws Exception;
 
@@ -25,8 +25,8 @@ public abstract class StyleMatcher {
 	 * in 'plain' font (currently 'plain' just means that it is not using 'strikeout'
 	 * as that is the only other style we currently care about).
 	 */
-	public static StyleMatcher plainFont(final String string) {
-		return new StyleMatcher() {
+	public static StyledStringMatcher plainFont(final String string) {
+		return new StyledStringMatcher() {
 			@Override
 			public String toString() {
 				return "plain("+string+")";
@@ -51,22 +51,22 @@ public abstract class StyleMatcher {
 	 * equals the concatenation of all the text in the {@link StyledString} formatted
 	 * in 'strikeout' font.
 	 */
-	public static StyleMatcher strikeout(final String string) {
-		return new StyleMatcher() {
+	public static StyledStringMatcher strikeout(final String expectedString) {
+		return new StyledStringMatcher() {
 			@Override
 			public String toString() {
-				return "strikeout("+string+")";
+				return "strikeout("+expectedString+")";
 			}
 			@Override
 			public void match(StyledString styledString) throws Exception {
 				StringBuilder extractedText = new StringBuilder();
-				String string = styledString.getString();
+				String unstyledString = styledString.getString();
 				for (StyleRange styleRange : styledString.getStyleRanges()) {
 					if (styleRange.strikeout) {
-						extractedText.append(string.substring(styleRange.start, styleRange.start + styleRange.length));
+						extractedText.append(unstyledString.substring(styleRange.start, styleRange.start + styleRange.length));
 					}
 				}
-				assertEquals(string, extractedText.toString());
+				assertEquals(expectedString, extractedText.toString());
 			}
 		};
 	}
