@@ -62,13 +62,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private MappingNode appNode;
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
-	private List<CloudDomain> domains;
+	private Map<String, Object> cloudData;
 
-	public YamlGraphDeploymentProperties(String content, String appName, List<CloudDomain> domains) {
+	public YamlGraphDeploymentProperties(String content, String appName, Map<String, Object> cloudData) {
 		super();
 		this.appNode = null;
 		this.applicationsValueNode = null;
-		this.domains = domains;
+		this.cloudData = cloudData;
 		this.content = content;
 		initializeYaml(appName);
 	}
@@ -230,7 +230,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		TextEdit edit;
 
 		if (appNode == null) {
-			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, domains);
+			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, cloudData);
 			if (applicationsValueNode == null) {
 				DumperOptions options = new DumperOptions();
 				options.setExplicitStart(true);
@@ -327,6 +327,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
 		SequenceNode sequence;
 		ScalarNode n;
+		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
@@ -825,6 +826,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			return Collections.emptySet();
 		}
 
+		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 		LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
 		LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 

@@ -17,9 +17,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
@@ -34,12 +32,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
  */
 public class Yaml2DeploymentProperties {
 	
-	private static final List<CloudDomain> SPRING_CLOUD_DOMAINS = Arrays.asList(
-			new CloudDomain(null, "springsource.org", null), new CloudDomain(null, "spring.io", null),
-			new CloudDomain(null, "spring.framework", null));
-	
 	private static CloudApplicationDeploymentProperties readDeploymentProperties(final String filePath) throws Exception {
-		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, SPRING_CLOUD_DOMAINS) {
+		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createCloudDataMap()) {
 			@Override
 			protected InputStream getInputStream() throws Exception {
 				return new FileInputStream(ManifestCompareMergeTests.getTestFile(filePath));
