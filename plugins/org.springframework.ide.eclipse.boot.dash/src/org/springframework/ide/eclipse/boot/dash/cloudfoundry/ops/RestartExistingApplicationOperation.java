@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -67,7 +66,7 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 		}
 		IProject project = cde.getProject();
 
-		CloudApplicationDeploymentProperties properties = model.resolveDeploymentProperties(project, ui,
+		CloudApplicationDeploymentProperties properties = model.resolveDeploymentProperties(cde, ui,
 				monitor);
 
 		// Update JAVA_OPTS env variable with Remote DevTools Client secret

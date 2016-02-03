@@ -173,7 +173,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private IProject project;
 	private boolean readOnly;
 	private final boolean noModeSwitch;
-	private Map<String, Object> defaultData;
+	private Map<String, Object> cloudData;
 	private CloudApplicationDeploymentProperties deploymentProperties;
 	private String defaultYaml;
 	private LiveVariable<IFile> fileModel;
@@ -241,9 +241,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 	};
 
-	public DeploymentPropertiesDialog(Shell parentShell, Map<String, Object> defaultData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
+	public DeploymentPropertiesDialog(Shell parentShell, Map<String, Object> cloudData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
 		super(parentShell);
-		this.defaultData = defaultData;
+		this.cloudData = cloudData;
 		this.project = project;
 		this.defaultYaml = defaultYaml;
 		this.readOnly = readOnly;
@@ -251,7 +251,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
 		this.docProvider = new TextFileDocumentProvider();
-		this.appName = ApplicationManifestHandler.getDefaultName(defaultData);
+		this.appName = ApplicationManifestHandler.getDefaultName(cloudData);
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
@@ -767,7 +767,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		try {
-			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, defaultData, getManifest()) {
+			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, cloudData, getManifest()) {
 				@Override
 				protected InputStream getInputStream() throws Exception {
 					return new ByteArrayInputStream(getManifestContents().getBytes());

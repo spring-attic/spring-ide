@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 public class Yaml2DeploymentProperties {
 	
 	private static CloudApplicationDeploymentProperties readDeploymentProperties(final String filePath) throws Exception {
-		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createDefaultDataMap()) {
+		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createCloudDataMap()) {
 			@Override
 			protected InputStream getInputStream() throws Exception {
 				return new FileInputStream(ManifestCompareMergeTests.getTestFile(filePath));
@@ -310,10 +310,4 @@ public class Yaml2DeploymentProperties {
 		assertEquals(new HashSet<>(Arrays.asList("app.spring.io")), props.getUris());
 	}
 
-	@Test
-	public void test_buildpack_1() throws Exception {
-		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/root-1.yml");
-		assertEquals(ManifestCompareMergeTests.DEFAULT_BUILDPACK, props.getBuildpack());
-	}
-	
 }

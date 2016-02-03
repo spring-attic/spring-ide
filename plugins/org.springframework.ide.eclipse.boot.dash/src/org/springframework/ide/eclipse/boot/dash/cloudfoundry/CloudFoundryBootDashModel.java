@@ -656,30 +656,26 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             if user canceled operation while resolving deployment
 	 *             properties
 	 */
-	public CloudApplicationDeploymentProperties resolveDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
+	public CloudApplicationDeploymentProperties resolveDeploymentProperties(CloudAppDashElement cde, UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		/*
 		 * Refresh the cloud application first to get the latest deployment properties changes
 		 */
-		CFApplication app = getAppCache().getApp(project);
+		IProject project = cde.getProject();
+		CFApplication app = getAppCache().getApp(cde.getName());
 
 		new RefreshApplications(this, Collections.singletonList(app)).run(monitor);
 		/*
 		 * Now construct deployment properties object
 		 */
-		Map<String, Object> defaultData = new HashMap<>();
-		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
-		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
-		if (app != null) {
-			defaultData.put(ApplicationManifestHandler.NAME_PROP, app.getName());
-		}
+		Map<String, Object> cloudData = buildOperationCloudData(monitor, project, app);
 
-		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, defaultData, app);
+		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
 		CloudAppDashElement element = app == null ? null : getApplication(app.getName());
 		final IFile manifestFile = element == null ? null : element.getDeploymentManifestFile();
 		if (manifestFile != null) {
 			if (manifestFile.exists()) {
 				final String yamlContents = IOUtil.toString(manifestFile.getContents());
-				MultiTextEdit edit = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), defaultData)
+				MultiTextEdit edit = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), cloudData)
 						.getDifferences(deploymentProperties);
 
 				/*
@@ -729,7 +725,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						 */
 						final byte[] yamlBytes = left.getContent();
 						List<CloudApplicationDeploymentProperties> props = new ApplicationManifestHandler(project,
-								defaultData, manifestFile) {
+								cloudData, manifestFile) {
 							@Override
 							protected InputStream getInputStream() throws Exception {
 								return new ByteArrayInputStream(yamlBytes);
@@ -772,13 +768,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		Map<String, Object> defaultData = new HashMap<>();
-		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
-		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
-		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, defaultData, null);
+		Map<String, Object> cloudData = buildOperationCloudData(monitor, project, null);
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudData, null);
 		CloudAppDashElement element = getApplication(props.getAppName());
 		if (ui != null) {
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, defaultData);
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudData);
 			DumperOptions options = new DumperOptions();
 			options.setExplicitStart(true);
 			options.setCanonical(false);
@@ -787,7 +781,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 			String defaultManifest = new Yaml(options).dump(yaml);
 
-			props = ui.promptApplicationDeploymentProperties(defaultData, project,
+			props = ui.promptApplicationDeploymentProperties(cloudData, project,
 					element == null ? DeploymentPropertiesDialog.findManifestYamlFile(project)
 							: element.getDeploymentManifestFile(),
 					defaultManifest, false, false);
@@ -807,12 +801,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				+ getRunTarget().getName() + "? The applications will be permanently removed.";
 	}
 
-	protected String getAppName(IProject project) {
-		// check if there is a project -> app mapping:
-		CFApplication app = getAppCache().getApp(project);
-		return app != null ? app.getName() : project.getName();
-	}
-
 	public boolean isConnected() {
 		return getRunTarget().isConnected();
 	}
@@ -827,6 +815,16 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public ObservableSet<CloudServiceDashElement> getServices() {
 		return services;
+	}
+
+	public Map<String, Object> buildOperationCloudData(IProgressMonitor monitor, IProject project, CFApplication app) throws Exception {
+		Map<String, Object> cloudData = new HashMap<>();
+		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
+		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
+		if (app != null) {
+			cloudData.put(ApplicationManifestHandler.NAME_PROP, app.getName());
+		}
+		return cloudData;
 	}
 
 }

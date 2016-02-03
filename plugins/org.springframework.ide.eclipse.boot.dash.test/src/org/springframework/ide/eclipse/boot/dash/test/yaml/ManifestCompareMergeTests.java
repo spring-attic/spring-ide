@@ -51,18 +51,18 @@ public class ManifestCompareMergeTests {
 			new CloudDomain(null, "springsource.org", null), new CloudDomain(null, "spring.io", null),
 			new CloudDomain(null, "spring.framework", null));
 	
-	public static Map<String, Object> createDefaultDataMap() {
-		Map<String, Object> defaultData = new HashMap<>();
-		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
-		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, DEFAULT_BUILDPACK);
-		return defaultData;
+	public static Map<String, Object> createCloudDataMap() {
+		Map<String, Object> cloudData = new HashMap<>();
+		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
+		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, DEFAULT_BUILDPACK);
+		return cloudData;
 	}
 	
 	private static void performMergeTest(File manifest, DeploymentProperties props, File expected) throws Exception {
 		FileInputStream manifestStream = null, expectedStream = null;
 		try {
 			String yamlContents = IOUtil.toString(manifestStream = new FileInputStream(manifest));
-			YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(yamlContents, props.getAppName(), createDefaultDataMap());
+			YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(yamlContents, props.getAppName(), createCloudDataMap());
 			TextEdit edit = yamlGraphProps.getDifferences(props);
 			if (expected == null) {
 				assertEquals(null, edit);

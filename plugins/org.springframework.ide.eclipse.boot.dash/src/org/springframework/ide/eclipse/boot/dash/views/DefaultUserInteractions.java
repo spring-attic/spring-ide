@@ -221,7 +221,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final Map<String, Object> defaultData,
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final Map<String, Object> cloudData,
 			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth)
 					throws OperationCanceledException {
 		final Shell shell = getShell();
@@ -232,7 +232,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 				@Override
 				public void run() {
-					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, defaultData, project, manifest, defaultYaml, readOnly, noModeSwicth);
+					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, cloudData, project, manifest, defaultYaml, readOnly, noModeSwicth);
 					if (dialog.open() == IDialogConstants.OK_ID) {
 						props[0] = dialog.getCloudApplicationDeploymentProperties();
 					}

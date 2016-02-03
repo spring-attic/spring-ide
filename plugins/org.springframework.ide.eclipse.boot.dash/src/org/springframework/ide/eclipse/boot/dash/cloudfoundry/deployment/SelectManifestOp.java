@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -61,14 +60,11 @@ public class SelectManifestOp extends CloudOperation {
 //		 */
 //		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
-		Map<String, Object> defaultData = new HashMap<>();
-		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, model.getRunTarget().getDomains(monitor));
-		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, model.getRunTarget().getBuildpack(project));
-		defaultData.put(ApplicationManifestHandler.NAME_PROP, cde.getName());
+		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project, model.getAppCache().getApp(cde.getName()));
 
 		try {
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, defaultData,
-					model.getAppCache().getApp(project)), defaultData);
+			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, cloudData,
+					model.getAppCache().getApp(cde.getName())), cloudData);
 		} catch (Exception e) {
 			// ignore
 		}
@@ -81,7 +77,7 @@ public class SelectManifestOp extends CloudOperation {
 
 		String defaultManifest = new Yaml(options).dump(yaml);
 
-		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(defaultData, project,
+		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(cloudData, project,
 				manifest, defaultManifest, true, false);
 
 		if (props == null) {

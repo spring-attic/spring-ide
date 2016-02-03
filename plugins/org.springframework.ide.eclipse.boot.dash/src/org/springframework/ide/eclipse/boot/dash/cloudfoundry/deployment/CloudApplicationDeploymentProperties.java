@@ -245,13 +245,13 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> defaultData, CFApplication app) throws Exception {
+	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> cloudData, CFApplication app) throws Exception {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
 		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
-		properties.setBuildpack(app == null ? ApplicationManifestHandler.getDefaultBuildpack(defaultData) : app.getBuildpackUrl());
+		properties.setBuildpack(app == null ? ApplicationManifestHandler.getDefaultBuildpack(cloudData) : app.getBuildpackUrl());
 
 		/*
 		 * TODO: Re-evaluate whether JAVA_OPTS need to be treated differently
@@ -271,7 +271,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 
 		if (app == null) {
-			List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(defaultData);
+			List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), domains.get(0).getName());
 			properties.setUris(Collections.singletonList(cloudAppUrl.getUrl()));
 		} else {

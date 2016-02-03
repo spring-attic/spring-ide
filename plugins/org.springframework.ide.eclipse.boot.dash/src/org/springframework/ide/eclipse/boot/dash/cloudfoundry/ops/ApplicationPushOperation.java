@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -22,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
@@ -124,11 +124,9 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(IProgressMonitor mon) throws Exception {
 		IProject project = deploymentProperties.getProject();
 
-		Map<String, Object> defaultData = new HashMap<>();
-		defaultData.put(ApplicationManifestHandler.DOMAINS_PROP, model.getRunTarget().getDomains(mon));
-		defaultData.put(ApplicationManifestHandler.BUILDPACK_PROP, model.getRunTarget().getBuildpack(project));
+		Map<String, Object> cloudData = model.buildOperationCloudData(mon, project, null);
 
-		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, defaultData);
+		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, cloudData);
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),

@@ -44,7 +44,7 @@ public interface UserInteractions {
 
 	/**
 	 * Brings up the UI to enter application deployment manifest
-	 * @param defaultData
+	 * @param cloudData
 	 * @param project
 	 * @param manifest
 	 * @param defaultYaml
@@ -53,7 +53,7 @@ public interface UserInteractions {
 	 * @return
 	 * @throws OperationCanceledException
 	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(Map<String, Object> defaultData,
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(Map<String, Object> cloudData,
 			IProject project, IFile manifest, String defaultYaml, boolean readOnly,
 			boolean noModeSwicth) throws OperationCanceledException;
 

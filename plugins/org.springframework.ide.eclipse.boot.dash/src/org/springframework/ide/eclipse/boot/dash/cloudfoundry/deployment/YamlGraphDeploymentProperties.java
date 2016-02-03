@@ -62,13 +62,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private MappingNode appNode;
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
-	private Map<String, Object> defaultData;
+	private Map<String, Object> cloudData;
 
-	public YamlGraphDeploymentProperties(String content, String appName, Map<String, Object> defaultData) {
+	public YamlGraphDeploymentProperties(String content, String appName, Map<String, Object> cloudData) {
 		super();
 		this.appNode = null;
 		this.applicationsValueNode = null;
-		this.defaultData = defaultData;
+		this.cloudData = cloudData;
 		this.content = content;
 		initializeYaml(appName);
 	}
@@ -141,7 +141,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	@Override
 	public String getBuildpack() {
 		ScalarNode n = getNode(appNode, ApplicationManifestHandler.BUILDPACK_PROP, ScalarNode.class);
-		return n == null ? ApplicationManifestHandler.getDefaultBuildpack(defaultData) : n.getValue();
+		return n == null ? null : n.getValue();
 	}
 
 	@Override
@@ -230,7 +230,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		TextEdit edit;
 
 		if (appNode == null) {
-			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, defaultData);
+			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, cloudData);
 			if (applicationsValueNode == null) {
 				DumperOptions options = new DumperOptions();
 				options.setExplicitStart(true);
@@ -327,7 +327,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
 		SequenceNode sequence;
 		ScalarNode n;
-		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(defaultData);
+		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
@@ -826,7 +826,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			return Collections.emptySet();
 		}
 
-		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(defaultData);
+		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 		LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
 		LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 
