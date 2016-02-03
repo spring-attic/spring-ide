@@ -994,6 +994,13 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"    name: foo\n" +
 				"    color-children:\n"+
 				"      <*>",
+				//funky
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    funky: <*>",
 				//mapped-children
 				"foo:\n" +
 				"  data:\n" +

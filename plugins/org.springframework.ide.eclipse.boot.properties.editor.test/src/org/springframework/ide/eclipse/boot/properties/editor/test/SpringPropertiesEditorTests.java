@@ -578,7 +578,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"children : List<demo.ColorData>",
 				"mapped-children : Map<String, demo.ColorData>",
 				"color-children : Map<demo.Color[RED, GREEN, BLUE], demo.ColorData>",
-				"tags : List<String>"
+				"tags : List<String>",
+				"funky : boolean"
 		);
 
 		assertCompletionsVariations("foo.data.wav<*>", "foo.data.wavelen=<*>");
