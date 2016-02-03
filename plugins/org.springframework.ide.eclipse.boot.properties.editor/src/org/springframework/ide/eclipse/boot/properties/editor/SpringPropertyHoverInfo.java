@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
@@ -37,7 +38,6 @@ import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
  *
  * @author Kris De Volder
  */
-@SuppressWarnings("restriction")
 public class SpringPropertyHoverInfo extends HoverInfo {
 
 	private static final String[] NO_ARGS = new String[0];
@@ -62,10 +62,7 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
 		HtmlBuffer html = new HtmlBuffer();
 
-		html.raw("<b>");
-			html.text(data.getId());
-		html.raw("</b>");
-		html.raw("<br>");
+		renderId(html);
 
 		String type = data.getType();
 		if (type==null) {
@@ -82,6 +79,17 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 			html.raw("</i>");
 		}
 
+		if (data.isDeprecated()) {
+			html.raw("<br><br>");
+			String reason = data.getDeprecationReason();
+			if (StringUtil.hasText(reason)) {
+				html.bold("Deprecated: ");
+				html.text(reason);
+			} else {
+				html.bold("Deprecated!");
+			}
+		}
+
 		String description = data.getDescription();
 		if (description!=null) {
 			html.raw("<br><br>");
@@ -89,6 +97,20 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 		}
 
 		return html.toString();
+	}
+
+	protected void renderId(HtmlBuffer html) {
+		boolean deprecated = data.isDeprecated();
+		String tag = deprecated ? "s" : "b";
+		String replacement = data.getDeprecationReplacement();
+
+		html.raw("<"+tag+">");
+			html.text(data.getId());
+		html.raw("</"+tag+">");
+		if (StringUtil.hasText(replacement)) {
+			html.text(" -> "+ replacement);
+		}
+		html.raw("<br>");
 	}
 
 	public static String formatDefaultValue(Object defaultValue) {

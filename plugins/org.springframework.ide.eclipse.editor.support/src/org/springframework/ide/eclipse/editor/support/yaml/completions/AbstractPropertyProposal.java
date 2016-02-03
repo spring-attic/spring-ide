@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalApplie
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
-import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 
 public abstract class AbstractPropertyProposal extends ScoreableProposal implements ICompletionProposalExtension3,
 ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
@@ -39,6 +38,7 @@ ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposa
 
 	protected final IDocument fDoc;
 	private final ProposalApplier proposalApplier;
+	private boolean isDeprecated = false;
 
 	public AbstractPropertyProposal(IDocument doc, ProposalApplier applier) {
 		this.proposalApplier = applier;
@@ -92,14 +92,28 @@ ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposa
 		return result;
 	}
 
+	protected boolean isDeprecated() {
+		return isDeprecated;
+	}
+	public void deprecate() {
+		if (!isDeprecated()) {
+			deemphasize();
+			deemphasize();
+			isDeprecated = true;
+		}
+	}
 	protected abstract YType getType();
 	protected abstract String getHighlightPattern();
 	protected abstract String getBaseDisplayString();
 	protected abstract String niceTypeName(YType type);
 
 	private void highlightPattern(String pattern, String data, StyledString result) {
-		Styler highlightStyle = isDeemphasized()?CompletionFactory.GREY_UNDERLINE:CompletionFactory.UNDERLINE;
-		Styler plainStyle = isDeemphasized()?CompletionFactory.GREY:CompletionFactory.NULL_STYLER;
+		Styler highlightStyle = CompletionFactory.HIGHLIGHT;
+		Styler plainStyle = isDeemphasized()?CompletionFactory.DEEMPHASIZE:CompletionFactory.NULL_STYLER;
+		if (isDeprecated()) {
+			highlightStyle = CompletionFactory.compose(highlightStyle, CompletionFactory.DEPRECATE);
+			plainStyle = CompletionFactory.compose(plainStyle, CompletionFactory.DEPRECATE);
+		}
 		if (StringUtils.hasText(pattern)) {
 			int dataPos = 0;	int dataLen = data.length();
 			int patternPos = 0; int patternLen = pattern.length();

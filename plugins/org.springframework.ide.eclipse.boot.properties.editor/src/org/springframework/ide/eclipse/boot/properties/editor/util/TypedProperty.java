@@ -38,14 +38,17 @@ public class TypedProperty implements YTypedProperty {
 	 */
 	private final Provider<HtmlSnippet> descriptionProvider;
 
-	public TypedProperty(String name, Type type) {
-		this(name, type, DescriptionProviders.NO_DESCRIPTION);
+	private final boolean isDeprecated;
+
+	public TypedProperty(String name, Type type, boolean isDeprecated) {
+		this(name, type, DescriptionProviders.NO_DESCRIPTION, isDeprecated);
 	}
 
-	public TypedProperty(String name, Type type, Provider<HtmlSnippet> descriptionProvider) {
+	public TypedProperty(String name, Type type, Provider<HtmlSnippet> descriptionProvider, boolean isDeprecated) {
 		this.name = name;
 		this.type = type;
 		this.descriptionProvider = descriptionProvider;
+		this.isDeprecated = isDeprecated;
 	}
 
 	public String getName() {
@@ -72,5 +75,9 @@ public class TypedProperty implements YTypedProperty {
 			return typedProperty.getType();
 		}
 		return null;
+	}
+
+	public boolean isDeprecated() {
+		return isDeprecated;
 	}
 }

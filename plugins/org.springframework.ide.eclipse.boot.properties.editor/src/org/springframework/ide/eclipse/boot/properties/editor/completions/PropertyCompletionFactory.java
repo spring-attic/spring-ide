@@ -37,6 +37,7 @@ public class PropertyCompletionFactory extends CompletionFactory {
 
 			private HoverInfo hoverInfo;
 
+
 			@Override
 			public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
 				if (hoverInfo==null) {
@@ -88,6 +89,9 @@ public class PropertyCompletionFactory extends CompletionFactory {
 			super(doc, applier);
 			this.typeUtil = typeUtil;
 			this.match = match;
+			if (match.data.isDeprecated()) {
+				deprecate();
+			}
 		}
 
 		@Override

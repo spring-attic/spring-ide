@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
@@ -32,6 +33,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
@@ -91,6 +93,9 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 							}
 							PropertyInfo validProperty = SpringPropertiesCompletionEngine.findLongestValidProperty(index, fullName);
 							if (validProperty!=null) {
+								if (validProperty.isDeprecated()) {
+									problemCollector.accept(problemDeprecated(trimmedRegion, validProperty));
+								}
 								int offset = validProperty.getId().length() + trimmedRegion.getOffset();
 								PropertyNavigator navigator = new PropertyNavigator(doc, problemCollector, typeUtil, trimmedRegion);
 								Type valueType = navigator.navigate(offset, TypeParser.parse(validProperty.getType()));
@@ -116,9 +121,34 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		}
 	}
 
+	protected SpringPropertyProblem problemDeprecated(IRegion trimmedRegion, PropertyInfo property) {
+		StringBuilder msg = new StringBuilder("'"+property.getId());
+		String replace = property.getDeprecationReplacement();
+		String reason = property.getDeprecationReason();
+		boolean hasReplace = StringUtil.hasText(replace);
+		boolean hasReason = StringUtil.hasText(reason);
+		if (!hasReplace && !hasReason) {
+			msg.append("' is Deprecated!");
+		} else {
+			msg.append("' is Deprecated: ");
+			if (hasReplace) {
+				msg.append("Use '"+ replace +"' instead.");
+				if (hasReason) {
+					msg.append(" Reason: ");
+				}
+			}
+			if (hasReason) {
+				msg.append(reason);
+			}
+		}
+		SpringPropertyProblem p = problem(PROP_DEPRECATED, msg.toString(), trimmedRegion.getOffset(), trimmedRegion.getLength());
+		p.setPropertyName(property.getId());
+		return p;
+	}
+
 	protected SpringPropertyProblem problemUnkownProperty(String fullName, IRegion trimmedRegion,
 			PropertyInfo similarEntry, String validPrefix) {
-		SpringPropertyProblem p = problem(SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY,
+		SpringPropertyProblem p = problem(PROP_UNKNOWN_PROPERTY,
 				"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
 				trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length());
 		p.setPropertyName(fullName);

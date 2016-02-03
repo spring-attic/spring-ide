@@ -535,7 +535,7 @@ public class TypeUtil {
 					Type valueType = getDomainType(type);
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
 					for (String propName : keyValues) {
-						properties.add(new TypedProperty(propName, valueType));
+						properties.add(new TypedProperty(propName, valueType, false));
 					}
 					return properties;
 				}
@@ -553,12 +553,13 @@ public class TypeUtil {
 				if (setters!=null && !setters.isEmpty()) {
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(setters.size());
 					for (IMethod m : setters) {
+						boolean isDeprecated = m.getAnnotation("Deprecated").exists() || m.getAnnotation("java.lang.Deprecated").exists();
 						Type propType = Type.fromSignature(m.getParameterTypes()[0], eclipseType);
 						if (beanMode.includesHyphenated()) {
-							properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType));
+							properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType, isDeprecated));
 						}
 						if (beanMode.includesCamelCase()) {
-							properties.add(new TypedProperty(setterNameToCamelName(m.getElementName()), propType));
+							properties.add(new TypedProperty(setterNameToCamelName(m.getElementName()), propType, isDeprecated));
 						}
 					}
 					return properties;

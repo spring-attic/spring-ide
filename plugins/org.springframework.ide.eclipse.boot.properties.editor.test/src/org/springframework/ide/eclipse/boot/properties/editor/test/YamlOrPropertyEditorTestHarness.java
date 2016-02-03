@@ -30,7 +30,9 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.viewers.StyledString;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
@@ -75,15 +77,25 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
 	}
 
-	public void data(String id, String type, Object deflt, String description,
-			String... source) {
-				ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
-				item.setId(id);
-				item.setDescription(description);
-				item.setType(type);
-				item.setDefaultValue(deflt);
-				index.add(new PropertyInfo(item));
-			}
+	public ConfigurationMetadataProperty data(String id, String type, Object deflt, String description,
+			String... source
+	) {
+		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
+		item.setId(id);
+		item.setDescription(description);
+		item.setType(type);
+		item.setDefaultValue(deflt);
+		index.add(new PropertyInfo(item));
+		return item;
+	}
+
+	public void deprecate(String key, String replacedBy, String reason) {
+		PropertyInfo info = index.get(key);
+		Deprecation d = new Deprecation();
+		d.setReplacement(replacedBy);
+		d.setReason(reason);
+		info.setDeprecation(d);
+	}
 
 	public void useProject(IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
@@ -654,15 +666,24 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		assertEquals(expect.toString(), actual.toString());
 	}
 
-	public void assertCompletionsDisplayString(String editorText, String... completionsLabels)
-			throws Exception {
-				MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
-				ICompletionProposal[] completions = getCompletions(editor);
-				String[] actualLabels = new String[completions.length];
-				for (int i = 0; i < actualLabels.length; i++) {
-					actualLabels[i] = completions[i].getDisplayString();
-				}
-				assertElements(actualLabels, completionsLabels);
-			}
+	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		String[] actualLabels = new String[completions.length];
+		for (int i = 0; i < actualLabels.length; i++) {
+			actualLabels[i] = completions[i].getDisplayString();
+		}
+		assertElements(actualLabels, completionsLabels);
+	}
+
+	public void assertStyledCompletions(String editorText, StyleMatcher... expectStyles) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		StyledString[] actualLabels = new StyledString[completions.length];
+		for (int i = 0; i < actualLabels.length; i++) {
+			fail("Implement please");
+		}
+	}
+
 
 }

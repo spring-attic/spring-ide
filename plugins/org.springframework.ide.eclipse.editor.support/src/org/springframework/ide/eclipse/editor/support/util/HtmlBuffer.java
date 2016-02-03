@@ -144,4 +144,10 @@ public class HtmlBuffer {
 		snippet.render(this);
 	}
 
+	public void bold(String string) {
+		raw("<b>");
+		text(string);
+		raw("</b>");
+	}
+
 }

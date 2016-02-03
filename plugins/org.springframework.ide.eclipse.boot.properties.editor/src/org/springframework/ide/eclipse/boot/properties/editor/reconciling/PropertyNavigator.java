@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 /**
@@ -211,11 +212,23 @@ public class PropertyNavigator {
 							"Type '"+typeUtil.niceTypeName(type)+"' has no property '"+key+"'",
 							keyStart, keyEnd-keyStart));
 				} else {
+					if (prop.isDeprecated()) {
+						problemCollector.accept(problemDeprecated(prop, keyStart, keyEnd-keyStart));
+					}
 					return navigate(keyEnd, prop.getType());
 				}
 			}
 		}
 		return null;
+	}
+
+	private ReconcileProblem problemDeprecated(TypedProperty prop, int offset, int len) {
+		SpringPropertyProblem p = problem(SpringPropertiesProblemType.PROP_DEPRECATED,
+				"'"+prop.getName()+"' is Deprecated!",
+				offset, len
+		);
+		p.setPropertyName(prop.getName());
+		return p;
 	}
 
 	/**

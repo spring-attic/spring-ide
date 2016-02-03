@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
@@ -791,6 +792,91 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("relaxed-color=b<*>", "relaxed-color=blue<*>");
 		assertCompletion("relaxedColor=b<*>", "relaxedColor=blue<*>");
 	}
+
+	public void testReconcileDeprecatedProperty() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertProblems(editor,
+				"error.path|Deprecated: Use 'server.error.path'"
+				//no other problems
+		);
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertProblems(editor,
+				"error.path|Deprecated: Use 'server.error.path' instead. Reason: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, "This is old.");
+		assertProblems(editor,
+				"error.path|Deprecated: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, null);
+		assertProblems(editor,
+				"error.path|Deprecated!"
+				//no other problems
+		);
+
+	}
+
+	public void testDeprecatedPropertyCompletion() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		data("server.error.path", "java.lang.String", null, "Path of the error controller.");
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertCompletionsDisplayString("error.pa<*>",
+				"server.error.path : String", // should be first because it is not deprecated, even though it is not as good a pattern match
+				"error.path : String"
+		);
+		//TODO: could we check that 'deprecated' completions are formatted with 'strikethrough font?
+		assertStyledCompletions("error.pa<*>",
+				StyleMatcher.plainFont("server.error.path : String"),
+				StyleMatcher.strikeout("server.error")
+		);
+	}
+
+	public void testDeprecatedPropertyHoverInfo() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertHoverText(editor, "path", "<s>error.path</s> -&gt; server.error.path");
+		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertHoverText(editor, "path", "<s>error.path</s> -&gt; server.error.path");
+		assertHoverText(editor, "path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, "This is old.");
+		assertHoverText(editor, "path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, null);
+		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+	}
+
+	public void testDeprecatedBeanPropertyReconcile() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# comment\n" +
+				"foo.old-name=Old faithfull\n"
+		);
+		assertProblems(editor,
+				"old-name|Deprecated"
+		);
+	}
+
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
