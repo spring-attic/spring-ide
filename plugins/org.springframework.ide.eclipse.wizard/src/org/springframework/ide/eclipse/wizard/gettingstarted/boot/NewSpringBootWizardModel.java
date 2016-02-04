@@ -245,7 +245,7 @@ public class NewSpringBootWizardModel {
 		preferredSelections.save(this);
 		DownloadManager downloader = null;
 		try {
-			downloader = new DownloadManager().allowUIThread(allowUIThread);
+			downloader = new DownloadManager(urlConnectionFactory).allowUIThread(allowUIThread);
 
 			DownloadableItem zip = new DownloadableItem(newURL(downloadUrl .getValue()), downloader);
 			String projectNameValue = projectName.getValue();
