@@ -283,8 +283,7 @@ public class BootDashLabels implements Disposable {
 					}
 				} else {
 					styledLabel = getJavaLabels().getStyledText(jp);
-
-					boolean devtools = BootPropertyTester.hasDevtools(element.getProject());
+					boolean devtools = element.hasDevtools();
 					if (devtools) {
 						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.darkGreen());
 						styledLabel.append(devtoolsDecoration);
@@ -334,6 +333,12 @@ public class BootDashLabels implements Disposable {
 				}
 
 				break;
+			case DEVTOOLS:
+				if (BootPropertyTester.hasDevtools(element.getProject())) {
+					styledLabel = new StyledString("devtools", stylers.darkGreen());
+				} else {
+					styledLabel = new StyledString();
+				}
 			case RUN_STATE_ICN:
 				label = element.getRunState().toString();
 				break;

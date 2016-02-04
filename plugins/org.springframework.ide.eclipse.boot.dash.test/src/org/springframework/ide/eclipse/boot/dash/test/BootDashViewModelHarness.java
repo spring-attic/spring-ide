@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,6 +47,9 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
+import org.springframework.ide.eclipse.boot.dash.util.Stylers;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -203,6 +207,23 @@ public class BootDashViewModelHarness {
 		ValidationResult status = validator.getValue();
 		if (!status.isOk()) {
 			fail(status.toString());
+		}
+	}
+
+	public static void assertLabelContains(String expectSnippet, Object element) {
+		assertContains(expectSnippet, getLabel(element));
+	}
+
+	public static String getLabel(Object element) {
+		Stylers stylers = new Stylers(null);
+		BootDashLabels labels = new BootDashLabels(stylers);
+		try {
+			return labels
+					.getStyledText(element, BootDashColumn.TREE_VIEWER_MAIN)
+					.getString();
+		} finally {
+			labels.dispose();
+			stylers.dispose();
 		}
 	}
 

@@ -10,14 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 import java.util.EnumSet;
 
@@ -31,9 +24,10 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 public class LocalRunTarget extends AbstractRunTarget {
 
 	public static final RunTarget INSTANCE = new LocalRunTarget();
-	private static final BootDashColumn[] DEFAULT_COLUMNS = {
+	public static final BootDashColumn[] DEFAULT_COLUMNS = {
 			RUN_STATE_ICN,
 			NAME,
+			DEVTOOLS,
 			LIVE_PORT,
 			INSTANCES,
 			DEFAULT_PATH,

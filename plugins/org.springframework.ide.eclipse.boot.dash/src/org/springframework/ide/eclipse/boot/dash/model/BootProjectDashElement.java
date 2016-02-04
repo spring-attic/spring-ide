@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
@@ -20,6 +22,9 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -42,12 +47,37 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private LaunchConfDashElementFactory childFactory;
 	private ObservableSet<BootDashElement> children;
 	private ObservableSet<Integer> ports;
+	private LiveExpression<Boolean> hasDevtools = null;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
 			BootProjectDashElementFactory factory, LaunchConfDashElementFactory childFactory) {
 		super(context, project);
 		this.projectProperties = projectProperties;
 		this.childFactory = childFactory;
+	}
+
+	@Override
+	public boolean hasDevtools() {
+		if (hasDevtools==null) {
+			hasDevtools = new LiveExpression<Boolean>(false) {
+				@Override
+				protected Boolean compute() {
+					return BootPropertyTester.hasDevtools(getProject());
+				}
+			};
+			ClasspathListenerManager classpathListener = new ClasspathListenerManager(new ClasspathListener() {
+				public void classpathChanged(IJavaProject jp) {
+				}
+			});
+			hasDevtools.addListener(new ValueListener<Boolean>() {
+				public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+
+				}
+			});
+			dependsOn(hasDevtools);
+			addDisposableChild(classpathListener);
+		}
+		return hasDevtools.getValue();
 	}
 
 	@Override

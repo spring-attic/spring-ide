@@ -36,18 +36,18 @@ import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataR
  * file all make use of a per-project index of spring properties metadata extracted
  * from project's classpath. This Index manager is responsible for keeping at most
  * one index per-project and to keep the index up-to-date.
- *  
+ *
  * @author Kris De Volder
  */
 public class SpringPropertiesIndexManager extends ListenerManager<Listener<SpringPropertiesIndexManager>> implements ClasspathListener {
-	
+
 	//TODO: More precise cache flushing?
 	// right now, any detected change that may affect the cached metadata results.
 	// in clearing the entire cache.
 	// Probably this is okay, since reading the data is pretty fast.
-	
+
 	private Map<String, FuzzyMap<PropertyInfo>> indexes = null;
-	
+
 	public SpringPropertiesIndexManager() {
 		SpringPropertiesEditorPlugin.getClasspathListeners().addListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new LiveMetadataListener(), IResourceChangeEvent.POST_CHANGE);
@@ -65,7 +65,7 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 		}
 		return index;
 	}
-	
+
 	@Override
 	public synchronized void classpathChanged(IJavaProject jp) {
 		clear();
@@ -79,19 +79,19 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 			}
 		}
 	}
-	
+
 
 	/**
 	 * Called by LiveMetadataListener when a change to live json metadata file in the
 	 * output folder of a IJavaProject is detected.
-	 * 
+	 *
 	 * @param The project on which the metadata change was detected.
 	 * @param jsonFile The IFile in project's output folder that was changed.
 	 */
 	public synchronized void liveMetadataChanged(IJavaProject jp, IFile jsonFile) {
 		clear();
 	}
-	
+
 	private class LiveMetadataListener implements IResourceChangeListener, IResourceDeltaVisitor {
 
 		@Override

@@ -33,6 +33,7 @@ public enum BootDashColumn {
 	DEFAULT_PATH(	"Path",		70),
 	TAGS(			"Tags",		100),
 	EXPOSED_URL(	"Exposed via",		100),
+	DEVTOOLS(		"Devtools", 70),
 	TREE_VIEWER_MAIN("", 100); //this is a 'fake' column which corresponds to the single column shown in unified tree viewer.
 
 	//Configure some odds and ends that don't apply to every column:

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.*;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
@@ -725,9 +726,22 @@ public class BootDashModelTest {
 		assertProjectProperty(element.getProject(), "default.request-mapping.path", "something");
 
 		assertEquals("something", element.getDefaultRequestMappingPath());
-
 	}
 
+	@Test public void testDevtoolsTextDecorationOnLocalElements() throws Exception {
+		String projectName = "project-hahaha";
+		IProject project = createBootProject(projectName, withStarters("web", "actuator", "devtools"));
+		BootDashElement element = getElement(projectName);
+		assertLabelContains("[devtools]", element);
+
+		//Also check that we do not add 'devtools' label to launch configs.
+		ILaunchConfiguration conf = BootLaunchConfigurationDelegate.createConf(project);
+		String confName = conf.getName();
+
+		assertEquals(confName, getLabel(harness.getElementFor(conf)));
+
+		//Try a project without devtools as well
+	}
 
 	/**************************************************************************************
 	 * TAGS Tests START
@@ -1036,4 +1050,5 @@ public class BootDashModelTest {
 		BootLaunchConfigurationDelegate.setProperties(wc, props);
 		wc.doSave();
 	}
+
 }

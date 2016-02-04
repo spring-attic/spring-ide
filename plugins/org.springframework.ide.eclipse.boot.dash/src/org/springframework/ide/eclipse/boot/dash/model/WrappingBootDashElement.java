@@ -179,6 +179,11 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		}
 	}
 
+	@Override
+	public boolean hasDevtools() {
+		return false;
+	}
+
 	public BootDashModel getBootDashModel() {
 		return bootDashModel;
 	}

@@ -10,6 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+
 /**
  * @author Kris De Volder
  */
@@ -32,5 +39,13 @@ public class ArrayUtils {
 			return arr[0];
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] remove(T[] array, T element) {
+		ArrayList<T> toKeep = new ArrayList<>(Arrays.asList(array));
+		toKeep.remove(element);
+		T[] newArray =(T[]) Array.newInstance(array.getClass().getComponentType(), toKeep.size());
+		return toKeep.toArray(newArray);
 	}
 }
