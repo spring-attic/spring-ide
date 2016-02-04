@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.waitForImportJob;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.viewers.StyledString;
@@ -38,6 +40,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
@@ -694,6 +697,38 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		}
 		return new StyledString(completion.getDisplayString());
 	}
+
+	/**
+	 * Verifies an expected textSnippet is contained in the hovertext that is
+	 * computed when hovering mouse at position at the end of first occurence of
+	 * a given string in the editor.
+	 * <p>
+	 * This method should be removed and the corresponding bits and pieces pushed into 'MockPropertiesEditor'
+	 * as is already the case for MockYamlEditor.
+	 */
+	@Deprecated
+	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
+		String hoverText = getHoverText(editor, afterString);
+		assertContains(expectSnippet, hoverText);
+	}
+
+	/**
+	 * Compute hover text when mouse hovers at the end of the first occurence of
+	 * a given String in the editor contents.
+	 */
+	public String getHoverText(MockPropertiesEditor editor, String atString) {
+		int pos = editor.getText().indexOf(atString);
+		if (pos>=0) {
+			pos += atString.length();
+		}
+		IRegion region = getHoverProvider().getHoverRegion(editor.document, pos);
+		if (region!=null) {
+			return getHoverProvider().getHoverInfo(editor.document, region).getHtml();
+		}
+		return null;
+	}
+
+	protected abstract HoverInfoProvider getHoverProvider();
 
 
 }

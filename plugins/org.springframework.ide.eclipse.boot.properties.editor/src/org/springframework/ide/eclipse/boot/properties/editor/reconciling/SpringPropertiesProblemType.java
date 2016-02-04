@@ -37,7 +37,7 @@ public enum SpringPropertiesProblemType implements ProblemType {
 	PROP_VALUE_TYPE_MISMATCH("Expecting a value of a certain type, but value doesn't parse as such"),
 	PROP_INVALID_BEAN_PROPERTY("Accessing a named property in a type that doesn't provide a property accessor with that name"),
 	PROP_UNKNOWN_PROPERTY(WARNING, "Property-key not found in any configuration metadata on the project's classpath"),
-	PROP_DEPRECATED(WARNING, "Property-key is marked as Deprecated"),
+	PROP_DEPRECATED(WARNING, "Property is marked as Deprecated"),
 
 	YAML_SYNTAX_ERROR("Error parsing the input using snakeyaml"),
 	YAML_UNKNOWN_PROPERTY(WARNING, "Property-key not found in the configuration metadata on the project's classpath"),
@@ -47,7 +47,8 @@ public enum SpringPropertiesProblemType implements ProblemType {
 	YAML_EXPECT_TYPE_FOUND_MAPPING("Found a 'mapping' node where a type that can't be treated as a 'property map' is expected"),
 	YAML_EXPECT_MAPPING("Expecting a 'mapping' node but found something else"),
 	YAML_EXPECT_BEAN_PROPERTY_NAME("Expecting a 'bean property' name but found something more complex"),
-	YAML_INVALID_BEAN_PROPERTY("Accessing a named property in a type that doesn't provide a property accessor with that name");
+	YAML_INVALID_BEAN_PROPERTY("Accessing a named property in a type that doesn't provide a property accessor with that name"),
+	YAML_DEPRECATED(WARNING, "Property is marked as Deprecated");
 
 	private final ProblemSeverity defaultSeverity;
 	private String description;

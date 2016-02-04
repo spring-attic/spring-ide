@@ -15,6 +15,7 @@ import static org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2.get
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -22,6 +23,9 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
@@ -88,6 +92,11 @@ public class JavaTypeNavigationHoverInfo extends HoverInfo {
 			jtLinks.javaTypeLink(html, typeUtil.getJavaProject(), Object.class.toString());
 		}
 
+		if (isDeprecated()) {
+			html.raw("<br><br>");
+			html.bold("Deprecated!");
+		}
+
 		//				String deflt = formatDefaultValue(data.getDefaultValue());
 		//				if (deflt!=null) {
 		//					html.raw("<br><br>");
@@ -104,6 +113,19 @@ public class JavaTypeNavigationHoverInfo extends HoverInfo {
 		}
 
 		return html.toString();
+	}
+
+	private boolean isDeprecated() {
+		//Note: If you are considerind caching the result of this method... don't.
+		//The rendered html itself is cached by the superclass, which means this method only gets called once.
+		Map<String, TypedProperty> props = typeUtil.getPropertiesMap(parentType, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+		if (props!=null) {
+			TypedProperty prop = props.get(propName);
+			if (prop!=null) {
+				return prop.isDeprecated();
+			}
+		}
+		return false;
 	}
 
 	private String getDescription() {

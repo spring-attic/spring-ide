@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DEPRECATED;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.asScalar;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST.getChildren;
 
@@ -129,6 +130,9 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 				return;
 			} else if (match!=null) {
 				Type type = TypeParser.parse(match.getType());
+				if (match.isDeprecated()) {
+					deprecatedProperty(match, keyNode);
+				}
 				reconcile(entry.getValueNode(), type);
 			} else if (extension!=null) {
 				//We don't really care about the extension only about the fact that it
@@ -200,13 +204,19 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 					String key = NodeUtil.asScalar(keyNode);
 					if (key==null) {
 						expectBeanPropertyName(keyNode, type);
-					} else if (!props.containsKey(key)) {
-						unknownBeanProperty(keyNode, type, key);
-					}
-
-					if (key!=null) {
-						Node valNode = entry.getValueNode();
-						reconcile(valNode, TypedProperty.typeOf(props.get(key)));
+					} else {
+						if (!props.containsKey(key)) {
+							unknownBeanProperty(keyNode, type, key);
+						} else {
+							Node valNode = entry.getValueNode();
+							TypedProperty typedProperty = props.get(key);
+							if (typedProperty!=null) {
+								if (typedProperty.isDeprecated()) {
+									deprecatedProperty(type, typedProperty, keyNode);
+								}
+								reconcile(valNode, typedProperty.getType());
+							}
+						}
 					}
 				}
 			}
@@ -309,6 +319,37 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 
 	private void expectType(SpringPropertiesProblemType problemType, Type type, Node node) {
 		problems.accept(problem(problemType, node, "Expecting a '"+typeUtil.niceTypeName(type)+"' but got "+describe(node)));
+	}
+
+	private void deprecatedProperty(PropertyInfo property, Node keyNode) {
+		StringBuilder msg = new StringBuilder("'"+property.getId());
+		String replace = property.getDeprecationReplacement();
+		String reason = property.getDeprecationReason();
+		boolean hasReplace = StringUtil.hasText(replace);
+		boolean hasReason = StringUtil.hasText(reason);
+		if (!hasReplace && !hasReason) {
+			msg.append("' is Deprecated!");
+		} else {
+			msg.append("' is Deprecated: ");
+			if (hasReplace) {
+				msg.append("Use '"+ replace +"' instead.");
+				if (hasReason) {
+					msg.append(" Reason: ");
+				}
+			}
+			if (hasReason) {
+				msg.append(reason);
+			}
+		}
+		SpringPropertyProblem problem = problem(YAML_DEPRECATED, keyNode, msg.toString());
+		problem.setPropertyName(property.getId());
+		problems.accept(problem);
+	}
+
+	private void deprecatedProperty(Type contextType, TypedProperty property, Node keyNode) {
+		problems.accept(problem(YAML_DEPRECATED, keyNode,
+				"Property '"+property.getName()+"' of type '"+typeUtil.niceTypeName(contextType)+"' is Deprecated!"
+		));
 	}
 
 	protected SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {

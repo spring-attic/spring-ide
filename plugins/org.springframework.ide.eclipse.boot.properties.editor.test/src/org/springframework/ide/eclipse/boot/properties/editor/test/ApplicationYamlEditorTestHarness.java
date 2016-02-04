@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.Arrays;
@@ -21,14 +20,11 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
-import org.springframework.ide.eclipse.boot.properties.editor.test.ApplicationYamlEditorTestHarness.YamlEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
@@ -59,6 +55,8 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 			return index;
 		}
 	};
+
+
 
 	private TypeUtilProvider typeUtilProvider = new TypeUtilProvider() {
 		public TypeUtil getTypeUtil(IDocument doc) {
@@ -150,6 +148,12 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 		public YamlEditor(String string) {
 			super(string, structureProvider, parser, hoverProvider);
 		}
+	}
+
+	@Override
+	protected HoverInfoProvider getHoverProvider() {
+		fail("HoverInfoProvider missing");
+		return null;
 	}
 
 
