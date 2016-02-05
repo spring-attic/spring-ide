@@ -21,7 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.*;
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.assertLabelContains;
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
@@ -62,6 +63,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.MavenId;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -76,8 +80,10 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
+import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -92,12 +98,17 @@ public class BootDashModelTest {
 
 	private static final long MODEL_UPDATE_TIMEOUT = 3000; // short, should be nearly instant
 	private static final long RUN_STATE_CHANGE_TIMEOUT = 20000;
+	private static final long MAVEN_BUILD_TIMEOUT = 20000;
 
+	private SpringBootCore springBootCore = SpringBootCore.getDefault(); // should be getting this via projects harness?
 	private TestBootDashModelContext context;
 	private BootProjectTestHarness projects;
 	private BootDashModel model;
 
 	private PortFinder portFinder = new PortFinder();
+
+	@Rule
+	public AutobuildingEnablement autobuild = new AutobuildingEnablement(false);
 
 	@Rule
 	public TestBracketter testBracketer = new TestBracketter();
@@ -729,9 +740,10 @@ public class BootDashModelTest {
 	}
 
 	@Test public void testDevtoolsTextDecorationOnLocalElements() throws Exception {
-		String projectName = "project-hahaha";
+		final String projectName = "project-hahaha";
 		IProject project = createBootProject(projectName, withStarters("web", "actuator", "devtools"));
-		BootDashElement element = getElement(projectName);
+		final BootDashElement element = getElement(projectName);
+		assertTrue(element.hasDevtools());
 		assertLabelContains("[devtools]", element);
 
 		//Also check that we do not add 'devtools' label to launch configs.
@@ -740,7 +752,17 @@ public class BootDashModelTest {
 
 		assertEquals(confName, getLabel(harness.getElementFor(conf)));
 
-		//Try a project without devtools as well
+		//Try and see that if we remove the devtools dependency from the project then the label updates.
+		StsTestUtil.setAutoBuilding(true); // so that autobuild causes classpath update as would
+											// happen in a 'real' workspace when pom is changed.
+		removeDevtools(project);
+		new ACondition("Wait for devtools to disapear", MAVEN_BUILD_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertFalse(element.hasDevtools());
+				assertEquals(projectName, getLabel(element));
+				return true;
+			}
+		};
 	}
 
 	/**************************************************************************************
@@ -1050,5 +1072,15 @@ public class BootDashModelTest {
 		BootLaunchConfigurationDelegate.setProperties(wc, props);
 		wc.doSave();
 	}
+
+	private void removeDevtools(IProject project) throws Exception {
+		ISpringBootProject bootProject = springBootCore.project(project);
+		MavenId devtools = new MavenId(
+				EnableDisableBootDevtools.SPRING_BOOT_DEVTOOLS_GID,
+				EnableDisableBootDevtools.SPRING_BOOT_DEVTOOLS_AID
+		);
+		bootProject.removeMavenDependency(devtools);
+	}
+
 
 }

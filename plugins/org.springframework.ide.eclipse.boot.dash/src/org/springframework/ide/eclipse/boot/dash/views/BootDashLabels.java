@@ -283,7 +283,9 @@ public class BootDashLabels implements Disposable {
 					}
 				} else {
 					styledLabel = getJavaLabels().getStyledText(jp);
-					boolean devtools = element.hasDevtools();
+					//TODO: should use 'element.hasDevtools()' but its not implemented
+					// yet on CF elements.
+					boolean devtools = BootPropertyTester.hasDevtools(element.getProject());
 					if (devtools) {
 						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.darkGreen());
 						styledLabel.append(devtoolsDecoration);
@@ -334,7 +336,7 @@ public class BootDashLabels implements Disposable {
 
 				break;
 			case DEVTOOLS:
-				if (BootPropertyTester.hasDevtools(element.getProject())) {
+				if (element.hasDevtools()) {
 					styledLabel = new StyledString("devtools", stylers.darkGreen());
 				} else {
 					styledLabel = new StyledString();

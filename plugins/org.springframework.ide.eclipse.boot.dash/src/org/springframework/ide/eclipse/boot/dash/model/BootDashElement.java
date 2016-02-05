@@ -94,4 +94,5 @@ public interface BootDashElement extends Nameable, Taggable {
 	 */
 	Object getParent();
 	BootDashColumn[] getColumns();
+	boolean hasDevtools();
 }

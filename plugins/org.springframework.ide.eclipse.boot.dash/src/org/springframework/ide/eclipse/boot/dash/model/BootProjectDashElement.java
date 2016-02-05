@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
@@ -62,20 +61,21 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			hasDevtools = new LiveExpression<Boolean>(false) {
 				@Override
 				protected Boolean compute() {
-					return BootPropertyTester.hasDevtools(getProject());
+					boolean val = BootPropertyTester.hasDevtools(getProject());
+					System.out.println("hasDevools["+getProject().getName()+"] <- "+val);
+					return val;
 				}
 			};
+			hasDevtools.refresh();
 			ClasspathListenerManager classpathListener = new ClasspathListenerManager(new ClasspathListener() {
 				public void classpathChanged(IJavaProject jp) {
+					if (jp.getProject().equals(getProject())) {
+						hasDevtools.refresh();
+					}
 				}
 			});
-			hasDevtools.addListener(new ValueListener<Boolean>() {
-				public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
-
-				}
-			});
-			dependsOn(hasDevtools);
-			addDisposableChild(classpathListener);
+			this.dependsOn(hasDevtools);
+			this.addDisposableChild(classpathListener);
 		}
 		return hasDevtools.getValue();
 	}
