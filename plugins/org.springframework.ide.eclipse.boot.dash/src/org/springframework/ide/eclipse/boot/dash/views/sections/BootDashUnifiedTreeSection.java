@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
@@ -88,6 +89,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -194,8 +196,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
-	final private ValueListener<Set<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<Set<RunTarget>>() {
-		protected void uiGotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+	final private ValueListener<ImmutableSet<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<ImmutableSet<RunTarget>>() {
+		protected void uiGotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
 				tv.refresh();
 			}
@@ -460,6 +462,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 		addVisible(manager, actions.getExposeRunAppAction());
 		addVisible(manager, actions.getExposeDebugAppAction());
+		addSubmenu(manager, "Deploy and Run On...", actions.getRunOnTargetActions());
+		addSubmenu(manager, "Deploy and Debug On...", actions.getDebugOnTargetActions());
 
 		manager.add(new Separator());
 
@@ -526,10 +530,30 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 //		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 
-	private void addVisible(IMenuManager manager, IAction a) {
+
+	/**
+	 * Adds a submenu containing a given list of actions. The menu is only added if
+	 * there is at least one visible action in the list.
+	 */
+	private void addSubmenu(IMenuManager parent, String label, ImmutableList<IAction> actions) {
+		if (actions!=null && !actions.isEmpty()) {
+			boolean notEmpty = false;
+			IMenuManager submenu = new MenuManager(label);
+			for (IAction a : actions) {
+				notEmpty |= addVisible(submenu, a);
+			}
+			if (notEmpty) {
+				parent.add(submenu);
+			}
+		}
+	}
+
+	private boolean addVisible(IMenuManager manager, IAction a) {
 		if (isVisible(a)) {
 			manager.add(a);
+			return true;
 		}
+		return false;
 	}
 
 	private boolean isVisible(IAction a) {

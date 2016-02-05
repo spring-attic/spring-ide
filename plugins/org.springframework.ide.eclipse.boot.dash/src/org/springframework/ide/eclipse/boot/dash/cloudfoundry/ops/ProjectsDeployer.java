@@ -32,16 +32,22 @@ public class ProjectsDeployer extends CloudOperation {
 	private final UserInteractions ui;
 	private final RunState runOrDebug;
 
-	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
-			Map<IProject, BootDashElement> projectsToDeploy) {
+	public ProjectsDeployer(CloudFoundryBootDashModel model,
+			UserInteractions ui,
+			Map<IProject, BootDashElement> projectsToDeploy,
+			RunState runOrDebug) {
 		super("Deploying projects", model);
 		this.projectsToDeploy = projectsToDeploy;
 		this.ui = ui;
-		this.runOrDebug = RunState.RUNNING;
+		this.runOrDebug = runOrDebug;
 	}
 
-	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
-			List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps, RunState runOrDebug) {
+	public ProjectsDeployer(CloudFoundryBootDashModel model,
+			UserInteractions ui,
+			List<BootDashElement> elementsToRedeploy,
+			boolean shouldAutoReplaceApps,
+			RunState runOrDebug
+	) {
 		super("Deploying projects", model);
 		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
 

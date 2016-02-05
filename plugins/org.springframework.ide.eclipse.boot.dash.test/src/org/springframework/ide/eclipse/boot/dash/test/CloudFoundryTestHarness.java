@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -127,7 +128,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return name;
 	}
 
-	private static final List<RunTarget> NO_TARGETS = ImmutableList.of();
+	private static final ImmutableSet<RunTarget> NO_TARGETS = ImmutableSet.of();
 
 	private CloudFoundryClientFactory clientFactory;
 	public final CloudFoundryRunTargetType cfTargetType;

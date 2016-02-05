@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
 import com.google.common.collect.ImmutableSet;
 

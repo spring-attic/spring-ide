@@ -347,7 +347,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				}
 			}
 
-			performDeployment(projects, ui);
+			performDeployment(projects, ui, RunState.RUNNING);
 		}
 	}
 
@@ -375,13 +375,13 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return true;
 	}
 
-	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
-			throws Exception {
-
-
+	public void performDeployment(
+			final Map<IProject, BootDashElement> projectsToDeploy,
+			final UserInteractions ui,
+			RunState runOrDebug
+	) throws Exception {
 		getOperationsExecution(ui).runOpAsynch(
-				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy));
-
+				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug));
 	}
 
 	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project, RunState preferedRunState) throws Exception {

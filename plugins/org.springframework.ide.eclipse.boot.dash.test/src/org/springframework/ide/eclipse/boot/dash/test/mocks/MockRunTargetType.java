@@ -11,10 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class MockRunTargetType extends AbstractRunTargetType {
 
@@ -30,7 +30,7 @@ public class MockRunTargetType extends AbstractRunTargetType {
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSet<RunTarget> targets) {
+	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
 	}
 
 	@Override

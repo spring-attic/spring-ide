@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
@@ -36,7 +37,7 @@ import com.google.common.base.Function;
  */
 public class BootDashViewModel extends AbstractDisposable {
 
-	private LiveSet<RunTarget> runTargets;
+	private LiveSetVariable<RunTarget> runTargets;
 	private BootDashModelManager models;
 	private Set<RunTargetType> runTargetTypes;
 	private RunTargetPropertiesManager manager;
@@ -54,7 +55,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	 * added by adding them to the runTarget's LiveSet.
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
-		runTargets = new LiveSet<RunTarget>(new LinkedHashSet<RunTarget>());
+		runTargets = new LiveSetVariable<RunTarget>(new LinkedHashSet<RunTarget>());
 		this.context = context;
 		models = new BootDashModelManager(context, this, runTargets);
 
@@ -86,7 +87,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		return new DebugStrategyManager(SshDebugSupport.INSTANCE, this);
 	}
 
-	public LiveSet<RunTarget> getRunTargets() {
+	public LiveSetVariable<RunTarget> getRunTargets() {
 		return runTargets;
 	}
 

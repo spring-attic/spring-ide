@@ -25,7 +25,9 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProp
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>> {
+import com.google.common.collect.ImmutableSet;
+
+public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<RunTarget>> {
 
 	private final BootDashModelContext context;
 	private final RunTargetType[] types;
@@ -65,7 +67,7 @@ public class RunTargetPropertiesManager implements ValueListener<Set<RunTarget>>
 	}
 
 	@Override
-	public synchronized void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+	public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
 		store(value);
 	}
 
