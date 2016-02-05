@@ -37,11 +37,13 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.Composer;
+import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.parser.ParserImpl;
 import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.resolver.Resolver;
@@ -60,6 +62,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	private String content;
 	private MappingNode appNode;
+	private Node root;
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
 	private Map<String, Object> cloudData;
@@ -68,6 +71,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		super();
 		this.appNode = null;
 		this.applicationsValueNode = null;
+		this.root = null;
 		this.cloudData = cloudData;
 		this.content = content;
 		initializeYaml(appName);
@@ -75,7 +79,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	private void initializeYaml(String appName) {
 		Composer composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(new ByteArrayInputStream(content.getBytes())))), new Resolver());
-		Node root = composer.getSingleNode();
+		root = composer.getSingleNode();
 
 		Node apps = YamlGraphDeploymentProperties.findValueNode(root, "applications");
 		if (apps instanceof SequenceNode) {
@@ -100,7 +104,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return null;
 	}
 
-	private DumperOptions createDumperOptions() {
+	public static DumperOptions createDumperOptions() {
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(false);
 		options.setCanonical(false);
@@ -121,16 +125,18 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	@Override
 	public String getAppName() {
-		ScalarNode n = getNode(appNode, ApplicationManifestHandler.NAME_PROP, ScalarNode.class);
-		return n == null ? null : n.getValue();
+		/*
+		 * Name must be located in the app node!
+		 */
+		return getPropertyValue(appNode, ApplicationManifestHandler.NAME_PROP, String.class);
 	}
 
 	@Override
 	public int getMemory() {
-		ScalarNode n = getNode(appNode, ApplicationManifestHandler.MEMORY_PROP, ScalarNode.class);
-		if (n != null) {
+		String memoryStringValue = getAbsoluteValue(ApplicationManifestHandler.MEMORY_PROP, String.class);
+		if (memoryStringValue != null) {
 			try {
-				return ApplicationManifestHandler.convertMemory(((ScalarNode)n).getValue());
+				return ApplicationManifestHandler.convertMemory(memoryStringValue);
 			} catch (CoreException e) {
 				BootDashActivator.log(e);
 			}
@@ -140,51 +146,27 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	@Override
 	public String getBuildpack() {
-		ScalarNode n = getNode(appNode, ApplicationManifestHandler.BUILDPACK_PROP, ScalarNode.class);
-		return n == null ? null : n.getValue();
+		return getAbsoluteValue(ApplicationManifestHandler.BUILDPACK_PROP, String.class);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, String> getEnvironmentVariables() {
-		MappingNode mapping = getNode(appNode, ApplicationManifestHandler.ENV_PROP, MappingNode.class);
-		if (mapping != null) {
-			Map<String, String> vars = new HashMap<>();
-			for (NodeTuple entry : mapping.getValue()) {
-				if (entry.getKeyNode() instanceof ScalarNode && entry.getValueNode() instanceof ScalarNode) {
-					vars.put(((ScalarNode)entry.getKeyNode()).getValue(), ((ScalarNode)entry.getValueNode()).getValue());
-				}
-			}
-			return vars;
-		}
-		return Collections.emptyMap();
+		Map<String, String> map = getAbsoluteValue(ApplicationManifestHandler.ENV_PROP, Map.class);
+		return map == null ? Collections.<String, String>emptyMap() : map;
 	}
 
 	@Override
 	public int getInstances() {
-		ScalarNode n = getNode(appNode, ApplicationManifestHandler.INSTANCES_PROP, ScalarNode.class);
-		if (n != null) {
-			try {
-				return Integer.valueOf(n.getValue());
-			} catch (NumberFormatException e) {
-				BootDashActivator.log(e);
-			}
-		}
-		return DeploymentProperties.DEFAULT_INSTANCES;
+		Integer n = getAbsoluteValue(ApplicationManifestHandler.INSTANCES_PROP, Integer.class);
+		return n == null ? DeploymentProperties.DEFAULT_INSTANCES : n.intValue();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getServices() {
-		SequenceNode sequence = getNode(appNode, ApplicationManifestHandler.SERVICES_PROP, SequenceNode.class);
-		if (sequence != null) {
-			List<String> services = new ArrayList<>();
-			for (Node entry : sequence.getValue()) {
-				if (entry instanceof ScalarNode) {
-					services.add(((ScalarNode)entry).getValue());
-				}
-			}
-			return services;
-		}
-		return Collections.emptyList();
+		List<String> services = getAbsoluteValue(ApplicationManifestHandler.SERVICES_PROP, List.class);
+		return services == null ? Collections.<String>emptyList() : services;
 	}
 
 	public static Node findValueNode(Node node, String key) {
@@ -277,14 +259,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 
 			if (getInstances() != props.getInstances()) {
-				/*
-				 * Value == null if number of instances is 1, i.e. remove instances from YAML
-				 */
-				Integer newValue = props.getInstances() == DeploymentProperties.DEFAULT_INSTANCES ? null : new Integer(props.getInstances());
-				edit = createEdit(appNode, newValue, ApplicationManifestHandler.INSTANCES_PROP);
-				if (edit != null) {
-					edits.addChild(edit);
-				}
+				getDifferenceForEntry(edits, ApplicationManifestHandler.INSTANCES_PROP, props.getInstances(), DEFAULT_INSTANCES, Integer.class);
 			}
 
 			if (getDiskQuota() != props.getDiskQuota()) {
@@ -301,32 +276,302 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				}
 			}
 
-			if (!getServices().equals(props.getServices())) {
-				edit = createEdit(appNode, props.getServices(), ApplicationManifestHandler.SERVICES_PROP);
-				if (edit != null) {
-					edits.addChild(edit);
-				}
+			if (!new HashSet<>(getServices()).equals(new HashSet<>(props.getServices()))) {
+				getDifferencesForList(edits, ApplicationManifestHandler.SERVICES_PROP, props.getServices());
 			}
 
 			if (!getEnvironmentVariables().equals(props.getEnvironmentVariables())) {
-				edit = createEdit(appNode, props.getEnvironmentVariables(), ApplicationManifestHandler.ENV_PROP);
-				if (edit != null) {
-					edits.addChild(edit);
-				}
+				getDifferencesForMap(edits, ApplicationManifestHandler.ENV_PROP, props.getEnvironmentVariables());
 			}
 
 			/*
 			 * If any text edits are produced then there are differences in the URIs
 			 */
-			getDifferenceForUris(props.getUris(), edits);
+			Set<String> currentUris = getUris();
+			Set<String> otherUris = props.getUris();
+			if (!isRandomRouteMatch(currentUris, otherUris) && !currentUris.equals(otherUris)) {
+				getDifferenceForUris(props.getUris(), edits);
+			}
 
 		}
 		return edits.hasChildren() ? edits : null;
 	}
 
+	private boolean isRandomRouteMatch(Set<String> currentUris, Set<String> otherUris) {
+		if (currentUris.size() == 1 && otherUris.size() == 1) {
+			String uri = currentUris.iterator().next();
+			String host = uri.substring(0, uri.indexOf('.'));
+			return ApplicationManifestHandler.RANDOM_VAR.equals(host);
+		}
+		return false;
+	}
+
+	/**
+	 * Creates diff text edits for entry in the map node given by the
+	 * attribute's name based on its new value and type as well as the default
+	 * value that is not serialized under normal circumstances
+	 *
+	 * @param me
+	 *            container to append text edits
+	 * @param key
+	 *            manifest attribute name
+	 * @param newValue
+	 *            the new value to create diff edits for
+	 * @param defaultValue
+	 *            the default value for the attribute that is usually not
+	 *            serialized
+	 * @param type
+	 *            type of the value for the attribute
+	 */
+	private <T> void getDifferenceForEntry(MultiTextEdit me, String key, T newValue, T defaultValue, Class<T> type) {
+		TextEdit edit = null;
+		if (Objects.equal(newValue, defaultValue)) {
+			/*
+			 * New value is the default value. Check if entry can be safely removed from YAML
+			 */
+			T rootValue = getPropertyValue(root, key, type);
+			if (appNode != root && rootValue != null) {
+				if (newValue == null) {
+					me.addChild(createEdit((MappingNode)root, (Object) null, key));
+					for (Node n : applicationsValueNode.getValue()) {
+						if (n instanceof MappingNode) {
+							MappingNode application = (MappingNode) n;
+							if (application == appNode) {
+								edit = createEdit(appNode, (Object) null, key);
+								if (edit != null) {
+									me.addChild(edit);
+								}
+							} else {
+								T appValue = getPropertyValue(application, key, type);
+								if (appValue == null) {
+									me.addChild(createEdit(application, rootValue, key));
+								}
+							}
+						}
+					}
+				} else {
+					edit = createEdit(appNode, newValue, key);
+					if (edit != null) {
+						me.addChild(edit);
+					}
+				}
+			} else {
+				edit = createEdit(appNode, (T) null, key);
+				if (edit != null) {
+					me.addChild(edit);
+				}
+			}
+		} else {
+			/*
+			 * New value is not default hence it have to be serialized and
+			 * therefore would override the value in the root node for the same
+			 * attribute
+			 */
+			edit = createEdit(appNode, newValue, key);
+			if (edit != null) {
+				me.addChild(edit);
+			}
+		}
+	}
+
+	/**
+	 * Creates text edits based on differences between current manifest
+	 * attribute list value and the passed new list value. The manifest
+	 * attribute value is considered to be defined either on the application or
+	 * the root node of the manifest YAML and text edit is calculated
+	 * accordingly. It also supports multiple apps defined in the manifest
+	 *
+	 * @param me
+	 *            multi text edit gathering all edits
+	 * @param key
+	 *            manifest attribute name
+	 * @param newValue
+	 *            the new value to set
+	 */
+	@SuppressWarnings("unchecked")
+	private void getDifferencesForList(MultiTextEdit me, String key, List<String> newValue) {
+		TextEdit edit;
+		/*
+		 * Moved new value entries in the set to avoid duplication
+		 */
+		LinkedHashSet<String> otherValue = new LinkedHashSet<>(newValue);
+		/*
+		 * Get the list value from the root node
+		 */
+		List<String> rootList = root != appNode ? getPropertyValue(root, key, List.class) : Collections.emptyList();
+		if (rootList == null) {
+			rootList = Collections.emptyList();
+		}
+		if (otherValue.containsAll(rootList)) {
+			/*
+			 * All list entries from the root are present in the new value
+			 */
+			otherValue.removeAll(rootList);
+			/*
+			 * Create an edit for a difference between the remaining list of
+			 * values and current app's node list
+			 */
+			edit = createEdit(appNode, new ArrayList<>(otherValue), key);
+			if (edit != null) {
+				me.addChild(edit);
+			}
+		} else {
+			/*
+			 * Some list entries from the root are missing move all root values
+			 * to application nodes. Applications value node must be present
+			 * because rootList wasn't empty since we got here
+			 */
+			for (Node n : applicationsValueNode.getValue()) {
+				if (n instanceof MappingNode) {
+					MappingNode application = (MappingNode) n;
+					if (n == appNode) {
+						/*
+						 * Current app node
+						 */
+						edit = createEdit(application, newValue, key);
+						if (edit != null) {
+							me.addChild(edit);
+						}
+					} else {
+						/*
+						 * Any other app node. Get its list value for the attribute
+						 */
+						List<String> currentValues = getPropertyValue(application, key, List.class);
+						if (currentValues == null) {
+							/*
+							 * There is no value for the property so just create an edit for the list from the root
+							 */
+							edit = createEdit(application, rootList, key);
+						} else {
+							/*
+							 * Create a joint list of values from app's node list value and root node list value
+							 */
+							LinkedHashSet<String> values = new LinkedHashSet<>(currentValues);
+							values.addAll(rootList);
+							/*
+							 * Create and edit with the new value being the joint list
+							 */
+							edit = createEdit(application, new ArrayList<>(values), key);
+						}
+						if (edit != null) {
+							me.addChild(edit);
+						}
+					}
+				}
+			}
+			/*
+			 * Remove the list from the root node
+			 */
+			edit = createEdit((MappingNode)root, Collections.<String>emptyList(), key);
+			if (edit != null) {
+				me.addChild(edit);
+			}
+		}
+	}
+
+	/**
+	 * Creates text edits based on differences between current manifest
+	 * attribute map value and the passed new map value. The manifest
+	 * attribute value is considered to be defined either on the application or
+	 * the root node of the manifest YAML and text edit is calculated
+	 * accordingly. It also supports multiple apps defined in the manifest
+	 *
+	 * @param me
+	 *            multi text edit gathering all edits
+	 * @param key
+	 *            manifest attribute name
+	 * @param newValue
+	 *            the new value to set
+	 */
+	@SuppressWarnings("unchecked")
+	private void getDifferencesForMap(MultiTextEdit me, String key, Map<String, String> newValue) {
+		TextEdit edit;
+		/*
+		 * Get the map value from the root node
+		 */
+		Map<String, String> rootMap = root != appNode ? getPropertyValue(root, key, Map.class) : Collections.emptyMap();
+		/*
+		 * Copy the new value to leave it unchanged
+		 */
+		LinkedHashMap<String, String> otherValue = new LinkedHashMap<>(newValue);
+		if (rootMap == null) {
+			rootMap = Collections.emptyMap();
+		}
+		if (otherValue.keySet().containsAll(rootMap.keySet())) {
+			/*
+			 * All map entries from the root are present in the new value
+			 */
+			for (String k : rootMap.keySet()) {
+				if (Objects.equal(otherValue.get(k), rootMap.get(k))) {
+					otherValue.remove(k);
+				}
+			}
+			/*
+			 * Create an edit for a difference between the remaining map and
+			 * current app's node map
+			 */
+			edit = createEdit(appNode, otherValue, key);
+			if (edit != null) {
+				me.addChild(edit);
+			}
+		} else {
+			/*
+			 * Some map entries from the root must be removed. Move root node map to applications.
+			 * Applications value node must be present because rootList wasn't empty since we got here.
+			 */
+			for (Node n : applicationsValueNode.getValue()) {
+				if (n instanceof MappingNode) {
+					MappingNode application = (MappingNode) n;
+					if (n == appNode) {
+						/*
+						 * Current app node
+						 */
+						edit = createEdit(application, newValue, key);
+						if (edit != null) {
+							me.addChild(edit);
+						}
+					} else {
+						/*
+						 * Any other app node. Get its map value for the attribute
+						 */
+						Map<String, String> currentValues = getPropertyValue(application, key, Map.class);
+						if (currentValues == null) {
+							/*
+							 * There is no value for the property so just create an edit for the map from the root
+							 */
+							edit = createEdit(application, rootMap, key);
+						} else {
+							/*
+							 * Create a joint map of entries from app's node map value and root node map value
+							 */
+							for (Map.Entry<String, String> entry : rootMap.entrySet()) {
+								if (!currentValues.containsKey(entry.getKey())) {
+									currentValues.put(entry.getKey(), entry.getValue());
+								}
+							}
+							/*
+							 * Create and edit with the new value being the joint map
+							 */
+							edit = createEdit(application, currentValues, key);
+						}
+						if (edit != null) {
+							me.addChild(edit);
+						}
+					}
+				}
+			}
+			/*
+			 * Remove the list from the root node
+			 */
+			edit = createEdit((MappingNode)root, Collections.<String, String>emptyMap(), key);
+			if (edit != null) {
+				me.addChild(edit);
+			}
+
+		}
+	}
+
 	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
-		SequenceNode sequence;
-		ScalarNode n;
 		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
@@ -338,77 +583,84 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		LinkedHashSet<String> currentHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> currentDomains = new LinkedHashSet<>();
 
-		n = getNode(appNode, ApplicationManifestHandler.SUB_DOMAIN_PROP, ScalarNode.class);
-		if (n != null) {
-			currentHosts.add(n.getValue());
+		/*
+		 * Gather hosts from "host" and "hosts" attributes from app and root nodes
+		 */
+		String host = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
+		if (host != null) {
+			currentHosts.add(host);
 		}
-		sequence = getNode(appNode, ApplicationManifestHandler.SUB_DOMAINS_PROP, SequenceNode.class);
-		if (sequence != null) {
-			for (Node o : sequence.getValue()) {
-				if (o instanceof ScalarNode) {
-					currentHosts.add(((ScalarNode) o).getValue());
+		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAINS_PROP, List.class);
+		if (hostsList != null) {
+			for (Object o : hostsList) {
+				if (o instanceof String) {
+					currentHosts.add((String) o);
 				}
 			}
 		}
 
 		/*
-		 * Gather domains from app node from 'domain' and 'domains' attributes
+		 * Gather domains from 'domain' and 'domains' attributes from app and root nodes
 		 */
-		n = getNode(appNode, ApplicationManifestHandler.DOMAIN_PROP, ScalarNode.class);
-		if (n != null) {
-			currentDomains.add(n.getValue());
+		String domain = getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
+		if (domain != null) {
+			currentDomains.add(domain);
 		}
-		sequence = getNode(appNode, ApplicationManifestHandler.DOMAINS_PROP, SequenceNode.class);
-		if (sequence != null) {
-			for (Node o : sequence.getValue()) {
-				if (o instanceof ScalarNode) {
-					currentDomains.add(((ScalarNode) o).getValue());
+		List<?> domainsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
+		if (domainsList != null) {
+			for (Object o : domainsList) {
+				if (o instanceof String) {
+					currentDomains.add((String) o);
 				}
 			}
 		}
 
 		boolean match = false;
-		boolean randomRemoved = false;
-		ScalarNode noHostNode = getNode(appNode, ApplicationManifestHandler.NO_HOSTNAME_PROP, ScalarNode.class);
-		ScalarNode randomRouteNode = getNode(appNode, ApplicationManifestHandler.RANDOM_ROUTE_PROP, ScalarNode.class);
-		ScalarNode noRouteNode = getNode(appNode, ApplicationManifestHandler.NO_ROUTE_PROP, ScalarNode.class);
+		Boolean noHost = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
+		Boolean randomRoute = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
+		Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
 
 		if (otherNoRoute) {
-			if (noRouteNode == null || !String.valueOf(true).equals(noRouteNode.getValue())) {
-				me.addChild(createEdit(appNode, Boolean.TRUE, ApplicationManifestHandler.NO_ROUTE_PROP));
+			if (!Boolean.TRUE.equals(noRoute)) {
+				getDifferenceForEntry(me, ApplicationManifestHandler.NO_ROUTE_PROP, true, false, Boolean.class);
 
-				if (noHostNode != null) {
+				if (getPropertyValue(appNode, ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class) != null) {
 					me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.NO_HOSTNAME_PROP));
 				}
 
-				if (randomRouteNode != null) {
-					randomRemoved = true;
+				if (getPropertyValue(appNode, ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class) != null) {
 					me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.RANDOM_ROUTE_PROP));
 				}
 			} else {
 				match = true;
 			}
 		} else {
-			if (noRouteNode != null && String.valueOf(true).equals(noRouteNode.getValue())) {
-				me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.NO_ROUTE_PROP));
+			if (Boolean.TRUE.equals(noRoute)) {
+				getDifferenceForEntry(me, ApplicationManifestHandler.NO_ROUTE_PROP, false, false, Boolean.class);
 			}
 
 			if (otherNoHostname) {
-				if (noHostNode == null || !String.valueOf(true).equals(noHostNode.getValue())) {
+				if (!Boolean.TRUE.equals(noHost)) {
 					me.addChild(createEdit(appNode, Boolean.TRUE, ApplicationManifestHandler.NO_HOSTNAME_PROP));
 				}
 			} else {
-				if (noHostNode != null && String.valueOf(true).equals(noHostNode.getValue())) {
+				/*
+				 * There is at least a host in the deployment properties. Remove
+				 * "no-hostname" attribute if there is one from the application
+				 * node. Don't care if it's in the root or anywhere else
+				 */
+				if (getPropertyValue(appNode, ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class) != null) {
 					me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.NO_HOSTNAME_PROP));
 				}
 			}
 
-			if (randomRouteNode != null && otherHosts.size() == 1 && otherDomains.size() == 1
-					&& String.valueOf(true).equals(randomRouteNode.getValue()) && currentHosts.isEmpty()) {
+			if (Boolean.TRUE.equals(randomRoute) && otherHosts.size() == 1 && otherDomains.size() == 1 && currentHosts.isEmpty()) {
 				match = true;
+			} else if (getPropertyValue(appNode, ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class) != null) {
+				me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.RANDOM_ROUTE_PROP));
 			}
 
-			if (currentHosts.isEmpty() && !(noHostNode != null && String.valueOf(true).equals(noHostNode.getValue()))) {
+			if (currentHosts.isEmpty() && !Boolean.TRUE.equals(noHost)) {
 				currentHosts.add(getAppName());
 			}
 
@@ -418,53 +670,87 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		}
 
 		if (!match && (!currentHosts.equals(otherHosts) || !currentDomains.equals(otherDomains))) {
-			if (!randomRemoved && randomRouteNode != null) {
-				me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.RANDOM_ROUTE_PROP));
-			}
-
 			generateEditForHostsAndDomains(me, currentHosts, currentDomains, otherHosts, otherDomains);
 		}
 
 	}
 
 	private void generateEditForHostsAndDomains(MultiTextEdit me, Set<String> currentHosts, Set<String> currentDomains, Set<String> otherHosts, Set<String> otherDomains) {
-		TextEdit te = null;
-		ScalarNode n = null;
-
-		n = getNode(appNode, ApplicationManifestHandler.SUB_DOMAIN_PROP, ScalarNode.class);
+		/*
+		 * Calculate current 'host' attrbute value
+		 */
+		String host = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
 		if (otherHosts.size() == 1) {
+			/*
+			 * Only one host for deployment props
+			 */
 			String otherHost = otherHosts.iterator().next();
-			if (n == null || !otherHost.equals(n.getValue())) {
-				me.addChild(createEdit(appNode, otherHost, ApplicationManifestHandler.SUB_DOMAIN_PROP));
+			/*
+			 * If calculated host is different from deployment props create edit
+			 */
+			if (host == null || !otherHost.equals(host)) {
+				getDifferenceForEntry(me, ApplicationManifestHandler.SUB_DOMAIN_PROP, otherHost, null, String.class);
 			}
+			/*
+			 * Ensure the deployment props hosts are empty since the difference has been dealt with here
+			 */
 			otherHosts.clear();
 		} else {
-			if (n != null && !otherHosts.remove(n.getValue())) {
-				me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.SUB_DOMAIN_PROP));
+			/*
+			 * Deployment props have more than one host.
+			 * Check if current "host" attribute value is one of the hosts from deployment props
+			 */
+			if (host != null && !otherHosts.remove(host)) {
+				/*
+				 * If current 'host' attribute value is not contained in
+				 * deployment props hosts then ensure "host" attribute value is
+				 * cleared
+				 */
+				getDifferenceForEntry(me, ApplicationManifestHandler.SUB_DOMAIN_PROP, null, null, String.class);
 			}
 		}
-		te = createEdit(appNode, new ArrayList<>(otherHosts), ApplicationManifestHandler.SUB_DOMAINS_PROP);
-		if (te != null) {
-			me.addChild(te);
-		}
+		/*
+		 * Calculate edit for hosts list
+		 */
+		getDifferencesForList(me, ApplicationManifestHandler.SUB_DOMAINS_PROP, new ArrayList<>(otherHosts));
 
-		n = getNode(appNode, ApplicationManifestHandler.DOMAIN_PROP, ScalarNode.class);
+		/*
+		 * Calculate current 'domain' attribute value
+		 */
+		String domain = getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
 		if (otherDomains.size() == 1) {
+			/*
+			 * Only one domain for deployment props
+			 */
 			String otherDomain = otherDomains.iterator().next();
-			if (n == null || !otherDomain.equals(n.getValue())) {
-				me.addChild(createEdit(appNode, otherDomain,  ApplicationManifestHandler.DOMAIN_PROP));
+			/*
+			 * If calculated domain is different from deployment props create edit
+			 */
+			if (domain == null || !otherDomain.equals(domain)) {
+				getDifferenceForEntry(me, ApplicationManifestHandler.DOMAIN_PROP, otherDomain, null, String.class);
 			}
+			/*
+			 * Ensure the deployment props domains are empty since the difference has been dealt with here
+			 */
 			otherDomains.clear();
 		} else {
-			if (n != null && !otherDomains.remove(n.getValue())) {
-				me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.DOMAIN_PROP));
+			/*
+			 * Deployment props have more than one domain.
+			 * Check if current "domain" attribute value is one of the domains from deployment props
+			 */
+			if (domain != null && !otherDomains.remove(domain)) {
+				/*
+				 * If current 'domain' attribute value is not contained in
+				 * deployment props domains then ensure "domain" attribute value is
+				 * cleared
+				 */
+				getDifferenceForEntry(me, ApplicationManifestHandler.DOMAIN_PROP, null, null, String.class);
 			}
 		}
-		te = createEdit(appNode, new ArrayList<>(otherDomains), ApplicationManifestHandler.DOMAINS_PROP);
-		if (te != null) {
-			me.addChild(te);
-		}
-
+		/*
+		 * Calculate edit for domains list
+		 */
+		getDifferencesForList(me, ApplicationManifestHandler.DOMAINS_PROP, new ArrayList<>(otherDomains));
 	}
 
 	/**
@@ -484,8 +770,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		if (tuple == null) {
 			if (otherValue != null) {
 				StringBuilder serializedValue = serialize(property, otherValue);
-				postIndent(serializedValue, getDefaultOffset());
-				int position = positionToAppendAt(parent);
+				boolean[] postIndent = new boolean[] { true };
+				int position = positionToAppendAt(parent, postIndent);
+				if (postIndent[0]) {
+					postIndent(serializedValue, getDefaultOffset());
+				} else {
+					preIndent(serializedValue, getDefaultOffset());
+				}
 				return new ReplaceEdit(position, 0, serializedValue.toString());
 			}
 		} else {
@@ -495,24 +786,21 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				 */
 				int start = tuple.getKeyNode().getStartMark().getIndex();
 				int end = tuple.getValueNode().getEndMark().getIndex();
-//				int index = parent.getValue().indexOf(tuple);
-//				if (!(index > 0 && parent.getValue().get(index - 1).getValueNode() instanceof CollectionNode)) {
-//					/*
-//					 * If previous tuple is not a map or list then try to remove the preceding line break
-//					 */
-//					for (; start > 0 && Character.isWhitespace(content.charAt(start - 1)) && content.charAt(start - 1) != '\n'; start--);
-//				}
-				for (; end > 0 && end < content.length() && Character.isWhitespace(content.charAt(end))/* && content.charAt(end - 1) != '\n'*/; end++);
 				/*
-				 * HACK!
-				 * See if the tuple is first in the application mapping node and application is within application list.
-				 * In this case indent for the next value should jump up next to '-', which takes one char from the indent
+				 * k1: v1
+				 * k-delete: v-delete
+				 * ^                 ^
+				 * start index       end index
+				 * k2: v2
+				 *
+				 * Extend end index to position of k2 and leave start index where it was with correct indent
+				 *
+				 * However, if it' the last tuple in the map than just delete it and leave the line with the indent in the beginning for now.
 				 */
-//				if ( applicationsValueNode != null && parent.getValue().get(0) == tuple) {
-//					end++;
-//				}
+				if (parent.getValue().get(parent.getValue().size() - 1) != tuple) {
+					for (; end > 0 && end < content.length() && Character.isWhitespace(content.charAt(end)); end++);
+				}
 				return new DeleteEdit(start, end - start);
-//				return createDeleteEditIncludingLine(tuple.getKeyNode().getStartMark().getIndex(), tuple.getValueNode().getEndMark().getIndex());
 			} else {
 				/*
 				 * Replace the current value (whether it's a scalr value or anything else without affecting the white space
@@ -525,16 +813,31 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return null;
 	}
 
-	private int positionToAppendAt(MappingNode m) {
-		if (m == appNode) {
-			for (NodeTuple tuple : m.getValue()) {
-				if (tuple.getKeyNode() instanceof ScalarNode && ApplicationManifestHandler.NAME_PROP.equals(((ScalarNode)tuple.getKeyNode()).getValue())) {
-					int index = tuple.getValueNode().getEndMark().getIndex();
-					for (; index > 0 && index < content.length() && Character.isWhitespace(content.charAt(index)); index++);
-					return index;
-				}
+	/**
+	 * Calculates position to append entries to the map node. Also provides a
+	 * hint on how to properly append entries. If entries are to be appended
+	 * after the last entry in the map node then they need to be all
+	 * pre-indented, and post-indented otherwise
+	 *
+	 * @param m the map node
+	 * @param postIndent the post- or pre- indent calculated hint
+	 * @return the index to append entries
+	 */
+	private int positionToAppendAt(MappingNode m, boolean[] postIndent) {
+		/*
+		 * Check if there is a name attribute in the map node (case of application node) and make the end index of tha 'name: XXX' tuple as the index to append
+		 */
+		for (NodeTuple tuple : m.getValue()) {
+			if (tuple.getKeyNode() instanceof ScalarNode
+					&& ApplicationManifestHandler.NAME_PROP.equals(((ScalarNode) tuple.getKeyNode()).getValue())) {
+				int index = tuple.getValueNode().getEndMark().getIndex();
+				for (; index > 0 && index < content.length() && Character.isWhitespace(content.charAt(index)); index++)
+					;
+				postIndent[0] = m.getValue().get(m.getValue().size() - 1) != tuple;
+				return index;
 			}
 		}
+		postIndent[0] = true;
 		return m.getStartMark().getIndex();
 	}
 
@@ -543,8 +846,15 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		if (tuple == null) {
 			if (otherValue != null && !otherValue.isEmpty()) {
 				StringBuilder serializedValue = serialize(property, otherValue);
-				postIndent(serializedValue, getDefaultOffset());
-				int position = positionToAppendAt(parent);
+//				postIndent(serializedValue, getDefaultOffset());
+//				int position = positionToAppendAt(parent);
+				boolean[] postIndent = new boolean[] { true };
+				int position = positionToAppendAt(parent, postIndent);
+				if (postIndent[0]) {
+					postIndent(serializedValue, getDefaultOffset());
+				} else {
+					preIndent(serializedValue, getDefaultOffset());
+				}
 				return new ReplaceEdit(position, 0, serializedValue.toString());
 			}
 		} else {
@@ -639,8 +949,15 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				 * If other value is something that can be serialized, serialize the key and other value and put in the YAML
 				 */
 				StringBuilder serializedValue = serialize(property, otherValue);
-				postIndent(serializedValue, getDefaultOffset());
-				int position = positionToAppendAt(parent);
+//				postIndent(serializedValue, getDefaultOffset());
+//				int position = positionToAppendAt(parent);
+				boolean[] postIndent = new boolean[] { true };
+				int position = positionToAppendAt(parent, postIndent);
+				if (postIndent[0]) {
+					postIndent(serializedValue, getDefaultOffset());
+				} else {
+					preIndent(serializedValue, getDefaultOffset());
+				}
 				return new ReplaceEdit(position, 0, serializedValue.toString());
 			}
 		} else {
@@ -746,19 +1063,6 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return s;
 	}
 
-//	private StringBuilder serialize(String property, Object value, int offset) {
-//		Map<Object, Object> obj = new HashMap<>();
-//		obj.put(property, value);
-//		StringBuilder s = new StringBuilder(yaml.dump(obj));
-//		if (offset > 0) {
-////			offsetString(s, offset);
-//			for (int i = 0; i < offset; i++) {
-//				s.append(' ');
-//			}
-//		}
-//		return s;
-//	}
-
 	private StringBuilder serializeListEntry(Object obj, int offset) {
 		StringBuilder s = new StringBuilder(yaml.dump(Collections.singletonList(obj)));
 		if (offset > 0) {
@@ -820,9 +1124,8 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	@Override
 	public Set<String> getUris() {
-		ScalarNode n = getNode(appNode, ApplicationManifestHandler.NO_ROUTE_PROP, ScalarNode.class);
-		SequenceNode sequence;
-		if (n != null && String.valueOf(true).equals(n.getValue())) {
+		Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
+		if (Boolean.TRUE.equals(noRoute)) {
 			return Collections.emptySet();
 		}
 
@@ -833,15 +1136,15 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		/*
 		 * Gather domains from app node from 'domain' and 'domains' attributes
 		 */
-		n = getNode(appNode, ApplicationManifestHandler.DOMAIN_PROP, ScalarNode.class);
-		if (n != null) {
-			domainsSet.add(n.getValue());
+		String domain = getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
+		if (domain != null) {
+			domainsSet.add(domain);
 		}
-		sequence = getNode(appNode, ApplicationManifestHandler.DOMAINS_PROP, SequenceNode.class);
-		if (sequence != null) {
-			for (Node o : sequence.getValue()) {
-				if (o instanceof ScalarNode) {
-					domainsSet.add(((ScalarNode)o).getValue());
+		List<?> domainsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
+		if (domainsList != null) {
+			for (Object o : domainsList) {
+				if (o instanceof String && ApplicationManifestHandler.isDomainValid((String) o , domains)) {
+					domainsSet.add((String)o);
 				}
 			}
 		}
@@ -850,15 +1153,15 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		 * Gather hosts from app node from 'host' and 'hosts'
 		 * attributes.
 		 */
-		n = getNode(appNode, ApplicationManifestHandler.SUB_DOMAIN_PROP, ScalarNode.class);
-		if (n != null) {
-			hostsSet.add(n.getValue());
+		String host = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
+		if (host != null) {
+			hostsSet.add(host);
 		}
-		sequence = getNode(appNode, ApplicationManifestHandler.SUB_DOMAINS_PROP, SequenceNode.class);
-		if (sequence != null) {
-			for (Node o : sequence.getValue()) {
-				if (o instanceof ScalarNode) {
-					hostsSet.add(((ScalarNode)o).getValue());
+		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAINS_PROP, List.class);
+		if (hostsList != null) {
+			for (Object o : hostsList) {
+				if (o instanceof String) {
+					hostsSet.add((String)o);
 				}
 			}
 		}
@@ -868,14 +1171,14 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		 * "no-hostname: true" otherwise take app name as the host name
 		 */
 		if (hostsSet.isEmpty()) {
-			n = getNode(appNode, ApplicationManifestHandler.RANDOM_ROUTE_PROP, ScalarNode.class);
-			if (n != null && String.valueOf(true).equals(n.getValue())) {
+			Boolean randomRoute = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
+			if (Boolean.TRUE.equals(randomRoute)) {
 				hostsSet.add(ApplicationManifestHandler.RANDOM_VAR);
 				domainsSet.clear();
 				domainsSet.add(domains.get(0).getName());
 			} else {
-				n = getNode(appNode, ApplicationManifestHandler.NO_HOSTNAME_PROP, ScalarNode.class);
-				if (n == null || !String.valueOf(true).equals(n.getValue())) {
+				Boolean noHostname = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
+				if (!Boolean.TRUE.equals(noHostname)) {
 					hostsSet.add(getAppName());
 				}
 			}
@@ -907,15 +1210,66 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	@Override
 	public int getDiskQuota() {
-		ScalarNode n = getNode(appNode, ApplicationManifestHandler.DISK_QUOTA_PROP, ScalarNode.class);
-		if (n != null) {
+		String quotaStringValue = getAbsoluteValue(ApplicationManifestHandler.DISK_QUOTA_PROP, String.class);
+		if (quotaStringValue != null) {
 			try {
-				return ApplicationManifestHandler.convertMemory(((ScalarNode)n).getValue());
+				return ApplicationManifestHandler.convertMemory(quotaStringValue);
 			} catch (CoreException e) {
 				BootDashActivator.log(e);
 			}
 		}
 		return DeploymentProperties.DEFAULT_MEMORY;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <V> V getPropertyValue(final Node n, final String key, Class<V> parameter) {
+		return (V) new Constructor(parameter) {
+			@Override
+			public Object getSingleData(Class<?> type) {
+			      // Ensure that the stream contains a single document and construct it
+		        Node node = YamlGraphDeploymentProperties.findValueNode(n, key);
+		        if (node != null) {
+		        	if (type != null) {
+		        		node.setTag(new Tag(type));
+		        	} else {
+		        		node.setTag(rootTag);
+		        	}
+		        	return constructObject(node);
+		        }
+		        return null;
+		    }
+		}.getSingleData(parameter);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected <V> V getAbsoluteValue(String key, Class<V> parameter) {
+		V v = getPropertyValue(appNode, key, parameter);
+		if (Collection.class.isAssignableFrom(parameter)) {
+			if (root != appNode) {
+				V rootV = getPropertyValue(root, key, parameter);
+				if (rootV != null) {
+					if (v != null){
+						((Collection) rootV).addAll((Collection) v);
+					}
+					v = rootV;
+				}
+			}
+		} else if (Map.class.isAssignableFrom(parameter)) {
+			if (root != appNode) {
+				V rootV = getPropertyValue(root, key, parameter);
+				if (rootV != null) {
+					if (v != null){
+						((Map) rootV).putAll((Map) v);
+					}
+					v = rootV;
+				}
+			}
+		} else if (v == null) {
+			if (root != appNode) {
+				v = getPropertyValue(root, key, parameter);
+			}
+		}
+		return v;
 	}
 
 }

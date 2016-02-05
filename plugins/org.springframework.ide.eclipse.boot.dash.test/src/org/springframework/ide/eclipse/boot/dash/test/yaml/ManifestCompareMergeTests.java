@@ -302,6 +302,18 @@ public class ManifestCompareMergeTests {
 	}
 
 	@Test
+	public void test_map_11() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("test-app.springsource.org"));
+		props.setMemory(2048);
+		Map<String, String> env = new LinkedHashMap<>();
+		env.put("KEY1", "value1");
+		props.setEnvironmentVariables(env);
+		performMergeTest(getTestFile("mergeTestsData/map-11.yml"), props, getTestFile("mergeTestsData/map-11-expected.yml"));
+	}
+
+	@Test
 	public void test_instances_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app");
@@ -335,6 +347,15 @@ public class ManifestCompareMergeTests {
 		props.setUris(Collections.singletonList("test-app.springsource.org"));
 		props.setMemory(2048);
 		performMergeTest(getTestFile("mergeTestsData/instances-4.yml"), props, null);
+	}
+
+	@Test
+	public void test_instances_5() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("test-app.springsource.org"));
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/instances-5.yml"), props, getTestFile("mergeTestsData/instances-5-expected.yml"));
 	}
 
 	@Test
@@ -520,5 +541,219 @@ public class ManifestCompareMergeTests {
 		props.setMemory(2048);
 		performMergeTest(getTestFile("mergeTestsData/hosts-domains-7.yml"), props, null);
 	}
+
+	@Test
+	public void test_hosts_domains_8() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Arrays.asList("app1.spring.io", "app2.spring.io"));
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/hosts-domains-8.yml"), props, getTestFile("mergeTestsData/hosts-domains-8-expected.yml"));
+	}
+
+	@Test
+	public void test_root_node_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(3);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-node-1.yml"), props, getTestFile("mergeTestsData/root-node-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_node_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-node-2.yml"), props, getTestFile("mergeTestsData/root-node-2-expected.yml"));
+	}
+	
+	@Test
+	public void test_root_list_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		props.setServices(Arrays.asList("s1", "s2", "s3"));
+		performMergeTest(getTestFile("mergeTestsData/root-list-1.yml"), props, getTestFile("mergeTestsData/root-list-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_list_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		props.setServices(Arrays.asList("s1", "s2", "s3", "s4", "s5"));
+		performMergeTest(getTestFile("mergeTestsData/root-list-2.yml"), props, getTestFile("mergeTestsData/root-list-2-expected.yml"));
+	}
+
+	@Test
+	public void test_root_list_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		props.setServices(Arrays.asList("s1", "s3", "s4", "s5"));
+		performMergeTest(getTestFile("mergeTestsData/root-list-3.yml"), props, getTestFile("mergeTestsData/root-list-3-expected.yml"));
+	}
+
+	@Test
+	public void test_root_map_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		Map<String, String> env = new HashMap<>();
+		env.put("k1", "v1");
+		env.put("k2", "v2");
+		env.put("k3", "v3");
+		props.setEnvironmentVariables(env);
+		performMergeTest(getTestFile("mergeTestsData/root-map-1.yml"), props, getTestFile("mergeTestsData/root-map-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_map_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		Map<String, String> env = new HashMap<>();
+		env.put("k1", "v1");
+		env.put("k2", "v2-alt");
+		props.setEnvironmentVariables(env);
+		performMergeTest(getTestFile("mergeTestsData/root-map-2.yml"), props, getTestFile("mergeTestsData/root-map-2-expected.yml"));
+	}
+
+	@Test
+	public void test_root_map_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-map-3.yml"), props, getTestFile("mergeTestsData/root-map-3-expected.yml"));
+	}
+
+	@Test
+	public void test_root_map_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		Map<String, String> env = new HashMap<>();
+		env.put("k2", "v2");
+		props.setEnvironmentVariables(env);
+		performMergeTest(getTestFile("mergeTestsData/root-map-4.yml"), props, getTestFile("mergeTestsData/root-map-4-expected.yml"));
+	}
+
+	@Test
+	public void test_root_noroute_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-noroute-1.yml"), props, getTestFile("mergeTestsData/root-noroute-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_noroute_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		performMergeTest(getTestFile("mergeTestsData/root-noroute-2.yml"), props, getTestFile("mergeTestsData/root-noroute-2-expected.yml"));
+	}
+
+	@Test
+	public void test_root_randomroute_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-randomroute-1.yml"), props, getTestFile("mergeTestsData/root-randomroute-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_randomroute_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-randomroute-2.yml"), props, null);
+	}
+
+	@Test
+	public void test_root_nohost_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("my-app.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-nohost-1.yml"), props, getTestFile("mergeTestsData/root-nohost-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_nohost_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("springsource.org", "spring.io"));
+		performMergeTest(getTestFile("mergeTestsData/root-nohost-2.yml"), props, getTestFile("mergeTestsData/root-nohost-2-expected.yml"));
+	}
+
+	@Test
+	public void test_root_nohost_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-nohost-3.yml"), props, null);
+	}
+
+	@Test
+	public void test_root_hosts_domains_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app1.springsource.org", "app2.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-hosts-domains-1.yml"), props, getTestFile("mergeTestsData/root-hosts-domains-1-expected.yml"));
+	}
+
+	@Test
+	public void test_root_hosts_domains_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("my-app.springsource.org", "test-app1.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-hosts-domains-2.yml"), props, getTestFile("mergeTestsData/root-hosts-domains-2-expected.yml"));
+	}
+
+	@Test
+	public void test_root_hosts_domains_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("test-app-1.springsource.org", "test-app-3.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/root-hosts-domains-3.yml"), props, getTestFile("mergeTestsData/root-hosts-domains-3-expected.yml"));
+	}
+
 }
 

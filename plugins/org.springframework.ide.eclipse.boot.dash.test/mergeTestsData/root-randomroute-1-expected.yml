@@ -1,0 +1,11 @@
+---
+random-route: true
+applications:
+- name: another-app
+- name: app
+  hosts:
+  - app-1
+  - app-2
+  domain: springsource.org
+  memory: 2048M
+  
