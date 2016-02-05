@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -96,10 +97,10 @@ public class ExposeAppAction extends RunStateAction {
 								monitor.beginTask("Restart and Expose Boot Dash Elements", selecteds.size());
 								try {
 									for (BootDashElement el : selecteds) {
-										if (el instanceof BootProjectDashElement) {
+										if (el instanceof AbstractLaunchConfigurationsDashElement<?>) {
 											monitor.subTask("Restarting: " + el.getName());
 											try {
-												BootProjectDashElement localDashProject = (BootProjectDashElement) el;
+												AbstractLaunchConfigurationsDashElement<?> localDashProject = (AbstractLaunchConfigurationsDashElement<?>) el;
 												localDashProject.restartAndExpose(ExposeAppAction.this.goalState, ngrokClient, eurekaInstance, ui);
 											} catch (Exception e) {
 												return BootActivator.createErrorStatus(e);
