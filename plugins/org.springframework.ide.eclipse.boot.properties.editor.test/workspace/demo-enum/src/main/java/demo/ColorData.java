@@ -15,7 +15,8 @@ public class ColorData {
 	private List<ColorData> children;
 	private List<String> tags;
 	private Map<String, ColorData> mappedChildren;
-	
+	private boolean funky;
+
 	/**
 	 * Children of this node organized by color
 	 */
@@ -33,14 +34,14 @@ public class ColorData {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * Set the name of the color.
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * Get the next color
 	 */
@@ -79,5 +80,11 @@ public class ColorData {
 	}
 	public void setTags(List<String> tags) {
 		this.tags = tags;
+	}
+	public boolean isFunky() {
+		return funky;
+	}
+	public void setFunky(boolean funky) {
+		this.funky = funky;
 	}
 }

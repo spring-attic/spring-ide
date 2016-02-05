@@ -209,7 +209,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 							edits.delete(navOffset+1, offset);
 							edits.insert(offset, prop.getName()+postFix);
 							proposals.add(
-								completionFactory.simpleProposal(prop.getName(), score, edits)
+								completionFactory.beanProperty(doc, null, type, prefix, prop, score, edits, typeUtil)
 							);
 						}
 					}

@@ -287,7 +287,10 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.Foo"));
 
 		assertCompletionsVariations("volder.foo.l<*>", "volder.foo.list[<*>");
-		assertCompletionsDisplayString("volder.foo.list[0].<*>", "name", "description", "roles");
+		assertCompletionsDisplayString("volder.foo.list[0].<*>",
+				"name : String",
+				"description : String",
+				"roles : List<String>");
 
 		assertCompletionsVariations("volder.foo.list[0].na<*>",
 				"volder.foo.list[0].name=<*>"
@@ -517,7 +520,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"foo.color-names.red=<*>"
 		);
 		assertCompletionsDisplayString("foo.color-names.<*>",
-				"red", "green", "blue"
+				"red : String", "green : String", "blue : String"
 		);
 		assertCompletionsVariations("foo.color-names.B<*>",
 				"foo.color-names.BLUE=<*>"
@@ -534,7 +537,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"foo.color-data.BLUE.<*>"
 		);
 		assertCompletionsDisplayString("foo.color-data.<*>",
-				"blue", "green", "red"
+				"blue : demo.ColorData", "green : demo.ColorData", "red : demo.ColorData"
 		);
 	}
 
@@ -568,8 +571,15 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("foo.dat<*>", "foo.data.<*>");
 
 		assertCompletionsDisplayString("foo.data.",
-				"wavelen", "name", "next", "nested", "children",
-				"mapped-children", "color-children", "tags"
+				"wavelen : double",
+				"name : String",
+				"next : demo.Color[RED, GREEN, BLUE]",
+				"nested : demo.ColorData",
+				"children : List<demo.ColorData>",
+				"mapped-children : Map<String, demo.ColorData>",
+				"color-children : Map<demo.Color[RED, GREEN, BLUE], demo.ColorData>",
+				"tags : List<String>",
+				"funky : boolean"
 		);
 
 		assertCompletionsVariations("foo.data.wav<*>", "foo.data.wavelen=<*>");
@@ -791,6 +801,103 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("relaxed-color=b<*>", "relaxed-color=blue<*>");
 		assertCompletion("relaxedColor=b<*>", "relaxedColor=blue<*>");
 	}
+
+	public void testReconcileDeprecatedProperty() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertProblems(editor,
+				"error.path|Deprecated: Use 'server.error.path'"
+				//no other problems
+		);
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertProblems(editor,
+				"error.path|Deprecated: Use 'server.error.path' instead. Reason: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, "This is old.");
+		assertProblems(editor,
+				"error.path|Deprecated: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, null);
+		assertProblems(editor,
+				"error.path|Deprecated!"
+				//no other problems
+		);
+
+	}
+
+	public void testDeprecatedPropertyCompletion() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		data("server.error.path", "java.lang.String", null, "Path of the error controller.");
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertCompletionsDisplayString("error.pa<*>",
+				"server.error.path : String", // should be first because it is not deprecated, even though it is not as good a pattern match
+				"error.path : String"
+		);
+		//TODO: could we check that 'deprecated' completions are formatted with 'strikethrough font?
+		assertStyledCompletions("error.pa<*>",
+				StyledStringMatcher.plainFont("server.error.path : String"),
+				StyledStringMatcher.strikeout("error.path")
+		);
+	}
+
+	public void testDeprecatedPropertyHoverInfo() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertHoverText(editor, "path", "<s>error.path</s> -&gt; server.error.path");
+		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertHoverText(editor, "path", "<s>error.path</s> -&gt; server.error.path");
+		assertHoverText(editor, "path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, "This is old.");
+		assertHoverText(editor, "path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, null);
+		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+	}
+
+	public void testDeprecatedBeanPropertyReconcile() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# comment\n" +
+				"foo.name=Old faithfull\n" +
+				"foo.new-name=New and fancy\n"
+		);
+		assertProblems(editor,
+				"name|Deprecated"
+		);
+	}
+
+	public void testDeprecatedBeanPropertyCompletions() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		assertStyledCompletions("foo.nam<*>",
+				StyledStringMatcher.plainFont("new-name : String"),
+				StyledStringMatcher.strikeout("name")
+		);
+	}
+
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

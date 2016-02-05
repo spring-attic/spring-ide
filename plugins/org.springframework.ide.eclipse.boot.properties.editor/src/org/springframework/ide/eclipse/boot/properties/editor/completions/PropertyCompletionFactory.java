@@ -32,22 +32,24 @@ public class PropertyCompletionFactory extends CompletionFactory {
 		return new PropertyProposal(doc, applier, prop, typeUtil);
 	}
 
-	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty p, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
-		return new AbstractPropertyProposal(doc, applier) {
+	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty property, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
+		AbstractPropertyProposal proposal = new AbstractPropertyProposal(doc, applier) {
 
 			private HoverInfo hoverInfo;
+
 
 			@Override
 			public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
 				if (hoverInfo==null) {
-					hoverInfo = new JavaTypeNavigationHoverInfo(contextProperty+"."+p.getName(), p.getName(), contextType, p.getType(), typeUtil);
+					String prefix = contextProperty==null?"":contextProperty+".";
+					hoverInfo = new JavaTypeNavigationHoverInfo(prefix+property.getName(), property.getName(), contextType, property.getType(), typeUtil);
 				}
 				return hoverInfo;
 			}
 
 			@Override
 			protected String getBaseDisplayString() {
-				return p.getName();
+				return property.getName();
 			}
 
 			@Override
@@ -57,7 +59,7 @@ public class PropertyCompletionFactory extends CompletionFactory {
 
 			@Override
 			protected Type getType() {
-				return p.getType();
+				return property.getType();
 			}
 
 			@Override
@@ -70,6 +72,10 @@ public class PropertyCompletionFactory extends CompletionFactory {
 				return typeUtil.niceTypeName((Type) type);
 			}
 		};
+		if (property.isDeprecated()) {
+			proposal.deprecate();
+		}
+		return proposal;
 	}
 
 	private DocumentContextFinder documentContextFinder;
@@ -88,6 +94,9 @@ public class PropertyCompletionFactory extends CompletionFactory {
 			super(doc, applier);
 			this.typeUtil = typeUtil;
 			this.match = match;
+			if (match.data.isDeprecated()) {
+				deprecate();
+			}
 		}
 
 		@Override

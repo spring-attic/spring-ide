@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
@@ -535,7 +536,7 @@ public class TypeUtil {
 					Type valueType = getDomainType(type);
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
 					for (String propName : keyValues) {
-						properties.add(new TypedProperty(propName, valueType));
+						properties.add(new TypedProperty(propName, valueType, false));
 					}
 					return properties;
 				}
@@ -546,19 +547,23 @@ public class TypeUtil {
 
 			//TODO: handle type parameters.
 			if (eclipseType!=null) {
-				List<IMethod> setters = getSetterMethods(eclipseType);
-				//TODO: setters inherited from super classes?
-				//TODO: the code below is too simplistic. More complex cases allow for non-atomic property types
-				//   to be defined by having only a getter (e.g. when the type is a pre-initialized collection, array or bean).
-				if (setters!=null && !setters.isEmpty()) {
-					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(setters.size());
-					for (IMethod m : setters) {
-						Type propType = Type.fromSignature(m.getParameterTypes()[0], eclipseType);
+				List<IMethod> getters = getGetterMethods(eclipseType);
+				//TODO: getters inherited from super classes?
+				if (getters!=null && !getters.isEmpty()) {
+					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(getters.size());
+					for (IMethod m : getters) {
+						boolean isDeprecated = m.getAnnotation("Deprecated").exists() || m.getAnnotation("java.lang.Deprecated").exists();
+						Type propType = null;
+						try {
+							propType = Type.fromSignature(m.getReturnType(), eclipseType);
+						} catch (JavaModelException e) {
+							BootActivator.log(e);
+						}
 						if (beanMode.includesHyphenated()) {
-							properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType));
+							properties.add(new TypedProperty(getterOrSetterNameToProperty(m.getElementName()), propType, isDeprecated));
 						}
 						if (beanMode.includesCamelCase()) {
-							properties.add(new TypedProperty(setterNameToCamelName(m.getElementName()), propType));
+							properties.add(new TypedProperty(getterOrSetterNameToCamelName(m.getElementName()), propType, isDeprecated));
 						}
 					}
 					return properties;
@@ -568,35 +573,39 @@ public class TypeUtil {
 		return null;
 	}
 
-	private String setterNameToProperty(String name) {
-		String camelName = setterNameToCamelName(name);
+	private String getterOrSetterNameToProperty(String name) {
+		String camelName = getterOrSetterNameToCamelName(name);
 		return StringUtil.camelCaseToHyphens(camelName);
 	}
 
-	public String setterNameToCamelName(String name) {
-		Assert.isLegal(name.startsWith("set"));
-		String camelName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
+	public String getterOrSetterNameToCamelName(String name) {
+		Assert.isLegal(name.startsWith("set") || name.startsWith("get") || name.startsWith("is"));
+		int prefixLen = name.startsWith("is") ? 2 : 3;
+		String camelName = Character.toLowerCase(name.charAt(prefixLen)) + name.substring(prefixLen+1);
 		return camelName;
 	}
 
-	private List<IMethod> getSetterMethods(IType eclipseType) {
+	private List<IMethod> getGetterMethods(IType eclipseType) {
 		try {
 			if (eclipseType!=null && eclipseType.isClass()) {
 				IMethod[] allMethods = eclipseType.getMethods();
 				if (ArrayUtils.hasElements(allMethods)) {
-					ArrayList<IMethod> setters = new ArrayList<IMethod>();
+					ArrayList<IMethod> getters = new ArrayList<IMethod>();
 					for (IMethod m : allMethods) {
 						String mname = m.getElementName();
-						if (mname.startsWith("set") && mname.length()>=4) {
+						if (
+								(mname.startsWith("get") && mname.length()>=4) ||
+								(mname.startsWith("is") && mname.length()>=3)
+						) {
 							//Need at least 4 chars or the property name will be empty.
 							String sig = m.getSignature();
 							int numParams = Signature.getParameterCount(sig);
-							if (numParams==1) {
-								setters.add(m);
+							if (numParams==0) {
+								getters.add(m);
 							}
 						}
 					}
-					return setters;
+					return getters;
 				}
 			}
 		} catch (Exception e) {
@@ -604,6 +613,32 @@ public class TypeUtil {
 		}
 		return null;
 	}
+
+//	private List<IMethod> getSetterMethods(IType eclipseType) {
+//		try {
+//			if (eclipseType!=null && eclipseType.isClass()) {
+//				IMethod[] allMethods = eclipseType.getMethods();
+//				if (ArrayUtils.hasElements(allMethods)) {
+//					ArrayList<IMethod> setters = new ArrayList<IMethod>();
+//					for (IMethod m : allMethods) {
+//						String mname = m.getElementName();
+//						if (mname.startsWith("set") && mname.length()>=4) {
+//							//Need at least 4 chars or the property name will be empty.
+//							String sig = m.getSignature();
+//							int numParams = Signature.getParameterCount(sig);
+//							if (numParams==1) {
+//								setters.add(m);
+//							}
+//						}
+//					}
+//					return setters;
+//				}
+//			}
+//		} catch (Exception e) {
+//			BootActivator.log(e);
+//		}
+//		return null;
+//	}
 
 	public Map<String, TypedProperty> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		//TODO: optimize, produce directly as a map instead of

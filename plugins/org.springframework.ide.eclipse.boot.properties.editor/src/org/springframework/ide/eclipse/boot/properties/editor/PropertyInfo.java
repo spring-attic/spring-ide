@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.configurationmetadata.ConfigurationMetadataSource;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
+import org.springframework.boot.configurationmetadata.Deprecation;
 
 /**
  * Information about a spring property, basically, this is the same as
@@ -58,9 +59,11 @@ public class PropertyInfo {
 	final private Object defaultValue;
 	final private String description;
 	private List<PropertySource> sources;
+	private Deprecation deprecation;
 
 	public PropertyInfo(String id, String type, String name,
 			Object defaultValue, String description,
+			Deprecation deprecation,
 			List<PropertySource> sources) {
 		super();
 		this.id = id;
@@ -68,6 +71,7 @@ public class PropertyInfo {
 		this.name = name;
 		this.defaultValue = defaultValue;
 		this.description = description;
+		this.deprecation = deprecation;
 		this.sources = sources;
 	}
 	public PropertyInfo(ConfigurationMetadataProperty prop) {
@@ -77,6 +81,7 @@ public class PropertyInfo {
 			prop.getName(),
 			prop.getDefaultValue(),
 			prop.getDescription(),
+			prop.getDeprecation(),
 			null
 		);
 	}
@@ -118,6 +123,23 @@ public class PropertyInfo {
 		if (alias.equals(id)) {
 			return this;
 		}
-		return new PropertyInfo(alias, type, name, defaultValue, description, sources);
+		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, sources);
 	}
+
+	public void setDeprecation(Deprecation d) {
+		this.deprecation = d;
+	}
+
+	public boolean isDeprecated() {
+		return deprecation!=null;
+	}
+
+	public String getDeprecationReason() {
+		return deprecation == null ? null : deprecation.getReason();
+	}
+
+	public String getDeprecationReplacement() {
+		return deprecation == null ? null : deprecation.getReplacement();
+	}
+
 }

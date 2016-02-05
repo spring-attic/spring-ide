@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.configurationmetadata;
+package org.springframework.boot.configurationmetadata;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,9 +26,11 @@ import java.util.Map;
  * The default {@link ConfigurationMetadataRepository} implementation.
  *
  * @author Stephane Nicoll
- * @since 1.2.0
+ * @since 1.3.0
  */
-public class SimpleConfigurationMetadataRepository implements ConfigurationMetadataRepository {
+@SuppressWarnings("serial")
+public class SimpleConfigurationMetadataRepository
+		implements ConfigurationMetadataRepository, Serializable {
 
 	private final Map<String, ConfigurationMetadataGroup> allGroups = new HashMap<String, ConfigurationMetadataGroup>();
 
@@ -38,7 +41,7 @@ public class SimpleConfigurationMetadataRepository implements ConfigurationMetad
 
 	@Override
 	public Map<String, ConfigurationMetadataProperty> getAllProperties() {
-		Map<String,ConfigurationMetadataProperty> properties = new HashMap<String, ConfigurationMetadataProperty>();
+		Map<String, ConfigurationMetadataProperty> properties = new HashMap<String, ConfigurationMetadataProperty>();
 		for (ConfigurationMetadataGroup group : this.allGroups.values()) {
 			properties.putAll(group.getProperties());
 		}
@@ -47,6 +50,7 @@ public class SimpleConfigurationMetadataRepository implements ConfigurationMetad
 
 	/**
 	 * Register the specified {@link ConfigurationMetadataSource sources}.
+	 * @param sources the sources to add
 	 */
 	public void add(Collection<ConfigurationMetadataSource> sources) {
 		for (ConfigurationMetadataSource source : sources) {
@@ -64,34 +68,41 @@ public class SimpleConfigurationMetadataRepository implements ConfigurationMetad
 	}
 
 	/**
-	 * Add a {@link ConfigurationMetadataProperty} with the {@link ConfigurationMetadataSource source}
-	 * that defines it, if any.
+	 * Add a {@link ConfigurationMetadataProperty} with the
+	 * {@link ConfigurationMetadataSource source} that defines it, if any.
+	 * @param property the property to add
+	 * @param source the source
 	 */
-	public void add(ConfigurationMetadataProperty property, ConfigurationMetadataSource source) {
+	public void add(ConfigurationMetadataProperty property,
+			ConfigurationMetadataSource source) {
 		if (source != null) {
-			putIfAbsent(source.getProperties(),property.getId(), property);
+			putIfAbsent(source.getProperties(), property.getId(), property);
 		}
 		putIfAbsent(getGroup(source).getProperties(), property.getId(), property);
 	}
 
-
 	/**
 	 * Merge the content of the specified repository to this repository.
+	 * @param repository the repository to include
 	 */
 	public void include(ConfigurationMetadataRepository repository) {
 		for (ConfigurationMetadataGroup group : repository.getAllGroups().values()) {
 			ConfigurationMetadataGroup existingGroup = this.allGroups.get(group.getId());
-			if (existingGroup == null)  {
+			if (existingGroup == null) {
 				this.allGroups.put(group.getId(), group);
 			}
 			else {
 				// Merge properties
-				for (Map.Entry<String, ConfigurationMetadataProperty> entry : group.getProperties().entrySet()) {
-					putIfAbsent(existingGroup.getProperties(), entry.getKey(), entry.getValue());
+				for (Map.Entry<String, ConfigurationMetadataProperty> entry : group
+						.getProperties().entrySet()) {
+					putIfAbsent(existingGroup.getProperties(), entry.getKey(),
+							entry.getValue());
 				}
 				// Merge sources
-				for (Map.Entry<String, ConfigurationMetadataSource> entry : group.getSources().entrySet()) {
-					putIfAbsent(existingGroup.getSources(), entry.getKey(), entry.getValue());
+				for (Map.Entry<String, ConfigurationMetadataSource> entry : group
+						.getSources().entrySet()) {
+					putIfAbsent(existingGroup.getSources(), entry.getKey(),
+							entry.getValue());
 				}
 			}
 		}
@@ -107,9 +118,7 @@ public class SimpleConfigurationMetadataRepository implements ConfigurationMetad
 			}
 			return rootGroup;
 		}
-		else {
-			return this.allGroups.get(source.getGroupId());
-		}
+		return this.allGroups.get(source.getGroupId());
 	}
 
 	private <V> void putIfAbsent(Map<String, V> map, String key, V value) {

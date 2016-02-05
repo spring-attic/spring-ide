@@ -34,7 +34,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/json-20140107.jar
-Export-Package: org.springframework.configurationmetadata,
+Export-Package: org.springframework.boot.configurationmetadata,
  org.springframework.ide.eclipse.boot.properties.editor,
  org.springframework.ide.eclipse.boot.properties.editor.completions,
  org.springframework.ide.eclipse.boot.properties.editor.maven,

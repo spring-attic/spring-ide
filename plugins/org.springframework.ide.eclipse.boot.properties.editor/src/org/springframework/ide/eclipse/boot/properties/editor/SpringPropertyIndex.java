@@ -14,11 +14,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.configurationmetadata.ConfigurationMetadataGroup;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.configurationmetadata.ConfigurationMetadataSource;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 
 public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 

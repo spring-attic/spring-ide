@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.configurationmetadata;
+package org.springframework.boot.configurationmetadata;
 
 import java.util.Map;
 
@@ -22,24 +22,25 @@ import java.util.Map;
  * A repository of configuration metadata.
  *
  * @author Stephane Nicoll
- * @since 1.2.0
+ * @since 1.3.0
  */
 public interface ConfigurationMetadataRepository {
 
 	/**
-	 * Defines the name of the "root" group, that is the group that
-	 * gathers all the properties that aren't attached to a specific
-	 * group.
+	 * Defines the name of the "root" group, that is the group that gathers all the
+	 * properties that aren't attached to a specific group.
 	 */
-	static final String ROOT_GROUP = "_ROOT_GROUP_";
+	String ROOT_GROUP = "_ROOT_GROUP_";
 
 	/**
 	 * Return the groups, indexed by id.
+	 * @return all configuration meta-data groups
 	 */
 	Map<String, ConfigurationMetadataGroup> getAllGroups();
 
 	/**
 	 * Return the properties, indexed by id.
+	 * @return all configuration meta-data properties
 	 */
 	Map<String, ConfigurationMetadataProperty> getAllProperties();
 

@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Display;
 public class ColorManager {
 
 	public static final RGB GREY = new RGB(128,128,128);
+	public static final RGB CYAN = new RGB(0,128,128);
 
 	private static ColorManager instance;
 	protected Map<RGB,Color> fColorTable = new HashMap<RGB,Color>();

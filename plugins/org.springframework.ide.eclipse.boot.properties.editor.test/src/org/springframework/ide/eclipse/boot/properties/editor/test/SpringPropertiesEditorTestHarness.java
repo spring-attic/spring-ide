@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -37,6 +35,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHove
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -60,26 +59,15 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		engine.setTypeUtil(new TypeUtil(javaProject));
 	}
 
+	@Override
+	protected HoverInfoProvider getHoverProvider() {
+		return engine;
+	}
+
 	protected SpringPropertiesReconcileEngine createReconcileEngine() {
 		return new SpringPropertiesReconcileEngine(engine.getIndexProvider(), engine.getTypeUtil());
 	}
 
-
-	/**
-	 * Compute hover text when mouse hovers at the end of the first occurence of
-	 * a given String in the editor contents.
-	 */
-	public String getHoverText(MockPropertiesEditor editor, String atString) {
-		int pos = editor.getText().indexOf(atString);
-		if (pos>=0) {
-			pos += atString.length();
-		}
-		IRegion region = engine.getHoverRegion(editor.document, pos);
-		if (region!=null) {
-			return engine.getHoverInfo(editor.document, region).getHtml();
-		}
-		return null;
-	}
 
 	@Override
 	public ICompletionProposal[] getCompletions(MockEditor editor)
@@ -88,16 +76,6 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		ICompletionProposal[] completions = _completions.toArray(new ICompletionProposal[_completions.size()]);
 		Arrays.sort(completions, COMPARATOR);
 		return completions;
-	}
-
-	/**
-	 * Verifies an expected textSnippet is contained in the hovertext that is
-	 * computed when hovering mouse at position at the end of first occurence of
-	 * a given string in the editor.
-	 */
-	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
-		String hoverText = getHoverText(editor, afterString);
-		assertContains(expectSnippet, hoverText);
 	}
 
 	public void assertCompletionDisplayString(String editorContents, String expected) throws Exception {

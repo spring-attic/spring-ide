@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.configurationmetadata;
+package org.springframework.boot.configurationmetadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
  * A raw metadata structure. Used to initialize a {@link ConfigurationMetadataRepository}.
  *
  * @author Stephane Nicoll
- * @since 1.2.0
+ * @since 1.3.0
  */
 class RawConfigurationMetadata {
 
@@ -31,9 +31,14 @@ class RawConfigurationMetadata {
 
 	private final List<ConfigurationMetadataItem> items;
 
-	RawConfigurationMetadata(List<ConfigurationMetadataSource> sources, List<ConfigurationMetadataItem> items) {
+	private final List<ConfigurationMetadataHint> hints;
+
+	RawConfigurationMetadata(List<ConfigurationMetadataSource> sources,
+			List<ConfigurationMetadataItem> items,
+			List<ConfigurationMetadataHint> hints) {
 		this.sources = new ArrayList<ConfigurationMetadataSource>(sources);
 		this.items = new ArrayList<ConfigurationMetadataItem>(items);
+		this.hints = new ArrayList<ConfigurationMetadataHint>(hints);
 		for (ConfigurationMetadataItem item : this.items) {
 			resolveName(item);
 		}
@@ -56,8 +61,13 @@ class RawConfigurationMetadata {
 		return this.items;
 	}
 
+	public List<ConfigurationMetadataHint> getHints() {
+		return this.hints;
+	}
+
 	/**
 	 * Resolve the name of an item against this instance.
+	 * @param item the item to resolve
 	 * @see ConfigurationMetadataProperty#setName(String)
 	 */
 	private void resolveName(ConfigurationMetadataItem item) {

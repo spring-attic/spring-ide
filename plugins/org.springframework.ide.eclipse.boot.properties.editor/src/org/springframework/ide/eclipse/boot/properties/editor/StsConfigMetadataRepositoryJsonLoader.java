@@ -15,7 +15,6 @@ import static org.springframework.ide.eclipse.boot.properties.editor.SpringPrope
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -31,9 +30,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.springframework.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.configurationmetadata.ConfigurationMetadataRepositoryJsonLoader;
-import org.springframework.configurationmetadata.SimpleConfigurationMetadataRepository;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
 import org.springframework.ide.eclipse.boot.util.FileUtil;
 
 /**
@@ -54,8 +52,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		ADDITIONAL_SPRING_CONFIGURATION_METADATA_JSON
 	};
 
-	private SimpleConfigurationMetadataRepository repository = new SimpleConfigurationMetadataRepository();
-	private ConfigurationMetadataRepositoryJsonLoader loader = new ConfigurationMetadataRepositoryJsonLoader();
+	private ConfigurationMetadataRepositoryJsonBuilder builder = ConfigurationMetadataRepositoryJsonBuilder.create();
 
 	/**
 	 * Load the {@link ConfigMetadataRepository} with the metadata of the current
@@ -83,6 +80,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			}
 		}
 		loadFromOutputFolder(project);
+		ConfigurationMetadataRepository repository = builder.build();
 		debug("<< load ConfigurationMetadataRepository for "+project.getElementName()+": "+repository.getAllProperties().size()+" properties");
 		return repository;
 	}
@@ -179,8 +177,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 	}
 
 	private void loadFromInputStream(InputStream is) throws IOException {
-		ConfigurationMetadataRepository extra = loader.loadAll(Collections.singleton(is));
-		repository.include(extra);
+		builder.withJsonResource(is);
 	}
 
 	/// Debug utils

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.waitForImportJob;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.io.File;
@@ -29,12 +30,17 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.viewers.StyledString;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
@@ -75,15 +81,25 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
 	}
 
-	public void data(String id, String type, Object deflt, String description,
-			String... source) {
-				ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
-				item.setId(id);
-				item.setDescription(description);
-				item.setType(type);
-				item.setDefaultValue(deflt);
-				index.add(new PropertyInfo(item));
-			}
+	public ConfigurationMetadataProperty data(String id, String type, Object deflt, String description,
+			String... source
+	) {
+		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
+		item.setId(id);
+		item.setDescription(description);
+		item.setType(type);
+		item.setDefaultValue(deflt);
+		index.add(new PropertyInfo(item));
+		return item;
+	}
+
+	public void deprecate(String key, String replacedBy, String reason) {
+		PropertyInfo info = index.get(key);
+		Deprecation d = new Deprecation();
+		d.setReplacement(replacedBy);
+		d.setReason(reason);
+		info.setDeprecation(d);
+	}
 
 	public void useProject(IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
@@ -654,15 +670,65 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		assertEquals(expect.toString(), actual.toString());
 	}
 
-	public void assertCompletionsDisplayString(String editorText, String... completionsLabels)
-			throws Exception {
-				MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
-				ICompletionProposal[] completions = getCompletions(editor);
-				String[] actualLabels = new String[completions.length];
-				for (int i = 0; i < actualLabels.length; i++) {
-					actualLabels[i] = completions[i].getDisplayString();
-				}
-				assertElements(actualLabels, completionsLabels);
-			}
+	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		String[] actualLabels = new String[completions.length];
+		for (int i = 0; i < actualLabels.length; i++) {
+			actualLabels[i] = completions[i].getDisplayString();
+		}
+		assertElements(actualLabels, completionsLabels);
+	}
+
+	public void assertStyledCompletions(String editorText, StyledStringMatcher... expectStyles) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		assertEquals("Wrong number of elements", expectStyles.length, completions.length);
+		for (int i = 0; i < expectStyles.length; i++) {
+			ICompletionProposal completion = completions[i];
+			StyledString actualLabel = getStyledDisplayString(completion);
+			expectStyles[i].match(actualLabel);
+		}
+	}
+
+	private StyledString getStyledDisplayString(ICompletionProposal completion) {
+		if (completion instanceof ICompletionProposalExtension6) {
+			return ((ICompletionProposalExtension6)completion).getStyledDisplayString();
+		}
+		return new StyledString(completion.getDisplayString());
+	}
+
+	/**
+	 * Verifies an expected textSnippet is contained in the hovertext that is
+	 * computed when hovering mouse at position at the end of first occurence of
+	 * a given string in the editor.
+	 * <p>
+	 * This method should be removed and the corresponding bits and pieces pushed into 'MockPropertiesEditor'
+	 * as is already the case for MockYamlEditor.
+	 */
+	@Deprecated
+	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
+		String hoverText = getHoverText(editor, afterString);
+		assertContains(expectSnippet, hoverText);
+	}
+
+	/**
+	 * Compute hover text when mouse hovers at the end of the first occurence of
+	 * a given String in the editor contents.
+	 */
+	public String getHoverText(MockPropertiesEditor editor, String atString) {
+		int pos = editor.getText().indexOf(atString);
+		if (pos>=0) {
+			pos += atString.length();
+		}
+		IRegion region = getHoverProvider().getHoverRegion(editor.document, pos);
+		if (region!=null) {
+			return getHoverProvider().getHoverInfo(editor.document, region).getHtml();
+		}
+		return null;
+	}
+
+	protected abstract HoverInfoProvider getHoverProvider();
+
 
 }

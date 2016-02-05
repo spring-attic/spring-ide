@@ -34,20 +34,19 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty
  */
 public class CompletionFactory {
 
-	public static final Styler UNDERLINE = new Styler() {
+	public static final Styler HIGHLIGHT = new Styler() {
 		public void applyStyles(TextStyle textStyle) {
-			textStyle.underline = true;
+			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.CYAN);
 		};
 	};
 
-	public static final Styler GREY_UNDERLINE = new Styler() {
+	public static final Styler DEPRECATE = new Styler() {
 		public void applyStyles(TextStyle textStyle) {
-			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.GREY);
-			textStyle.underline = true;
+			textStyle.strikeout = true;
 		};
 	};
 
-	public static final Styler GREY = new Styler() {
+	public static final Styler DEEMPHASIZE = new Styler() {
 		public void applyStyles(TextStyle textStyle) {
 			textStyle.foreground = ColorManager.getInstance().getColor(ColorManager.GREY);
 		};
@@ -58,6 +57,21 @@ public class CompletionFactory {
 		};
 	};
 
+	public static Styler compose(final Styler s1, final Styler s2) {
+		if (s1==NULL_STYLER) {
+			return s2;
+		} else if (s2==NULL_STYLER) {
+			return s1;
+		} else {
+			return new Styler() {
+				@Override
+				public void applyStyles(TextStyle textStyle) {
+					s1.applyStyles(textStyle);
+					s2.applyStyles(textStyle);
+				}
+			};
+		}
+	}
 
 	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
