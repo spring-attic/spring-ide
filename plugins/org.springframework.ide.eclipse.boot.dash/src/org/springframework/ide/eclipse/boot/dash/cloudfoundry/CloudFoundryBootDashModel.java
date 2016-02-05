@@ -52,6 +52,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
@@ -347,7 +348,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				}
 			}
 
-			performDeployment(projects, ui, RunState.RUNNING);
+			DebugSupport debugSupport = null;
+			performDeployment(projects, ui, RunState.RUNNING, debugSupport);
 		}
 	}
 
@@ -378,10 +380,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	public void performDeployment(
 			final Map<IProject, BootDashElement> projectsToDeploy,
 			final UserInteractions ui,
-			RunState runOrDebug
+			RunState runOrDebug,
+			DebugSupport debugSuppport
 	) throws Exception {
 		getOperationsExecution(ui).runOpAsynch(
-				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug));
+				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport));
 	}
 
 	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project, RunState preferedRunState) throws Exception {
