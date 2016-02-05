@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.util;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 /**
  * @author Kris De Volder
@@ -20,7 +21,12 @@ public class LaunchConfRunStateTracker extends RunStateTracker<ILaunchConfigurat
 
 	@Override
 	protected ILaunchConfiguration getOwner(ILaunch l) {
-		return l.getLaunchConfiguration();
+		ILaunchConfiguration conf = l.getLaunchConfiguration();
+		if (conf instanceof ILaunchConfigurationWorkingCopy) {
+			//Because ngrok expose cheats and launches a working copy...
+			return ((ILaunchConfigurationWorkingCopy)conf).getOriginal();
+		}
+		return conf;
 	}
 
 }
