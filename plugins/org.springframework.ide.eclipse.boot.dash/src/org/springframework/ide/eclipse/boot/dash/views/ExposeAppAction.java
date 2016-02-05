@@ -50,9 +50,9 @@ public class ExposeAppAction extends RunStateAction {
 		model.addElementStateListener(new ElementStateListener() {
 			@Override
 			public void stateChanged(BootDashElement e) {
-				if (e instanceof BootProjectDashElement && e.getRunState().equals(RunState.INACTIVE)) {
+				if (e instanceof AbstractLaunchConfigurationsDashElement<?> && e.getRunState().equals(RunState.INACTIVE)) {
 					try {
-						BootProjectDashElement localDashProject = (BootProjectDashElement) e;
+						AbstractLaunchConfigurationsDashElement<?> localDashProject = (AbstractLaunchConfigurationsDashElement<?>) e;
 						localDashProject.shutdownExpose();
 					} catch (Exception ex) {
 						ui.errorPopup("error shutting down tunnel", "error shutting down tunnel");
