@@ -47,7 +47,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -80,12 +83,12 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
@@ -675,15 +678,35 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		if (manifestFile != null) {
 			if (manifestFile.exists()) {
 				final String yamlContents = IOUtil.toString(manifestFile.getContents());
-				MultiTextEdit edit = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), cloudData)
-						.getDifferences(deploymentProperties);
+				String errorMessage = null;
+				TextEdit edit = null;
+				try {
+					YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), cloudData);
+					MultiTextEdit me = yamlGraph.getDifferences(deploymentProperties);
+					edit = me != null && me.hasChildren() ? me : null;
+					if (yamlGraph.getInheritFilePath() != null) {
+						errorMessage = "'inherit' attribute is present in the manifest but is not supported. Merge with caution.";
+					}
+				} catch (MalformedTreeException e) {
+					BootDashActivator.log(e);
+					errorMessage = "Failed to create text differences between local manifest file and deployment properties on CF. Merge with caution.";
+					edit = new ReplaceEdit(0, yamlContents.length(),
+							new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
+									.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
+				} catch (Throwable t) {
+					BootDashActivator.log(t);
+					errorMessage = "Failed to parse local manifest file YAML contents. Merge with caution.";
+					edit = new ReplaceEdit(0, yamlContents.length(),
+							new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
+									.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
+				}
 
 				/*
 				 * If UI is available and there differences between manifest and
 				 * current deployment properties on CF then prompt the user to
 				 * perform the merge
 				 */
-				if (edit != null && edit.hasChildren() && ui != null) {
+				if (edit != null && ui != null) {
 					final IDocument doc = new Document(yamlContents);
 					edit.apply(doc);
 
@@ -700,16 +723,19 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					config.setRightImage(right.getImage());
 					config.setLeftEditable(true);
 
+					final String message = errorMessage;
+
 					final CompareEditorInput input = new CompareEditorInput(config) {
 						@Override
 						protected Object prepareInput(IProgressMonitor arg0)
 								throws InvocationTargetException, InterruptedException {
+							setMessage(message);
 							return new DiffNode(left, right);
 						}
 					};
 					input.setTitle("Merge Local Deployment Manifest File");
 
-					int result = ui.openManifestCompareDialog(input);
+					int result = ui.openManifestCompareDialog(input, null);
 					switch (result) {
 					case IDialogConstants.CANCEL_ID:
 						throw new OperationCanceledException();

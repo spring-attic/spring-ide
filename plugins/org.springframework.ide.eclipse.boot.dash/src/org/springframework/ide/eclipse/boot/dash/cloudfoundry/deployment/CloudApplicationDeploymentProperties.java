@@ -27,11 +27,11 @@ import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 

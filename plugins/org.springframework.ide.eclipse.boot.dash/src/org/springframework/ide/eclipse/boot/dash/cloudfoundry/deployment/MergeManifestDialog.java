@@ -71,9 +71,13 @@ public class MergeManifestDialog extends TitleAreaDialog {
 	public void create() {
 		super.create();
 		setTitle("Merge Manifest File");
-		setMessage(
-				"Manifest file deployment properties are different from current deployment properties on CF. Please merge changes if applicable.",
-				IMessageProvider.INFORMATION);
+		if (fCompareEditorInput != null && fCompareEditorInput.getMessage() != null) {
+			setMessage(fCompareEditorInput.getMessage(), IMessageProvider.WARNING);
+		} else {
+			setMessage(
+					"Manifest file deployment properties are different from current deployment properties on CF. Please merge changes if applicable.",
+					IMessageProvider.INFORMATION);
+		}
 	}
 
 	protected void buttonPressed(int buttonId) {

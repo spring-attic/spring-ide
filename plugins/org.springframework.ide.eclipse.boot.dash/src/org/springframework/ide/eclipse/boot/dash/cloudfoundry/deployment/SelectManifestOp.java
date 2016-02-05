@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;

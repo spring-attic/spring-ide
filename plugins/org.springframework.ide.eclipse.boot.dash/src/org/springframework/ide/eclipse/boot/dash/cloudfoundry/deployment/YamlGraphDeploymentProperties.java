@@ -144,6 +144,10 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return DeploymentProperties.DEFAULT_MEMORY;
 	}
 
+	public String getInheritFilePath() {
+		return getPropertyValue(root, ApplicationManifestHandler.INHERIT_PROP, String.class);
+	}
+
 	@Override
 	public String getBuildpack() {
 		return getAbsoluteValue(ApplicationManifestHandler.BUILDPACK_PROP, String.class);

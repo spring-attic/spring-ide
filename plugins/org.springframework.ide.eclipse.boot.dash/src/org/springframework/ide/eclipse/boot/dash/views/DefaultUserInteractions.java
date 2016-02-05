@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.compare.CompareEditorInput;
-import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -27,12 +27,14 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -44,8 +46,8 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogMode
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -54,7 +56,6 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  *
  * @author Kris De Volder
  */
-@SuppressWarnings("restriction")
 public class DefaultUserInteractions implements UserInteractions {
 
 	public interface UIContext {
@@ -297,18 +298,26 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public int openManifestCompareDialog(final CompareEditorInput input) throws CoreException {
+	public int openManifestCompareDialog(final CompareEditorInput input, final IRunnableContext context) throws CoreException {
 		final int[] result = new int[] { -1 };
+		final Exception[] exception = new Exception[] { null };
 		getShell().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				if (CompareUIPlugin.getDefault().compareResultOK(input, null)) {
+				try {
+					if (context == null) {
+						PlatformUI.getWorkbench().getProgressService().run(true, true, input);
+					} else {
+						context.run(true, true, input);
+					}
 					result[0] = new MergeManifestDialog(getShell(), input).open();
+				} catch (InvocationTargetException | InterruptedException e) {
+					exception[0] = e;
 				}
 			}
 		});
-		if (result[0] == -1) {
-			throw ExceptionUtil.coreException("Failed to compare deployment manifest file and deployment propeties");
+		if (exception[0] != null) {
+			throw ExceptionUtil.coreException(exception[0]);
 		}
 		return result[0];
 	}

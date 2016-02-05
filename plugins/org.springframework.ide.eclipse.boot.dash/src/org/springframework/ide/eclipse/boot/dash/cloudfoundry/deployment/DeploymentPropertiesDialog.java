@@ -773,7 +773,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					return new ByteArrayInputStream(getManifestContents().getBytes());
 				}
 			}.load(new NullProgressMonitor());
-			String applicationName = manifestTypeModel.getValue() ? (appName == null ? appNameCombo.getText() : appName) : null;
+			/*
+			 * If "Select Manifest..." action is invoked appName is not null,
+			 * but we should allow for any manifest file selected for now. Hence
+			 * set the applicationName var to null in that case
+			 */
+			String applicationName = manifestTypeModel.getValue() ? (appName == null ? appNameCombo.getText() : null) : null;
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
