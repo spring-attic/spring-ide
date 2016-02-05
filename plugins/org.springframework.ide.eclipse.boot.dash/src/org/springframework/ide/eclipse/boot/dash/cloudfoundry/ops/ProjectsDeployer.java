@@ -11,9 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -21,8 +18,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
@@ -31,15 +28,18 @@ public class ProjectsDeployer extends CloudOperation {
 	private final Set<IProject> projectsToDeploy;
 	private final UserInteractions ui;
 	private final RunState runOrDebug;
+	private final DebugSupport debugSupport;
 
 	public ProjectsDeployer(CloudFoundryBootDashModel model,
 			UserInteractions ui,
 			Set<IProject> projectsToDeploy,
-			RunState runOrDebug) {
+			RunState runOrDebug,
+			DebugSupport debugSupport) {
 		super("Deploying projects", model);
 		this.projectsToDeploy = projectsToDeploy;
 		this.ui = ui;
 		this.runOrDebug = runOrDebug;
+		this.debugSupport = debugSupport;
 	}
 
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
@@ -54,7 +54,7 @@ public class ProjectsDeployer extends CloudOperation {
 			try {
 				CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 
-				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, runOrDebug, ui, monitor);
+				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, debugSupport, runOrDebug, ui, monitor);
 				model.getOperationsExecution(ui).runOpAsynch(op);
 			} catch (Exception e) {
 				if (!(e instanceof OperationCanceledException)) {

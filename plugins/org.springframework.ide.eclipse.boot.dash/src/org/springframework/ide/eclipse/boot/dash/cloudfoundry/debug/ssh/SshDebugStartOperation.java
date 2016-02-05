@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 
 /**
@@ -22,7 +23,7 @@ public class SshDebugStartOperation extends CloudApplicationOperation {
 
 	private CloudAppDashElement app;
 
-	public SshDebugStartOperation(CloudAppDashElement app, SshDebugSupport debugSupport) {
+	public SshDebugStartOperation(CloudAppDashElement app, DebugSupport debugSupport) {
 		super("Starting SSH debugging for app '"+app.getName()+"'", app.getCloudModel(), app.getName());
 		this.app = app;
 	}
