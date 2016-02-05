@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,13 +28,13 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ProjectsDeployer extends CloudOperation {
 
-	private final Map<IProject, BootDashElement> projectsToDeploy;
+	private final Set<IProject> projectsToDeploy;
 	private final UserInteractions ui;
 	private final RunState runOrDebug;
 
 	public ProjectsDeployer(CloudFoundryBootDashModel model,
 			UserInteractions ui,
-			Map<IProject, BootDashElement> projectsToDeploy,
+			Set<IProject> projectsToDeploy,
 			RunState runOrDebug) {
 		super("Deploying projects", model);
 		this.projectsToDeploy = projectsToDeploy;
@@ -42,34 +42,16 @@ public class ProjectsDeployer extends CloudOperation {
 		this.runOrDebug = runOrDebug;
 	}
 
-	public ProjectsDeployer(CloudFoundryBootDashModel model,
-			UserInteractions ui,
-			List<BootDashElement> elementsToRedeploy,
-			boolean shouldAutoReplaceApps,
-			RunState runOrDebug
-	) {
-		super("Deploying projects", model);
-		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
-
-		for (BootDashElement element : elementsToRedeploy) {
-			this.projectsToDeploy.put(element.getProject(), element);
-		}
-
-		this.ui = ui;
-		this.runOrDebug = runOrDebug;
-	}
-
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		for (Iterator<Entry<IProject, BootDashElement>> it = projectsToDeploy.entrySet().iterator(); it.hasNext();) {
-			Entry<IProject, BootDashElement> entry = it.next();
+		for (Iterator<IProject> it = projectsToDeploy.iterator(); it.hasNext();) {
+			IProject project = it.next();
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 
 			try {
-				IProject project = entry.getKey();
 				CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 
 				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, runOrDebug, ui, monitor);

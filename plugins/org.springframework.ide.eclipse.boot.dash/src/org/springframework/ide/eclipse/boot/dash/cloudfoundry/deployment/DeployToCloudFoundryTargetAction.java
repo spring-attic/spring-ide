@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -68,9 +69,11 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 			final BootDashElement element = getSingleSelectedElement();
 			if (element!=null) {
 				final IProject project = element.getProject();
-				CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) model.getSectionByTargetId(target.getId());
-				//No need to wrap this in a job as it already does that itself:
-				cfModel.performDeployment(ImmutableMap.of(project, element), ui, runOrDebug);
+				if (project!=null) {
+					CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) model.getSectionByTargetId(target.getId());
+					//No need to wrap this in a job as it already does that itself:
+					cfModel.performDeployment(ImmutableSet.of(project), ui, runOrDebug);
+				}
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);

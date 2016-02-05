@@ -27,7 +27,6 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.w
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
@@ -51,6 +50,7 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -159,6 +159,28 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				return true;
 			}
 		};
+	}
+
+	@Test public void testDeployAppIntoDebugMode() throws Exception {
+		harness.createCfTarget(CfTestTargetParams.fromEnv());
+		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+		final BootProjectDashElement project = harness.getElementFor(
+				projects.createBootProject("to-deploy", withStarters("actuator", "web"))
+		);
+		final String appName = harness.randomAppName();
+
+		harness.answerDeploymentPrompt(ui, appName, appName);
+		model.performDeployment(ImmutableSet.of(project.getProject()), ui, RunState.DEBUGGING);
+
+		new ACondition("wait for app '"+ appName +"'to be DEBUGGING", APP_DEPLOY_TIMEOUT) {
+			public boolean test() throws Exception {
+				CloudAppDashElement element = model.getApplication(appName);
+				assertEquals(RunState.DEBUGGING, element.getRunState());
+				return true;
+			}
+		};
+
 	}
 
 	@Test

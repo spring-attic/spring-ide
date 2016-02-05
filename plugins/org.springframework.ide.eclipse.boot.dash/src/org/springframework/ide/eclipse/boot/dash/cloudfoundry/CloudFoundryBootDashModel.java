@@ -91,6 +91,7 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 public class CloudFoundryBootDashModel extends AbstractBootDashModel implements ModifiableModel {
 
@@ -337,17 +338,15 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public void add(List<Object> sources, UserInteractions ui) throws Exception {
 
-		Map<IProject, BootDashElement> projects = new LinkedHashMap<IProject, BootDashElement>();
+		Builder<IProject> projects = ImmutableSet.builder();
 		if (sources != null) {
 			for (Object obj : sources) {
 				IProject project = getProject(obj);
-
 				if (project != null) {
-					projects.put(project, null);
+					projects.add(project);
 				}
 			}
-
-			performDeployment(projects, ui, RunState.RUNNING);
+			performDeployment(projects.build(), ui, RunState.RUNNING);
 		}
 	}
 
@@ -376,7 +375,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	public void performDeployment(
-			final Map<IProject, BootDashElement> projectsToDeploy,
+			final Set<IProject> projectsToDeploy,
 			final UserInteractions ui,
 			RunState runOrDebug
 	) throws Exception {
