@@ -62,7 +62,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 				@Override
 				protected Boolean compute() {
 					boolean val = BootPropertyTester.hasDevtools(getProject());
-					System.out.println("hasDevools["+getProject().getName()+"] <- "+val);
 					return val;
 				}
 			};

@@ -61,4 +61,9 @@ public abstract class ObservableSet<T> extends LiveExpression<ImmutableSet<T>> {
 		return getValue();
 	}
 
+	public boolean contains(T e) {
+		return getValues().contains(e);
+	}
+
+
 }

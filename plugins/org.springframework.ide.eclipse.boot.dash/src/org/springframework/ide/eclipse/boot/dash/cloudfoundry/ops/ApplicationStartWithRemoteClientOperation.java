@@ -55,7 +55,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		List<CloudApplicationOperation> ops = new ArrayList<CloudApplicationOperation>();
+		List<Operation<?>> ops = new ArrayList<Operation<?>>();
 
 		CloudAppInstances instances = getCachedApplicationInstances();
 		Map<String, String> envVars = instances.getApplication().getEnvAsMap();
@@ -66,12 +66,9 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 					"Local project not associated to CF app '" + appName + "'"));
 		}
 
-		String opName = "Restarting application '" + cde.getName() + "' in "
-				+ (runOrDebug == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
-
 		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true));
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
-			ops.add(operations.restartAndPush(opName, appName, debugSupport, runOrDebug, ui));
+			ops.add(operations.restartAndPush(cde, debugSupport, runOrDebug, ui));
 		} else if (cde.getRunState() == RunState.INACTIVE) {
 			ops.add(operations.restartOnly(cde.getProject(), appName, runOrDebug));
 		}

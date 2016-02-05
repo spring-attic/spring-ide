@@ -16,6 +16,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -41,7 +42,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSet<RunTarget> targets) {
+	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
 		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory,
 				targets.getValues(), context);
 		RunTargetWizard wizard = new RunTargetWizard(model);

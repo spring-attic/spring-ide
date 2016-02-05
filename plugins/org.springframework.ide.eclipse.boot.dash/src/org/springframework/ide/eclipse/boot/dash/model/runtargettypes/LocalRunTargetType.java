@@ -1,10 +1,23 @@
+/*******************************************************************************
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
+/**
+ * @author Kris De Volder
+ */
 public class LocalRunTargetType extends AbstractRunTargetType {
 	LocalRunTargetType(String name) {
 		super(name);
@@ -20,7 +33,7 @@ public class LocalRunTargetType extends AbstractRunTargetType {
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSet<RunTarget> targets) {
+	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
 		throw new UnsupportedOperationException(
 				this + " is a Singleton, it is not possible to create additional targets of this type.");
 	}

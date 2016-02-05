@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,17 +11,17 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 public class AddRunTargetAction extends AbstractBootDashAction {
 
-	private LiveSet<RunTarget> targets;
+	private LiveSetVariable<RunTarget> targets;
 	private RunTargetType runTargetType;
 
-	public AddRunTargetAction(RunTargetType runTargetType, LiveSet<RunTarget> targets, UserInteractions ui) {
+	public AddRunTargetAction(RunTargetType runTargetType, LiveSetVariable<RunTarget> targets, UserInteractions ui) {
 		super(ui);
 		this.runTargetType = runTargetType;
 		this.targets = targets;

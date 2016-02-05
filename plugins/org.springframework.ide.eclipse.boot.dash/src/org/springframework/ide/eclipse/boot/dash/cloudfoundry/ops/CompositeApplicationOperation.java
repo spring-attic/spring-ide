@@ -25,26 +25,26 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
  */
 public class CompositeApplicationOperation extends CloudApplicationOperation {
 
-	private List<CloudApplicationOperation> operations;
+	private List<Operation<?>> operations;
 
 	private RunState preferredInitialRunState;
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<CloudApplicationOperation> operations, RunState preferredInitialRunState) {
+			List<Operation<?>> operations, RunState preferredInitialRunState) {
 		super(opName, model, appName);
 		this.operations = operations;
 		this.preferredInitialRunState = preferredInitialRunState;
 	}
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<CloudApplicationOperation> operations) {
+			List<Operation<?>> operations) {
 		this(opName, model, appName, operations, null);
 	}
 
 	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
 		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName);
 
-		this.operations = new ArrayList<CloudApplicationOperation>();
+		this.operations = new ArrayList<Operation<?>>();
 		this.operations.add(enclosedOp);
 		setSchedulingRule(enclosedOp.getSchedulingRule());
 	}
@@ -52,8 +52,10 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 	@Override
 	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
 		super.addOperationEventHandler(eventHandler);
-		for (CloudApplicationOperation op : operations) {
-			op.addOperationEventHandler(eventHandler);
+		for (Operation<?> op : operations) {
+			if (op instanceof CloudApplicationOperation) {
+				((CloudApplicationOperation)op).addOperationEventHandler(eventHandler);
+			}
 		}
 	}
 
@@ -75,7 +77,7 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			// Run ops in series
 			resetAndShowConsole();
 
-			for (CloudApplicationOperation op : operations) {
+			for (Operation<?> op : operations) {
 				op.run(monitor);
 			}
 
