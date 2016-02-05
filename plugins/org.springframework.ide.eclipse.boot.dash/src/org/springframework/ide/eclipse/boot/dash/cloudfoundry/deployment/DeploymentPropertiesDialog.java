@@ -773,7 +773,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					return new ByteArrayInputStream(getManifestContents().getBytes());
 				}
 			}.load(new NullProgressMonitor());
-			String applicationName = appName == null ? appNameCombo.getText() : appName;
+			String applicationName = manifestTypeModel.getValue() ? (appName == null ? appNameCombo.getText() : appName) : null;
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
