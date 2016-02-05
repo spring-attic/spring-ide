@@ -110,7 +110,7 @@ public class WizardPlugin extends AbstractUIPlugin {
 	}
 
 	public static URLConnectionFactory getUrlConnectionFactory() {
-		final String userAgent = "STS "+WizardPlugin.getDefault().getBundle().getVersion();
+		final String userAgent = "STS/"+WizardPlugin.getDefault().getBundle().getVersion();
 		//TODO: post 3.7.2 the URLConnectionFactory in master will have support for adding userAgent string
 		//  so we do not have to implement it here by subclassing.
 		return new URLConnectionFactory() {
