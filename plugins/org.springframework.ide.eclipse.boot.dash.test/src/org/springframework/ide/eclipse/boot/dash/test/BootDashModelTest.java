@@ -63,6 +63,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -755,7 +756,7 @@ public class BootDashModelTest {
 		//Try and see that if we remove the devtools dependency from the project then the label updates.
 		StsTestUtil.setAutoBuilding(true); // so that autobuild causes classpath update as would
 											// happen in a 'real' workspace when pom is changed.
-		removeDevtools(project);
+		IMavenCoordinates devtools = removeDevtools(project);
 		new ACondition("Wait for devtools to disapear", MAVEN_BUILD_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertFalse(element.hasDevtools());
@@ -763,6 +764,16 @@ public class BootDashModelTest {
 				return true;
 			}
 		};
+
+		springBootCore.project(project).addMavenDependency(devtools, true);
+		new ACondition("Wait for devtools to re-apear", MAVEN_BUILD_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertFalse(element.hasDevtools());
+				assertEquals(projectName, getLabel(element));
+				return true;
+			}
+		};
+
 	}
 
 	/**************************************************************************************
@@ -1073,13 +1084,22 @@ public class BootDashModelTest {
 		wc.doSave();
 	}
 
-	private void removeDevtools(IProject project) throws Exception {
+	private IMavenCoordinates removeDevtools(IProject project) throws Exception {
 		ISpringBootProject bootProject = springBootCore.project(project);
-		MavenId devtools = new MavenId(
+		MavenId devtoolsId = new MavenId(
 				EnableDisableBootDevtools.SPRING_BOOT_DEVTOOLS_GID,
 				EnableDisableBootDevtools.SPRING_BOOT_DEVTOOLS_AID
 		);
-		bootProject.removeMavenDependency(devtools);
+
+		IMavenCoordinates devtools = null;
+		for (IMavenCoordinates dep : bootProject.getDependencies()) {
+			if (new MavenId(dep.getGroupId(), dep.getArtifactId()).equals(devtoolsId)) {
+				devtools = dep;
+			}
+		}
+		assertNotNull("Devtools dependency not found, so can't remove it", devtools);
+		bootProject.removeMavenDependency(devtoolsId);
+		return devtools;
 	}
 
 
