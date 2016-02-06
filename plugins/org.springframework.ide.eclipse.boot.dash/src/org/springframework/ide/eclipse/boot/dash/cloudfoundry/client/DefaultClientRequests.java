@@ -64,7 +64,8 @@ public class DefaultClientRequests implements ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
-						new Staging(null, deploymentProperties.getBuildpack(), null, deploymentProperties.getTimeout()),
+						new Staging(deploymentProperties.getCommand(), deploymentProperties.getBuildpack(),
+								deploymentProperties.getStack(), deploymentProperties.getTimeout()),
 						deploymentProperties.getMemory(), new ArrayList<>(deploymentProperties.getUris()),
 						deploymentProperties.getServices());
 			}

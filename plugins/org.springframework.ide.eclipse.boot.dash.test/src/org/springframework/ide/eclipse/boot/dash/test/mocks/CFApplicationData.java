@@ -35,6 +35,8 @@ public class CFApplicationData implements CFApplication {
 	private AppState state = AppState.STOPPED;
 	private int diskQuota = 1024;
 	private Integer timeout = null;
+	private String command = null;
+	private String stack = null;
 
 	@Override
 	public String getName() {
@@ -107,6 +109,14 @@ public class CFApplicationData implements CFApplication {
 	
 	public Integer getTimeout() {
 		return timeout;
+	}
+	
+	public String getCommand() {
+		return command;
+	}
+	
+	public String getStack() {
+		return stack;
 	}
 
 }

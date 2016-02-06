@@ -35,6 +35,10 @@ public interface DeploymentProperties {
 
 	String getBuildpack();
 
+	String getCommand();
+
+	String getStack();
+
 	Map<String, String> getEnvironmentVariables();
 
 	int getInstances();

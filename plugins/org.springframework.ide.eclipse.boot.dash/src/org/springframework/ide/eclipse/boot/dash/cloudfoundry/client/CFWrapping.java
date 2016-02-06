@@ -185,6 +185,24 @@ public class CFWrapping {
 		}
 
 		@Override
+		public String getCommand() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getCommand();
+			}
+			return null;
+		}
+
+		@Override
+		public String getStack() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getStack();
+			}
+			return null;
+		}
+
+		@Override
 		public AppState getState() {
 			return a.getState();
 		}

@@ -98,6 +98,10 @@ public class ApplicationManifestHandler {
 
 	public static final String TIMEOUT_PROP = "timeout";
 
+	public static final String COMMAND_PROP = "command";
+
+	public static final String STACK_PROP = "stack";
+
 	private final IProject project;
 
 	private final IFile manifestFile;
@@ -298,6 +302,10 @@ public class ApplicationManifestHandler {
 
 		readTimeout(appMap, allResults, properties);
 
+		readCommand(appMap, allResults, properties);
+
+		readStack(appMap, allResults, properties);
+
 		ValidationResult validation = properties.getValidator().getValue();
 		if (validation != null && !validation.isOk()) {
 			throw ExceptionUtil.coreException(validation.msg);
@@ -418,6 +426,12 @@ public class ApplicationManifestHandler {
 		}
 		if (properties.getTimeout() != null) {
 			application.put(ApplicationManifestHandler.TIMEOUT_PROP, properties.getTimeout());
+		}
+		if (properties.getCommand() != null) {
+			application.put(ApplicationManifestHandler.COMMAND_PROP, properties.getCommand());
+		}
+		if (properties.getStack() != null) {
+			application.put(ApplicationManifestHandler.STACK_PROP, properties.getStack());
 		}
 		if (properties.getServices() != null && !properties.getServices().isEmpty()) {
 			application.put(SERVICES_PROP, properties.getServices());
@@ -590,6 +604,30 @@ public class ApplicationManifestHandler {
 		}
 		if (buildpack != null) {
 			properties.setBuildpack(buildpack);
+		}
+	}
+
+	protected void readCommand(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		String command = getValue(application, COMMAND_PROP, String.class);
+		if (command == null) {
+			command = getValue(allResults, COMMAND_PROP, String.class);
+		}
+		if (command != null) {
+			properties.setCommand(command);
+		}
+	}
+
+	protected void readStack(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		String stack = getValue(application, STACK_PROP, String.class);
+		if (stack == null) {
+			stack = getValue(allResults, STACK_PROP, String.class);
+		}
+		if (stack != null) {
+			properties.setStack(stack);
 		}
 	}
 

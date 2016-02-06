@@ -77,12 +77,14 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 				subMonitor.worked(1);
 			}
 
-			if (properties.getBuildpack() != null
-					&& !properties.getBuildpack().equals(app.getDetectedBuildpack())
-					&& !Objects.equal(properties.getTimeout(), app.getTimeout())) {
-				subMonitor.setTaskName("Updating " + appName + " buildpack.");
+			if (!Objects.equal(properties.getBuildpack(), app.getBuildpackUrl())
+					|| !Objects.equal(properties.getTimeout(), app.getTimeout())
+					|| !Objects.equal(properties.getCommand(), app.getCommand())
+					|| !Objects.equal(properties.getStack(), app.getStack())) {
+				subMonitor.setTaskName("Updating " + appName + " staging data.");
 
-				model.getRunTarget().getClient().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack(), null, properties.getTimeout()));
+				model.getRunTarget().getClient().updateApplicationStaging(appName, new Staging(properties.getCommand(),
+						properties.getBuildpack(), properties.getStack(), properties.getTimeout()));
 				updated = true;
 
 				subMonitor.worked(1);

@@ -171,6 +171,16 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return getAbsoluteValue(ApplicationManifestHandler.TIMEOUT_PROP, Integer.class);
 	}
 
+	@Override
+	public String getCommand() {
+		return getAbsoluteValue(ApplicationManifestHandler.COMMAND_PROP, String.class);
+	}
+
+	@Override
+	public String getStack() {
+		return getAbsoluteValue(ApplicationManifestHandler.STACK_PROP, String.class);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getServices() {
@@ -273,6 +283,14 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 			if (!Objects.equal(getTimeout(), props.getTimeout())) {
 				getDifferenceForEntry(edits, ApplicationManifestHandler.TIMEOUT_PROP, props.getTimeout(), null, Integer.class);
+			}
+
+			if (!Objects.equal(getCommand(), props.getCommand())) {
+				getDifferenceForEntry(edits, ApplicationManifestHandler.COMMAND_PROP, props.getCommand(), null, String.class);
+			}
+
+			if (!Objects.equal(getStack(), props.getStack())) {
+				getDifferenceForEntry(edits, ApplicationManifestHandler.STACK_PROP, props.getStack(), null, String.class);
 			}
 
 			if (getDiskQuota() != props.getDiskQuota()) {
