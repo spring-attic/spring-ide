@@ -28,4 +28,5 @@ public interface CFApplication extends CFEntity {
 	List<String> getUris();
 	AppState getState();
 	int getDiskQuota();
+	Integer getTimeout();
 }

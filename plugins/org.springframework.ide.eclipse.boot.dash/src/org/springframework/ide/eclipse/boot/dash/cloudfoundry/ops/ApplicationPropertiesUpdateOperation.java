@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.ArrayList;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -20,7 +19,9 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+
+import com.google.common.base.Objects;
 
 /**
  * Updates deployment properties (e.g. memory, URL, instances) of an existing
@@ -77,10 +78,11 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			}
 
 			if (properties.getBuildpack() != null
-					&& !properties.getBuildpack().equals(app.getDetectedBuildpack())) {
+					&& !properties.getBuildpack().equals(app.getDetectedBuildpack())
+					&& !Objects.equal(properties.getTimeout(), app.getTimeout())) {
 				subMonitor.setTaskName("Updating " + appName + " buildpack.");
 
-				model.getRunTarget().getClient().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack()));
+				model.getRunTarget().getClient().updateApplicationStaging(appName, new Staging(null, properties.getBuildpack(), null, properties.getTimeout()));
 				updated = true;
 
 				subMonitor.worked(1);

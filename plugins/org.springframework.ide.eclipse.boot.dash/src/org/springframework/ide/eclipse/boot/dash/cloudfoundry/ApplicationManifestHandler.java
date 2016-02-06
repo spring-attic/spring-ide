@@ -96,6 +96,8 @@ public class ApplicationManifestHandler {
 
 	public static final String INHERIT_PROP = "inherit";
 
+	public static final String TIMEOUT_PROP = "timeout";
+
 	private final IProject project;
 
 	private final IFile manifestFile;
@@ -294,6 +296,8 @@ public class ApplicationManifestHandler {
 
 		readInstances(appMap, allResults, properties);
 
+		readTimeout(appMap, allResults, properties);
+
 		ValidationResult validation = properties.getValidator().getValue();
 		if (validation != null && !validation.isOk()) {
 			throw ExceptionUtil.coreException(validation.msg);
@@ -411,6 +415,9 @@ public class ApplicationManifestHandler {
 
 		if (properties.getInstances() != DeploymentProperties.DEFAULT_INSTANCES) {
 			application.put(ApplicationManifestHandler.INSTANCES_PROP, properties.getInstances());
+		}
+		if (properties.getTimeout() != null) {
+			application.put(ApplicationManifestHandler.TIMEOUT_PROP, properties.getTimeout());
 		}
 		if (properties.getServices() != null && !properties.getServices().isEmpty()) {
 			application.put(SERVICES_PROP, properties.getServices());
@@ -559,6 +566,18 @@ public class ApplicationManifestHandler {
 		}
 		if (instances != null) {
 			properties.setInstances(instances);
+		}
+	}
+
+	protected void readTimeout(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		Integer timeout = getValue(application, TIMEOUT_PROP, Integer.class);
+		if (timeout == null) {
+			timeout = getValue(allResults, TIMEOUT_PROP, Integer.class);
+		}
+		if (timeout != null) {
+			properties.setTimeout(timeout);
 		}
 	}
 

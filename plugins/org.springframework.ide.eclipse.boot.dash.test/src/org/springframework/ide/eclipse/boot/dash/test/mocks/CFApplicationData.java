@@ -34,6 +34,7 @@ public class CFApplicationData implements CFApplication {
 	private List<String> uris = new ArrayList<>();
 	private AppState state = AppState.STOPPED;
 	private int diskQuota = 1024;
+	private Integer timeout = null;
 
 	@Override
 	public String getName() {
@@ -102,6 +103,10 @@ public class CFApplicationData implements CFApplication {
 	@Override
 	public int getDiskQuota() {
 		return diskQuota;
+	}
+	
+	public Integer getTimeout() {
+		return timeout;
 	}
 
 }

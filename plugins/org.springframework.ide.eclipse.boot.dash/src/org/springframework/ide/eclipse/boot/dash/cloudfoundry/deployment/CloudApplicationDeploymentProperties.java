@@ -63,6 +63,8 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	protected final LiveVariable<IFile> manifestFile = new LiveVariable<IFile>();
 
+	protected final LiveVariable<Integer> timeout = new LiveVariable<>();
+
 	protected Validator validator;
 
 	public CloudApplicationDeploymentProperties() {
@@ -97,6 +99,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public int getDiskQuota() {
 		return diskQuota.getValue();
+	}
+
+	public void setTimeout(Integer timeout) {
+		this.timeout.setValue(timeout);
+	}
+
+	public Integer getTimeout() {
+		return timeout.getValue();
 	}
 
 	public void setManifestFile(IFile file) {
@@ -269,6 +279,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setMemory(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getMemory());
 		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
+		properties.setTimeout(app == null ? null : app.getTimeout());
 
 		if (app == null) {
 			List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);

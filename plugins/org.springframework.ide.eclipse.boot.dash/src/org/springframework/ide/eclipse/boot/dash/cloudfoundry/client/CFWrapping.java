@@ -176,6 +176,15 @@ public class CFWrapping {
 		}
 
 		@Override
+		public Integer getTimeout() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getHealthCheckTimeout();
+			}
+			return null;
+		}
+
+		@Override
 		public AppState getState() {
 			return a.getState();
 		}

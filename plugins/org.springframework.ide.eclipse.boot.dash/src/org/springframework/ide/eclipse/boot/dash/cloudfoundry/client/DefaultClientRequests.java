@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrap;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapApps;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +28,6 @@ import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
-import org.cloudfoundry.client.lib.domain.CloudService;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
@@ -41,8 +42,6 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.*;
 
 public class DefaultClientRequests implements ClientRequests {
 
@@ -65,8 +64,9 @@ public class DefaultClientRequests implements ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
-						new Staging(null, deploymentProperties.getBuildpack()), deploymentProperties.getMemory(),
-						new ArrayList<>(deploymentProperties.getUris()), deploymentProperties.getServices());
+						new Staging(null, deploymentProperties.getBuildpack(), null, deploymentProperties.getTimeout()),
+						deploymentProperties.getMemory(), new ArrayList<>(deploymentProperties.getUris()),
+						deploymentProperties.getServices());
 			}
 		}.call();
 	}

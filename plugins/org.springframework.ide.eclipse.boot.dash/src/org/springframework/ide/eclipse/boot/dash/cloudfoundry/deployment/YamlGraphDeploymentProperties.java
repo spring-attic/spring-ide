@@ -166,6 +166,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return n == null ? DeploymentProperties.DEFAULT_INSTANCES : n.intValue();
 	}
 
+	@Override
+	public Integer getTimeout() {
+		return getAbsoluteValue(ApplicationManifestHandler.TIMEOUT_PROP, Integer.class);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getServices() {
@@ -264,6 +269,10 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 			if (getInstances() != props.getInstances()) {
 				getDifferenceForEntry(edits, ApplicationManifestHandler.INSTANCES_PROP, props.getInstances(), DEFAULT_INSTANCES, Integer.class);
+			}
+
+			if (!Objects.equal(getTimeout(), props.getTimeout())) {
+				getDifferenceForEntry(edits, ApplicationManifestHandler.TIMEOUT_PROP, props.getTimeout(), null, Integer.class);
 			}
 
 			if (getDiskQuota() != props.getDiskQuota()) {
