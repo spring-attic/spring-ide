@@ -23,17 +23,22 @@ import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
+import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -74,6 +79,9 @@ public class BootDashActions {
 
 	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
 	private ToggleFilterAction[] toggleFilterActions;
+
+	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
+	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -188,6 +196,9 @@ public class BootDashActions {
 		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(model, elementsSelection, ui);
 
 		duplicateConfigAction = new DuplicateConfigAction(model, elementsSelection, ui);
+
+		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
+		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -420,6 +431,8 @@ public class BootDashActions {
 			}
 			toggleFilterActions = null;
 		}
+		debugOnTargetActions.dispose();
+		runOnTargetActions.dispose();
 	}
 
 	public IAction getToggleFiltersDialogAction() {
@@ -436,5 +449,32 @@ public class BootDashActions {
 
 	public ToggleFilterAction[] getToggleFilterActions() {
 		return toggleFilterActions;
+	}
+
+	public ImmutableList<IAction> getDebugOnTargetActions() {
+		return getDeployAndStartOnTargetActions(debugOnTargetActions);
+	}
+	public ImmutableList<IAction> getRunOnTargetActions() {
+		return getDeployAndStartOnTargetActions(runOnTargetActions);
+	}
+	private ImmutableList<IAction> getDeployAndStartOnTargetActions(
+			DisposingFactory<RunTarget, AbstractBootDashAction> actionFactory) {
+		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
+		for (RunTarget target : model.getRunTargets().getValues()) {
+			if (target.getType() instanceof CloudFoundryRunTargetType) {
+				builder.add(actionFactory.createOrGet(target));
+			}
+		}
+		return builder.build();
+	}
+
+	private DisposingFactory<RunTarget, AbstractBootDashAction> createDeployOnTargetActions(final RunState runningOrDebugging) {
+		ObservableSet<RunTarget> runtargets = model.getRunTargets();
+		return new DisposingFactory<RunTarget, AbstractBootDashAction>(runtargets) {
+			@Override
+			protected AbstractBootDashAction create(RunTarget target) {
+				return new DeployToCloudFoundryTargetAction(model, target, runningOrDebugging, elementsSelection, ui);
+			}
+		};
 	}
 }

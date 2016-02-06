@@ -23,6 +23,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 
+import com.google.common.collect.ImmutableSet;
+
 public class SelectRunTargetLaunchTabModel extends LaunchTabSelectionModel<CloudFoundryRunTarget> {
 
 //	public static SelectProjectLaunchTabModel create() {
@@ -58,7 +60,7 @@ public class SelectRunTargetLaunchTabModel extends LaunchTabSelectionModel<Cloud
 	}
 
 	public CloudFoundryRunTarget[] getChoices() {
-		List<RunTarget> targets = context.getRunTargets().getValues();
+		ImmutableSet<RunTarget> targets = context.getRunTargets().getValues();
 		ArrayList<CloudFoundryRunTarget> interesting = new ArrayList<>(targets.size());
 		for (RunTarget t : targets) {
 			if (t instanceof CloudFoundryRunTarget) {

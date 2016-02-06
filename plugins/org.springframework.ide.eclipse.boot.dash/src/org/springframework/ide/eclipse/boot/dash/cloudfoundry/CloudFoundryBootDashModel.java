@@ -55,6 +55,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
@@ -94,6 +95,7 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 public class CloudFoundryBootDashModel extends AbstractBootDashModel implements ModifiableModel {
 
@@ -340,17 +342,15 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public void add(List<Object> sources, UserInteractions ui) throws Exception {
 
-		Map<IProject, BootDashElement> projects = new LinkedHashMap<IProject, BootDashElement>();
+		Builder<IProject> projects = ImmutableSet.builder();
 		if (sources != null) {
 			for (Object obj : sources) {
 				IProject project = getProject(obj);
-
 				if (project != null) {
-					projects.put(project, null);
+					projects.add(project);
 				}
 			}
-
-			performDeployment(projects, ui);
+			performDeployment(projects.build(), ui, RunState.RUNNING);
 		}
 	}
 
@@ -378,13 +378,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return true;
 	}
 
-	public void performDeployment(final Map<IProject, BootDashElement> projectsToDeploy, final UserInteractions ui)
-			throws Exception {
-
-
+	public void performDeployment(
+			final Set<IProject> projectsToDeploy,
+			final UserInteractions ui,
+			RunState runOrDebug
+	) throws Exception {
+		DebugSupport debugSuppport = getViewModel().getCfDebugSupport();
 		getOperationsExecution(ui).runOpAsynch(
-				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy));
-
+				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport));
 	}
 
 	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project, RunState preferedRunState) throws Exception {

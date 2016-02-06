@@ -32,6 +32,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Cloud Foundry Target properties that uses {@link LiveExpression} and
  * {@link Validator}.
@@ -54,12 +56,12 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
 	private CloudFoundryClientFactory clientFactory;
-	private List<RunTarget> existingTargets;
+	private ImmutableSet<RunTarget> existingTargets;
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
-			List<RunTarget> existingTargets, BootDashModelContext context) {
+			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context) {
 		super(runTargetType, context);
-		this.existingTargets = existingTargets == null ? new ArrayList<RunTarget>() : existingTargets;
+		this.existingTargets = existingTargets == null ? ImmutableSet.<RunTarget>of() : existingTargets;
 		this.clientFactory = clientFactory;
 		// The credentials validator should be notified any time there are
 		// changes

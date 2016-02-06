@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.getApp;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.getLaunchType;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -24,17 +23,13 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
@@ -104,14 +99,7 @@ public class SshDebugSupport extends DebugSupport {
 
 	@Override
 	public Operation<?> createOperation(CloudAppDashElement app, String opName, UserInteractions ui) {
-		CloudFoundryBootDashModel cloudModel = app.getCloudModel();
-		return new CompositeApplicationOperation(opName, cloudModel, app.getName(),
-				Arrays.asList(new CloudApplicationOperation[] {
-						cloudModel.getApplicationDeploymentOperations().restartAndPush(opName, app.getName(), this, RunState.DEBUGGING, ui),
-						new SshDebugStartOperation(app, this)
-				}),
-				RunState.STARTING
-		);
+		return new SshDebugStartOperation(app, this);
 	}
 
 	@Override

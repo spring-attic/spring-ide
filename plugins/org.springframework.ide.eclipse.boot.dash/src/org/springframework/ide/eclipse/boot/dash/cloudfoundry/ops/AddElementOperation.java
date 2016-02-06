@@ -22,12 +22,14 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Adds an element to the Cloud Foundry boot dash model for a give
@@ -40,7 +42,10 @@ public class AddElementOperation extends CloudApplicationOperation {
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 	private RunState preferedRunState;
 	private CFApplication existingApplication;
-
+	private ApplicationDeploymentOperations operations;
+	private DebugSupport debugSupport;
+	private RunState runningOrDebugging;
+	private UserInteractions ui;
 	/**
 	 *
 	 * @param deploymentProperties
@@ -54,11 +59,14 @@ public class AddElementOperation extends CloudApplicationOperation {
 	 *            exists
 	 */
 	public AddElementOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState) {
+			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState, ApplicationDeploymentOperations operations, DebugSupport debugSupport, RunState runningOrDebugging, UserInteractions ui) {
 		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
 		this.existingApplication = existingApplication;
 		this.preferedRunState = preferedRunState;
+		this.operations = operations;
+		this.debugSupport = debugSupport;
+		this.runningOrDebugging = runningOrDebugging;
 	}
 
 	@Override
@@ -95,6 +103,9 @@ public class AddElementOperation extends CloudApplicationOperation {
 			String hc = cde.getTarget().getHealthCheck(cde.getAppGuid());
 			cde.setHealthCheck(hc);
 		}
+
+		// once CDE is available, restart
+		this.operations.restartAndPush(cde, debugSupport, runningOrDebugging, ui).run(monitor);
 	}
 
 	private static BootDashElement findLocalBdeForProject(IProject project) {

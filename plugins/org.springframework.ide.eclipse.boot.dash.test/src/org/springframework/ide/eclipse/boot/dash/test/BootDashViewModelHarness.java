@@ -55,6 +55,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import com.google.common.collect.ImmutableSet;
+
 public class BootDashViewModelHarness {
 
 	public final BootDashModelContext context;
@@ -159,7 +161,7 @@ public class BootDashViewModelHarness {
 		model.dispose();
 	}
 
-	public List<RunTarget> getRunTargets() {
+	public ImmutableSet<RunTarget> getRunTargets() {
 		return model.getRunTargets().getValues();
 	}
 

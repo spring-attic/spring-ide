@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -32,25 +32,47 @@ public class ApplicationDeploymentOperations {
 
 	private final CloudFoundryBootDashModel model;
 
-
 	public ApplicationDeploymentOperations(CloudFoundryBootDashModel model) {
 		this.model = model;
 	}
 
-	public CloudApplicationOperation restartAndPush(String opName, String appName, DebugSupport debugSupport,
-			RunState runState, UserInteractions ui)  {
-		return new RestartExistingApplicationOperation(opName, model, appName, debugSupport, runState, this, ui);
+	public Operation<?> restartAndPush(CloudAppDashElement element, DebugSupport debugSupport,
+			RunState runningOrDebugging, UserInteractions ui) throws Exception {
+		String opName = "Starting application '" + element.getName() + "' in "
+				+ (runningOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+
+		Operation<?> restartExistingOp = new RestartExistingApplicationOperation(opName, model, element.getName(),
+				debugSupport, runningOrDebugging, this, ui);
+
+		if (runningOrDebugging == RunState.DEBUGGING) {
+
+			if (debugSupport != null && debugSupport.isSupported(element)) {
+				Operation<?> debugOp = debugSupport.createOperation(element, opName, ui);
+
+				CloudFoundryBootDashModel cloudModel = element.getCloudModel();
+				return new CompositeApplicationOperation(opName, cloudModel, element.getName(),
+						Arrays.asList(new Operation<?>[] { restartExistingOp, debugOp }), RunState.STARTING);
+			} else {
+				String title = "Debugging is not supported for '" + element.getName() + "'";
+				String msg = debugSupport.getNotSupportedMessage(element);
+				if (msg == null) {
+					msg = title;
+				}
+				ui.errorPopup(title, msg);
+				throw org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil.coreException(msg);
+			}
+		} else {
+			return restartExistingOp;
+		}
 	}
 
-	public CloudApplicationOperation restartOnly(IProject project, String appName,
-			RunState preferredState) {
+	public CloudApplicationOperation restartOnly(IProject project, String appName, RunState preferredState) {
 		return new ApplicationRestartOnlyOp(appName, this.model, preferredState);
 	}
 
 	public CloudApplicationOperation createRestartPush(IProject project,
-			CloudApplicationDeploymentProperties properties, RunState runOrDebug, UserInteractions ui,
-			IProgressMonitor monitor) throws Exception {
-		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
+			CloudApplicationDeploymentProperties properties, DebugSupport debugSupport, RunState runOrDebug,
+			UserInteractions ui, IProgressMonitor monitor) throws Exception {
 
 		CFApplication existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
 
@@ -61,48 +83,8 @@ public class ApplicationDeploymentOperations {
 
 		RunState initialRunstate = RunState.STARTING;
 
-		CloudApplicationOperation addElementOp = new AddElementOperation(properties, model, existingApp,
-				initialRunstate);
-		deploymentOperations.add(addElementOp);
-
-		List<CloudApplicationOperation> uploadAndRestartOps = getPushAndRestartOperations(properties, ui);
-		deploymentOperations.addAll(uploadAndRestartOps);
-
-		CloudApplicationOperation op = new CompositeApplicationOperation(
-				"Deploying and starting project: " + project.getName(), model, properties.getAppName(),
-				deploymentOperations);
-		return op;
-	}
-
-	/**
-	 * Convenience method to return a list of ops, in case the caller wants to
-	 * build their own ops.
-	 *
-	 * @return non-null list of ops that perform upload, update and restart
-	 */
-	public List<CloudApplicationOperation> getPushAndRestartOperations(CloudApplicationDeploymentProperties properties,
-			UserInteractions ui) {
-		List<CloudApplicationOperation> deploymentOperations = new ArrayList<CloudApplicationOperation>();
-		// set the preferred runstate in the first op that gets executed. Not
-		// necessary to add it to any of the following ops
-		// as the app will remain in the preferred run state unless any one of
-		// the ops, or any other op running in parallel, changes the state to
-		// something else
-
-		// Stop application first to avoid issues when updating or restarting
-		// the app in case
-		// the app is in a "failed" state in CF. This is a work around to handle
-		// 503 errors that
-		// may result when the underlying client indirectly fetches app instance
-		// stats that may not
-		// be available (and thus throw 503)
-		deploymentOperations.add(new ApplicationStopOperation(properties.getAppName(), model, false));
-		deploymentOperations.add(new ApplicationPropertiesUpdateOperation(properties, model));
-		deploymentOperations.add(new ApplicationPushOperation(properties, model, ui));
-		RunState preferredState = null;
-		deploymentOperations.add(restartOnly(properties.getProject(), properties.getAppName(), preferredState));
-
-		return deploymentOperations;
+		return new AddElementOperation(properties, model, existingApp, initialRunstate, this, debugSupport, runOrDebug,
+				ui);
 	}
 
 }

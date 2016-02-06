@@ -133,7 +133,7 @@ public class BootDashViewModelTest {
 
 		when(bootDashModel.getRunTarget()).thenReturn(target);
 
-		LiveSet<RunTarget> runTargets = harness.model.getRunTargets();
+		LiveSetVariable<RunTarget> runTargets = harness.model.getRunTargets();
 
 		//Adding...
 		runTargets.add(target);
@@ -362,11 +362,11 @@ public class BootDashViewModelTest {
 
 		UserInteractions ui = mock(UserInteractions.class);
 
-		List<RunTarget> targetsBefore = harness.getRunTargets();
+		ImmutableSet<RunTarget> targetsBefore = harness.getRunTargets();
 		int numTargetsBefore = targetsBefore.size();
 
 		harness.model.removeTarget(otherTarget, ui);
-		List<RunTarget> targetsAfter = harness.getRunTargets();
+		ImmutableSet<RunTarget> targetsAfter = harness.getRunTargets();
 
 		//Since target is not in the model, nothing should happen.
 		assertEquals(targetsBefore, targetsAfter);

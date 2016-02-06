@@ -30,7 +30,6 @@ public abstract class CloudOperation extends Operation<Void> {
 
 	@Override
 	protected Void runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}

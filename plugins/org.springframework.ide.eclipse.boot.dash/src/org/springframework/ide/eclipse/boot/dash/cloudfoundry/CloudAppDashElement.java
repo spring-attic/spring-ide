@@ -14,7 +14,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -99,24 +98,8 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// through uploading via full deployment
 		// && runingOrDebugging == RunState.RUNNING
 		) {
-			String opName = "Starting application '" + getName() + "' in "
-					+ (runingOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
-			DebugSupport debugSupport = getDebugSupport();
-			if (runingOrDebugging == RunState.DEBUGGING) {
-				if (debugSupport.isSupported(this)) {
-					op = debugSupport.createOperation(this, opName, ui);
-				} else {
-					String title = "Debugging is not supported for '"+this.getName()+"'";
-					String msg = debugSupport.getNotSupportedMessage(this);
-					if (msg==null) {
-						msg = title;
-					}
-					ui.errorPopup(title, msg);
-				}
-			} else {
-				op = cloudModel.getApplicationDeploymentOperations().restartAndPush(opName, getName(), debugSupport,
-						runingOrDebugging, ui);
-			}
+			op = cloudModel.getApplicationDeploymentOperations().restartAndPush(this, getDebugSupport(),
+					runingOrDebugging, ui);
 		} else {
 			// Set the initial run state as Starting
 			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
