@@ -20,6 +20,7 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -85,15 +86,13 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 		IConsole[] activeConsoles = manager.getConsoles();
 		if (activeConsoles != null) {
 			ImmutableSet<ILaunchConfiguration> launchConfs = element.getLaunchConfigs();
-			for (ILaunchConfiguration conf : launchConfs) {
-				for (ILaunch launch : LaunchUtils.getLaunches(conf)) {
-					IProcess[] processes = launch.getProcesses();
-					if (processes != null) {
-						for (IProcess process : processes) {
-							IConsole console = getConsole(process, activeConsoles);
-							if (console!=null) {
-								return console;
-							}
+			for (ILaunch launch : BootLaunchUtils.getLaunches(launchConfs)) {
+				IProcess[] processes = launch.getProcesses();
+				if (processes != null) {
+					for (IProcess process : processes) {
+						IConsole console = getConsole(process, activeConsoles);
+						if (console!=null) {
+							return console;
 						}
 					}
 				}

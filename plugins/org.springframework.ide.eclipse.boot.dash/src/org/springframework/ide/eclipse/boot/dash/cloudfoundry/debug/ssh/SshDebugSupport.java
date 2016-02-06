@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
@@ -81,7 +82,7 @@ public class SshDebugSupport extends DebugSupport {
 	public boolean isDebuggerAttached(CloudAppDashElement app) {
 		ILaunchConfiguration conf = SshDebugLaunchConfigurationDelegate.findConfig(app);
 		if (conf!=null) {
-			for (ILaunch l : LaunchUtils.getLaunches(conf)) {
+			for (ILaunch l : BootLaunchUtils.getLaunches(conf)) {
 				if (!l.isTerminated()) {
 					for (IDebugTarget dt : l.getDebugTargets()) {
 						if (!dt.isTerminated()) {
@@ -92,7 +93,7 @@ public class SshDebugSupport extends DebugSupport {
 					return true;
 				}
 			}
-			LaunchUtils.getLaunches(conf);
+			BootLaunchUtils.getLaunches(conf);
 		}
 		return false;
 	}

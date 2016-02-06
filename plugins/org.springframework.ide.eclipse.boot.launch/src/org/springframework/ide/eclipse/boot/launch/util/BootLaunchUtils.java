@@ -23,9 +23,12 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -105,6 +108,10 @@ public class BootLaunchUtils {
 		return ILaunchManager.DEBUG_MODE.equals(launch.getLaunchMode());
 	}
 
+	public static List<ILaunch> getLaunches(ILaunchConfiguration c) {
+		return getLaunches(ImmutableSet.of(c));
+	}
+
 	public static List<ILaunch> getLaunches(Set<ILaunchConfiguration> configs) {
 		ILaunch[] all = DebugPlugin.getDefault().getLaunchManager().getLaunches();
 		ArrayList<ILaunch> selected = new ArrayList<ILaunch>();
@@ -112,6 +119,14 @@ public class BootLaunchUtils {
 			ILaunchConfiguration lConf = l.getLaunchConfiguration();
 			if (lConf!=null && configs.contains(lConf)) {
 				selected.add(l);
+			}
+			//This weird stuff below is for ngrok support in the boot dash which creates working copys that are really
+			// used as a kind of 'temporary proxy' for its original LaunchConfiguration.
+			while (lConf instanceof ILaunchConfigurationWorkingCopy) {
+				lConf = ((ILaunchConfigurationWorkingCopy) lConf).getOriginal();
+				if (configs.contains(lConf)) {
+					selected.add(l);
+				}
 			}
 		}
 		return selected;
