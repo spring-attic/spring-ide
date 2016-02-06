@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
@@ -75,7 +76,7 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 
 	@Override
 	protected ImmutableSet<ILaunch> getLaunches() {
-		return ImmutableSet.copyOf(LaunchUtils.getLaunches(delegate));
+		return ImmutableSet.copyOf(BootLaunchUtils.getLaunches(ImmutableSet.of(delegate)));
 	}
 
 	@Override
