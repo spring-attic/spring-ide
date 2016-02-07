@@ -17,9 +17,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,22 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * The 'toggle filters' are fixed set of view filters that can be toggled on/off by the user.
@@ -24,6 +36,16 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
  */
 public class ToggleFiltersModel {
 
+	private static final Filter<BootDashElement> HIDE_SOLITARY_CONFS = new Filter<BootDashElement>() {
+		public boolean accept(BootDashElement e) {
+			if (e instanceof LaunchConfDashElement) {
+				LaunchConfDashElement conf = (LaunchConfDashElement) e;
+				return conf.getParent().getCurrentChildren().size()!=1;
+			}
+			return true;
+		}
+	};
+
 	private static final Filter<BootDashElement> HIDE_NON_WORKSPACE_ELEMENTS = new Filter<BootDashElement>() {
 		public boolean accept(BootDashElement t) {
 			if (t!=null) {
@@ -33,22 +55,63 @@ public class ToggleFiltersModel {
 			return false;
 		}
 	};
+
+	private static final String STORE_ID = "toggle-filters";
 	private static final FilterChoice[] FILTERS = {
-			new FilterChoice("Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS)
+			new FilterChoice("hide.non-workspace", "Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS),
+			new FilterChoice("hide.solitary-launch-config", "Hide solitary launch configs", HIDE_SOLITARY_CONFS, true)
 	};
 
+	private final PropertyStoreApi persistentProperties;
+
+	public ToggleFiltersModel(BootDashModelContext context) {
+		this(PropertyStoreFactory.createSubStore(STORE_ID, context.getViewProperties()));
+	}
+
+	public ToggleFiltersModel(IPropertyStore propertyStore) {
+		this.persistentProperties = new PropertyStoreApi(propertyStore);
+		this.selectedFilters = new LiveSetVariable<FilterChoice>(restoreFilters());
+		this.compositeFilter = new LiveExpression<Filter<BootDashElement>>() {
+			{
+				dependsOn(selectedFilters);
+			}
+			@Override
+			protected Filter<BootDashElement> compute() {
+				Filter<BootDashElement> composed = Filters.acceptAll();
+				for (FilterChoice chosen : selectedFilters.getValues()) {
+					composed = Filters.compose(composed, chosen.getFilter());
+				}
+				return composed;
+			}
+		};
+
+		selectedFilters.addListener(new ValueListener<ImmutableSet<FilterChoice>>() {
+			public void gotValue(LiveExpression<ImmutableSet<FilterChoice>> exp, ImmutableSet<FilterChoice> value) {
+				saveFilters(value);
+			}
+		});
+	}
+
 	public static class FilterChoice implements Ilabelable {
+		private final String id;
 		private final String label;
 		private final Filter<BootDashElement> filter;
+		private final boolean defaultEnable;
 
-		private FilterChoice(String label, Filter<BootDashElement> filter) {
+		public FilterChoice(String id, String label, Filter<BootDashElement> filter) {
+			this(id, label, filter, false);
+		}
+
+		public FilterChoice(String id, String label, Filter<BootDashElement> filter, boolean defaultEnable) {
+			this.id = id;
 			this.label = label;
 			this.filter = filter;
+			this.defaultEnable = defaultEnable;
 		}
 
 		@Override
 		public String toString() {
-			return "FilterChoice("+label+")";
+			return "FilterChoice("+getLabel()+")";
 		}
 
 		@Override
@@ -60,37 +123,52 @@ public class ToggleFiltersModel {
 			return filter;
 		}
 
+		public String getId() {
+			return id;
+		}
 	}
 
-	private LiveSet<FilterChoice> selectedFilters = new LiveSet<FilterChoice>();
-	private LiveExpression<Filter<BootDashElement>> compositeFilter;
-	{
-		final Filter<BootDashElement> initial = Filters.acceptAll();
-		compositeFilter = new LiveExpression<Filter<BootDashElement>>() {
-			{
-				dependsOn(selectedFilters);
-			}
-			@Override
-			protected Filter<BootDashElement> compute() {
-				Filter<BootDashElement> composed = initial;
-				for (FilterChoice chosen : selectedFilters.getValues()) {
-					composed = Filters.compose(composed, chosen.getFilter());
-				}
-				return composed;
-			}
-		};
-	}
+	private final LiveSetVariable<FilterChoice> selectedFilters;
+	private final LiveExpression<Filter<BootDashElement>> compositeFilter;
+
 	/**
 	 * @return The filter that is defined by composing all the selected toggle filters.
 	 */
 	public LiveExpression<Filter<BootDashElement>> getFilter() {
 		return compositeFilter;
 	}
+	private Set<FilterChoice> restoreFilters() {
+		Set<FilterChoice> builder = new HashSet<>();
+		for (FilterChoice filter : getAvailableFilters()) {
+			if (persistentProperties.get(filter.getId(), filter.defaultEnable)) {
+				builder.add(filter);
+			}
+		}
+		return builder;
+	}
+
+	private void saveFilters(ImmutableSet<FilterChoice> filters) {
+		try {
+			for (FilterChoice f : getAvailableFilters()) {
+				boolean active = filters.contains(f);
+				if (active==f.defaultEnable) {
+					//don't store default values that way if we change the default in the future then
+					// users will get the new default rather than their persisted value
+					persistentProperties.put(f.getId(), (String)null);
+				} else {
+					persistentProperties.put(f.getId(), active);
+				}
+			}
+		} catch (Exception e) {
+			//trouble saving filters... log and move on. This is not critical
+			BootDashActivator.log(e);
+		}
+	}
+
 	public FilterChoice[] getAvailableFilters() {
 		return FILTERS;
 	}
-	public LiveSet<FilterChoice> getSelectedFilters() {
+	public LiveSetVariable<FilterChoice> getSelectedFilters() {
 		return selectedFilters;
 	}
-
 }

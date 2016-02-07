@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-	<version>3.7.1-SNAPSHOT</version>
+	<version>3.7.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<organization>
@@ -79,8 +79,8 @@
 		<test.skip>${maven.test.skip}</test.skip>
 		<maven.test.error.ignore>false</maven.test.error.ignore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 		<encoding>UTF-8</encoding>
 		<test.vmargs>${test.osvmargs}</test.vmargs>
 		<test.osvmargs></test.osvmargs>
@@ -98,7 +98,8 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.yaml</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
-		
+		<module>plugins/org.springframework.ide.eclipse.editor.support</module>
+        <module>plugins/org.springframework.ide.eclipse.cloudfoundry.manifest.editor</module>		
         <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
         
 		<!-- core -->
@@ -186,6 +187,10 @@
 		<module>plugins/org.springframework.ide.eclipse.roo.core</module>
 		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature</module>
+		
+		<!-- gradle -->
+		<module>plugins/org.springframework.ide.eclipse.gradle</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship</module>
 
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
@@ -424,6 +429,11 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
+				</repository>
+				<repository>
+		  			<id>buildship</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/1.0/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,10 +31,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.EnumValueParser;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
+import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -43,7 +46,6 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  * @author Kris De Volder
  */
 public class TypeUtil {
-
 
 	private static abstract class RadixableParser implements ValueParser {
 
@@ -65,6 +67,7 @@ public class TypeUtil {
 
 	}
 
+	private static final Object OBJECT_TYPE_NAME = Object.class.getName();
 	private static final String STRING_TYPE_NAME = String.class.getName();
 	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
 
@@ -199,10 +202,6 @@ public class TypeUtil {
 		});
 	}
 
-	public interface ValueParser {
-		Object parse(String str);
-	}
-
 	public ValueParser getValueParser(Type type) {
 		ValueParser simpleParser = VALUE_PARSERS.get(type.getErasure());
 		if (simpleParser!=null) {
@@ -214,6 +213,11 @@ public class TypeUtil {
 			// from when it is null. An empty array means a type that has no values, so
 			// assigning anything to it is an error.
 			return new EnumValueParser(niceTypeName(type), enumValues);
+		}
+		if (isMap(type)) {
+			//Trying to parse map types from scalars is not possible. Thus we
+			// provide a parser that allows throws
+			return new AlwaysFailingParser(niceTypeName(type));
 		}
 		return null;
 	}
@@ -336,9 +340,20 @@ public class TypeUtil {
 		return !isAtomic(type);
 	}
 
+	public static boolean isObject(Type type) {
+		return type!=null && OBJECT_TYPE_NAME.equals(type.getErasure());
+	}
+
+	public static boolean isString(Type type) {
+		return type!=null && STRING_TYPE_NAME.equals(type.getErasure());
+	}
+
 	public boolean isAtomic(Type type) {
-		String typeName = type.getErasure();
-		return ATOMIC_TYPES.contains(typeName) || isEnum(type);
+		if (type!=null) {
+			String typeName = type.getErasure();
+			return ATOMIC_TYPES.contains(typeName) || isEnum(type);
+		}
+		return false;
 	}
 
 	/**
@@ -356,19 +371,21 @@ public class TypeUtil {
 	}
 
 	public static boolean isList(Type type) {
-		String erasure = type.getErasure();
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
 		//However, use reflection here is okay assuming types we care about
 		//are part of JRE standard libraries. Using eclipse 'type hirearchy' would
 		//also potentialy be very slow.
-		try {
-			Class<?> erasureClass = Class.forName(erasure);
-			return List.class.isAssignableFrom(erasureClass);
-		} catch (Exception e) {
-			//type not resolveable assume its not 'array like'
-			return false;
+		if (type!=null) {
+			String erasure = type.getErasure();
+			try {
+				Class<?> erasureClass = Class.forName(erasure);
+				return List.class.isAssignableFrom(erasureClass);
+			} catch (Exception e) {
+				//type not resolveable assume its not 'array like'
+			}
 		}
+		return false;
 	}
 
 	/**
@@ -379,7 +396,7 @@ public class TypeUtil {
 	}
 
 	public static boolean isArray(Type type) {
-		return type.getErasure().endsWith("[]");
+		return type!=null && type.getErasure().endsWith("[]");
 	}
 
 	public static boolean isMap(Type type) {
@@ -388,14 +405,16 @@ public class TypeUtil {
 		//However, use reflection here is okay assuming types we care about
 		//are part of JRE standard libraries. Using eclipse 'type hirearchy' would
 		//also potentialy be very slow.
-		String erasure = type.getErasure();
-		try {
-			Class<?> erasureClass = Class.forName(erasure);
-			return Map.class.isAssignableFrom(erasureClass);
-		} catch (Exception e) {
-			//type not resolveable
-			return false;
+		if (type!=null) {
+			String erasure = type.getErasure();
+			try {
+				Class<?> erasureClass = Class.forName(erasure);
+				return Map.class.isAssignableFrom(erasureClass);
+			} catch (Exception e) {
+				//type not resolveable
+			}
 		}
+		return false;
 	}
 
 	/**
@@ -435,8 +454,8 @@ public class TypeUtil {
 		return null;
 	}
 
-	public static Type getKeyType(Type mapOrArrayType) {
-		if (isBracketable(mapOrArrayType)) {
+	public Type getKeyType(Type mapOrArrayType) {
+		if (isSequencable(mapOrArrayType)) {
 			return INTEGER_TYPE;
 		} else {
 			//assumed to be a map
@@ -517,7 +536,7 @@ public class TypeUtil {
 					Type valueType = getDomainType(type);
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
 					for (String propName : keyValues) {
-						properties.add(new TypedProperty(propName, valueType));
+						properties.add(new TypedProperty(propName, valueType, false));
 					}
 					return properties;
 				}
@@ -528,19 +547,23 @@ public class TypeUtil {
 
 			//TODO: handle type parameters.
 			if (eclipseType!=null) {
-				List<IMethod> setters = getSetterMethods(eclipseType);
-				//TODO: setters inherited from super classes?
-				//TODO: the code below is too simplistic. More complex cases allow for non-atomic property types
-				//   to be defined by having only a setter (e.g. when the type is a pre-initialized collection, array or bean).
-				if (setters!=null && !setters.isEmpty()) {
-					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(setters.size());
-					for (IMethod m : setters) {
-						Type propType = Type.fromSignature(m.getParameterTypes()[0], eclipseType);
+				List<IMethod> getters = getGetterMethods(eclipseType);
+				//TODO: getters inherited from super classes?
+				if (getters!=null && !getters.isEmpty()) {
+					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(getters.size());
+					for (IMethod m : getters) {
+						boolean isDeprecated = m.getAnnotation("Deprecated").exists() || m.getAnnotation("java.lang.Deprecated").exists();
+						Type propType = null;
+						try {
+							propType = Type.fromSignature(m.getReturnType(), eclipseType);
+						} catch (JavaModelException e) {
+							BootActivator.log(e);
+						}
 						if (beanMode.includesHyphenated()) {
-							properties.add(new TypedProperty(setterNameToProperty(m.getElementName()), propType));
+							properties.add(new TypedProperty(getterOrSetterNameToProperty(m.getElementName()), propType, isDeprecated));
 						}
 						if (beanMode.includesCamelCase()) {
-							properties.add(new TypedProperty(setterNameToCamelName(m.getElementName()), propType));
+							properties.add(new TypedProperty(getterOrSetterNameToCamelName(m.getElementName()), propType, isDeprecated));
 						}
 					}
 					return properties;
@@ -550,35 +573,39 @@ public class TypeUtil {
 		return null;
 	}
 
-	private String setterNameToProperty(String name) {
-		String camelName = setterNameToCamelName(name);
+	private String getterOrSetterNameToProperty(String name) {
+		String camelName = getterOrSetterNameToCamelName(name);
 		return StringUtil.camelCaseToHyphens(camelName);
 	}
 
-	public String setterNameToCamelName(String name) {
-		Assert.isLegal(name.startsWith("set"));
-		String camelName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
+	public String getterOrSetterNameToCamelName(String name) {
+		Assert.isLegal(name.startsWith("set") || name.startsWith("get") || name.startsWith("is"));
+		int prefixLen = name.startsWith("is") ? 2 : 3;
+		String camelName = Character.toLowerCase(name.charAt(prefixLen)) + name.substring(prefixLen+1);
 		return camelName;
 	}
 
-	private List<IMethod> getSetterMethods(IType eclipseType) {
+	private List<IMethod> getGetterMethods(IType eclipseType) {
 		try {
 			if (eclipseType!=null && eclipseType.isClass()) {
 				IMethod[] allMethods = eclipseType.getMethods();
 				if (ArrayUtils.hasElements(allMethods)) {
-					ArrayList<IMethod> setters = new ArrayList<IMethod>();
+					ArrayList<IMethod> getters = new ArrayList<IMethod>();
 					for (IMethod m : allMethods) {
 						String mname = m.getElementName();
-						if (mname.startsWith("set") && mname.length()>=4) {
+						if (
+								(mname.startsWith("get") && mname.length()>=4) ||
+								(mname.startsWith("is") && mname.length()>=3)
+						) {
 							//Need at least 4 chars or the property name will be empty.
 							String sig = m.getSignature();
 							int numParams = Signature.getParameterCount(sig);
-							if (numParams==1) {
-								setters.add(m);
+							if (numParams==0) {
+								getters.add(m);
 							}
 						}
 					}
-					return setters;
+					return getters;
 				}
 			}
 		} catch (Exception e) {
@@ -587,14 +614,40 @@ public class TypeUtil {
 		return null;
 	}
 
-	public Map<String,Type> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
+//	private List<IMethod> getSetterMethods(IType eclipseType) {
+//		try {
+//			if (eclipseType!=null && eclipseType.isClass()) {
+//				IMethod[] allMethods = eclipseType.getMethods();
+//				if (ArrayUtils.hasElements(allMethods)) {
+//					ArrayList<IMethod> setters = new ArrayList<IMethod>();
+//					for (IMethod m : allMethods) {
+//						String mname = m.getElementName();
+//						if (mname.startsWith("set") && mname.length()>=4) {
+//							//Need at least 4 chars or the property name will be empty.
+//							String sig = m.getSignature();
+//							int numParams = Signature.getParameterCount(sig);
+//							if (numParams==1) {
+//								setters.add(m);
+//							}
+//						}
+//					}
+//					return setters;
+//				}
+//			}
+//		} catch (Exception e) {
+//			BootActivator.log(e);
+//		}
+//		return null;
+//	}
+
+	public Map<String, TypedProperty> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		//TODO: optimize, produce directly as a map instead of
 		// first creating list and then coverting it.
 		List<TypedProperty> list = getProperties(type, enumMode, beanMode);
 		if (list!=null) {
-			Map<String, Type> map = new HashMap<String, Type>();
+			Map<String, TypedProperty> map = new HashMap<>();
 			for (TypedProperty p : list) {
-				map.put(p.getName(), p.getType());
+				map.put(p.getName(), p);
 			}
 			return map;
 		}
@@ -643,5 +696,70 @@ public class TypeUtil {
 		}
 		return null;
 	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Addapting our interface so it is compatible with YTypeUtil
+	//
+	// This allows our types to be used by the more generic stuff from the 'editor.support' plugin.
+	//
+	// Note, it may be possible to avoid having these 'adaptor' methods by making YTypeUtil a paramerized
+	// type. I.e something like "interface YTypeUtil<T extends YType>.
+	// Paramterizations like that tend to propagate fire and wide in the code and make for complicated
+	// signatures. For now using these bredging methods is simpler if perhaps a bit more error prone.
+
+//	@Override
+//	public boolean isAtomic(YType type) {
+//		return isAtomic((Type)type);
+//	}
+//
+//	@Override
+//	public boolean isMap(YType type) {
+//		return isMap((Type)type);
+//	}
+//
+//	@Override
+//	public boolean isSequencable(YType type) {
+//		return isSequencable((Type)type);
+//	}
+//
+//	@Override
+//	public YType getDomainType(YType type) {
+//		return getDomainType((Type)type);
+//	}
+//
+//	@Override
+//	public String[] getHintValues(YType type) {
+//		return getAllowedValues((Type) type, EnumCaseMode.ALIASED);
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	@Override
+//	public List<YTypedProperty> getProperties(YType type) {
+//		//Dirty hack, passing this through a raw type to bypass the java type system
+//		//complaining the List<TypedProperty> is not compatible with List<YTypedProperty>
+//		//This dirty and 'illegal' conversion is okay because the list is only used for reading.
+//		@SuppressWarnings("rawtypes")
+//		List props = getProperties((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+//		return Collections.unmodifiableList(props);
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	@Override
+//	public Map<String, YTypedProperty> getPropertiesMap(YType type) {
+//		//Dirty hack, see comment in getProperties(YType)
+//		@SuppressWarnings("rawtypes")
+//		Map map = getPropertiesMap((Type)type, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
+//		return Collections.unmodifiableMap(map);
+//	}
+//
+//	@Override
+//	public String niceTypeName(YType type) {
+//		return niceTypeName((Type)type);
+//	}
+//
+//	@Override
+//	public YType getKeyType(YType type) {
+//		return getKeyType((Type)type);
+//	}
 
 }

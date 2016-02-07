@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.IMethod;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 public class ActuatorClient {
@@ -133,13 +133,18 @@ public class ActuatorClient {
 
 	}
 
-	private RestTemplate rest = new RestTemplate();
+	private RestOperations rest;
 	private URI target;
 	private TypeLookup typeLookup;
 
 	public ActuatorClient(URI target, TypeLookup typeLookup) {
+		this(target, typeLookup, new RestTemplate());
+	}
+
+	public ActuatorClient(URI target, TypeLookup typeLookup, RestTemplate rest) {
 		this.target = target;
 		this.typeLookup = typeLookup;
+		this.rest = rest;
 	}
 	public List<RequestMapping> getRequestMappings() {
 		try {

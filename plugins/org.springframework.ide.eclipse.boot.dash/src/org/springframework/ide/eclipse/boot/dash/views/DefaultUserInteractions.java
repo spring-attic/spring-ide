@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.compare.CompareEditorInput;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
@@ -23,17 +27,19 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationDeploymentPropertiesWizard;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.MergeManifestDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -41,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -63,7 +70,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public ILaunchConfiguration chooseConfigurationDialog(final String dialogTitle, final String message,
-			final List<ILaunchConfiguration> configs) {
+			final Collection<ILaunchConfiguration> configs) {
 		final LiveVariable<ILaunchConfiguration> chosen = new LiveVariable<ILaunchConfiguration>();
 		context.getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
@@ -215,29 +222,55 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final IProject project,
-			final List<CloudDomain> domains) throws OperationCanceledException {
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final Map<String, Object> cloudData,
+			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth)
+					throws OperationCanceledException {
 		final Shell shell = getShell();
-		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[1];
+		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[] { null };
 
 		if (shell != null) {
 			shell.getDisplay().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
-					ApplicationDeploymentPropertiesWizard wizard = new ApplicationDeploymentPropertiesWizard(project,
-							domains);
-					WizardDialog dialog = new WizardDialog(getShell(), wizard);
-					if (dialog.open() == Window.OK) {
-						props[0] = wizard.getProperties();
+					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, cloudData, project, manifest, defaultYaml, readOnly, noModeSwicth);
+					if (dialog.open() == IDialogConstants.OK_ID) {
+						props[0] = dialog.getCloudApplicationDeploymentProperties();
 					}
 				}
 			});
 		}
 		if (props[0] == null) {
 			throw new OperationCanceledException();
+		} else {
+			 return props[0];
 		}
-		return props[0];
+	}
+
+
+	@Override
+	public boolean yesNoWithToggle(final String propertyKey, final String title, final String message, final String toggleMessage) {
+		final String ANSWER = propertyKey+".answer";
+		final String TOGGLE = propertyKey+".toggle";
+		final IPreferenceStore store = getPreferencesStore();
+		store.setDefault(ANSWER, true);
+		boolean toggleState = store.getBoolean(TOGGLE);
+		boolean answer = store.getBoolean(ANSWER);
+		if (toggleState) {
+			return answer;
+		}
+		final boolean[] dialog = new boolean[2];
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialogWithToggle result = MessageDialogWithToggle.openYesNoQuestion(getShell(), title , message, toggleMessage, false, null, null);
+				dialog[0] = result.getReturnCode()==IDialogConstants.YES_ID;
+				dialog[1] = result.getToggleState();
+			}
+		});
+		store.setValue(TOGGLE, dialog[1]);
+		store.setValue(ANSWER, dialog[0]);
+		return dialog[0];
 	}
 
 	@Override
@@ -262,5 +295,30 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	protected IPreferenceStore getPreferencesStore() {
 		return BootDashActivator.getDefault().getPreferenceStore();
+	}
+
+	@Override
+	public int openManifestCompareDialog(final CompareEditorInput input, final IRunnableContext context) throws CoreException {
+		final int[] result = new int[] { -1 };
+		final Exception[] exception = new Exception[] { null };
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (context == null) {
+						PlatformUI.getWorkbench().getProgressService().run(true, true, input);
+					} else {
+						context.run(true, true, input);
+					}
+					result[0] = new MergeManifestDialog(getShell(), input).open();
+				} catch (InvocationTargetException | InterruptedException e) {
+					exception[0] = e;
+				}
+			}
+		});
+		if (exception[0] != null) {
+			throw ExceptionUtil.coreException(exception[0]);
+		}
+		return result[0];
 	}
 }

@@ -106,7 +106,7 @@ public class JarNameGeneratorTest extends StsTestCase {
 
 	@Override
 	protected String getBundleName() {
-		return Activator.BUNDLE_ID;
+		return BootDashTestBundleConstants.BUNDLE_ID;
 	}
 
 }

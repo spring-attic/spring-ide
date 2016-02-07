@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.mockito.Mockito;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
@@ -28,6 +29,8 @@ import org.springframework.ide.eclipse.boot.test.util.JavaUtils;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.setPackage;
 
 public class BootJarPackagingTest extends StsTestCase {
 
@@ -48,7 +51,9 @@ public class BootJarPackagingTest extends StsTestCase {
 	public void testSimple() throws Exception {
 		UserInteractions ui = Mockito.mock(UserInteractions.class);
 		BootProjectTestHarness harness = getHarness();
-		IProject project = harness.createBootProject("simple-boot");
+		IProject project = harness.createBootProject("simple-boot",
+				setPackage("demo")
+		);
 		createFile(project, "src/main/java/demo/Greeter.java",
 				"package demo;\n" +
 				"\n" +
@@ -79,7 +84,9 @@ public class BootJarPackagingTest extends StsTestCase {
 		UserInteractions ui = Mockito.mock(UserInteractions.class);
 		BootProjectTestHarness harness = getHarness();
 
-		IProject project = harness.createBootProject("simple-boot");
+		IProject project = harness.createBootProject("simple-boot",
+				setPackage("demo")
+		);
 		fileReplace(project, "pom.xml",
 				"</dependencies>",
 				"	<dependency>\n" +
@@ -150,7 +157,7 @@ public class BootJarPackagingTest extends StsTestCase {
 
 	@Override
 	protected String getBundleName() {
-		return Activator.BUNDLE_ID;
+		return BootDashTestBundleConstants.BUNDLE_ID;
 	}
 
 }

@@ -1,28 +1,21 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013-2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     GoPivotal, Inc. - initial API and implementation
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +33,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
@@ -69,6 +60,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectLoc
 import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectNameValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
  * A ZipUrlImportWizard is a simple wizard in which one can paste a url
@@ -77,7 +69,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
  */
 public class NewSpringBootWizardModel {
 
-	private static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
@@ -111,26 +102,34 @@ public class NewSpringBootWizardModel {
 
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String JSON_URL;
-	private final String CONTENT_TYPE;
 	private PopularityTracker popularities;
+	private PreferredSelections preferredSelections;
+
+	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
+		this(
+				WizardPlugin.getUrlConnectionFactory(),
+				StsProperties.getInstance(new NullProgressMonitor()),
+				prefs
+		);
+	}
 
 	public NewSpringBootWizardModel() throws Exception {
 		this(
-				new URLConnectionFactory(),
+				WizardPlugin.getUrlConnectionFactory(),
 				StsProperties.getInstance(new NullProgressMonitor()),
 				WizardPlugin.getDefault().getPreferenceStore()
 		);
 	}
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), JSON_CONTENT_TYPE_HEADER, prefs);
+		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), prefs);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, String contentType, IPreferenceStore prefs) throws Exception {
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
+		this.preferredSelections = new PreferredSelections(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
-		this.CONTENT_TYPE = contentType;
 
 		baseUrl = new LiveVariable<String>("<computed>");
 		baseUrlValidator = new UrlValidator("Base Url", baseUrl);
@@ -159,6 +158,8 @@ public class NewSpringBootWizardModel {
 		});
 
 		addBuildTypeValidator();
+
+		preferredSelections.restore(this);
 	}
 
 	/**
@@ -166,25 +167,30 @@ public class NewSpringBootWizardModel {
 	 * build type is supported.
 	 */
 	private void addBuildTypeValidator() {
-		RadioGroup buildTypeGroup = getRadioGroups().getGroup("type");
+		final RadioGroup buildTypeGroup = getRadioGroups().getGroup("type");
 		if (buildTypeGroup!=null) {
 			buildTypeGroup.validator(new Validator() {
+				{
+					dependsOn(buildTypeGroup.getVariable());
+				}
 				@Override
 				protected ValidationResult compute() {
-					BuildType bt = getBuildType();
-					if (!bt.getImportStrategy().isSupported()) {
+					ImportStrategy s = getImportStrategy();
+					if (s==null) {
+						return ValidationResult.error("No 'type' selected");
+					} else if (!s.isSupported()) {
 						//This means some required STS component like m2e or gradle tooling is not installed
-						return ValidationResult.error(bt.getNotInstalledMessage());
+						return ValidationResult.error(s.getNotInstalledMessage());
 					}
 					return ValidationResult.OK;
 				}
-			}.dependsOn(buildTypeGroup.getVariable()));
+			});
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public final FieldArrayModel<String> stringInputs = new FieldArrayModel<String>(
-			//The fields need to be discovered by parsing web form.
+			//The fields need to be discovered by parsing json from rest endpoint.
 	);
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
@@ -204,6 +210,8 @@ public class NewSpringBootWizardModel {
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
 
+	private DependencyFilterBox filterBox = new DependencyFilterBox();
+
 	/**
 	 * Retrieves the most popular dependencies based on the number of times they have
 	 * been used to create a project.
@@ -212,61 +220,34 @@ public class NewSpringBootWizardModel {
 	 * @return An array of the most popular dependencies. May return fewer items than requested.
 	 */
 	public List<CheckBoxModel<Dependency>> getMostPopular(int howMany) {
-		final Map<CheckBoxModel<Dependency>, Integer> useCounts = new HashMap<CheckBoxModel<Dependency>, Integer>(); //usecounts by dependency id
-
-		ArrayList<CheckBoxModel<Dependency>> allUsedBoxes = new ArrayList<CheckBoxModel<Dependency>>();
-		for (String category : dependencies.getCategories()) {
-			allUsedBoxes.addAll(dependencies.getContents(category).getCheckBoxModels());
-		}
-
-		for (Iterator<CheckBoxModel<Dependency>> iterator = allUsedBoxes.iterator(); iterator.hasNext();) {
-			CheckBoxModel<Dependency> cb = iterator.next();
-			int useCount = popularities.getUsageCount(cb.getValue());
-			if (useCount==0) {
-				iterator.remove(); //don't care about those options never used at all.
-			} else {
-				useCounts.put(cb, popularities.getUsageCount(cb.getValue()));
-			}
-		}
-		Collections.sort(allUsedBoxes, new Comparator<CheckBoxModel<Dependency>>() {
-			public int compare(CheckBoxModel<Dependency> o1, CheckBoxModel<Dependency> o2) {
-				return useCounts.get(o2) - useCounts.get(o1);
-			}
-		});
-
-		howMany = Math.min(allUsedBoxes.size(), howMany);
-		List<CheckBoxModel<Dependency>> result = new ArrayList<CheckBoxModel<Dependency>>();
-		for (int i = 0; i < howMany; i++) {
-			result.add(allUsedBoxes.get(i));
-		}
-		return Collections.unmodifiableList(result);
+		return popularities.getMostPopular(dependencies, howMany);
 	}
 
 	/**
 	 * Shouldn't be public really. This is just to make it easier to call from unit test.
 	 */
 	public void updateUsageCounts() {
-		for (String category : dependencies.getCategories()) {
-			MultiSelectionFieldModel<Dependency> contents = dependencies.getContents(category);
-			for (Dependency d : contents.getCurrentSelections()) {
-				popularities.incrementUsageCount(d);
-			}
-		}
+		popularities.incrementUsageCount(dependencies.getCurrentSelection());
 	}
 
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
 		updateUsageCounts();
+		preferredSelections.save(this);
 		DownloadManager downloader = null;
 		try {
-			downloader = new DownloadManager().allowUIThread(allowUIThread);
+			downloader = new DownloadManager(urlConnectionFactory).allowUIThread(allowUIThread);
 
 			DownloadableItem zip = new DownloadableItem(newURL(downloadUrl .getValue()), downloader);
 			String projectNameValue = projectName.getValue();
 			CodeSet cs = CodeSet.fromZip(projectNameValue, zip, new Path("/"));
 
-			IRunnableWithProgress oper = getImportStrategy().createOperation(ImportUtils.importConfig(
+			ImportStrategy strat = getImportStrategy();
+			if (strat==null) {
+				strat = BuildType.GENERAL.getDefaultStrategy();
+			}
+			IRunnableWithProgress oper = strat.createOperation(ImportUtils.importConfig(
 					new Path(location.getValue()),
 					projectNameValue,
 					cs
@@ -288,32 +269,44 @@ public class NewSpringBootWizardModel {
 
 	/**
 	 * Get currently selected import strategy.
-	 * Never returns null (some default is returned in any case).
 	 */
 	public ImportStrategy getImportStrategy() {
-		return getBuildType().getImportStrategy();
+		TypeRadioInfo selected = getSelectedTypeRadio();
+		if (selected!=null) {
+			return selected.getImportStrategy();
+		}
+		return null;
+	}
+
+	/**
+	 * Convenience method so that test code can easily select an import strategy.
+	 * This will throw an exception if the given importstragey is not present
+	 * in this wizardmodel.
+	 */
+	public void setImportStrategy(ImportStrategy is) {
+		RadioGroup typeRadios = getRadioGroups().getGroup("type");
+		RadioInfo radio = typeRadios.getRadio(is.getId());
+		Assert.isLegal(radio!=null);
+		typeRadios.setValue(radio);
 	}
 
 	/**
 	 * Gets the currently selected BuildType.
-	 * Never returns null (some default is returned in any case).
 	 */
 	public BuildType getBuildType() {
+		ImportStrategy is = getImportStrategy();
+		if (is!=null) {
+			return is.getBuildType();
+		}
+		return null;
+	}
+
+	private TypeRadioInfo getSelectedTypeRadio() {
 		RadioGroup buildTypeRadios = getRadioGroups().getGroup("type");
 		if (buildTypeRadios!=null) {
-			RadioInfo selected = buildTypeRadios.getSelection().selection.getValue();
-			if (selected!=null) {
-				BuildType bt = KNOWN_TYPES.get(selected.getValue());
-				if (bt!=null) {
-					return bt;
-				} else {
-					//Uknown build type, import it as a general project which is better than nothing
-					return BuildType.GENERAL;
-				}
-			}
+			return (TypeRadioInfo) buildTypeRadios.getSelection().selection.getValue();
 		}
-		//Old initialzr app doesn't have button to specify build type... it is always maven
-		return BuildType.MAVEN;
+		return null;
 	}
 
 	private void addToWorkingSets(IProject project, IProgressMonitor monitor) {
@@ -349,10 +342,13 @@ public class NewSpringBootWizardModel {
 			RadioGroup group = radioGroups.ensureGroup(groupName);
 			group.label("Type:");
 			for (Type type : serviceSpec.getTypeOptions(groupName)) {
-				if (KNOWN_TYPES.containsKey(type.getId())) {
-					TypeRadioInfo radio = new TypeRadioInfo(groupName, type.getId(), type.isDefault(), type.getAction());
-					radio.setLabel(type.getName());
-					group.add(radio);
+				BuildType bt = KNOWN_TYPES.get(type.getId());
+				if (bt!=null) {
+					for (ImportStrategy is : bt.getImportStrategies()) {
+						TypeRadioInfo radio = new TypeRadioInfo(groupName, type, is);
+						radio.setLabel(is.displayName());
+						group.add(radio);
+					}
 				}
 			}
 			//When a type is selected the 'baseUrl' should be update according to its action.
@@ -385,28 +381,23 @@ public class NewSpringBootWizardModel {
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
 			String catName = dgroup.getName();
 			for (Dependency dep : dgroup.getContent()) {
-				dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep.getVersionRange()));
+				dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep));
 			}
 		}
 	}
 
-	private LiveExpression<Boolean> createEnablementExp(final RadioGroup bootVersion, String versionRange) {
+	private LiveExpression<Boolean> createEnablementExp(final RadioGroup bootVersion, final Dependency dep) {
 		try {
+			String versionRange = dep.getVersionRange();
 			if (StringUtils.hasText(versionRange)) {
-				final VersionRange range = new VersionRange(versionRange);
 				return new LiveExpression<Boolean>() {
 					{ dependsOn(bootVersion.getSelection().selection); }
 					@Override
 					protected Boolean compute() {
-						try {
-							String versionStr = bootVersion.getSelection().selection.getValue().getValue();
-							if (versionStr!=null) {
-								Version version = new Version(versionStr.replace("BUILD-SNAPSHOT", "ZZZZZZZZZZZZZ"));
-								//replacement of BS -> ZZ: see bug https://www.pivotaltracker.com/story/show/100963226
-								return range.includes(version);
-							}
-						} catch (Exception e) {
-							WizardPlugin.log(e);
+						RadioInfo radio = bootVersion.getValue();
+						if (radio!=null) {
+							String versionString = radio.getValue();
+							return dep.isSupportedFor(versionString);
 						}
 						return true;
 					}
@@ -427,25 +418,7 @@ public class NewSpringBootWizardModel {
 	}
 
 	private InitializrServiceSpec parseJsonFrom(URL url) throws Exception {
-		URLConnection conn = null;
-		InputStream input = null;
-		try {
-			conn = urlConnectionFactory.createConnection(url);
-			conn.addRequestProperty("User-Agent", "STS "+WizardPlugin.getDefault().getBundle().getVersion());
-			if (CONTENT_TYPE!=null) {
-				conn.addRequestProperty("Accept", CONTENT_TYPE);
-			}
-			conn.connect();
-			input = conn.getInputStream();
-			return InitializrServiceSpec.parseFrom(input);
-		} finally {
-			if (input!=null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-				}
-			}
-		}
+		return InitializrServiceSpec.parseFrom(urlConnectionFactory, url);
 	}
 
 	private URL newURL(String value) {
@@ -504,6 +477,14 @@ public class NewSpringBootWizardModel {
 		return null;
 	}
 
+	public LiveVariable<String> getDependencyFilterBoxText() {
+		return filterBox.getText();
+	}
+
+	public LiveExpression<Filter<CheckBoxModel<Dependency>>> getDependencyFilter() {
+		return filterBox.getFilter();
+	}
+
 	/**
 	 * Convenience method for easier scripting of the wizard model (used in testing). Not used
 	 * by the UI itself. If the dependencyId isn't found in the wizard model then an IllegalArgumentException
@@ -521,5 +502,6 @@ public class NewSpringBootWizardModel {
 		}
 		throw new IllegalArgumentException("No such dependency: "+dependencyId);
 	}
+
 
 }

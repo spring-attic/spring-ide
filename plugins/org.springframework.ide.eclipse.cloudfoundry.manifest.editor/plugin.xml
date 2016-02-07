@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.dadacoalition.yedit.yamlsource"
+            default-charset="UTF-8"
+            id="org.springframework.ide.eclipse.manifest.yml"
+            name="Cloudfoundry Manifest"
+            priority="high">
+      </content-type>
+      <file-association
+            content-type="org.springframework.ide.eclipse.manifest.yml"
+            file-names="manifest.yml">
+      </file-association>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Cloud Foundry Manifest Editor"
+            icon="icons/cloud_obj.png"
+            class="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlEditor"
+            id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlEditor">
+            <contentTypeBinding
+               contentTypeId="org.springframework.ide.eclipse.manifest.yml"
+            /> 
+            <contentTypeBinding
+               contentTypeId="org.dadacoalition.yedit.yamlsource"
+            />
+      </editor>
+   </extension>
+   
+</plugin>

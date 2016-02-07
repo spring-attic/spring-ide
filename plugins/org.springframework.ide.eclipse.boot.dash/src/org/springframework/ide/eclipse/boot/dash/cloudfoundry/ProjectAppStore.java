@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
@@ -40,12 +41,12 @@ public class ProjectAppStore {
 		return existingProjectToAppMappings;
 	}
 
-	public synchronized void storeProjectToAppMapping(Collection<BootDashElement> elements) throws Exception {
+	public synchronized void storeProjectToAppMapping(Collection<CloudAppDashElement> updated) throws Exception {
 		PropertiesMapper<Map<String, String>> propertiesMapper = new PropertiesMapper<Map<String, String>>();
 		Map<String, String> projectsToApps = new HashMap<String, String>();
 
-		if (elements != null) {
-			for (BootDashElement element : elements) {
+		if (updated != null) {
+			for (BootDashElement element : updated) {
 				IProject project = element.getProject();
 				if (project != null) {
 					projectsToApps.put(element.getName(), project.getName());

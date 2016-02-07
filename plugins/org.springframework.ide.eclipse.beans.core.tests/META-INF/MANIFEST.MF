@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE Beans Core Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.core.tests
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.core.tests.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core,
@@ -27,5 +27,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.orm,
  org.springsource.ide.eclipse.commons.frameworks.test.util
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Spring IDE Developers

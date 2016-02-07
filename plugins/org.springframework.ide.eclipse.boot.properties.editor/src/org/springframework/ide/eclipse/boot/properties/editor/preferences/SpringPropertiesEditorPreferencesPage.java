@@ -10,15 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemType;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 
 /**
  * @author Kris De Volder
  */
 public class SpringPropertiesEditorPreferencesPage extends AbstractPropertiesEditorPreferencesPage {
 
-	protected ProblemType[] getProblemTypes() {
-		return ProblemType.FOR_PROPERTIES;
+	protected SpringPropertiesProblemType[] getProblemTypes() {
+		return SpringPropertiesProblemType.FOR_PROPERTIES;
+	}
+
+	@Override
+	protected String getEnableProjectPreferencesKey() {
+		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.PROP);
 	}
 
 }

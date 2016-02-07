@@ -5,20 +5,14 @@
 	<parent>
 		<groupId>org.springframework.ide.eclipse</groupId>
 		<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-		<version>3.7.1-SNAPSHOT</version>
+		<version>3.7.3-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.boot.dash</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	
-	<properties>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
-		<encoding>UTF-8</encoding>
-	</properties>
-	
-    <build>
+	<build>
 		<plugins>
 
 			<plugin>

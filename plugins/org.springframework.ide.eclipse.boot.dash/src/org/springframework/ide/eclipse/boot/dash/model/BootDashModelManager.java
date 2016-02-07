@@ -17,12 +17,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * An instance of this class manages a LiveSet of BootDashModels, one model per
@@ -36,14 +40,17 @@ public class BootDashModelManager implements Disposable {
 
 	private LiveSet<BootDashModel> models;
 	private Map<String, BootDashModel> modelsPerTargetId;
-	private LiveExpression<Set<RunTarget>> targets;
+	private ObservableSet<RunTarget> targets;
 	private RunTargetChangeListener targetListener;
 	private ListenerList elementStateListeners = new ListenerList();
 	private ElementStateListener upstreamElementStateListener;
-	private BootDashModelContext context;
 
-	public BootDashModelManager(BootDashModelContext context, LiveExpression<Set<RunTarget>> targets) {
+	private BootDashModelContext context;
+	private BootDashViewModel viewModel;
+
+	public BootDashModelManager(BootDashModelContext context, BootDashViewModel viewModel, ObservableSet<RunTarget> targets) {
 		this.context = context;
+		this.viewModel = viewModel;
 		this.targets = targets;
 	}
 
@@ -56,15 +63,17 @@ public class BootDashModelManager implements Disposable {
 		return models;
 	}
 
-	class RunTargetChangeListener implements ValueListener<Set<RunTarget>> {
+	class RunTargetChangeListener implements ValueListener<ImmutableSet<RunTarget>> {
 
 		@Override
-		public void gotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> actualRunTargets) {
+		public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> actualRunTargets) {
 			synchronized (modelsPerTargetId) {
 				Map<String, RunTarget> currentTargetsPerId = new LinkedHashMap<String, RunTarget>();
 				if (actualRunTargets != null) {
 					for (RunTarget runTarget : actualRunTargets) {
-						currentTargetsPerId.put(runTarget.getId(), runTarget);
+						String id = runTarget.getId();
+						Assert.isNotNull(id);
+						currentTargetsPerId.put(id, runTarget);
 					}
 				}
 
@@ -77,7 +86,7 @@ public class BootDashModelManager implements Disposable {
 
 				for (Entry<String, RunTarget> entry : currentTargetsPerId.entrySet()) {
 					if (modelsPerTargetId.get(entry.getKey()) == null) {
-						BootDashModel model = entry.getValue().createElementsTabelModel(context);
+						BootDashModel model = entry.getValue().createElementsTabelModel(context, viewModel);
 						if (model != null) {
 							modelsPerTargetId.put(entry.getKey(), model);
 							hasChanged = true;

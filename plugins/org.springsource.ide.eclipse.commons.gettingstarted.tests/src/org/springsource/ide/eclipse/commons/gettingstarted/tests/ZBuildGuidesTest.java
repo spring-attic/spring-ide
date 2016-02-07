@@ -28,6 +28,8 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.GithubRepoContent;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportUtils;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
@@ -52,13 +54,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 	// alphabetically.
 
 	private CodeSet codeset;
-	private BuildType buildType;
+	private ImportStrategy importStrategy;
 
-	public ZBuildGuidesTest(GithubRepoContent guide, CodeSet codeset, BuildType buildType) {
+	public ZBuildGuidesTest(GithubRepoContent guide, CodeSet codeset, ImportStrategy importStrategy) {
 		super(guide);
-		setName(getName()+"-"+codeset.getName()+"-"+buildType);
+		setName(getName()+"-"+codeset.getName()+"-"+importStrategy);
 		this.codeset = codeset;
-		this.buildType = buildType;
+		this.importStrategy = importStrategy;
 	}
 
 	@Override
@@ -89,12 +91,12 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 			System.out.println("=== codeset build test ===");
 			System.out.println("guide   : "+guide.getName());
 			System.out.println("codeset : "+codeset.getName());
-			System.out.println("type    : "+buildType);
+			System.out.println("type    : "+importStrategy);
 			System.out.println();
 
 			ImportConfiguration importConf = ImportUtils.importConfig(guide, codeset);
 			String projectName = importConf.getProjectName();
-			final IRunnableWithProgress importOp = buildType.getImportStrategy().createOperation(importConf);
+			final IRunnableWithProgress importOp = importStrategy.createOperation(importConf);
 //			buildJob(new GradleRunnable("import "+guide.getName() + " " + codeset.getName() + " "+buildType) {
 //				@Override
 //				public void doit(IProgressMonitor mon) throws Exception {
@@ -133,12 +135,13 @@ public class ZBuildGuidesTest extends GuidesTestCase {
 					if (zipLooksOk(g)) {
 						//Avoid running build tests for zips that look like they have 'missing parts'
 						for (CodeSet cs : g.getCodeSets()) {
-							List<BuildType> buildTypes = cs.getBuildTypes();
-							for (BuildType bt : buildTypes) {
-								//Don't run tests for things we haven't yet implemented support for.
-								if (bt.getImportStrategy().isSupported()) {
-									GuidesTestCase test = new ZBuildGuidesTest(g, cs, bt);
-									suite.addTest(test);
+							for (BuildType bt : cs.getBuildTypes()) {
+								for (ImportStrategy is : bt.getImportStrategies()) {
+									//Don't run tests for things we haven't yet implemented support for.
+									if (is.isSupported()) {
+										GuidesTestCase test = new ZBuildGuidesTest(g, cs, is);
+										suite.addTest(test);
+									}
 								}
 							}
 						}

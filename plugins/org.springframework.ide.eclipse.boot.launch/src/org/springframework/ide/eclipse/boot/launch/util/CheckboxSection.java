@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.util;
 
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,6 +34,8 @@ public class CheckboxSection extends WizardPageSection {
 	private Button button;
 
 	private SelectionModel<Boolean> model;
+	private boolean grabVer = false;
+	private boolean grabHor = false;
 
 	public CheckboxSection(IPageWithSections owner, SelectionModel<Boolean> model, String label) {
 		super(owner);
@@ -40,10 +43,21 @@ public class CheckboxSection extends WizardPageSection {
 		this.label = label;
 	}
 
+	public CheckboxSection grabHor(boolean v) {
+		grabHor = v;
+		return this;
+	}
+
+	public CheckboxSection grabVer(boolean v) {
+		grabVer = v;
+		return this;
+	}
+
 	@Override
 	public void createContents(Composite page) {
 		button = new Button(page, SWT.CHECK);
 		button.setText(label);
+		GridDataFactory.fillDefaults().grab(grabHor, grabVer).applyTo(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				model.selection.setValue(button.getSelection());

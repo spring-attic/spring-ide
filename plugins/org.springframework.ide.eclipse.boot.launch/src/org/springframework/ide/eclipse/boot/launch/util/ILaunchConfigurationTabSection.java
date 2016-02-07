@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.launch.util;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
@@ -36,6 +37,6 @@ public interface ILaunchConfigurationTabSection extends IPageSection {
 	 * This state is used by launch config editor to properly enable/disable
 	 * the 'revert' and 'apply' buttons.
 	 */
-	LiveVariable<Boolean> getDirtyState();
+	LiveExpression<Boolean> getDirtyState();
 
 }

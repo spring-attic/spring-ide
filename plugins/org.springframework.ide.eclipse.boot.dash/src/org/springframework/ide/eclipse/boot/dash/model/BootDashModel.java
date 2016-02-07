@@ -1,113 +1,63 @@
-/*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Pivotal, Inc. - initial API and implementation
- *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import org.eclipse.core.runtime.ListenerList;
+import java.util.Comparator;
+
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
-public abstract class BootDashModel {
+public interface BootDashModel {
 
-	public enum State {
-		READY,
-		LOADING
+	interface ModelStateListener {
+		void stateChanged(BootDashModel model);
 	}
 
-	private RunTarget target;
-
-	private State state = State.READY;
-
-	public BootDashModel(RunTarget target) {
-		super();
-		this.target = target;
+	interface ElementStateListener {
+		/**
+		 * Called when something about the element has changed.
+		 * <p>
+		 * Note this doesn't get called when (top-level) elements are
+		 * added / removed to the model. Only when some property of
+		 * the element itself has changed.
+		 * <p>
+		 * Note: think of the 'children' of an element as a propery of its parent element.
+		 * So, if a child is added/removed to/from an element then the element
+		 * itself will receive a stateChanged event.
+		 */
+		void stateChanged(BootDashElement e);
 	}
 
-	public RunTarget getRunTarget() {
-		return this.target;
-	}
+	RunTarget getRunTarget();
 
-	ListenerList elementStateListeners = new ListenerList();
+	ObservableSet<BootDashElement> getElements();
 
-	private ListenerList modelStateListeners = new ListenerList();
-
-	public void notifyElementChanged(BootDashElement element) {
-		for (Object l : elementStateListeners.getListeners()) {
-			((ElementStateListener) l).stateChanged(element);
-		}
-	}
-
-	abstract public LiveSet<BootDashElement> getElements();
-
-	abstract public BootDashModelConsoleManager getElementConsoleManager();
+	BootDashModelConsoleManager getElementConsoleManager();
 
 	/**
 	 * When no longer needed the model should be disposed, otherwise it will
 	 * continue listening for changes to the workspace in order to keep itself
 	 * in synch.
 	 */
-	abstract public void dispose();
+	void dispose();
 
 	/**
 	 * Trigger manual model refresh.
 	 */
-	abstract public void refresh();
+	void refresh(UserInteractions ui);
 
-	/**
-	 * Returns the state of the model
-	 * @return
-	 */
-	public synchronized State getState() {
-		return state;
-	}
+	void addElementStateListener(BootDashModel.ElementStateListener l);
 
-	protected final synchronized void setState(State newState) {
-		if (state != newState) {
-			state = newState;
-			for (Object l : modelStateListeners.getListeners()) {
-				((ModelStateListener) l).stateChanged(this);
-			}
-		}
-	}
+	void removeElementStateListener(BootDashModel.ElementStateListener l);
 
-	public void addElementStateListener(ElementStateListener l) {
-		elementStateListeners.add(l);
-	}
+	void addModelStateListener(BootDashModel.ModelStateListener l);
 
-	public void removeElementStateListener(ElementStateListener l) {
-		elementStateListeners.remove(l);
-	}
+	void removeModelStateListener(BootDashModel.ModelStateListener l);
 
-	public void addModelStateListener(ModelStateListener l) {
-		modelStateListeners.add(l);
-	}
+	BootDashViewModel getViewModel();
 
-	public void removeModelStateListener(ModelStateListener l) {
-		modelStateListeners.remove(l);
-	}
+	void notifyElementChanged(BootDashElement element);
 
-	public interface ElementStateListener {
-		/**
-		 * Called when something about the element has changed.
-		 * <p>
-		 * Note this doesn't get called when elements are added / removed etc.
-		 * Only when some property of the element itself has changed.
-		 */
-		void stateChanged(BootDashElement e);
-	}
+	RefreshState getRefreshState();
 
-	public interface ModelStateListener {
-		/**
-		 * Called when the model state has changed
-		 */
-		void stateChanged(BootDashModel model);
-	}
+	Comparator<BootDashElement> getElementComparator();
 
 }

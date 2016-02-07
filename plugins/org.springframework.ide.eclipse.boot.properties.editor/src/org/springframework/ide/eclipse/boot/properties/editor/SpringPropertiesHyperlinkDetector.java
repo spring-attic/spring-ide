@@ -24,6 +24,8 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.PartInitException;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 
 /**
  * @author Kris De Volder
@@ -68,9 +70,9 @@ public class SpringPropertiesHyperlinkDetector extends AbstractHyperlinkDetector
 	}
 
 	private static final IHyperlink[] NO_LINKS = null; //Caller expects null rather than empty array
-	private IPropertyHoverInfoProvider engine;
+	private HoverInfoProvider engine;
 
-	public SpringPropertiesHyperlinkDetector(IPropertyHoverInfoProvider engine) {
+	public SpringPropertiesHyperlinkDetector(HoverInfoProvider engine) {
 		this.engine = engine;
 	}
 

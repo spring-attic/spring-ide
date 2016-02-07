@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
 import java.util.Arrays;
@@ -17,7 +18,9 @@ import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,9 +28,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -37,7 +44,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  */
 public class BootProjectTestHarness {
 
-	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 3*60*1000; // long, may download maven dependencies
+	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 5*60*1000; // long, may download maven dependencies
 
 	private IWorkspace workspace;
 
@@ -54,6 +61,16 @@ public class BootProjectTestHarness {
 		};
 	}
 
+	public static WizardConfigurer withImportStrategy(final String id) {
+		final ImportStrategy is = ImportStrategies.withId(id);
+		Assert.isNotNull(is);
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				wizard.setImportStrategy(is);
+			}
+		};
+	}
+
 	public static WizardConfigurer withStarters(final String... ids) {
 		if (ids.length>0) {
 			return new WizardConfigurer() {
@@ -65,6 +82,33 @@ public class BootProjectTestHarness {
 			};
 		}
 		return WizardConfigurer.NULL;
+	}
+
+	public static WizardConfigurer setPackage(final String pkgName) {
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				wizard.getStringInput("packageName").setValue(pkgName);
+			}
+		};
+	}
+
+	/**
+	 * @return A wizard configurer that ensures the selected 'boot version' is exactly
+	 * a given version of boot.
+	 */
+	public static WizardConfigurer bootVersion(final String wantedVersion) throws Exception {
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				for (RadioInfo option : bootVersionRadio.getRadios()) {
+					if (option.getValue().equals(wantedVersion)) {
+						bootVersionRadio.setValue(option);
+						return;
+					}
+				}
+				fail("The wanted bootVersion '"+wantedVersion+"'is not found in the wizard");
+			}
+		};
 	}
 
 	/**
@@ -127,7 +171,7 @@ public class BootProjectTestHarness {
 		final Job job = new Job("Create boot project '"+projectName+"'") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel();
+					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
 					wizard.allowUIThread(true);
 					wizard.getProjectName().setValue(projectName);
 					wizard.getArtifactId().setValue(projectName);
@@ -146,27 +190,43 @@ public class BootProjectTestHarness {
 				}
 			}
 		};
-		job.setRule(workspace.getRuleFactory().buildRule());
+		//job.setRule(workspace.getRuleFactory().buildRule());
 		job.schedule();
 
-		new ACondition() {
+		waitForImportJob(getProject(projectName), job);
+		return getProject(projectName);
+	}
+
+	public static void waitForImportJob(final IProject project, final Job job) throws Exception {
+		new ACondition("Wait for import of "+project.getName(), BOOT_PROJECT_CREATION_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
 				assertOk(job.getResult());
-				StsTestUtil.assertNoErrors(getProject(projectName));
+				StsTestUtil.assertNoErrors(project);
 				return true;
 			}
-
-		}.waitFor(BOOT_PROJECT_CREATION_TIMEOUT);
-		return getProject(projectName);
+		};
 	}
 
 	public IProject getProject(String projectName) {
 		return workspace.getRoot().getProject(projectName);
 	}
 
+	public static void buildMavenProject(IProject p) throws CoreException {
+		ISpringBootProject bp = SpringBootCore.create(p);
+		Job job = bp.updateProjectConfiguration();
+		if (job!=null) {
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				throw ExceptionUtil.coreException(e);
+			}
+		}
+		bp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+	}
+
 	public static void assertOk(IStatus result) throws Exception {
-		if (!result.isOK()) {
+		if (result==null || !result.isOK()) {
 			throw ExceptionUtil.coreException(result);
 		}
 	}

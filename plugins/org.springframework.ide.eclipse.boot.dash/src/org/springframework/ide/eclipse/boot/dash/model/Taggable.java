@@ -14,23 +14,23 @@ import java.util.LinkedHashSet;
 
 /**
  * Interface for taggable items
- * 
+ *
  * @author Alex Boyko
  *
  */
 public interface Taggable {
-	
+
 	/**
 	 * Returns an ordered set of string tags
 	 * @return array of tags
 	 */
 	LinkedHashSet<String> getTags();
-	
-	
+
+
 	/**
 	 * Sets an ordered set of new tags
 	 * @param newTags new tags
 	 */
 	void setTags(LinkedHashSet<String> newTags);
-	
+
 }

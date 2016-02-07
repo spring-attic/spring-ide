@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,19 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 
 /**
  * Refreshes the application instances.
@@ -33,29 +31,30 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
  */
 public class AppInstancesRefreshOperation extends CloudOperation {
 
-	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model) {
+	private List<CFApplication> appsToLookUp;
+
+	public AppInstancesRefreshOperation(CloudFoundryBootDashModel model, List<CFApplication> appsToLookUp) {
 		super("Refreshing running state of applications in: " + model.getRunTarget().getName(), model);
+		this.appsToLookUp = appsToLookUp;
 	}
 
 	@Override
-	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		List<CloudAppInstances> appInstances = this.model.getAppCache().getAppInstances();
-
-		List<CloudApplication> appsToLookUp = new ArrayList<CloudApplication>();
-		for (CloudAppInstances instances : appInstances) {
-			CloudApplication app = instances.getApplication();
-			if (app != null) {
-				appsToLookUp.add(app);
+	protected void doCloudOp(IProgressMonitor monitor) throws Exception {
+		this.model.setRefreshState(RefreshState.loading("Fetching App Instances..."));
+		try {
+			if (!appsToLookUp.isEmpty()) {
+				long timeToWait = 1000*30;
+				Map<CFApplication, ApplicationStats> stats = model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait);
+				for (Entry<CFApplication, ApplicationStats> entry : stats.entrySet()) {
+					CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
+					this.model.updateApplication(instances);
+				}
 			}
+			model.setRefreshState(RefreshState.READY);
+		} catch (Exception e) {
+			this.model.setRefreshState(RefreshState.error(e));
+			throw e;
 		}
-		if (!appsToLookUp.isEmpty()) {
-			Map<CloudApplication, ApplicationStats> stats = requests.getApplicationStats(appsToLookUp);
-			for (Entry<CloudApplication, ApplicationStats> entry : stats.entrySet()) {
-				CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
-				this.model.updateApplication(instances);
-			}
-		}
-		model.internalSetState(State.READY);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

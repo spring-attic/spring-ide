@@ -11,9 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
  * A run target type represents a type of 'deployment environment' to which
@@ -22,7 +22,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
  *
  * @author Kris De Volder
  */
-public interface RunTargetType extends Nameable, Comparable<RunTargetType> {
+public interface RunTargetType extends Nameable {
 
 	/**
 	 * @return Whether it is possible to create instances of this type. Not all
@@ -36,7 +36,7 @@ public interface RunTargetType extends Nameable, Comparable<RunTargetType> {
 	 * of this method. When called it opens a UI allowing the user to create a new
 	 * run target.
 	 */
-	void openTargetCreationUi(LiveSet<RunTarget> targets);
+	void openTargetCreationUi(LiveSetVariable<RunTarget> targets);
 
 	/**
 	 *
@@ -44,8 +44,6 @@ public interface RunTargetType extends Nameable, Comparable<RunTargetType> {
 	 * type cannot be instantiated.
 	 */
 	RunTarget createRunTarget(TargetProperties properties);
-
-	int compareTo(RunTargetType type);
 
 	ImageDescriptor getIcon();
 

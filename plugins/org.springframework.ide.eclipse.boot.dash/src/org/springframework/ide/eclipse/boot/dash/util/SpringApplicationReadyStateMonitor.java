@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
@@ -25,7 +26,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  * or the application enters the 'ready' state.
  * <p>
  * When the application reaches ready state then its 'ready' LiveExp will change value from
- * false to true. Clients who which to respond to this 'event' can attach a listener to
+ * false to true. Clients who wish to respond to this 'event' can attach a listener to
  * the livexp.
  *
  * @author Kris De Volder
@@ -58,7 +59,7 @@ public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
 		job.schedule();
 	}
 
-	public LiveVariable<Boolean> getReady() {
+	public LiveExpression<Boolean> getReady() {
 		return ready;
 	}
 

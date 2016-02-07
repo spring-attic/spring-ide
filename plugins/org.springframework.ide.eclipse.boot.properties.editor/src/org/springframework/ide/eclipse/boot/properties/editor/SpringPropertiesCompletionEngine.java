@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Provider;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jface.fieldassist.ContentProposal;
@@ -33,14 +35,9 @@ import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.ProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
-import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.boot.properties.editor.util.PrefixFinder;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -48,12 +45,19 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
+import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 
 /**
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvider, ICompletionEngine {
+public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICompletionEngine {
 
 	private boolean preferLowerCaseEnums = true; //might make sense to make this user configurable
 
@@ -128,7 +132,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 				return SpringPropertiesEditorPlugin.getIndexManager().get(jp);
 			}
 		};
-		setDocumentContextFinder(DocumentContextFinder.DEFAULT);
+		setDocumentContextFinder(DocumentContextFinders.PROPS_DEFAULT);
 		this.typeUtil = new TypeUtil(jp);
 
 //		System.out.println(">>> spring properties metadata loaded "+index.size()+" items===");
@@ -205,7 +209,7 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 							edits.delete(navOffset+1, offset);
 							edits.insert(offset, prop.getName()+postFix);
 							proposals.add(
-								completionFactory.simpleProposal(prop.getName(), score, edits)
+								completionFactory.beanProperty(doc, null, type, prefix, prop, score, edits, typeUtil)
 							);
 						}
 					}
@@ -337,13 +341,13 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 
 	private int findValueStart(IDocument doc, int pos) {
 		try {
-			pos = skipWhiteSpace(doc, pos);
+			pos = DocumentUtil.skipWhiteSpace(doc, pos);
 			if (pos>=0) {
 				char assign = doc.getChar(pos);
 				if (!isAssign(assign)) {
 					return pos; //For the case where key and value are separated by whitespace instead of assignment
 				}
-				pos = skipWhiteSpace(doc, pos+1);
+				pos = DocumentUtil.skipWhiteSpace(doc, pos+1);
 				if (pos>=0) {
 					return pos;
 				}
@@ -497,21 +501,6 @@ public class SpringPropertiesCompletionEngine implements IPropertyHoverInfoProvi
 
 	public Provider<FuzzyMap<PropertyInfo>> getIndexProvider() {
 		return indexProvider;
-	}
-
-	public static int skipWhiteSpace(IDocument doc, int pos) {
-		try {
-			int end = doc.getLength();
-			while (pos<end&&Character.isWhitespace(doc.getChar(pos))) {
-				pos++;
-			}
-			if (pos<end) {
-				return pos;
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
 	}
 
 	public void setDocumentContextFinder(DocumentContextFinder it) {

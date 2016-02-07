@@ -18,6 +18,10 @@ import java.util.Map;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.ApplicationLog;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -26,7 +30,8 @@ import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
-public class ApplicationLogConsole extends MessageConsole implements ApplicationLogListener {
+@SuppressWarnings("restriction")
+public class ApplicationLogConsole extends MessageConsole implements ApplicationLogListener, IPropertyChangeListener {
 
 	private Map<LogType, IOConsoleOutputStream> activeStreams = new HashMap<LogType, IOConsoleOutputStream>();
 
@@ -74,12 +79,11 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 			IOConsoleOutputStream stream = getStream(type);
 
 			try {
-				if (stream != null) {
+				if (stream != null && !stream.isClosed()) {
 					message = format(message);
 					stream.write(message);
 					return true;
 				}
-
 			} catch (IOException e) {
 				BootDashActivator.log(e);
 			}
@@ -175,4 +179,28 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 	public void onError(Throwable exception) {
 		writeApplicationLog(exception.getMessage(), LogType.CFSTDERROR);
 	}
+
+	@Override
+	protected void init() {
+		super.init();
+		JFaceResources.getFontRegistry().addListener(this);
+	}
+
+	@Override
+	protected void dispose() {
+		JFaceResources.getFontRegistry().removeListener(this);
+		super.dispose();
+	}
+
+	/**
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		String property = evt.getProperty();
+		if (property.equals(IDebugUIConstants.PREF_CONSOLE_FONT)) {
+			setFont(JFaceResources.getFont(IDebugUIConstants.PREF_CONSOLE_FONT));
+		}
+	}
+
 }

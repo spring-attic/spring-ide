@@ -41,7 +41,7 @@ public abstract class AbstractRunTarget implements RunTarget {
 
 	@Override
 	public String toString() {
-		return "RunTarget("+id+")";
+		return "RunTarget("+getType().getName()+", "+id+")";
 	}
 
 	@Override
@@ -49,6 +49,7 @@ public abstract class AbstractRunTarget implements RunTarget {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -66,6 +67,11 @@ public abstract class AbstractRunTarget implements RunTarget {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
 		return true;
 	}
 
@@ -77,15 +83,6 @@ public abstract class AbstractRunTarget implements RunTarget {
 	@Override
 	public RunTargetType getType() {
 		return type;
-	}
-
-	@Override
-	public int compareTo(RunTarget other) {
-		int typeComp = other.getType().compareTo(this.getType());
-		if (typeComp!=0) {
-			return typeComp;
-		}
-		return this.getId().compareTo(other.getId());
 	}
 
 }

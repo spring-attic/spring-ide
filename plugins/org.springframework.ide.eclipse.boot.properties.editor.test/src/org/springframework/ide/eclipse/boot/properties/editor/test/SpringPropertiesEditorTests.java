@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -62,7 +64,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor("");
+		MockPropertiesEditor editor = new MockPropertiesEditor("");
 		ICompletionProposal[] completions = getCompletions(editor);
 		assertTrue(completions.length>100); //should be many proposals
 		String previous = null;
@@ -135,7 +137,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testHoverInfos() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"#foo\n" +
 				"# bar\n" +
 				"server.port=8080\n" +
@@ -143,9 +145,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		//Case 1: an 'exact' match of the property is in the hover region
 		assertHoverText(editor, "server.",
-				"<b>server.port</b>"+
-				"<br><a href=\"type%2Fjava.lang.Integer\">java.lang.Integer</a>"+
-				"<br><br>Server HTTP port"
+				"<b>server.port</b>"
 		);
 		//Case 2: an object/map property has extra text after the property name
 		assertHoverText(editor, "logging.", "<b>logging.level</b>");
@@ -153,7 +153,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testHoverInfosWithSpaces() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"#foo\n" +
 				"# bar\n"+
 				"\n" +
@@ -162,9 +162,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 		//Case 1: an 'exact' match of the property is in the hover region
 		assertHoverText(editor, "server.",
-				"<b>server.port</b>"+
-				"<br><a href=\"type%2Fjava.lang.Integer\">java.lang.Integer</a>"+
-				"<br><br>Server HTTP port"
+				"<b>server.port</b>"
 		);
 		//Case 2: an object/map property has extra text after the property name
 		assertHoverText(editor, "logging.", "<b>logging.level</b>");
@@ -173,7 +171,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testHoverLongAndShort() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		data("server.port.fancy", BOOLEAN, 8080, "Whether the port is fancy.");
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port=8080\n" +
 				"server.port.fancy=true\n"
 		);
@@ -183,36 +181,30 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 
 	public void testPredefinedProject() throws Exception {
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IType type = JavaCore.create(p).findType("demo.DemoApplication");
 		assertNotNull(type);
 	}
 
 	public void testEnableApt() throws Throwable {
-		IProject p = createPredefinedProject("demo-live-metadata");
+		IProject p = createPredefinedMavenProject("demo-live-metadata");
 		IJavaProject jp = JavaCore.create(p);
 
 		//Check some assumptions about the initial state of the test project (if these checks fail then
 		// the test may be 'vacuous' since the things we are testing for already exist beforehand.
-		assertFalse(AptUtils.isAptEnabled(jp));
-		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
-		assertFalse(metadataFile.exists());
-
-		AptUtils.configureApt(jp);
-		buildProject(jp);
-
 		assertTrue(AptUtils.isAptEnabled(jp));
-		assertTrue(metadataFile.exists()); //apt should create the json metadata file during project build.
+		IFile metadataFile = JavaProjectUtil.getOutputFile(jp, StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS[0]);
+		assertTrue(metadataFile.exists());
 		assertContains("\"name\": \"foo.counter\"", getContents(metadataFile));
 	}
 
 	public void testHyperlinkTargets() throws Exception {
 		System.out.println(">>> testHyperlinkTargets");
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port=888\n" +
 				"spring.datasource.login-timeout=1000\n" +
 				"flyway.init-sqls=a,b,c\n"
@@ -233,11 +225,11 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testHyperlinkTargetsLoggingLevel() throws Exception {
 		System.out.println(">>> testHyperlinkTargetsLoggingLevel");
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"logging.level.com.acme=INFO\n"
 		);
 		assertLinkTargets(editor, "level",
@@ -248,7 +240,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcile() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port=8080\n" +
 				"server.port.extracrap=8080\n" +
 				"logging.level.com.acme=INFO\n" +
@@ -264,12 +256,12 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testReconcilePojoArray() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"token.bad.guy=problem\n"+
 				"volder.foo.list[0].name=Kris\n" +
 				"volder.foo.list[0].description=Kris\n" +
@@ -289,13 +281,16 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoArrayCompletions() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
 
 		assertCompletionsVariations("volder.foo.l<*>", "volder.foo.list[<*>");
-		assertCompletionsDisplayString("volder.foo.list[0].<*>", "name", "description", "roles");
+		assertCompletionsDisplayString("volder.foo.list[0].<*>",
+				"name : String",
+				"description : String",
+				"roles : List<String>");
 
 		assertCompletionsVariations("volder.foo.list[0].na<*>",
 				"volder.foo.list[0].name=<*>"
@@ -310,7 +305,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileArrayNotation() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"borked=bad+\n" + //token problem, to make sure reconciler is working
 				"security.user.role[0]=foo\n" +
 				"security.user.role[${one}]=foo"
@@ -323,7 +318,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileArrayNotationError() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"security.user.role[bork]=foo\n" +
 				"security.user.role[1=foo\n" +
 				"security.user.role[1]crap=foo\n" +
@@ -343,7 +338,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testRelaxedNameReconciling() throws Exception {
 		data("connection.remote-host", "java.lang.String", "service.net", null);
 		data("foo-bar.name", "java.lang.String", null, null);
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"bork=foo\n" +
 				"connection.remote-host=alternate.net\n" +
 				"connection.remoteHost=alternate.net\n" +
@@ -361,7 +356,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		// around because the relaxed names aren't same length as the
 		// canonical ids.
 		data("foo-bar-zor.enabled", "java.lang.Boolean", null, null);
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"fooBarZor.enabled=notBoolean\n" +
 				"fooBarZor.enabled.subprop=true\n"
 		);
@@ -378,7 +373,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileValues() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port=badPort\n" +
 				"liquibase.enabled=nuggels"
 		);
@@ -390,7 +385,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testNoReconcileInterpolatedValues() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port=${port}\n" +
 				"liquibase.enabled=nuggels"
 		);
@@ -402,7 +397,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileValuesWithSpaces() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port  =   badPort\n" +
 				"liquibase.enabled   nuggels  \n" +
 				"liquibase.enabled   : snikkers"
@@ -418,7 +413,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testReconcileWithExtraSpaces() throws Exception {
 		defaultTestData();
 		//Same test as previous but with extra spaces to make things more confusing
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"   server.port   =  8080  \n" +
 				"\n" +
 				"  server.port.extracrap = 8080\n" +
@@ -434,7 +429,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumPropertyCompletion() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -452,13 +447,13 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumPropertyReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 
 		data("foo.color", "demo.Color", null, "A foonky colour");
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"foo.color=BLUE\n"+
 				"foo.color=RED\n"+
 				"foo.color=GREEN\n"+
@@ -473,7 +468,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapValueCompletion() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -490,14 +485,14 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapValueReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
 
 		assertNotNull(jp.findType("demo.Color"));
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"foo.name-colors.jacket=BLUE\n" +
 				"foo.name-colors.hat=RED\n" +
 				"foo.name-colors.pants=GREEN\n" +
@@ -509,7 +504,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumMapKeyCompletion() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
@@ -525,7 +520,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"foo.color-names.red=<*>"
 		);
 		assertCompletionsDisplayString("foo.color-names.<*>",
-				"red", "green", "blue"
+				"red : String", "green : String", "blue : String"
 		);
 		assertCompletionsVariations("foo.color-names.B<*>",
 				"foo.color-names.BLUE=<*>"
@@ -542,18 +537,18 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"foo.color-data.BLUE.<*>"
 		);
 		assertCompletionsDisplayString("foo.color-data.<*>",
-				"blue", "green", "red"
+				"blue : demo.ColorData", "green : demo.ColorData", "red : demo.ColorData"
 		);
 	}
 
 	public void testEnumMapKeyReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"foo.color-names.RED=Rood\n"+
 				"foo.color-names.GREEN=Groen\n"+
 				"foo.color-names.BLUE=Blauw\n" +
@@ -567,7 +562,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoCompletions() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -576,8 +571,15 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("foo.dat<*>", "foo.data.<*>");
 
 		assertCompletionsDisplayString("foo.data.",
-				"wavelen", "name", "next", "nested", "children",
-				"mapped-children", "color-children", "tags"
+				"wavelen : double",
+				"name : String",
+				"next : demo.Color[RED, GREEN, BLUE]",
+				"nested : demo.ColorData",
+				"children : List<demo.ColorData>",
+				"mapped-children : Map<String, demo.ColorData>",
+				"color-children : Map<demo.Color[RED, GREEN, BLUE], demo.ColorData>",
+				"tags : List<String>",
+				"funky : boolean"
 		);
 
 		assertCompletionsVariations("foo.data.wav<*>", "foo.data.wavelen=<*>");
@@ -595,13 +597,13 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 			"foo.data.bogus=Something\n" +
 			"foo.data.wavelen=3.0\n" +
 			"foo.data.wavelen=not a double\n" +
@@ -629,7 +631,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Interpretation of '.' changes depending on the domain type (i.e. when domain type is
 		//is a simple type got which '.' navigation is invalid then the '.' is 'eaten' by the key.
 
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
@@ -640,7 +642,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("enummap", "java.util.Map<java.lang.String,demo.Color>", null, "map of enums");
 		data("pojomap", "java.util.Map<java.lang.String,demo.ColorData>", null, "map of pojos");
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"atommap.something.with.dots=Vaporize\n" +
 				"atommap.something.with.bracket[0]=Brackelate\n" +
 				"objectmap.other.with.dots=Objectify\n" +
@@ -669,13 +671,13 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		//Similar to testMapKeyDotInterpretation but this time maps are not attached to property
 		// directly but via a pojo property
 
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"foo.color-names.BLUE.dot=Blauw\n"+
 				"foo.color-data.RED.name=Good\n"+
 				"foo.color-data.GREEN.bad=Bad\n"+
@@ -695,14 +697,14 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.ClothingSize"));
 
 		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
 
-		MockEditor editor = new MockEditor(
+		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"simple.pants.size=NOT_A_SIZE\n"+
 				"simple.pants.size=EXTRA_SMALL\n"+
 				"simple.pants.size=extra-small\n"+
@@ -713,7 +715,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"NOT_A_SIZE|ClothingSize"
 		);
 
-		editor = new MockEditor(
+		editor = new MockPropertiesEditor(
 				"foo.color-names.red=Rood\n"+
 				"foo.color-names.green=Groen\n"+
 				"foo.color-names.blue=Blauw\n" +
@@ -725,7 +727,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"blue.bad|Color" //because value type is not dotable the dots will be taken to be part of map key
 		);
 
-		editor = new MockEditor(
+		editor = new MockPropertiesEditor(
 				"foo.color-data.red.next=green\n" +
 				"foo.color-data.red.next=not a color\n" +
 				"foo.color-data.red.bogus=green\n" +
@@ -738,7 +740,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumsInLowerCaseContentAssist() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.ClothingSize"));
@@ -781,7 +783,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testNavigationProposalAfterRelaxedPropertyName() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -790,7 +792,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testValueProposalAssignedToRelaxedPropertyName() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -799,6 +801,103 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertCompletion("relaxed-color=b<*>", "relaxed-color=blue<*>");
 		assertCompletion("relaxedColor=b<*>", "relaxedColor=blue<*>");
 	}
+
+	public void testReconcileDeprecatedProperty() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertProblems(editor,
+				"error.path|Deprecated: Use 'server.error.path'"
+				//no other problems
+		);
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertProblems(editor,
+				"error.path|Deprecated: Use 'server.error.path' instead. Reason: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, "This is old.");
+		assertProblems(editor,
+				"error.path|Deprecated: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, null);
+		assertProblems(editor,
+				"error.path|Deprecated!"
+				//no other problems
+		);
+
+	}
+
+	public void testDeprecatedPropertyCompletion() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		data("server.error.path", "java.lang.String", null, "Path of the error controller.");
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertCompletionsDisplayString("error.pa<*>",
+				"server.error.path : String", // should be first because it is not deprecated, even though it is not as good a pattern match
+				"error.path : String"
+		);
+		//TODO: could we check that 'deprecated' completions are formatted with 'strikethrough font?
+		assertStyledCompletions("error.pa<*>",
+				StyledStringMatcher.plainFont("server.error.path : String"),
+				StyledStringMatcher.strikeout("error.path")
+		);
+	}
+
+	public void testDeprecatedPropertyHoverInfo() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertHoverText(editor, "path", "<s>error.path</s> -&gt; server.error.path");
+		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertHoverText(editor, "path", "<s>error.path</s> -&gt; server.error.path");
+		assertHoverText(editor, "path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, "This is old.");
+		assertHoverText(editor, "path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, null);
+		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+	}
+
+	public void testDeprecatedBeanPropertyReconcile() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"# comment\n" +
+				"foo.name=Old faithfull\n" +
+				"foo.new-name=New and fancy\n"
+		);
+		assertProblems(editor,
+				"name|Deprecated"
+		);
+	}
+
+	public void testDeprecatedBeanPropertyCompletions() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		assertStyledCompletions("foo.nam<*>",
+				StyledStringMatcher.plainFont("new-name : String"),
+				StyledStringMatcher.strikeout("name")
+		);
+	}
+
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

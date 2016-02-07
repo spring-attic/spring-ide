@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.metadata;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.metadata.MetadataPlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
@@ -50,7 +50,7 @@ Import-Package: org.aspectj.lang.annotation,
  org.springframework.web.bind.annotation;version="[4.0.0,4.3.0)",
  org.springframework.web.context;version="[4.0.0,4.3.0)",
  org.springframework.web.context.support;version="[4.0.0,4.3.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

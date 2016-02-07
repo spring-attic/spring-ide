@@ -18,52 +18,72 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
- * Runs {@link CloudApplicationOperation} in series
+ * Runs a list of {@link CloudApplicationOperation} in series
  */
 public class CompositeApplicationOperation extends CloudApplicationOperation {
 
-	private List<CloudApplicationOperation> operations;
+	private List<Operation<?>> operations;
 
-	private boolean resetConsole;
+	private RunState preferredInitialRunState;
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<CloudApplicationOperation> operations, boolean resetConsole) {
+			List<Operation<?>> operations, RunState preferredInitialRunState) {
 		super(opName, model, appName);
 		this.operations = operations;
-		this.resetConsole = resetConsole;
+		this.preferredInitialRunState = preferredInitialRunState;
 	}
 
-	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp, boolean resetConsole) {
+	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
+			List<Operation<?>> operations) {
+		this(opName, model, appName, operations, null);
+	}
+
+	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
 		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName);
 
-		this.operations = new ArrayList<CloudApplicationOperation>();
+		this.operations = new ArrayList<Operation<?>>();
 		this.operations.add(enclosedOp);
-		this.resetConsole = resetConsole;
+		setSchedulingRule(enclosedOp.getSchedulingRule());
 	}
 
 	@Override
-	public void addApplicationUpdateListener(ApplicationUpdateListener appUpdateNotifier) {
-		super.addApplicationUpdateListener(appUpdateNotifier);
-		for (CloudApplicationOperation op : operations) {
-			op.addApplicationUpdateListener(appUpdateNotifier);
+	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
+		super.addOperationEventHandler(eventHandler);
+		for (Operation<?> op : operations) {
+			if (op instanceof CloudApplicationOperation) {
+				((CloudApplicationOperation)op).addOperationEventHandler(eventHandler);
+			}
 		}
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		try {
-			// Run ops in series
-			if (resetConsole) {
-				resetAndShowConsole();
+
+			// Can only update the run state if the element exists. It's
+			// possible the operation is performing
+			// steps where element doesn't yet exist (e.g an operation is
+			// creating it)
+			if (preferredInitialRunState != null && getDashElement() != null) {
+				boolean checkTermination = true;
+				this.eventHandler.fireEvent(
+						eventFactory.getUpdateRunStateEvent(getDashElement(), preferredInitialRunState),
+						checkTermination);
 			}
-			for (CloudApplicationOperation op : operations) {
+
+			// Run ops in series
+			resetAndShowConsole();
+
+			for (Operation<?> op : operations) {
 				op.run(monitor);
 			}
+
 		} catch (Throwable t) {
 			if (!(t instanceof OperationCanceledException)) {
-				getAppUpdateListener().onError(t);
+				eventHandler.onError(appName, t);
 			}
 			throw t instanceof Exception ? (Exception) t : new CoreException(BootDashActivator.createErrorStatus(t));
 		}

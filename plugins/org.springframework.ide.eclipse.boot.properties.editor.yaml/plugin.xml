@@ -13,7 +13,7 @@
       </content-type>
       <file-association
             content-type="org.springframework.ide.eclipse.application.yml"
-            file-names="application.yml,bootstrap.yml">
+            file-names="application.yml,bootstrap.yml,application-dev.yml">
       </file-association>
    </extension>
 
@@ -21,84 +21,15 @@
          point="org.eclipse.ui.editors">
       <editor
             name="Spring Yaml Properties Editor"
-            icon="icons/spring_obj.gif"
+            icon="icons/spring_yml.png"
             class="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor"
             id="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor">
             <contentTypeBinding
                contentTypeId="org.springframework.ide.eclipse.application.yml"
             /> 
+            <contentTypeBinding
+               contentTypeId="org.dadacoalition.yedit.yamlsource"
+            /> 
       </editor>
    </extension>
-
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-            <command
-                  commandId="org.springframework.ide.eclipse.boot.properties.editor.yaml.enable"
-                  id="org.springframework.ide.eclipse.boot.properties.editor.yaml.enable"
-                  label="Enable Spring Yaml Editor"
-                  mnemonic="E">
-                  <visibleWhen
-                        checkEnabled="true">
-                  </visibleWhen>
-            </command>
-            <command
-                  commandId="org.springframework.ide.eclipse.boot.properties.editor.yaml.disable"
-                  id="org.springframework.ide.eclipse.boot.properties.editor.yaml.disable"
-                  label="Disable Spring Yaml Editor"
-                  mnemonic="D">
-                  <visibleWhen
-                        checkEnabled="true">
-                  </visibleWhen>
-            </command>
-      </menuContribution>
-   </extension>
-
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:enable,org.springframework.ide.eclipse.application.yml"
-            commandId="org.springframework.ide.eclipse.boot.properties.editor.yaml.enable">
-            <enabledWhen>
-              <and>
-	             <count value="1"/>
-	             <iterate>
-	           	   <adapt type="org.eclipse.core.resources.IResource">
-	           	      <test property="org.eclipse.core.resources.contentTypeId" 
-   	        			value="org.dadacoalition.yedit.yamlsource"/>"
-	           	   </adapt>
-	             </iterate>
-              </and>
-            </enabledWhen>
-      </handler>
-      <handler
-            class="org.springframework.ide.eclipse.boot.properties.editor.ui.ContentTypeEnablerDisabler:disable,org.springframework.ide.eclipse.application.yml"
-            commandId="org.springframework.ide.eclipse.boot.properties.editor.yaml.disable">
-            <enabledWhen>
-              <and>
-	             <count value="1"/>
-	             <iterate>
-	           	   <adapt type="org.eclipse.core.resources.IResource">
-	           	      <test property="org.eclipse.core.resources.contentTypeId" 
-   	        			value="org.springframework.ide.eclipse.application.yml"/>"
-	           	   </adapt>
-	             </iterate>
-              </and>
-            </enabledWhen>
-      </handler>
-   </extension>
-   
-  <extension
-        point="org.eclipse.ui.commands">
-     <command
-           id="org.springframework.ide.eclipse.boot.properties.editor.yaml.enable"
-           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Enable Spring Properties Editor"/>
-     <command
-           id="org.springframework.ide.eclipse.boot.properties.editor.yaml.disable"
-           categoryId="org.springframework.ide.eclipse.boot.properties.editor.category"
-           name="Disable Spring Properties Editor"/>
-  </extension>
-
 </plugin>

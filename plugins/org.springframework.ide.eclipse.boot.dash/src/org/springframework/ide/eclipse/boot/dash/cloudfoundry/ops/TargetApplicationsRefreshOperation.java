@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,12 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * This performs a "two-tier" refresh as fetching list of
@@ -41,50 +42,64 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
  */
 public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
-	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model) {
+	private UserInteractions ui;
+
+	public TargetApplicationsRefreshOperation(CloudFoundryBootDashModel model, UserInteractions ui) {
 		super("Refreshing list of Cloud applications for: " + model.getRunTarget().getName(), model);
+		this.ui = ui;
 	}
 
 	@Override
-	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		try {
+	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
+		if (model.getRunTarget().isConnected()) {
+			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
+			try {
 
-			// 1. Fetch basic list of applications. Should be the "faster" of
-			// the
-			// two refresh operations
+				// 1. Fetch basic list of applications. Should be the "faster" of
+				// the
+				// two refresh operations
 
-			List<CloudApplication> apps = requests.getApplicationsWithBasicInfo();
+				List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
 
-			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
-			if (apps != null) {
+				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
+				if (apps != null) {
 
-				Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
-						.getMapping();
+					Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
+							.getMapping();
 
-				for (CloudApplication app : apps) {
+					for (CFApplication app : apps) {
 
-					String projectName = existingProjectToAppMappings.get(app.getName());
-					IProject project = null;
-					if (projectName != null) {
-						project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-						if (project == null || !project.isAccessible()) {
-							project = null;
+						String projectName = existingProjectToAppMappings.get(app.getName());
+						IProject project = null;
+						if (projectName != null) {
+							project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+							if (project == null || !project.isAccessible()) {
+								project = null;
+							}
 						}
+
+						// No stats available at this stage. Just set stats to null
+						// for now.
+						updatedApplications.put(new CloudAppInstances(app, null), project);
 					}
-
-					// No stats available at this stage. Just set stats to null
-					// for now.
-					updatedApplications.put(new CloudAppInstances(app, null), project);
 				}
+
+				this.model.updateElements(updatedApplications);
+
+				// 2. Launch the slower app stats/instances refresh operation.
+				this.model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(this.model, apps));
+				this.model.getOperationsExecution(ui).runOpAsynch(new HealthCheckRefreshOperation(this.model));
+				model.setRefreshState(RefreshState.READY);
+			} catch (Exception e) {
+				/*
+				 * Failed to obtain applications list from CF
+				 */
+				model.updateElements(null);
+				model.setRefreshState(RefreshState.error(e));
+				throw e;
 			}
-
-			this.model.updateElements(updatedApplications);
-
-			// 2. Launch the slower app stats/instances refresh operation.
-			this.model.getOperationsExecution().runOpAsynch(new AppInstancesRefreshOperation(this.model));
-
-		} catch (Exception e) {
-			BootDashActivator.log(e);
+		} else {
+			model.updateElements(null);
 		}
 	}
 

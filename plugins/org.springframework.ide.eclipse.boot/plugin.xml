@@ -120,9 +120,18 @@
     <extension point="org.eclipse.ui.preferencePages">
 	 	<page
          category="org.springsource.ide.eclipse.commons.preferencePage"
+         class="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
+         id="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
+         name="Boot">
+   		</page>
+   	</extension>
+   	
+    <extension point="org.eclipse.ui.preferencePages">
+	 	<page
+         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
          class="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
          id="org.springframework.ide.eclipse.boot.ui.preferences.BootInstallPreferencePage"
-         name="Spring Boot">
+         name="CLI">
    		</page>
    	</extension>
    	

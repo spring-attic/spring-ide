@@ -11,13 +11,18 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
-import java.util.Set;
 
+import org.eclipse.jface.action.IAction;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Abstract super class for BootDash actions that operate on selections
@@ -27,18 +32,56 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  */
 public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 
+	private static final boolean DEBUG = false;//(""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 	private final MultiSelection<BootDashElement> selection;
-	private ValueListener<Set<BootDashElement>> selectionListener;
+	private ValueListener<ImmutableSet<BootDashElement>> selectionListener;
+	protected final BootDashViewModel model;
+	private ElementStateListener modelListener;
 
 	public AbstractBootDashElementsAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(ui);
-		this.selection = selection;
-		selection.getElements().addListener(selectionListener = new ValueListener<Set<BootDashElement>>() {
-			public void gotValue(LiveExpression<Set<BootDashElement>> exp,
-					Set<BootDashElement> selecteds) {
-				updateEnablement();
+		this(null, selection, ui);
+	}
+
+	public AbstractBootDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui) {
+		this(model, _selection, ui, IAction.AS_UNSPECIFIED);
+	}
+
+	public AbstractBootDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui, int style) {
+		super(ui, style);
+		this.model = model;
+		this.selection = _selection;
+		if (model!=null) {
+			model.addElementStateListener(modelListener = new ElementStateListener() {
+				public void stateChanged(BootDashElement e) {
+					debug("action '"+getText()+"' updating for element "+e);
+					if (selection.getValue().contains(e)) {
+						Display.getDefault().asyncExec(new Runnable() {
+							public void run() {
+								update();
+							}
+						});
+					}
+				}
+
+			});
+		}
+		selection.getElements().addListener(selectionListener = new ValueListener<ImmutableSet<BootDashElement>>() {
+			public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> selecteds) {
+				update();
 			}
 		});
+	}
+
+	public void update() {
+		updateEnablement();
+		updateVisibility();
 	}
 
 	/**
@@ -50,7 +93,11 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		this.setEnabled(selecteds.size()==1);
 	}
 
-	protected Collection<BootDashElement> getSelectedElements() {
+	public void updateVisibility() {
+		this.setVisible(getSelectedElements().size() > 0);
+	}
+
+	public Collection<BootDashElement> getSelectedElements() {
 		return selection.getValue();
 	}
 
@@ -62,5 +109,10 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		if (selectionListener!=null) {
 			selection.getElements().removeListener(selectionListener);
 		}
+		if (modelListener!=null) {
+			model.removeElementStateListener(modelListener);
+			modelListener = null;
+		}
+		super.dispose();
 	}
 }

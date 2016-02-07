@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -29,9 +28,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -57,16 +57,15 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private boolean canFinish = false;
 
-	private CloudFoundryTargetWizardModel wizardModel = new CloudFoundryTargetWizardModel();
+	private CloudFoundryTargetWizardModel wizardModel;
 
-	private EnableSpaceControlListener enableSpaceControlListener = null;
+	private EnableSpaceControlListener credentialsValidationListener = null;
 
 	private SetSpaceValListener setSpaceValListener = null;
-	private LiveSet<RunTarget> targets;
 
-	public CloudFoundryTargetWizardPage(LiveSet<RunTarget> targets) {
+	public CloudFoundryTargetWizardPage(CloudFoundryTargetWizardModel model) {
 		super("Add a Cloud Foundry Target");
-		this.targets = targets;
+		this.wizardModel = model;
 		setTitle("Add a Cloud Foundry Target");
 		setDescription("Enter credentials and a Cloud Foundry target URL.");
 
@@ -116,7 +115,11 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		passwordText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				wizardModel.setPassword(passwordText.getText());
+				try {
+					wizardModel.setPassword(passwordText.getText());
+				} catch (CannotAccessPropertyException e1) {
+					// Ignore. This will execute without exception
+				}
 			}
 		});
 
@@ -160,19 +163,16 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				// can be cancelled in the wizard's progress bar)
 				OrgsAndSpaces spaces = null;
 				try {
-					spaces = CloudFoundryUiUtil.getCloudSpaces(wizardModel, getWizard().getContainer());
+					spaces = wizardModel.resolveSpaces(getWizard().getContainer());
 				} catch (Exception e) {
 					setErrorMessage(e.getMessage());
 					refreshWizardUI();
 					return;
 				}
 				if (spaces != null) {
-					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(targets, spaces, wizardModel);
+					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(wizardModel);
 					WizardDialog dialog = new WizardDialog(getShell(), spacesWizard);
 					dialog.open();
-				} else {
-					setErrorMessage(
-							"No spaces available to select. Please check that the credentials and target URL are correct, and spaces are defined in the target.");
 				}
 			}
 		});
@@ -191,8 +191,9 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 		});
 
-		wizardModel.addListeners(this, enableSpaceControlListener = new EnableSpaceControlListener(),
-				setSpaceValListener = new SetSpaceValListener());
+		wizardModel.addAllPropertiesListener(this);
+		wizardModel.addCredentialsListener(credentialsValidationListener = new EnableSpaceControlListener());
+		wizardModel.addSpaceSelectionListener(setSpaceValListener = new SetSpaceValListener());
 
 		setValuesFromTargetProperties();
 		refreshWizardUI();
@@ -205,7 +206,12 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		if (emailText != null && !emailText.isDisposed() && userName != null) {
 			emailText.setText(userName);
 		}
-		String password = wizardModel.getPassword();
+		String password = null;
+		try {
+			password = wizardModel.getPassword();
+		} catch (CannotAccessPropertyException e) {
+			// Ignore
+		}
 		if (passwordText != null && !passwordText.isDisposed() && password != null) {
 			passwordText.setText(password);
 		}
@@ -230,7 +236,12 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 	}
 
 	public RunTarget getRunTarget() {
-		return wizardModel.finish();
+		try {
+			return wizardModel.finish();
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
 	}
 
 	/*
@@ -271,14 +282,16 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	@Override
 	public void dispose() {
-		wizardModel.removeListeners(this, enableSpaceControlListener, setSpaceValListener);
+		wizardModel.removeAllPropertiesListeners(this);
+		wizardModel.removeCredentialsListeners(credentialsValidationListener);
+		wizardModel.removeSpaceSelectionListeners(setSpaceValListener);
 		super.dispose();
 	}
 
-	class SetSpaceValListener implements ValueListener<CloudSpace> {
+	class SetSpaceValListener implements ValueListener<CFSpace> {
 
 		@Override
-		public void gotValue(LiveExpression<CloudSpace> exp, CloudSpace value) {
+		public void gotValue(LiveExpression<CFSpace> exp, CFSpace value) {
 			if (spaceValueText != null && !spaceValueText.isDisposed()) {
 				spaceValueText.setText(value != null ? value.getName() : "");
 			}

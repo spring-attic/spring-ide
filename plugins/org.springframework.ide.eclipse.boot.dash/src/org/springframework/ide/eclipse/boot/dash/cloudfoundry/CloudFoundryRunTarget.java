@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,36 +14,45 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.DEBUGGING
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.STARTING;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.APP;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ClientRequests;
+import org.eclipse.jdt.core.JavaCore;
+import org.osgi.framework.Version;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
@@ -51,19 +60,23 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	// Cache these to avoid frequent client calls
 	private List<CloudDomain> domains;
-	private List<CloudSpace> spaces;
+	private List<CFSpace> spaces;
+	private List<Buildpack> buildpacks;
 
-	private CloudFoundryOperations cachedClient;
+	private LiveVariable<ClientRequests> cachedClient;
+	private CloudFoundryClientFactory clientFactory;
 
-	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties) {
-		super(RunTargetTypes.CLOUDFOUNDRY, CloudFoundryTargetProperties.getId(targetProperties),
+	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
+		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
+		this.clientFactory = clientFactory;
+		this.cachedClient = new LiveVariable<>();
 	}
 
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
-	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
-	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, APP, PROJECT, INSTANCES, HOST, DEFAULT_PATH, TAGS };
+	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
+	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, HOST, DEFAULT_PATH, TAGS };
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -71,24 +84,62 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element) {
-		return Collections.emptyList();
-	}
-
-	@Override
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
 		return null;
 	}
 
-	public CloudFoundryOperations getClient() throws Exception {
-		if (cachedClient == null) {
-			cachedClient = createClient();
-		}
-		return cachedClient;
+	public ClientRequests getClient() {
+		return cachedClient.getValue();
 	}
 
-	protected CloudFoundryOperations createClient() throws Exception {
-		return CloudFoundryUiUtil.getClient(this);
+	public void connect() throws Exception {
+		try {
+			this.domains = null;
+			this.spaces = null;
+			this.buildpacks = null;
+			cachedClient.setValue(createClient());
+		} catch (Exception e) {
+			cachedClient.setValue(null);
+			throw e;
+		}
+	}
+
+	public void disconnect() {
+		this.domains = null;
+		this.spaces = null;
+		this.buildpacks = null;
+		if (getClient() != null) {
+			getClient().logout();
+			cachedClient.setValue(null);
+		}
+	}
+
+	public boolean isConnected() {
+		return cachedClient.getValue() != null;
+	}
+
+	public void addConnectionStateListener(ValueListener<ClientRequests> l) {
+		cachedClient.addListener(l);
+	}
+
+	public void removeConnectionStateListener(ValueListener<ClientRequests> l) {
+		cachedClient.removeListener(l);
+	}
+
+	public Version getCCApiVersion() {
+		try {
+			ClientRequests client = getClient();
+			if (client!=null) {
+				return client.getApiVersion();
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	protected ClientRequests createClient() throws Exception {
+		return clientFactory.getClient(this);
 	}
 
 	@Override
@@ -102,8 +153,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public BootDashModel createElementsTabelModel(BootDashModelContext context) {
-		return new CloudFoundryBootDashModel(this, context);
+	public CloudFoundryBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
+		return new CloudFoundryBootDashModel(this, context, parent);
 	}
 
 	@Override
@@ -129,9 +180,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public void refresh() throws Exception {
 		// Fetching a new client always validates the CF credentials
-		cachedClient = createClient();
-		domains = null;
-		spaces = null;
+		disconnect();
+		connect();
 	}
 
 	@Override
@@ -139,20 +189,20 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return true;
 	}
 
-	public synchronized List<CloudDomain> getDomains(ClientRequests requests, IProgressMonitor monitor)
+	public synchronized List<CloudDomain> getDomains( IProgressMonitor monitor)
 			throws Exception {
 		if (domains == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 			subMonitor.beginTask("Refreshing list of domains for " + getName(), 5);
 
-			domains = requests.getDomains();
+			domains = getClient().getDomains();
 
 			subMonitor.worked(5);
 		}
 		return domains;
 	}
 
-	public synchronized List<CloudSpace> getSpaces(ClientRequests requests, IProgressMonitor monitor) throws Exception {
+	public synchronized List<CFSpace> getSpaces(ClientRequests requests, IProgressMonitor monitor) throws Exception {
 		if (spaces == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 
@@ -162,4 +212,71 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 		return spaces;
 	}
+
+	public boolean isPWS() {
+		return "https://api.run.pivotal.io".equals(getUrl());
+	}
+
+	private String getUrl() {
+		String url = targetProperties.getUrl();
+		while (url.endsWith("/")) {
+			url = url.substring(0, url.length()-1);
+		}
+		return url;
+	}
+
+	public SshClientSupport getSshClientSupport() throws Exception {
+		ClientRequests client = getClient();
+		return client.getSshClientSupport();
+	}
+
+	public String getBuildpack(IProject project) {
+		// Only support Java project for now
+		IJavaProject javaProject = JavaCore.create(project);
+
+		if (javaProject != null) {
+			try {
+				if (this.buildpacks == null) {
+					// Cache it to avoid frequent calls to CF
+					this.buildpacks = getClient().getBuildpacks();
+				}
+
+				if (this.buildpacks != null) {
+					String javaBuildpack = null;
+					// Only chose a java build iff ONE java buildpack exists
+					// that contains the java_buildpack pattern.
+
+					for (Buildpack bp : this.buildpacks) {
+						// iterate through all buildpacks to make sure only
+						// ONE java buildpack exists
+						if (bp.getName().contains("java_buildpack")) {
+							if (javaBuildpack == null) {
+								javaBuildpack = bp.getName();
+							} else {
+								// If more than two buildpacks contain
+								// "java_buildpack", do not chose any. Let CF buildpack
+								// detection decided which one to chose.
+								javaBuildpack = null;
+								break;
+							}
+						}
+					}
+					return javaBuildpack;
+				}
+			} catch (Exception e) {
+				BootDashActivator.log(e);
+			}
+		}
+
+		return null;
+	}
+
+	public String getHealthCheck(UUID appGuid) {
+		return getClient().getHealthCheck(appGuid);
+	}
+
+	public void setHealthCheck(UUID guid, String hcType) {
+		getClient().setHealthCheck(guid, hcType);
+	}
+
 }

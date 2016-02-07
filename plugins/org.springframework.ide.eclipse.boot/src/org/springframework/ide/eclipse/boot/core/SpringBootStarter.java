@@ -1,16 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2012 GoPivotal, Inc.
+ * Copyright (c) 2012-2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
-
-import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 /**
  * A 'SpringBootStarter is maven style dependency that can be added to
@@ -18,76 +16,60 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
  *
  * @author Kris De Volder
  */
-public class SpringBootStarter implements Ilabelable {
+public class SpringBootStarter {
 
-	/**
-	 * ArtifactId prefix to recognize when a dependency is a spring-boot-starter.
-	 */
-	public static final String AID_PREFIX = "spring-boot-starter-";
-
-	public static final String SB_PREFIX = "spring-boot-";
-
-	private String name;
+	private String id; //id used by initalizr service
 	private IMavenCoordinates dep;
+	private String scope;
+	private Bom bom;
+	private Repo repo;
 
-	public SpringBootStarter(IMavenCoordinates dep) {
-		String artifact = dep.getArtifactId();
-		if (artifact.startsWith(AID_PREFIX)) {
-			this.name = artifact.substring(AID_PREFIX.length());
-		} else if (artifact.startsWith(SB_PREFIX)){
-			this.name = artifact.substring(SB_PREFIX.length());
-		} else {
-			this.name = artifact;
-		}
+	public SpringBootStarter(String id, IMavenCoordinates dep, String scope, Bom bom, Repo repo) {
+		this.id = id;
 		this.dep = dep;
+		this.scope = scope;
+		this.bom = bom;
+		this.repo = repo;
 	}
-
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
 	}
-
-	public IMavenCoordinates getDep() {
+	public String getArtifactId() {
+		return dep.getArtifactId();
+	}
+	public String getGroupId() {
+		return dep.getGroupId();
+	}
+	public String getVersion() {
+		return dep.getVersion();
+	}
+	public IMavenCoordinates getDependency() {
 		return dep;
 	}
-
-	public static boolean isStarter(IMavenCoordinates dep) {
-		return isStarterAId(dep.getArtifactId());
+	public String getScope() {
+		return scope;
 	}
-
-	public static boolean isStarterAId(String aid) {
-		return aid!=null && (
-				aid.startsWith(AID_PREFIX) ||
-				aid.equals("spring-boot-devtools")
-		);
+	public Bom getBom() {
+		return bom;
 	}
-
-	@Override
-	public String toString() {
-		return "SpringBootStarter("+getName()+", "+dep.getVersion()+")";
-	}
-
-	public String getArtifactId() {
-		return getDep().getArtifactId();
-	}
-
-	public String getGroupId() {
-		return getDep().getGroupId();
+	public Repo getRepo() {
+		return repo;
 	}
 
 	/**
 	 * GroupId + ArtifactId, can be used as a key in a map of SpringBootStarter objects.
 	 * Typically the gid + aid will identify the starter. The version is 'fixed' within
-	 * a project to the spring boot version associated with that project.
+	 * a project so it isn't part of the 'id'.
 	 */
-	public StarterId getId() {
-		return new StarterId(getGroupId(), getArtifactId());
+	public MavenId getMavenId() {
+		return new MavenId(dep.getGroupId(), dep.getArtifactId());
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((dep == null) ? 0 : dep.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -100,21 +82,15 @@ public class SpringBootStarter implements Ilabelable {
 		if (getClass() != obj.getClass())
 			return false;
 		SpringBootStarter other = (SpringBootStarter) obj;
-		if (dep == null) {
-			if (other.dep != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!dep.equals(other.dep))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
-
-	/**
-	 * Provides a nice label that can be shown UI to identify a starter. By implementing this
-	 * interface we don't need to provide custom label providers in many contexts.
-	 */
 	@Override
-	public String getLabel() {
-		return getName();
+	public String toString() {
+		return "SpringBootStarter("+id+")";
 	}
-
 }

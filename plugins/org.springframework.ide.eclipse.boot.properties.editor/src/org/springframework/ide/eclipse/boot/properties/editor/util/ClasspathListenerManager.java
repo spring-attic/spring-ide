@@ -19,11 +19,16 @@ import org.eclipse.jdt.core.JavaCore;
 
 /**
  * An instance of this class provides a means to register
- * listeners that get notified when classpath for a IJavaProject 
+ * listeners that get notified when classpath for a IJavaProject
  * changes.
- * 
+ *
+ * Deprecated. This provides very similar functionality to
+ * ClasspathListenerManager in frameworks.core.
+ * This one should probably go away.
+ *
  * @author Kris De Volder
  */
+@Deprecated
 public class ClasspathListenerManager extends ListenerManager<ClasspathListener>{
 
 	private class MyListener implements IElementChangedListener {
@@ -48,10 +53,10 @@ public class ClasspathListenerManager extends ListenerManager<ClasspathListener>
 				break;
 			}
 		}
-		
+
 		private boolean isClasspathChanged(int flags) {
 			return 0!= (flags & (
-					IJavaElementDelta.F_CLASSPATH_CHANGED | 
+					IJavaElementDelta.F_CLASSPATH_CHANGED |
 					IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED
 			));
 		}

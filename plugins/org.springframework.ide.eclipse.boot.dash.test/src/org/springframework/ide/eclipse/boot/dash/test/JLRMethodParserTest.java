@@ -67,7 +67,6 @@ public class JLRMethodParserTest extends TestCase {
 		assertNull(getMethodName("haha"));
 		assertNull(getMethodName("String haha()"));
 		assertNull(getMethodName("public synchronized String haha()"));
-
 	}
 
 }

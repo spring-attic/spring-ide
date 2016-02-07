@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Boot Launch Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.launch.test
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit,
@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.debug.ui,
  org.springframework.ide.eclipse.boot,
  org.springsource.ide.eclipse.commons.frameworks.core,
- org.springframework.ide.eclipse.boot.test
+ org.springframework.ide.eclipse.boot.test,
+ org.springsource.ide.eclipse.commons.frameworks.test.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

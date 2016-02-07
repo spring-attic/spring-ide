@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.dash.views.sections.RequestMappingContentProposalProvider;
 import org.springframework.ide.eclipse.boot.dash.views.sections.UIUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -40,16 +39,25 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 	private LiveVariable<BootDashElement> liveVar = new LiveVariable<BootDashElement>();
 	private ContentProposalAdapter ca;
 
+	/**
+	 * Tracks whether editor value is dirty. Necessary to avoid from accidentally
+	 * synchronizing the editor text with the model (when there are change event),
+	 * and then loosing text we are currently typing.
+	 */
+	private boolean isDirty = false;
+
 	final private KeyListener KEY_LISTENER = new KeyAdapter() {
 		@Override
 		public void keyPressed(KeyEvent e) {
 			if (e.doit) {
 				if (e.character == '\u001b') { // Escape character
-					defaultPath.setText(
-							getLabels().getStyledText(getBootDashElement(), BootDashColumn.DEFAULT_PATH).getString());
+					defaultPath.setText(getElementText());
 					e.widget.getDisplay().getActiveShell().forceFocus();
+					isDirty = false;
 				} else if (e.character == '\r') { // Return key
 					e.widget.getDisplay().getActiveShell().forceFocus();
+				} else {
+					isDirty = true;
 				}
 			}
 		}
@@ -64,10 +72,7 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 		defaultPath.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				BootDashElement bde = getBootDashElement();
-				if (bde != null && !defaultPath.getText().equals(bde.getDefaultRequestMappingPath())) {
-					bde.setDefaultRequestMapingPath(defaultPath.getText());
-				}
+				save();
 			}
 		});
 
@@ -95,10 +100,28 @@ public class DefaultPathPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		if (defaultPath != null && !defaultPath.isDisposed()) {
-			BootDashElement bde = getBootDashElement();
-			defaultPath.setText(getLabels().getStyledText(bde, BootDashColumn.DEFAULT_PATH).getString());
+		if (!isDirty && defaultPath != null && !defaultPath.isDisposed()) {
+			defaultPath.setText(getElementText());
 		}
+	}
+
+	private void save() {
+		BootDashElement bde = getBootDashElement();
+		if (bde != null && !defaultPath.getText().equals(getElementText())) {
+			bde.setDefaultRequestMappingPath(defaultPath.getText());
+		}
+		isDirty = false;
+	}
+
+	protected String getElementText() {
+		BootDashElement e = getBootDashElement();
+		if (e!=null) {
+			String str = e.getDefaultRequestMappingPath();
+			if (str!=null) {
+				return str;
+			}
+		}
+		return "";
 	}
 
 	@Override

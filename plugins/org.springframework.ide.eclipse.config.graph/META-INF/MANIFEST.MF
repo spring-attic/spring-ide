@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.config.graph;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.config.graph.ConfigGraphPlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.core.runtime,
@@ -23,7 +23,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.core,
  org.springsource.ide.eclipse.commons.core,
  org.springframework.ide.eclipse.config.core
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.config.graph,
  org.springframework.ide.eclipse.config.graph.actions,

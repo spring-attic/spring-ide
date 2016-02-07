@@ -10,25 +10,29 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker;
-import org.springframework.ide.eclipse.boot.dash.util.ProjectRunStateTracker.ProjectRunStateListener;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
+import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
@@ -37,17 +41,24 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  *
  * @author Kris De Volder
  */
-public class LocalBootDashModel extends BootDashModel {
+public class LocalBootDashModel extends AbstractBootDashModel implements DeletionCapabableModel {
 
 	private IWorkspace workspace;
+	private BootProjectDashElementFactory projectElementFactory;
+	private LaunchConfDashElementFactory launchConfElementFactory;
+
 	ProjectChangeListenerManager openCloseListenerManager;
 	ClasspathListenerManager classpathListenerManager;
-	BootDashElementFactory elementFactory;
-	ProjectRunStateTracker runStateTracker;
-	LiveSet<BootDashElement> elements; //lazy created
+
+	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
+	final LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
+
+	LiveSetVariable<BootDashElement> elements; //lazy created
 	private BootDashModelConsoleManager consoleManager;
 
-	private BootDashModelStateSaver modelState;
+	private DevtoolsPortRefresher devtoolsPortRefresher;
+	private LiveExpression<Pattern> projectExclusion;
+	private ValueListener<Pattern> projectExclusionListener;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -62,59 +73,29 @@ public class LocalBootDashModel extends BootDashModel {
 		}
 	}
 
-	public LocalBootDashModel(BootDashModelContext context) {
-		super(RunTargets.LOCAL);
+	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
+		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
-		this.elementFactory = new BootDashElementFactory(this, context.getProjectProperties());
+		this.launchConfElementFactory = new LaunchConfDashElementFactory(this, context.getLaunchManager());
+		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
-		try {
-			ISavedState lastState = workspace.addSaveParticipant(BootDashActivator.PLUGIN_ID, modelState = new BootDashModelStateSaver(context, elementFactory));
-			modelState.restore(lastState);
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
+		this.projectExclusion = context.getBootProjectExclusion();
 	}
 
 	void init() {
 		if (elements==null) {
-			this.elements = new LiveSet<BootDashElement>();
+			this.elements = new LiveSetVariable<BootDashElement>();
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
-			this.runStateTracker = new ProjectRunStateTracker();
-			runStateTracker.setListener(new ProjectRunStateListener() {
-				public void stateChanged(IProject p) {
-					BootDashElement e = elementFactory.createOrGet(p);
-					if (e!=null) {
-						notifyElementChanged(e);
-					}
+			projectExclusion.addListener(projectExclusionListener = new ValueListener<Pattern>() {
+				public void gotValue(LiveExpression<Pattern> exp, Pattern value) {
+					updateElementsFromWorkspace();
 				}
 			});
 			updateElementsFromWorkspace();
+			this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		}
-	}
-
-	void updateElementsFromWorkspace() {
-		Set<BootDashElement> newElements = new HashSet<BootDashElement>();
-		for (IProject p : this.workspace.getRoot().getProjects()) {
-			BootDashElement element = elementFactory.createOrGet(p);
-			if (element!=null) {
-				newElements.add(element);
-			}
-		}
-		for (BootDashElement oldElement : elements.getValues()) {
-			if (!newElements.contains(oldElement)) {
-				if (oldElement instanceof Disposable) {
-					((Disposable) oldElement).dispose();
-				}
-			}
-		}
-		elements.replaceAll(newElements);
-	}
-
-	public synchronized LiveSet<BootDashElement> getElements() {
-		init();
-		return elements;
 	}
 
 	/**
@@ -125,16 +106,56 @@ public class LocalBootDashModel extends BootDashModel {
 		if (elements!=null) {
 			elements = null;
 			openCloseListenerManager.dispose();
-			elementFactory.dispose();
+			openCloseListenerManager = null;
 			classpathListenerManager.dispose();
-			runStateTracker.dispose();
+			classpathListenerManager = null;
+			devtoolsPortRefresher.dispose();
+			devtoolsPortRefresher = null;
 		}
+		if (launchConfElementFactory!=null) {
+			launchConfElementFactory.dispose();
+			launchConfElementFactory = null;
+		}
+		if (projectElementFactory!=null) {
+			projectElementFactory.dispose();
+			projectElementFactory = null;
+		}
+		if (projectExclusionListener!=null) {
+			projectExclusion.removeListener(projectExclusionListener);
+			projectExclusionListener=null;
+		}
+		launchConfTracker.dispose();
+		launchConfRunStateTracker.dispose();
+	}
+
+	void updateElementsFromWorkspace() {
+		Set<BootDashElement> newElements = new HashSet<BootDashElement>();
+		for (IProject p : this.workspace.getRoot().getProjects()) {
+			BootDashElement element = projectElementFactory.createOrGet(p);
+			if (element!=null) {
+				newElements.add(element);
+			}
+		}
+		elements.replaceAll(newElements);
+		for (BootDashElement oldElement : elements.getValues()) {
+			if (!newElements.contains(oldElement)) {
+				if (oldElement instanceof Disposable) {
+					((Disposable) oldElement).dispose();
+					projectElementFactory.disposed(oldElement.getProject());
+				}
+			}
+		}
+	}
+
+	public synchronized ObservableSet<BootDashElement> getElements() {
+		init();
+		return elements;
 	}
 
 	/**
 	 * Trigger manual model refresh.
 	 */
-	public void refresh() {
+	public void refresh(UserInteractions ui) {
 		updateElementsFromWorkspace();
 	}
 
@@ -143,22 +164,34 @@ public class LocalBootDashModel extends BootDashModel {
 		return consoleManager;
 	}
 
-
-	////////////// listener cruft ///////////////////////////
-
-
-
-	public ProjectRunStateTracker getRunStateTracker() {
-		return runStateTracker;
+	public LaunchConfRunStateTracker getLaunchConfRunStateTracker() {
+		return launchConfRunStateTracker;
 	}
 
-	public ILaunchConfiguration getPreferredConfigs(WrappingBootDashElement<IProject> e) {
-		return modelState.getPreferredConfig(e);
+	public BootProjectDashElementFactory getProjectElementFactory() {
+		return projectElementFactory;
 	}
 
-	public void setPreferredConfig(
-			WrappingBootDashElement<IProject> e,
-			ILaunchConfiguration c) {
-		modelState.setPreferredConfig(e, c);
+	public LaunchConfDashElementFactory getLaunchConfElementFactory() {
+		return launchConfElementFactory;
+	}
+
+	@Override
+	public void delete(Collection<BootDashElement> elements, UserInteractions ui) {
+		for (BootDashElement e : elements) {
+			if (e instanceof Deletable) {
+				((Deletable)e).delete(ui);
+			}
+		}
+	}
+
+	@Override
+	public boolean canDelete(BootDashElement element) {
+		return element instanceof Deletable;
+	}
+
+	@Override
+	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
+		return "Are you sure you want to delete the selected local launch configuration(s)? The configuration(s) will be permanently removed from the workspace.";
 	}
 }

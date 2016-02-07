@@ -19,41 +19,67 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 public class EnableDisableBootDevtools implements IObjectActionDelegate {
 
-	private static final String SPRING_BOOT_DEVTOOLS = "spring-boot-devtools";
+	private static final VersionRange DEVTOOLS_SUPPORTED = new VersionRange("1.3.0");
+	public static final String SPRING_BOOT_DEVTOOLS_AID = "spring-boot-devtools";
+	public static final String SPRING_BOOT_DEVTOOLS_GID = "org.springframework.boot";
+	private static final SpringBootStarter DEVTOOLS_STARTER = new SpringBootStarter("devtools",
+		new MavenCoordinates(SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID, null),
+		"compile", /*bom*/null, /*repo*/null
+	);
+	private SpringBootCore springBootCore;
+
 	private IProject project;
 	private IWorkbenchPart activePart;
 	private ISpringBootProject bootProject;
 
+	/**
+	 * Constructor that eclipse calls when it instantiates the delegate
+	 */
+	public EnableDisableBootDevtools() {
+		this(SpringBootCore.getDefault());
+	}
+
+	/**
+	 * Constructor that test code can use to inject mocks etc.
+	 */
+	public EnableDisableBootDevtools(SpringBootCore springBootCore) {
+		this.springBootCore = springBootCore;
+	}
+
 	@Override
 	public void run(IAction action) {
 		try {
-			SpringBootStarter devtools = getUsedDevtools(bootProject);
-			if (devtools!=null) {
-				bootProject.removeStarter(devtools);
+			SpringBootStarter devtools = getAvaibleDevtools(bootProject);
+			if (hasDevTools(bootProject)) {
+				bootProject.removeMavenDependency(devtools.getMavenId());
 			} else {
-				devtools = getAvaibleDevtools(bootProject);
 				if (devtools!=null) {
-					bootProject.addStarter(devtools);
+					bootProject.addMavenDependency(devtools.getDependency(), /*preferManaged*/true);
 				} else {
 					MessageDialog.openError(activePart.getSite().getShell(), "Boot Devtools Dependency could not be added", explainFailure());
 				}
 			}
 		} catch (Exception e) {
+			BootActivator.log(e);
 			MessageDialog.openError(activePart.getSite().getShell(), "Unexpected failure",
 					"The action to add/remove devtools unexpectedly failed with an error:\n" +
 					ExceptionUtil.getMessage(e) + "\n" +
 					"The error log may contain further information.");
-			BootActivator.log(e);
 		}
 	}
 
@@ -82,8 +108,7 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 		}
 		action.setEnabled(project!=null);
 		if (bootProject!=null) {
-			boolean hasDevtools = null!=getUsedDevtools(bootProject);
-			action.setText(hasDevtools?"Remove Boot Devtools":"Add Boot Devtools");
+			action.setText(hasDevTools(bootProject)?"Remove Boot Devtools":"Add Boot Devtools");
 		} else if (project!=null) {
 			//action shouldn't really be enabled, but it is enabled so that it can
 			// fail with an explanation when the user tries it.
@@ -91,33 +116,30 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 		}
 	}
 
+	private boolean hasDevTools(ISpringBootProject bootProject) {
+		try {
+			List<IMavenCoordinates> deps = bootProject.getDependencies();
+			if (deps!=null) {
+				for (IMavenCoordinates d : deps) {
+					if (SPRING_BOOT_DEVTOOLS_AID.equals(d.getArtifactId())) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return false;
+	}
+
 	private SpringBootStarter getAvaibleDevtools(ISpringBootProject project) {
 		try {
-			if (project!=null) {
-				return getStarter(SPRING_BOOT_DEVTOOLS, project.getKnownStarters());
+			String versionString = project.getBootVersion();
+			if (StringUtils.hasText(versionString) && DEVTOOLS_SUPPORTED.includes(new Version(versionString))) {
+				return DEVTOOLS_STARTER;
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
-		}
-		return null;
-	}
-
-	private SpringBootStarter getUsedDevtools(ISpringBootProject project) {
-		try {
-			if (project!=null) {
-				return getStarter(SPRING_BOOT_DEVTOOLS, project.getBootStarters());
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return null;
-	}
-
-	private SpringBootStarter getStarter(String id, List<SpringBootStarter> starters) {
-		for (SpringBootStarter s : starters) {
-			if (s.getArtifactId().equals(id)) {
-				return s;
-			}
 		}
 		return null;
 	}
@@ -146,12 +168,20 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 	private ISpringBootProject getBootProject(IProject project) {
 		try {
 			if (project!=null) {
-				return SpringBootCore.create(project);
+				return springBootCore.project(project);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			if (!isExpected(e)) {
+				BootActivator.log(e);
+			}
 		}
 		return null;
+	}
+
+	private boolean isExpected(Exception e) {
+		//See https://issuetracker.springsource.com/browse/STS-4263
+		String msg = ExceptionUtil.getMessage(e);
+		return msg!=null && msg.contains("only implemented for m2e");
 	}
 
 	@Override

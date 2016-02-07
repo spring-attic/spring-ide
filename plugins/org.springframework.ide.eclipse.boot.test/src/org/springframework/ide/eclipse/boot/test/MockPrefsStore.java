@@ -10,10 +10,26 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+
 import org.eclipse.jface.preference.PreferenceStore;
 
 /**
  * @author Kris De Volder
  */
 public class MockPrefsStore extends PreferenceStore {
+
+	@Override
+	public void save() throws IOException {
+		//Override save or it will throw unless we provide a file to save to.
+		try {
+			Field f = PreferenceStore.class.getDeclaredField("dirty");
+			f.setAccessible(true);
+			f.set(this, false);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+	}
+
 }

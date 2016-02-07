@@ -32,11 +32,8 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -55,7 +52,7 @@ public class DevtoolsUtil {
 
 	private static final String JAVA_OPTS_ENV_VAR = "JAVA_OPTS";
 	private static final String REMOTE_SECRET_JVM_ARG = "-Dspring.devtools.remote.secret=";
-	private static final String REMOTE_DEBUG_JVM_ARGS = "-Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n";
+//	private static final String REMOTE_DEBUG_JVM_ARGS = "-Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n";
 
 	private static ILaunchManager getLaunchManager() {
 		return DebugPlugin.getDefault().getLaunchManager();
@@ -64,7 +61,6 @@ public class DevtoolsUtil {
 	private static ILaunchConfigurationType getConfigurationType() {
 		return getLaunchManager().getLaunchConfigurationType(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
 	}
-
 
 	private static ILaunchConfigurationWorkingCopy createConfiguration(IProject project, String host) throws CoreException {
 		ILaunchConfigurationType configType = getConfigurationType();
@@ -82,7 +78,7 @@ public class DevtoolsUtil {
 		return "http://"+host;
 	}
 
-	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {
+	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudAppDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {
 		if (host==null) {
 			throw ExceptionUtil.coreException("Can not launch devtools client: Host not specified");
 		}
@@ -90,7 +86,7 @@ public class DevtoolsUtil {
 		return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
 	}
 
-	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, CloudDashElement cde) throws CoreException {
+	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, CloudAppDashElement cde) throws CoreException {
 		ILaunchConfiguration existing = findConfig(project, host);
 		ILaunchConfigurationWorkingCopy wc;
 		if (existing!=null) {
@@ -138,14 +134,10 @@ public class DevtoolsUtil {
 	}
 
 
-	public static boolean isDevClientAttached(BootDashElement bde, String launchMode) {
-		if (bde.getTarget().getType()!=RunTargetTypes.CLOUDFOUNDRY) {
-			//Not yet implemented for other types of elements
-			throw new IllegalArgumentException("This operation is not implemented for "+bde.getTarget().getType());
-		}
-		IProject project = bde.getProject();
+	public static boolean isDevClientAttached(CloudAppDashElement cde, String launchMode) {
+		IProject project = cde.getProject();
 		if (project!=null) { // else not associated with a local project... can't really attach debugger then
-			String host = bde.getLiveHost();
+			String host = cde.getLiveHost();
 			if (host!=null) { // else app not running, can't attach debugger then
 				return isLaunchMode(findLaunches(project, host), launchMode);
 			}
@@ -177,17 +169,17 @@ public class DevtoolsUtil {
 		return false;
 	}
 
-	public static void launchDevtools(CloudDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
+	public static void launchDevtools(CloudAppDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
 		launchDevtools(cde.getProject(), cde.getLiveHost(), debugSecret, cde, mode, monitor);
 	}
 
-	public static void setElement(ILaunchConfigurationWorkingCopy l, CloudDashElement cde) {
+	public static void setElement(ILaunchConfigurationWorkingCopy l, CloudAppDashElement cde) {
 		//Tag the launch so we can easily determine what CDE it belongs to later.
 		l.setAttribute(TARGET_ID, cde.getTarget().getId());
 		l.setAttribute(APP_NAME, cde.getName());
 	}
 
-	public static boolean isLaunchFor(ILaunch l, CloudDashElement cde) {
+	public static boolean isLaunchFor(ILaunch l, CloudAppDashElement cde) {
 		String targetId = getAttribute(l, TARGET_ID);
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
@@ -200,20 +192,20 @@ public class DevtoolsUtil {
 	/**
 	 * Retreive corresponding CDE for a given launch.
 	 */
-	public static CloudDashElement getElement(ILaunchConfiguration l, BootDashViewModel model) {
+	public static CloudAppDashElement getElement(ILaunchConfiguration l, BootDashViewModel model) {
 		String targetId = getAttribute(l, TARGET_ID);
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
 			BootDashModel section = model.getSectionByTargetId(targetId);
 			if (section instanceof CloudFoundryBootDashModel) {
 				CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) section;
-				return cfModel.getElement(appName);
+				return cfModel.getApplication(appName);
 			}
 		}
 		return null;
 	}
 
-	public static CloudDashElement getElement(ILaunch l, BootDashViewModel viewModel) {
+	public static CloudAppDashElement getElement(ILaunch l, BootDashViewModel viewModel) {
 		ILaunchConfiguration conf = l.getLaunchConfiguration();
 		if (conf!=null) {
 			return getElement(conf, viewModel);
@@ -263,9 +255,9 @@ public class DevtoolsUtil {
 				handleStateChange(process.getLaunch());
 			}
 			private void handleStateChange(ILaunch l) {
-				CloudDashElement e = DevtoolsUtil.getElement(l, viewModel);
+				CloudAppDashElement e = DevtoolsUtil.getElement(l, viewModel);
 				if (e!=null) {
-					BootDashModel model = e.getParent();
+					BootDashModel model = e.getBootDashModel();
 					model.notifyElementChanged(e);
 				}
 			}
@@ -276,7 +268,7 @@ public class DevtoolsUtil {
 		return new DevtoolsDebugTargetDisconnector(model);
 	}
 
-	public static void disconnectDevtoolsClientsFor(CloudDashElement e) {
+	public static void disconnectDevtoolsClientsFor(CloudAppDashElement e) {
 		ILaunchManager lm = getLaunchManager();
 		for (ILaunch l : lm.getLaunches()) {
 			if (!l.isTerminated() && isLaunchFor(l, e)) {
@@ -300,19 +292,19 @@ public class DevtoolsUtil {
 		return secret;
 	}
 
-	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
+	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret) {
 		String javaOpts = envVars.get(JAVA_OPTS_ENV_VAR);
-		if (javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
-			if (runOrDebug == RunState.DEBUGGING) {
-				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
-			} else {
-				return !javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
-			}
+		if (javaOpts!=null && javaOpts.matches("(.*\\s+|^)" + REMOTE_SECRET_JVM_ARG + secret + "(\\s+.*|$)")) {
+//			if (runOrDebug == RunState.DEBUGGING) {
+//				return javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
+//			} else {
+//				return !javaOpts.matches("(.*\\s+|^)" + REMOTE_DEBUG_JVM_ARGS + "(\\s+.*|$)");
+//			}
 		}
 		return false;
 	}
 
-	public static void setupEnvVarsForRemoteClient(Map<String, String> envVars, String secret, RunState runOrDebug) {
+	public static void setupEnvVarsForRemoteClient(Map<String, String> envVars, String secret) {
 		String javaOpts = clearJavaOpts(envVars.get(JAVA_OPTS_ENV_VAR));
 		StringBuilder sb = javaOpts == null ? new StringBuilder() : new StringBuilder(javaOpts);
 		if (sb.length() > 0) {
@@ -320,15 +312,19 @@ public class DevtoolsUtil {
 		}
 		sb.append(REMOTE_SECRET_JVM_ARG);
 		sb.append(secret);
-		if (runOrDebug == RunState.DEBUGGING) {
-			sb.append(' ');
-			sb.append(REMOTE_DEBUG_JVM_ARGS);
-		}
+//		if (runOrDebug == RunState.DEBUGGING) {
+//			sb.append(' ');
+//			sb.append(REMOTE_DEBUG_JVM_ARGS);
+//		}
 		envVars.put(JAVA_OPTS_ENV_VAR, sb.toString());
 	}
 
 	private static String clearJavaOpts(String opts) {
-		return opts == null ? null : opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "").replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
+		if (opts!=null) {
+//			opts = opts.replaceAll(REMOTE_DEBUG_JVM_ARGS + "\\s*", "");
+			opts = opts.replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
+		}
+		return opts;
 	}
 
 }

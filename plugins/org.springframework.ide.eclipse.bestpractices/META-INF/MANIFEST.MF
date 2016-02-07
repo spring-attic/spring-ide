@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE Best Practices
 Bundle-SymbolicName: org.springframework.ide.eclipse.bestpractices;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Vendor: Spring IDE Developers
 Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.console,
@@ -25,7 +25,7 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.config.core
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.springframework.ide.eclipse.internal.bestpractices.springiderules
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs

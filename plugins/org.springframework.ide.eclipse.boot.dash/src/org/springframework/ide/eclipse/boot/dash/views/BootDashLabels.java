@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.Arrays;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
@@ -25,20 +24,23 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.State;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Provides various methods for implementing various Label providers for the Boot Dash
@@ -64,11 +66,12 @@ public class BootDashLabels implements Disposable {
 	private AppearanceAwareLabelProvider javaLabels = null;
 	private RunStateImages runStateImages = null;
 
+
 	/**
 	 * TODO replace 'runStateImages' and this registry with a single registry
 	 * for working with both animatons & simple images.
 	 */
-	private ImageDescriptorRegistry images;
+	private ImageDecorator images = new ImageDecorator();
 
 	private Stylers stylers;
 
@@ -144,14 +147,38 @@ public class BootDashLabels implements Disposable {
 	// methods instead.
 
 	public Image[] getImageAnimation(BootDashModel element, BootDashColumn column) {
-		return toAnimation(element.getRunTarget().getType().getIcon());
+		ImageDescriptor icon = getIcon(element);
+		ImageDescriptor decoration = getDecoration(element);
+		return toAnimation(icon, decoration);
 	}
 
-	private Image[] toAnimation(ImageDescriptor icon) {
-		if (images==null) {
-			images = new ImageDescriptorRegistry();
+	private ImageDescriptor getIcon(BootDashModel element) {
+		if (element instanceof CloudFoundryBootDashModel) {
+			CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) element;
+			if (cfModel.getRunTarget().isConnected()) {
+				return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
+			} else {
+				return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
+			}
 		}
-		Image img = images.get(icon);
+		return element.getRunTarget().getType().getIcon();
+	}
+
+	private ImageDescriptor getDecoration(BootDashModel element) {
+		if (element.getRefreshState().getId() == RefreshState.ERROR.getId()) {
+			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
+		} else if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
+			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
+		}
+		return null;
+	}
+
+	private Image[] toAnimation(ImageDescriptor icon, ImageDescriptor decoration) {
+		Image img = images.get(icon, decoration);
+		return toAnimation(img);
+	}
+
+	private Image[] toAnimation(Image img) {
 		if (img!=null) {
 			return new Image[]{img};
 		}
@@ -159,17 +186,25 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
-		if (element != null) {
-			switch (column) {
-			case PROJECT:
-				IJavaProject jp = element.getJavaProject();
-				return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
-			case TREE_VIEWER_MAIN:
-			case RUN_STATE_ICN:
-				return decorateRunStateImages(element, getRunStateAnimation(element.getRunState()));
-			default:
-				return NO_IMAGES;
+		if (element instanceof CloudServiceDashElement) {
+			ImageDescriptor img = BootDashActivator.getImageDescriptor("icons/service.png");
+			return toAnimation(img, null);
+		}
+		try {
+			if (element != null) {
+				switch (column) {
+				case PROJECT:
+					IJavaProject jp = element.getJavaProject();
+					return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
+				case TREE_VIEWER_MAIN:
+				case RUN_STATE_ICN:
+					return decorateRunStateImages(element);
+				default:
+					return NO_IMAGES;
+				}
 			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
 		}
 		return NO_IMAGES;
 	}
@@ -180,8 +215,12 @@ public class BootDashLabels implements Disposable {
 			if (element.getRunTarget() != null) {
 				//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
 				// colorfully.
-				if (element.getState() == State.LOADING) {
-					return new StyledString("Loading... - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY)).append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
+				if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
+					StyledString prefix = new StyledString();
+					if (element.getRefreshState().getMessage() != null) {
+						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
+					}
+					return prefix.append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
 				} else {
 					return new StyledString(element.getRunTarget().getName(), stylers.bold());
 				}
@@ -204,14 +243,14 @@ public class BootDashLabels implements Disposable {
 			return stylers.darkGreen();
 		case INSTANCES:
 			return stylers.darkBlue();
-		case APP:
+		case NAME:
 		case PROJECT:
 //			return null;
 		case HOST:
 		case RUN_STATE_ICN:
 		case DEFAULT_PATH:
 		default:
-			return stylers.NULL;
+			return Stylers.NULL;
 		}
 	}
 
@@ -244,7 +283,8 @@ public class BootDashLabels implements Disposable {
 					}
 				} else {
 					styledLabel = getJavaLabels().getStyledText(jp);
-
+					//TODO: should use 'element.hasDevtools()' but its not implemented
+					// yet on CF elements.
 					boolean devtools = BootPropertyTester.hasDevtools(element.getProject());
 					if (devtools) {
 						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.darkGreen());
@@ -257,7 +297,7 @@ public class BootDashLabels implements Disposable {
 				label = host == null ? UNKNOWN_LABEL : host;
 				break;
 			case TREE_VIEWER_MAIN:
-				BootDashColumn[] cols = element.getParent().getRunTarget().getDefaultColumns();
+				BootDashColumn[] cols = element.getColumns();
 				styledLabel = new StyledString();
 				for (BootDashColumn col : cols) {
 					//Ignore RUN_STATE_ICN because its already represented in the label's icon.
@@ -284,7 +324,7 @@ public class BootDashLabels implements Disposable {
 					}
 				}
 				break;
-			case APP:
+			case NAME:
 				styledLabel = new StyledString();
 
 				if (element.getName() != null) {
@@ -295,18 +335,38 @@ public class BootDashLabels implements Disposable {
 				}
 
 				break;
+			case DEVTOOLS:
+				if (element.hasDevtools()) {
+					styledLabel = new StyledString("devtools", stylers.darkGreen());
+				} else {
+					styledLabel = new StyledString();
+				}
 			case RUN_STATE_ICN:
 				label = element.getRunState().toString();
 				break;
 			case LIVE_PORT:
 				RunState runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
-					int port = element.getLivePort();
-					String textLabel = port < 0 ? "unknown port" : (":" + port);
+					String textLabel;
+					ImmutableSet<Integer> ports = element.getLivePorts();
+					if (ports.isEmpty()) {
+						textLabel = "unknown port";
+					} else {
+						StringBuilder str = new StringBuilder();
+						String separator = "";
+						for (Integer port : ports) {
+							str.append(separator);
+							str.append(":");
+							str.append(port);
+
+							separator = " ";
+						}
+						textLabel = str.toString();
+					}
 					if (stylers == null) {
 						label = textLabel;
 					} else {
-						styledLabel = new StyledString(textLabel,stylers.darkGreen());
+						styledLabel = new StyledString(textLabel, stylers.darkGreen());
 					}
 				}
 				break;
@@ -314,18 +374,19 @@ public class BootDashLabels implements Disposable {
 				String path = element.getDefaultRequestMappingPath();
 				if (stylers == null) {
 					label = path == null ? "" : path;
-				}
-				else {
+				} else {
 					styledLabel = new StyledString(path == null ? "" : path, stylers.darkGrey());
 				}
 				break;
 			case INSTANCES:
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
-				if (stylers == null) {
-					label = actual + "/" + desired;
-				} else {
-					styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+				if (desired!=1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
+					if (stylers == null) {
+						label = actual + "/" + desired;
+					} else {
+						styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+					}
 				}
 				break;
 			case EXPOSED_URL:
@@ -363,6 +424,23 @@ public class BootDashLabels implements Disposable {
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// private / helper stuff
 
+	private String commaSeparated(Collection<String> elements) {
+		if (elements!=null) {
+			StringBuilder buf = new StringBuilder();
+			boolean needComma = false;
+			for (String string : elements) {
+				if (needComma) {
+					buf.append(',');
+				} else {
+					needComma = true;
+				}
+				buf.append(string);
+			}
+			return buf.toString();
+		}
+		return "";
+	}
+
 	private boolean hasText(StyledString stext) {
 		return !stext.getString().isEmpty();
 	}
@@ -386,16 +464,12 @@ public class BootDashLabels implements Disposable {
 		return null;
 	}
 
-	private static Image[] decorateRunStateImages(BootDashElement bde, Image[] images) {
-		Image[] decoratedImages = Arrays.copyOf(images, images.length);
-		if (bde.getTarget() != null) {
-			if (bde.getTarget().getType() == RunTargetTypes.CLOUDFOUNDRY) {
-				if (bde.getRunState() == RunState.RUNNING && DevtoolsUtil.isDevClientAttached(bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
-					ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
-					for (int i = 0; i < decoratedImages.length; i++) {
-						decoratedImages[i] = new DecorationOverlayIcon(decoratedImages[i], decorDesc, IDecoration.BOTTOM_RIGHT).createImage(decoratedImages[i].getDevice());
-					}
-				}
+	private Image[] decorateRunStateImages(BootDashElement bde) throws Exception {
+		Image[] decoratedImages = getRunStateAnimation(bde.getRunState());
+		if (bde.getTarget() != null && bde instanceof CloudAppDashElement && bde.getRunState() == RunState.RUNNING) {
+			if (DevtoolsUtil.isDevClientAttached((CloudAppDashElement)bde, ILaunchManager.RUN_MODE) && decoratedImages.length > 0) {
+				ImageDescriptor decorDesc = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
+				decoratedImages = runStateImages.getDecoratedImages(bde.getRunState(), decorDesc, IDecoration.BOTTOM_RIGHT);
 			}
 		}
 		return decoratedImages;

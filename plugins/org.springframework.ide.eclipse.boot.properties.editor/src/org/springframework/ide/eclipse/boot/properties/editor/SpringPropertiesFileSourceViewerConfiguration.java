@@ -40,22 +40,28 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.DefaultQuickfixContext;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.QuickfixContext;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDetectorUtil;
+import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
+import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotationHover;
+import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
-extends PropertiesFileSourceViewerConfiguration {
+extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 
 	private static final String DIALOG_SETTINGS_KEY = PropertiesFileSourceViewerConfiguration.class.getName();
+	private static final DocumentContextFinder documentContextFinder = DocumentContextFinders.PROPS_DEFAULT;
 	private SpringPropertiesCompletionEngine engine;
-	private SpringPropertiesReconciler fReconciler;
+	private ForceableReconciler fReconciler;
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		@Override
 		protected IReconcileEngine createEngine() throws Exception {
@@ -78,11 +84,11 @@ extends PropertiesFileSourceViewerConfiguration {
 			if (engine!=null) {
 				ContentAssistant a = new ContentAssistant();
 				a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
-				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
-				a.setContentAssistProcessor(new SpringPropertiesProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
+				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
+				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
 				a.enableColoredLabels(true);
 				a.enableAutoActivation(true);
-				a.setInformationControlCreator(new SpringPropertiesInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
+				a.setInformationControlCreator(new HoverInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
 				setSorter(a);
 				a.setRestoreCompletionProposalSize(getDialogSettings(sourceViewer, DIALOG_SETTINGS_KEY));
 				return a;
@@ -113,12 +119,12 @@ extends PropertiesFileSourceViewerConfiguration {
 
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-		ITextHover delegate = new SpringPropertiesAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
+		ITextHover delegate = new ReconcileProblemAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
 		try {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
 				if (engine!=null) {
-					return new SpringPropertiesTextHover(sourceViewer, engine, delegate);
+					return new HoverInfoTextHover(sourceViewer, engine, delegate);
 				}
 			}
 		} catch (Exception e) {
@@ -128,7 +134,7 @@ extends PropertiesFileSourceViewerConfiguration {
 	}
 
 	protected QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
-		return new DefaultQuickfixContext(getPreferencesStore(), sourceViewer,
+		return new DefaultQuickfixContext(SpringPropertiesEditorPlugin.PLUGIN_ID, getPreferencesStore(), sourceViewer,
 				new DefaultUserInteractions(getShell()));
 	}
 
@@ -156,7 +162,7 @@ extends PropertiesFileSourceViewerConfiguration {
 		try {
 			Class<?> sorterInterface = Class.forName("org.eclipse.jface.text.contentassist.ICompletionProposalSorter");
 			Method m = ContentAssistant.class.getMethod("setSorter", sorterInterface);
-			m.invoke(a, PropertyCompletionFactory.SORTER);
+			m.invoke(a, CompletionFactory.SORTER);
 		} catch (Throwable e) {
 			//ignore, sorter not supported with Eclipse 3.7 API
 		}
@@ -165,7 +171,7 @@ extends PropertiesFileSourceViewerConfiguration {
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		if (fReconciler==null) {
-			fReconciler = fReconcilerFactory.createReconciler(sourceViewer);
+			fReconciler = fReconcilerFactory.createReconciler(sourceViewer, documentContextFinder, this);
 		}
 		return fReconciler;
 	}

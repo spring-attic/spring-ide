@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,64 +11,62 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ProjectsDeployer extends CloudOperation {
 
-	private final Map<IProject, BootDashElement> projectsToDeploy;
+	private final Set<IProject> projectsToDeploy;
 	private final UserInteractions ui;
-	private final boolean shouldAutoReplaceApps;
 	private final RunState runOrDebug;
+	private final DebugSupport debugSupport;
 
-	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
-			Map<IProject, BootDashElement> projectsToDeploy, boolean shouldAutoReplaceApps) {
+	public ProjectsDeployer(CloudFoundryBootDashModel model,
+			UserInteractions ui,
+			Set<IProject> projectsToDeploy,
+			RunState runOrDebug,
+			DebugSupport debugSupport) {
 		super("Deploying projects", model);
 		this.projectsToDeploy = projectsToDeploy;
 		this.ui = ui;
-		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
-		this.runOrDebug = RunState.RUNNING;
-	}
-
-	public ProjectsDeployer(CloudFoundryBootDashModel model, UserInteractions ui,
-			List<BootDashElement> elementsToRedeploy, boolean shouldAutoReplaceApps, RunState runOrDebug) {
-		super("Deploying projects", model);
-		this.projectsToDeploy = new LinkedHashMap<IProject, BootDashElement>();
-
-		for (BootDashElement element : elementsToRedeploy) {
-			this.projectsToDeploy.put(element.getProject(), element);
-		}
-
-		this.ui = ui;
-		this.shouldAutoReplaceApps = shouldAutoReplaceApps;
 		this.runOrDebug = runOrDebug;
+		this.debugSupport = debugSupport;
 	}
 
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		SubMonitor subMonitor = SubMonitor.convert(monitor, projectsToDeploy.size() * 100);
-		for (Iterator<Entry<IProject, BootDashElement>> it = projectsToDeploy.entrySet().iterator(); it.hasNext();) {
-			Entry<IProject, BootDashElement> entry = it.next();
+		for (Iterator<IProject> it = projectsToDeploy.iterator(); it.hasNext();) {
+			IProject project = it.next();
 
-			if (subMonitor.isCanceled()) {
+			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 
-			CloudApplicationOperation fullDeploymentOp = new FullApplicationDeployment(entry.getKey(), model, ui,
-					shouldAutoReplaceApps, runOrDebug);
+			try {
+				CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 
-			fullDeploymentOp.run(subMonitor.newChild(100));
+				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, debugSupport, runOrDebug, ui, monitor);
+				model.getOperationsExecution(ui).runOpAsynch(op);
+			} catch (Exception e) {
+				if (!(e instanceof OperationCanceledException)) {
+					BootDashActivator.log(e);
+					if (ui != null) {
+						String message = e.getMessage() != null && e.getMessage().trim().length() > 0 ? e.getMessage()
+								: "Error type: " + e.getClass().getName()
+										+ ". Check Error Log view for further details.";
+						ui.errorPopup("Operation Failure", message);
+					}
+				}
+			}
 		}
 	}
 }

@@ -27,12 +27,13 @@ public enum BootDashColumn {
 	RUN_STATE_ICN(	"",	        20),
 	INSTANCES(      "Instances", 50),
 	PROJECT(		"Project", 	150),
-	APP(    		"Application", 150),
+	NAME(			"Name",		150),
 	HOST(           "Host",     70),
 	LIVE_PORT(		"Port",		70),
 	DEFAULT_PATH(	"Path",		70),
 	TAGS(			"Tags",		100),
-	EXPOSED_URL(			"Exposed via",		100),
+	EXPOSED_URL(	"Exposed via",		100),
+	DEVTOOLS(		"Devtools", 70),
 	TREE_VIEWER_MAIN("", 100); //this is a 'fake' column which corresponds to the single column shown in unified tree viewer.
 
 	//Configure some odds and ends that don't apply to every column:

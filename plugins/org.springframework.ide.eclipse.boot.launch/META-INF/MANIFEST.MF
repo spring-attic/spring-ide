@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Boot Launch
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.launch;singleton:=true
 Bundle-Vendor: Pivotal Software Inc.
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -22,11 +22,16 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot.properties.editor,
  org.springsource.ide.eclipse.commons.core,
  org.eclipse.ui.console,
- org.eclipse.m2e.jdt
+ org.eclipse.m2e.jdt,
+ com.google.guava,
+ org.springframework.ide.eclipse.editor.support,
+ org.eclipse.jdt.debug
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.launch,
  org.springframework.ide.eclipse.boot.launch.devtools,
  org.springframework.ide.eclipse.boot.launch.livebean,
+ org.springframework.ide.eclipse.boot.launch.process,
  org.springframework.ide.eclipse.boot.launch.profiles,
  org.springframework.ide.eclipse.boot.launch.util
+Bundle-Activator: org.springframework.ide.eclipse.boot.launch.BootLaunchActivator

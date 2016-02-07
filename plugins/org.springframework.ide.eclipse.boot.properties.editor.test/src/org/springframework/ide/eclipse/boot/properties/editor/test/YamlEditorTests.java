@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,11 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 /**
  * @author Kris De Volder
  */
-public class YamlEditorTests extends YamlEditorTestHarness {
+public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testHovers() throws Exception {
 		defaultTestData();
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"spring:\n" +
 				"  application:\n" +
 				"    name: foofoo\n" +
@@ -33,41 +33,41 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"  port: 8888"
 		);
 
-		assertIsHoverRegion(editor, "spring");
-		assertIsHoverRegion(editor, "application");
-		assertIsHoverRegion(editor, "name");
+		editor.assertIsHoverRegion("spring");
+		editor.assertIsHoverRegion("application");
+		editor.assertIsHoverRegion("name");
 
-		assertIsHoverRegion(editor, "server");
-		assertIsHoverRegion(editor, "port");
+		editor.assertIsHoverRegion("server");
+		editor.assertIsHoverRegion("port");
 
-		assertHoverContains(editor, "name", "<b>spring.application.name</b><br><a href=\"type%2Fjava.lang.String\">java.lang.String</a><br><br>Application name.</body>");
-		assertHoverContains(editor, "port", "<b>server.port</b>");
-		assertHoverContains(editor, "8888", "<b>server.port</b>"); // hover over value show info about corresponding key. Is this logical?
+		editor.assertHoverContains("name", "<b>spring.application.name</b>");
+		editor.assertHoverContains("port", "<b>server.port</b>");
+		editor.assertHoverContains("8888", "<b>server.port</b>"); // hover over value show info about corresponding key. Is this logical?
 
-		assertNoHover(editor, "beyond");
-		assertNoHover(editor, "the-valid");
-		assertNoHover(editor, "range");
+		editor.assertNoHover("beyond");
+		editor.assertNoHover("the-valid");
+		editor.assertNoHover("range");
 
-		//TODO: these provide no hovers now, but maybe (some of them) should if we index proprty sources and not just the
+		//Note currently, these provide no hovers, but maybe (some of them) should if we index proprty sources and not just the
 		// properties themselves.
-		assertNoHover(editor, "spring");
-		assertNoHover(editor, "application");
-		assertNoHover(editor, "server");
+		editor.assertNoHover("spring");
+		editor.assertNoHover("application");
+		editor.assertNoHover("server");
 
 
-		//Test for the case where we can't produc an AST for editor text
+		//Test for the case where we can't produce an AST for editor text
 		editor = new YamlEditor(
 				"- syntax\n" +
 				"error:\n"
 		);
-		assertNoHover(editor, "syntax");
-		assertNoHover(editor, "error");
+		editor.assertNoHover("syntax");
+		editor.assertNoHover("error");
 	}
 
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"#A comment at the start\n" +
 				"foo:\n" +
 				"  data:\n" +
@@ -80,10 +80,10 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    getter-only: getme\n"
 		);
 
-		assertHoverContains(editor, "data", "Pojo"); // description from json metadata
-		assertHoverContains(editor, "wavelen", "JavaDoc from field"); // javadoc from field
-		assertHoverContains(editor, "name", "Set the name"); // javadoc from setter
-		assertHoverContains(editor, "next", "Get the next"); // javadoc from getter
+		editor.assertHoverContains("data", "Pojo"); // description from json metadata
+		editor.assertHoverContains("wavelen", "JavaDoc from field"); // javadoc from field
+		editor.assertHoverContains("name", "Set the name"); // javadoc from setter
+		editor.assertHoverContains("next", "Get the next"); // javadoc from getter
 
 		assertLinkTargets(editor, "data", "demo.FooProperties.setData(ColorData)");
 		assertLinkTargets(editor, "wavelen", "demo.ColorData.setWavelen(double)");
@@ -92,11 +92,11 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testHyperlinkTargets() throws Exception {
 		System.out.println(">>> testHyperlinkTargets");
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"server:\n"+
 				"  port: 888\n" +
 				"spring:\n" +
@@ -121,7 +121,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcile() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"server:\n" +
 				"  port: \n" +
 				"    extracrap: 8080\n" +
@@ -143,17 +143,17 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void test_STS_4140_StringArrayReconciling() throws Exception {
 		defaultTestData();
 
-		MockEditor editor;
+		YamlEditor editor;
 
 		//Case 0: very focussed test for easy debugging
-		editor = new MockEditor(
+		editor = new YamlEditor(
 			"flyway:\n" +
 			"  schemas: [MEMBER_VERSION, MEMBER]"
 		);
 		assertProblems(editor /*none*/);
 
 		//Case 1: String[] as a flow sequence
-		editor = new MockEditor(
+		editor = new YamlEditor(
 			"something-bad: wrong\n"+
 			"flyway:\n" +
 			"  url: jdbc:h2:file:~/localdb;IGNORECASE=TRUE;mv_store=false\n" +
@@ -167,7 +167,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Case 1: String[] as a block sequence
-		editor = new MockEditor(
+		editor = new YamlEditor(
 			"something-bad: wrong\n"+
 			"flyway:\n" +
 			"  url: jdbc:h2:file:~/localdb;IGNORECASE=TRUE;mv_store=false\n" +
@@ -201,7 +201,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	public void testReconcileIntegerScalar() throws Exception {
 		data("server.port", "java.lang.Integer", null, "Port of server");
 		data("server.threads", "java.lang.Integer", null, "Number of threads for server threadpool");
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"server:\n" +
 				"  port: \n" +
 				"    8888\n" +
@@ -215,7 +215,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcileExpectMapping() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"server:\n" +
 				"  - a\n" +
 				"  - b\n"
@@ -227,7 +227,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcileExpectScalar() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"server:\n" +
 				"  ? - a\n" +
 				"    - b\n" +
@@ -239,12 +239,12 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testReconcileCamelCaseBasic() throws Exception {
-		MockEditor editor;
+		YamlEditor editor;
 		data("something.with-many-parts", "java.lang.Integer", "For testing tolerance of camelCase", null);
 		data("something.with-parts.and-more", "java.lang.Integer", "For testing tolerance of camelCase", null);
 
 		//Nothing special... not using camel case
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"something:\n" +
 				"  with-many-parts: not-a-number"
@@ -254,7 +254,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Now check that reconcile also tolerates camel case and reports no error for it
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"something:\n" +
 				"  withManyParts: 123"
@@ -264,7 +264,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Now check that reconciler traverses camelCase and reports errors assigning to camelCase names
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"something:\n" +
 				"  withManyParts: not-a-number"
@@ -274,7 +274,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Now check also that camelcase tolerance works if its not in the end of the path
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"something:\n" +
 				"  withParts:\n" +
@@ -305,16 +305,16 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testReconcileCamelCaseBeanProp() throws Exception {
-		MockEditor editor;
+		YamlEditor editor;
 
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
 		data("demo.bean", "demo.CamelCaser", "For testing tolerance of camelCase", null);
 
 		//Nothing special... not using camel case
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"demo:\n" +
 				"  bean:\n"+
@@ -325,7 +325,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Now check that reconcile also tolerates camel case and reports no error for it
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"demo:\n" +
 				"  bean:\n"+
@@ -336,7 +336,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Now check that reconciler traverses camelCase and reports errors assigning to camelCase names
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"demo:\n" +
 				"  bean:\n"+
@@ -347,7 +347,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//Now check also that camelcase tolerance works if its not in the end of the path
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"#Comment for good measure\n" +
 				"demo:\n" +
 				"  bean:\n"+
@@ -364,7 +364,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testContentAssistCamelCaseBeanProp() throws Exception {
-		IProject p = createPredefinedProject("demo");
+		IProject p = createPredefinedMavenProject("demo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
@@ -416,12 +416,12 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 
 	public void testReconcileBeanPropName() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
 		data("some-foo", "demo.Foo", null, "some Foo pojo property");
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"some-foo:\n" +
 				"  name: Good\n" +
 				"  bogus: Bad\n" +
@@ -438,7 +438,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testIgnoreSpringExpression() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"server:\n" +
 				"  port: ${random.int}\n" + //should not be an error
 				"  bad: wrong\n"
@@ -449,13 +449,13 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testReconcilePojoArray() throws Exception {
-		IProject p = createPredefinedProject("demo-list-of-pojo");
+		IProject p = createPredefinedMavenProject("demo-list-of-pojo");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
 
 		{
-			MockEditor editor = new MockEditor(
+			YamlEditor editor = new YamlEditor(
 					"token-bad-guy: problem\n"+
 					"volder:\n" +
 					"  foo:\n" +
@@ -478,7 +478,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 		{ //Pojo array can also be entered as a map with integer keys
 
-			MockEditor editor = new MockEditor(
+			YamlEditor editor = new YamlEditor(
 					"token-bad-guy: problem\n"+
 					"volder:\n" +
 					"  foo:\n" +
@@ -504,7 +504,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcileSequenceGotAtomicType() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"liquibase:\n" +
 				"  enabled:\n" +
 				"    - element\n"
@@ -516,7 +516,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcileSequenceGotMapType() throws Exception {
 		data("the-map", "java.util.Map<java.lang.String,java.lang.String>", null, "Nice mappy");
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"the-map:\n" +
 				"  - a\n" +
 				"  - b\n"
@@ -527,13 +527,13 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumPropertyReconciling() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 
 		data("foo.color", "demo.Color", null, "A foonky colour");
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"foo:\n"+
 				"  color: BLUE\n" +
 				"  color: RED\n" + //technically not allowed to bind same key twice but we don' check this
@@ -550,7 +550,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testReconcileSkipIfNoMetadata() throws Exception {
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"foo:\n"+
 				"  color: BLUE\n" +
 				"  color: RED\n" + //technically not allowed to bind same key twice but we don' check this
@@ -567,7 +567,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcileCatchesParseError() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"somemap: val\n"+
 				"- sequence"
 		);
@@ -578,7 +578,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 
 	public void testReconcileCatchesScannerError() throws Exception {
 		defaultTestData();
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"somemap: \"quotes not closed\n"
 		);
 		assertProblems(editor,
@@ -890,7 +890,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testContentAssistPropertyWithPojoType() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		//Try in-place completion
 		assertCompletion(
@@ -917,7 +917,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testContentAssistPropertyWithEnumType() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		//Try in-place completion
 		assertCompletion(
@@ -977,7 +977,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testCompletionForExistingBeanPropertiesAreDemoted() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		assertCompletions(
 				"foo:\n" +
 				"  data:\n" +
@@ -994,6 +994,13 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"    name: foo\n" +
 				"    color-children:\n"+
 				"      <*>",
+				//funky
+				"foo:\n" +
+				"  data:\n" +
+				"    children:\n" +
+				"      -\n" +
+				"    name: foo\n" +
+				"    funky: <*>",
 				//mapped-children
 				"foo:\n" +
 				"  data:\n" +
@@ -1418,7 +1425,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumValueCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.color", "demo.Color", null, "A foonky colour");
 
 		assertCompletion("foo.c<*>",
@@ -1440,7 +1447,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumMapValueCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		assertCompletions(
 				"foo:\n" +
@@ -1473,12 +1480,12 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumMapValueReconciling() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.name-colors", "java.util.Map<java.lang.String,demo.Color>", null, "Map with colors in its values");
 
-		MockEditor editor;
+		YamlEditor editor;
 
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"foo:\n"+
 				"  name-colors:\n" +
 				"    jacket: BLUE\n" +
@@ -1491,7 +1498,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//lowercase enums should work too
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"foo:\n"+
 				"  name-colors:\n" +
 				"    jacket: blue\n" +
@@ -1505,7 +1512,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumMapKeyCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		data("foo.color-names", "java.util.Map<demo.Color,java.lang.String>", null, "Map with colors in its keys");
 		data("foo.color-data", "java.util.Map<demo.Color,demo.ColorData>", null, "Map with colors in its keys, and pojo in values");
@@ -1619,9 +1626,9 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testPojoReconciling() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 			"foo:\n" +
 			"  data:\n" +
 			"    bogus: Something\n" +
@@ -1651,11 +1658,11 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
 
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"simple:\n" +
 				"  pants:\n"+
 				"    size: NOT_A_SIZE\n"+
@@ -1668,7 +1675,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"NOT_A_SIZE|ClothingSize"
 		);
 
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"foo:\n" +
 				"  color-names:\n"+
 				"    red: Rood\n"+
@@ -1685,7 +1692,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"bad: Blauw|Expecting a 'String' but got a 'Mapping'"
 		);
 
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"foo:\n" +
 				"  color-data:\n"+
 				"    red:\n" +
@@ -1701,7 +1708,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testEnumsInLowerCaseContentAssist() throws Exception {
-		IProject p = createPredefinedProject("demo-enum");
+		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.ClothingSize"));
@@ -1782,7 +1789,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testPojoInListCompletion() throws Exception {
-		useProject(createPredefinedProject("demo-enum"));
+		useProject(createPredefinedMavenProject("demo-enum"));
 
 		assertCompletion(
 				"foo:\n" +
@@ -1958,12 +1965,12 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 	}
 
 	public void testMultiProfileYamlReconcile() throws Exception {
-		MockEditor editor;
+		YamlEditor editor;
 		//See https://issuetracker.springsource.com/browse/STS-4144
 		defaultTestData();
 
 		//Narrowly focussed test-case for easier debugging
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"spring:\n" +
 				"  profiles: seven\n"
 		);
@@ -1972,7 +1979,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 
 		//More complete test
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"spring:\n" +
 				"  profiles: seven\n" +
 				"server:\n" +
@@ -1994,7 +2001,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		data("my.boxarray", "int[]", null, "An array of boxed primitives");
 		data("my.list", "java.util.List<java.lang.Integer>", null, "A list of boxed types");
 
-		MockEditor editor = new MockEditor(
+		YamlEditor editor = new YamlEditor(
 				"my:\n" +
 				"  array:\n" +
 				"    - 777\n" +
@@ -2005,7 +2012,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"bad|Expecting a 'int'"
 		);
 
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"my:\n" +
 				"  boxarray:\n" +
 				"    - 777\n" +
@@ -2016,7 +2023,7 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 				"bad|Expecting a 'int'"
 		);
 
-		editor = new MockEditor(
+		editor = new YamlEditor(
 				"my:\n" +
 				"  list:\n" +
 				"    - 777\n" +
@@ -2028,7 +2035,321 @@ public class YamlEditorTests extends YamlEditorTestHarness {
 		);
 	}
 
-	// TODO: allow relaxed property names in reconciling
+	public void test_STS4231() throws Exception {
+		//Should the 'predefined' project need to be recreated... use the commented code below:
+//		BootProjectTestHarness projectHarness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+//		IProject project = projectHarness.createBootProject("sts-4231",
+//				bootVersionAtLeast("1.3.0"),
+//				withStarters("web", "cloud-config-server")
+//		);
+
+		//For more robust test use predefined project which is not so much a moving target:
+		IProject project = createPredefinedMavenProject("sts-4231");
+		useProject(project);
+
+		assertCompletionsDisplayString(
+				"info:\n" +
+				"  component: Config Server\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    name: configserver\n" +
+				"  jmx:\n" +
+				"    default-domain: cloud.config.server\n" +
+				"  cloud:\n" +
+				"    config:\n" +
+				"      server:\n" +
+				"        git:\n" +
+				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
+				"          repos:\n" +
+				"            my-repo:\n" +
+				"              <*>\n",
+				// ==>
+				"name : String",
+				"pattern : String[]"
+		);
+
+		assertCompletion(
+				"info:\n" +
+				"  component: Config Server\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    name: configserver\n" +
+				"  jmx:\n" +
+				"    default-domain: cloud.config.server\n" +
+				"  cloud:\n" +
+				"    config:\n" +
+				"      server:\n" +
+				"        git:\n" +
+				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
+				"          repos:\n" +
+				"            my-repo:\n" +
+				"              p<*>\n",
+				// ==>
+				"info:\n" +
+				"  component: Config Server\n" +
+				"spring:\n" +
+				"  application:\n" +
+				"    name: configserver\n" +
+				"  jmx:\n" +
+				"    default-domain: cloud.config.server\n" +
+				"  cloud:\n" +
+				"    config:\n" +
+				"      server:\n" +
+				"        git:\n" +
+				"          uri: https://github.com/spring-cloud-samples/config-repo\n" +
+				"          repos:\n" +
+				"            my-repo:\n" +
+				"              pattern:\n" +
+				"                - <*>\n"
+		);
+
+	}
+
+	public void test_STS_4254_MapStringObjectReconciling() throws Exception {
+		YamlEditor editor;
+		data("info", "java.util.Map<java.lang.String,java.lang.Object>", null, "Info for the actuator's info endpoint.");
+
+		editor = new YamlEditor(
+				"info: not-a-map\n"
+		);
+		assertProblems(editor,
+				"not-a-map|Expecting a 'Map<String, Object>'"
+		);
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    artifact: foo-bar\n"
+		);
+		assertProblems(editor
+				/*nothing*/
+		);
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  more: \n" +
+				"    deeply:\n" +
+				"      nested: foo-bar\n"
+		);
+		assertProblems(editor
+				/*nothing*/
+		);
+
+		editor= new YamlEditor(
+				"booger: Bad\n" +
+				"info:\n" +
+				"  akey: avalue\n"
+		);
+		assertProblems(editor,
+				"booger|Unknown property"
+		);
+	}
+
+	public void test_STS_4254_MapStringStringReconciling() throws Exception {
+		YamlEditor editor;
+		data("info", "java.util.Map<java.lang.String,java.lang.String>", null, "Info for the actuator's info endpoint.");
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    artifact: foo-bar\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  more: \n" +
+				"    deeply:\n" +
+				"      nested: foo-bar\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		editor= new YamlEditor(
+				"booger: Bad\n" +
+				"info:\n" +
+				"  akey: avalue\n"
+		);
+		assertProblems(editor,
+				"booger|Unknown property"
+		);
+
+	}
+
+	public void test_STS_4254_MapStringIntegerReconciling() throws Exception {
+		YamlEditor editor;
+		data("info", "java.util.Map<java.lang.String,java.lang.Integer>", null, "Info for the actuator's info endpoint.");
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    foo-bar\n"
+		);
+		assertProblems(editor,
+				"foo-bar|Expecting a 'int'"
+		);
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  build: 123\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    number: 123\n"
+		);
+		assertProblems(editor
+				/*no problems*/
+		);
+
+		editor= new YamlEditor(
+				"info:\n" +
+				"  build: \n" +
+				"    artifact: abc\n"
+		);
+		assertProblems(editor,
+				"abc|Expecting a 'int'"
+		);
+
+		//A more complex example for good measure
+		editor= new YamlEditor(
+				"info:\n" +
+				"  some: \n" +
+				"    nested: foo\n" +
+				"    and: bar\n" +
+				"  or: 444\n" +
+				"  also: bad\n"
+		);
+		assertProblems(editor,
+				"foo|Expecting a 'int'",
+				"bar|Expecting a 'int'",
+				"bad|Expecting a 'int'"
+		);
+	}
+
+	public void testDeprecatedReconcileProperty() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		YamlEditor editor = new YamlEditor(
+				"# a comment\n"+
+				"error:\n"+
+				"  path: foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		assertProblems(editor,
+				"path|'error.path' is Deprecated: Use 'server.error.path'"
+				//no other problems
+		);
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertProblems(editor,
+				"path|'error.path' is Deprecated: Use 'server.error.path' instead. Reason: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, "This is old.");
+		assertProblems(editor,
+				"path|'error.path' is Deprecated: This is old."
+				//no other problems
+		);
+
+		deprecate("error.path", null, null);
+		assertProblems(editor,
+				"path|'error.path' is Deprecated!"
+				//no other problems
+		);
+	}
+
+	public void testDeprecatedPropertyCompletion() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		data("server.error.path", "java.lang.String", null, "Path of the error controller.");
+		deprecate("error.path", "server.error.path", "This is old.");
+		assertCompletionsDisplayString(
+				"errorpa<*>"
+				, // =>
+				"server.error.path : String", // should be first because it is not deprecated, even though it is not as good a pattern match
+				"error.path : String"
+		);
+		assertStyledCompletions("error.pa<*>",
+				StyledStringMatcher.plainFont("server.error.path : String"),
+				StyledStringMatcher.strikeout("error.path")
+		);
+	}
+
+	public void testDeprecatedPropertyHoverInfo() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		MockYamlEditor editor = new YamlEditor(
+				"# a comment\n"+
+				"error:\n" +
+				"  path: foo\n"
+		);
+
+		deprecate("error.path", "server.error.path", null);
+		editor.assertHoverContains("path", "<s>error.path</s> -&gt; server.error.path");
+		editor.assertHoverContains("path", "<b>Deprecated!</b>");
+
+		deprecate("error.path", "server.error.path", "This is old.");
+		editor.assertHoverContains("path", "<s>error.path</s> -&gt; server.error.path");
+		editor.assertHoverContains("path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, "This is old.");
+		editor.assertHoverContains("path", "<b>Deprecated: </b>This is old");
+
+		deprecate("error.path", null, null);
+		editor.assertHoverContains("path", "<b>Deprecated!</b>");
+	}
+
+	public void testDeprecatedBeanPropertyHoverInfo() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A bean with deprecated property.");
+		MockYamlEditor editor = new YamlEditor(
+				"# a comment\n"+
+				"foo:\n" +
+				"  name: foo\n"
+		);
+
+		editor.assertHoverContains("name", "<b>Deprecated!</b>");
+	}
+
+	public void testDeprecatedBeanPropertyReconcile() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		YamlEditor editor = new YamlEditor(
+				"# comment\n" +
+				"foo:\n" +
+				"  name: Old faithfull\n" +
+				"  new-name: New and fancy\n"
+		);
+		assertProblems(editor,
+				"name|Property 'name' of type 'demo.Deprecater' is Deprecated!"
+		);
+	}
+
+	public void testDeprecatedBeanPropertyCompletions() throws Exception {
+		IProject jp = createPredefinedMavenProject("demo");
+		useProject(jp);
+		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
+
+		assertStyledCompletions(
+				"foo:\n" +
+				"  nam<*>"
+				, // =>
+				StyledStringMatcher.plainFont("new-name : String"),
+				StyledStringMatcher.strikeout("name")
+		);
+	}
+
+
 
 	///////////////// cruft ////////////////////////////////////////////////////////
 

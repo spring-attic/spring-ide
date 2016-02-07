@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Boot
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot;singleton:=true
 Bundle-Vendor: Pivotal Software Inc.
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.core.BootActivator
 Require-Bundle: org.eclipse.core.resources,
  org.eclipse.m2e.core,
@@ -29,11 +29,18 @@ Require-Bundle: org.eclipse.core.resources,
  org.springsource.ide.eclipse.commons.ui,
  org.springframework.ide.eclipse.core,
  org.eclipse.ui.ide,
- org.eclipse.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.eclipse.ui,
+ org.springframework.ide.eclipse.wizard,
+ com.fasterxml.jackson.core.jackson-core,
+ com.fasterxml.jackson.core.jackson-databind,
+ com.fasterxml.jackson.core.jackson-annotations,
+ org.eclipse.ui.forms
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core,
  org.springframework.ide.eclipse.boot.core.cli,
+ org.springframework.ide.eclipse.boot.core.dialogs,
+ org.springframework.ide.eclipse.boot.core.initializr,
  org.springframework.ide.eclipse.boot.ui,
  org.springframework.ide.eclipse.boot.util
 Import-Package: org.eclipse.core.runtime,

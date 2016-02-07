@@ -15,16 +15,23 @@ import static org.springframework.ide.eclipse.boot.ui.BootUIImages.BOOT_ICON;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridLayout;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxSection;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
+import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
+import org.springframework.ide.eclipse.boot.launch.util.GroupLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
+import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 /**
  * @author Kris De Volder
@@ -49,11 +56,18 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 				new MainTypeLaunchTabSection(this, model.project.selection, model.mainTypeName),
 				new ProfileLaunchTabSection(this, model.profile),
 				new HLineSection(this),
-				new EnableDebugSection(this, model.enableDebug),
+				columns(2,
+						new EnableDebugSection(this, model.enableDebug),
+						new HideFromBootDashSection(this, model.hideFromDash)
+				),
 				new EnableJmxSection(this, model.enableJmx),
 				new HLineSection(this),
 				new PropertiesTableSection(this, model.project.selection)
 		});
+	}
+
+	private IPageSection columns(final int numColumns, WizardPageSection... sections) {
+		return new GroupLaunchTabSection(this, null, sections).columns(2);
 	}
 
 }

@@ -1,35 +1,38 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	GoPivotal, Inc. - initial API and implementation
+ * 	Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.importing;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 
+/**
+ * Import stratgety used in place of a Strategy that could not be instantiated, presumably because
+ * the required Eclipse plugins are not installed.
+ *
+ * @author Kris De Volder
+ */
 public class NullImportStrategy extends ImportStrategy {
 
-	private String buildType;
-	private String notInstalledMessage;
-
-	public NullImportStrategy(String buildType, String notInstalledMessage) {
-		this.buildType = buildType;
-		this.notInstalledMessage = notInstalledMessage;
+	public NullImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
+		super(buildType, name, notInstalledMessage);
 	}
 
 	@Override
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
-		throw new Error("Can not import using '"+buildType+"' because "+notInstalledMessage);
+		throw new IllegalStateException(getNotInstalledMessage());
 	}
 
 	@Override
 	public boolean isSupported() {
 		return false;
 	}
-	
+
 }

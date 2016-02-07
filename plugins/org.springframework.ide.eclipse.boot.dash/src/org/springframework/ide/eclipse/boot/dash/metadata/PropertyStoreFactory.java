@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
@@ -43,10 +48,11 @@ public class PropertyStoreFactory {
 	}
 
 	public static SecuredCredentialsStore createSecuredCredentialsStore() {
-		return new SecuredCredentialsStore();
+		return new DefaultSecuredCredentialsStore();
 	}
 
 	public static <S> IPropertyStore createForScope(final S scope, final IScopedPropertyStore<S> scopedStore) {
+		Assert.isNotNull(scopedStore);
 		return new IPropertyStore() {
 
 			@Override
@@ -80,6 +86,52 @@ public class PropertyStoreFactory {
 			@Override
 			public String get(String key) {
 				return backingStore.get(subkey(key));
+			}
+		};
+	}
+
+	public static IPropertyStore createFor(final ILaunchConfiguration launchConf) {
+		return new IPropertyStore() {
+
+			private static final String prefix = "boot.dash.";
+			private ILaunchConfiguration conf = launchConf;
+
+			@Override
+			public synchronized void put(String key, String value) throws Exception {
+				ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+				wc.setAttribute(prefix+key, value);
+				wc.doSave();
+			}
+
+
+			@Override
+			public String get(String key) {
+				try {
+					return conf.getAttribute(prefix+key,(String)null);
+				} catch (Exception e) {
+					BootDashActivator.log(e);
+				};
+				return null;
+			}
+		};
+	}
+
+	public static IPropertyStore backedBy(final IPreferenceStore preferenceStore) {
+		return new IPropertyStore() {
+			@Override
+			public void put(String key, String value) throws Exception {
+				if (value==null) {
+					preferenceStore.setToDefault(key);
+				} else {
+					preferenceStore.setValue(key, value);
+				}
+			}
+			@Override
+			public String get(String key) {
+				if (preferenceStore.contains(key)) {
+					return preferenceStore.getString(key);
+				}
+				return null;
 			}
 		};
 	}

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -28,7 +29,15 @@ public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 	public void run() {
 		BootDashModel model = sectionSelection.getValue();
 		if (model!=null) {
-			model.refresh();
+			model.refresh(ui);
+		}
+	}
+
+	@Override
+	public void updateEnablement() {
+		super.updateEnablement();
+		if (sectionSelection.getValue() instanceof CloudFoundryBootDashModel) {
+			setEnabled(((CloudFoundryBootDashModel)sectionSelection.getValue()).getRunTarget().isConnected());
 		}
 	}
 

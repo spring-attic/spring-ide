@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml;
 
-import org.dadacoalition.yedit.editor.YEdit;
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -18,14 +17,15 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
+import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlEditor;
 
-public class SpringYamlEditor extends YEdit implements Listener<SpringPropertiesIndexManager>, IPropertyChangeListener {
+public class SpringYamlEditor extends AbstractYamlEditor implements Listener<SpringPropertiesIndexManager>, IPropertyChangeListener {
 
-	private SpringYeditSourceViewerConfiguration sourceViewerConf;
+	private ApplicationYamlSourceViewerConfiguration sourceViewerConf;
 
 	@Override
 	protected YEditSourceViewerConfiguration createSourceViewerConfiguration() {
-		return this.sourceViewerConf = new SpringYeditSourceViewerConfiguration(this);
+		return this.sourceViewerConf = new ApplicationYamlSourceViewerConfiguration(this);
 	}
 
 	@Override

@@ -27,7 +27,8 @@ public class CloudFoundryGeneralPropertiesSection extends AbstractBdeGeneralProp
 				new InstancesPropertyControl(),
 				new HostPropertyControl(),
 				new DefaultPathPropertyControl(),
-				new TagsPropertyControl()
+				new TagsPropertyControl(),
+				new HealthCheckPropertyControl()
 		};
 	}
 

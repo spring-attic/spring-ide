@@ -15,7 +15,11 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+
+import com.google.common.collect.ImmutableSet;
 
 public interface BootDashElement extends Nameable, Taggable {
 	IJavaProject getJavaProject();
@@ -38,7 +42,7 @@ public interface BootDashElement extends Nameable, Taggable {
 
 	/**
 	 * Get the request mappings from a running process. May return null if
-	 * request mappings can not be determined. (Son 'null' means 'unknown', whereas
+	 * request mappings can not be determined. (So 'null' means 'unknown', whereas
 	 * an empty list means 'no request mappings').
 	 */
 	List<RequestMapping> getLiveRequestMappings();
@@ -55,29 +59,22 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * If more than one configuration exists then the 'preferred config' is used to decide which one
 	 * of the existing elements should be considered as 'active'.
 	 *
+	 * TODO: isn't this supposed to be obsolete? Remove?
+	 *
 	 * @return active configuration or null.
 	 */
 	ILaunchConfiguration getActiveConfig();
 
 	/**
-	 * A preferred configuration may be associated with an element. This is used by various operations
-	 * as a 'tie breaker' if there is more than one existing configuration associated with an element.
-	 */
-	ILaunchConfiguration getPreferredConfig();
-	void setPreferredConfig(ILaunchConfiguration config);
-
-	/**
 	 * The 'default' path is used by some actions to quickly open
 	 * the app in a browser view. This is just a stored value. There is no guarantee
 	 * that it actually exists on the given element when it is running (i.e. it may
-	 * or may not be the path of a RequestMapping returned from get getLiveRequestMappings.
-	 * Usually, it should be, but if the request mappings have changed since the
-	 * value was stored then it may no longer exist.
+	 * or may not be the path of a RequestMapping returned from getLiveRequestMappings.
 	 */
 	String getDefaultRequestMappingPath();
-	void setDefaultRequestMapingPath(String defaultPath);
+	void setDefaultRequestMappingPath(String defaultPath);
 
-	BootDashModel getParent();
+	BootDashModel getBootDashModel();
 
 	void stopAsync(UserInteractions ui) throws Exception;
 	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
@@ -85,4 +82,17 @@ public interface BootDashElement extends Nameable, Taggable {
 	int getActualInstances();
 	int getDesiredInstances();
 
+	ImmutableSet<BootDashElement> getCurrentChildren();
+	ObservableSet<BootDashElement> getChildren();
+	ImmutableSet<ILaunchConfiguration> getLaunchConfigs();
+	ImmutableSet<Integer> getLivePorts();
+
+	/**
+	 * Fetch the parent of a BDE. If this is a nested BDE then the parent will be
+	 * another {@link BootDashElement}. If the element is one owned directly by a
+	 * {@link BootDashModel} then the parent is that model.
+	 */
+	Object getParent();
+	BootDashColumn[] getColumns();
+	boolean hasDevtools();
 }

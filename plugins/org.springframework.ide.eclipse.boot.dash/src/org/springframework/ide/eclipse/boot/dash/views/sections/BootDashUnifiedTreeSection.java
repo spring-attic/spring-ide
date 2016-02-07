@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -20,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -28,6 +26,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -57,8 +56,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -70,8 +67,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Filter;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
@@ -89,8 +86,10 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -124,13 +123,27 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private Stylers stylers;
 
-	public static class MySorter extends ViewerSorter {
+	public static class BootModelViewerSorter extends ViewerSorter {
+
+		private final BootDashViewModel viewModel;
+
+		public BootModelViewerSorter(BootDashViewModel viewModel) {
+			this.viewModel = viewModel;
+		}
+
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			if (e1 instanceof BootDashModel && e2 instanceof BootDashModel) {
-				BootDashModel m1 = (BootDashModel) e1;
-				BootDashModel m2 = (BootDashModel) e2;
-				return m1.getRunTarget().compareTo(m2.getRunTarget());
+				return this.viewModel.getModelComparator().compare((BootDashModel) e1, (BootDashModel) e2);
+			} else if (e1 instanceof BootDashElement && e2 instanceof BootDashElement) {
+				BootDashElement bde1 = (BootDashElement) e1;
+				BootDashElement bde2 = (BootDashElement) e2;
+				if (bde1.getBootDashModel()==bde2.getBootDashModel()) {
+					Comparator<BootDashElement> comparator = bde1.getBootDashModel().getElementComparator();
+					if (comparator!=null) {
+						return comparator.compare(bde1, bde2);
+					}
+				}
 			}
 			return super.compare(viewer, e1, e2);
 		}
@@ -154,23 +167,45 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (tv != null && !tv.getControl().isDisposed()) {
-						tv.update(e, null);
+						//tv.update(e, null);
+						tv.refresh(e, true);
 					}
 				}
 			});
 		}
 	};
 
-	final private ValueListener<Set<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<Set<RunTarget>>() {
-		protected void uiGotValue(LiveExpression<Set<RunTarget>> exp, Set<RunTarget> value) {
+	final private ModelStateListener MODEL_STATE_LISTENER = new ModelStateListener() {
+		public void stateChanged(final BootDashModel model) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					if (tv != null && !tv.getControl().isDisposed()) {
+						tv.update(model, null);
+						/*
+						 * TODO: ideally the above should do the repaint of
+						 * the control's area where the tree item is
+						 * located, but for some reason repaint doesn't
+						 * happen. #refresh() didn't trigger the repaint either
+						 */
+						tv.getControl().redraw();
+					} else {
+						model.removeModelStateListener(MODEL_STATE_LISTENER);
+					}
+				}
+			});
+		}
+	};
+
+	final private ValueListener<ImmutableSet<RunTarget>> RUN_TARGET_LISTENER = new UIValueListener<ImmutableSet<RunTarget>>() {
+		protected void uiGotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
 				tv.refresh();
 			}
 		}
 	};
 
-	private final ValueListener<Set<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<Set<BootDashElement>>() {
-		protected void uiGotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
+	private final ValueListener<ImmutableSet<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<ImmutableSet<BootDashElement>>() {
+		protected void uiGotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
 				//TODO: refreshing the whole table is overkill, but is a bit tricky to figure out which BDM
 				// this set of elements belong to. If we did know then we could just refresh the node representing its section
@@ -180,31 +215,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				//This listener can't easily be removed because of the intermediary adapter that adds it to a numner of different
 				// things. So at least remove it when model remains chatty after view got disposed.
 				exp.removeListener(this);
-			}
-		}
-	};
-
-	private final ModelStateListener MODEL_STATE_LISTENER = new ModelStateListener() {
-		@Override
-		public void stateChanged(final BootDashModel model) {
-			if (PlatformUI.isWorkbenchRunning()) {
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (tv != null && !tv.getControl().isDisposed()) {
-							tv.update(model, null);
-							/*
-							 * TODO: ideally the above should do the repaint of
-							 * the control's area where the tree item is
-							 * located, but for some reason repaint doesn't
-							 * happen. #refresh() didn't trigger the repaint either
-							 */
-							tv.getControl().redraw();
-						} else {
-							model.removeModelStateListener(MODEL_STATE_LISTENER);
-						}
-					}
-				});
 			}
 		}
 	};
@@ -231,21 +241,31 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			super(page, style);
 		}
 
-
 		@Override
-		protected Object[] getFilteredChildren(Object parent) {
-			int totalElements = sizeof(getRawChildren(parent));
-			Object[] filteredElements = super.getFilteredChildren(parent);
-			hiddenElementCount.setValue(totalElements - sizeof(filteredElements));
-			return filteredElements;
+		public void refresh(Object obj) {
+			super.refresh(obj);
+			// Every sub-tree refresh should update the hidden elements label
+			int totalElements = countChildren(getRoot());
+			int filteredElements = countFilteredChildren(getRoot());
+			hiddenElementCount.setValue(totalElements - filteredElements);
 		}
 
-		private int sizeof(Object[] os) {
-			if (os!=null) {
-				return os.length;
+		private int countChildren(Object element) {
+			int count = 0;
+			for (Object o : getRawChildren(element)) {
+				count += 1 + countChildren(o);
 			}
-			return 0;
+			return count;
 		}
+
+		private int countFilteredChildren(Object element) {
+			int count = 0;
+			for (Object o : super.getFilteredChildren(element)) {
+				count += 1 + countFilteredChildren(o);
+			}
+			return count;
+		}
+
 	}
 
 	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model, UserInteractions ui) {
@@ -259,14 +279,16 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	@Override
 	public void createContents(Composite page) {
 		tv = new CustomTreeViewer(page, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
-
+		tv.setExpandPreCheckFilters(true);
 		tv.setContentProvider(new BootDashTreeContentProvider());
-		tv.setSorter(new MySorter());
+		tv.setSorter(new BootModelViewerSorter(this.model));
 		tv.setInput(model);
 		tv.getTree().setLinesVisible(true);
 
 		stylers = new Stylers(tv.getTree().getFont());
 		tv.setLabelProvider(new BootDashTreeLabelProvider(stylers, tv));
+
+		ColumnViewerToolTipSupport.enableFor(tv);
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getTree());
 
@@ -370,7 +392,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		if (mixedSelection==null) {
 			mixedSelection = MultiSelection.from(Object.class, new ObservableSet<Object>() {
 				@Override
-				protected Set<Object> compute() {
+				protected ImmutableSet<Object> compute() {
 					if (tv!=null) {
 						ISelection s = tv.getSelection();
 						if (s instanceof IStructuredSelection) {
@@ -378,7 +400,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							return ImmutableSet.copyOf(elements);
 						}
 					}
-					return Collections.emptySet();
+					return ImmutableSet.of();
 				}
 			});
 			debug("mixedSelection", mixedSelection.getElements());
@@ -428,13 +450,21 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenBrowserAction());
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
-		addVisible(manager, actions.getOpenConfigAction());
-		addPreferredConfigSelectionMenu(manager);
 		addVisible(manager, actions.getShowPropertiesViewAction());
 
 		manager.add(new Separator());
+
+		addVisible(manager, actions.getOpenConfigAction());
+		addVisible(manager, actions.getDuplicateConfigAction());
+		addVisible(manager, actions.getDeleteConfigsAction());
+
+		manager.add(new Separator());
+
 		addVisible(manager, actions.getExposeRunAppAction());
 		addVisible(manager, actions.getExposeDebugAppAction());
+		addSubmenu(manager, "Deploy and Run On...", actions.getRunOnTargetActions());
+		addSubmenu(manager, "Deploy and Debug On...", actions.getDebugOnTargetActions());
+
 		manager.add(new Separator());
 
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
@@ -457,12 +487,17 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, restartOnlyAction);
 		}
 
+		IAction selectManifestAction = actions.getSelectManifestAction();
+		if (selectManifestAction != null) {
+			addVisible(manager, selectManifestAction);
+		}
+
 		IAction restartWithRemoteDevClientAction = actions.getRestartWithRemoteDevClientAction();
 		if (restartWithRemoteDevClientAction != null) {
 			addVisible(manager, actions.getRestartWithRemoteDevClientAction());
 		}
 
-		IAction deleteAppsAction = actions.getDeleteApplicationsAction();
+		IAction deleteAppsAction = actions.getDeleteAppsAction();
 		if (deleteAppsAction != null) {
 			addVisible(manager, deleteAppsAction);
 		}
@@ -475,6 +510,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		IAction openCloudAdminConsoleAction = actions.getOpenCloudAdminConsoleAction();
 		if (openCloudAdminConsoleAction != null) {
 			addVisible(manager, openCloudAdminConsoleAction);
+		}
+
+		IAction toggleCloudConnectAction = actions.getToggleTargetConnectionAction();
+		if (toggleCloudConnectAction != null) {
+			addVisible(manager, toggleCloudConnectAction);
 		}
 
 		IAction reconnectConsole = actions.getReconnectCloudConsole();
@@ -490,10 +530,30 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 //		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 
-	private void addVisible(IMenuManager manager, IAction a) {
+
+	/**
+	 * Adds a submenu containing a given list of actions. The menu is only added if
+	 * there is at least one visible action in the list.
+	 */
+	private void addSubmenu(IMenuManager parent, String label, ImmutableList<IAction> actions) {
+		if (actions!=null && !actions.isEmpty()) {
+			boolean notEmpty = false;
+			IMenuManager submenu = new MenuManager(label);
+			for (IAction a : actions) {
+				notEmpty |= addVisible(submenu, a);
+			}
+			if (notEmpty) {
+				parent.add(submenu);
+			}
+		}
+	}
+
+	private boolean addVisible(IMenuManager manager, IAction a) {
 		if (isVisible(a)) {
 			manager.add(a);
+			return true;
 		}
+		return false;
 	}
 
 	private boolean isVisible(IAction a) {
@@ -501,21 +561,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			return ((AbstractBootDashAction) a).isVisible();
 		}
 		return true;
-	}
-
-	private void addPreferredConfigSelectionMenu(IMenuManager parent) {
-		BootDashElement element = selection.getSingle();
-		if (element!=null) {
-			ILaunchConfiguration defaultConfig = element.getPreferredConfig();
-			List<ILaunchConfiguration> allConfigs = element.getTarget().getLaunchConfigs(element);
-			if (!allConfigs.isEmpty()) {
-				MenuManager menu = new MenuManager("Default Config...", BootDashActivator.getImageDescriptor("icons/boot-icon.png"), null);
-				parent.add(menu);
-				for (ILaunchConfiguration conf : allConfigs) {
-					menu.add(actions.selectDefaultConfigAction(element, defaultConfig, conf));
-				}
-			}
-		}
 	}
 
 	private void addDragSupport(final TreeViewer viewer) {
@@ -669,7 +714,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			return false;
 		}
 		for (BootDashElement e : selection) {
-			if (!e.getParent().getRunTarget().canDeployAppsFrom()) {
+			if (!e.getBootDashModel().getRunTarget().canDeployAppsFrom()) {
 				return false;
 			}
 		}

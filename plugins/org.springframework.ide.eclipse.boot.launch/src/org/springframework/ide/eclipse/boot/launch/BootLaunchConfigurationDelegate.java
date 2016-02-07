@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -30,6 +31,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
@@ -58,6 +60,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static final String ENABLE_LIFE_CYCLE = "spring.boot.lifecycle.enable";
 	public static final boolean DEFAULT_ENABLE_LIFE_CYCLE = true;
+
+	public static final String HIDE_FROM_BOOT_DASH = "spring.boot.dash.hidden";
+	public static final boolean DEFAULT_HIDE_FROM_BOOT_DASH = false;
 
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
 	private static final String TERMINATION_TIMEOUT = "spring.boot.lifecycle.termination.timeout";
@@ -131,6 +136,19 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return enabled;
 	}
 
+	public static boolean isHiddenFromBootDash(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
+		} catch (CoreException e) {
+			BootActivator.log(e);
+		}
+		return DEFAULT_HIDE_FROM_BOOT_DASH;
+	}
+
+	public static void setHiddenFromBootDash(ILaunchConfigurationWorkingCopy conf, boolean hide) {
+		conf.setAttribute(HIDE_FROM_BOOT_DASH, hide);
+	}
+
 	/**
 	 * Retrieve the 'Enable Life Cycle Tracking' option from the config. Note that
 	 * this doesn't necesarily mean that this feature is effectively enabled as
@@ -162,14 +180,6 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			return BootPropertyTester.supportsLifeCycleManagement(p);
 		}
 		return false;
-	}
-
-	/**
-	 * Get all ILaunchConfigurations  for "Run As >> Spring Boot App" that are
-	 * associated with a given project.
-	 */
-	public static List<ILaunchConfiguration> getLaunchConfigs(IProject p) {
-		return getLaunchConfigs(p, TYPE_ID);
 	}
 
 	/**
@@ -276,6 +286,20 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		conf.setAttribute(PROFILE, profile);
 	}
 
+	public static ILaunchConfiguration duplicate(ILaunchConfiguration conf) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy(conf.getName());
+		for (Entry<String, Object> e : conf.getAttributes().entrySet()) {
+			String key = e.getKey();
+			Object value = e.getValue();
+			if (value instanceof String) {
+				wc.setAttribute(key, (String)value);
+			}
+		}
+		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+		return wc.doSave();
+	}
+
+
 	public static ILaunchConfigurationWorkingCopy createWorkingCopy(String nameHint) throws CoreException {
 		String name = getLaunchMan().generateLaunchConfigurationName(nameHint);
 		return getConfType().newInstance(null, name);
@@ -304,6 +328,10 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return wc;
 	}
 
+	public static ILaunchConfiguration createConf(IProject project) throws CoreException {
+		return createConf(JavaCore.create(project));
+	}
+
 	public static ILaunchConfiguration createConf(IJavaProject project) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc = null;
 		ILaunchConfigurationType configType = getConfType();
@@ -324,6 +352,14 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			}
 		}
 		return -1;
+	}
+
+	public static long getTerminationTimeoutAsLong(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		if (conf!=null) {
+			return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(conf);
+		}
+		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
 	}
 
 }

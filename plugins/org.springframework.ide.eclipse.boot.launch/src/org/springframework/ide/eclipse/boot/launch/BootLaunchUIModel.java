@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.DEFAULT_ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_HIDE_FROM_BOOT_DASH;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.HIDE_FROM_BOOT_DASH;
+
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -54,13 +59,15 @@ public class BootLaunchUIModel {
 	public final ProfileLaunchTabModel profile;
 	public final LaunchTabSelectionModel<Boolean> enableDebug;
 	public final EnableJmxFeaturesModel enableJmx;
+	public final LaunchTabSelectionModel<Boolean> hideFromDash;
 
 	public BootLaunchUIModel(IProfileHistory profileHistory) {
 		project = SelectProjectLaunchTabModel.create();
 		mainTypeName = MainTypeNameLaunchTabModel.create();
 		profile = ProfileLaunchTabModel.create(project.selection, profileHistory);
-		enableDebug = EnableDebugLaunchTabModel.create();
+		enableDebug = CheckboxLaunchTabModel.create(ENABLE_DEBUG_OUTPUT, DEFAULT_ENABLE_DEBUG_OUTPUT);
 		enableJmx = new EnableJmxFeaturesModel();
+		hideFromDash = CheckboxLaunchTabModel.create(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
 	}
 
 }

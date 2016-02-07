@@ -32,8 +32,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.MetaDataManipulator;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 @SuppressWarnings("restriction")
@@ -160,7 +160,7 @@ public class CreateAdditionalMetadataQuickfix implements ICompletionProposal {
 
 	@Override
 	public String getDisplayString() {
-		return "Create metadata for '"+missingPropertyKey+"'";
+		return "Create metadata for '"+missingPropertyKey+"'.";
 	}
 
 	@Override

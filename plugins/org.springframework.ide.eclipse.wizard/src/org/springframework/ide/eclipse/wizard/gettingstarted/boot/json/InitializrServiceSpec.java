@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot.json;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,8 +25,9 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
@@ -35,9 +39,29 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 public class InitializrServiceSpec {
 
 	private JSONObject data;
+	public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
 
 	public InitializrServiceSpec(JSONObject jsonObject) {
 		this.data = jsonObject;
+	}
+
+	public static InitializrServiceSpec parseFrom(URLConnectionFactory urlConnectionFactory, URL url) throws IOException, Exception {
+		URLConnection conn = null;
+		InputStream input = null;
+		try {
+			conn = urlConnectionFactory.createConnection(url);
+			conn.addRequestProperty("Accept", JSON_CONTENT_TYPE_HEADER);
+			conn.connect();
+			input = conn.getInputStream();
+			return parseFrom(input);
+		} finally {
+			if (input!=null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
+			}
+		}
 	}
 
 	public static InitializrServiceSpec parseFrom(InputStream input) throws Exception {
@@ -111,6 +135,28 @@ public class InitializrServiceSpec {
 
 		public String getVersionRange() {
 			return versionRange;
+		}
+
+		@Override
+		public String toString() {
+			return "Dep("+id+","+description+","+versionRange+")";
+		}
+
+		public boolean isSupportedFor(String bootVersion) {
+			try {
+				if (StringUtils.hasText(versionRange)) {
+					final VersionRange range = new VersionRange(versionRange);
+					String versionStr = bootVersion;
+					if (versionStr!=null) {
+						Version version = new Version(versionStr.replace("BUILD-SNAPSHOT", "ZZZZZZZZZZZZZ"));
+						//replacement of BS -> ZZ: see bug https://www.pivotaltracker.com/story/show/100963226
+						return range.includes(version);
+					}
+				}
+			} catch (Exception e) {
+				WizardPlugin.log(e);
+			}
+			return true;
 		}
 	}
 

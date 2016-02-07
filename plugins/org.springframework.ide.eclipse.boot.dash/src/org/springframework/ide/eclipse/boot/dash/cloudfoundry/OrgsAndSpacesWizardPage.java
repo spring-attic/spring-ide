@@ -12,9 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudEntity;
-import org.cloudfoundry.client.lib.domain.CloudOrganization;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -31,14 +29,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFEntity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  * Wizard page to allow users to select a target cloud space when cloning an
  * existing server.
  */
-class OrgsAndSpacesWizardPage extends WizardPage {
+class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<ValidationResult> {
 
 	protected TreeViewer orgsSpacesViewer;
 
@@ -46,23 +48,27 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	private final OrgsAndSpaces spaces;
 
-	private LiveSet<RunTarget> targets;
+	private boolean canFinish = false;
 
-	OrgsAndSpacesWizardPage(LiveSet<RunTarget> targets, OrgsAndSpaces spaces,
-			CloudFoundryTargetWizardModel targetProperties) {
+	OrgsAndSpacesWizardPage(CloudFoundryTargetWizardModel targetProperties) {
 		super("Select an Org and Space");
-		this.targets = targets;
 		setTitle("Select an Org and Space");
 		setDescription("Select a space in " + targetProperties.getUrl());
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 		this.targetProperties = targetProperties;
-		this.spaces = spaces;
+		this.spaces = targetProperties.getSpaces();
+		targetProperties.addAllPropertiesListener(this);
+	}
 
+	@Override
+	public void dispose() {
+		this.targetProperties.removeAllPropertiesListeners(this);
+		super.dispose();
 	}
 
 	@Override
 	public boolean isPageComplete() {
-		return targetProperties.getSpaceName() != null && targetProperties.getOrganizationName() != null;
+		return canFinish && targetProperties.getSpaceName() != null && targetProperties.getOrganizationName() != null;
 	}
 
 	@Override
@@ -98,9 +104,9 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 	}
 
 	public void setInput() {
-		List<CloudOrganization> orgInput = spaces.getOrgs();
+		List<CFOrganization> orgInput = spaces.getOrgs();
 
-		CloudOrganization[] organizationInput = orgInput.toArray(new CloudOrganization[orgInput.size()]);
+		CFOrganization[] organizationInput = orgInput.toArray(new CFOrganization[orgInput.size()]);
 		orgsSpacesViewer.setInput(organizationInput);
 
 		// Expand all first, so that child elements can be selected
@@ -111,7 +117,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 
 	protected void setInitialSelectionInViewer() {
 
-		CloudSpace selectedSpace = spaces.getAllSpaces().get(0);
+		CFSpace selectedSpace = spaces.getAllSpaces().get(0);
 
 		if (selectedSpace != null) {
 			setSpaceInProperties(selectedSpace);
@@ -119,7 +125,7 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		}
 	}
 
-	protected void setSelectionInViewer(CloudSpace selectedSpace) {
+	protected void setSelectionInViewer(CFSpace selectedSpace) {
 		// Now set the cloud space in the tree
 		Tree tree = orgsSpacesViewer.getTree();
 		TreeItem[] orgItems = tree.getItems();
@@ -130,8 +136,8 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 			// org
 			for (TreeItem item : orgItems) {
 				Object treeObj = item.getData();
-				if (treeObj instanceof CloudOrganization
-						&& ((CloudOrganization) treeObj).getName().equals(selectedSpace.getOrganization().getName())) {
+				if (treeObj instanceof CFOrganization
+						&& ((CFOrganization) treeObj).getName().equals(selectedSpace.getOrganization().getName())) {
 					orgItem = item;
 					break;
 
@@ -143,8 +149,8 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 				if (children != null) {
 					for (TreeItem childItem : children) {
 						Object treeObj = childItem.getData();
-						if (treeObj instanceof CloudSpace
-								&& ((CloudSpace) treeObj).getName().equals(selectedSpace.getName())) {
+						if (treeObj instanceof CFSpace
+								&& ((CFSpace) treeObj).getName().equals(selectedSpace.getName())) {
 							tree.select(childItem);
 							break;
 						}
@@ -162,38 +168,14 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 			if (selectedItems != null && selectedItems.length > 0) {
 				// It's a single selection tree, so only get the first selection
 				Object selectedObj = selectedItems[0].getData();
-				setSpaceInProperties(selectedObj instanceof CloudSpace ? (CloudSpace) selectedObj : null);
+				setSpaceInProperties(selectedObj instanceof CFSpace ? (CFSpace) selectedObj : null);
 			}
 		}
 		refreshWizardUI();
 	}
 
-	protected void setSpaceInProperties(CloudSpace space) {
-		// TODO: Move this to a validator
-		setErrorMessage(null);
-		if (space != null) {
-			RunTarget existing = getExistingRunTarget(space);
-			if (existing != null) {
-				setErrorMessage("A run target for that space already exists: '" + existing.getName()
-						+ "'. Please select another space.");
-				targetProperties.setSpace(null);
-				return;
-			}
-		}
-		targetProperties.setSpace(space);
-	}
-
-	protected RunTarget getExistingRunTarget(CloudSpace space) {
-		if (space != null) {
-			String targetId = CloudFoundryTargetProperties.getId(targetProperties.getUsername(),
-					targetProperties.getUrl(), space.getOrganization().getName(), space.getName());
-			for (RunTarget target : targets.getValues()) {
-				if (targetId.equals(target.getId())) {
-					return target;
-				}
-			}
-		}
-		return null;
+	protected void setSpaceInProperties(CFSpace selectedSpace) {
+		targetProperties.setSpace(selectedSpace);
 	}
 
 	private void refreshWizardUI() {
@@ -211,9 +193,9 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		}
 
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			if (e1 instanceof CloudEntity && e2 instanceof CloudEntity) {
-				String name1 = ((CloudEntity) e1).getName();
-				String name2 = ((CloudEntity) e2).getName();
+			if (e1 instanceof CFEntity && e2 instanceof CFEntity) {
+				String name1 = ((CFEntity) e1).getName();
+				String name2 = ((CFEntity) e2).getName();
 				return name1.compareTo(name2);
 			}
 
@@ -232,10 +214,10 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		}
 
 		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof CloudOrganization) {
-				List<CloudSpace> children = spaces.getOrgSpaces(((CloudOrganization) parentElement).getName());
+			if (parentElement instanceof CFOrganization) {
+				List<CFSpace> children = spaces.getOrgSpaces(((CFOrganization) parentElement).getName());
 				if (children != null) {
-					return children.toArray(new CloudSpace[children.size()]);
+					return children.toArray(new CFSpace[children.size()]);
 				}
 			}
 			return null;
@@ -267,11 +249,24 @@ class OrgsAndSpacesWizardPage extends WizardPage {
 		}
 
 		public String getText(Object element) {
-			if (element instanceof CloudEntity) {
-				CloudEntity cloudEntity = (CloudEntity) element;
+			if (element instanceof CFEntity) {
+				CFEntity cloudEntity = (CFEntity) element;
 				return cloudEntity.getName();
 			}
 			return super.getText(element);
 		}
+	}
+
+	@Override
+	public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
+		setErrorMessage(null);
+		canFinish = true;
+		if (value.status == IStatus.ERROR) {
+			setErrorMessage(value.msg);
+			canFinish = false;
+		} else {
+			setMessage(value.msg, value.status);
+		}
+		refreshWizardUI();
 	}
 }

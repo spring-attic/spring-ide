@@ -66,6 +66,9 @@ public class OpenConfigFileAction extends AbstractNavigatorAction {
 						&& ((IAdaptable) rElement).getAdapter(IBean.class) != null) {
 					rElement = (IBean) ((IAdaptable) rElement).getAdapter(IBean.class);
 				}
+				if (rElement instanceof ISourceModelElement && ((ISourceModelElement) rElement).getElementSourceLocation() == null) {
+					return false;
+				}
 				element = rElement;
 				return true;
 			}

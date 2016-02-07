@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2014 Pivotal Software Inc.
+ *  Copyright (c) 2012 - 2015 Pivotal Software Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -42,6 +42,10 @@ public class IntegrationImages {
 	public static final ImageDescriptor AGGREGATOR = create(INT, "aggregator.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor AGGREGATOR_SMALL = scale(AGGREGATOR, SCALE);
+
+	public static final ImageDescriptor BARRIER = create(INT, "barrier.png"); //$NON-NLS-1$
+
+	public static final ImageDescriptor BARRIER_SMALL = scale(BARRIER, SCALE);
 
 	public static final ImageDescriptor BRIDGE = create(INT, "bridge.png"); //$NON-NLS-1$
 

@@ -17,9 +17,12 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -29,7 +32,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash"; //$NON-NLS-1$
 
-	public static final String DT_ICON_ID = "dt-icon";
+	public static final String DT_ICON_ID = "devttools";
+	public static final String MANIFEST_ICON = "manifest";
+	public static final String CLOUD_ICON = "cloud";
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -86,8 +91,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns a new <code>IStatus</code> for this plug-in
+	 * Deprecated use {@link ExceptionUtil} methods instead.
 	 */
+	@Deprecated
 	public static IStatus createErrorStatus(Throwable exception) {
 		String message = exception.getMessage();
 		if (message == null) {
@@ -96,6 +102,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
+	/**
+	 * Deprecated use {@link ExceptionUtil} methods instead.
+	 */
+	@Deprecated
 	public static IStatus createErrorStatus(Throwable exception, String message) {
 		if (message == null) {
 			message = "";
@@ -103,12 +113,21 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
+	/**
+	 * Deprecated. Use {@link ExceptionUtil}.coreException instead.
+	 */
+	@Deprecated
 	public static CoreException asCoreException(String message) {
 		return new CoreException(createErrorStatus(null, message));
 	}
 
 	public static void log(Throwable e) {
-		getDefault().getLog().log(createErrorStatus(e));
+		try {
+			getDefault().getLog().log(createErrorStatus(e));
+		} catch (NullPointerException npe) {
+			//Can happen if errors are trying to be logged during Eclipse's shutdown
+			e.printStackTrace();
+		}
 	}
 
 	public static void logWarning(String message) {
@@ -120,9 +139,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	public BootDashViewModel getModel() {
 		if (model==null) {
-			model = new BootDashViewModel(new DefaultBootDashModelContext(),
+			DefaultBootDashModelContext context = new DefaultBootDashModelContext();
+			model = new BootDashViewModel(context,
 					RunTargetTypes.LOCAL,
-					RunTargetTypes.CLOUDFOUNDRY
+					new CloudFoundryRunTargetType(context, CloudFoundryClientFactory.DEFAULT)
 					// RunTargetTypes.LATTICE
 			);
 		}
@@ -133,6 +153,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 		reg.put(DT_ICON_ID, getImageDescriptor("/icons/DT.png"));
+		reg.put(CLOUD_ICON, getImageDescriptor("/icons/cloud_obj.png"));
+		reg.put(MANIFEST_ICON, getImageDescriptor("icons/selectmanifest.gif"));
 	}
 
 }

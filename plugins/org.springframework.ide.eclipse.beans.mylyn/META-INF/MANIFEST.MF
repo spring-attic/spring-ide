@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.mylyn;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.mylyn.Activator
 Bundle-Localization: plugin
 Import-Package: org.eclipse.core.commands.common,
@@ -54,7 +54,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.w3c.dom
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.beans.mylyn,
  org.springframework.ide.eclipse.beans.mylyn.core,

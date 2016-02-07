@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.launch;
 
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,14 +30,22 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
+import org.springframework.ide.eclipse.boot.util.ProcessTracker;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
+	private static final String SILENT_EXIT_EXCEPTION = "org.springframework.boot.devtools.restart.SilentExitExceptionHandler$SilentExitException";
+
 	private static final String M2E_CLASSPATH_PROVIDER = "org.eclipse.m2e.launchconfig.classpathProvider";
+
 	protected static final String M2E_SOURCEPATH_PROVIDER = "org.eclipse.m2e.launchconfig.sourcepathProvider";
 	public static final String JAVA_LAUNCH_CONFIG_TYPE_ID = IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION;
 	public static final String ENABLE_DEBUG_OUTPUT = "spring.boot.debug.enable";
@@ -216,7 +223,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		for (PropVal p : props) {
 			//Don't store stuff with 'empty keys'. These are likely just
 			// 'empty' entries user added but never filled in.
-			if (hasText(p.name)) {
+			if (StringUtil.hasText(p.name)) {
 				String prefixed = PROPS_PREFIX+p.name+OID_SEPERATOR+(oid++);
 				String valueEnabled = (p.isChecked?'1':'0')+p.value;
 				conf.setAttribute(prefixed, valueEnabled);
@@ -264,7 +271,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	public static IProject getProject(ILaunchConfiguration conf) {
 		try {
 			String pname = getProjectName(conf);
-			if (hasText(pname)) {
+			if (StringUtil.hasText(pname)) {
 				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
 				//debug(conf, "getProject => "+p);
 				return p;
@@ -335,13 +342,30 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	}
 
 	@Override
-	public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor monitor)
+	public void launch(ILaunchConfiguration conf, String mode, final ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
+		conf = configureSourcePathProvider(conf);
+		if (ILaunchManager.DEBUG_MODE.equals(mode) && isIgnoreSilentExitException(conf)) {
+			final IgnoreExceptionOfType breakpointListener = new IgnoreExceptionOfType(launch, SILENT_EXIT_EXCEPTION);
+			new ProcessTracker(new ProcessListenerAdapter() {
+				@Override
+				public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
+					if (launch.equals(target.getLaunch())){
+						breakpointListener.dispose();
+						tracker.dispose();
+					}
+				}
+			});
+		}
+		super.launch(conf, mode, launch, monitor);
+	}
+
+	protected ILaunchConfiguration configureSourcePathProvider(ILaunchConfiguration conf) throws CoreException {
 		IProject project = BootLaunchConfigurationDelegate.getProject(conf);
 		if (project.hasNature(SpringBootCore.M2E_NATURE)) {
 			conf = setAttribute(conf, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
 		}
-		super.launch(conf, mode, launch, monitor);
+		return conf;
 	}
 
 	private ILaunchConfiguration setAttribute(ILaunchConfiguration conf, String a, String v) {
@@ -357,5 +381,9 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		return conf;
 	}
 
+	public static boolean isIgnoreSilentExitException(ILaunchConfiguration conf) {
+		//This might be controlled by individual launch conf in future, but for now, it is just a global preference.
+		return BootPreferences.getInstance().isIgnoreSilentExit();
+	}
 
 }

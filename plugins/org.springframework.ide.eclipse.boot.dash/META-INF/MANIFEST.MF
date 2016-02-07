@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring Boot Dashboard View
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.BootDashActivator
 Bundle-Vendor: Pivotal Inc
 Require-Bundle: org.eclipse.ui,
@@ -25,8 +25,7 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.lang,
  org.json,
  org.springframework.ide.eclipse.boot.properties.editor,
- org.springframework.ide.eclipse.cloudfoundry.client,
- org.springsource.ide.eclipse.commons.receptor.client,
+ org.springsource.ide.eclipse.commons.cloudfoundry.client,
  com.google.guava;bundle-version="15.0.0",
  org.codehaus.jackson.mapper,
  org.codehaus.jackson.core,
@@ -35,8 +34,17 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.server.core,
  org.springframework.ide.eclipse.ui,
  org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
- org.apache.httpcomponents.httpcore
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.apache.httpcomponents.httpcore,
+ com.jcraft.jsch,
+ org.eclipse.ui.editors,
+ org.eclipse.jface.text,
+ org.dadacoalition.yedit,
+ org.eclipse.ui.workbench,
+ org.springframework.ide.eclipse.editor.support,
+ org.yaml.snakeyaml,
+ org.eclipse.compare,
+ org.springframework.ide.eclipse.cloudfoundry.manifest.editor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/commons-logging-1.2.jar,
@@ -44,12 +52,15 @@ Bundle-ClassPath: .,
  lib/spring-core-4.1.6.RELEASE.jar
 Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging,
+ org.springframework.ide.eclipse.boot.dash.livexp,
  org.springframework.ide.eclipse.boot.dash.metadata,
  org.springframework.ide.eclipse.boot.dash.model,
  org.springframework.ide.eclipse.boot.dash.model.requestmappings,
  org.springframework.ide.eclipse.boot.dash.model.runtargettypes,
  org.springframework.ide.eclipse.boot.dash.ngrok,
- org.springframework.ide.eclipse.boot.dash.util
+ org.springframework.ide.eclipse.boot.dash.util,
+ org.springframework.ide.eclipse.boot.dash.views,
+ org.springframework.ide.eclipse.boot.dash.views.sections
 Import-Package: org.springframework.core,
  org.springframework.web.client,
  org.yaml.snakeyaml

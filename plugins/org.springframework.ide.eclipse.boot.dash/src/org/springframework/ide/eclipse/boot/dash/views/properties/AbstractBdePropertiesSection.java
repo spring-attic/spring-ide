@@ -62,19 +62,17 @@ public abstract class AbstractBdePropertiesSection extends AbstractPropertySecti
 
 	@Override
 	public void stateChanged(BootDashElement e) {
-		if (Display.getCurrent() == null) {
-			Display display = getPart().getSite().getShell().getDisplay();
-			if (display == null) {
-				display = Display.getDefault();
-			}
-			if (display != null) {
-				display.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						refresh();
-					}
-				});
-			}
+		Display display = getPart().getSite().getShell().getDisplay();
+		if (display == null) {
+			display = Display.getDefault();
+		}
+		if (display != null) {
+			display.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					refresh();
+				}
+			});
 		} else {
 			refresh();
 		}

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.osgi;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.osgi.Activator
 Bundle-Localization: plugin
 Bundle-Vendor: %providerName
@@ -54,7 +54,7 @@ Import-Package: org.eclipse.core.commands.common,
  org.springframework.ide.eclipse.core.model,
  org.w3c.dom
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.springframework.ide.eclipse.blueprint.ui.namespaces,
  org.springframework.ide.eclipse.osgi,
  org.springframework.ide.eclipse.osgi.ui.editor,

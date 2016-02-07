@@ -59,7 +59,7 @@ public class DefaultPathEditorSupport extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		if (value instanceof String && element instanceof BootDashElement) {
-			((BootDashElement)element).setDefaultRequestMapingPath((String) value);
+			((BootDashElement)element).setDefaultRequestMappingPath((String) value);
 		}
 	}
 }

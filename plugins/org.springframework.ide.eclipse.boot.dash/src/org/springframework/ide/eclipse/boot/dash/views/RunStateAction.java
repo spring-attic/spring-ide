@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -32,7 +33,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
  * @author Kris De Volder
  */
 public abstract class RunStateAction extends AbstractBootDashElementsAction {
-
 
 	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
@@ -79,11 +79,11 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 
 	private boolean appliesTo(Collection<BootDashElement> selection) {
 		for (BootDashElement e : selection) {
-			if (appliesTo(e)) {
-				return true;
+			if (!appliesTo(e)) {
+				return false;
 			}
 		}
-		return false;
+		return !selection.isEmpty();
 	}
 
 	private boolean appliesTo(BootDashElement e) {
@@ -142,6 +142,10 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 			model.removeElementStateListener(stateListener);
 			stateListener = null;
 		}
+	}
+
+	public RunState getGoalState() {
+		return goalState;
 	}
 
 }

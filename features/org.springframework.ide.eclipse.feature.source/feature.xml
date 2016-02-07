@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.feature.source"
       label="%featureName"
-      version="3.7.1.qualifier"
+      version="3.7.3.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -150,6 +150,20 @@
 
    <plugin
          id="org.springframework.ide.eclipse.wizard.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="org.springframework.ide.eclipse.gradle.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.buildship.source"
          download-size="0"
          install-size="0"
          version="0.0.0"

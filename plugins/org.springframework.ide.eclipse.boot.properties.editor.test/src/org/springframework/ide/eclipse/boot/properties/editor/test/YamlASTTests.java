@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,20 +13,20 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import java.util.List;
 
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.NodeRef;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 
 /**
  * @author Kris De Volder
  */
-public class YamlASTTests extends YamlEditorTestHarness {
+public class YamlASTTests extends ApplicationYamlEditorTestHarness {
 
 	/**
 	 * Check that node at given offset exactly covers the expected text
 	 * snippet in the document.
 	 */
-	public void assertNodeTextAt(YamlEditor input, int offset, String expectText) throws Exception {
+	public void assertNodeTextAt(MockYamlEditor input, int offset, String expectText) throws Exception {
 		YamlFileAST ast = input.parse();
 		Node node = ast.findNode(offset);
 		String actualText = input.textUnder(node);
@@ -36,7 +36,7 @@ public class YamlASTTests extends YamlEditorTestHarness {
 
 	@Test
 	public void testFindNode() throws Exception {
-		YamlEditor input = new YamlEditor(
+		MockYamlEditor input = new YamlEditor(
 				"spring:\n" +
 				"  application:\n" +
 				"    name: foofoo\n" +
@@ -51,14 +51,14 @@ public class YamlASTTests extends YamlEditorTestHarness {
 		doFindNodeTest(input, "server");
 	}
 
-	private void doFindNodeTest(YamlEditor input, String nodeText) throws Exception {
+	private void doFindNodeTest(MockYamlEditor input, String nodeText) throws Exception {
 		assertNodeTextAt(input, input.startOf(nodeText), nodeText);
 		assertNodeTextAt(input, input.endOf(nodeText)-1, nodeText);
 		assertNodeTextAt(input, input.middleOf(nodeText), nodeText);
 	}
 
 	public void testFindPath() throws Exception {
-		YamlEditor input = new YamlEditor(
+		MockYamlEditor input = new YamlEditor(
 				"foo:\n" +
 				"  bar:\n" +
 				"    first: foofoo\n" +
@@ -77,7 +77,7 @@ public class YamlASTTests extends YamlEditorTestHarness {
 
 	@Test
 	public void testMultiDocsPath() {
-		YamlEditor input = new YamlEditor(
+		MockYamlEditor input = new YamlEditor(
 				"theFirst\n" +
 				"---\n" +
 				"second\n" +
@@ -92,7 +92,7 @@ public class YamlASTTests extends YamlEditorTestHarness {
 	}
 
 	public void testSequencePath() {
-		YamlEditor input = new YamlEditor(
+		MockYamlEditor input = new YamlEditor(
 				"fooList:\n"+
 				"  - a\n" +
 				"  - b\n" +
@@ -110,7 +110,7 @@ public class YamlASTTests extends YamlEditorTestHarness {
 		);
 	}
 
-	protected void assertPath(YamlEditor input, String nodeText, String expected) {
+	protected void assertPath(MockYamlEditor input, String nodeText, String expected) {
 		YamlFileAST ast = input.parse();
 		String path = pathString(ast.findPath(input.middleOf(nodeText)));
 		assertEquals(expected,  path);

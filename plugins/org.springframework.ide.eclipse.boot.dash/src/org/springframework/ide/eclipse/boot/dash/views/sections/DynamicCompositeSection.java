@@ -18,12 +18,12 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -147,7 +147,7 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 			}
 		}
 		@SuppressWarnings("rawtypes")
-		LiveExpression newElements = newSelection.getElements();
+		ObservableSet newElements = newSelection.getElements();
 		elements.setDelegate(newElements);
 	}
 

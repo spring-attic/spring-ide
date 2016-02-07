@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
@@ -28,7 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
  */
 public class RunStateImages {
 
-	private Map<RunState, Image[]> animations = new HashMap<RunState, Image[]>();
+	private Map<Object, Image[]> animations = new HashMap<Object, Image[]>();
 
 	public synchronized Image[] getAnimation(RunState state) throws Exception {
 		Image[] anim = animations.get(state);
@@ -81,10 +84,27 @@ public class RunStateImages {
 		}
 	}
 
+	public synchronized Image[] getDecoratedImages(final RunState state, final ImageDescriptor descriptor, final int position) throws Exception {
+		Image[] images = getAnimation(state);
+		if (descriptor == null) {
+			return images;
+		} else {
+			Object key = Arrays.<Object>asList(state, descriptor, position);
+			Image[] decoratedImages = animations.get(key);
+			if (decoratedImages == null) {
+				decoratedImages = Arrays.copyOf(images, images.length);
+				for (int i = 0; i < decoratedImages.length; i++) {
+					decoratedImages[i] = new DecorationOverlayIcon(decoratedImages[i], descriptor, IDecoration.BOTTOM_RIGHT).createImage(decoratedImages[i].getDevice());
+				}
+				animations.put(key, decoratedImages);
+			}
+			return decoratedImages;
+		}
+	}
+
 	void dispose() {
 		if (animations!=null) {
-			for (RunState s : animations.keySet()) {
-				Image[] anim = animations.get(s);
+			for (Image[] anim : animations.values()) {
 				if (anim!=null) {
 					for (Image image : anim) {
 						image.dispose();

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -23,18 +24,46 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  */
 public abstract class AbstractBootDashModelAction extends AbstractBootDashAction {
 
+	final private ModelStateListener STATE_LISTENER = new ModelStateListener() {
+		@Override
+		public void stateChanged(BootDashModel model) {
+			update();
+		}
+	};
+
 	protected final LiveExpression<BootDashModel> sectionSelection;
 	private ValueListener<BootDashModel> sectionListener;
+	private BootDashModel listeningTo;
 
 	protected AbstractBootDashModelAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
 		super(ui);
 		this.sectionSelection = section;
+		this.listeningTo = null;
 		this.sectionSelection.addListener(sectionListener = new ValueListener<BootDashModel>() {
 			public void gotValue(LiveExpression<BootDashModel> exp, BootDashModel value) {
-				updateVisibility();
-				updateEnablement();
+				update();
 			}
 		});
+		update();
+	}
+
+	private void updateStateListener() {
+		if (listeningTo != null) {
+			listeningTo.removeModelStateListener(STATE_LISTENER);
+			listeningTo = null;
+		}
+		if (isVisible()) {
+			listeningTo = sectionSelection.getValue();
+			if (listeningTo != null) {
+				listeningTo.addModelStateListener(STATE_LISTENER);
+			}
+		}
+	}
+
+	public void update() {
+		updateVisibility();
+		updateEnablement();
+		updateStateListener();
 	}
 
 	public void updateEnablement() {
@@ -47,6 +76,10 @@ public abstract class AbstractBootDashModelAction extends AbstractBootDashAction
 
 	@Override
 	public void dispose() {
+		if (listeningTo != null) {
+			listeningTo.removeModelStateListener(STATE_LISTENER);
+			listeningTo = null;
+		}
 		if (sectionListener!=null) {
 			sectionSelection.removeListener(sectionListener);
 			sectionListener = null;

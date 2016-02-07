@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.webflow.ui;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Import-Package: org.eclipse.core.commands.common,
@@ -77,7 +77,7 @@ Import-Package: org.eclipse.core.commands.common,
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.springframework.ide.eclipse.webflow.ui,
  org.springframework.ide.eclipse.webflow.ui.namespaces,
  org.springframework.ide.eclipse.webflow.ui.navigator.actions,

@@ -16,7 +16,6 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 public abstract class AbstractRunTargetType implements RunTargetType {
 
 	private String name;
-	private int sortingOrder;
 
 	public AbstractRunTargetType(String name) {
 		this.name = name;
@@ -32,32 +31,28 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		return "RunTargetType("+getName()+")";
 	}
 
-	private int getSortingOrder() {
-		if (sortingOrder==0) {
-			int idx = 1;
-			for (RunTargetType t : RunTargetTypes.ALL) {
-				if (t==this) {
-					sortingOrder = idx;
-					break;
-				}
-				idx++;
-			}
-		}
-		if (sortingOrder==0) {
-			throw new IllegalStateException("Bug: Sorting order for "+this+" is not defined. "
-					+ "It should be added to 'RunTargetTypes.ALL' ?");
-		}
-		return sortingOrder;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
 	}
 
 	@Override
-	public int compareTo(RunTargetType other) {
-		if (other instanceof AbstractRunTargetType) {
-			return ((AbstractRunTargetType)other).getSortingOrder() - this.getSortingOrder();
-		} else {
-			//someone didn't use AbstractRunTargetType as base class its up to them to implement comparing then.
-			return -(other.compareTo(this));
-		}
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractRunTargetType other = (AbstractRunTargetType) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
 	}
-
 }

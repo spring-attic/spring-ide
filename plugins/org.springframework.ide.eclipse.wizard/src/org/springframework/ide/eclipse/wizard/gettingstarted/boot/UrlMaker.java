@@ -84,7 +84,7 @@ public class UrlMaker extends LiveExpression<String> {
 		for (FieldModel<RadioInfo> f : radioInputs) {
 			RadioInfo radio = f.getValue();
 			if (radio!=null) {
-				String paramValue = radio.getValue();
+				String paramValue = radio.getUrlParamValue();
 				if (paramValue!=null) {
 					builder.addParameter(f.getName(), paramValue);
 				}
@@ -93,7 +93,7 @@ public class UrlMaker extends LiveExpression<String> {
 
 		for (MultiSelectionFieldModel<IdAble> mf : multiInputs) {
 			String name = mf.getName();
-			for (IdAble selectedValue : mf.getCurrentSelections()) {
+			for (IdAble selectedValue : mf.getCurrentSelection()) {
 				//Note that it is possible for values to be selected and disabled at the same time
 				// (i.e. a checkbox can be checked and 'greyed' out at the same time)
 				//We must therefore check enablement before adding a selection to the URI.

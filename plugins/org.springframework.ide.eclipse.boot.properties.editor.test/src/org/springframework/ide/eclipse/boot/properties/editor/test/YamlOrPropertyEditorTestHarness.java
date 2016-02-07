@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,38 +10,57 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.waitForImportJob;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
+
+import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.viewers.StyledString;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.IReconcileEngine;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesReconcileEngine.IProblemCollector;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
+import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
+import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import junit.framework.TestCase;
 
 /**
  * @author Kris De Volder
  */
-public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
+public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	protected static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
-			return PropertyCompletionFactory.SORTER.compare(p1, p2);
+			return CompletionFactory.SORTER.compare(p1, p2);
 		}
 	};
 
@@ -51,43 +70,36 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		public IJavaProject getJavaProject(IDocument doc) {
 			return javaProject;
 		}
+
+		@Override
+		public SeverityProvider getSeverityProvider(IDocument doc) {
+			return new DefaultSeverityProvider();
+		}
 	};
 
-	public class MockProblemCollector implements IProblemCollector {
-
-		private List<SpringPropertyProblem> problems = null;
-
-		public List<SpringPropertyProblem> getAllProblems() {
-			return problems;
-		}
-
-		public void beginCollecting() {
-			problems = new ArrayList<SpringPropertyProblem>();
-		}
-
-		public void endCollecting() {
-		}
-
-		public void accept(SpringPropertyProblem e) {
-			problems.add(e);
-		}
-
-	}
-
-	@Override
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
 	}
 
-	public void data(String id, String type, Object deflt, String description,
-			String... source) {
-				ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
-				item.setId(id);
-				item.setDescription(description);
-				item.setType(type);
-				item.setDefaultValue(deflt);
-				index.add(new PropertyInfo(item));
-			}
+	public ConfigurationMetadataProperty data(String id, String type, Object deflt, String description,
+			String... source
+	) {
+		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
+		item.setId(id);
+		item.setDescription(description);
+		item.setType(type);
+		item.setDefaultValue(deflt);
+		index.add(new PropertyInfo(item));
+		return item;
+	}
+
+	public void deprecate(String key, String replacedBy, String reason) {
+		PropertyInfo info = index.get(key);
+		Deprecation d = new Deprecation();
+		d.setReplacement(replacedBy);
+		d.setReason(reason);
+		info.setDeprecation(d);
+	}
 
 	public void useProject(IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
@@ -511,16 +523,49 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		data("spring.view.suffix", "java.lang.String", null, "Spring MVC view suffix.");
 	}
 
-	@Override
-	protected IProject createPredefinedProject(String projectName)
-			throws CoreException, IOException {
-				StsTestUtil.setAutoBuilding(false);
-				IProject p = super.createPredefinedProject(projectName);
-				StsTestUtil.assertNoErrors(p);
-				return p;
+	protected IProject createPredefinedMavenProject(final String projectName) throws Exception {
+		StsTestUtil.setAutoBuilding(false);
+		ImportConfiguration importConf = new ImportConfiguration() {
+
+			@Override
+			public String getProjectName() {
+				return projectName;
 			}
 
-	public List<SpringPropertyProblem> reconcile(MockEditor editor) {
+			@Override
+			public String getLocation() {
+				return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(projectName).toString();
+			}
+
+			@Override
+			public CodeSet getCodeSet() {
+				File sourceWorkspace = new File(StsTestUtil.getSourceWorkspacePath(getBundleName()));
+				File sourceProject = new File(sourceWorkspace, projectName);
+				return new CopyFromFolder(projectName, sourceProject);
+			}
+		};
+		final IRunnableWithProgress importOp = BuildType.MAVEN.getDefaultStrategy().createOperation(importConf);
+		Job runner = new Job("Import "+projectName) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					importOp.run(monitor);
+				} catch (Throwable e) {
+					return ExceptionUtil.status(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		runner.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		runner.schedule();
+
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		waitForImportJob(project, runner);
+//		BootProjectTestHarness.assertNoErrors(project);
+		return project;
+	}
+
+	public List<ReconcileProblem> reconcile(MockEditor editor) {
 		IReconcileEngine reconciler = createReconcileEngine();
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
@@ -544,7 +589,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 	 */
 	public void assertProblems(MockEditor editor, String... expectedProblems)
 			throws BadLocationException {
-		List<SpringPropertyProblem> actualProblems = reconcile(editor);
+		List<ReconcileProblem> actualProblems = reconcile(editor);
 		String bad = null;
 		if (actualProblems.size()!=expectedProblems.length) {
 			bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
@@ -560,34 +605,33 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 			fail(bad+problemSumary(editor, actualProblems));
 		}
 	}
-	private String problemSumary(MockEditor editor, List<SpringPropertyProblem> actualProblems)
-			throws BadLocationException {
-				StringBuilder buf = new StringBuilder();
-				for (SpringPropertyProblem p : actualProblems) {
-					buf.append("\n----------------------\n");
+	private String problemSumary(MockEditor editor, List<ReconcileProblem> actualProblems) throws BadLocationException {
+		StringBuilder buf = new StringBuilder();
+		for (ReconcileProblem p : actualProblems) {
+			buf.append("\n----------------------\n");
 
-					String snippet = editor.getText(p.getOffset(), p.getLength());
-					buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
-					buf.append("   "+p.getMessage());
-				}
-				return buf.toString();
-			}
+			String snippet = editor.getText(p.getOffset(), p.getLength());
+			buf.append("("+p.getOffset()+", "+p.getLength()+")["+snippet+"]:\n");
+			buf.append("   "+p.getMessage());
+		}
+		return buf.toString();
+	}
 
-	private boolean matchProblem(MockEditor editor, SpringPropertyProblem actual, String expect) {
+	private boolean matchProblem(MockEditor editor, ReconcileProblem problem, String expect) {
 		String[] parts = expect.split("\\|");
 		assertEquals(2, parts.length);
 		String badSnippet = parts[0];
 		String messageSnippet = parts[1];
 		try {
-			String actualBadSnippet = editor.getText(actual.getOffset(), actual.getLength()).trim();
+			String actualBadSnippet = editor.getText(problem.getOffset(), problem.getLength()).trim();
 			return actualBadSnippet.equals(badSnippet)
-					&& actual.getMessage().contains(messageSnippet);
+					&& problem.getMessage().contains(messageSnippet);
 		} catch (BadLocationException e) {
 			return false;
 		}
 	}
 
-	public ICompletionProposal getFirstCompletion(MockEditor editor) throws Exception {
+	public ICompletionProposal getFirstCompletion(MockPropertiesEditor editor) throws Exception {
 		return getCompletions(editor)[0];
 	}
 
@@ -597,7 +641,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 	 * Simulates applying the first completion to a text buffer and checks the result.
 	 */
 	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
+		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
@@ -608,7 +652,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 	 * expected results.
 	 */
 	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
-		MockEditor editor = new MockEditor(textBefore);
+		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		StringBuilder expect = new StringBuilder();
 		StringBuilder actual = new StringBuilder();
 		for (String after : expectTextAfter) {
@@ -618,7 +662,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 
 		ICompletionProposal[] completions = getCompletions(editor);
 		for (int i = 0; i < completions.length; i++) {
-			editor = new MockEditor(textBefore);
+			editor = new MockPropertiesEditor(textBefore);
 			editor.apply(completions[i]);
 			actual.append(editor.getText());
 			actual.append("\n-------------------\n");
@@ -626,15 +670,65 @@ public abstract class YamlOrPropertyEditorTestHarness extends StsTestCase {
 		assertEquals(expect.toString(), actual.toString());
 	}
 
-	public void assertCompletionsDisplayString(String editorText, String... completionsLabels)
-			throws Exception {
-				MockEditor editor = new MockEditor(editorText);
-				ICompletionProposal[] completions = getCompletions(editor);
-				String[] actualLabels = new String[completions.length];
-				for (int i = 0; i < actualLabels.length; i++) {
-					actualLabels[i] = completions[i].getDisplayString();
-				}
-				assertElements(actualLabels, completionsLabels);
-			}
+	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		String[] actualLabels = new String[completions.length];
+		for (int i = 0; i < actualLabels.length; i++) {
+			actualLabels[i] = completions[i].getDisplayString();
+		}
+		assertElements(actualLabels, completionsLabels);
+	}
+
+	public void assertStyledCompletions(String editorText, StyledStringMatcher... expectStyles) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		assertEquals("Wrong number of elements", expectStyles.length, completions.length);
+		for (int i = 0; i < expectStyles.length; i++) {
+			ICompletionProposal completion = completions[i];
+			StyledString actualLabel = getStyledDisplayString(completion);
+			expectStyles[i].match(actualLabel);
+		}
+	}
+
+	private StyledString getStyledDisplayString(ICompletionProposal completion) {
+		if (completion instanceof ICompletionProposalExtension6) {
+			return ((ICompletionProposalExtension6)completion).getStyledDisplayString();
+		}
+		return new StyledString(completion.getDisplayString());
+	}
+
+	/**
+	 * Verifies an expected textSnippet is contained in the hovertext that is
+	 * computed when hovering mouse at position at the end of first occurence of
+	 * a given string in the editor.
+	 * <p>
+	 * This method should be removed and the corresponding bits and pieces pushed into 'MockPropertiesEditor'
+	 * as is already the case for MockYamlEditor.
+	 */
+	@Deprecated
+	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
+		String hoverText = getHoverText(editor, afterString);
+		assertContains(expectSnippet, hoverText);
+	}
+
+	/**
+	 * Compute hover text when mouse hovers at the end of the first occurence of
+	 * a given String in the editor contents.
+	 */
+	public String getHoverText(MockPropertiesEditor editor, String atString) {
+		int pos = editor.getText().indexOf(atString);
+		if (pos>=0) {
+			pos += atString.length();
+		}
+		IRegion region = getHoverProvider().getHoverRegion(editor.document, pos);
+		if (region!=null) {
+			return getHoverProvider().getHoverInfo(editor.document, region).getHtml();
+		}
+		return null;
+	}
+
+	protected abstract HoverInfoProvider getHoverProvider();
+
 
 }

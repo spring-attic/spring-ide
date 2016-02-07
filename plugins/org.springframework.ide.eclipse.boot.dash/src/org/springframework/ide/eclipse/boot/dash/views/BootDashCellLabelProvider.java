@@ -15,6 +15,8 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.util.ColumnViewerAnimator;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -61,5 +63,16 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 			animator.dispose();
 			animator = null;
 		}
+	}
+
+	@Override
+	public String getToolTipText(Object element) {
+		if (element instanceof BootDashModel) {
+			RefreshState state = ((BootDashModel) element).getRefreshState();
+			if (state.getId() == RefreshState.ERROR.getId()) {
+				return state.getMessage();
+			}
+		}
+		return null;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,21 +19,28 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
+import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 public class BootDashActions {
 
@@ -54,17 +61,27 @@ public class BootDashActions {
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
-	private DeleteApplicationsAction deleteApplicationsAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
+	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
-
+	private ToggleBootDashModelConnection toggleTargetConnectionAction;
 	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
-	private ToggleFiltersAction toggleFiltersAction;
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
+
+	private DuplicateConfigAction duplicateConfigAction;
+
+	private DeleteElementsAction<CloudFoundryRunTargetType> deleteAppsAction;
+	private DeleteElementsAction<LocalRunTargetType> deleteConfigsAction;
+
+	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
+	private ToggleFilterAction[] toggleFilterActions;
+
+	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
+	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -85,36 +102,16 @@ public class BootDashActions {
 		makeActions();
 	}
 
-	/**
-	 * Create BDA tied to a specific section (in the old dashboard which has one section per RunTarget).
-	 */
-	public BootDashActions(BootDashViewModel model, BootDashModel sectionModel,
-			MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		this(
-				model,
-				selection,
-				LiveExpression.constant(sectionModel),
-				ui
-		);
-	}
-
 	protected void makeActions() {
-		RunStateAction restartAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.RUNNING);
-		restartAction.setText("(Re)start");
-		restartAction.setToolTipText("Start or restart the process associated with the selected elements");
-		restartAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
-		restartAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+		RunStateAction restartAction = new RestartAction(model, elementsSelection, ui, RunState.RUNNING);
 
-		RunStateAction rebugAction = new RunOrDebugStateAction(model, elementsSelection, ui, RunState.DEBUGGING);
-		rebugAction.setText("(Re)debug");
-		rebugAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode");
-		rebugAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
-		rebugAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
+		RunStateAction rebugAction = new RedebugAction(model, elementsSelection, ui, RunState.DEBUGGING);
 
 		RunStateAction stopAction = new RunStateAction(model, elementsSelection, ui, RunState.INACTIVE) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
-				return s == RunState.DEBUGGING || s == RunState.RUNNING;
+				// Enable stop button so CF apps can be stopped when "STARTING"
+				return s != RunState.INACTIVE;
 			}
 
 			@Override
@@ -151,26 +148,38 @@ public class BootDashActions {
 
 		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction };
 
-		openConfigAction = new OpenLaunchConfigAction(elementsSelection, ui);
+		openConfigAction = new OpenLaunchConfigAction(model, elementsSelection, ui);
 		openConsoleAction = new OpenConsoleAction(elementsSelection, model, ui);
 		openBrowserAction = new OpenInBrowserAction(model, elementsSelection, ui);
 		openInPackageExplorerAction = new OpenInPackageExplorer(elementsSelection, ui);
 		addTargetActions = createAddTargetActions();
 
-		deleteApplicationsAction = new DeleteApplicationsAction(elementsSelection, ui);
+		deleteAppsAction = new DeleteElementsAction<>(CloudFoundryRunTargetType.class, elementsSelection, ui);
+		deleteAppsAction.setText("Delete Apps");
+		deleteAppsAction.setToolTipText("Permantently removes selected application(s) from CloudFoundry");
+		deleteConfigsAction = new DeleteElementsAction<>(LocalRunTargetType.class, elementsSelection, ui);
+		deleteConfigsAction.setText("Delete Config");
+		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
+
 		restartOnlyAction = new RestartApplicationOnlyAction(elementsSelection, ui);
 		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(elementsSelection, ui);
+		selectManifestAction = new SelectManifestAction(elementsSelection, ui);
 
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
-			updatePasswordAction = new UpdatePasswordAction(sectionSelection, model, ui);
+			updatePasswordAction = new UpdatePasswordAction(sectionSelection, ui);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
+			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
 
-		toggleFiltersAction = new ToggleFiltersAction(model.getToggleFilters(), elementsSelection, ui);
+		toggleFiltersDialogAction = new OpenToggleFiltersDialogAction(model.getToggleFilters(), elementsSelection, ui);
+		toggleFilterActions = new ToggleFilterAction[model.getToggleFilters().getAvailableFilters().length];
+		for (int i = 0; i < toggleFilterActions.length; i++) {
+			toggleFilterActions[i] = new ToggleFilterAction(model, model.getToggleFilters().getAvailableFilters()[i], ui);
+		}
 
 		exposeRunAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
 		exposeRunAppAction.setText("(Re)start and Expose via ngrok");
@@ -186,6 +195,10 @@ public class BootDashActions {
 
 		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(model, elementsSelection, ui);
 
+		duplicateConfigAction = new DuplicateConfigAction(model, elementsSelection, ui);
+
+		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
+		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -193,13 +206,35 @@ public class BootDashActions {
 		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
 		for (RunTargetType tt : targetTypes) {
 			if (tt.canInstantiate()) {
-				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), elementsSelection, ui));
+				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), ui));
 			}
 		}
 		return actions.toArray(new AddRunTargetAction[actions.size()]);
 	}
 
-	static class RunOrDebugStateAction extends RunStateAction {
+	private static final class RestartAction extends RunOrDebugStateAction {
+		private RestartAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,
+				RunState goalState) {
+			super(model, selection, ui, goalState);
+			setText("(Re)start");
+			setToolTipText("Start or restart the process associated with the selected elements");
+			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
+			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+		}
+	}
+
+	private static final class RedebugAction extends RunOrDebugStateAction {
+		private RedebugAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,
+				RunState goalState) {
+			super(model, selection, ui, goalState);
+			setText("(Re)debug");
+			setToolTipText("Start or restart the process associated with the selected elements in debug mode");
+			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
+			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
+		}
+	}
+
+	public static class RunOrDebugStateAction extends RunStateAction {
 
 		public RunOrDebugStateAction(BootDashViewModel model, MultiSelection<BootDashElement> selection,
 				UserInteractions ui, RunState goalState) {
@@ -209,7 +244,7 @@ public class BootDashActions {
 
 		@Override
 		protected Job createJob() {
-			final Collection<BootDashElement> selecteds = getSelectedElements();
+			final Collection<BootDashElement> selecteds = getTargetElements();
 			if (!selecteds.isEmpty()) {
 				return new Job("Restarting " + selecteds.size() + " Dash Elements") {
 					@Override
@@ -234,6 +269,33 @@ public class BootDashActions {
 				};
 			}
 			return null;
+		}
+
+		/**
+		 * Automatically retarget this action to apply to all the children of an element
+		 * (if it has children). This way the action behaves logically if both a parent and some children
+		 * are selected (i.e. we don't want to execute the action twice on the explicitly selected children!)
+		 */
+		public Collection<BootDashElement> getTargetElements() {
+			Builder<BootDashElement> builder = ImmutableSet.builder();
+			addTargetsFor(builder, getSelectedElements());
+			return builder.build();
+		}
+
+		private void addTargetsFor(Builder<BootDashElement> builder, Collection<BootDashElement> selecteds) {
+			for (BootDashElement s : selecteds) {
+				addTargetsFor(builder, s);
+			}
+		}
+
+		private void addTargetsFor(Builder<BootDashElement> builder, BootDashElement s) {
+			ImmutableSet<BootDashElement> children = s.getChildren().getValues();
+			if (children.isEmpty()) {
+				//No children, add s itself
+				builder.add(s);
+			} else {
+				addTargetsFor(builder, children);
+			}
 		}
 	}
 
@@ -272,15 +334,21 @@ public class BootDashActions {
 		return refreshAction;
 	}
 
-	/**
-	 * @return May be null as it may not be supported on all models.
-	 */
-	public IAction getDeleteApplicationsAction() {
-		return deleteApplicationsAction;
+	public IAction getDeleteAppsAction() {
+		return deleteAppsAction;
 	}
+
+	public IAction getDeleteConfigsAction() {
+		return deleteConfigsAction;
+	}
+
 
 	public IAction getRestartOnlyApplicationAction() {
 		return restartOnlyAction;
+	}
+
+	public IAction getSelectManifestAction() {
+		return selectManifestAction;
 	}
 
 	public IAction getReconnectCloudConsole() {
@@ -289,6 +357,10 @@ public class BootDashActions {
 
 	public IAction getOpenCloudAdminConsoleAction() {
 		return openCloudAdminConsoleAction;
+	}
+
+	public IAction getToggleTargetConnectionAction() {
+		return toggleTargetConnectionAction;
 	}
 
 	/**
@@ -335,9 +407,9 @@ public class BootDashActions {
 			}
 			addTargetActions = null;
 		}
-		if (toggleFiltersAction != null) {
-			toggleFiltersAction.dispose();
-			toggleFiltersAction = null;
+		if (toggleFiltersDialogAction != null) {
+			toggleFiltersDialogAction.dispose();
+			toggleFiltersDialogAction = null;
 		}
 
 		if (exposeRunAppAction != null) {
@@ -349,32 +421,60 @@ public class BootDashActions {
 			exposeDebugAppAction.dispose();
 			exposeDebugAppAction = null;
 		}
+		if (duplicateConfigAction != null) {
+			duplicateConfigAction.dispose();
+			duplicateConfigAction = null;
+		}
+		if (toggleFilterActions!=null) {
+			for (ToggleFilterAction a : toggleFilterActions) {
+				a.dispose();
+			}
+			toggleFilterActions = null;
+		}
+		debugOnTargetActions.dispose();
+		runOnTargetActions.dispose();
 	}
 
-	public IAction getToggleFiltersAction() {
-		return toggleFiltersAction;
+	public IAction getToggleFiltersDialogAction() {
+		return toggleFiltersDialogAction;
 	}
 
 	public RestartWithRemoteDevClientAction getRestartWithRemoteDevClientAction() {
 		return restartWithRemoteDevClientAction;
 	}
 
-	public IAction selectDefaultConfigAction(
-			final BootDashElement target,
-			final ILaunchConfiguration currentDefault,
-			final ILaunchConfiguration newDefault
-	) {
-		Action action = new Action(newDefault.getName(), SWT.CHECK) {
-			@Override
-			public void run() {
-				target.setPreferredConfig(newDefault);
-				//target.openConfig(getSite().getShell());
-			}
-		};
-		action.setChecked(newDefault.equals(currentDefault));
-		action.setToolTipText("Make '"+newDefault.getName()+"' the default launch configuration. It will"
-				+ "be used the next time you (re)launch '"+target.getName());
-		return action;
+	public DuplicateConfigAction getDuplicateConfigAction() {
+		return duplicateConfigAction;
 	}
 
+	public ToggleFilterAction[] getToggleFilterActions() {
+		return toggleFilterActions;
+	}
+
+	public ImmutableList<IAction> getDebugOnTargetActions() {
+		return getDeployAndStartOnTargetActions(debugOnTargetActions);
+	}
+	public ImmutableList<IAction> getRunOnTargetActions() {
+		return getDeployAndStartOnTargetActions(runOnTargetActions);
+	}
+	private ImmutableList<IAction> getDeployAndStartOnTargetActions(
+			DisposingFactory<RunTarget, AbstractBootDashAction> actionFactory) {
+		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
+		for (RunTarget target : model.getRunTargets().getValues()) {
+			if (target.getType() instanceof CloudFoundryRunTargetType) {
+				builder.add(actionFactory.createOrGet(target));
+			}
+		}
+		return builder.build();
+	}
+
+	private DisposingFactory<RunTarget, AbstractBootDashAction> createDeployOnTargetActions(final RunState runningOrDebugging) {
+		ObservableSet<RunTarget> runtargets = model.getRunTargets();
+		return new DisposingFactory<RunTarget, AbstractBootDashAction>(runtargets) {
+			@Override
+			protected AbstractBootDashAction create(RunTarget target) {
+				return new DeployToCloudFoundryTargetAction(model, target, runningOrDebugging, elementsSelection, ui);
+			}
+		};
+	}
 }

@@ -10,19 +10,38 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-public abstract class WrappingBootDashElement<T> implements BootDashElement {
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
+/**
+ * Abstract base class that is convenient to implement {@link BootDashElement}.
+ * @author Kris De Volder
+ */
+public abstract class WrappingBootDashElement<T> extends AbstractDisposable implements BootDashElement {
 
 	public static final String TAGS_KEY = "tags";
 
@@ -31,11 +50,26 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	protected final T delegate;
 
-	private BootDashModel parent;
+	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
+	private ListenerList disposeListeners = new ListenerList();
 
-	public WrappingBootDashElement(BootDashModel parent, T delegate) {
-		this.parent = parent;
+	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
+
+	@SuppressWarnings("rawtypes")
+	private ValueListener elementStateNotifier = new ValueListener() {
+		public void gotValue(LiveExpression exp, Object value) {
+			getBootDashModel().notifyElementChanged(WrappingBootDashElement.this);
+		}
+	};
+
+	@Override
+	public BootDashColumn[] getColumns() {
+		return getTarget().getDefaultColumns();
+	}
+
+	public WrappingBootDashElement(BootDashModel bootDashModel, T delegate) {
+		this.bootDashModel = bootDashModel;
 		this.delegate = delegate;
 	}
 
@@ -114,7 +148,7 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 			} else {
 				getPersistentProperties().put(TAGS_KEY, newTags.toArray(new String[newTags.size()]));
 			}
-			parent.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
@@ -122,21 +156,36 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 
 	@Override
 	public final String getDefaultRequestMappingPath() {
-		return getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
+		String storedValue = getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
+		if (storedValue!=null) {
+			return storedValue;
+		}
+		//inherit a default value from parent node?
+		Object parent = getParent();
+		if (parent instanceof BootDashElement) {
+			String inheritedValue = ((BootDashElement) parent).getDefaultRequestMappingPath();
+			return inheritedValue;
+		}
+		return null;
 	}
 
 	@Override
-	public final void setDefaultRequestMapingPath(String defaultPath) {
+	public final void setDefaultRequestMappingPath(String defaultPath) {
 		try {
 			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
-			parent.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
 	}
 
-	public BootDashModel getParent() {
-		return parent;
+	@Override
+	public boolean hasDevtools() {
+		return false;
+	}
+
+	public BootDashModel getBootDashModel() {
+		return bootDashModel;
 	}
 
 	@Override
@@ -144,5 +193,91 @@ public abstract class WrappingBootDashElement<T> implements BootDashElement {
 		return getProject() != null ? JavaCore.create(getProject()) : null;
 	}
 
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+		return LiveSets.emptySet(BootDashElement.class);
+	}
 
+	@Override
+	public ImmutableSet<BootDashElement> getCurrentChildren() {
+		return getChildren().getValue();
+	}
+
+	@Override
+	public void onDispose(DisposeListener listener) {
+		this.disposeListeners.add(listener);
+	}
+
+	@Override
+	public void dispose() {
+		for (Object l : disposeListeners.getListeners()) {
+			((DisposeListener)l).disposed(this);
+		}
+	}
+
+	@Override
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+		//Default implementation for BDEs that do not have any relation to launch configs
+		//Subclass should override when elements relate to launch configs.
+		return ImmutableSet.of();
+	}
+
+	/**
+	 * Gets a summary of the 'livePorts' for this node and its children. This default implementation
+	 * is provided for nodes that only have a single port. Nodes that need to compute an actual
+	 * summary should override this.
+	 */
+	@Override
+	public ImmutableSet<Integer> getLivePorts() {
+		int port = getLivePort();
+		if (port>0) {
+			return ImmutableSet.of(port);
+		} else {
+			return ImmutableSet.of();
+		}
+	}
+
+	@Override
+	public List<RequestMapping> getLiveRequestMappings() {
+		final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+		synchronized (this) {
+			if (liveRequestMappings==null) {
+				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
+					protected ImmutableList<RequestMapping> compute() {
+						URI target = actuatorUrl.getValue();
+						if (target!=null) {
+							ActuatorClient client = new ActuatorClient(target, getTypeLookup());
+							List<RequestMapping> list = client.getRequestMappings();
+							if (list!=null) {
+								System.out.println("request mappings size = "+list.size());
+								return ImmutableList.copyOf(client.getRequestMappings());
+							}
+						}
+						return null;
+					}
+				};
+				liveRequestMappings.dependsOn(actuatorUrl);
+				addElementState(liveRequestMappings);
+				addDisposableChild(liveRequestMappings);
+			}
+		}
+		return liveRequestMappings.getValue();
+	}
+
+	/**
+	 * Ensure that element state notifications are fired when a given liveExp's value changes.
+	 */
+	@SuppressWarnings("unchecked")
+	private void addElementState(LiveExpression<?> state) {
+		state.addListener(elementStateNotifier);
+	}
+
+	/**
+	 * Subclass should override to determine where to access the actuator for an app.
+	 * The Default implementation just returns null. Any functionality that depends on this
+	 * should in turn be disabled / return null.
+	 */
+	protected LiveExpression<URI> getActuatorUrl() {
+		return LiveExpression.constant(null);
+	}
 }

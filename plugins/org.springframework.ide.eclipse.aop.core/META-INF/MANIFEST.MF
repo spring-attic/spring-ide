@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.aop.core;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.aop.core.Activator
 Bundle-Localization: plugin
 Eclipse-LazyStart: true
@@ -15,7 +15,7 @@ Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.model.builder,
  org.springframework.ide.eclipse.aop.core.util
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.aopalliance.aop,
  org.aopalliance.intercept,

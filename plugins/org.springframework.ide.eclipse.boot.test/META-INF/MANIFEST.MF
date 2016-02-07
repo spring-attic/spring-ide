@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Boot Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.test
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit,
@@ -19,8 +19,17 @@ Require-Bundle: org.eclipse.ui,
  org.hamcrest.library,
  org.eclipse.ui.ide,
  org.eclipse.debug.core,
- org.eclipse.jdt.launching
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.eclipse.jdt.launching,
+ org.eclipse.buildship.core,
+ com.fasterxml.jackson.core.jackson-core,
+ com.fasterxml.jackson.core.jackson-databind,
+ org.eclipse.m2e.core.ui,
+ org.eclipse.wst.sse.core,
+ org.eclipse.wst.xml.core,
+ org.mockito,
+ org.hamcrest,
+ org.hamcrest.library
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.
 Export-Package: org.springframework.ide.eclipse.boot.test,

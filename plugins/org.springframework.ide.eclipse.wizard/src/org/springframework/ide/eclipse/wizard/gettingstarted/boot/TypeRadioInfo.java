@@ -10,28 +10,47 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.boot;
 
+import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Type;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
+
 /**
  * Extension of {@link RadioInfo} adds extra attribute(s) only
- * applicable to the the 'type' input field.
+ * applicable to the 'type' input field.
  *
  * @author Kris De Volder
  */
 public class TypeRadioInfo extends RadioInfo {
 
-	private String action;
+	private ImportStrategy importStrategy;
+	private Type type;
 
 	public String getAction() {
-		return action;
+		return type.getAction();
 	}
 
-	public TypeRadioInfo(String groupName, String value, boolean checked, String action) {
-		super(groupName, value, checked);
-		this.action = action;
+	public TypeRadioInfo(String groupName, Type type, ImportStrategy importStrategy) {
+		super(groupName, importStrategy.getId(), type.isDefault());
+		this.type = type;
+		this.importStrategy = importStrategy;
 	}
 
 	@Override
 	public String toString() {
-		return "Radio(" + getGroupName()+", "+getValue()+", "+action+")";
+		return "Radio(" + getGroupName()+", "+getValue()+")";
+	}
+
+	public ImportStrategy getImportStrategy() {
+		return importStrategy;
+	}
+
+	@Override
+	public String getUrlParamValue() {
+		//We override super because the start.spring.io wizard doesn't understand the difference between
+		// "GRADLE-STS" and "GRADLE-Buildship". Since our own wizard supports multipe import-strategies per
+		//project type, our type IDs are distinct from the ones used by start.spring.io
+		//This method returns the corresponding id to be used when passing it to start.spring.io as url
+		//parameter value.
+		return type.getId();
 	}
 
 }

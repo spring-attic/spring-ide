@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.*;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
+
+import javax.inject.Provider;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -27,12 +30,14 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Provider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.ValueParser;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
@@ -48,26 +53,6 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
-
-	public interface IProblemCollector {
-
-		void beginCollecting();
-		void endCollecting();
-		void accept(SpringPropertyProblem springPropertyProblem);
-
-		/**
-		 * Problem collector that simply ignores/discards anything passed to it.
-		 */
-		IProblemCollector NULL = new IProblemCollector() {
-			public void beginCollecting() {
-			}
-			public void endCollecting() {
-			}
-			public void accept(SpringPropertyProblem springPropertyProblem) {
-			}
-		};
-	}
-
 
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		this.fIndexProvider = provider;
@@ -108,6 +93,9 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 							}
 							PropertyInfo validProperty = SpringPropertiesCompletionEngine.findLongestValidProperty(index, fullName);
 							if (validProperty!=null) {
+								if (validProperty.isDeprecated()) {
+									problemCollector.accept(problemDeprecated(trimmedRegion, validProperty));
+								}
 								int offset = validProperty.getId().length() + trimmedRegion.getOffset();
 								PropertyNavigator navigator = new PropertyNavigator(doc, problemCollector, typeUtil, trimmedRegion);
 								Type valueType = navigator.navigate(offset, TypeParser.parse(validProperty.getType()));
@@ -133,9 +121,34 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		}
 	}
 
+	protected SpringPropertyProblem problemDeprecated(IRegion trimmedRegion, PropertyInfo property) {
+		StringBuilder msg = new StringBuilder("'"+property.getId());
+		String replace = property.getDeprecationReplacement();
+		String reason = property.getDeprecationReason();
+		boolean hasReplace = StringUtil.hasText(replace);
+		boolean hasReason = StringUtil.hasText(reason);
+		if (!hasReplace && !hasReason) {
+			msg.append("' is Deprecated!");
+		} else {
+			msg.append("' is Deprecated: ");
+			if (hasReplace) {
+				msg.append("Use '"+ replace +"' instead.");
+				if (hasReason) {
+					msg.append(" Reason: ");
+				}
+			}
+			if (hasReason) {
+				msg.append(reason);
+			}
+		}
+		SpringPropertyProblem p = problem(PROP_DEPRECATED, msg.toString(), trimmedRegion.getOffset(), trimmedRegion.getLength());
+		p.setPropertyName(property.getId());
+		return p;
+	}
+
 	protected SpringPropertyProblem problemUnkownProperty(String fullName, IRegion trimmedRegion,
 			PropertyInfo similarEntry, String validPrefix) {
-		SpringPropertyProblem p = problem(ProblemType.PROP_UNKNOWN_PROPERTY,
+		SpringPropertyProblem p = problem(PROP_UNKNOWN_PROPERTY,
 				"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
 				trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length());
 		p.setPropertyName(fullName);
@@ -186,7 +199,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 				}
 			}
 			if (errorRegion!=null) {
-				problems.accept(problem(ProblemType.PROP_VALUE_TYPE_MISMATCH,
+				problems.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}

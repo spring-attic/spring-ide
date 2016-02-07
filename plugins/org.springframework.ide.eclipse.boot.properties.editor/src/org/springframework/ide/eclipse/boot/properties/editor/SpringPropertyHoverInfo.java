@@ -23,9 +23,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
+import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information
@@ -35,7 +38,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.HtmlBuffer;
  *
  * @author Kris De Volder
  */
-@SuppressWarnings("restriction")
 public class SpringPropertyHoverInfo extends HoverInfo {
 
 	private static final String[] NO_ARGS = new String[0];
@@ -57,27 +59,16 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 
 	@Override
 	protected String renderAsHtml() {
-		return getHtmlHoverText(data);
-	}
-
-	public static String getHtmlHoverText(PropertyInfo data) {
+		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
 		HtmlBuffer html = new HtmlBuffer();
 
-		html.raw("<b>");
-			html.text(data.getId());
-		html.raw("</b>");
-		html.raw("<br>");
+		renderId(html);
 
 		String type = data.getType();
 		if (type==null) {
 			type = Object.class.getName();
 		}
-		html.raw("<a href=\"");
-		html.url("type/"+type);
-		html.raw("\">");
-		html.text(type);
-		html.raw("</a>");
-
+		jtLinks.javaTypeLink(html, javaProject, type);
 
 		String deflt = formatDefaultValue(data.getDefaultValue());
 		if (deflt!=null) {
@@ -88,6 +79,17 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 			html.raw("</i>");
 		}
 
+		if (data.isDeprecated()) {
+			html.raw("<br><br>");
+			String reason = data.getDeprecationReason();
+			if (StringUtil.hasText(reason)) {
+				html.bold("Deprecated: ");
+				html.text(reason);
+			} else {
+				html.bold("Deprecated!");
+			}
+		}
+
 		String description = data.getDescription();
 		if (description!=null) {
 			html.raw("<br><br>");
@@ -95,6 +97,20 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 		}
 
 		return html.toString();
+	}
+
+	protected void renderId(HtmlBuffer html) {
+		boolean deprecated = data.isDeprecated();
+		String tag = deprecated ? "s" : "b";
+		String replacement = data.getDeprecationReplacement();
+
+		html.raw("<"+tag+">");
+			html.text(data.getId());
+		html.raw("</"+tag+">");
+		if (StringUtil.hasText(replacement)) {
+			html.text(" -> "+ replacement);
+		}
+		html.raw("<br>");
 	}
 
 	public static String formatDefaultValue(Object defaultValue) {

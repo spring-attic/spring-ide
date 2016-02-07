@@ -23,11 +23,13 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.texteditor.spelling.NoCompletionsProposal;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyAnnotation;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
-import org.springframework.ide.eclipse.boot.properties.editor.ui.UserInteractions;
+import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 
 @SuppressWarnings("restriction")
 public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistProcessor {
@@ -73,7 +75,7 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 
 	private List<ICompletionProposal> computeProposals(IQuickAssistInvocationContext context, IAnnotationModel model) {
 		int offset= context.getOffset();
-		ArrayList<SpringPropertyProblem> annotationList= new ArrayList<SpringPropertyProblem>();
+		ArrayList<ReconcileProblem> annotationList= new ArrayList<>();
 		@SuppressWarnings("rawtypes")
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
@@ -89,16 +91,16 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 		return computeProposals(context, problems);
 	}
 
-	private void collectionProblems(Annotation annotation, ArrayList<SpringPropertyProblem> annotationList) {
-		if (annotation instanceof SpringPropertyAnnotation) {
-			annotationList.add(((SpringPropertyAnnotation)annotation).getSpringPropertyProblem());
+	private void collectionProblems(Annotation annotation, ArrayList<ReconcileProblem> annotationList) {
+		if (annotation instanceof ReconcileProblemAnnotation) {
+			annotationList.add(((ReconcileProblemAnnotation)annotation).getSpringPropertyProblem());
 		}
 	}
 
 	private List<ICompletionProposal> computeProposals(IQuickAssistInvocationContext context, SpringPropertyProblem[] problems) {
 		List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
 		for (SpringPropertyProblem problem : problems) {
-			proposals.addAll(problem.getQuickfixes(new DefaultQuickfixContext(preferences, context.getSourceViewer(), ui)));
+			proposals.addAll(problem.getQuickfixes(new DefaultQuickfixContext(SpringPropertiesEditorPlugin.PLUGIN_ID, preferences, context.getSourceViewer(), ui)));
 		}
 		return proposals;
 	}
@@ -112,7 +114,7 @@ public class SpringPropertyProblemQuickAssistProcessor implements IQuickAssistPr
 
 	@Override
 	public boolean canFix(Annotation annotation) {
-		return annotation instanceof SpringPropertyAnnotation && !annotation.isMarkedDeleted();
+		return annotation instanceof ReconcileProblemAnnotation && !annotation.isMarkedDeleted();
 	}
 
 	/*

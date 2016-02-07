@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.ui;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Localization: plugin
 Bundle-Vendor: %providerName
 Bundle-Activator: org.springframework.ide.eclipse.ui.SpringUIPlugin
@@ -82,7 +82,7 @@ Export-Package: org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.workingsets,
  org.springframework.ide.eclipse.ui.workingsets.actions
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.browser,

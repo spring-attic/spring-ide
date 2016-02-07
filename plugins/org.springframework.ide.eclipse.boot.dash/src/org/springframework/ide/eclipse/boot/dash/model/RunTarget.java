@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.EnumSet;
-import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,9 +21,12 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 /**
  * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
  *
+ * TODO: launch configs are not applicable to all runtargets and methods relating
+ * to launch configs do not belong in here. Remove and refactor!
+ *
  * @author Kris De Volder
  */
-public interface RunTarget extends IdAble, Nameable, Comparable<RunTarget> {
+public interface RunTarget extends IdAble, Nameable {
 
 	public abstract RunTargetType getType();
 
@@ -36,12 +38,6 @@ public interface RunTarget extends IdAble, Nameable, Comparable<RunTarget> {
 	 *         element be brought into a given run-state.
 	 */
 	public abstract EnumSet<RunState> supportedGoalStates();
-
-	/**
-	 * Retrieve all existing launch configurations that are applicable for
-	 * launching a given BootDashElement on this RunTarget.
-	 */
-	public abstract List<ILaunchConfiguration> getLaunchConfigs(BootDashElement element);
 
 	/**
 	 * Create a launch config for a given dash element and initialize it with
@@ -61,7 +57,7 @@ public interface RunTarget extends IdAble, Nameable, Comparable<RunTarget> {
 	 * Factory method to create the model for the 'elements tabel' of this run
 	 * target.
 	 */
-	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context);
+	public abstract BootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent);
 
 	/**
 	 *

@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
@@ -51,6 +50,8 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSect
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -133,9 +134,9 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 				}
 			}
 			this.selection = selection;
-			selection.getElements().addListener(new ValueListener<Set<BootDashElement>>() {
+			selection.getElements().addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
 				@Override
-				public void gotValue(LiveExpression<Set<BootDashElement>> exp, Set<BootDashElement> value) {
+				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 					ISelection selection = getSelection();
 					for (ISelectionChangedListener selectionListener : selectionListeners) {
 						selectionListener.selectionChanged(new SelectionChangedEvent(BootDashTreeView.this, selection));
@@ -183,7 +184,10 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		addAddRunTargetMenuActions(manager);
 
 		manager.add(new Separator());
-		manager.add(actions.getToggleFiltersAction());
+		//manager.add(actions.getToggleFiltersDialogAction());
+		for (ToggleFilterAction a : actions.getToggleFilterActions()) {
+			manager.add(a);
+		}
 		// manager.add(refreshAction);
 		// manager.add(new Separator());
 		// manager.add(action2);
@@ -197,7 +201,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
-		manager.add(actions.getToggleFiltersAction());
+		manager.add(actions.getToggleFiltersDialogAction());
 
 // This ought to work, but it doesn't.
 //		manager.add(createAddRunTargetMenuManager());

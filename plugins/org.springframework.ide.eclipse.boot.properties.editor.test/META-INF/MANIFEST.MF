@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.properties.editor.test
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.properties.editor.test.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -19,6 +19,13 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.test.util,
  org.springframework.ide.eclipse.boot,
  org.yaml.snakeyaml,
- org.springframework.ide.eclipse.boot.properties.editor.yaml
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.springframework.ide.eclipse.boot.properties.editor.yaml,
+ org.springframework.ide.eclipse.boot.test,
+ org.mockito,
+ org.hamcrest,
+ org.hamcrest.library,
+ org.springframework.ide.eclipse.wizard,
+ org.springframework.ide.eclipse.editor.support
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Export-Package: org.springframework.ide.eclipse.boot.properties.editor.test

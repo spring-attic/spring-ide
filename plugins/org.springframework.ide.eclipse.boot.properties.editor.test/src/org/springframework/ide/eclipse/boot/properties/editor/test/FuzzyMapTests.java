@@ -18,7 +18,7 @@ import junit.framework.TestCase;
 
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
-import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 
 public class FuzzyMapTests extends TestCase {
 

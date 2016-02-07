@@ -43,13 +43,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesProposalProcessor;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -83,7 +84,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 					 new PropertyNameContentProposalProvider(project);
 				this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(),
 						proposalProvider, CTRL_SPACE,
-						SpringPropertiesProposalProcessor.AUTO_ACTIVATION_CHARS
+						ProposalProcessor.AUTO_ACTIVATION_CHARS
 				).setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 			} else {
 				this.editor = new TextCellEditor(tableViewer.getTable());
@@ -173,19 +174,8 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 		}
 
 		private PropVal getElementUnder(MouseEvent e) {
-			//Tricky: just asking for the 'cell' at event position returns null
-			// when click is received on a checkbox in the CheckBoxTableViewer.
-			//Since we really only want to know if we are clicking in some
-			//existing row we can just 'ignore' event.x position and set
-			//it to the middle of the viewer.
-			ViewerCell cell = tableViewer.getCell(new Point(
-					tableViewer.getTable().getBounds().width/2,
-					e.y
-			));
-			if (cell!=null) {
-				return (PropVal) cell.getElement();
-			}
-			return null;
+			TableItem item = tableViewer.getTable().getItem(new Point(e.x, e.y));
+			return item == null ? null : (PropVal) item.getData();
 		}
 	};
 

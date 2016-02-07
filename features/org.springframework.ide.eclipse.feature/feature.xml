@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Spring IDE Developers
+ * Copyright (c) 2005, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.feature"
       label="%featureName"
-      version="3.7.1.qualifier"
+      version="3.7.3.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -169,6 +169,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.springframework.ide.eclipse.gradle"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.buildship"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
          id="org.springframework.aop"
          download-size="0"
          install-size="0"
@@ -245,6 +259,27 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.springframework.web"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.web.servlet"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.validation"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
    <!-- spring boot -->
    
    <plugin
@@ -275,5 +310,11 @@
          version="0.0.0"
          unpack="false"/>
          
+   <plugin
+         id="org.springframework.ide.eclipse.editor.support"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

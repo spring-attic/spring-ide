@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@ import java.util.Map.Entry;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
@@ -38,7 +40,21 @@ public class CloudAppCache {
 
 	private final Map<String, CacheItem> appCache = new HashMap<String, CacheItem>();
 
+	//TODO: when we use v2 client this info is probably integerated with the rest of the appCache.
+	// Then this should be removed.
+	private Map<String, String> healthChecks = new HashMap<>();
+
+
 	public CloudAppCache() {
+	}
+
+
+	public synchronized String getHealthCheck(CloudAppDashElement e) {
+		return healthChecks.get(e.getName());
+	}
+
+	public synchronized void setHealthCheck(CloudAppDashElement e, String healthCheck) {
+		healthChecks.put(e.getName(), healthCheck);
 	}
 
 	/**
@@ -142,22 +158,11 @@ public class CloudAppCache {
 		appCache.remove(appName);
 	}
 
-	public synchronized CloudApplication getApp(String appName) {
+	public synchronized CFApplication getApp(String appName) {
 		CacheItem item = appCache.get(appName);
 		if (item != null) {
 			return item.appInstances.getApplication();
 		}
-		return null;
-	}
-
-	public synchronized CloudApplication getApp(IProject project) {
-
-		for (Entry<String, CacheItem> entry : appCache.entrySet()) {
-			if (entry.getValue().project != null && entry.getValue().project.equals(project)) {
-				return entry.getValue().appInstances.getApplication();
-			}
-		}
-
 		return null;
 	}
 
@@ -273,4 +278,5 @@ public class CloudAppCache {
 			return true;
 		}
 	}
+
 }

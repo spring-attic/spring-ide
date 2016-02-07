@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.properties.editor.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 
 /**
  * Provider for tags content proposals

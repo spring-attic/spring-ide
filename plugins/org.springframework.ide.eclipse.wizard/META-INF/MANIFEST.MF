@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE Template Project Wizards
 Bundle-SymbolicName: org.springframework.ide.eclipse.wizard;singleton:=true
-Bundle-Version: 3.7.1.qualifier
+Bundle-Version: 3.7.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.wizard.WizardPlugin
 Bundle-Vendor: Spring IDE Developers
 Require-Bundle: org.eclipse.ui,
@@ -38,13 +38,13 @@ Require-Bundle: org.eclipse.ui,
  org.codehaus.jackson.core,
  org.codehaus.jackson.mapper,
  org.apache.commons.logging,
- org.springsource.ide.eclipse.gradle.core;bundle-version="3.7.0";resolution:=optional,
  org.springsource.ide.eclipse.commons.gettingstarted;bundle-version="3.5.0";resolution:=optional,
- org.springsource.ide.eclipse.gradle.toolingapi;bundle-version="3.7.0";resolution:=optional,
  org.springsource.ide.eclipse.commons.browser;bundle-version="[3.5.0,4.0.0)";resolution:=optional,
  org.json;bundle-version="1.0.0",
- org.springframework.ide.eclipse.quickfix
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.springframework.ide.eclipse.quickfix,
+ org.apache.commons.compress;bundle-version="1.6.0",
+ com.google.guava
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,
  lib/jettison-1.0-RC2.jar,

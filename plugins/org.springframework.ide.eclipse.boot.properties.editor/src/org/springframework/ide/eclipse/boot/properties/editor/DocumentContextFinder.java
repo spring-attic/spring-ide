@@ -12,26 +12,20 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
-import org.springframework.ide.eclipse.boot.properties.editor.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 
 /**
  * Provides a method to find context information for IDocument instances.
  * <p>
- * In production there's only one instance, but unit testing it is 
+ * In production there's only one instance, but unit testing it is
  * convenient to be able to mock it up rather than have to
  * instantiate a lot of eclipse editor UI machinery.
- * 
+ *
  * @author Kris De Volder
  */
 public interface DocumentContextFinder {
 
-	IJavaProject getJavaProject(IDocument fDoc);
-	
-	DocumentContextFinder DEFAULT = new DocumentContextFinder() {
-		@Override
-		public IJavaProject getJavaProject(IDocument doc) {
-			return DocumentUtil.getJavaProject(doc);
-		}
-	};
+	IJavaProject getJavaProject(IDocument doc);
+	SeverityProvider getSeverityProvider(IDocument doc);
 
 }

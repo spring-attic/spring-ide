@@ -10,36 +10,29 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.wizard.gettingstarted.content;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.wizard.WizardPlugin;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.NullImportStrategy;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategyHolder;
 
 public enum BuildType {
 	MAVEN("pom.xml",
 	      "org.springframework.ide.eclipse.wizard.gettingstarted.importing.MavenStrategy",
 	      "Can not use Maven: M2E (Eclipse Maven Tooling) is not installed"
 	),
-	GRADLE("build.gradle",
-			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GradleStrategy",
-			"Can not use Gradle: STS Gradle Tooling is not installed. You can install it from the STS Dashboard."
-	),
-//	GROOVY_CLI("app.groovy",
-//			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
-//			"NA", //This message doesn't matter because
-//															  // project imports as 'resources' so no
-//															  // particular tooling is needed.
-//			"Spring CLI"
-//	),
+	GRADLE("build.gradle"),
 	GENERAL(null,
 			"org.springframework.ide.eclipse.wizard.gettingstarted.importing.GeneralProjectStrategy",
-			"NA",
-			"General"
+			"NA"
 	);
 
-//	MAVEN("pom.xml", new NullImportStrategy("Maven"));
-//	ECLIPSE(".project", ImportStrategy.ECLIPSE);
+	private static final ContributedImportStrategies contributions = new ContributedImportStrategies();
 
 	/**
 	 * Location of the 'build script' relative to codeset (project) root.
@@ -49,22 +42,24 @@ public enum BuildType {
 	 * be imported with the corresponding ImportStrategy.
 	 */
 	private Path buildScriptPath;
-	private String klass; //Class name for import strategy. May not be able to classload if requisite tooling isn't installed.
-	private String notInstalledMessage; //Message tailored to the particular tooling that is needed for an
-	private ImportStrategy importStrategy;
+	private List<ImportStrategyHolder> strategies = new ArrayList<ImportStrategyHolder>();
 	private String displayName;
+	private boolean hasDefaultStrategy = false;
 
-	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
+	private BuildType(String buildScriptPath) {
 		if (buildScriptPath!=null) {
 			this.buildScriptPath = new Path(buildScriptPath);
 		}
-		this.klass = importStrategyClass;
-		this.notInstalledMessage = notInstalledMessage;
 	}
 
-	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage, String displayName) {
-		this(buildScriptPath, importStrategyClass, notInstalledMessage);
-		this.displayName = displayName;
+	private BuildType(String buildScriptPath, String importStrategyClass, String notInstalledMessage) {
+		this(buildScriptPath);
+		hasDefaultStrategy = true;
+		addStrategy(new ImportStrategyHolder(this,
+				ImportStrategies.forClass(importStrategyClass),
+				notInstalledMessage,
+				"Default"
+		));
 	}
 
 
@@ -72,18 +67,13 @@ public enum BuildType {
 		return buildScriptPath;
 	}
 
-	public ImportStrategy getImportStrategy() {
-		if (this.importStrategy==null) {
-			try {
-				this.importStrategy = (ImportStrategy) Class.forName(klass).newInstance();
-			} catch (Throwable e) {
-				//THe most likely cause of this error is that optional dependencies needed to support
-				// this import strategy are not installed.
-				WizardPlugin.log(e);
-				this.importStrategy = new NullImportStrategy(name(), notInstalledMessage);
-			}
+	public List<ImportStrategy> getImportStrategies() {
+		contributions.initialize();
+		ArrayList<ImportStrategy> instances = new ArrayList<ImportStrategy>(strategies.size());
+		for (ImportStrategyHolder f : strategies) {
+			instances.add(f.get());
 		}
-		return this.importStrategy;
+		return Collections.unmodifiableList(instances);
 	}
 
 	public String displayName() {
@@ -99,8 +89,25 @@ public enum BuildType {
 	 */
 	public static final BuildType DEFAULT = MAVEN;
 
-	public String getNotInstalledMessage() {
-		return notInstalledMessage;
+//	/**
+//	 * This will return the first import strategy. This method is deprecated, it is provided only
+//	 * to avoid completely breaking code that assumes only a single strategy per build-type is available.
+//	 * <p>
+//	 * Code using this method will work, but will only be able to use one of the import strategies.
+//	 * It should be rewritten to support multiple strategies (i.e. use getImportStrategies() method.
+//	 */
+//	@Deprecated
+//	public ImportStrategy getImportStrategy() {
+//		return getImportStrategies().get(0);
+//	}
+
+	public void addStrategy(ImportStrategyHolder strategyHolder) {
+		strategies.add(strategyHolder);
+	}
+
+	public ImportStrategy getDefaultStrategy() {
+		Assert.isLegal(hasDefaultStrategy);
+		return getImportStrategies().get(0);
 	}
 
 }

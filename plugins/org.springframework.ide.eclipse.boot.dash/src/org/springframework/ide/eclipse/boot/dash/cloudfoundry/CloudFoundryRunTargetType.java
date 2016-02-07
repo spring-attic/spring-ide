@@ -15,6 +15,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -28,13 +32,20 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
-	public CloudFoundryRunTargetType() {
+	private CloudFoundryClientFactory clientFactory;
+	private BootDashModelContext context;
+
+	public CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		super("Cloud Foundry");
+		this.context = context;
+		this.clientFactory = clientFactory;
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSet<RunTarget> targets) {
-		RunTargetWizard wizard = new RunTargetWizard(targets);
+	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory,
+				targets.getValues(), context);
+		RunTargetWizard wizard = new RunTargetWizard(model);
 		Shell shell = CloudFoundryUiUtil.getShell();
 		if (shell != null) {
 			WizardDialog dialog = new WizardDialog(shell, wizard);
@@ -55,13 +66,12 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	@Override
 	public RunTarget createRunTarget(TargetProperties props) {
 		return props instanceof CloudFoundryTargetProperties
-				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props)
-				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props));
+				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
+				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this), this, clientFactory);
 	}
 
 	@Override
 	public ImageDescriptor getIcon() {
 		return SMALL_ICON;
 	}
-
 }

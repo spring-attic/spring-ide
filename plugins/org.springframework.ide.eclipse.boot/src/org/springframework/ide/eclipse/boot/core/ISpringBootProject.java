@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 
 /**
@@ -31,9 +32,24 @@ public interface ISpringBootProject {
 	public IProject getProject();
 
 	/**
-	 * @return List of maven coordinates for known boot starters. These are discovered dynamically
-	 * based on project contents. E.g. for maven projects we examine the 'dependencyManagement'
-	 * section of the project's effective pom.
+	 * Fetches list of dependencies from the project. Dependencies returned may have 'incomplete' coordinates.
+	 * For example may only have group-id and artifact-id but not version. The info is extracted
+	 * from something like a pom.xml and the info that is listed there may also be incomplete.
+	 * @throws CoreException
+	 */
+	public List<IMavenCoordinates> getDependencies() throws CoreException;
+
+	/**
+	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
+	 * the initializr web service.
+	 *
+	 * TODO: if we have this, do we still need 'getKnownStarters' method?
+	 */
+	public SpringBootStarters getStarterInfos();
+
+	/**
+	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
+	 * the initializr web service.
 	 *
 	 * @throws CoreException
 	 */
@@ -44,21 +60,6 @@ public interface ISpringBootProject {
 	 * @throws CoreException
 	 */
 	public List<SpringBootStarter> getBootStarters() throws CoreException;
-
-	/**
-	 * Modify project classpath, adding a SpringBootStarter. Note that this has to be done indirectly,
-	 * by modifying the project's build scripts or pom rather than by directly modifying the classpath
-	 * itself.
-	 * @throws CoreException
-	 */
-	public void addStarter(SpringBootStarter webStarter) throws CoreException;
-
-	/**
-	 * Modify project classpath, removing a SpringBootStarter. Note that this has to be done indirectly,
-	 * by modifying the project's build scripts or pom rather than by directly modifying the classpath
-	 * itself.
-	 */
-	public void removeStarter(SpringBootStarter webStarter) throws CoreException;
 
 	/**
 	 * Modify project classpath adding and/or removing starters to make them match the given
@@ -73,12 +74,12 @@ public interface ISpringBootProject {
 	 * for a maven project it will be added to the project's pom file in the
 	 * dependencies section.
 	 */
-	public void addMavenDependency(MavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
+	public void addMavenDependency(IMavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
 
 	/**
 	 * @since 3.7.0
 	 */
-	public void addMavenDependency(MavenCoordinates depConfigurationProcessor, boolean preferManagedVersion, boolean optional) throws CoreException;
+	public void addMavenDependency(IMavenCoordinates depConfigurationProcessor, boolean preferManagedVersion, boolean optional) throws CoreException;
 
 
 	/**
@@ -91,8 +92,13 @@ public interface ISpringBootProject {
 	 * Equivalent of triggering a 'update project' operation on a Maven project. I.e. re-apply whatever configuration
 	 * gets done based on pom.xml or its equivalent. Client calling this should beware that this operation may be
 	 * asynchronous.
+	 * @return Job if the operation is asynchronous or null otherwise.
 	 */
-	void updateProjectConfiguration();
+	Job updateProjectConfiguration();
 
+	/**
+	 * Remove a dependency with given group-id and artifact-id from project's pom or build script.
+	 */
+	public void removeMavenDependency(MavenId mavenId) throws CoreException;
 
 }

@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.util.List;
-
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -21,7 +20,10 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.util.LaunchUtil;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
+
+import com.google.common.collect.ImmutableSet;
 
 @SuppressWarnings("restriction")
 public class LocalElementConsoleManager extends BootDashModelConsoleManager {
@@ -66,32 +68,10 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 
 	@Override
 	public void showConsole(BootDashElement element) throws Exception {
-		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+		IConsoleManager manager = eclipseConsoleManager();
 
-		IConsole appConsole = null;
+		IConsole appConsole = getConsole(element);
 
-		IConsole[] activeConsoles = manager.getConsoles();
-		if (activeConsoles != null) {
-			List<ILaunch> launches = LaunchUtil.getLaunches(element.getProject());
-
-			for (ILaunch launch : launches) {
-
-				IProcess[] processes = launch.getProcesses();
-
-				if (processes != null) {
-
-					int total = processes.length;
-
-					for (int i = 0; appConsole == null && i < total; i++) {
-						appConsole = getConsole(processes[i], activeConsoles);
-					}
-
-					if (appConsole != null) {
-						break;
-					}
-				}
-			}
-		}
 
 		if (appConsole != null) {
 			manager.showConsoleView(appConsole);
@@ -99,6 +79,30 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 			throw BootDashActivator.asCoreException("Failed to open console for: " + element.getName()
 					+ ". Either a process console may not exist or the application is not running.");
 		}
+	}
+
+	private IConsole getConsole(BootDashElement element) {
+		IConsoleManager manager = eclipseConsoleManager();
+		IConsole[] activeConsoles = manager.getConsoles();
+		if (activeConsoles != null) {
+			ImmutableSet<ILaunchConfiguration> launchConfs = element.getLaunchConfigs();
+			for (ILaunch launch : BootLaunchUtils.getLaunches(launchConfs)) {
+				IProcess[] processes = launch.getProcesses();
+				if (processes != null) {
+					for (IProcess process : processes) {
+						IConsole console = getConsole(process, activeConsoles);
+						if (console!=null) {
+							return console;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	protected IConsoleManager eclipseConsoleManager() {
+		return ConsolePlugin.getDefault().getConsoleManager();
 	}
 
 	@Override

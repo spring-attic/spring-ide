@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import junit.framework.TestCase;
+import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.DocumentEdits;
+import junit.framework.TestCase;
 
 /**
  * @author Kris De Volder
@@ -21,7 +20,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.Docume
 public class DocumentEditsTest extends TestCase {
 
 	class TestSubject {
-		private MockEditor editor;
+		private MockPropertiesEditor editor;
 		private DocumentEdits edits;
 		private String orgText;
 
@@ -31,7 +30,7 @@ public class DocumentEditsTest extends TestCase {
 		}
 
 		public void reset() {
-			this.editor = new MockEditor(orgText);
+			this.editor = new MockPropertiesEditor(orgText);
 			this.edits = new DocumentEdits(editor.document);
 		}
 

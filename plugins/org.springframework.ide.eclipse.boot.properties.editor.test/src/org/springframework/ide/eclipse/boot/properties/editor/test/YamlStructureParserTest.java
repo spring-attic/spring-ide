@@ -13,19 +13,19 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPath;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.path.YamlPathSegment;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SDocNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SKeyNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SNode;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.structure.YamlStructureParser.SRootNode;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SDocNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 
-public class YamlStructureParserTest extends YamlEditorTestHarness {
+public class YamlStructureParserTest extends ApplicationYamlEditorTestHarness {
 
 	public void testSimple() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"hello:\n"+
 				"  world:\n" +
 				"    message\n"
@@ -40,7 +40,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		);
 	}
 
-	public void assertParse(YamlEditor editor, String... expectDumpLines) throws Exception {
+	public void assertParse(MockYamlEditor editor, String... expectDumpLines) throws Exception {
 		StringBuilder expected = new StringBuilder();
 		for (String line : expectDumpLines) {
 			expected.append(line);
@@ -49,7 +49,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertEquals(expected.toString().trim(),  editor.parseStructure().toString().trim());
 	}
 
-	public void assertParseOneDoc(YamlEditor editor, String... expectDumpLines) throws Exception {
+	public void assertParseOneDoc(MockYamlEditor editor, String... expectDumpLines) throws Exception {
 		StringBuilder expected = new StringBuilder();
 		for (String line : expectDumpLines) {
 			expected.append(line);
@@ -59,7 +59,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testComments() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"#A comment\n" +
 				"hello:\n"+
 				"  #Another comment\n" +
@@ -78,7 +78,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testSiblings() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -113,7 +113,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testMultiDocs() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -156,7 +156,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 
 
 	public void testSequenceBasic() throws Exception {
-		YamlEditor editor;
+		MockYamlEditor editor;
 
 		//Sequence at root level
 		editor = new YamlEditor(
@@ -239,7 +239,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testSequenceWithNestedSequence() throws Exception {
-		YamlEditor editor;
+		MockYamlEditor editor;
 
 		editor = new YamlEditor(
 				"- - a\n" +
@@ -360,7 +360,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testSequenceWithNestedMap() throws Exception {
-		YamlEditor editor;
+		MockYamlEditor editor;
 
 		// A map nested in a sequence may start on the same line
 		editor = new YamlEditor(
@@ -427,7 +427,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testTraverseSeq() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"foo:\n" +
 				"- - - - a\n" +
 				"    - c\n" +
@@ -454,7 +454,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testFindAndTraverseSeqNode() throws Exception {
-		YamlEditor editor;
+		MockYamlEditor editor;
 
 		editor = new YamlEditor(
 				"foo:\n"+
@@ -484,7 +484,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 
 	}
 
-	private void findAndTraversPathPath(YamlEditor editor, String snippet) throws Exception {
+	private void findAndTraversPathPath(MockYamlEditor editor, String snippet) throws Exception {
 		SRootNode root = editor.parseStructure();
 		SNode node = root.find(editor.startOf(snippet));
 		assertNotNull(node);
@@ -495,7 +495,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testTraverseSeqKey() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"foo:\n" +
 				"- bar:\n" +
 				"  - a\n" +
@@ -512,7 +512,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testTreeEnd() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -543,7 +543,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testTreeEndKeyNodeNoChildren() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"  canada:\n" +
@@ -562,7 +562,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testFind() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -596,7 +596,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testFindInMultiDoc() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -634,7 +634,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 
 
 	public void testFindInSequence() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"foo:\n" +
 				"- alchemy\n" +
 				"- bistro\n" +
@@ -670,7 +670,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testGetKey() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -692,7 +692,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testIsInValue() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -718,7 +718,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertValueRange(editor, root, "foo:", null);
 	}
 
-	private void assertValueRange(YamlEditor editor, SRootNode root, String nodeText, String expectedValue) throws Exception {
+	private void assertValueRange(MockYamlEditor editor, SRootNode root, String nodeText, String expectedValue) throws Exception {
 		int start = editor.getText().indexOf(nodeText);
 		SKeyNode node = (SKeyNode) root.find(start);
 		int valueRangeStart;
@@ -738,7 +738,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testTraverse() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"world:\n" +
 				"  europe:\n" +
 				"    france:\n" +
@@ -768,7 +768,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 	}
 
 	public void testGetFirstRealChild() throws Exception {
-		YamlEditor editor = new YamlEditor(
+		MockYamlEditor editor = new YamlEditor(
 				"no-children:\n" +
 				"unreal-children:\n" +
 				"  #Unreal\n" +
@@ -805,7 +805,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertTrue("Doesn't match: '"+string+"'", pat.matcher(string).matches());
 	}
 
-	private void assertFirstRealChild(YamlEditor editor, String testNodeName, String expectedNodeSnippet) throws Exception {
+	private void assertFirstRealChild(MockYamlEditor editor, String testNodeName, String expectedNodeSnippet) throws Exception {
 		SDocNode doc = getOnlyDocument(editor.parseStructure());
 		SKeyNode testNode = doc.getChildWithKey(testNodeName);
 		assertNotNull(testNode);
@@ -838,7 +838,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		return new YamlPath(segments);
 	}
 
-	private void assertKey(YamlEditor editor, SRootNode root, String nodeText, String expectedKey) throws Exception {
+	private void assertKey(MockYamlEditor editor, SRootNode root, String nodeText, String expectedKey) throws Exception {
 		int start = editor.getText().indexOf(nodeText);
 		SKeyNode node = (SKeyNode) root.find(start);
 		String key = node.getKey();
@@ -854,7 +854,7 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertFalse(node.isInKey(endOfKeyRange+1));
 	}
 
-	private void assertFind(YamlEditor editor, SRootNode root, String snippet, int... expectPath) {
+	private void assertFind(MockYamlEditor editor, SRootNode root, String snippet, int... expectPath) {
 		int start = editor.getRawText().indexOf(snippet);
 		int end = start+snippet.length();
 		int middle = (start+end) / 2;
@@ -866,13 +866,13 @@ public class YamlStructureParserTest extends YamlEditorTestHarness {
 		assertEquals(expectNode, root.find(end));
 	}
 
-	private void assertFindStart(YamlEditor editor, SRootNode root, String snippet, int... expectPath) {
+	private void assertFindStart(MockYamlEditor editor, SRootNode root, String snippet, int... expectPath) {
 		int start = editor.getRawText().indexOf(snippet);
 		SNode expectNode = getNodeAtPath(root, expectPath);
 		assertEquals(expectNode, root.find(start));
 	}
 
-	private void assertTreeText(YamlEditor editor, SNode node, String expected) throws Exception {
+	private void assertTreeText(MockYamlEditor editor, SNode node, String expected) throws Exception {
 		String actual = editor.textBetween(node.getStart(), node.getTreeEnd());
 		assertEquals(expected.trim(), actual.trim());
 	}

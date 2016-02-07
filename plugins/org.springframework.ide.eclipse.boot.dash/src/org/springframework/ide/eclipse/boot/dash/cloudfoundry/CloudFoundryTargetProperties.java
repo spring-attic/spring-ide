@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import java.util.Map;
-
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
@@ -25,12 +24,14 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public final static String ORG_GUID = "organization_guid";
 	public final static String SPACE_GUID = "space_guid";
 
-	public CloudFoundryTargetProperties() {
-		super(RunTargetTypes.CLOUDFOUNDRY);
+	public final static String DISCONNECTED = "disconnected";
+
+	public CloudFoundryTargetProperties(RunTargetType runTargetType, BootDashModelContext context) {
+		super(runTargetType, context);
 	}
 
-	public CloudFoundryTargetProperties(TargetProperties targetProperties) {
-		super(targetProperties.getAllProperties(), RunTargetTypes.CLOUDFOUNDRY);
+	public CloudFoundryTargetProperties(TargetProperties targetProperties, RunTargetType runTargetType) {
+		super(targetProperties, runTargetType);
 		if (get(RUN_TARGET_ID) == null) {
 			put(RUN_TARGET_ID, getId(this));
 		}
@@ -54,14 +55,6 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public boolean isSelfsigned() {
 		return map.get(SELF_SIGNED_PROP) != null && Boolean.parseBoolean(map.get(SELF_SIGNED_PROP));
-	}
-
-	@Override
-	public Map<String, String> getPropertiesToPersist() {
-		Map<String, String> map = super.getPropertiesToPersist();
-		// Exclude password as password are persisted separately
-		map.remove(PASSWORD_PROP);
-		return map;
 	}
 
 	public static String getId(CloudFoundryTargetProperties cloudProps) {

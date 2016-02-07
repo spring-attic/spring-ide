@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
  * The filter for searching for tags.
@@ -20,7 +25,7 @@ import java.util.regex.Pattern;
  * @author Alex Boyko
  *
  */
-public class TagSearchFilter implements Filter<BootDashElement> {
+public class  TagSearchFilter<T extends Taggable> implements Filter<T> {
 
 	private String searchTerm;
 
@@ -51,20 +56,33 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 	}
 
 	@Override
-	public boolean accept(BootDashElement element) {
+	public boolean accept(T element) {
 		if (searchTags.length == 0 && searchTerm.isEmpty()) {
 			return true;
 		}
-		LinkedHashSet<String> elementTags = ((Taggable) element).getTags();
-		int initSize = elementTags.size();
-		elementTags.removeAll(Arrays.asList(searchTags));
+
+		List<String> searchTags_caseIndependent = new ArrayList<>(searchTags.length);
+		for (String searchTag : searchTags) {
+			searchTags_caseIndependent.add(searchTag.toLowerCase());
+		}
+
+		String searchTerm_caseIndependent = searchTerm.toLowerCase();
+
+		Set<String> elementTags = getTags(element);
+		HashSet<String> tags_caseIndependent = new HashSet<>();
+		for (String tag : elementTags) {
+			tags_caseIndependent.add(tag.toLowerCase());
+		}
+
+		int initSize = tags_caseIndependent.size();
+		tags_caseIndependent.removeAll(searchTags_caseIndependent);
 		// Check if all search tags are present in the element tags set
-		if (elementTags.size() == initSize - searchTags.length) {
-			if (searchTerm.isEmpty()) {
+		if (tags_caseIndependent.size() == initSize - searchTags_caseIndependent.size()) {
+			if (searchTerm_caseIndependent.isEmpty()) {
 				return true;
 			} else {
-				for (String elementTag : elementTags) {
-					if (elementTag.contains(searchTerm)) {
+				for (String elementTag : tags_caseIndependent) {
+					if (elementTag.contains(searchTerm_caseIndependent)) {
 						return true;
 					}
 				}
@@ -80,6 +98,10 @@ public class TagSearchFilter implements Filter<BootDashElement> {
 			initSearchText += TagUtils.SEPARATOR + searchTerm;
 		}
 		return initSearchText;
+	}
+
+	protected Set<String> getTags(T element) {
+		return element.getTags();
 	}
 
 }

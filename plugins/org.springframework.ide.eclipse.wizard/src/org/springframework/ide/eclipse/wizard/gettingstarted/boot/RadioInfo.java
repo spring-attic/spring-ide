@@ -55,4 +55,14 @@ public class RadioInfo implements Ilabelable {
 		return label;
 	}
 
+	/**
+	 * The value to be passed as a query parameter to start.spring.io app,
+	 * when this option is selected. Typically this will be the same as the
+	 * value returned by getValue, but subclasses may override to change it
+	 * to something else.
+	 */
+	public String getUrlParamValue() {
+		return getValue();
+	}
+
 }
