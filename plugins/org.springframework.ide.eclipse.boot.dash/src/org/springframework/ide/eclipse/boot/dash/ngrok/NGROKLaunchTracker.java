@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,16 +20,16 @@ public class NGROKLaunchTracker {
 
 	private static Map<String, NGROKClient> tunnels = new ConcurrentHashMap<String, NGROKClient>();
 
-	public static void add(String projectName, NGROKClient ngrokClient, NGROKTunnel tunnel) {
-		tunnels.put(projectName, ngrokClient);
+	public static void add(String tunnelName, NGROKClient ngrokClient, NGROKTunnel tunnel) {
+		tunnels.put(tunnelName, ngrokClient);
 	}
 
-	public static NGROKClient get(String projectName) {
-		return tunnels.get(projectName);
+	public static NGROKClient get(String tunnelName) {
+		return tunnels.get(tunnelName);
 	}
 
-	public static void remove(String projectName) {
-		tunnels.remove(projectName);
+	public static void remove(String tunnelName) {
+		tunnels.remove(tunnelName);
 	}
 
 }
