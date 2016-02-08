@@ -289,7 +289,10 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				getDifferenceForEntry(edits, ApplicationManifestHandler.COMMAND_PROP, props.getCommand(), null, String.class);
 			}
 
-			if (!Objects.equal(getStack(), props.getStack())) {
+			/*
+			 * Only if 'stack' attribute is present in the manifest perform the comparison
+			 */
+			if (getStack() != null && !getStack().equals(props.getStack())) {
 				getDifferenceForEntry(edits, ApplicationManifestHandler.STACK_PROP, props.getStack(), null, String.class);
 			}
 
