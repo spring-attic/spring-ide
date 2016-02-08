@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
@@ -51,10 +52,18 @@ public class ManifestCompareMergeTests {
 			new CloudDomain(null, "springsource.org", null), new CloudDomain(null, "spring.io", null),
 			new CloudDomain(null, "spring.framework", null));
 	
+	public static final List<CFStack> SPRING_CLOUD_STACKS = Arrays.asList(new CFStack[] { new CFStack() {
+		@Override
+		public String getName() {
+			return "stack1";
+		}
+	}});
+	
 	public static Map<String, Object> createCloudDataMap() {
 		Map<String, Object> cloudData = new HashMap<>();
 		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
 		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, DEFAULT_BUILDPACK);
+		cloudData.put(ApplicationManifestHandler.STACK_PROP, SPRING_CLOUD_STACKS);
 		return cloudData;
 	}
 	

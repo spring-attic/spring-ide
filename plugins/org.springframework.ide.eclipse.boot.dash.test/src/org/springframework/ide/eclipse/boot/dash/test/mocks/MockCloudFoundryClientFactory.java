@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
@@ -266,6 +267,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception {
 			notImplementedStub();
+		}
+
+		@Override
+		public List<CFStack> getStacks() throws Exception {
+			notImplementedStub();
+			return null;
 		}
 	};
 

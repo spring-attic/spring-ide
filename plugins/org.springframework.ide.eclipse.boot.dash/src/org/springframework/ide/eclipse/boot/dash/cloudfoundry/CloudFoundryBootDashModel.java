@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -848,6 +847,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		Map<String, Object> cloudData = new HashMap<>();
 		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
 		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
+		cloudData.put(ApplicationManifestHandler.STACK_PROP, getRunTarget().getStacks(monitor));
 		if (app != null) {
 			cloudData.put(ApplicationManifestHandler.NAME_PROP, app.getName());
 		}

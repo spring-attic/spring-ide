@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
@@ -47,9 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -62,6 +61,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private List<CloudDomain> domains;
 	private List<CFSpace> spaces;
 	private List<Buildpack> buildpacks;
+	private List<CFStack> stacks;
 
 	private LiveVariable<ClientRequests> cachedClient;
 	private CloudFoundryClientFactory clientFactory;
@@ -97,6 +97,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			this.domains = null;
 			this.spaces = null;
 			this.buildpacks = null;
+			this.stacks = null;
 			cachedClient.setValue(createClient());
 		} catch (Exception e) {
 			cachedClient.setValue(null);
@@ -108,6 +109,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		this.domains = null;
 		this.spaces = null;
 		this.buildpacks = null;
+		this.stacks = null;
 		if (getClient() != null) {
 			getClient().logout();
 			cachedClient.setValue(null);
@@ -200,6 +202,19 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			subMonitor.worked(5);
 		}
 		return domains;
+	}
+
+	public synchronized List<CFStack> getStacks(IProgressMonitor monitor)
+			throws Exception {
+		if (stacks == null) {
+			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+			subMonitor.beginTask("Refreshing list of stacks for " + getName(), 5);
+
+			stacks = getClient().getStacks();
+
+			subMonitor.worked(5);
+		}
+		return stacks;
 	}
 
 	public synchronized List<CFSpace> getSpaces(ClientRequests requests, IProgressMonitor monitor) throws Exception {

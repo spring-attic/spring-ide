@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -122,6 +123,12 @@ public class ApplicationManifestHandler {
 	public static List<CloudDomain> getCloudDomains(Map<String, Object> cloudData) {
 		Object obj = cloudData == null ? null : cloudData.get(DOMAINS_PROP);
 		return obj instanceof List ? (List<CloudDomain>) obj : Collections.<CloudDomain>emptyList();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<CFStack> getCloudStacks(Map<String, Object> cloudData) {
+		Object obj = cloudData == null ? null : cloudData.get(STACK_PROP);
+		return obj instanceof List ? (List<CFStack>) obj : Collections.<CFStack>emptyList();
 	}
 
 	public static String getDefaultBuildpack(Map<String, Object> cloudData) {
@@ -626,7 +633,7 @@ public class ApplicationManifestHandler {
 		if (stack == null) {
 			stack = getValue(allResults, STACK_PROP, String.class);
 		}
-		if (stack != null) {
+		if (stack != null && isStackValid(stack, getCloudStacks(cloudData))) {
 			properties.setStack(stack);
 		}
 	}
@@ -753,6 +760,15 @@ public class ApplicationManifestHandler {
 	public static boolean isDomainValid(String domain, List<CloudDomain> domains) {
 		for (CloudDomain cloudDomain : domains) {
 			if (cloudDomain.getName().equals(domain)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isStackValid(String stack, List<CFStack> stacks) {
+		for (CFStack cloudStack : stacks) {
+			if (cloudStack.getName().equals(stack)) {
 				return true;
 			}
 		}
