@@ -65,6 +65,10 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	protected final LiveVariable<Integer> timeout = new LiveVariable<>();
 
+	protected final LiveVariable<String> command = new LiveVariable<>();
+
+	protected final LiveVariable<String> stack = new LiveVariable<>();
+
 	protected Validator validator;
 
 	public CloudApplicationDeploymentProperties() {
@@ -107,6 +111,22 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public Integer getTimeout() {
 		return timeout.getValue();
+	}
+
+	public void setCommand(String command) {
+		this.command.setValue(command);
+	}
+
+	public String getCommand() {
+		return command.getValue();
+	}
+
+	public void setStack(String stack) {
+		this.stack.setValue(stack);
+	}
+
+	public String getStack() {
+		return stack.getValue();
 	}
 
 	public void setManifestFile(IFile file) {
@@ -280,6 +300,8 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 		properties.setTimeout(app == null ? null : app.getTimeout());
+		properties.setCommand(app == null ? null : app.getCommand());
+		properties.setStack(app == null ? null : app.getStack());
 
 		if (app == null) {
 			List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);

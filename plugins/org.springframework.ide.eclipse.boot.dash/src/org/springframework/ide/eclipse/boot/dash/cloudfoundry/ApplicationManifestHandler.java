@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -98,6 +99,10 @@ public class ApplicationManifestHandler {
 
 	public static final String TIMEOUT_PROP = "timeout";
 
+	public static final String COMMAND_PROP = "command";
+
+	public static final String STACK_PROP = "stack";
+
 	private final IProject project;
 
 	private final IFile manifestFile;
@@ -118,6 +123,12 @@ public class ApplicationManifestHandler {
 	public static List<CloudDomain> getCloudDomains(Map<String, Object> cloudData) {
 		Object obj = cloudData == null ? null : cloudData.get(DOMAINS_PROP);
 		return obj instanceof List ? (List<CloudDomain>) obj : Collections.<CloudDomain>emptyList();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<CFStack> getCloudStacks(Map<String, Object> cloudData) {
+		Object obj = cloudData == null ? null : cloudData.get(STACK_PROP);
+		return obj instanceof List ? (List<CFStack>) obj : Collections.<CFStack>emptyList();
 	}
 
 	public static String getDefaultBuildpack(Map<String, Object> cloudData) {
@@ -298,6 +309,10 @@ public class ApplicationManifestHandler {
 
 		readTimeout(appMap, allResults, properties);
 
+		readCommand(appMap, allResults, properties);
+
+		readStack(appMap, allResults, properties);
+
 		ValidationResult validation = properties.getValidator().getValue();
 		if (validation != null && !validation.isOk()) {
 			throw ExceptionUtil.coreException(validation.msg);
@@ -418,6 +433,12 @@ public class ApplicationManifestHandler {
 		}
 		if (properties.getTimeout() != null) {
 			application.put(ApplicationManifestHandler.TIMEOUT_PROP, properties.getTimeout());
+		}
+		if (properties.getCommand() != null) {
+			application.put(ApplicationManifestHandler.COMMAND_PROP, properties.getCommand());
+		}
+		if (properties.getStack() != null) {
+			application.put(ApplicationManifestHandler.STACK_PROP, properties.getStack());
 		}
 		if (properties.getServices() != null && !properties.getServices().isEmpty()) {
 			application.put(SERVICES_PROP, properties.getServices());
@@ -593,6 +614,30 @@ public class ApplicationManifestHandler {
 		}
 	}
 
+	protected void readCommand(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		String command = getValue(application, COMMAND_PROP, String.class);
+		if (command == null) {
+			command = getValue(allResults, COMMAND_PROP, String.class);
+		}
+		if (command != null) {
+			properties.setCommand(command);
+		}
+	}
+
+	protected void readStack(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+
+		String stack = getValue(application, STACK_PROP, String.class);
+		if (stack == null) {
+			stack = getValue(allResults, STACK_PROP, String.class);
+		}
+		if (stack != null && isStackValid(stack, getCloudStacks(cloudData))) {
+			properties.setStack(stack);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
@@ -715,6 +760,15 @@ public class ApplicationManifestHandler {
 	public static boolean isDomainValid(String domain, List<CloudDomain> domains) {
 		for (CloudDomain cloudDomain : domains) {
 			if (cloudDomain.getName().equals(domain)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isStackValid(String stack, List<CFStack> stacks) {
+		for (CFStack cloudStack : stacks) {
+			if (cloudStack.getName().equals(stack)) {
 				return true;
 			}
 		}

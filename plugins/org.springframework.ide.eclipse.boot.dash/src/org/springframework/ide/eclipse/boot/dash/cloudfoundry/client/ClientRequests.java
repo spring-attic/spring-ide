@@ -44,6 +44,7 @@ public interface ClientRequests {
 	CloudAppInstances getExistingAppInstances(UUID guid) throws Exception;
 	List<CFService> getServices() throws Exception;
 	List<CFSpace> getSpaces() throws Exception;
+	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName) throws Exception;
 	void stopApplication(String appName) throws Exception;
 	StreamingLogToken streamLogs(String appName, ApplicationLogConsole logConsole);

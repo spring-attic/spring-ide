@@ -10,25 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+public interface CFStack extends CFEntity {
 
-import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
-
-public interface CFApplication extends CFEntity {
-	int getInstances();
-	int getRunningInstances();
-	Map<String, String> getEnvAsMap();
-	int getMemory();
-	UUID getGuid();
-	List<String> getServices();
-	String getDetectedBuildpack();
-	String getBuildpackUrl();
-	List<String> getUris();
-	AppState getState();
-	int getDiskQuota();
-	Integer getTimeout();
-	String getCommand();
-	String getStack();
 }

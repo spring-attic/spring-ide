@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
@@ -42,10 +42,10 @@ public class ExposedPropertyControl extends AbstractBdePropertyControl {
 		exposedURL.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				BootProjectDashElement bde = getLocalBootDashElement();
+				AbstractLaunchConfigurationsDashElement<?> bde = getLocalBootDashElement();
 				if (bde != null) {
-					String projectName = bde.getName();
-					NGROKClient ngrokClient = NGROKLaunchTracker.get(projectName);
+					String tunnelName = bde.getName();
+					NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
 					if (ngrokClient != null) {
 						String addr = ngrokClient.getURL();
 						UiUtil.openUrl(addr);
@@ -57,10 +57,10 @@ public class ExposedPropertyControl extends AbstractBdePropertyControl {
 
 	@Override
 	public void refreshControl() {
-		BootProjectDashElement bde = getLocalBootDashElement();
+		AbstractLaunchConfigurationsDashElement<?> bde = getLocalBootDashElement();
 		if (bde != null) {
-			String projectName = bde.getName();
-			NGROKClient ngrokClient = NGROKLaunchTracker.get(projectName);
+			String tunnelName = bde.getName();
+			NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
 			if (ngrokClient != null) {
 				exposedURL.setText(ngrokClient.getTunnel().getPublic_url() + "   --- (local ngrok instance at: <a href=\"\">" + ngrokClient.getURL() + "</a>)");
 			}
@@ -70,11 +70,11 @@ public class ExposedPropertyControl extends AbstractBdePropertyControl {
 		}
 	}
 
-	private BootProjectDashElement getLocalBootDashElement() {
+	private AbstractLaunchConfigurationsDashElement<?> getLocalBootDashElement() {
 		if (exposedURL != null && !exposedURL.isDisposed()) {
 			BootDashElement bde = getBootDashElement();
-			if (bde instanceof BootProjectDashElement) {
-				return (BootProjectDashElement) bde;
+			if (bde instanceof AbstractLaunchConfigurationsDashElement<?>) {
+				return (AbstractLaunchConfigurationsDashElement<?>) bde;
 			}
 		}
 

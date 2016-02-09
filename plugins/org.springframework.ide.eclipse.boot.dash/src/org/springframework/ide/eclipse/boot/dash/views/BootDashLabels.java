@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,9 +28,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
@@ -392,9 +392,9 @@ public class BootDashLabels implements Disposable {
 			case EXPOSED_URL:
 				runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
-					if (element instanceof BootProjectDashElement) {
-						String projectName = element.getName();
-						NGROKClient ngrokClient = NGROKLaunchTracker.get(projectName);
+					if (element instanceof AbstractLaunchConfigurationsDashElement<?>) {
+						String tunnelName = element.getName();
+						NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
 						if (ngrokClient != null) {
 							styledLabel = new StyledString("\u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue());
 						}

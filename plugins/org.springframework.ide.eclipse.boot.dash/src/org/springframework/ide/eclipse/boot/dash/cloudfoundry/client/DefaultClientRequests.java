@@ -64,7 +64,8 @@ public class DefaultClientRequests implements ClientRequests {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
 				client.createApplication(deploymentProperties.getAppName(),
-						new Staging(null, deploymentProperties.getBuildpack(), null, deploymentProperties.getTimeout()),
+						new Staging(deploymentProperties.getCommand(), deploymentProperties.getBuildpack(),
+								deploymentProperties.getStack(), deploymentProperties.getTimeout()),
 						deploymentProperties.getMemory(), new ArrayList<>(deploymentProperties.getUris()),
 						deploymentProperties.getServices());
 			}
@@ -291,6 +292,15 @@ public class DefaultClientRequests implements ClientRequests {
 		}.call();
 	}
 
+	public List<CFStack> getStacks() throws Exception {
+		return new ClientRequest<List<CFStack>>(this.client, "Getting Cloud Stacks") {
+
+			@Override
+			protected List<CFStack> doRun(CloudFoundryOperations client) throws Exception {
+				return CFWrapping.wrapStacks(client.getStacks());
+			}
+		}.call();
+	}
 
 	public List<CFSpace> getSpaces() throws Exception {
 		return new ClientRequest<List<CFSpace>>(this.client, "Getting Cloud spaces") {

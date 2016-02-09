@@ -310,4 +310,16 @@ public class Yaml2DeploymentProperties {
 		assertEquals(new HashSet<>(Arrays.asList("app.spring.io")), props.getUris());
 	}
 
+	@Test
+	public void test_command_1() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/command-1.yml");
+		assertEquals("mycommand", props.getCommand());
+	}
+
+	@Test
+	public void test_stack_1() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/stack-1.yml");
+		assertEquals("stack1", props.getStack());
+	}
+
 }

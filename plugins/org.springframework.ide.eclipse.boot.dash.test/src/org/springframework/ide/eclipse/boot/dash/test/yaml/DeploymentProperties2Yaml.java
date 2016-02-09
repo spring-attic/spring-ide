@@ -138,4 +138,25 @@ public class DeploymentProperties2Yaml {
 		props.setUris(Arrays.asList("springsource.org", "spring.io"));
 		testDeploymentProperties(props, "manifest-generate-data/no-hostname-2.yml");
 	}
+
+	@Test
+	public void test_command_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(512);
+		props.setCommand("my-command");
+		props.setUris(Arrays.asList("app.springsource.org"));
+		testDeploymentProperties(props, "manifest-generate-data/command-1.yml");
+	}
+
+	@Test
+	public void test_stack_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(512);
+		props.setStack("my-stack");
+		props.setUris(Arrays.asList("app.springsource.org"));
+		testDeploymentProperties(props, "manifest-generate-data/stack-1.yml");
+	}
+
 }

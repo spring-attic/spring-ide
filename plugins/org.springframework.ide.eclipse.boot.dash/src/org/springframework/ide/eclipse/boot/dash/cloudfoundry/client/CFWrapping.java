@@ -21,6 +21,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.cloudfoundry.client.lib.domain.CloudStack;
 import org.cloudfoundry.client.lib.domain.Staging;
 
 import com.google.common.collect.ImmutableList;
@@ -70,6 +71,17 @@ public class CFWrapping {
 		if (services!=null) {
 			Builder<CFService> builder = ImmutableList.builder();
 			for (CloudService s : services) {
+				builder.add(wrap(s));
+			}
+			return builder.build();
+		}
+		return null;
+	}
+
+	public static List<CFStack> wrapStacks(List<CloudStack> stacks) {
+		if (stacks!=null) {
+			Builder<CFStack> builder = ImmutableList.builder();
+			for (CloudStack s : stacks) {
 				builder.add(wrap(s));
 			}
 			return builder.build();
@@ -185,6 +197,24 @@ public class CFWrapping {
 		}
 
 		@Override
+		public String getCommand() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getCommand();
+			}
+			return null;
+		}
+
+		@Override
+		public String getStack() {
+			Staging s = a.getStaging();
+			if (s!=null) {
+				return s.getStack();
+			}
+			return null;
+		}
+
+		@Override
 		public AppState getState() {
 			return a.getState();
 		}
@@ -216,6 +246,18 @@ public class CFWrapping {
 	public static CFService wrap(final CloudService s) {
 		if (s!=null) {
 			return new CFService() {
+				@Override
+				public String getName() {
+					return s.getName();
+				}
+			};
+		}
+		return null;
+	}
+
+	public static CFStack wrap(final CloudStack s) {
+		if (s!=null) {
+			return new CFStack() {
 				@Override
 				public String getName() {
 					return s.getName();
