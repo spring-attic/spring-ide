@@ -93,7 +93,6 @@ public class SshDebugSupport extends DebugSupport {
 					return true;
 				}
 			}
-			BootLaunchUtils.getLaunches(conf);
 		}
 		return false;
 	}
