@@ -35,6 +35,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String DT_ICON_ID = "devttools";
 	public static final String MANIFEST_ICON = "manifest";
 	public static final String CLOUD_ICON = "cloud";
+	public static final String REFRESH_ICON = "refresh";
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -155,6 +156,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		reg.put(DT_ICON_ID, getImageDescriptor("/icons/DT.png"));
 		reg.put(CLOUD_ICON, getImageDescriptor("/icons/cloud_obj.png"));
 		reg.put(MANIFEST_ICON, getImageDescriptor("icons/selectmanifest.gif"));
+		reg.put(REFRESH_ICON, getImageDescriptor("/icons/refresh.gif"));
 	}
 
 }
