@@ -14,6 +14,7 @@ import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -38,8 +39,10 @@ import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * @author Kris De Volder
@@ -70,12 +73,23 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
+	/**
+	 * Use threadlocal to gain access to current launch in some of the methods (i.e. getVMArguments in particualr) of the {@link AbstractBootLaunchConfigurationDelegate}
+	 * framework that, unfortunately don't pass it along as parameters. It's either this, or copy a whole bunch of code just so
+	 * we can modify it to add an extra argument.
+	 */
+	private static final ThreadLocal<ILaunch> CURRENT_LAUNCH = new ThreadLocal<>();
 
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		profileHistory.updateHistory(getProject(conf), getProfile(conf));
-		super.launch(conf, mode, launch, monitor);
+		CURRENT_LAUNCH.set(launch);
+		try {
+			profileHistory.updateHistory(getProject(conf), getProfile(conf));
+			super.launch(conf, mode, launch, monitor);
+		} finally {
+			CURRENT_LAUNCH.remove();
+		}
 	}
 
 	@Override
@@ -113,10 +127,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 					//ignore: bad data in launch config.
 				}
 				if (port==0) {
-					port = JmxBeanSupport.randomPort();
+					port = PortFinder.findFreePort(); //slightly better than calling JmxBeanSupport.randomPort()
 				}
 				String enableLiveBeanArgs = JmxBeanSupport.jmxBeanVmArgs(port, enabled);
 				vmArgs = enableLiveBeanArgs + vmArgs;
+				CURRENT_LAUNCH.get().setAttribute(JMX_PORT, ""+port);
 			}
 			return vmArgs;
 		} catch (Exception e) {
@@ -197,7 +212,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
-		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+		setJMXPort(wc, "0");
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
 		}
@@ -295,7 +310,12 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				wc.setAttribute(key, (String)value);
 			}
 		}
-		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+
+		int existingJmxPort = getJMXPortAsInt(conf);
+		if (existingJmxPort>0) {
+			//change port on duplicated config, but only if it was set to a specific port.
+			setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+		}
 		return wc.doSave();
 	}
 
@@ -344,6 +364,18 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static int getJMXPortAsInt(ILaunchConfiguration conf) {
 		String jmxPortStr = getJMXPort(conf);
+		if (jmxPortStr!=null) {
+			try {
+				return Integer.parseInt(jmxPortStr);
+			} catch (Exception e) {
+				//Ignore
+			}
+		}
+		return -1;
+	}
+
+	public static int getJMXPortAsInt(ILaunch conf) {
+		String jmxPortStr = conf.getAttribute(JMX_PORT);
 		if (jmxPortStr!=null) {
 			try {
 				return Integer.parseInt(jmxPortStr);

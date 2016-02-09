@@ -60,7 +60,7 @@ public class BootLaunchUtils {
 					&& conf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID)
 					&& BootLaunchConfigurationDelegate.canUseLifeCycle(conf)
 			) {
-				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
+				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
 				SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(jmxPort);
 				SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
 				try {
