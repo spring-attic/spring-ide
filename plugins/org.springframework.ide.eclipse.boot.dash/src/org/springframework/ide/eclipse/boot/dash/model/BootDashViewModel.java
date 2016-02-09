@@ -47,6 +47,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	private ProcessTracker devtoolsProcessTracker;
 	private List<RunTargetType> orderedRunTargetTypes;
 	private Comparator<BootDashModel> modelComparator;
+	private Comparator<RunTarget> targetComparator;
 	private DebugStrategyManager cfDebugStrategies;
 	private BootDashModelContext context;
 
@@ -66,6 +67,7 @@ public class BootDashViewModel extends AbstractDisposable {
 
 		this.orderedRunTargetTypes = Arrays.asList(runTargetTypes);
 		this.modelComparator = new BootModelComparator(orderedRunTargetTypes);
+		this.targetComparator = new RunTargetComparator(orderedRunTargetTypes);
 
 		this.runTargetTypes = new LinkedHashSet<RunTargetType>(orderedRunTargetTypes);
 		filterBox = new BootDashElementsFilterBoxModel();
@@ -170,6 +172,10 @@ public class BootDashViewModel extends AbstractDisposable {
 
 	public Comparator<BootDashModel> getModelComparator() {
 		return this.modelComparator;
+	}
+
+	public Comparator<RunTarget> getTargetComparator() {
+		return this.targetComparator;
 	}
 
 	public DebugSupport getCfDebugSupport() {

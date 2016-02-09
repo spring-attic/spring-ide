@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -459,8 +460,11 @@ public class BootDashActions {
 	}
 	private ImmutableList<IAction> getDeployAndStartOnTargetActions(
 			DisposingFactory<RunTarget, AbstractBootDashAction> actionFactory) {
+		ArrayList<RunTarget> targets = new ArrayList<>(model.getRunTargets().getValues());
+		Collections.sort(targets, model.getTargetComparator());
+
 		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
-		for (RunTarget target : model.getRunTargets().getValues()) {
+		for (RunTarget target : targets) {
 			if (target.getType() instanceof CloudFoundryRunTargetType) {
 				builder.add(actionFactory.createOrGet(target));
 			}
