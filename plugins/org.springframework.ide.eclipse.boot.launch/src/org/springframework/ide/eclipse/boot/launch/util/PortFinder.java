@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test.util;
+package org.springframework.ide.eclipse.boot.launch.util;
 
 import java.io.IOException;
 import java.net.ServerSocket;

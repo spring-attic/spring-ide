@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -32,12 +33,14 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
@@ -55,6 +58,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	private static final String JMX_PORT = "spring.boot.livebean.port";
 
+	public static final String ANSI_CONSOLE_OUTPUT = "spring.boot.ansi.console";
+
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
 
@@ -70,12 +75,23 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	private ProfileHistory profileHistory = new ProfileHistory();
 
+	/**
+	 * Use threadlocal to gain access to current launch in some of the methods (i.e. getVMArguments in particualr) of the {@link AbstractBootLaunchConfigurationDelegate}
+	 * framework that, unfortunately don't pass it along as parameters. It's either this, or copy a whole bunch of code just so
+	 * we can modify it to add an extra argument.
+	 */
+	private static final ThreadLocal<ILaunch> CURRENT_LAUNCH = new ThreadLocal<>();
 
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		profileHistory.updateHistory(getProject(conf), getProfile(conf));
-		super.launch(conf, mode, launch, monitor);
+		CURRENT_LAUNCH.set(launch);
+		try {
+			profileHistory.updateHistory(getProject(conf), getProfile(conf));
+			super.launch(conf, mode, launch, monitor);
+		} finally {
+			CURRENT_LAUNCH.remove();
+		}
 	}
 
 	@Override
@@ -83,7 +99,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		List<PropVal> props = getProperties(conf);
 		String profile = getProfile(conf);
 		boolean debugOutput = getEnableDebugOutput(conf);
-		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile)) {
+		boolean enableAnsiConsole = supportsAnsiConsoleOutput() && getEnableAnsiConsoleOutput(conf);
+		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile) && !enableAnsiConsole) {
 			//shortcut for case where no boot-specific customizations are specified.
 			return super.getProgramArguments(conf);
 		}
@@ -93,6 +110,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		if (hasText(profile)) {
 			args.add(propertyAssignmentArgument("spring.profiles.active", profile));
+		}
+		if (enableAnsiConsole) {
+			args.add(propertyAssignmentArgument("spring.output.ansi.enabled", "always"));
 		}
 		addPropertiesArguments(args, props);
 		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
@@ -113,10 +133,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 					//ignore: bad data in launch config.
 				}
 				if (port==0) {
-					port = JmxBeanSupport.randomPort();
+					port = PortFinder.findFreePort(); //slightly better than calling JmxBeanSupport.randomPort()
 				}
 				String enableLiveBeanArgs = JmxBeanSupport.jmxBeanVmArgs(port, enabled);
 				vmArgs = enableLiveBeanArgs + vmArgs;
+				CURRENT_LAUNCH.get().setAttribute(JMX_PORT, ""+port);
 			}
 			return vmArgs;
 		} catch (Exception e) {
@@ -197,7 +218,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
-		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+		setJMXPort(wc, "0");
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
 		}
@@ -295,7 +316,12 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				wc.setAttribute(key, (String)value);
 			}
 		}
-		setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+
+		int existingJmxPort = getJMXPortAsInt(conf);
+		if (existingJmxPort>0) {
+			//change port on duplicated config, but only if it was set to a specific port.
+			setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+		}
 		return wc.doSave();
 	}
 
@@ -354,12 +380,42 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return -1;
 	}
 
+	public static int getJMXPortAsInt(ILaunch conf) {
+		String jmxPortStr = conf.getAttribute(JMX_PORT);
+		if (jmxPortStr!=null) {
+			try {
+				return Integer.parseInt(jmxPortStr);
+			} catch (Exception e) {
+				//Ignore
+			}
+		}
+		return -1;
+	}
+
 	public static long getTerminationTimeoutAsLong(ILaunch launch) {
 		ILaunchConfiguration conf = launch.getLaunchConfiguration();
 		if (conf!=null) {
 			return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(conf);
 		}
 		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+	}
+
+	public static boolean supportsAnsiConsoleOutput() {
+		Bundle bundle = Platform.getBundle("net.mihai-nita.ansicon.plugin");
+		return bundle != null && bundle.getState() != Bundle.UNINSTALLED;
+	}
+
+	public static boolean getEnableAnsiConsoleOutput(ILaunchConfiguration conf) {
+		boolean defaultValue = supportsAnsiConsoleOutput();
+		try {
+			return conf.getAttribute(ANSI_CONSOLE_OUTPUT, defaultValue);
+		} catch (CoreException e) {
+			return defaultValue;
+		}
+	}
+
+	public static void setEnableAnsiConsoleOutput(ILaunchConfigurationWorkingCopy wc, boolean enable) {
+		wc.setAttribute(ANSI_CONSOLE_OUTPUT, enable);
 	}
 
 }

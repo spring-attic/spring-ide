@@ -34,9 +34,8 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
@@ -116,12 +115,12 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 										// used to create a better error message on failure.
 
 		for (ILaunchConfiguration c : getLaunchConfigs(project)) {
-			String jmxPortProp = getActiveJMXPort(c);
 			for (ILaunch l : LaunchUtils.getLaunches(c)) {
 				if (!l.isTerminated()) {
+					int jmxPortProp = getActiveJMXPort(l);
 					hasActiveProcess = true;
 
-					if (jmxPortProp!=null) {
+					if (jmxPortProp>0) {
 						//Looks like JMX is enabled.
 						return "service:jmx:rmi:///jndi/rmi://" + HOST + ":" + jmxPortProp + "/jmxrmi";
 					}
@@ -142,15 +141,24 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 		}
 	}
 
-	private String getActiveJMXPort(ILaunchConfiguration c) {
-		if (BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(c)) {
-			String port = BootLaunchConfigurationDelegate.getJMXPort(c);
-			if (StringUtil.hasText(port)) {
+	private int getActiveJMXPort(ILaunch l) {
+		try {
+			int port = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+			if (port > 0) {
 				return port;
 			}
+			//Maybe user configured it manually himself in VM args:
+			ILaunchConfiguration conf = l.getLaunchConfiguration();
+			if (conf!=null) {
+				if (BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(conf)) {
+					String portStr = getVMSystemProp(conf, JmxBeanSupport.JMX_PORT_PROP);
+					return Integer.parseInt(portStr);
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
 		}
-		//Maybe user configured it manually himself in VM args:
-		return getVMSystemProp(c, JmxBeanSupport.JMX_PORT_PROP);
+		return 0;
 	}
 
 	/**

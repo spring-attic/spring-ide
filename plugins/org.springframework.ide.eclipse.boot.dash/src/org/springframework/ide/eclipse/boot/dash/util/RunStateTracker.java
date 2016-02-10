@@ -150,12 +150,9 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private boolean updateInProgress;
 
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
-		ILaunchConfiguration conf = l.getLaunchConfiguration();
-		if (conf!=null) {
-			int jmxPort = getJMXPort(conf);
-			if (jmxPort>0) {
-				return new SpringApplicationReadyStateMonitor(jmxPort);
-			}
+		int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+		if (jmxPort>0) {
+			return new SpringApplicationReadyStateMonitor(jmxPort);
 		}
 		return DummyReadyStateMonitor.create();
 	}
@@ -173,22 +170,6 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 				}
 			}
 		}
-	}
-
-	/**
-	 * Gets the JMX port for life-cycle tracking if this feature is enabled in
-	 * the configuration.
-	 */
-	protected int getJMXPort(ILaunchConfiguration conf) {
-		try {
-			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
-				String portStr = BootLaunchConfigurationDelegate.getJMXPort(conf);
-				return Integer.parseInt(portStr);
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return 0; // 0 means feature is disabled
 	}
 
 	protected ILaunchManager launchManager() {

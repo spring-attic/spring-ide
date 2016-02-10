@@ -72,11 +72,15 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 					"Enables support for Live Beans Graph View by adding vm args:\n",
 					Feature.LIVE_BEAN_GRAPH));
 
+			String portToolTip = "The port used for communicating with JMX beans (0 means STS should pick the port automatically on startup). "
+					+ "The same port is used/shared by both 'Life Cycle Management' and the 'Live Beans Graph'";
 			Label label = new Label(row, SWT.NONE);
 			label.setText("JMX Port:");
 			portWidget = new Text(row, SWT.BORDER);
 			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 7), SWT.DEFAULT)
 				.applyTo(portWidget);
+			label.setToolTipText(portToolTip);
+			portWidget.setToolTipText(portToolTip);
 
 			lifeCycleCheckbox = new Button(row, SWT.CHECK);
 			lifeCycleCheckbox.setText("Enable Life Cycle Management.");

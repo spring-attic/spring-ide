@@ -114,6 +114,18 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertEquals("", BootLaunchConfigurationDelegate.getProfile(wc));
 	}
 
+	public void testSetGetAnsiConsoleOutput() throws Exception {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		boolean ideSupportsAnsiConsoleOutput = BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput();
+		assertEquals(ideSupportsAnsiConsoleOutput, BootLaunchConfigurationDelegate.getEnableAnsiConsoleOutput(wc));
+
+		BootLaunchConfigurationDelegate.setEnableAnsiConsoleOutput(wc, true);
+		assertEquals(true, BootLaunchConfigurationDelegate.getEnableAnsiConsoleOutput(wc));
+
+		BootLaunchConfigurationDelegate.setEnableAnsiConsoleOutput(wc, false);
+		assertEquals(false, BootLaunchConfigurationDelegate.getEnableAnsiConsoleOutput(wc));
+	}
+
 	public void testClearProperties() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(
@@ -194,7 +206,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertContains("AUTO-CONFIGURATION REPORT", result.out);
 		assertOk(result);
 	}
-
+	
 	public void testLaunchWithLiveBeans() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
