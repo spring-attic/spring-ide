@@ -14,7 +14,6 @@ import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.hasText;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -44,7 +43,6 @@ import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * @author Kris De Volder
