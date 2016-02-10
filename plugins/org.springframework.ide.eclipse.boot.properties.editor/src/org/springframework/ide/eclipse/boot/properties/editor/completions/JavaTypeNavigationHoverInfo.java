@@ -18,16 +18,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 
 
 /**
@@ -36,7 +36,7 @@ import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
  * foo.bar[0].children.wavelen
  */
 @SuppressWarnings("restriction")
-public class JavaTypeNavigationHoverInfo extends HoverInfo {
+public class JavaTypeNavigationHoverInfo extends AbstractPropertyHoverInfo {
 
 
 	/**
@@ -68,67 +68,71 @@ public class JavaTypeNavigationHoverInfo extends HoverInfo {
 
 	private TypeUtil typeUtil;
 
+	private Deprecation deprecation;
+
 	public JavaTypeNavigationHoverInfo(String id,  String propName, Type fromType, Type toType, TypeUtil typeUtil) {
 		this.id = id;
 		this.propName = propName;
 		this.parentType = fromType;
 		this.type = toType;
 		this.typeUtil = typeUtil;
-	}
-
-	@Override
-	protected String renderAsHtml() {
-		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
-		HtmlBuffer html = new HtmlBuffer();
-
-		html.raw("<b>");
-		html.text(id);
-		html.raw("</b>");
-		html.raw("<br>");
-
-		if (type!=null) {
-			jtLinks.javaTypeLink(html, typeUtil, type);
-		} else {
-			jtLinks.javaTypeLink(html, typeUtil.getJavaProject(), Object.class.toString());
-		}
-
-		if (isDeprecated()) {
-			html.raw("<br><br>");
-			html.bold("Deprecated!");
-		}
-
-		//				String deflt = formatDefaultValue(data.getDefaultValue());
-		//				if (deflt!=null) {
-		//					html.raw("<br><br>");
-		//					html.text("Default: ");
-		//					html.raw("<i>");
-		//					html.text(deflt);
-		//					html.raw("</i>");
-		//				}
-
-		String description = getDescription();
-		if (description!=null) {
-			html.raw("<br><br>");
-			html.raw(description);
-		}
-
-		return html.toString();
-	}
-
-	private boolean isDeprecated() {
 		//Note: If you are considerind caching the result of this method... don't.
 		//The rendered html itself is cached by the superclass, which means this method only gets called once.
 		Map<String, TypedProperty> props = typeUtil.getPropertiesMap(parentType, EnumCaseMode.ALIASED, BeanPropertyNameMode.ALIASED);
 		if (props!=null) {
 			TypedProperty prop = props.get(propName);
 			if (prop!=null) {
-				return prop.isDeprecated();
+				this.deprecation = prop.getDeprecation();
 			}
 		}
-		return false;
 	}
 
-	private String getDescription() {
+//	@Override
+//	protected String renderAsHtml() {
+//		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
+//		HtmlBuffer html = new HtmlBuffer();
+//
+//		html.raw("<b>");
+//		html.text(id);
+//		html.raw("</b>");
+//		html.raw("<br>");
+//
+//		if (type!=null) {
+//			jtLinks.javaTypeLink(html, typeUtil, type);
+//		} else {
+//			jtLinks.javaTypeLink(html, typeUtil.getJavaProject(), Object.class.toString());
+//		}
+//
+//		if (isDeprecated()) {
+//			html.raw("<br><br>");
+//			html.bold("Deprecated!");
+//		}
+//
+//		//				String deflt = formatDefaultValue(data.getDefaultValue());
+//		//				if (deflt!=null) {
+//		//					html.raw("<br><br>");
+//		//					html.text("Default: ");
+//		//					html.raw("<i>");
+//		//					html.text(deflt);
+//		//					html.raw("</i>");
+//		//				}
+//
+//		String description = getDescription();
+//		if (description!=null) {
+//			html.raw("<br><br>");
+//			html.raw(description);
+//		}
+//
+//		return html.toString();
+//	}
+
+	@Override
+	protected boolean isDeprecated() {
+		return deprecation!=null;
+	}
+
+	@Override
+	protected HtmlSnippet getDescription() {
 		try {
 			List<IJavaElement> jes = getAllJavaElements();
 			if (jes!=null) {
@@ -136,7 +140,7 @@ public class JavaTypeNavigationHoverInfo extends HoverInfo {
 					if (je instanceof IMember) {
 						String jdoc = getHTMLContent((IMember)je, true);
 						if (jdoc!=null) {
-							return jdoc;
+							return HtmlSnippet.raw(jdoc);
 						}
 					}
 				}
@@ -186,5 +190,42 @@ public class JavaTypeNavigationHoverInfo extends HoverInfo {
 		if (e!=null) {
 			elements.add(e);
 		}
+	}
+
+	@Override
+	protected Object getDefaultValue() {
+		//Not supported
+		return null;
+	}
+
+	@Override
+	protected IJavaProject getJavaProject() {
+		return typeUtil.getJavaProject();
+	}
+
+	@Override
+	protected String getType() {
+		return typeUtil.niceTypeName(type);
+	}
+
+	@Override
+	protected String getDeprecationReason() {
+		if (deprecation!=null) {
+			return deprecation.getReason();
+		}
+		return null;
+	}
+
+	@Override
+	protected String getId() {
+		return id;
+	}
+
+	@Override
+	protected String getDeprecationReplacement() {
+		if (deprecation!=null) {
+			return deprecation.getReplacement();
+		}
+		return null;
 	}
 }

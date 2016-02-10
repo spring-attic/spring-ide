@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
 import static org.springframework.ide.eclipse.boot.util.StringUtil.arrayToCommaDelimitedString;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.collectionToCommaDelimitedString;
@@ -24,11 +24,15 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information
@@ -38,7 +42,7 @@ import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
  *
  * @author Kris De Volder
  */
-public class SpringPropertyHoverInfo extends HoverInfo {
+public class SpringPropertyHoverInfo extends AbstractPropertyHoverInfo {
 
 	private static final String[] NO_ARGS = new String[0];
 
@@ -55,82 +59,6 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 	public SpringPropertyHoverInfo(IJavaProject project, PropertyInfo data) {
 		this.javaProject = project;
 		this.data = data;
-	}
-
-	@Override
-	protected String renderAsHtml() {
-		JavaTypeLinks jtLinks = new JavaTypeLinks(this);
-		HtmlBuffer html = new HtmlBuffer();
-
-		renderId(html);
-
-		String type = data.getType();
-		if (type==null) {
-			type = Object.class.getName();
-		}
-		jtLinks.javaTypeLink(html, javaProject, type);
-
-		String deflt = formatDefaultValue(data.getDefaultValue());
-		if (deflt!=null) {
-			html.raw("<br><br>");
-			html.text("Default: ");
-			html.raw("<i>");
-			html.text(deflt);
-			html.raw("</i>");
-		}
-
-		if (data.isDeprecated()) {
-			html.raw("<br><br>");
-			String reason = data.getDeprecationReason();
-			if (StringUtil.hasText(reason)) {
-				html.bold("Deprecated: ");
-				html.text(reason);
-			} else {
-				html.bold("Deprecated!");
-			}
-		}
-
-		String description = data.getDescription();
-		if (description!=null) {
-			html.raw("<br><br>");
-			html.text(description);
-		}
-
-		return html.toString();
-	}
-
-	protected void renderId(HtmlBuffer html) {
-		boolean deprecated = data.isDeprecated();
-		String tag = deprecated ? "s" : "b";
-		String replacement = data.getDeprecationReplacement();
-
-		html.raw("<"+tag+">");
-			html.text(data.getId());
-		html.raw("</"+tag+">");
-		if (StringUtil.hasText(replacement)) {
-			html.text(" -> "+ replacement);
-		}
-		html.raw("<br>");
-	}
-
-	public static String formatDefaultValue(Object defaultValue) {
-		if (defaultValue!=null) {
-			if (defaultValue instanceof String) {
-				return (String) defaultValue;
-			} else if (defaultValue instanceof Number) {
-				return ((Number)defaultValue).toString();
-			} else if (defaultValue instanceof Boolean) {
-				return Boolean.toString((Boolean) defaultValue);
-			} else if (defaultValue instanceof Object[]) {
-				return arrayToCommaDelimitedString((Object[]) defaultValue);
-			} else if (defaultValue instanceof Collection<?>) {
-				return collectionToCommaDelimitedString((Collection<?>) defaultValue);
-			} else {
-				//no idea what it is but try 'toString' and hope for the best
-				return defaultValue.toString();
-			}
-		}
-		return null;
 	}
 
 	public PropertyInfo getElement() {
@@ -266,6 +194,50 @@ public class SpringPropertyHoverInfo extends HoverInfo {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	protected Object getDefaultValue() {
+		return data.getDefaultValue();
+	}
+
+	@Override
+	protected IJavaProject getJavaProject() {
+		return javaProject;
+	}
+
+	@Override
+	protected HtmlSnippet getDescription() {
+		String desc = data.getDescription();
+		if (StringUtil.hasText(desc)) {
+			return HtmlSnippet.text(desc);
+		}
+		return null;
+	}
+
+	@Override
+	protected String getType() {
+		return data.getType();
+	}
+
+	@Override
+	protected String getDeprecationReason() {
+		return data.getDeprecationReason();
+	}
+
+	@Override
+	protected String getId() {
+		return data.getId();
+	}
+
+	@Override
+	protected String getDeprecationReplacement() {
+		return data.getDeprecationReplacement();
+	}
+
+	@Override
+	protected boolean isDeprecated() {
+		return data.isDeprecated();
 	}
 
 }

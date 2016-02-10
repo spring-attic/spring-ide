@@ -68,6 +68,11 @@ public class TypedProperty implements YTypedProperty {
 	@Override
 	public HtmlSnippet getDescription() {
 		//TODO: real implementation that somehow gets this from somewhere (i.e. the JavaDoc)
+		// Note that presently the application.yml and application.properties editor do not actually
+		// use this description provider but produce hover infos in a different way (so this is only
+		// used in Schema-based content assist, reconciling and hovering.
+		//So in that sense putting a good implementation here is kind of pointless right now.
+		//More refactoring needs to be done to also make use of this.
 		return descriptionProvider.get();
 	}
 
@@ -94,5 +99,9 @@ public class TypedProperty implements YTypedProperty {
 			return deprecation.getReason();
 		}
 		return null;
+	}
+
+	public Deprecation getDeprecation() {
+		return deprecation;
 	}
 }

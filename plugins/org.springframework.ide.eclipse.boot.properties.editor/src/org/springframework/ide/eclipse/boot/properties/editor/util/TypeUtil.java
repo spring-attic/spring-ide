@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.gradle.jarjar.com.google.common.collect.ImmutableSet;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
@@ -49,6 +50,14 @@ import org.springframework.ide.eclipse.editor.support.util.ValueParser;
  * @author Kris De Volder
  */
 public class TypeUtil {
+
+	private static final ImmutableSet<String> DEPRECATED_ANOT_NAMES = ImmutableSet.of(
+			"org.springframework.boot.context.properties.DeprecatedConfigurationProperty",
+			"DeprecatedConfigurationProperty",
+			"java.lang.Deprecated",
+			"Deprecated"
+	);
+
 
 	private static abstract class RadixableParser implements ValueParser {
 
@@ -577,39 +586,25 @@ public class TypeUtil {
 	}
 
 	private Deprecation getDeprecation(IMethod m) {
-		String[] ANOT_NAMES = {
-				"org.springframework.boot.context.properties.DeprecatedConfigurationProperty",
-				"DeprecatedConfigurationProperty",
-				"java.lang.Deprecated",
-				"Deprecated"
-		};
-		for (String name : ANOT_NAMES) {
-			Deprecation d = getDeprecation(m.getAnnotation(name));
-			if (d!=null) {
-				return d;
-			}
-		}
-		return null;
-	}
-
-	private Deprecation getDeprecation(IAnnotation a) {
-		Deprecation d = null;
 		try {
-			if (a.exists()) {
-				d = new Deprecation();
-				for (IMemberValuePair pair : a.getMemberValuePairs()) {
-					String name = pair.getMemberName();
-					if (name.equals("reason")) {
-						d.setReason((String) pair.getValue());
-					} else if (name.equals("replacement")) {
-						d.setReplacement((String) pair.getValue());
+			for (IAnnotation a : m.getAnnotations()) {
+				if (DEPRECATED_ANOT_NAMES.contains(a.getElementName())) {
+					Deprecation d = new Deprecation();
+					for (IMemberValuePair pair : a.getMemberValuePairs()) {
+						String name = pair.getMemberName();
+						if (name.equals("reason")) {
+							d.setReason((String) pair.getValue());
+						} else if (name.equals("replacement")) {
+							d.setReplacement((String) pair.getValue());
+						}
 					}
+					return d;
 				}
 			}
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}
-		return d;
+		return null;
 	}
 
 	private String getterOrSetterNameToProperty(String name) {
