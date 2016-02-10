@@ -536,10 +536,18 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		YamlEditor editor = new YamlEditor(
 				"foo:\n"+
 				"  color: BLUE\n" +
-				"  color: RED\n" + //technically not allowed to bind same key twice but we don' check this
+				"---\n" +
+				"foo:\n" +
+				"  color: RED\n" +
+				"---\n" +
+				"foo:\n" +
 				"  color: GREEN\n" +
+				"---\n" +
+				"foo:\n" +
 				"  color:\n" +
 				"    bad: BLUE\n" +
+				"---\n" +
+				"foo:\n" +
 				"  color: Bogus\n"
 		);
 
@@ -1672,7 +1680,12 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"    size: SMALL\n"
 		);
 		assertProblems(editor,
-				"NOT_A_SIZE|ClothingSize"
+				"size|Duplicate",
+				"NOT_A_SIZE|ClothingSize",
+				"size|Duplicate",
+				"size|Duplicate",
+				"size|Duplicate",
+				"size|Duplicate"
 		);
 
 		editor = new YamlEditor(
@@ -2350,6 +2363,51 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 
+	public void testReconcileDuplicateProperties() throws Exception {
+		defaultTestData();
+		YamlEditor editor = new YamlEditor(
+				"spring:\n" +
+				"  profiles: cloudfoundry\n" +
+				"spring:  \n" +
+				"  application:\n" +
+				"    name: eureka"
+		);
+		assertProblems(editor,
+				"spring|Duplicate",
+				"spring|Duplicate"
+		);
+	}
+
+	public void testReconcileDuplicatePropertiesNested() throws Exception {
+		data("foo.person.name", "String", null, "Name of person");
+		data("foo.person.family", "String", null, "Family name of person");
+		YamlEditor editor = new YamlEditor(
+				"foo:\n" +
+				"  person:\n" +
+				"    name: Hohohoh\n" +
+				"  person:\n" +
+				"    family:\n"
+		);
+		assertProblems(editor,
+				"person|Duplicate",
+				"person|Duplicate"
+		);
+	}
+
+	public void testReconcileDuplicatePropertiesInBean() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("some.color", "demo.ColorData", null, "Some info about a color.");
+		YamlEditor editor = new YamlEditor(
+				"some:\n" +
+				"  color:\n" +
+				"    name: RED\n" +
+				"    name: GREEN\n"
+		);
+		assertProblems(editor,
+				"name|Duplicate",
+				"name|Duplicate"
+		);
+	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////
 
