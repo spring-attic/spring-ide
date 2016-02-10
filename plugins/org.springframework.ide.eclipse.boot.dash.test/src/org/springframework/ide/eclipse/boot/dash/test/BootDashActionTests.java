@@ -23,6 +23,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.IAction;
@@ -44,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.views.DuplicateConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
@@ -169,6 +171,7 @@ public class BootDashActionTests {
 		};
 	}
 
+
 	@Test
 	public void duplicateConfigAction() throws Exception {
 		String projectName = "hohoho";
@@ -179,6 +182,46 @@ public class BootDashActionTests {
 		MockMultiSelection<BootDashElement> selection = harness.selection;
 		final DuplicateConfigAction action = actions.getDuplicateConfigAction();
 		final ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertEquals(0, getJMXPortAsInt(conf1));
+		selection.setElements(element);
+		new ACondition("Wait for enablement", 3000) {
+			public boolean test() throws Exception {
+				assertTrue(action.isEnabled());
+				return true;
+			}
+		};
+
+		action.run();
+
+		new ACondition("Wait for action post conditions", 3000) {
+			public boolean test() throws Exception {
+				ImmutableSet<ILaunchConfiguration> confs = element.getLaunchConfigs();
+				assertEquals(2, confs.size());
+				assertEquals(2, element.getCurrentChildren().size());
+				assertTrue(confs.contains(conf1));
+				for (ILaunchConfiguration other : confs) {
+					assertEquals(0, getJMXPortAsInt(other));
+				}
+				return true;
+			}
+
+		};
+	}
+
+	@Test
+	public void duplicateConfigActionWithJmxPortSet() throws Exception {
+		String projectName = "hohoho";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		final AbstractLaunchConfigurationsDashElement<?> element = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+		final DuplicateConfigAction action = actions.getDuplicateConfigAction();
+		final ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
+		assertEquals(0, getJMXPortAsInt(conf1));
+		String randomPort = ""+JmxBeanSupport.randomPort();
+		setJMXPort(conf1, randomPort);
+		assertEquals(randomPort, BootLaunchConfigurationDelegate.getJMXPort(conf1));
 		selection.setElements(element);
 		new ACondition("Wait for enablement", 3000) {
 			public boolean test() throws Exception {
@@ -202,7 +245,26 @@ public class BootDashActionTests {
 				}
 				return true;
 			}
+
 		};
+	}
+
+	private static void setJMXPort(ILaunchConfiguration conf, String port) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+		BootLaunchConfigurationDelegate.setJMXPort(wc, port);
+		wc.doSave();
+	}
+
+	private static int getJMXPortAsInt(ILaunchConfiguration conf) {
+		try {
+			String str = BootLaunchConfigurationDelegate.getJMXPort(conf);
+			if (str!=null) {
+				return Integer.parseInt(str);
+			}
+		} catch (NumberFormatException e) {
+			//couldn't parse
+		}
+		return -1;
 	}
 
 	@Test

@@ -163,11 +163,7 @@ public class BootProcessFactory implements IProcessFactory {
 	}
 
 	private int getJMXPort(ILaunch launch) {
-		ILaunchConfiguration conf = launch.getLaunchConfiguration();
-		if (conf!=null && BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
-			return BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
-		}
-		return -1;
+		return BootLaunchConfigurationDelegate.getJMXPortAsInt(launch);
 	}
 
 }

@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -483,21 +484,26 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		ILaunchConfiguration conf = getActiveConfig();
 		if (conf!=null && READY_STATES.contains(getRunState())) {
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
-				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(conf);
-				if (jmxPort>0) {
-					SpringApplicationLifeCycleClientManager cm = null;
-					try {
-						cm = new SpringApplicationLifeCycleClientManager(jmxPort);
-
-						SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
-						if (c!=null) {
-							return c.getProperty(propName, -1);
-						}
-					} catch (Exception e) {
-						//most likely this just means the app isn't running so ignore
-					} finally {
-						if (cm!=null) {
-							cm.disposeClient();
+				//TODO: what if there are several launches? Right now we ignore all but the first
+				// non-terminated launch.
+				for (ILaunch l : BootLaunchUtils.getLaunches(conf)) {
+					if (!l.isTerminated()) {
+						int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+						if (jmxPort>0) {
+							SpringApplicationLifeCycleClientManager cm = null;
+							try {
+								cm = new SpringApplicationLifeCycleClientManager(jmxPort);
+								SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
+								if (c!=null) {
+									return c.getProperty(propName, -1);
+								}
+							} catch (Exception e) {
+								//most likely this just means the app isn't running so ignore
+							} finally {
+								if (cm!=null) {
+									cm.disposeClient();
+								}
+							}
 						}
 					}
 				}
