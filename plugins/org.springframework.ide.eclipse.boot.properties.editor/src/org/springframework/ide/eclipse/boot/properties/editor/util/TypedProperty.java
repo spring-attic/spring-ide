@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
@@ -38,17 +39,17 @@ public class TypedProperty implements YTypedProperty {
 	 */
 	private final Provider<HtmlSnippet> descriptionProvider;
 
-	private final boolean isDeprecated;
+	private final Deprecation deprecation;
 
-	public TypedProperty(String name, Type type, boolean isDeprecated) {
-		this(name, type, DescriptionProviders.NO_DESCRIPTION, isDeprecated);
+	public TypedProperty(String name, Type type, Deprecation deprecation) {
+		this(name, type, DescriptionProviders.NO_DESCRIPTION, deprecation);
 	}
 
-	public TypedProperty(String name, Type type, Provider<HtmlSnippet> descriptionProvider, boolean isDeprecated) {
+	public TypedProperty(String name, Type type, Provider<HtmlSnippet> descriptionProvider, Deprecation deprecation) {
 		this.name = name;
 		this.type = type;
 		this.descriptionProvider = descriptionProvider;
-		this.isDeprecated = isDeprecated;
+		this.deprecation = deprecation;
 	}
 
 	public String getName() {
@@ -78,6 +79,20 @@ public class TypedProperty implements YTypedProperty {
 	}
 
 	public boolean isDeprecated() {
-		return isDeprecated;
+		return deprecation!=null;
+	}
+
+	public String getDeprecationReplacement() {
+		if (deprecation!=null) {
+			return deprecation.getReplacement();
+		}
+		return null;
+	}
+
+	public String getDeprecationReason() {
+		if (deprecation!=null) {
+			return deprecation.getReason();
+		}
+		return null;
 	}
 }

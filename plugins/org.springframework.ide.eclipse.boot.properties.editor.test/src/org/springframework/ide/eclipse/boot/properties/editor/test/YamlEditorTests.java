@@ -1649,8 +1649,12 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 		assertProblems(editor,
 				"bogus|Unknown property",
+				"wavelen|Duplicate",
+				"wavelen|Duplicate",
 				"not a double|'double'",
+				"wavelen|Duplicate",
 				"more: 3.0|Expecting a 'double' but got a 'Mapping' node",
+				"wavelen|Duplicate",
 				"- 3.0|Expecting a 'double' but got a 'Sequence' node"
 		);
 	}
@@ -1700,8 +1704,10 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"      bad: Blauw"
 		);
 		assertProblems(editor,
+				"blue|Duplicate",
 				"not-a-color|Color",
 				"blue.bad|Color",
+				"blue|Duplicate",
 				"bad: Blauw|Expecting a 'String' but got a 'Mapping'"
 		);
 
@@ -1715,6 +1721,8 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"      name: Rood\n"
 		);
 		assertProblems(editor,
+				"next|Duplicate",
+				"next|Duplicate",
 				"not a color|Color",
 				"bogus|Unknown property"
 		);
@@ -2341,11 +2349,28 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"# comment\n" +
 				"foo:\n" +
 				"  name: Old faithfull\n" +
-				"  new-name: New and fancy\n"
+				"  new-name: New and fancy\n" +
+				"  alt-name: alternate\n"
 		);
 		assertProblems(editor,
-				"name|Property 'name' of type 'demo.Deprecater' is Deprecated!"
+				"name|Property 'name' of type 'demo.Deprecater' is Deprecated!",
+				"alt-name|Deprecated"
 		);
+
+		editor = new YamlEditor(
+				"# comment\n" +
+				"foo:\n" +
+				"  alt-name: alternate\n"
+		);
+		//check that message also contains reason and replacement infos.
+		assertProblems(editor,
+				"alt-name|Use 'something.else' instead"
+		);
+		assertProblems(editor,
+				"alt-name|No good anymore"
+		);
+
+
 	}
 
 	public void testDeprecatedBeanPropertyCompletions() throws Exception {
@@ -2358,7 +2383,8 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  nam<*>"
 				, // =>
 				StyledStringMatcher.plainFont("new-name : String"),
-				StyledStringMatcher.strikeout("name")
+				StyledStringMatcher.strikeout("name"),
+				StyledStringMatcher.strikeout("alt-name")
 		);
 	}
 

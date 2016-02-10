@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DEPRECATED;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DUPLICATE_KEY;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.asScalar;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST.getChildren;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -349,34 +349,22 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	}
 
 	private void deprecatedProperty(PropertyInfo property, Node keyNode) {
-		StringBuilder msg = new StringBuilder("'"+property.getId());
-		String replace = property.getDeprecationReplacement();
-		String reason = property.getDeprecationReason();
-		boolean hasReplace = StringUtil.hasText(replace);
-		boolean hasReason = StringUtil.hasText(reason);
-		if (!hasReplace && !hasReason) {
-			msg.append("' is Deprecated!");
-		} else {
-			msg.append("' is Deprecated: ");
-			if (hasReplace) {
-				msg.append("Use '"+ replace +"' instead.");
-				if (hasReason) {
-					msg.append(" Reason: ");
-				}
-			}
-			if (hasReason) {
-				msg.append(reason);
-			}
-		}
-		SpringPropertyProblem problem = problem(YAML_DEPRECATED, keyNode, msg.toString());
-		problem.setPropertyName(property.getId());
+		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getId(), null, keyNode,
+				property.getDeprecationReplacement(), property.getDeprecationReason());
 		problems.accept(problem);
 	}
 
 	private void deprecatedProperty(Type contextType, TypedProperty property, Node keyNode) {
-		problems.accept(problem(YAML_DEPRECATED, keyNode,
-				"Property '"+property.getName()+"' of type '"+typeUtil.niceTypeName(contextType)+"' is Deprecated!"
-		));
+		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getName(), typeUtil.niceTypeName(contextType),
+				keyNode, property.getDeprecationReplacement(), property.getDeprecationReason());
+		problems.accept(problem);
+	}
+
+	protected SpringPropertyProblem deprecatedPropertyProblem(String name, String contextType, Node keyNode,
+			String replace, String reason) {
+		SpringPropertyProblem problem = problem(YAML_DEPRECATED, keyNode, TypeUtil.deprecatedPropertyMessage(name, contextType, replace, reason));
+		problem.setPropertyName(name);
+		return problem;
 	}
 
 	protected SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {

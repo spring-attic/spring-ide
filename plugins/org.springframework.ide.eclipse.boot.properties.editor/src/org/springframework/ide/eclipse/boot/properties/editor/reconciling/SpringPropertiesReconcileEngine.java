@@ -122,26 +122,14 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 	}
 
 	protected SpringPropertyProblem problemDeprecated(IRegion trimmedRegion, PropertyInfo property) {
-		StringBuilder msg = new StringBuilder("'"+property.getId());
-		String replace = property.getDeprecationReplacement();
-		String reason = property.getDeprecationReason();
-		boolean hasReplace = StringUtil.hasText(replace);
-		boolean hasReason = StringUtil.hasText(reason);
-		if (!hasReplace && !hasReason) {
-			msg.append("' is Deprecated!");
-		} else {
-			msg.append("' is Deprecated: ");
-			if (hasReplace) {
-				msg.append("Use '"+ replace +"' instead.");
-				if (hasReason) {
-					msg.append(" Reason: ");
-				}
-			}
-			if (hasReason) {
-				msg.append(reason);
-			}
-		}
-		SpringPropertyProblem p = problem(PROP_DEPRECATED, msg.toString(), trimmedRegion.getOffset(), trimmedRegion.getLength());
+		SpringPropertyProblem p = problem(PROP_DEPRECATED,
+				TypeUtil.deprecatedPropertyMessage(
+						property.getId(), null,
+						property.getDeprecationReplacement(),
+						property.getDeprecationReason()
+				),
+				trimmedRegion.getOffset(), trimmedRegion.getLength()
+		);
 		p.setPropertyName(property.getId());
 		return p;
 	}

@@ -26,13 +26,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -536,7 +539,7 @@ public class TypeUtil {
 					Type valueType = getDomainType(type);
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
 					for (String propName : keyValues) {
-						properties.add(new TypedProperty(propName, valueType, false));
+						properties.add(new TypedProperty(propName, valueType, null));
 					}
 					return properties;
 				}
@@ -552,7 +555,7 @@ public class TypeUtil {
 				if (getters!=null && !getters.isEmpty()) {
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(getters.size());
 					for (IMethod m : getters) {
-						boolean isDeprecated = m.getAnnotation("Deprecated").exists() || m.getAnnotation("java.lang.Deprecated").exists();
+						Deprecation deprecation = getDeprecation(m);
 						Type propType = null;
 						try {
 							propType = Type.fromSignature(m.getReturnType(), eclipseType);
@@ -560,10 +563,10 @@ public class TypeUtil {
 							BootActivator.log(e);
 						}
 						if (beanMode.includesHyphenated()) {
-							properties.add(new TypedProperty(getterOrSetterNameToProperty(m.getElementName()), propType, isDeprecated));
+							properties.add(new TypedProperty(getterOrSetterNameToProperty(m.getElementName()), propType, deprecation));
 						}
 						if (beanMode.includesCamelCase()) {
-							properties.add(new TypedProperty(getterOrSetterNameToCamelName(m.getElementName()), propType, isDeprecated));
+							properties.add(new TypedProperty(getterOrSetterNameToCamelName(m.getElementName()), propType, deprecation));
 						}
 					}
 					return properties;
@@ -571,6 +574,42 @@ public class TypeUtil {
 			}
 		}
 		return null;
+	}
+
+	private Deprecation getDeprecation(IMethod m) {
+		String[] ANOT_NAMES = {
+				"org.springframework.boot.context.properties.DeprecatedConfigurationProperty",
+				"DeprecatedConfigurationProperty",
+				"java.lang.Deprecated",
+				"Deprecated"
+		};
+		for (String name : ANOT_NAMES) {
+			Deprecation d = getDeprecation(m.getAnnotation(name));
+			if (d!=null) {
+				return d;
+			}
+		}
+		return null;
+	}
+
+	private Deprecation getDeprecation(IAnnotation a) {
+		Deprecation d = null;
+		try {
+			if (a.exists()) {
+				d = new Deprecation();
+				for (IMemberValuePair pair : a.getMemberValuePairs()) {
+					String name = pair.getMemberName();
+					if (name.equals("reason")) {
+						d.setReason((String) pair.getValue());
+					} else if (name.equals("replacement")) {
+						d.setReplacement((String) pair.getValue());
+					}
+				}
+			}
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return d;
 	}
 
 	private String getterOrSetterNameToProperty(String name) {
@@ -695,6 +734,30 @@ public class TypeUtil {
 			return m;
 		}
 		return null;
+	}
+
+	public static String deprecatedPropertyMessage(String name, String contextType, String replace, String reason) {
+		StringBuilder msg = new StringBuilder("Property '"+name+"'");
+		if (StringUtil.hasText(contextType)) {
+			msg.append(" of type '"+contextType+"'");
+		}
+		boolean hasReplace = StringUtil.hasText(replace);
+		boolean hasReason = StringUtil.hasText(reason);
+		if (!hasReplace && !hasReason) {
+			msg.append(" is Deprecated!");
+		} else {
+			msg.append(" is Deprecated: ");
+			if (hasReplace) {
+				msg.append("Use '"+ replace +"' instead.");
+				if (hasReason) {
+					msg.append(" Reason: ");
+				}
+			}
+			if (hasReason) {
+				msg.append(reason);
+			}
+		}
+		return msg.toString();
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////

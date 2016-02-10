@@ -880,10 +880,12 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"# comment\n" +
 				"foo.name=Old faithfull\n" +
-				"foo.new-name=New and fancy\n"
+				"foo.new-name=New and fancy\n" +
+				"foo.alt-name=alternate\n"
 		);
 		assertProblems(editor,
-				"name|Deprecated"
+				"name|Deprecated",
+				"alt-name|Property 'alt-name' of type 'demo.Deprecater' is Deprecated: Use 'something.else' instead. Reason: No good anymore"
 		);
 	}
 
@@ -894,7 +896,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		assertStyledCompletions("foo.nam<*>",
 				StyledStringMatcher.plainFont("new-name : String"),
-				StyledStringMatcher.strikeout("name")
+				StyledStringMatcher.strikeout("name"),
+				StyledStringMatcher.strikeout("alt-name")
 		);
 	}
 
