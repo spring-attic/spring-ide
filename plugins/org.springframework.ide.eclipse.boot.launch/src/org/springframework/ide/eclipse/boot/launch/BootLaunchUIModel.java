@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConf
 import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.ENABLE_DEBUG_OUTPUT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_HIDE_FROM_BOOT_DASH;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.HIDE_FROM_BOOT_DASH;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.ANSI_CONSOLE_OUTPUT;
 
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -60,6 +61,7 @@ public class BootLaunchUIModel {
 	public final LaunchTabSelectionModel<Boolean> enableDebug;
 	public final EnableJmxFeaturesModel enableJmx;
 	public final LaunchTabSelectionModel<Boolean> hideFromDash;
+	public final LaunchTabSelectionModel<Boolean> ansiConsoleOutput;
 
 	public BootLaunchUIModel(IProfileHistory profileHistory) {
 		project = SelectProjectLaunchTabModel.create();
@@ -68,6 +70,7 @@ public class BootLaunchUIModel {
 		enableDebug = CheckboxLaunchTabModel.create(ENABLE_DEBUG_OUTPUT, DEFAULT_ENABLE_DEBUG_OUTPUT);
 		enableJmx = new EnableJmxFeaturesModel();
 		hideFromDash = CheckboxLaunchTabModel.create(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
+		ansiConsoleOutput = CheckboxLaunchTabModel.create(ANSI_CONSOLE_OUTPUT, BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput());
 	}
 
 }

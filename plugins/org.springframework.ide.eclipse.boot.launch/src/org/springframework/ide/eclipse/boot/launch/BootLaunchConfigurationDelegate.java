@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -33,6 +34,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
@@ -57,6 +59,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
 
 	private static final String JMX_PORT = "spring.boot.livebean.port";
+
+	public static final String ANSI_CONSOLE_OUTPUT = "spring.boot.ansi.console";
 
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
@@ -97,7 +101,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		List<PropVal> props = getProperties(conf);
 		String profile = getProfile(conf);
 		boolean debugOutput = getEnableDebugOutput(conf);
-		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile)) {
+		boolean enableAnsiConsole = supportsAnsiConsoleOutput() && getEnableAnsiConsoleOutput(conf);
+		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile) && !enableAnsiConsole) {
 			//shortcut for case where no boot-specific customizations are specified.
 			return super.getProgramArguments(conf);
 		}
@@ -107,6 +112,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		}
 		if (hasText(profile)) {
 			args.add(propertyAssignmentArgument("spring.profiles.active", profile));
+		}
+		if (enableAnsiConsole) {
+			args.add(propertyAssignmentArgument("spring.output.ansi.enabled", "always"));
 		}
 		addPropertiesArguments(args, props);
 		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
@@ -392,6 +400,24 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			return BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(conf);
 		}
 		return BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+	}
+
+	public static boolean supportsAnsiConsoleOutput() {
+		Bundle bundle = Platform.getBundle("net.mihai-nita.ansicon.plugin");
+		return bundle != null && bundle.getState() != Bundle.UNINSTALLED;
+	}
+
+	public static boolean getEnableAnsiConsoleOutput(ILaunchConfiguration conf) {
+		boolean defaultValue = supportsAnsiConsoleOutput();
+		try {
+			return conf.getAttribute(ANSI_CONSOLE_OUTPUT, defaultValue);
+		} catch (CoreException e) {
+			return defaultValue;
+		}
+	}
+
+	public static void setEnableAnsiConsoleOutput(ILaunchConfigurationWorkingCopy wc, boolean enable) {
+		wc.setAttribute(ANSI_CONSOLE_OUTPUT, enable);
 	}
 
 }
