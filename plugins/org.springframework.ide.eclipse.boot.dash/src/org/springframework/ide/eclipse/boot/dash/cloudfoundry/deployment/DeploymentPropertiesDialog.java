@@ -737,7 +737,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			}
 			int result = new MessageDialog(getShell(), "Changes Detected", null,
 					"Masnifest file '" + file.getFile().getFullPath().toOSString()
-							+ "' has been changed. Do you want to save changes or discrad them?",
+							+ "' has been changed. Do you want to save changes or discard them?",
 					MessageDialog.QUESTION, buttonLabels.toArray(new String[buttonLabels.size()]), buttonLabels.indexOf(SAVE_BTN_LABEL)).open();
 			if (result >= 0 && SAVE_BTN_LABEL.equals(buttonLabels.get(result))) {
 				try {
@@ -774,7 +774,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 //			});
 //			int result = new MessageDialog(getShell(), "Changes Detected", null,
 //					"Masnifest file '" + file.getFile().getFullPath().toOSString()
-//							+ "' has been changed. Do you want to save changes now, later or discrad them?",
+//							+ "' has been changed. Do you want to save changes now, later or discard them?",
 //					MessageDialog.QUESTION_WITH_CANCEL, buttonLabels.toArray(new String[buttonLabels.size()]), 2)
 //							.open();
 //			if (SAVE_BTN_LABEL.equals(buttonLabels.get(result))) {
