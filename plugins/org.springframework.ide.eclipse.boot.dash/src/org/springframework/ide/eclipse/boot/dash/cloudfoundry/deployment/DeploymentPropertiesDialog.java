@@ -278,7 +278,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						fileLabel.setText(fileModel.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : ""));
+						if (!fileLabel.isDisposed()) {
+							fileLabel.setText(fileModel.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : ""));
+						}
 					}
 				});
 			}
@@ -357,7 +359,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 						appNamesList.setInput(Collections.<String>emptyList());
 					} else {
 						appNamesList.setInput(new ArrayList<>(names.keySet()));
-						appNamesList.setSelection(new StructuredSelection(Collections.singletonList(names.keySet().iterator().next())), true);
+						if (appNamesList.getSelection().isEmpty()) {
+							appNamesList.setSelection(new StructuredSelection(Collections.singletonList(names.keySet().iterator().next())), true);
+						}
 						revealAppTextInYamlFile();
 					}
 
@@ -1075,8 +1079,30 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			try {
 				docProvider.saveDocument(new NullProgressMonitor(), value, docProvider.getDocument(value), true);
 				mustSaveFiles.remove(value);
+				/*
+				 * Update app names as well
+				 */
+				Composer composer = new Composer(
+						new ParserImpl(new StreamReader(new InputStreamReader(
+								new ByteArrayInputStream(docProvider.getDocument(value).get().getBytes())))),
+						new Resolver());
+				LinkedHashMap<String, Node> appsToNodes = createAppToNodeMap(composer.getSingleNode());
+				if (appNamesList != null && !appsToNodes.containsKey(appNamesList.getStructuredSelection().getFirstElement())) {
+					String selectedName = (String) appNamesList.getStructuredSelection().getFirstElement();
+					appNames.setValue(appsToNodes);
+					MessageDialog.openError(getShell(), "Invalid Application Name",
+							"Application names are out of sync with manifest file contents. Current manifest file does not contain deployment properties for application '"
+									+ selectedName + "'.");
+					return;
+				}
 			} catch (CoreException e) {
 				BootDashActivator.log(e);
+				MessageDialog.openError(getShell(), "Error Saving Manifest", "Error occurred saving the manifest file '" + value.getFile().getFullPath().toOSString() + "'.\nError: " + e.getMessage());
+				return;
+			} catch (Throwable t) {
+				BootDashActivator.log(t);
+				MessageDialog.openError(getShell(), "Errors in the Manifest File", "Error occurred parsing the manifest file '" + value.getFile().getFullPath().toOSString() + "'.\nError: " + t.getMessage());
+				return;
 			}
 		}
 		try {
@@ -1093,13 +1119,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			 */
 			String applicationName = null;
 			if (manifestTypeModel.getValue()) {
-				if (appName == null) {
+				if (appNamesList != null) {
 					if (!appNamesList.getStructuredSelection().isEmpty()) {
 						applicationName = (String) appNamesList.getStructuredSelection().getFirstElement();
 					}
 				}
 			}
-//			String applicationName = manifestTypeModel.getValue() ? (appName == null ? (String) appNameCombo.getStructuredSelection().getFirstElement() : null) : null;
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
