@@ -638,7 +638,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		manualYamlViewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)));
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
-		manualYamlViewer.getControl().setEnabled(!readOnly);
+		if (readOnly) {
+			manualYamlViewer.setEditable(false);
+			manualYamlViewer.getTextWidget().setCaret(null);
+			manualYamlViewer.getTextWidget().setCursor(getShell().getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
+		}
 		manualYamlDecorationSupport = new SourceViewerDecorationSupport(manualYamlViewer, manualOverviewRuler, manualMarkerAnnotationAccess, colorsCache);
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml), new AnnotationModel());
 
