@@ -40,6 +40,7 @@ import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
@@ -533,6 +534,10 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	protected IProject createPredefinedMavenProject(final String projectName) throws Exception {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		if (project.exists()) {
+			return project;
+		}
 		StsTestUtil.setAutoBuilding(false);
 		ImportConfiguration importConf = new ImportConfiguration() {
 
@@ -568,7 +573,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		runner.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		runner.schedule();
 
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		waitForImportJob(project, runner);
 //		BootProjectTestHarness.assertNoErrors(project);
 		return project;
