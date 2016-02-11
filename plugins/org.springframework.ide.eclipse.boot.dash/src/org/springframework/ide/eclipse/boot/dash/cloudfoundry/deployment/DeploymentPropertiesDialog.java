@@ -51,8 +51,10 @@ import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.VerticalRuler;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -250,7 +252,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		@Override
 		public void selectionChanged(final SelectionChangedEvent e) {
 			FileEditorInput currentInput = fileModel.getValue();
-			if (currentInput == null || !currentInput.getFile().equals(workspaceViewer.getStructuredSelection().getFirstElement())) {
+			if (currentInput == null || !currentInput.getFile().equals(getStructuredSelection(workspaceViewer).getFirstElement())) {
 				if (saveOrDiscardIfNeeded(false)) {
 					IResource resource = e.getSelection().isEmpty() ? null : (IResource) ((IStructuredSelection) e.getSelection()).toArray()[0];
 					fileModel.setValue(resource instanceof IFile ? new FileEditorInput((IFile) resource) : null);
@@ -808,7 +810,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private void revealAppTextInYamlFile() {
 		LinkedHashMap<String, Node> names = appNames.getValue();
 		if (names != null) {
-			Node n = names.get(appNamesList.getStructuredSelection().getFirstElement());
+			Node n = names.get(getStructuredSelection(appNamesList).getFirstElement());
 			if (n != null) {
 				fileYamlViewer.revealRange(n.getStartMark().getIndex(), n.getEndMark().getIndex() - n.getStartMark().getIndex());
 			}
@@ -1087,8 +1089,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 								new ByteArrayInputStream(docProvider.getDocument(value).get().getBytes())))),
 						new Resolver());
 				LinkedHashMap<String, Node> appsToNodes = createAppToNodeMap(composer.getSingleNode());
-				if (appNamesList != null && !appsToNodes.containsKey(appNamesList.getStructuredSelection().getFirstElement())) {
-					String selectedName = (String) appNamesList.getStructuredSelection().getFirstElement();
+				if (appNamesList != null && !appsToNodes.containsKey(getStructuredSelection(appNamesList).getFirstElement())) {
+					String selectedName = (String) getStructuredSelection(appNamesList).getFirstElement();
 					appNames.setValue(appsToNodes);
 					MessageDialog.openError(getShell(), "Invalid Application Name",
 							"Application names are out of sync with manifest file contents. Current manifest file does not contain deployment properties for application '"
@@ -1120,8 +1122,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			String applicationName = null;
 			if (manifestTypeModel.getValue()) {
 				if (appNamesList != null) {
-					if (!appNamesList.getStructuredSelection().isEmpty()) {
-						applicationName = (String) appNamesList.getStructuredSelection().getFirstElement();
+					if (!getStructuredSelection(appNamesList).isEmpty()) {
+						applicationName = (String) getStructuredSelection(appNamesList).getFirstElement();
 					}
 				}
 			}
@@ -1139,6 +1141,16 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		} catch (Exception e) {
 			MessageDialog.openError(getShell(), "Invalid YAML content", e.getMessage());
 		}
+	}
+
+	// TODO: this should be replaced with TreeViewer.getStructuredSelection once we drop support for Eclipse 4.4
+	// the TreeViewer.getStructuredSelection() API got introduced in Eclipse 4.5
+	private ITreeSelection getStructuredSelection(TreeViewer treeViewer) {
+		ISelection selection = treeViewer.getSelection();
+		if (selection instanceof ITreeSelection) {
+			return (ITreeSelection) selection;
+		}
+		throw new ClassCastException("AbstractTreeViewer should return an instance of ITreeSelection from its getSelection() method."); //$NON-NLS-1$
 	}
 
 	private TextFileDocumentProvider getTextDocumentProvider(IFile file) {
