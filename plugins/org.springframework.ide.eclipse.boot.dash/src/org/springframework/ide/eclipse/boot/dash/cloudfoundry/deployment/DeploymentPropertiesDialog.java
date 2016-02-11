@@ -638,10 +638,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		manualYamlViewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)));
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
-		manualYamlViewer.setEditable(!readOnly);
-		if (readOnly) {
-			manualYamlViewer.getTextWidget().setBackground(composite.getBackground());
-		}
+		manualYamlViewer.getControl().setEnabled(!readOnly);
 		manualYamlDecorationSupport = new SourceViewerDecorationSupport(manualYamlViewer, manualOverviewRuler, manualMarkerAnnotationAccess, colorsCache);
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml), new AnnotationModel());
 
@@ -869,6 +866,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		final FileEditorInput input = fileModel.getValue();
 		if (input == null) {
 			fileLabel.setText(NO_MANIFEST_SELECETED_LABEL);
+			fileYamlViewer.getControl().setEnabled(false);
 			appNames.setValue(null);
 			validate();
 		} else {
@@ -899,6 +897,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 							getShell().getDisplay().asyncExec(new Runnable() {
 								@Override
 								public void run() {
+									fileYamlViewer.getControl().setEnabled(root != null);
 									if (root == null) {
 										fileYamlViewer.setDocument(new Document(""));
 									} else {
@@ -926,6 +925,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			@Override
 			public void run() {
 				fileYamlViewer.setDocument(new Document(""));
+				fileYamlViewer.getControl().setEnabled(false);
 				appNames.setValue(null);
 				validate();
 			}
