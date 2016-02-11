@@ -2456,6 +2456,28 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testLocaleCompletions() throws Exception {
+		data("foobar.locale", "java.util.Locale", null, "The locale for foobars");
+
+		assertCompletions(
+				"foobar:\n" +
+				"  loca<*>"
+				, // ==>
+				"foobar:\n" +
+				"  locale: <*>"
+		);
+
+		assertCompletionWithLabel(
+				"foobar:\n" +
+				"  locale: en<*>"
+				,
+				"en_CA"
+				,
+				"foobar:\n" +
+				"  locale: en_CA<*>"
+		);
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {

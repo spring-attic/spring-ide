@@ -919,6 +919,24 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testLocaleCompletions() throws Exception {
+		data("foobar.locale", "java.util.Locale", null, "Yada yada");
+
+		assertCompletions(
+				"foobar.loca<*>"
+				, // ==>
+				"foobar.locale=<*>"
+		);
+
+		assertCompletionWithLabel(
+				"foobar.locale=en<*>"
+				,
+				"en_CA"
+				,
+				"foobar.locale=en_CA<*>"
+		);
+	}
+
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
 //	}
