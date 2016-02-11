@@ -238,7 +238,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
-			String[] values = typeUtil.getAllowedValues(type, enumCaseMode);
+			String[] values = typeUtil.getHintValues(type, enumCaseMode);
 			if (values!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (String value : values) {
