@@ -656,6 +656,26 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		assertEquals(expectTextAfter, editor.getText());
 	}
 
+
+	/**
+	 * Checks that completions contains a completion with a given display string (and check that
+	 * it applies as expected).
+	 */
+	public void assertCompletionWithLabel(String textBefore, String label, String expectTextAfter) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
+		ICompletionProposal[] completions = getCompletions(editor);
+		ICompletionProposal completion = null;
+		for (ICompletionProposal c : completions) {
+			if (c.getDisplayString().equals(label)) {
+				completion = c;
+				break;
+			}
+		}
+		assertNotNull("No completion found with label '"+label+"'", completion);
+		editor.apply(completion);
+		assertEquals(expectTextAfter, editor.getText());
+	}
+
 	/**
 	 * Checks that applying completions to a given 'textBefore' editor content produces the
 	 * expected results.

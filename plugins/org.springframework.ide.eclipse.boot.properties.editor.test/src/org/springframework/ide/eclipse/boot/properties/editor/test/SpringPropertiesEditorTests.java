@@ -901,6 +901,23 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testCharsetCompletions() throws Exception {
+		data("foobar.encoding", "java.nio.charset.Charset", null, "The charset-encoding to use for foobars");
+
+		assertCompletions(
+				"foobar.enco<*>"
+				, // ==>
+				"foobar.encoding=<*>"
+		);
+
+		assertCompletionWithLabel(
+				"foobar.encoding=UT<*>"
+				,
+				"UTF-8"
+				,
+				"foobar.encoding=UTF-8<*>"
+		);
+	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

@@ -1063,7 +1063,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
-
 	public void testNoCompletionsInsideComments() throws Exception {
 		defaultTestData();
 
@@ -2432,6 +2431,28 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertProblems(editor,
 				"name|Duplicate",
 				"name|Duplicate"
+		);
+	}
+
+	public void testCharSetCompletions() throws Exception {
+		data("foobar.encoding", "java.nio.charset.Charset", null, "The charset-encoding to use for foobars");
+
+		assertCompletions(
+				"foobar:\n" +
+				"  enco<*>"
+				, // ==>
+				"foobar:\n" +
+				"  encoding: <*>"
+		);
+
+		assertCompletionWithLabel(
+				"foobar:\n" +
+				"  encoding: UT<*>"
+				,
+				"UTF-8"
+				,
+				"foobar:\n" +
+				"  encoding: UTF-8<*>"
 		);
 	}
 

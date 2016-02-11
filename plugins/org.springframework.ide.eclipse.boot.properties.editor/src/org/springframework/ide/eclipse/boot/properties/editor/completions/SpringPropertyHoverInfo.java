@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.arrayToCommaDelimitedString;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.collectionToCommaDelimitedString;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,13 +21,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 
 /**

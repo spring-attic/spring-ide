@@ -15,6 +15,7 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayU
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
 
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IAnnotation;
@@ -60,7 +63,6 @@ public class TypeUtil {
 
 
 	private static abstract class RadixableParser implements ValueParser {
-
 		protected abstract Object parse(String str, int radix);
 
 		@Override
@@ -519,6 +521,16 @@ public class TypeUtil {
 	}
 
 	private static final String[] NO_PARAMS = new String[0];
+	private static final Map<String, Provider<String[]>> VALUE_HINTERS = new HashMap<>();
+	static {
+		valueHints("java.nio.charset.Charset", new LazyProvider<String[]>() {
+			@Override
+			protected String[] compute() {
+				Set<String> charsets = Charset.availableCharsets().keySet();
+				return charsets.toArray(new String[charsets.size()]);
+			}
+		});
+	}
 
 	/**
 	 * Determine properties that are setable on object of given type.
@@ -583,6 +595,13 @@ public class TypeUtil {
 			}
 		}
 		return null;
+	}
+
+	public static void valueHints(String typeName, Provider<String[]> provider) {
+		Assert.isLegal(!VALUE_HINTERS.containsKey(typeName)); //Only one value hinter per type is supported at the moment
+		ATOMIC_TYPES.add(typeName); //valueHints typically implies that the type should be treated as atomic as well.
+		ASSIGNABLE_TYPES.add(typeName); //valueHints typically implies that the type should be treated as atomic as well.
+		VALUE_HINTERS.put(typeName, provider);
 	}
 
 	private Deprecation getDeprecation(IMethod m) {
@@ -753,6 +772,18 @@ public class TypeUtil {
 			}
 		}
 		return msg.toString();
+	}
+
+	public String[] getHintValues(Type type, EnumCaseMode enumCaseMode) {
+		String[] allowed = getAllowedValues(type, enumCaseMode);
+		if (allowed!=null) {
+			return allowed;
+		}
+		Provider<String[]> valueHinter = VALUE_HINTERS.get(type.getErasure());
+		if (valueHinter!=null) {
+			return valueHinter.get();
+		}
+		return null;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
