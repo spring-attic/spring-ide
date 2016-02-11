@@ -25,4 +25,29 @@ public class CFServiceData implements CFService {
 		return name;
 	}
 
+	@Override
+	public String getPlan() {
+		return null;
+	}
+
+	@Override
+	public String getProvider() {
+		return null;
+	}
+
+	@Override
+	public String getVersion() {
+		return null;
+	}
+
+	@Override
+	public String getDashboardUrl() {
+		return null;
+	}
+
+	@Override
+	public String getType() {
+		return null;
+	}
+
 }

@@ -20,6 +20,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudService;
+import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudStack;
 import org.cloudfoundry.client.lib.domain.Staging;
@@ -60,17 +61,6 @@ public class CFWrapping {
 		if (spaces!=null) {
 			Builder<CFSpace> builder = ImmutableList.builder();
 			for (CloudSpace s : spaces) {
-				builder.add(wrap(s));
-			}
-			return builder.build();
-		}
-		return null;
-	}
-
-	public static List<CFService> wrapServices(List<CloudService> services) {
-		if (services!=null) {
-			Builder<CFService> builder = ImmutableList.builder();
-			for (CloudService s : services) {
 				builder.add(wrap(s));
 			}
 			return builder.build();
@@ -243,13 +233,39 @@ public class CFWrapping {
 		return null;
 	}
 
-	public static CFService wrap(final CloudService s) {
+	public static CFService wrap(final CloudService s, final CloudServiceInstance instance) {
 		if (s!=null) {
 			return new CFService() {
 				@Override
 				public String getName() {
 					return s.getName();
 				}
+
+				@Override
+				public String getPlan() {
+					return s.getPlan();
+				}
+
+				@Override
+				public String getProvider() {
+					return s.getProvider();
+				}
+
+				@Override
+				public String getVersion() {
+					return s.getVersion();
+				}
+
+				@Override
+				public String getDashboardUrl() {
+					return instance.getDashboardUrl();
+				}
+
+				@Override
+				public String getType() {
+					return instance.getType();
+				}
+
 			};
 		}
 		return null;

@@ -28,6 +28,7 @@ import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
+import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
@@ -42,6 +43,9 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 public class DefaultClientRequests implements ClientRequests {
 
@@ -287,7 +291,15 @@ public class DefaultClientRequests implements ClientRequests {
 
 			@Override
 			protected List<CFService> doRun(CloudFoundryOperations client) throws Exception {
-				return CFWrapping.wrapServices(client.getServices());
+				List<CloudService> services = client.getServices();
+				if (services != null) {
+					Builder<CFService> builder = ImmutableList.builder();
+					for (CloudService s : services) {
+						builder.add(wrap(s, client.getServiceInstance(s.getName())));
+					}
+					return builder.build();
+				}
+				return null;
 			}
 		}.call();
 	}

@@ -12,4 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 public interface CFService extends CFEntity {
 
+	String getPlan();
+
+	String getProvider();
+
+	String getVersion();
+
+	String getDashboardUrl();
+
+	String getType();
+
 }

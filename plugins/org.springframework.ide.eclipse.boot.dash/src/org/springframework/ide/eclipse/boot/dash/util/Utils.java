@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,29 +8,27 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
-
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+package org.springframework.ide.eclipse.boot.dash.util;
 
 /**
- * TODO: push these functions into BootDashElements so CF implements differently.
+ * Utility methods
  *
  * @author Kris De Volder
  */
-public class BootDashElementUtil {
+public class Utils {
 
-	public static String getUrl(BootDashElement el, RequestMapping rm) {
-		String path = rm.getPath();
-		return getUrl(el, path);
-	}
-
-	public static String getUrl(BootDashElement el, String path) {
+	/**
+	 * Creates http URL string based on host, port and path
+	 * @param host
+	 * @param port
+	 * @param path
+	 * @return the resultant URL
+	 */
+	public static String createUrl(String host, int port, String path) {
 		if (path==null) {
 			path = "";
 		}
-		String host = el.getLiveHost();
 		if (host!=null) {
-			int port = el.getLivePort();
 			if (port>0) {
 				if (!path.startsWith("/")) {
 					path = "/" +path;
@@ -41,10 +39,4 @@ public class BootDashElementUtil {
 		return null;
 	}
 
-	public static String getUrl(BootDashElement el) {
-		if (el!=null) {
-			return getUrl(el, el.getDefaultRequestMappingPath());
-		}
-		return null;
-	}
 }

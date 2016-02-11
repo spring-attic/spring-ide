@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import static org.springframework.ide.eclipse.boot.dash.model.BootDashElementUtil.getUrl;
 import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 
 import java.util.List;
@@ -36,6 +35,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
+import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -137,7 +137,7 @@ public class RequestMappingsSection extends PageSection implements Disposable {
 				if(clicked instanceof RequestMapping){
 					RequestMapping rm = (RequestMapping) clicked;
 					BootDashElement el = input.getValue();
-					String url = getUrl(el, rm);
+					String url = Utils.createUrl(el.getLiveHost(), el.getLivePort(), rm.getPath());
 					if (url!=null) {
 						openUrl(url);
 					}

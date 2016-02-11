@@ -112,4 +112,9 @@ public class CloudServiceDashElement extends WrappingBootDashElement<String> {
 		return null;
 	}
 
+	@Override
+	public String getUrl() {
+		return service != null ? service.getDashboardUrl() : null;
+	}
+
 }
