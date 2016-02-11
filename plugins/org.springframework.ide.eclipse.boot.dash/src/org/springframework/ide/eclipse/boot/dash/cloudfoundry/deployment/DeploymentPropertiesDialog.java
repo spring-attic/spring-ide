@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,8 +82,11 @@ import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
+import org.eclipse.ui.texteditor.DocumentProviderRegistry;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IElementStateListener;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
@@ -120,7 +122,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	final static private String[] FILE_FILTER_NAMES = new String[] {"Manifest YAML files - *manifest*.yml", "YAML files - *.yml", "All files - *.*"};
 	final static private String SAVE_BTN_LABEL = "Save";
 	final static private String DISCARD_BTN_LABEL = "Discard";
-	final static private String LATER_BTN_LABEL = "Later";
+//	final static private String LATER_BTN_LABEL = "Later";
 
 
 	private static abstract class DeepFileFilter extends ViewerFilter {
@@ -186,12 +188,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Map<String, Object> cloudData;
 	private CloudApplicationDeploymentProperties deploymentProperties;
 	private String defaultYaml;
-	private LiveVariable<IFile> fileModel;
+	private LiveVariable<FileEditorInput> fileModel;
 	private LiveVariable<Boolean> manifestTypeModel;
 	private LiveVariable<LinkedHashMap<String, Node>> appNames;
-	private Set<IFile> mustSaveFiles;
+	private Set<FileEditorInput> mustSaveFiles;
+	private Set<TextFileDocumentProvider> docProviders;
 
-	private TextFileDocumentProvider docProvider;
 	private SourceViewerDecorationSupport fileYamlDecorationSupport;
 	private SourceViewerDecorationSupport manualYamlDecorationSupport;
 	private Label fileLabel;
@@ -246,11 +248,21 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
 		@Override
-		public void selectionChanged(SelectionChangedEvent e) {
-			performSaveIfNeeded();
-			IResource resource = e.getSelection().isEmpty() ? null : (IResource) ((IStructuredSelection) e.getSelection()).toArray()[0];
-			fileModel.setValue(resource instanceof IFile ? (IFile) resource : null);
-			refreshButton.setEnabled(manifestTypeModel.getValue() && !workspaceViewer.getSelection().isEmpty());
+		public void selectionChanged(final SelectionChangedEvent e) {
+			FileEditorInput currentInput = fileModel.getValue();
+			if (currentInput == null || !currentInput.getFile().equals(workspaceViewer.getStructuredSelection().getFirstElement())) {
+				if (saveOrDiscardIfNeeded(false)) {
+					IResource resource = e.getSelection().isEmpty() ? null : (IResource) ((IStructuredSelection) e.getSelection()).toArray()[0];
+					fileModel.setValue(resource instanceof IFile ? new FileEditorInput((IFile) resource) : null);
+					refreshButton.setEnabled(manifestTypeModel.getValue() && !workspaceViewer.getSelection().isEmpty());
+				} else {
+					/*
+					 * Can assume that fileModel has a valid file. Cancelled save.
+					 * Reject selection change, select previously selected.
+					 */
+					workspaceViewer.setSelection(new StructuredSelection(new IFile[] { fileModel.getValue().getFile() }));
+				}
+			}
 		}
 	};
 
@@ -266,7 +278,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						fileLabel.setText(fileModel.getValue().getFullPath().toOSString() + (dirty ? "*" : ""));
+						fileLabel.setText(fileModel.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : ""));
 					}
 				});
 			}
@@ -302,13 +314,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		this.noModeSwitch = noModeSwitch;
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
-		this.docProvider = new TextFileDocumentProvider();
+		this.docProviders = new HashSet<>();
 		this.mustSaveFiles = new HashSet<>();
 		this.appName = ApplicationManifestHandler.getDefaultName(cloudData);
 		manifestTypeModel = new LiveVariable<>();
 		manifestTypeModel.setValue(manifest != null);
 		fileModel = new LiveVariable<>();
-		fileModel.setValue(manifest == null ? findManifestYamlFile(project) : manifest);
+		IFile foundManifest = findManifestYamlFile(project);
+		fileModel.setValue(manifest == null ? (foundManifest == null ? null : new FileEditorInput(foundManifest)) : new FileEditorInput(manifest));
 		appNames = new LiveVariable<>();
 	}
 
@@ -359,9 +372,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			});
 		}
 
-		fileModel.addListener(new ValueListener<IFile>() {
+		fileModel.addListener(new ValueListener<FileEditorInput>() {
 			@Override
-			public void gotValue(LiveExpression<IFile> exp, final IFile value) {
+			public void gotValue(LiveExpression<FileEditorInput> exp, final FileEditorInput value) {
 				updateManifestFile();
 			}
 		});
@@ -467,7 +480,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			workspaceViewer.reveal(project.getFile("manifest.yml"));
 		} else {
 			workspaceViewer.reveal(fileModel.getValue());
-			workspaceViewer.setSelection(new StructuredSelection(new IResource[] { fileModel.getValue() }), false);
+			workspaceViewer.setSelection(new StructuredSelection(new IResource[] { fileModel.getValue().getFile() }), false);
 		}
 		workspaceViewer.addSelectionChangedListener(selectionListener);
 
@@ -495,13 +508,13 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileFilterCombo = new Combo(fileGroup, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		fileFilterCombo.setItems(FILE_FILTER_NAMES);
 		int selectionIndex = 0;
-		IFile manifestFile = fileModel.getValue();
+		FileEditorInput manifestFile = fileModel.getValue();
 		if (manifestFile != null) {
 			selectionIndex = RESOURCE_FILTERS.length - 1;
 			for (int i = 0; i < RESOURCE_FILTERS.length; i++) {
 				boolean accept = true;
 				for (ViewerFilter filter : RESOURCE_FILTERS[i]) {
-					accept = filter.select(null, null, fileModel.getValue());
+					accept = filter.select(null, null, fileModel.getValue().getFile());
 					if (!accept) {
 						break;
 					}
@@ -585,7 +598,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		fileLabel = new Label(fileYamlComposite, SWT.WRAP);
 		fileLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER).span(3, SWT.DEFAULT).create());
-		docProvider.addElementStateListener(dirtyStateListener);
 
 		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 12, colorsCache);
@@ -663,13 +675,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		refreshButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IFile file = fileModel.getValue();
-				if (file != null) {
+				FileEditorInput file = fileModel.getValue();
+				TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
+				if (file != null && docProvider != null) {
 					IDocument doc = docProvider.getDocument(file);
 					Composer composer;
 					try {
 						composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(
-								doc == null ? file.getContents() : new ByteArrayInputStream(doc.get().getBytes())))),
+								doc == null ? file.getFile().getContents() : new ByteArrayInputStream(doc.get().getBytes())))),
 								new Resolver());
 						appNames.setValue(createAppToNodeMap(composer.getSingleNode()));
 					} catch (Throwable t) {
@@ -707,27 +720,29 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	}
 
-	private void performSaveIfNeeded() {
-		IFile file = fileModel.getValue();
-		if (file != null && docProvider.canSaveDocument(file)) {
-			List<String> buttonLabels = Arrays.asList(new String[] {
-				SAVE_BTN_LABEL,
-				DISCARD_BTN_LABEL,
-				LATER_BTN_LABEL
-			});
+	private boolean saveOrDiscardIfNeeded(boolean cancellable) {
+		FileEditorInput file = fileModel.getValue();
+		TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
+		boolean persisted = true;
+		if (docProvider != null && file != null && file.exists() && docProvider.canSaveDocument(file)) {
+			List<String> buttonLabels = new ArrayList<>();
+			buttonLabels.add(SAVE_BTN_LABEL);
+			buttonLabels.add(DISCARD_BTN_LABEL);
+			if (cancellable) {
+				buttonLabels.add(IDialogConstants.CANCEL_LABEL);
+			}
 			int result = new MessageDialog(getShell(), "Changes Detected", null,
-					"Masnifest file '" + file.getFullPath().toOSString()
-							+ "' has been changed. Do you want to save changes now, later or discrad them?",
-					MessageDialog.QUESTION_WITH_CANCEL, buttonLabels.toArray(new String[buttonLabels.size()]), 2)
-							.open();
-			if (SAVE_BTN_LABEL.equals(buttonLabels.get(result))) {
+					"Masnifest file '" + file.getFile().getFullPath().toOSString()
+							+ "' has been changed. Do you want to save changes or discrad them?",
+					MessageDialog.QUESTION, buttonLabels.toArray(new String[buttonLabels.size()]), buttonLabels.indexOf(SAVE_BTN_LABEL)).open();
+			if (result >= 0 && SAVE_BTN_LABEL.equals(buttonLabels.get(result))) {
 				try {
 					docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
 					mustSaveFiles.remove(file);
 				} catch (CoreException e) {
 					BootDashActivator.log(e);
 				}
-			} else if (DISCARD_BTN_LABEL.equals(buttonLabels.get(result))) {
+			} else if (result >= 0 && DISCARD_BTN_LABEL.equals(buttonLabels.get(result))) {
 				try {
 					docProvider.resetDocument(file);
 					mustSaveFiles.remove(file);
@@ -736,16 +751,55 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				}
 			} else {
 				/*
-				 * Gather files that must be saved, files that are not opened for
-				 * editing in other editors. Keep them to revert changes when the
-				 * dialog is closed.
+				 * Cancel is pressed
 				 */
-				if (docProvider.mustSaveDocument(file)) {
-					mustSaveFiles.add(file);
-				}
+				persisted = false;
 			}
 		}
+		return persisted;
 	}
+
+//	private void performSaveIfNeeded() {
+//		FileEditorInput file = fileModel.getValue();
+//		TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
+//		if (docProvider != null && file != null && docProvider.canSaveDocument(file)) {
+//			List<String> buttonLabels = Arrays.asList(new String[] {
+//				SAVE_BTN_LABEL,
+//				DISCARD_BTN_LABEL,
+//				LATER_BTN_LABEL
+//			});
+//			int result = new MessageDialog(getShell(), "Changes Detected", null,
+//					"Masnifest file '" + file.getFile().getFullPath().toOSString()
+//							+ "' has been changed. Do you want to save changes now, later or discrad them?",
+//					MessageDialog.QUESTION_WITH_CANCEL, buttonLabels.toArray(new String[buttonLabels.size()]), 2)
+//							.open();
+//			if (SAVE_BTN_LABEL.equals(buttonLabels.get(result))) {
+//				try {
+//					docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
+//					mustSaveFiles.remove(file);
+//				} catch (CoreException e) {
+//					BootDashActivator.log(e);
+//				}
+//			} else if (DISCARD_BTN_LABEL.equals(buttonLabels.get(result))) {
+//				try {
+//					docProvider.resetDocument(file);
+//					mustSaveFiles.remove(file);
+//				} catch (CoreException e) {
+//					BootDashActivator.log(e);
+//				}
+//			} else {
+//				/*
+//				 * Gather files that must be saved, files that are not opened for
+//				 * editing in other editors. Keep them to revert changes when the
+//				 * dialog is closed.
+//				 * NOTE: canSave and mustSave would return the same result for this doc provider
+//				 */
+//				if (docProvider.mustSaveDocument(file)) {
+//					mustSaveFiles.add(file);
+//				}
+//			}
+//		}
+//	}
 
 	private void revealAppTextInYamlFile() {
 		LinkedHashMap<String, Node> names = appNames.getValue();
@@ -806,51 +860,52 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	private void updateManifestFile() {
 		fileYamlViewer.setDocument(new Document(""));
-		final IFile file = (IFile) fileModel.getValue();
-		if (file == null) {
+		final FileEditorInput input = fileModel.getValue();
+		if (input == null) {
 			fileLabel.setText(NO_MANIFEST_SELECETED_LABEL);
 			appNames.setValue(null);
 			validate();
 		} else {
+			final IFile file = input.getFile();
 			fileLabel.setText(file.getFullPath().toOSString());
 			Job job = new Job("Loading YAML manifest file") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						IDocument doc = docProvider.getDocument(file);
-						final LinkedHashMap<String, Node> newAppNames = new LinkedHashMap<String, Node>();
-						if (doc == null) {
-							docProvider.connect(file);
-							doc = docProvider.getDocument(file);
-						}
-						Composer composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(
-								doc == null ? file.getContents() : new ByteArrayInputStream(doc.get().getBytes())))),
-								new Resolver());
-						final Node root = composer.getSingleNode();
-						newAppNames.putAll(createAppToNodeMap(root));
-						getShell().getDisplay().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								IDocument doc = docProvider.getDocument(file);
-								if (root == null) {
-									fileYamlViewer.setDocument(new Document(""));
-								} else {
-									fileYamlViewer.setDocument(doc, docProvider.getAnnotationModel(file));
-									fileLabel.setText(file.getFullPath().toOSString() + (docProvider.canSaveDocument(file) ? "*" : ""));
+					final TextFileDocumentProvider docProvider = getTextDocumentProvider(file);
+					if (docProvider == null) {
+						showBlankContent();
+					} else {
+						try {
+							IDocument doc = docProvider.getDocument(input);
+							final LinkedHashMap<String, Node> newAppNames = new LinkedHashMap<String, Node>();
+							if (doc == null) {
+								docProvider.connect(input);
+								doc = docProvider.getDocument(input);
+							}
+							/*
+							 * Parse manifest YAML
+							 */
+							Composer composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(
+									doc == null ? file.getContents() : new ByteArrayInputStream(doc.get().getBytes())))),
+									new Resolver());
+							final Node root = composer.getSingleNode();
+							newAppNames.putAll(createAppToNodeMap(root));
+							getShell().getDisplay().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									if (root == null) {
+										fileYamlViewer.setDocument(new Document(""));
+									} else {
+										fileYamlViewer.setDocument(docProvider.getDocument(input), docProvider.getAnnotationModel(input));
+										fileLabel.setText(file.getFullPath().toOSString() + (docProvider.canSaveDocument(input) ? "*" : ""));
+									}
+									appNames.setValue(newAppNames);
+									validate();
 								}
-								appNames.setValue(newAppNames);
-								validate();
-							}
-						});
-					} catch (final Throwable t) {
-						getShell().getDisplay().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								fileYamlViewer.setDocument(new Document(""));
-								appNames.setValue(null);
-								validate();
-							}
-						});
+							});
+						} catch (final Throwable t) {
+							showBlankContent();
+						}
 					}
 					return Status.OK_STATUS;
 				}
@@ -858,6 +913,17 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			job.setRule(file);
 			job.schedule();
 		}
+	}
+
+	private void showBlankContent() {
+		getShell().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				fileYamlViewer.setDocument(new Document(""));
+				appNames.setValue(null);
+				validate();
+			}
+		});
 	}
 
 	private LinkedHashMap<String, Node> createAppToNodeMap(Node root) {
@@ -914,7 +980,13 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	}
 
 	public IFile getManifest() {
-		return manifestTypeModel.getValue() ? fileModel.getValue() : null;
+		if (manifestTypeModel.getValue()) {
+			FileEditorInput input = fileModel.getValue();
+			if (input != null) {
+				return input.getFile();
+			}
+		}
+		return null;
 	}
 
 	public String getManifestContents() {
@@ -939,14 +1011,30 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	protected void dispose() {
 		/*
+		 * Remove element state listeners from document providers.
+		 */
+		for (TextFileDocumentProvider p : docProviders) {
+			p.removeElementStateListener(dirtyStateListener);
+		}
+
+		/*
 		 * Check if current file must be saved and add to the list all must save files
 		 */
-		IFile currentfile = fileModel.getValue();
-		if (currentfile != null && docProvider.mustSaveDocument(currentfile)) {
-			mustSaveFiles.add(currentfile);
-		}
-		docProvider.removeElementStateListener(dirtyStateListener);
+//		FileEditorInput input = fileModel.getValue();
+//		TextFileDocumentProvider docProvider = input == null ? null : getTextDocumentProvider(input.getFile());
+//		if (input != null && docProvider != null && docProvider.mustSaveDocument(input)) {
+//			mustSaveFiles.add(input);
+//		}
+		saveOrDiscardIfNeeded(false);
+
+		/*
+		 * Deactivate handlers for key bindings
+		 */
 		deactivateHandlers();
+
+		/*
+		 * dispose SWT and JFace resources
+		 */
 		colorsCache.dispose();
 		if (manualYamlDecorationSupport != null) {
 			manualYamlDecorationSupport.dispose();
@@ -954,15 +1042,20 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		if (fileYamlDecorationSupport != null) {
 			fileYamlDecorationSupport.dispose();
 		}
-		for (IFile file : mustSaveFiles) {
-			if (docProvider.mustSaveDocument(file)) {
-				try {
-					docProvider.resetDocument(file);
-				} catch (CoreException e) {
-					BootDashActivator.log(e);
-				}
-			}
-		}
+
+		/*
+		 * Revert changes to unsaved files that are not opened by any other editors
+		 */
+//		for (FileEditorInput inputFile : mustSaveFiles) {
+//			docProvider = inputFile == null ? null : getTextDocumentProvider(inputFile.getFile());
+//			if (docProvider != null && docProvider.mustSaveDocument(inputFile)) {
+//				try {
+//					docProvider.resetDocument(inputFile);
+//				} catch (CoreException e) {
+//					BootDashActivator.log(e);
+//				}
+//			}
+//		}
 	}
 
 	@Override
@@ -970,10 +1063,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		/*
 		 * Save the manifest file if it's dirty
 		 */
-		IFile value = fileModel.getValue();
-		if (value != null && docProvider.canSaveDocument(value)) {
+		FileEditorInput value = fileModel.getValue();
+		TextFileDocumentProvider docProvider = value == null ? null : getTextDocumentProvider(value.getFile());
+		if (value != null && docProvider != null && docProvider.canSaveDocument(value)) {
 			if (!MessageDialog.openConfirm(getShell(), "Save Changes",
-					"Manifest file '" + value.getFullPath()
+					"Manifest file '" + value.getFile().getFullPath()
 							.toOSString()
 					+ "' has unsaved changes. Changes must be saved before using the file to deploy the application.")) {
 				return;
@@ -1022,6 +1116,21 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 	}
 
+	private TextFileDocumentProvider getTextDocumentProvider(IFile file) {
+		TextFileDocumentProvider textDocProvider = null;
+		if (file != null) {
+			IDocumentProvider docProvider = DocumentProviderRegistry.getDefault().getDocumentProvider(new FileEditorInput(file));
+			if (docProvider instanceof TextFileDocumentProvider) {
+				textDocProvider = (TextFileDocumentProvider) docProvider;
+				if (!docProviders.contains(textDocProvider)) {
+					textDocProvider.addElementStateListener(dirtyStateListener);
+					docProviders.add(textDocProvider);
+				}
+			}
+		}
+		return textDocProvider;
+	}
+
 	public CloudApplicationDeploymentProperties getCloudApplicationDeploymentProperties() {
 		return deploymentProperties;
 	}
@@ -1052,7 +1161,28 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				 * Exception is thrown if dialog width/height cannot be read
 				 * from storage
 				 */
-				size.y += ((GridData) fileGroup.getLayoutData()).heightHint;
+				size.y += fileGroupLayoutData.heightHint;
+			}
+		}
+		/*
+		 * Same goes for app names composite contributing to the width of the dialog
+		 */
+		if (appNameComposite != null) {
+			GridData appNamesLayoutData = (GridData)appNameComposite.getLayoutData();
+			if (appNamesLayoutData.exclude) {
+				try {
+					/*
+					 * Hack: check if dialog height was persisted. If
+					 * persisted then no need to calculate dialog size
+					 */
+					getDialogBoundsSettings().getInt("DIALOG_WIDTH");
+				} catch (NumberFormatException e) {
+					/*
+					 * Exception is thrown if dialog height cannot be read
+					 * from storage
+					 */
+					size.x += appNamesLayoutData.widthHint;
+				}
 			}
 		}
 		return size;
