@@ -25,6 +25,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -56,6 +57,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -68,7 +70,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
@@ -462,8 +463,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 		addVisible(manager, actions.getExposeRunAppAction());
 		addVisible(manager, actions.getExposeDebugAppAction());
-		addSubmenu(manager, "Deploy and Run On...", actions.getRunOnTargetActions());
-		addSubmenu(manager, "Deploy and Debug On...", actions.getDebugOnTargetActions());
+		addSubmenu(manager, "Deploy and Run On...", BootDashActivator.getImageDescriptor("icons/run-on-cloud.png"), actions.getRunOnTargetActions());
+		addSubmenu(manager, "Deploy and Debug On...", BootDashActivator.getImageDescriptor("icons/debug-on-cloud.png"), actions.getDebugOnTargetActions());
 
 		manager.add(new Separator());
 
@@ -534,15 +535,17 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	/**
 	 * Adds a submenu containing a given list of actions. The menu is only added if
 	 * there is at least one visible action in the list.
+	 * @param imageDescriptor
 	 */
-	private void addSubmenu(IMenuManager parent, String label, ImmutableList<IAction> actions) {
+	private void addSubmenu(IMenuManager parent, String label, ImageDescriptor imageDescriptor, ImmutableList<IAction> actions) {
 		if (actions!=null && !actions.isEmpty()) {
 			boolean notEmpty = false;
-			IMenuManager submenu = new MenuManager(label);
+			MenuManager submenu = new MenuManager(label);
 			for (IAction a : actions) {
 				notEmpty |= addVisible(submenu, a);
 			}
 			if (notEmpty) {
+				submenu.setImageDescriptor(imageDescriptor);
 				parent.add(submenu);
 			}
 		}
