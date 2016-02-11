@@ -16,12 +16,14 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayU
 
 import java.net.InetAddress;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -60,7 +62,6 @@ public class TypeUtil {
 			"java.lang.Deprecated",
 			"Deprecated"
 	);
-
 
 	private static abstract class RadixableParser implements ValueParser {
 		protected abstract Object parse(String str, int radix);
@@ -528,6 +529,17 @@ public class TypeUtil {
 			protected String[] compute() {
 				Set<String> charsets = Charset.availableCharsets().keySet();
 				return charsets.toArray(new String[charsets.size()]);
+			}
+		});
+		valueHints("java.util.Locale", new LazyProvider<String[]>() {
+			@Override
+			protected String[] compute() {
+				Locale[] locales = SimpleDateFormat.getAvailableLocales();
+				String[] names = new String[locales.length];
+				for (int i = 0; i < names.length; i++) {
+					names[i] = locales[i].toString();
+				}
+				return names;
 			}
 		});
 	}
