@@ -40,7 +40,6 @@ import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
@@ -51,7 +50,6 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import junit.framework.TestCase;

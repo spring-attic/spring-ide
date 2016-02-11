@@ -33,6 +33,7 @@ import java.util.TreeSet;
 import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -681,16 +682,18 @@ public class TypeUtil {
 				if (ArrayUtils.hasElements(allMethods)) {
 					ArrayList<IMethod> getters = new ArrayList<IMethod>();
 					for (IMethod m : allMethods) {
-						String mname = m.getElementName();
-						if (
-								(mname.startsWith("get") && mname.length()>=4) ||
-								(mname.startsWith("is") && mname.length()>=3)
-						) {
-							//Need at least 4 chars or the property name will be empty.
-							String sig = m.getSignature();
-							int numParams = Signature.getParameterCount(sig);
-							if (numParams==0) {
-								getters.add(m);
+						if (!isStatic(m) && isPublic(m)) {
+							String mname = m.getElementName();
+							if (
+									(mname.startsWith("get") && mname.length()>=4) ||
+									(mname.startsWith("is") && mname.length()>=3)
+							) {
+								//Need at least 4 chars or the property name will be empty.
+								String sig = m.getSignature();
+								int numParams = Signature.getParameterCount(sig);
+								if (numParams==0) {
+									getters.add(m);
+								}
 							}
 						}
 					}
@@ -728,6 +731,29 @@ public class TypeUtil {
 //		}
 //		return null;
 //	}
+
+	private boolean isStatic(IMethod m) {
+		try {
+			return Flags.isStatic(m.getFlags());
+		} catch (JavaModelException e) {
+			//Couldn't determine if it was public or not... let's assume it was NOT
+			// (will result in potentially more CA completions)
+			BootActivator.log(e);
+			return false;
+		}
+	}
+
+	private boolean isPublic(IMethod m) {
+		try {
+			return m.getDeclaringType().isInterface()
+				|| Flags.isPublic(m.getFlags());
+		} catch (JavaModelException e) {
+			//Couldn't determine if it was public or not... let's assume it WAS
+			// (will result in potentially more CA completions)
+			BootActivator.log(e);
+			return true;
+		}
+	}
 
 	public Map<String, TypedProperty> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		//TODO: optimize, produce directly as a map instead of
