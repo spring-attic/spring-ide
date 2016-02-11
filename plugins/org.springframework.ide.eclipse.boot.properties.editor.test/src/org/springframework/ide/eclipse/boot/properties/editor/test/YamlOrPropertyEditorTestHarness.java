@@ -15,6 +15,7 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -61,6 +62,13 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	protected static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			return CompletionFactory.SORTER.compare(p1, p2);
+		}
+	};
+
+	private static final Comparator<ReconcileProblem> PROBLEM_COMPARATOR = new Comparator<ReconcileProblem>() {
+		@Override
+		public int compare(ReconcileProblem o1, ReconcileProblem o2) {
+			return o1.getOffset() - o2.getOffset();
 		}
 	};
 
@@ -590,6 +598,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	public void assertProblems(MockEditor editor, String... expectedProblems)
 			throws BadLocationException {
 		List<ReconcileProblem> actualProblems = reconcile(editor);
+		Collections.sort(actualProblems, PROBLEM_COMPARATOR);
 		String bad = null;
 		if (actualProblems.size()!=expectedProblems.length) {
 			bad = "Wrong number of problems (expecting "+expectedProblems.length+" but found "+actualProblems.size()+")";
@@ -643,6 +652,26 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
 		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		ICompletionProposal completion = getFirstCompletion(editor);
+		editor.apply(completion);
+		assertEquals(expectTextAfter, editor.getText());
+	}
+
+
+	/**
+	 * Checks that completions contains a completion with a given display string (and check that
+	 * it applies as expected).
+	 */
+	public void assertCompletionWithLabel(String textBefore, String label, String expectTextAfter) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
+		ICompletionProposal[] completions = getCompletions(editor);
+		ICompletionProposal completion = null;
+		for (ICompletionProposal c : completions) {
+			if (c.getDisplayString().equals(label)) {
+				completion = c;
+				break;
+			}
+		}
+		assertNotNull("No completion found with label '"+label+"'", completion);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
 	}

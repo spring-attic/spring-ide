@@ -11,11 +11,14 @@
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DEPRECATED;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DUPLICATE_KEY;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.asScalar;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST.getChildren;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
@@ -81,6 +84,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	protected void reconcile(Node node, IndexNavigator nav) {
 		switch (node.getNodeId()) {
 		case mapping:
+			checkForDuplicateKeys((MappingNode)node);
 			for (NodeTuple entry : ((MappingNode)node).getValue()) {
 				reconcile(entry, nav);
 			}
@@ -93,6 +97,28 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		default:
 			expectMapping(node);
 			break;
+		}
+	}
+
+	private void checkForDuplicateKeys(MappingNode node) {
+		Set<String> duplicateKeys = new HashSet<>();
+		Set<String> seenKeys = new HashSet<>();
+		for (NodeTuple entry : node.getValue()) {
+			String key = asScalar(entry.getKeyNode());
+			if (key!=null) {
+				if (!seenKeys.add(key)) {
+					duplicateKeys.add(key);
+				}
+			}
+		}
+		if (!duplicateKeys.isEmpty()) {
+			for (NodeTuple entry : node.getValue()) {
+				Node keyNode = entry.getKeyNode();
+				String key = asScalar(keyNode);
+				if (key!=null && duplicateKeys.contains(key)) {
+					problems.accept(problem(YAML_DUPLICATE_KEY, keyNode, "Duplicate key '"+key+"'"));
+				}
+			}
 		}
 	}
 
@@ -172,6 +198,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	}
 
 	private void reconcile(MappingNode mapping, Type type) {
+		checkForDuplicateKeys(mapping);
 		if (typeUtil.isAtomic(type)) {
 			expectTypeFoundMapping(type, mapping);
 		} else if (TypeUtil.isMap(type) || TypeUtil.isSequencable(type)) {
@@ -322,34 +349,22 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	}
 
 	private void deprecatedProperty(PropertyInfo property, Node keyNode) {
-		StringBuilder msg = new StringBuilder("'"+property.getId());
-		String replace = property.getDeprecationReplacement();
-		String reason = property.getDeprecationReason();
-		boolean hasReplace = StringUtil.hasText(replace);
-		boolean hasReason = StringUtil.hasText(reason);
-		if (!hasReplace && !hasReason) {
-			msg.append("' is Deprecated!");
-		} else {
-			msg.append("' is Deprecated: ");
-			if (hasReplace) {
-				msg.append("Use '"+ replace +"' instead.");
-				if (hasReason) {
-					msg.append(" Reason: ");
-				}
-			}
-			if (hasReason) {
-				msg.append(reason);
-			}
-		}
-		SpringPropertyProblem problem = problem(YAML_DEPRECATED, keyNode, msg.toString());
-		problem.setPropertyName(property.getId());
+		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getId(), null, keyNode,
+				property.getDeprecationReplacement(), property.getDeprecationReason());
 		problems.accept(problem);
 	}
 
 	private void deprecatedProperty(Type contextType, TypedProperty property, Node keyNode) {
-		problems.accept(problem(YAML_DEPRECATED, keyNode,
-				"Property '"+property.getName()+"' of type '"+typeUtil.niceTypeName(contextType)+"' is Deprecated!"
-		));
+		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getName(), typeUtil.niceTypeName(contextType),
+				keyNode, property.getDeprecationReplacement(), property.getDeprecationReason());
+		problems.accept(problem);
+	}
+
+	protected SpringPropertyProblem deprecatedPropertyProblem(String name, String contextType, Node keyNode,
+			String replace, String reason) {
+		SpringPropertyProblem problem = problem(YAML_DEPRECATED, keyNode, TypeUtil.deprecatedPropertyMessage(name, contextType, replace, reason));
+		problem.setPropertyName(name);
+		return problem;
 	}
 
 	protected SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {

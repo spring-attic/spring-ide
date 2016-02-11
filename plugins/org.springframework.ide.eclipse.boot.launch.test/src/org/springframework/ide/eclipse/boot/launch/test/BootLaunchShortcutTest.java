@@ -123,7 +123,7 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		assertEquals(DEFAULT_ENABLE_DEBUG_OUTPUT, getEnableDebugOutput(conf));
 		assertEquals(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT, getEnableLiveBeanSupport(conf));
 		int port = Integer.parseInt(getJMXPort(conf));
-		assertTrue(1000 < port && port < 65536);
+		assertEquals(0, port); // 0 means 'allocate dynamically'
 		assertElements(getProperties(conf)
 				/*empty*/
 		);

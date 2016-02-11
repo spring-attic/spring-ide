@@ -213,7 +213,7 @@ public class PropertyNavigator {
 							keyStart, keyEnd-keyStart));
 				} else {
 					if (prop.isDeprecated()) {
-						problemCollector.accept(problemDeprecated(prop, keyStart, keyEnd-keyStart));
+						problemCollector.accept(problemDeprecated(type, prop, keyStart, keyEnd-keyStart));
 					}
 					return navigate(keyEnd, prop.getType());
 				}
@@ -222,9 +222,12 @@ public class PropertyNavigator {
 		return null;
 	}
 
-	private ReconcileProblem problemDeprecated(TypedProperty prop, int offset, int len) {
+	private ReconcileProblem problemDeprecated(Type contextType, TypedProperty prop, int offset, int len) {
 		SpringPropertyProblem p = problem(SpringPropertiesProblemType.PROP_DEPRECATED,
-				"'"+prop.getName()+"' is Deprecated!",
+				TypeUtil.deprecatedPropertyMessage(
+						prop.getName(), typeUtil.niceTypeName(contextType),
+						prop.getDeprecationReplacement(), prop.getDeprecationReason()
+				),
 				offset, len
 		);
 		p.setPropertyName(prop.getName());

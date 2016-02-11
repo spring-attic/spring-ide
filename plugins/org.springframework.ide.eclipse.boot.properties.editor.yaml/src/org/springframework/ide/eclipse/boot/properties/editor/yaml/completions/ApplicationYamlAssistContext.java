@@ -24,9 +24,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.JavaTypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -238,7 +238,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
-			String[] values = typeUtil.getAllowedValues(type, enumCaseMode);
+			String[] values = typeUtil.getHintValues(type, enumCaseMode);
 			if (values!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (String value : values) {

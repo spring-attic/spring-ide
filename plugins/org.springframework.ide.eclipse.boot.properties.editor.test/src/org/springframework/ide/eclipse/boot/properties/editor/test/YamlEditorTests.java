@@ -536,10 +536,18 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		YamlEditor editor = new YamlEditor(
 				"foo:\n"+
 				"  color: BLUE\n" +
-				"  color: RED\n" + //technically not allowed to bind same key twice but we don' check this
+				"---\n" +
+				"foo:\n" +
+				"  color: RED\n" +
+				"---\n" +
+				"foo:\n" +
 				"  color: GREEN\n" +
+				"---\n" +
+				"foo:\n" +
 				"  color:\n" +
 				"    bad: BLUE\n" +
+				"---\n" +
+				"foo:\n" +
 				"  color: Bogus\n"
 		);
 
@@ -1054,7 +1062,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"    name: <*>foo"
 		);
 	}
-
 
 	public void testNoCompletionsInsideComments() throws Exception {
 		defaultTestData();
@@ -1641,8 +1648,12 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 		assertProblems(editor,
 				"bogus|Unknown property",
+				"wavelen|Duplicate",
+				"wavelen|Duplicate",
 				"not a double|'double'",
+				"wavelen|Duplicate",
 				"more: 3.0|Expecting a 'double' but got a 'Mapping' node",
+				"wavelen|Duplicate",
 				"- 3.0|Expecting a 'double' but got a 'Sequence' node"
 		);
 	}
@@ -1672,7 +1683,12 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"    size: SMALL\n"
 		);
 		assertProblems(editor,
-				"NOT_A_SIZE|ClothingSize"
+				"size|Duplicate",
+				"NOT_A_SIZE|ClothingSize",
+				"size|Duplicate",
+				"size|Duplicate",
+				"size|Duplicate",
+				"size|Duplicate"
 		);
 
 		editor = new YamlEditor(
@@ -1687,8 +1703,10 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"      bad: Blauw"
 		);
 		assertProblems(editor,
+				"blue|Duplicate",
 				"not-a-color|Color",
 				"blue.bad|Color",
+				"blue|Duplicate",
 				"bad: Blauw|Expecting a 'String' but got a 'Mapping'"
 		);
 
@@ -1702,6 +1720,8 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"      name: Rood\n"
 		);
 		assertProblems(editor,
+				"next|Duplicate",
+				"next|Duplicate",
 				"not a color|Color",
 				"bogus|Unknown property"
 		);
@@ -2328,11 +2348,28 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"# comment\n" +
 				"foo:\n" +
 				"  name: Old faithfull\n" +
-				"  new-name: New and fancy\n"
+				"  new-name: New and fancy\n" +
+				"  alt-name: alternate\n"
 		);
 		assertProblems(editor,
-				"name|Property 'name' of type 'demo.Deprecater' is Deprecated!"
+				"name|Property 'name' of type 'demo.Deprecater' is Deprecated!",
+				"alt-name|Deprecated"
 		);
+
+		editor = new YamlEditor(
+				"# comment\n" +
+				"foo:\n" +
+				"  alt-name: alternate\n"
+		);
+		//check that message also contains reason and replacement infos.
+		assertProblems(editor,
+				"alt-name|Use 'something.else' instead"
+		);
+		assertProblems(editor,
+				"alt-name|No good anymore"
+		);
+
+
 	}
 
 	public void testDeprecatedBeanPropertyCompletions() throws Exception {
@@ -2345,11 +2382,79 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  nam<*>"
 				, // =>
 				StyledStringMatcher.plainFont("new-name : String"),
-				StyledStringMatcher.strikeout("name")
+				StyledStringMatcher.strikeout("name"),
+				StyledStringMatcher.strikeout("alt-name")
 		);
 	}
 
 
+	public void testReconcileDuplicateProperties() throws Exception {
+		defaultTestData();
+		YamlEditor editor = new YamlEditor(
+				"spring:\n" +
+				"  profiles: cloudfoundry\n" +
+				"spring:  \n" +
+				"  application:\n" +
+				"    name: eureka"
+		);
+		assertProblems(editor,
+				"spring|Duplicate",
+				"spring|Duplicate"
+		);
+	}
+
+	public void testReconcileDuplicatePropertiesNested() throws Exception {
+		data("foo.person.name", "String", null, "Name of person");
+		data("foo.person.family", "String", null, "Family name of person");
+		YamlEditor editor = new YamlEditor(
+				"foo:\n" +
+				"  person:\n" +
+				"    name: Hohohoh\n" +
+				"  person:\n" +
+				"    family:\n"
+		);
+		assertProblems(editor,
+				"person|Duplicate",
+				"person|Duplicate"
+		);
+	}
+
+	public void testReconcileDuplicatePropertiesInBean() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("some.color", "demo.ColorData", null, "Some info about a color.");
+		YamlEditor editor = new YamlEditor(
+				"some:\n" +
+				"  color:\n" +
+				"    name: RED\n" +
+				"    name: GREEN\n"
+		);
+		assertProblems(editor,
+				"name|Duplicate",
+				"name|Duplicate"
+		);
+	}
+
+	public void testCharSetCompletions() throws Exception {
+		data("foobar.encoding", "java.nio.charset.Charset", null, "The charset-encoding to use for foobars");
+
+		assertCompletions(
+				"foobar:\n" +
+				"  enco<*>"
+				, // ==>
+				"foobar:\n" +
+				"  encoding: <*>"
+		);
+
+		assertCompletionWithLabel(
+				"foobar:\n" +
+				"  encoding: UT<*>"
+				,
+				"UTF-8"
+				,
+				"foobar:\n" +
+				"  encoding: UTF-8<*>"
+		);
+	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////
 
