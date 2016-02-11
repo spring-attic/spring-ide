@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import junit.framework.TestCase;
@@ -661,17 +662,20 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * Checks that completions contains a completion with a given display string (and check that
 	 * it applies as expected).
 	 */
-	public void assertCompletionWithLabel(String textBefore, String label, String expectTextAfter) throws Exception {
+	public void assertCompletionWithLabel(String textBefore, String expectLabel, String expectTextAfter) throws Exception {
 		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		ICompletionProposal[] completions = getCompletions(editor);
 		ICompletionProposal completion = null;
+		StringBuilder found = new StringBuilder();
 		for (ICompletionProposal c : completions) {
-			if (c.getDisplayString().equals(label)) {
+			String actualLabel = c.getDisplayString();
+			found.append(actualLabel+"\n");
+			if (actualLabel.equals(expectLabel)) {
 				completion = c;
 				break;
 			}
 		}
-		assertNotNull("No completion found with label '"+label+"'", completion);
+		assertNotNull("No completion found with label '"+expectLabel+"' in:\n"+found, completion);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
 	}

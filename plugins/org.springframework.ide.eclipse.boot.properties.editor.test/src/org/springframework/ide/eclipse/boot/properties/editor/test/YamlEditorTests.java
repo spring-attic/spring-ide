@@ -2478,6 +2478,28 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testMimeTypeCompletions() throws Exception {
+		data("foobar.mime", "org.springframework.util.MimeType", null, "The mimetype for foobars");
+
+		assertCompletions(
+				"foobar:\n" +
+				"  mi<*>"
+				, // ==>
+				"foobar:\n" +
+				"  mime: <*>"
+		);
+
+		assertCompletionWithLabel(
+				"foobar:\n" +
+				"  mime: json<*>"
+				,
+				"application/json; charset=utf-8"
+				,
+				"foobar:\n" +
+				"  mime: application/json; charset=utf-8<*>"
+		);
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
