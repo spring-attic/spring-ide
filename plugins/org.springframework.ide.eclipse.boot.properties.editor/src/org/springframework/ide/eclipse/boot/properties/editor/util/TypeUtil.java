@@ -38,13 +38,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.gradle.jarjar.com.google.common.collect.ImmutableSet;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Utilities to work with types represented as Strings as returned by
