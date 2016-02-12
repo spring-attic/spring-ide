@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class RemoveRunTargetAction extends AbstractBootDashModelAction {
@@ -44,6 +45,11 @@ public class RemoveRunTargetAction extends AbstractBootDashModelAction {
 		this.setEnabled(runTargetToRemove!=null && runTargetToRemove.canRemove());
 	}
 
+	@Override
+	public void updateVisibility() {
+		RunTarget runTargetToRemove = getRunTargetToRemove();
+		setVisible(runTargetToRemove != null && !RunTargetTypes.LOCAL.equals(runTargetToRemove.getType()));
+	}
 
 	private RunTarget getRunTargetToRemove() {
 		BootDashModel section = sectionSelection.getValue();
