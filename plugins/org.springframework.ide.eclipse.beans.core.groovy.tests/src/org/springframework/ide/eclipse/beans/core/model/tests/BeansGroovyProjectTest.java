@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
@@ -70,6 +71,10 @@ public class BeansGroovyProjectTest {
 
 	@Before
 	public void createProject() throws Exception {
+		for (IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			p.delete(true, null);
+		}
+		
 		project = StsTestUtil.createPredefinedProject("beans-config-tests", Activator.PLUGIN_ID);
 		javaProject = JdtUtils.getJavaProject(project);
 		
@@ -88,13 +93,13 @@ public class BeansGroovyProjectTest {
 	
 	@After
 	public void deleteProject() throws Exception {
-		new ACondition("Wait for Jobs") {
+		new ACondition("Wait for Jobs", 3 * 60 * 1000) {
 			@Override
 			public boolean test() throws Exception {
 				assertJobManagerIdle();
 				return true;
 			}
-		}.waitFor(3 * 60 * 1000);
+		};
 		project.delete(true, null);
 		BeansCorePlugin.setModel(realModel);
 	}
