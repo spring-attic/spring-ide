@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui,
  org.hamcrest,
  org.hamcrest.library,
  org.springframework.ide.eclipse.wizard,
- org.springframework.ide.eclipse.editor.support
+ org.springframework.ide.eclipse.editor.support,
+ org.springsource.ide.eclipse.commons.livexp
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.test

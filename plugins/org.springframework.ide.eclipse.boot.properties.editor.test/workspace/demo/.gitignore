@@ -1,3 +1,4 @@
 .classpath
 .settings
 .project
+/.apt_generated/

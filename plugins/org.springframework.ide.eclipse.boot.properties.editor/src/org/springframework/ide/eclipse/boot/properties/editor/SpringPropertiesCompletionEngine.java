@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Provider;
@@ -33,12 +35,14 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
+import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -50,6 +54,7 @@ import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
@@ -292,19 +297,17 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				Type type = getValueType(propertyName);
-				String[] valueCompletions = typeUtil.getHintValues(type, caseMode);
-				if (valueCompletions!=null && valueCompletions.length>0) {
+				Collection<String> valueCompletions = getValueHints(propertyName, caseMode);
+				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					for (int i = 0; i < valueCompletions.length; i++) {
-						String valueCandidate = valueCompletions[i];
+					for (String valueCandidate : valueCompletions) {
 						double score = FuzzyMatcher.matchScore(valuePrefix, valueCandidate);
 						if (score!=0) {
 							DocumentEdits edits = new DocumentEdits(doc);
 							edits.delete(startOfValue, offset);
 							edits.insert(offset, valueCandidate);
 							proposals.add(
-								completionFactory.valueProposal(valueCandidate, type, score, edits)
+								completionFactory.valueProposal(valueCandidate, getValueType(propertyName), score, edits)
 									//new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)
 							);
 						}
@@ -316,6 +319,29 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	private Collection<String> getValueHints(String propertyName, EnumCaseMode caseMode) {
+		HashSet<String> allHints = new HashSet<>();
+		{
+			Type type = getValueType(propertyName);
+			String[] hints = typeUtil.getHintValues(type, caseMode);
+			if (ArrayUtils.hasElements(hints)) {
+				allHints.addAll(Arrays.asList(hints));
+			}
+		}
+		{
+			PropertyInfo prop = getIndex().get(propertyName);
+			if (prop!=null) {
+				List<ValueHint> hints = prop.getValueHints();
+				if (CollectionUtil.hasElements(hints)) {
+					for (ValueHint h : hints) {
+						allHints.add(""+h.getValue());
+					}
+				}
+			}
+		}
+		return allHints;
 	}
 
 	/**

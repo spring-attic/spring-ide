@@ -937,6 +937,46 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testPropertyValueHintCompletions() throws Exception {
+		//Test that 'value hints' work when property name is associated with 'value' hints.
+		// via boot metadata.
+
+		//TODO: this should also work when hints associated with a
+		//  map property key
+		//  map property value
+		//  list property value
+
+		useProject(createPredefinedMavenProject("boot13"));
+		assertCompletionsDisplayString(
+				"spring.http.converters.preferred-json-mapper=<*>\n"
+				, //=>
+				"gson",
+				"jackson"
+		);
+
+/*
+		 TODO: value hints for a list
+		 management.health.status.order",
++    "values": [
++      {
++        "value": "UNKNOWN"
++      },
++      {
++        "value": "UP"
++      },
++      {
++        "value": "DOWN"
++      },
++      {
++        "value": "OUT_OF_SERVICE"
++      }
++    ],
+
+
+		 */
+	}
+
+
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
 //	}
