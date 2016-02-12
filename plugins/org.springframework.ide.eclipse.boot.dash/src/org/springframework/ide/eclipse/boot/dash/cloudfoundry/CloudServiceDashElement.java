@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 public class CloudServiceDashElement extends WrappingBootDashElement<String> {
 
-	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME};
+	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.TAGS};
 
 	private final CFService service;
 	private final PropertyStoreApi persistentProperties;
@@ -115,6 +115,10 @@ public class CloudServiceDashElement extends WrappingBootDashElement<String> {
 	@Override
 	public String getUrl() {
 		return service != null ? service.getDashboardUrl() : null;
+	}
+
+	public CFService getCloudService() {
+		return service;
 	}
 
 }
