@@ -22,6 +22,7 @@ public class CloudServiceGeneralPropertiesSection extends AbstractBdeGeneralProp
 	protected BootDashElementPropertyControl[] createPropertyControls() {
 		return new BootDashElementPropertyControl[] {
 				new ServiceGeneralPropertiesControl(),
+				new UrlPropertyControl(),
 				new TagsPropertyControl()
 		};
 	}

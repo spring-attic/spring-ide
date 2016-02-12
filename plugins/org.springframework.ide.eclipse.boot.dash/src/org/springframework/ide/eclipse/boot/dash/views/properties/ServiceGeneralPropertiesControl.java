@@ -12,17 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * Properties general section control for Cloud Service
@@ -32,13 +27,12 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class ServiceGeneralPropertiesControl extends AbstractBdePropertyControl {
 
-	private static final String UNDEFINED_VALUE_STR = "";
+	private static final String EMPTY_STR = "";
 
 	private Label plan;
 	private Label provider;
 	private Label version;
 	private Label type;
-	private Hyperlink dashboardUrl;
 
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
@@ -59,18 +53,6 @@ public class ServiceGeneralPropertiesControl extends AbstractBdePropertyControl 
 		page.getWidgetFactory().createLabel(composite, "Type:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		type = page.getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
 		type.setLayoutData(GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.FILL).create());
-
-		page.getWidgetFactory().createLabel(composite, "Dashboard:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
-		dashboardUrl = page.getWidgetFactory().createHyperlink(composite, null, SWT.NO_FOCUS);
-		dashboardUrl.setLayoutData(GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.FILL).create());
-		dashboardUrl.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (!dashboardUrl.getText().isEmpty()) {
-					UiUtil.openUrl(dashboardUrl.getText());
-				}
-			}
-		});
 	}
 
 	@Override
@@ -79,24 +61,16 @@ public class ServiceGeneralPropertiesControl extends AbstractBdePropertyControl 
 		if (element instanceof CloudServiceDashElement) {
 			CFService service = ((CloudServiceDashElement) element).getCloudService();
 			if (plan != null && !plan.isDisposed()) {
-				plan.setText(service == null || service.getPlan() == null ? UNDEFINED_VALUE_STR : service.getPlan());
+				plan.setText(service == null || service.getPlan() == null ? EMPTY_STR : service.getPlan());
 			}
 			if (provider != null && !provider.isDisposed()) {
-				provider.setText(service == null || service.getProvider() == null ? UNDEFINED_VALUE_STR : service.getProvider());
+				provider.setText(service == null || service.getProvider() == null ? EMPTY_STR : service.getProvider());
 			}
 			if (version != null && !version.isDisposed()) {
-				version.setText(service == null || service.getProvider() == null ? UNDEFINED_VALUE_STR : service.getVersion());
+				version.setText(service == null || service.getProvider() == null ? EMPTY_STR : service.getVersion());
 			}
 			if (type != null && !type.isDisposed()) {
-				type.setText(service == null || service.getType() == null ? UNDEFINED_VALUE_STR : service.getType());
-			}
-			if (dashboardUrl != null && !dashboardUrl.isDisposed()) {
-				dashboardUrl.setText(service == null || service.getDashboardUrl() == null ? UNDEFINED_VALUE_STR : service.getDashboardUrl());
-				int width = dashboardUrl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-				GridData data = GridDataFactory.copyData(((GridData)dashboardUrl.getLayoutData()));
-				data.widthHint = width;
-				dashboardUrl.setLayoutData(data);
-				dashboardUrl.getParent().layout();
+				type.setText(service == null || service.getType() == null ? EMPTY_STR : service.getType());
 			}
 		}
 	}
