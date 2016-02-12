@@ -132,7 +132,7 @@ public class ReconcileStrategy implements IReconcilingStrategy, IReconcilingStra
 		private IAnnotationModel fAnnotationModel;
 
 		/** Annotations to add. */
-		private Map<ReconcileProblemAnnotation, Position> fAddAnnotations;
+		private Map<Annotation, Position> fAddAnnotations;
 
 		/** Lock object for modifying the annotations. */
 		private Object fLockObject;
@@ -161,14 +161,14 @@ public class ReconcileStrategy implements IReconcilingStrategy, IReconcilingStra
 
 		public void beginCollecting() {
 			getSeverities().startReconciling();
-			fAddAnnotations= new HashMap<ReconcileProblemAnnotation, Position>();
+			fAddAnnotations= new HashMap<Annotation, Position>();
 		}
 
 		public void endCollecting() {
 			List<Annotation> toRemove= new ArrayList<Annotation>();
 			synchronized (fLockObject) {
 				@SuppressWarnings("unchecked")
-				Iterator<ReconcileProblemAnnotation> iter= fAnnotationModel.getAnnotationIterator();
+				Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
 					Annotation annotation= iter.next();
 					if (ReconcileProblemAnnotation.TYPES.contains(annotation.getType()))
