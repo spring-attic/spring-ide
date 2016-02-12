@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurati
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -137,6 +136,20 @@ public class ExposeAppAction extends RunStateAction {
 		}
 
 		return eurekaInstance;
+	}
+
+
+
+	@Override
+	public void updateVisibility() {
+		boolean visible = !getSelectedElements().isEmpty();
+		for (BootDashElement e : getSelectedElements()) {
+			if (!RunTargetTypes.LOCAL.equals(e.getTarget().getType())) {
+				visible = false;
+				break;
+			}
+		}
+		setVisible(visible);
 	}
 
 	@Override

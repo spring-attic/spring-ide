@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,16 +66,21 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 					"Local project not associated to CF app '" + appName + "'"));
 		}
 
+		boolean resetConsole = false;
 		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true));
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
 			ops.add(operations.restartAndPush(cde, debugSupport, runOrDebug, ui));
+			/*
+			 * Restart and push op resets console anyway, no need to reset it again
+			 */
 		} else if (cde.getRunState() == RunState.INACTIVE) {
-			ops.add(operations.restartOnly(cde.getProject(), appName, runOrDebug));
+			ops.add(operations.restartOnly(cde.getProject(), appName, RunState.STARTING));
+			resetConsole = true;
 		}
 
 		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
 
-		new CompositeApplicationOperation(getName(), model, appName, ops).run(monitor);
+		new CompositeApplicationOperation(getName(), model, appName, ops, null, resetConsole).run(monitor);
 	}
 
 }

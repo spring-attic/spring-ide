@@ -187,7 +187,7 @@ public class BootDashLabels implements Disposable {
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
 		if (element instanceof CloudServiceDashElement) {
-			ImageDescriptor img = BootDashActivator.getImageDescriptor("icons/service.png");
+			ImageDescriptor img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
 			return toAnimation(img, null);
 		}
 		try {

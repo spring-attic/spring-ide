@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -36,6 +35,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String MANIFEST_ICON = "manifest";
 	public static final String CLOUD_ICON = "cloud";
 	public static final String REFRESH_ICON = "refresh";
+	public static final String SERVICE_ICON = "service";
+	public static final String BOOT_ICON = "boot";
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -157,6 +158,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 		reg.put(CLOUD_ICON, getImageDescriptor("/icons/cloud_obj.png"));
 		reg.put(MANIFEST_ICON, getImageDescriptor("icons/selectmanifest.gif"));
 		reg.put(REFRESH_ICON, getImageDescriptor("/icons/refresh.gif"));
+		reg.put(SERVICE_ICON, getImageDescriptor("icons/service.png"));
+		reg.put(BOOT_ICON, getImageDescriptor("icons/boot-icon.png"));
 	}
 
 }

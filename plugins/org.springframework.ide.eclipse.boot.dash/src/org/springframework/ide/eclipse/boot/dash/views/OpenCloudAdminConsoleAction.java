@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
 /**
  * @author Martin Lippert
  */
-public class OpenCloudAdminConsoleAction extends AbstractBootDashModelAction {
+public class OpenCloudAdminConsoleAction extends AbstractCloudDashModelAction {
 
 	public OpenCloudAdminConsoleAction(LiveExpression<BootDashModel> sectionSelection, UserInteractions ui) {
 		super(sectionSelection, ui);

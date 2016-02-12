@@ -93,6 +93,15 @@
                   type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
             </input>
          </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.CloudServiceGeneralPropertiesSection"
+               filter="org.springframework.ide.eclipse.boot.dash.views.properties.CloudServiceElementFilter"
+               id="org.springframework.ide.eclipse.boot.dash.section.CloudServiceSection"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.General">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+            </input>
+         </propertySection>
       </propertySections>
    </extension>
    

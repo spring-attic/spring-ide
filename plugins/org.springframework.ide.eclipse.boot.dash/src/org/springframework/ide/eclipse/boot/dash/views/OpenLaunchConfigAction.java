@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,9 @@ public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
 	private boolean shouldShow() {
 		//Only show if all selected elements are local elements
+		if (getSelectedElements().isEmpty()) {
+			return false;
+		}
 		for (BootDashElement e : getSelectedElements()) {
 			if (!isCorrectTargetType(e)) {
 				return false;

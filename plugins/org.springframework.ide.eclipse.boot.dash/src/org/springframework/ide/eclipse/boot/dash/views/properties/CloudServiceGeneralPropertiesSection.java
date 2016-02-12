@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,24 +11,19 @@
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 /**
- * General properties section for Local apps
+ * General properties section for cloud service elements
  *
  * @author Alex Boyko
  *
  */
-public class LocalGeneralPropertiesSection extends AbstractBdeGeneralPropertiesSection {
+public class CloudServiceGeneralPropertiesSection extends AbstractBdeGeneralPropertiesSection {
 
 	@Override
 	protected BootDashElementPropertyControl[] createPropertyControls() {
 		return new BootDashElementPropertyControl[] {
-				new RunStatePropertyControl(),
-				new InstancesPropertyControl(),
-				new ProjectPropertyControl(),
-				new AppPropertyControl(),
+				new ServiceGeneralPropertiesControl(),
 				new UrlPropertyControl(),
-				new DefaultPathPropertyControl(),
-				new TagsPropertyControl(),
-				new ExposedPropertyControl()
+				new TagsPropertyControl()
 		};
 	}
 

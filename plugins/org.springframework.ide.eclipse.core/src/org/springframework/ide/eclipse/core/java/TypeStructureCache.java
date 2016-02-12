@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Spring IDE Developers
+ * Copyright (c) 2008, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.java;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -401,6 +402,8 @@ public class TypeStructureCache implements ITypeStructureCache {
 		if (newMethods == null) {
 			newMethods = TypeStructure.NoMethod;
 		}
+		
+		char[] fileName = reader.getFileName();
 
 		IBinaryMethod[] existingMs = existingType.binMethods;
 		if (newMethods.length != existingMs.length)
@@ -424,7 +427,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 								return true;
 							}
 							
-							if (!parameterAnnotationsEquals(method, existingMs[j], flags)) {
+							if (!parameterAnnotationsEquals(method, existingMs[j], fileName, flags)) {
 								return true;
 							}
 							
@@ -440,7 +443,7 @@ public class TypeStructureCache implements ITypeStructureCache {
 	}
 
 	private static boolean parameterAnnotationsEquals(IBinaryMethod newMethod,
-			IBinaryMethod existingMethod, int flags) {
+			IBinaryMethod existingMethod, char[] fileName, int flags) {
 		
 		char[][] argumentNames = newMethod.getArgumentNames();
 		char[][] existingArgumentNames = existingMethod.getArgumentNames();
@@ -455,8 +458,8 @@ public class TypeStructureCache implements ITypeStructureCache {
 			return false;
 		
 		for (int i = 0; i < argumentCount; i++) {
-			IBinaryAnnotation[] parameterAnnotations = newMethod.getParameterAnnotations(i);
-			IBinaryAnnotation[] existingParameterAnnotations = existingMethod.getParameterAnnotations(i);
+			IBinaryAnnotation[] parameterAnnotations = getParameterAnnotation(newMethod, i, fileName);
+			IBinaryAnnotation[] existingParameterAnnotations = getParameterAnnotation(existingMethod, i, fileName);
 			
 			if (!annotationsEqual(parameterAnnotations, existingParameterAnnotations, flags)) {
 				return false;
@@ -464,6 +467,37 @@ public class TypeStructureCache implements ITypeStructureCache {
 		}
 		
 		return true;
+	}
+
+	// changed API of IBinaryMethod (between Eclipse 4.5 and Eclipse 4.6)
+	// therefore adapting to this via reflection to use the correct existing method
+	private static IBinaryAnnotation[] getParameterAnnotation(IBinaryMethod newMethod, int i, char[] fileName) {
+		IBinaryAnnotation[] result = null;
+		
+		// try the old method first
+		try {
+
+			try {
+				Method getParameterAnnotationsMethod = newMethod.getClass().getMethod("getParameterAnnotations", int.class);
+				if (getParameterAnnotationsMethod != null) {
+					getParameterAnnotationsMethod.setAccessible(true);
+					result = (IBinaryAnnotation[]) getParameterAnnotationsMethod.invoke(newMethod, i);
+				}
+			} catch (NoSuchMethodException e) {
+				
+				// if the old method is not there, try the new one
+				Method getParameterAnnotationsMethod = newMethod.getClass().getMethod("getParameterAnnotations", int.class, char[].class);
+				if (getParameterAnnotationsMethod != null) {
+					getParameterAnnotationsMethod.setAccessible(true);
+					result = (IBinaryAnnotation[]) getParameterAnnotationsMethod.invoke(newMethod, i, fileName);
+				}
+			}
+			
+		} catch (Exception e) {
+			SpringCore.log(e);
+		}
+		
+		return result;
 	}
 
 	private static boolean annotationsEqual(IBinaryAnnotation[] existingAnnotations,

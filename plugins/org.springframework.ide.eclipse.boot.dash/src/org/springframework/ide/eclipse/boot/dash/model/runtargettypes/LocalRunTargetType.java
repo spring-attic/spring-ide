@@ -45,6 +45,6 @@ public class LocalRunTargetType extends AbstractRunTargetType {
 
 	@Override
 	public ImageDescriptor getIcon() {
-		return BootDashActivator.getImageDescriptor("icons/boot-icon.png");
+		return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.BOOT_ICON);
 	}
 }

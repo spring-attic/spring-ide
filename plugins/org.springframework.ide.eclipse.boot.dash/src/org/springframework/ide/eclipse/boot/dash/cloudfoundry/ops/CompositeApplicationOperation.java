@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,9 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Runs a list of {@link CloudApplicationOperation} in series
@@ -29,11 +29,19 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 
 	private RunState preferredInitialRunState;
 
+	private boolean resetConsole;
+
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<Operation<?>> operations, RunState preferredInitialRunState) {
+			List<Operation<?>> operations, RunState preferredInitialRunState, boolean resetConsole) {
 		super(opName, model, appName);
 		this.operations = operations;
 		this.preferredInitialRunState = preferredInitialRunState;
+		this.resetConsole = resetConsole;
+	}
+
+	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
+			List<Operation<?>> operations, RunState preferredInitialRunState) {
+		this(opName, model, appName, operations, preferredInitialRunState, true);
 	}
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
@@ -75,7 +83,9 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			}
 
 			// Run ops in series
-			resetAndShowConsole();
+			if (resetConsole) {
+				resetAndShowConsole();
+			}
 
 			for (Operation<?> op : operations) {
 				op.run(monitor);
@@ -85,7 +95,7 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			if (!(t instanceof OperationCanceledException)) {
 				eventHandler.onError(appName, t);
 			}
-			throw t instanceof Exception ? (Exception) t : new CoreException(BootDashActivator.createErrorStatus(t));
+			throw t instanceof Exception ? (Exception) t : new CoreException(ExceptionUtil.status(t));
 		}
 	}
 }

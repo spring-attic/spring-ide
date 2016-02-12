@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,6 +83,9 @@ public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootD
 
 	protected boolean shouldShowFor(Collection<BootDashElement> selectedElements) {
 		//Only visible if all selected elements belong to the correct runtarget type
+		if (selectedElements.isEmpty()) {
+			return false;
+		}
 		for (BootDashElement e : selectedElements) {
 			if (!isCorrectTargetType(e.getBootDashModel())) {
 				return false;

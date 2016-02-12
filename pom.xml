@@ -488,6 +488,50 @@
 		</profile>
 		
 		<profile>
+			<id>e46</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.6</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e46</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.6/</url>
+				</repository>
+				<repository>
+					<id>mars</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/neon/</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/46/dev/update</url>
+				</repository>
+				<repository>
+					<id>orbit-neon</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/S20151204220443/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/snapshots</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
+				</repository>
+			</repositories>
+		</profile>
+		
+		<profile>
 			<id>bamboo-signing</id>
 			<properties>
 				<signing.store.password>${env.bamboo_signing_store_password}</signing.store.password>
