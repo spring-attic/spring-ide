@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -75,6 +73,23 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	public void updateEnablement() {
 		Collection<BootDashElement> selecteds = getSelectedElements();
 		setEnabled(appliesTo(selecteds));
+	}
+
+	@Override
+	public void updateVisibility() {
+		/**
+		 * TODO: Evaluate possibility of adding new API on BootDashModel and/or
+		 * BootDashElement to check whether element supports run states.
+		 * Currently run state == null means element doesn't support run states
+		 */
+		boolean visible = !getSelectedElements().isEmpty();
+		for (BootDashElement e : getSelectedElements()) {
+			if (e.getRunState() == null) {
+				visible = false;
+				break;
+			}
+		}
+		setVisible(visible);
 	}
 
 	private boolean appliesTo(Collection<BootDashElement> selection) {
