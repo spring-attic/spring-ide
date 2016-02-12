@@ -21,19 +21,37 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
+
 /**
  * @author Kris De Volder
  */
 public class TypeUtilTests extends SpringPropertiesEditorTestHarness {
 
 	private Type getPropertyType(Type type, String propName, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
-		List<TypedProperty> props = engine.getTypeUtil().getProperties(type, enumMode, beanMode);
+		List<TypedProperty> props = getProperties(type, enumMode, beanMode);
 		for (TypedProperty prop : props) {
 			if (prop.getName().equals(propName)) {
 				return prop.getType();
 			}
 		}
 		return null;
+	}
+
+	private List<TypedProperty> getProperties(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
+		return engine.getTypeUtil().getProperties(type, enumMode, beanMode);
+	}
+
+	public void testGetTrickyProperties() throws Exception {
+		IProject p = createPredefinedMavenProject("demo");
+		useProject(p);
+
+		List<TypedProperty> props = getProperties(TypeParser.parse("demo.TrickyGetters"), EnumCaseMode.LOWER_CASE, BeanPropertyNameMode.HYPHENATED);
+		String[] actualNames = new String[props.size()];
+		for (int i = 0; i < actualNames.length; i++) {
+			actualNames[i] = props.get(i).getName();
+		}
+		assertElements(actualNames, "public-property"); //static and private properties should not be included.
 	}
 
 	public void testGetProperties() throws Exception {

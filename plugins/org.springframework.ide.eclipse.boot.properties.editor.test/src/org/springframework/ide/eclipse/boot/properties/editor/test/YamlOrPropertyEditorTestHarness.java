@@ -532,6 +532,10 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	protected IProject createPredefinedMavenProject(final String projectName) throws Exception {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		if (project.exists()) {
+			return project;
+		}
 		StsTestUtil.setAutoBuilding(false);
 		ImportConfiguration importConf = new ImportConfiguration() {
 
@@ -567,7 +571,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		runner.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		runner.schedule();
 
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		waitForImportJob(project, runner);
 //		BootProjectTestHarness.assertNoErrors(project);
 		return project;
@@ -661,17 +664,20 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * Checks that completions contains a completion with a given display string (and check that
 	 * it applies as expected).
 	 */
-	public void assertCompletionWithLabel(String textBefore, String label, String expectTextAfter) throws Exception {
+	public void assertCompletionWithLabel(String textBefore, String expectLabel, String expectTextAfter) throws Exception {
 		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		ICompletionProposal[] completions = getCompletions(editor);
 		ICompletionProposal completion = null;
+		StringBuilder found = new StringBuilder();
 		for (ICompletionProposal c : completions) {
-			if (c.getDisplayString().equals(label)) {
+			String actualLabel = c.getDisplayString();
+			found.append(actualLabel+"\n");
+			if (actualLabel.equals(expectLabel)) {
 				completion = c;
 				break;
 			}
 		}
-		assertNotNull("No completion found with label '"+label+"'", completion);
+		assertNotNull("No completion found with label '"+expectLabel+"' in:\n"+found, completion);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
 	}

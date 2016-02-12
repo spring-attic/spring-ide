@@ -14,6 +14,7 @@ import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayU
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.hasElements;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
 
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -27,10 +28,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -46,7 +49,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Always
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.MediaType;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -542,6 +548,25 @@ public class TypeUtil {
 				return names;
 			}
 		});
+		valueHints("org.springframework.util.MimeType", new LazyProvider<String[]>() {
+			@Override
+			protected String[] compute() {
+				try {
+					Field f = MediaType.class.getDeclaredField("KNOWN_TYPES");
+					f.setAccessible(true);
+					@SuppressWarnings("unchecked")
+					Map<MediaType, MediaType> map = (Map<MediaType, MediaType>) f.get(null);
+					TreeSet<String> mediaTypes = new TreeSet<>();
+					for (MediaType m : map.keySet()) {
+						mediaTypes.add(m.toString());
+					}
+					return mediaTypes.toArray(new String[mediaTypes.size()]);
+				} catch (Exception e) {
+					BootActivator.log(e);
+				}
+				return null;
+			}
+		});
 	}
 
 	/**
@@ -657,16 +682,18 @@ public class TypeUtil {
 				if (ArrayUtils.hasElements(allMethods)) {
 					ArrayList<IMethod> getters = new ArrayList<IMethod>();
 					for (IMethod m : allMethods) {
-						String mname = m.getElementName();
-						if (
-								(mname.startsWith("get") && mname.length()>=4) ||
-								(mname.startsWith("is") && mname.length()>=3)
-						) {
-							//Need at least 4 chars or the property name will be empty.
-							String sig = m.getSignature();
-							int numParams = Signature.getParameterCount(sig);
-							if (numParams==0) {
-								getters.add(m);
+						if (!isStatic(m) && isPublic(m)) {
+							String mname = m.getElementName();
+							if (
+									(mname.startsWith("get") && mname.length()>=4) ||
+									(mname.startsWith("is") && mname.length()>=3)
+							) {
+								//Need at least 4 chars or the property name will be empty.
+								String sig = m.getSignature();
+								int numParams = Signature.getParameterCount(sig);
+								if (numParams==0) {
+									getters.add(m);
+								}
 							}
 						}
 					}
@@ -704,6 +731,29 @@ public class TypeUtil {
 //		}
 //		return null;
 //	}
+
+	private boolean isStatic(IMethod m) {
+		try {
+			return Flags.isStatic(m.getFlags());
+		} catch (JavaModelException e) {
+			//Couldn't determine if it was public or not... let's assume it was NOT
+			// (will result in potentially more CA completions)
+			BootActivator.log(e);
+			return false;
+		}
+	}
+
+	private boolean isPublic(IMethod m) {
+		try {
+			return m.getDeclaringType().isInterface()
+				|| Flags.isPublic(m.getFlags());
+		} catch (JavaModelException e) {
+			//Couldn't determine if it was public or not... let's assume it WAS
+			// (will result in potentially more CA completions)
+			BootActivator.log(e);
+			return true;
+		}
+	}
 
 	public Map<String, TypedProperty> getPropertiesMap(Type type, EnumCaseMode enumMode, BeanPropertyNameMode beanMode) {
 		//TODO: optimize, produce directly as a map instead of
