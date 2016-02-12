@@ -49,8 +49,9 @@ import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
 import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import junit.framework.TestCase;
 

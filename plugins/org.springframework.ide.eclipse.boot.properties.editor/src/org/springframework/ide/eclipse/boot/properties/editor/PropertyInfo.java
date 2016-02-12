@@ -17,6 +17,9 @@ import java.util.List;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.boot.configurationmetadata.Deprecation;
+import org.springframework.boot.configurationmetadata.ValueHint;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Information about a spring property, basically, this is the same as
@@ -60,10 +63,11 @@ public class PropertyInfo {
 	final private String description;
 	private List<PropertySource> sources;
 	private Deprecation deprecation;
+	final private ImmutableList<ValueHint> valueHints;
 
 	public PropertyInfo(String id, String type, String name,
 			Object defaultValue, String description,
-			Deprecation deprecation,
+			Deprecation deprecation, List<ValueHint> valueHints,
 			List<PropertySource> sources) {
 		super();
 		this.id = id;
@@ -72,6 +76,7 @@ public class PropertyInfo {
 		this.defaultValue = defaultValue;
 		this.description = description;
 		this.deprecation = deprecation;
+		this.valueHints = valueHints==null?null:ImmutableList.copyOf(valueHints);
 		this.sources = sources;
 	}
 	public PropertyInfo(ConfigurationMetadataProperty prop) {
@@ -82,6 +87,7 @@ public class PropertyInfo {
 			prop.getDefaultValue(),
 			prop.getDescription(),
 			prop.getDeprecation(),
+			prop.getValueHints(),
 			null
 		);
 	}
@@ -99,6 +105,10 @@ public class PropertyInfo {
 	}
 	public String getDescription() {
 		return description;
+	}
+
+	public List<ValueHint> getValueHints() {
+		return valueHints;
 	}
 
 	public List<PropertySource> getSources() {
@@ -123,7 +133,7 @@ public class PropertyInfo {
 		if (alias.equals(id)) {
 			return this;
 		}
-		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, sources);
+		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, valueHints, sources);
 	}
 
 	public void setDeprecation(Deprecation d) {

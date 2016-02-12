@@ -11,14 +11,19 @@
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
@@ -28,6 +33,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyPr
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.JavaTypeNavigationHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -154,6 +160,13 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			this.type = type;
 		}
 
+		private PropertyInfo getPropertyInfo() {
+			if (parent instanceof IndexContext) {
+				return ((IndexContext)parent).indexNav.getExactMatch();
+			}
+			return null;
+		}
+
 		@Override
 		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
 			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
@@ -238,7 +251,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
-			String[] values = typeUtil.getHintValues(type, enumCaseMode);
+			Collection<String> values = getHintValues(enumCaseMode);
 			if (values!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (String value : values) {
@@ -253,6 +266,26 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				return completions;
 			}
 			return Collections.emptyList();
+		}
+
+		protected Collection<String> getHintValues(EnumCaseMode enumCaseMode) {
+			HashSet<String> allHints = new HashSet<>();
+			{
+				String[] hints = typeUtil.getHintValues(type, enumCaseMode);
+				if (ArrayUtils.hasElements(hints)) {
+					allHints.addAll(Arrays.asList(hints));
+				}
+			}
+			{
+				PropertyInfo prop = getPropertyInfo();
+				if (prop!=null) {
+					List<ValueHint> hints = prop.getValueHints();
+					for (ValueHint h : hints) {
+						allHints.add(""+h.getValue());
+					}
+				}
+			}
+			return allHints;
 		}
 
 		@Override
