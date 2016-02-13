@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -21,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
@@ -126,7 +126,8 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 
 		Map<String, Object> cloudData = model.buildOperationCloudData(mon, project, null);
 
-		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, cloudData);
+		IFile manifestFile = getDashElement() != null ? getDashElement().getDeploymentManifestFile() : null;
+		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, cloudData, manifestFile);
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),
