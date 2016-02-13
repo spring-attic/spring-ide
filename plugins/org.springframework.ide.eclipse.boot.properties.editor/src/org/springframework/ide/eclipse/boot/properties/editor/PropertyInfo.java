@@ -18,6 +18,10 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
+import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 
 import com.google.common.collect.ImmutableList;
 
@@ -107,8 +111,20 @@ public class PropertyInfo {
 		return description;
 	}
 
-	public List<ValueHint> getValueHints() {
-		return valueHints;
+	public HintProvider getHints(TypeUtil typeUtil, boolean dimensionAware) {
+		if (CollectionUtil.hasElements(valueHints)) {
+			if (dimensionAware) {
+				Type type = TypeParser.parse(this.type);
+				if (TypeUtil.isSequencable(type) || TypeUtil.isMap(type)) {
+					return HintProviders.forDomainAt(valueHints, TypeUtil.getDimensionality(type));
+				} else {
+					return HintProviders.forHere(valueHints);
+				}
+			} else {
+				return HintProviders.forAllValueContexts(valueHints);
+			}
+		}
+		return null;
 	}
 
 	public List<PropertySource> getSources() {

@@ -848,6 +848,25 @@ public class TypeUtil {
 		return null;
 	}
 
+	/**
+	 * Determine the dimensionality of a collection-like type (i.e. a Map or List). The dimensionality
+	 * is essentialy how many succesive 'indexing' operations need to be applied before reasing the actual elements.
+	 * <p>
+	 * For examle:
+	 * List<String> -> 1
+	 * List<List<String>> -> 2
+	 * List<List<List<String>>> -> 2
+	 * Map<*,List<String>> -> 2
+	 */
+	public static int getDimensionality(Type type) {
+		int dim = 0;
+		while (isSequencable(type) || isMap(type)) {
+			dim++;
+			type = getDomainType(type);
+		}
+		return dim;
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Addapting our interface so it is compatible with YTypeUtil
 	//
