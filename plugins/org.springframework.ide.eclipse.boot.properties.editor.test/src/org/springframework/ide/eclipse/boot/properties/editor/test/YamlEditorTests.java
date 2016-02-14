@@ -2507,28 +2507,9 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		//TODO: this should also work when hints associated with a
 		//  map property key
 		//  map property value
-		//  list property value
 
 		useProject(createPredefinedMavenProject("boot13"));
 
-		/*
-
-  {
-+    "name": "spring.http.converters.preferred-json-mapper",
-+    "values": [
-+      {
-+        "value": "gson"
-+      },
-+      {
-+        "value": "jackson"
-+      }
-+    ],
-+    "providers": [
-+      {
-+        "name": "any"
-+      }
-+    ]
-*/
 		assertCompletionsDisplayString(
 				"spring:\n" +
 				"  http:\n" +
@@ -2539,26 +2520,37 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"jackson"
 		);
 
-/*
-		 TODO: value hints for a list
-		 management.health.status.order",
-+    "values": [
-+      {
-+        "value": "UNKNOWN"
-+      },
-+      {
-+        "value": "UP"
-+      },
-+      {
-+        "value": "DOWN"
-+      },
-+      {
-+        "value": "OUT_OF_SERVICE"
-+      }
-+    ],
+	}
 
+	public void testPropertyListHintCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
 
-		 */
+		assertCompletion(
+				"management:\n" +
+				"  health:\n" +
+				"    status:\n" +
+				"      ord<*>"
+				, //=>
+				"management:\n" +
+				"  health:\n" +
+				"    status:\n" +
+				"      order:\n"+
+				"        - <*>"
+		);
+
+		assertCompletionsDisplayString(
+				"management:\n" +
+				"  health:\n" +
+				"    status:\n" +
+				"      order:\n" +
+				"        - <*>"
+				, //=>
+				"DOWN",
+				"OUT_OF_SERVICE",
+				"UNKNOWN",
+				"UP"
+		);
+
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////

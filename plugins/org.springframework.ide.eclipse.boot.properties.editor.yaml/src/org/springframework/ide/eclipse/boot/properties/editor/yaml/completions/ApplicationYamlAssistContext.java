@@ -27,6 +27,7 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
+import org.springframework.ide.eclipse.boot.properties.editor.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
@@ -152,19 +153,19 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		private PropertyCompletionFactory completionFactory;
 		private Type type;
 		private ApplicationYamlAssistContext parent;
+		private HintProvider hints;
 
-		public TypeContext(ApplicationYamlAssistContext parent, YamlPath contextPath, Type type, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+		public TypeContext(ApplicationYamlAssistContext parent, YamlPath contextPath, Type type,
+				PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf, HintProvider hints) {
 			super(parent.documentSelector, contextPath, typeUtil, conf);
 			this.parent = parent;
 			this.completionFactory = completionFactory;
 			this.type = type;
+			this.hints = hints;
 		}
 
-		private PropertyInfo getPropertyInfo() {
-			if (parent instanceof IndexContext) {
-				return ((IndexContext)parent).indexNav.getExactMatch();
-			}
-			return null;
+		private HintProvider getPropertyInfo() {
+			return hints;
 		}
 
 		@Override
@@ -277,9 +278,9 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				}
 			}
 			{
-				PropertyInfo prop = getPropertyInfo();
-				if (prop!=null) {
-					List<ValueHint> hints = prop.getValueHints();
+				HintProvider hintProvider = getPropertyInfo();
+				if (hintProvider!=null) {
+					List<ValueHint> hints = hintProvider.getValueHints();
 					for (ValueHint h : hints) {
 						allHints.add(""+h.getValue());
 					}
@@ -309,7 +310,8 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 
 		private AbstractYamlAssistContext contextWith(YamlPathSegment s, Type nextType) {
 			if (nextType!=null) {
-				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil, conf);
+				return new TypeContext(this, contextPath.append(s), nextType, completionFactory, typeUtil, conf,
+						new YamlPath(s).traverse(hints));
 			}
 			return null;
 		}
@@ -429,7 +431,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				} else if (subIndex.getExactMatch()!=null) {
 					IndexContext asIndexContext = new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
 					PropertyInfo prop = subIndex.getExactMatch();
-					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil, conf);
+					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil, conf, prop.getHints(typeUtil, true));
 				}
 			}
 			//Unsuported navigation => no context for assist

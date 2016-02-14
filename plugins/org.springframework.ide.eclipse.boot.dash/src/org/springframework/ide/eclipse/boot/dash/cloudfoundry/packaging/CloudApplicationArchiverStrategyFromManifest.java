@@ -52,9 +52,7 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 
 	private String getArchivePath(IProgressMonitor mon) {
 		if (parser.hasManifest()) {
-			if (parser.hasManifest()) {
-				return parser.getApplicationProperty(applicationName, ApplicationManifestHandler.PATH_PROP, mon);
-			}
+			return parser.getApplicationProperty(applicationName, ApplicationManifestHandler.PATH_PROP, mon);
 		}
 		return null;
 	}

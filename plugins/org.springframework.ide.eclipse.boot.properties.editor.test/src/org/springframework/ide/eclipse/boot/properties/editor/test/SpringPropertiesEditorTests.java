@@ -953,27 +953,35 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"gson",
 				"jackson"
 		);
+	}
 
-/*
-		 TODO: value hints for a list
-		 management.health.status.order",
-+    "values": [
-+      {
-+        "value": "UNKNOWN"
-+      },
-+      {
-+        "value": "UP"
-+      },
-+      {
-+        "value": "DOWN"
-+      },
-+      {
-+        "value": "OUT_OF_SERVICE"
-+      }
-+    ],
+	public void testPropertyListHintCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
 
+		assertCompletion(
+				"management.health.status.ord<*>"
+				, //=>
+				"management.health.status.order=<*>"
+		);
 
-		 */
+		assertCompletionsDisplayString(
+				"management.health.status.order=<*>"
+				, //=>
+				"DOWN",
+				"OUT_OF_SERVICE",
+				"UNKNOWN",
+				"UP"
+		);
+
+		assertCompletionsDisplayString(
+				"management.health.status.order=DOWN,<*>"
+				, //=>
+				"DOWN",
+				"OUT_OF_SERVICE",
+				"UNKNOWN",
+				"UP"
+		);
+
 	}
 
 

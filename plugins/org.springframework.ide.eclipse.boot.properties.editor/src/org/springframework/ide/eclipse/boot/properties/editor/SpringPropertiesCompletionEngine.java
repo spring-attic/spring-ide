@@ -76,6 +76,12 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	public static final boolean DEFAULT_VALUE_INCLUDED = false; //might make sense to make this user configurable
 
+	private static final PrefixFinder valuePrefixFinder = new PrefixFinder() {
+		protected boolean isPrefixChar(char c) {
+			return !Character.isWhitespace(c) && !isAssign(c) && c!=',';
+		}
+	};
+
 	private static final PrefixFinder fuzzySearchPrefix = new PrefixFinder() {
 		protected boolean isPrefixChar(char c) {
 			return !Character.isWhitespace(c);
@@ -284,15 +290,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
 		int regionStart = valuePartition.getOffset();
-		int startOfValue = findValueStart(doc, regionStart);
 		try {
-			String valuePrefix;
-			if (startOfValue>=0 && startOfValue<offset) {
-				valuePrefix = doc.get(startOfValue, offset-startOfValue);
-			} else {
-				startOfValue = offset;
-				valuePrefix = "";
-			}
+			String valuePrefix = valuePrefixFinder.getPrefix(doc, offset);
+			int startOfValue = offset - valuePrefix.length();
 			EnumCaseMode caseMode = caseMode(valuePrefix);
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
@@ -322,9 +322,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	}
 
 	private Collection<String> getValueHints(String propertyName, EnumCaseMode caseMode) {
+		Type type = getValueType(propertyName);
 		HashSet<String> allHints = new HashSet<>();
 		{
-			Type type = getValueType(propertyName);
 			String[] hints = typeUtil.getHintValues(type, caseMode);
 			if (ArrayUtils.hasElements(hints)) {
 				allHints.addAll(Arrays.asList(hints));
@@ -333,10 +333,13 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		{
 			PropertyInfo prop = getIndex().get(propertyName);
 			if (prop!=null) {
-				List<ValueHint> hints = prop.getValueHints();
-				if (CollectionUtil.hasElements(hints)) {
-					for (ValueHint h : hints) {
-						allHints.add(""+h.getValue());
+				HintProvider hintProvider = prop.getHints(typeUtil, false);
+				if (hintProvider!=null) {
+					List<ValueHint> hints = hintProvider.getValueHints();
+					if (CollectionUtil.hasElements(hints)) {
+						for (ValueHint h : hints) {
+							allHints.add(""+h.getValue());
+						}
 					}
 				}
 			}
