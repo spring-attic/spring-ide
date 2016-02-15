@@ -14,12 +14,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
@@ -75,15 +78,15 @@ public class CompletionFactory {
 
 	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
-	public ScoreableProposal simpleProposal(String name, int sortingOrder, ProposalApplier applier) {
-		return simpleProposal(name, -(1.0+sortingOrder), applier);
+	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier) {
+		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier);
 	}
 
-	public ScoreableProposal simpleProposal(String name, double score, ProposalApplier applier) {
-		return new SimpleProposal(name, score, applier);
+	public ScoreableProposal simpleProposal(String name, String pattern, double score, ProposalApplier applier) {
+		return new SimpleProposal(name, pattern, score, applier);
 	}
 
-	public static abstract class ScoreableProposal implements ICompletionProposal, ICompletionProposalExtension4 {
+	public static abstract class ScoreableProposal implements ICompletionProposal, ICompletionProposalExtension4, ICompletionProposalExtension6 {
 		private static final double DEEMP_VALUE = 100000; // should be large enough to move deemphasized stuff to bottom of list.
 
 		private double deemphasizedBy = 0.0;
@@ -103,6 +106,45 @@ public class CompletionFactory {
 		public boolean isAutoInsertable() {
 			return !isDeemphasized();
 		}
+
+		public StyledString getStyledDisplayString() {
+			StyledString result = new StyledString();
+			highlightPattern(getHighlightPattern(), getBaseDisplayString(), result);
+			return result;
+		}
+
+		private void highlightPattern(String pattern, String data, StyledString result) {
+			Styler highlightStyle = CompletionFactory.HIGHLIGHT;
+			Styler plainStyle = isDeemphasized()?CompletionFactory.DEEMPHASIZE:CompletionFactory.NULL_STYLER;
+			if (isDeprecated()) {
+				highlightStyle = CompletionFactory.compose(highlightStyle, CompletionFactory.DEPRECATE);
+				plainStyle = CompletionFactory.compose(plainStyle, CompletionFactory.DEPRECATE);
+			}
+			if (StringUtils.hasText(pattern)) {
+				int dataPos = 0;	int dataLen = data.length();
+				int patternPos = 0; int patternLen = pattern.length();
+
+				while (dataPos<dataLen && patternPos<patternLen) {
+					int pChar = pattern.charAt(patternPos++);
+					int highlightPos = data.indexOf(pChar, dataPos);
+					if (dataPos<highlightPos) {
+						result.append(data.substring(dataPos, highlightPos), plainStyle);
+					}
+					result.append(data.charAt(highlightPos), highlightStyle);
+					dataPos = highlightPos+1;
+				}
+				if (dataPos<dataLen) {
+					result.append(data.substring(dataPos), plainStyle);
+				}
+			} else { //no pattern to highlight
+				result.append(data, plainStyle);
+			}
+		}
+
+		protected abstract boolean isDeprecated();
+		protected abstract String getHighlightPattern();
+		protected abstract String getBaseDisplayString();
+
 	}
 
 	private static class SimpleProposal extends ScoreableProposal {
@@ -110,11 +152,13 @@ public class CompletionFactory {
 		private String value;
 		private ProposalApplier applier;
 		private double score;
+		private String pattern;
 
-		public SimpleProposal(String value, double score, ProposalApplier applier) {
+		public SimpleProposal(String value, String pattern, double score, ProposalApplier applier) {
 			this.score = score;
 			this.value = value;
 			this.applier = applier;
+			this.pattern = pattern;
 		}
 
 		@Override
@@ -159,6 +203,21 @@ public class CompletionFactory {
 		@Override
 		public double getBaseScore() {
 			return score;
+		}
+
+		@Override
+		protected boolean isDeprecated() {
+			return false;
+		}
+
+		@Override
+		protected String getHighlightPattern() {
+			return pattern;
+		}
+
+		@Override
+		protected String getBaseDisplayString() {
+			return value;
 		}
 	}
 
@@ -217,12 +276,12 @@ public class CompletionFactory {
 		};
 	}
 
-	public ScoreableProposal valueProposal(String value, YType yType, double score, ProposalApplier applier) {
-		return simpleProposal(value, score, applier);
+	public ScoreableProposal valueProposal(String value, String pattern, YType yType, double score, ProposalApplier applier) {
+		return simpleProposal(value, pattern, score, applier);
 	}
 
-	public ScoreableProposal valueProposal(String value, YType type, int order, ProposalApplier applier) {
-		return valueProposal(value, type, -(1.0+order), applier);
+	public ScoreableProposal valueProposal(String value, String pattern, YType type, int order, ProposalApplier applier) {
+		return valueProposal(value, pattern, type, -(1.0+order), applier);
 	}
 
 }

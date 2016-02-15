@@ -1,5 +1,7 @@
 logging:
   level:
+    root: fatal
+    some.package: info
     
     
     

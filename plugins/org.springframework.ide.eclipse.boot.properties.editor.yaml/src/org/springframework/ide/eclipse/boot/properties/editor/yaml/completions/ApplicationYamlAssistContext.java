@@ -277,7 +277,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
 						edits.delete(offset-query.length(), offset);
 						edits.insert(offset, value);
-						completions.add(completionFactory.valueProposal(value, type, score, edits));
+						completions.add(completionFactory.valueProposal(value, query, type, score, edits));
 					}
 				}
 				return completions;

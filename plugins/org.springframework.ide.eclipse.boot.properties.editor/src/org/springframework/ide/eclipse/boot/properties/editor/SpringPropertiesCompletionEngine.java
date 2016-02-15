@@ -338,9 +338,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
 		int regionStart = valuePartition.getOffset();
 		try {
-			String valuePrefix = valuePrefixFinder.getPrefix(doc, offset);
-			int startOfValue = offset - valuePrefix.length();
-			EnumCaseMode caseMode = caseMode(valuePrefix);
+			String query = valuePrefixFinder.getPrefix(doc, offset);
+			int startOfValue = offset - query.length();
+			EnumCaseMode caseMode = caseMode(query);
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
@@ -348,13 +348,13 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (String valueCandidate : valueCompletions) {
-						double score = FuzzyMatcher.matchScore(valuePrefix, valueCandidate);
+						double score = FuzzyMatcher.matchScore(query, valueCandidate);
 						if (score!=0) {
 							DocumentEdits edits = new DocumentEdits(doc);
 							edits.delete(startOfValue, offset);
 							edits.insert(offset, valueCandidate);
 							proposals.add(
-								completionFactory.valueProposal(valueCandidate, getValueType(propertyName), score, edits)
+								completionFactory.valueProposal(valueCandidate, query, getValueType(propertyName), score, edits)
 									//new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)
 							);
 						}
