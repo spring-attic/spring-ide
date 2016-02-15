@@ -369,25 +369,6 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		return null;
 	}
 
-	private int findValueStart(IDocument doc, int pos) {
-		try {
-			pos = DocumentUtil.skipWhiteSpace(doc, pos);
-			if (pos>=0) {
-				char assign = doc.getChar(pos);
-				if (!isAssign(assign)) {
-					return pos; //For the case where key and value are separated by whitespace instead of assignment
-				}
-				pos = DocumentUtil.skipWhiteSpace(doc, pos+1);
-				if (pos>=0) {
-					return pos;
-				}
-			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
-		}
-		return -1;
-	}
-
 	private List<Match<PropertyInfo>> findMatches(String prefix) {
 		List<Match<PropertyInfo>> matches = getIndex().find(camelCaseToHyphens(prefix));
 		return matches;

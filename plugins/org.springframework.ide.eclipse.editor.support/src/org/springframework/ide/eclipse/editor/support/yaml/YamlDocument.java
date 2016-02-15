@@ -166,5 +166,9 @@ public class YamlDocument {
 		return doc.getLineInformationOfOffset(offset).getOffset();
 	}
 
+	@Override
+	public String toString() {
+		return "YamlDocument("+getDocument().get()+")";
+	}
 
 }

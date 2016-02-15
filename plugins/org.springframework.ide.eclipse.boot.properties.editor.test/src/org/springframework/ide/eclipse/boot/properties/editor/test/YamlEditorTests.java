@@ -2550,7 +2550,24 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"UNKNOWN",
 				"UP"
 		);
+	}
 
+	public void testPropertyMapValueCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+
+		assertCompletionsDisplayString(
+				"logging:\n" +
+				"  level:\n" +
+				"    some.package: <*>"
+				, // =>
+				"trace",
+				"debug",
+				"info",
+				"warn",
+				"error",
+				"fatal",
+				"off"
+		);
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////

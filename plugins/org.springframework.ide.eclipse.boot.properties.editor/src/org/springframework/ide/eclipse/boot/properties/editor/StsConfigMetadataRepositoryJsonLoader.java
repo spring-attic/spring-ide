@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,6 @@ import static org.springframework.ide.eclipse.boot.properties.editor.SpringPrope
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -209,49 +207,11 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		}
 	}
 
-	private void jarDump(JarFile jarFile) {
-		Enumeration<JarEntry> entries = jarFile.entries();
-		while (entries.hasMoreElements()) {
-			JarEntry e = entries.nextElement();
-			System.out.println(e.getName());
-		}
-	}
-
-
-
-//	/**
-//	 * Load the {@link ConfigMetadataRepository} with the metadata defined by
-//	 * the specified {@code resources}. If the same config metadata items is
-//	 * held within different resources, the first that is loaded is kept.
-//	 */
-//	public ConfigMetadataRepository load(Collection<IFile> resources) throws IOException {
-//		Assert.notNull(resources, "Resources must not be null");
-//		if (resources.size() == 1) {
-//			return load(resources.iterator().next());
-//		}
-//
-//		SimpleConfigMetadataRepository repository = new SimpleConfigMetadataRepository();
-//		for (IResource resource : resources) {
-//			ConfigMetadataRepository repo = load(resource);
-//			repository.include(repo);
-//		}
-//		return repository;
-//	}
-//
-//	private ConfigMetadataRepository load(Resource resource) throws IOException {
-//		InputStream in = resource.getInputStream();
-//		try {
-//			return mapper.readRepository(in);
-//		}
-//		catch (IOException e) {
-//			throw new IllegalStateException("Failed to read config metadata from '" + resource + "'", e);
-//		}
-//		catch (JSONException e) {
-//			throw new IllegalStateException("Invalid config metadata document defined at '" + resource + "'", e);
-//		}
-//
-//		finally {
-//			in.close();
+//	private void jarDump(JarFile jarFile) {
+//		Enumeration<JarEntry> entries = jarFile.entries();
+//		while (entries.hasMoreElements()) {
+//			JarEntry e = entries.nextElement();
+//			System.out.println(e.getName());
 //		}
 //	}
 

@@ -238,6 +238,36 @@ public class YamlStructureParserTest extends ApplicationYamlEditorTestHarness {
 
 	}
 
+	public void testKeyWithADot() throws Exception {
+		MockYamlEditor editor;
+
+		//First try without a '.'
+		editor = new YamlEditor(
+				"logging:\n" +
+				"  level:\n" +
+				"    somepackage: "
+		);
+		assertParseOneDoc(editor,
+				"DOC(0): ",
+				"  KEY(0): logging:",
+				"    KEY(2): level:",
+				"      KEY(4): somepackage:"
+		);
+
+		editor = new YamlEditor(
+				"logging:\n" +
+				"  level:\n" +
+				"    some.package: "
+		);
+		assertParseOneDoc(editor,
+				"DOC(0): ",
+				"  KEY(0): logging:",
+				"    KEY(2): level:",
+				"      KEY(4): some.package:"
+		);
+
+	}
+
 	public void testSequenceWithNestedSequence() throws Exception {
 		MockYamlEditor editor;
 
