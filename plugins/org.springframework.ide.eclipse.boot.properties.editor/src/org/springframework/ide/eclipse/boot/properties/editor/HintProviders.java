@@ -112,7 +112,7 @@ public class HintProviders {
 		};
 	}
 
-	public static HintProvider forMap(final ImmutableList<ValueHint> keyHints, final ImmutableList<ValueHint> valueHints, final Type valueType) {
+	public static HintProvider forPropertiesMap(final ImmutableList<ValueHint> keyHints, final ImmutableList<ValueHint> valueHints, final Type valueType) {
 		return new HintProvider() {
 
 			@Override
@@ -128,7 +128,52 @@ public class HintProviders {
 
 			@Override
 			public List<ValueHint> getValueHints() {
-				return ImmutableList.of();
+				return valueHints;
+			}
+
+			@Override
+			public List<TypedProperty> getPropertyHints(EnumCaseMode enumCaseMode, BeanPropertyNameMode beanMode) {
+				if (CollectionUtil.hasElements(keyHints)) {
+					List<TypedProperty> props = new ArrayList<>(keyHints.size());
+					for (ValueHint keyHint : keyHints) {
+						Object key = keyHint.getValue();
+						if (key instanceof String) {
+							props.add(new TypedProperty((String)key, valueType, null));
+						}
+					}
+					return props;
+				}
+				return null;
+			}
+		};
+	}
+
+	public static HintProvider forMap(final ImmutableList<ValueHint> keyHints, final ImmutableList<ValueHint> valueHints, final Type valueType, final boolean dimensionAware) {
+		return new HintProvider() {
+
+			@Override
+			public HintProvider traverse(YamlPathSegment s) throws Exception {
+				switch (s.getType()) {
+				case VAL_AT_INDEX:
+				case VAL_AT_KEY:
+					if (dimensionAware) {
+						return forHere(valueHints);
+					} else {
+						return forAllValueContexts(valueHints);
+					}
+				default:
+					return null;
+				}
+			}
+
+			@Override
+			public List<ValueHint> getValueHints() {
+				if (dimensionAware) {
+					//pickier, completions only suggested
+					return ImmutableList.of();
+				} else {
+					return valueHints;
+				}
 			}
 
 			@Override

@@ -2503,11 +2503,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	public void testPropertyValueHintCompletions() throws Exception {
 		//Test that 'value hints' work when property name is associated with 'value' hints.
 		// via boot metadata.
-
-		//TODO: this should also work when hints associated with a
-		//  map property key
-		//  map property value
-
 		useProject(createPredefinedMavenProject("boot13"));
 
 		assertCompletionsDisplayString(

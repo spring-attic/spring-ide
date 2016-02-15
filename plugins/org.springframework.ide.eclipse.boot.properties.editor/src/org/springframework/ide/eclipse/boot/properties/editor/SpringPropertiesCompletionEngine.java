@@ -59,6 +59,8 @@ import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * @author Kris De Volder
  */
@@ -178,6 +180,10 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 					PropertyInfo prop = findLongestValidProperty(getIndex(), navPrefix);
 					if (prop!=null) {
 						int regionStart = navOffset-navPrefix.length();
+						Collection<ICompletionProposal> hintProposals = getKeyHintProposals(doc, prop, navOffset, offset);
+						if (CollectionUtil.hasElements(hintProposals)) {
+							return hintProposals;
+						}
 						PropertyNavigator navigator = new PropertyNavigator(doc, null, typeUtil, region(regionStart, navOffset));
 						Type type = navigator.navigate(regionStart+prop.getId().length(), TypeParser.parse(prop.getType()));
 						if (type!=null) {
@@ -190,6 +196,42 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			BootActivator.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	private Collection<ICompletionProposal> getKeyHintProposals(IDocument doc, PropertyInfo prop, int navOffset, int offset) {
+		HintProvider hintProvider = prop.getHints(typeUtil, false);
+		if (hintProvider!=null) {
+			String query = textBetween(doc, navOffset+1, offset);
+			System.out.println(query);
+			EnumCaseMode enumCaseMode = caseMode(query);
+			List<TypedProperty> hintProperties = hintProvider.getPropertyHints(enumCaseMode, BeanPropertyNameMode.HYPHENATED);
+			if (CollectionUtil.hasElements(hintProperties)) {
+				return createPropertyProposals(doc, TypeParser.parse(prop.getType()), navOffset, offset, query, hintProperties);
+			}
+		}
+		return ImmutableList.of();
+	}
+
+	private String textBetween(IDocument doc, int start, int end) {
+		if (end > doc.getLength()) {
+			end = doc.getLength();
+		}
+		if (start>doc.getLength()) {
+			start = doc.getLength();
+		}
+		if (start<0) {
+			start = 0;
+		}
+		if (end < 0) {
+			end = 0;
+		}
+		if (start<end) {
+			try {
+				return doc.get(start, end-start);
+			} catch (BadLocationException e) {
+			}
+ 		}
+		return "";
 	}
 
 	private IRegion region(int start, int end) {
@@ -211,21 +253,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				List<TypedProperty> objectProperties = typeUtil.getProperties(type, caseMode, BeanPropertyNameMode.HYPHENATED);
 				   //Note: properties editor itself deals with relaxed names. So it expects the properties here to be returned in hyphenated form only.
 				if (objectProperties!=null && !objectProperties.isEmpty()) {
-					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					for (TypedProperty prop : objectProperties) {
-						double score = FuzzyMatcher.matchScore(prefix, prop.getName());
-						if (score!=0) {
-							Type valueType = prop.getType();
-							String postFix = propertyCompletionPostfix(valueType);
-							DocumentEdits edits = new DocumentEdits(doc);
-							edits.delete(navOffset+1, offset);
-							edits.insert(offset, prop.getName()+postFix);
-							proposals.add(
-								completionFactory.beanProperty(doc, null, type, prefix, prop, score, edits, typeUtil)
-							);
-						}
-					}
-					return proposals;
+					return createPropertyProposals(doc, type, navOffset, offset, prefix, objectProperties);
 				}
 			} else {
 				//TODO: other cases ']' or '[' ?
@@ -234,6 +262,25 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			BootActivator.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	protected Collection<ICompletionProposal> createPropertyProposals(IDocument doc, Type type, int navOffset,
+			int offset, String prefix, List<TypedProperty> objectProperties) {
+		ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+		for (TypedProperty prop : objectProperties) {
+			double score = FuzzyMatcher.matchScore(prefix, prop.getName());
+			if (score!=0) {
+				Type valueType = prop.getType();
+				String postFix = propertyCompletionPostfix(valueType);
+				DocumentEdits edits = new DocumentEdits(doc);
+				edits.delete(navOffset+1, offset);
+				edits.insert(offset, prop.getName()+postFix);
+				proposals.add(
+					completionFactory.beanProperty(doc, null, type, prefix, prop, score, edits, typeUtil)
+				);
+			}
+		}
+		return proposals;
 	}
 
 	/**
@@ -331,7 +378,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			}
 		}
 		{
-			PropertyInfo prop = getIndex().get(propertyName);
+			PropertyInfo prop = getIndex().findLongestCommonPrefixEntry(propertyName);
 			if (prop!=null) {
 				HintProvider hintProvider = prop.getHints(typeUtil, false);
 				if (hintProvider!=null) {

@@ -120,7 +120,7 @@ public class PropertyInfo {
 		Type type = TypeParser.parse(this.type);
 		if (TypeUtil.isMap(type)) {
 			if (CollectionUtil.hasElements(valueHints) || CollectionUtil.hasElements(keyHints)) {
-				return HintProviders.forMap(keyHints, valueHints, TypeUtil.getDomainType(type));
+				return HintProviders.forMap(keyHints, valueHints, TypeUtil.getDomainType(type), dimensionAware);
 			}
 		} else if (TypeUtil.isSequencable(type)) {
 			if (CollectionUtil.hasElements(valueHints)) {
