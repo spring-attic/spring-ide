@@ -15,6 +15,10 @@ import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 import java.util.List;
 
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -30,6 +34,7 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
@@ -163,6 +168,8 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 			colWidget.setWidth(colType.getDefaultWidth());
 		}
 
+		createContextMenu(tv);
+
 		new DoubleClickListener(tv);
 	}
 
@@ -268,4 +275,42 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 			return NO_ELEMENTS;
 		}
 	}
+
+	private void createContextMenu(Viewer viewer) {
+	    MenuManager contextMenu = new MenuManager("#ViewerMenu"); //$NON-NLS-1$
+	    contextMenu.setRemoveAllWhenShown(true);
+	    contextMenu.addMenuListener(new IMenuListener() {
+	        @Override
+	        public void menuAboutToShow(IMenuManager mgr) {
+	            fillContextMenu(mgr);
+	        }
+
+	    });
+
+	    Menu menu = contextMenu.createContextMenu(viewer.getControl());
+	    viewer.getControl().setMenu(menu);
+	}
+
+	private void fillContextMenu(IMenuManager contextMenu) {
+		if (tv.getStructuredSelection().size() == 1) {
+			final RequestMapping rm = (RequestMapping) tv.getStructuredSelection().getFirstElement();
+			if (rm.isUserDefined()) {
+				final BootDashElement bde = getBootDashElement();
+				Action makeDefaultAction = new Action("Make Default") {
+					@Override
+					public void run() {
+						bde.setDefaultRequestMappingPath(rm.getPath());
+						tv.refresh();
+						/*
+						 * Just refresh doesn't cause repaint for some reason
+						 */
+						tv.getTable().redraw();
+					}
+				};
+				makeDefaultAction.setEnabled(!rm.getPath().equals(bde.getDefaultRequestMappingPath()));
+				contextMenu.add(makeDefaultAction);
+			}
+		}
+	}
+
 }
