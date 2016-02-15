@@ -2570,6 +2570,18 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testPropertyMapKeyCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+		assertCompletionsDisplayString(
+				"logging:\n" +
+				"  level:\n" +
+				"    <*>"
+				, // =>
+				"root : String"
+		);
+
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {

@@ -1,0 +1,25 @@
+logging:
+  level:
+    
+    
+    
+    
+    
+    
+      
+# Dropped hints for: logging.level.keys
+#Dropped hints for: logging.level.values
+#Dropped hints for: logging.level.keys
+#Dropped hints for: logging.level.values
+#Dropped hints for: liquibase.change-log
+#Dropped hints for: server.jsp-servlet.class-name
+#Dropped hints for: spring.cache.jcache.provider
+#Dropped hints for: spring.data.mongodb.field-naming-strategy
+#Dropped hints for: spring.datasource.driver-class-name
+#Dropped hints for: spring.datasource.xa.data-source-class-name
+#Dropped hints for: spring.jpa.hibernate.ddl-auto
+#Dropped hints for: spring.jpa.hibernate.naming-strategy
+#Dropped hints for: endpoints.cors.allowed-headers
+#Dropped hints for: endpoints.cors.allowed-methods
+#Dropped hints for: endpoints.cors.allowed-origins
+#Dropped hints for: management.health.status.order
