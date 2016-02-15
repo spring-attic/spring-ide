@@ -12,13 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import org.eclipse.jface.viewers.IFilter;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 
 public class RequestMappingPropertiesFilter implements IFilter {
 
 	@Override
 	public boolean select(Object toTest) {
-		return toTest instanceof BootProjectDashElement || toTest instanceof CloudAppDashElement;
+		return toTest instanceof AbstractLaunchConfigurationsDashElement || toTest instanceof CloudAppDashElement;
 	}
 
 }
