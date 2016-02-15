@@ -21,6 +21,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -292,8 +293,8 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	}
 
 	private void fillContextMenu(IMenuManager contextMenu) {
-		if (tv.getStructuredSelection().size() == 1) {
-			final RequestMapping rm = (RequestMapping) tv.getStructuredSelection().getFirstElement();
+		if (getStructuredSelection().size() == 1) {
+			final RequestMapping rm = (RequestMapping) getStructuredSelection().getFirstElement();
 			if (rm.isUserDefined()) {
 				final BootDashElement bde = getBootDashElement();
 				Action makeDefaultAction = new Action("Make Default") {
@@ -311,6 +312,13 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 				contextMenu.add(makeDefaultAction);
 			}
 		}
+	}
+
+	private IStructuredSelection getStructuredSelection() {
+		//Watch out, this is not Eclipse 4.4 api:
+		//return tv.getStructuredSelection();
+		//So do this instead:
+		return (IStructuredSelection) tv.getSelection();
 	}
 
 }
