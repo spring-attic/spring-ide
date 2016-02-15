@@ -45,8 +45,10 @@ public class ConfigurationMetadataProperty implements Serializable {
 	private Object defaultValue;
 
 	private final List<ValueHint> valueHints = new ArrayList<ValueHint>();
+	private final List<ValueHint> keyValueHints = new ArrayList<ValueHint>();
 
 	private final List<ValueProvider> valueProviders = new ArrayList<ValueProvider>();
+	private final List<ValueProvider> keyValueProviders = new ArrayList<ValueProvider>();
 
 	private Deprecation deprecation;
 
@@ -146,6 +148,20 @@ public class ConfigurationMetadataProperty implements Serializable {
 		return this.valueHints;
 	}
 
+	//STS CHANGE
+	/**
+	 * Similar to 'getValueHints', but returns the hints for the values of the keys of
+	 * a map (this info is therfore only meaningful if this property is bound to a Map
+	 * type).
+	 *
+	 * @return the value hints
+	 */
+	public List<ValueHint> getKeyValueHints() {
+		return this.keyValueHints;
+	}
+	//STS CHANGE END
+
+
 	/**
 	 * The value providers that are applicable to this item. Only one
 	 * {@link ValueProvider} is enabled for an item: the first in the list that is
@@ -155,6 +171,18 @@ public class ConfigurationMetadataProperty implements Serializable {
 	public List<ValueProvider> getValueProviders() {
 		return this.valueProviders;
 	}
+
+	//STS CHANGE
+	/**
+	 * The value providers that are applicable to this item. Only one
+	 * {@link ValueProvider} is enabled for an item: the first in the list that is
+	 * supported should be used.
+	 * @return the value providers
+	 */
+	public List<ValueProvider> getKeyValueProviders() {
+		return this.keyValueProviders;
+	}
+	//STS CHANGE END
 
 	/**
 	 * The {@link Deprecation} for this property, if any.

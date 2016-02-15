@@ -48,5 +48,4 @@ class ConfigurationMetadataHint {
 	public List<ValueProvider> getValueProviders() {
 		return this.valueProviders;
 	}
-
 }
