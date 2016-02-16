@@ -22,7 +22,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.draw2d.graph.CompoundDirectedGraphLayout;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-
+
 /**
  * @author Leo Dos Santos
  * @author Christian Dupuis

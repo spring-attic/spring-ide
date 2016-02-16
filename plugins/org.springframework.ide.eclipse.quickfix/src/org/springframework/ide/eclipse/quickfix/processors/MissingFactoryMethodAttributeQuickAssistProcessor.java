@@ -15,7 +15,7 @@ import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.quickfix.proposals.AddFactoryMethodQuickFixProposal;
 
-
+
 /**
  * @author Terry Denney
  */

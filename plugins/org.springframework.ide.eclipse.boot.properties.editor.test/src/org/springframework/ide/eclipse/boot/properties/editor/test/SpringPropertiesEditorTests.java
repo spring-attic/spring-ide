@@ -981,9 +981,56 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"UNKNOWN",
 				"UP"
 		);
-
 	}
 
+	public void testPropertyMapValueCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+
+		assertCompletionsDisplayString(
+				"logging.level.some: <*>"
+				, // =>
+				"trace",
+				"debug",
+				"info",
+				"warn",
+				"error",
+				"fatal",
+				"off"
+		);
+
+		assertCompletionsDisplayString(
+				"logging.level.some.package: <*>"
+				, // =>
+				"trace",
+				"debug",
+				"info",
+				"warn",
+				"error",
+				"fatal",
+				"off"
+		);
+	}
+
+	public void testPropertyMapKeyCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+		assertCompletionsDisplayString(
+				"logging.level.<*>"
+				, // =>
+				"root : String"
+		);
+
+		assertCompletionsDisplayString(
+				"logging.level.r<*>"
+				, // =>
+				"root : String"
+		);
+
+		assertCompletions(
+				"logging.level.ot<*>"
+				, // =>
+				"logging.level.root=<*>"
+		);
+	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

@@ -16,7 +16,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
 
-
+
 /**
  * @author Terry Denney
  */

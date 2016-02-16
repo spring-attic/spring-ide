@@ -68,10 +68,13 @@ public class PropertyInfo {
 	private List<PropertySource> sources;
 	private Deprecation deprecation;
 	final private ImmutableList<ValueHint> valueHints;
+	final private ImmutableList<ValueHint> keyHints;
 
 	public PropertyInfo(String id, String type, String name,
 			Object defaultValue, String description,
-			Deprecation deprecation, List<ValueHint> valueHints,
+			Deprecation deprecation,
+			List<ValueHint> valueHints,
+			List<ValueHint> keyHints,
 			List<PropertySource> sources) {
 		super();
 		this.id = id;
@@ -81,6 +84,7 @@ public class PropertyInfo {
 		this.description = description;
 		this.deprecation = deprecation;
 		this.valueHints = valueHints==null?null:ImmutableList.copyOf(valueHints);
+		this.keyHints = keyHints==null?null:ImmutableList.copyOf(keyHints);
 		this.sources = sources;
 	}
 	public PropertyInfo(ConfigurationMetadataProperty prop) {
@@ -92,6 +96,7 @@ public class PropertyInfo {
 			prop.getDescription(),
 			prop.getDeprecation(),
 			prop.getValueHints(),
+			prop.getKeyValueHints(),
 			null
 		);
 	}
@@ -112,16 +117,26 @@ public class PropertyInfo {
 	}
 
 	public HintProvider getHints(TypeUtil typeUtil, boolean dimensionAware) {
-		if (CollectionUtil.hasElements(valueHints)) {
-			if (dimensionAware) {
-				Type type = TypeParser.parse(this.type);
-				if (TypeUtil.isSequencable(type) || TypeUtil.isMap(type)) {
-					return HintProviders.forDomainAt(valueHints, TypeUtil.getDimensionality(type));
+		Type type = TypeParser.parse(this.type);
+		if (TypeUtil.isMap(type)) {
+			if (CollectionUtil.hasElements(valueHints) || CollectionUtil.hasElements(keyHints)) {
+				return HintProviders.forMap(keyHints, valueHints, TypeUtil.getDomainType(type), dimensionAware);
+			}
+		} else if (TypeUtil.isSequencable(type)) {
+			if (CollectionUtil.hasElements(valueHints)) {
+				if (dimensionAware) {
+					if (TypeUtil.isSequencable(type)) {
+						return HintProviders.forDomainAt(valueHints, TypeUtil.getDimensionality(type));
+					} else {
+						return HintProviders.forHere(valueHints);
+					}
 				} else {
-					return HintProviders.forHere(valueHints);
+					return HintProviders.forAllValueContexts(valueHints);
 				}
-			} else {
-				return HintProviders.forAllValueContexts(valueHints);
+			}
+		} else {
+			if (CollectionUtil.hasElements(valueHints)) {
+				return HintProviders.forHere(valueHints);
 			}
 		}
 		return null;
@@ -149,7 +164,7 @@ public class PropertyInfo {
 		if (alias.equals(id)) {
 			return this;
 		}
-		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, valueHints, sources);
+		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, valueHints, keyHints, sources);
 	}
 
 	public void setDeprecation(Deprecation d) {

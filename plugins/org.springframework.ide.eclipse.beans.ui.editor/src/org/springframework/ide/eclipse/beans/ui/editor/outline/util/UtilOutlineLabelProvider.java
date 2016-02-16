@@ -15,7 +15,7 @@ import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
+
 /**
  * @author Christian Dupuis
  * @author Torsten Juergeleit

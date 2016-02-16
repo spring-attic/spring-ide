@@ -15,12 +15,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.boot.configurationmetadata.ValueHint;
@@ -30,10 +27,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.JavaTypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.completions.JavaTypeNavigationHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -164,7 +161,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			this.hints = hints;
 		}
 
-		private HintProvider getPropertyInfo() {
+		private HintProvider getHintProvider() {
 			return hints;
 		}
 
@@ -191,7 +188,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query,
 				EnumCaseMode enumCaseMode, BeanPropertyNameMode beanMode) throws Exception {
 			int queryOffset = offset - query.length();
-			List<TypedProperty> properties = typeUtil.getProperties(type, enumCaseMode, beanMode);
+			List<TypedProperty> properties = getProperties(enumCaseMode, beanMode);
 			if (CollectionUtil.hasElements(properties)) {
 				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
 				SNode contextNode = getContextNode(doc);
@@ -231,6 +228,22 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return Collections.emptyList();
 		}
 
+		protected List<TypedProperty> getProperties(EnumCaseMode enumCaseMode, BeanPropertyNameMode beanMode) {
+			ArrayList<TypedProperty> props = new ArrayList<>();
+			List<TypedProperty> fromType = typeUtil.getProperties(type, enumCaseMode, beanMode);
+			if (CollectionUtil.hasElements(fromType)) {
+				props.addAll(fromType);
+			}
+			HintProvider hints = getHintProvider();
+			if (hints!=null) {
+				List<TypedProperty> fromHints = hints.getPropertyHints(enumCaseMode, beanMode);
+				if (CollectionUtil.hasElements(fromHints)) {
+					props.addAll(fromHints);
+				}
+			}
+			return props;
+		}
+
 		private Set<String> getDefinedProperties(SNode contextNode) {
 			try {
 				if (contextNode instanceof SChildBearingNode) {
@@ -261,7 +274,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
 						edits.delete(offset-query.length(), offset);
 						edits.insert(offset, value);
-						completions.add(completionFactory.valueProposal(value, type, score, edits));
+						completions.add(completionFactory.valueProposal(value, query, type, score, edits));
 					}
 				}
 				return completions;
@@ -278,7 +291,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				}
 			}
 			{
-				HintProvider hintProvider = getPropertyInfo();
+				HintProvider hintProvider = getHintProvider();
 				if (hintProvider!=null) {
 					List<ValueHint> hints = hintProvider.getValueHints();
 					for (ValueHint h : hints) {

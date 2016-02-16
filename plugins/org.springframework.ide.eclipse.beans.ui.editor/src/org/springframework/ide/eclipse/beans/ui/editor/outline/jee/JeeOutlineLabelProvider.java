@@ -16,7 +16,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutli
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
-
+
 /**
  * @author Christian Dupuis
  * @author Torsten Juergeleit

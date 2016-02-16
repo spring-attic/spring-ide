@@ -125,13 +125,41 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 		Map<String, ConfigurationMetadataProperty> allProperties = repository
 				.getAllProperties();
 		for (ConfigurationMetadataHint hint : metadata.getHints()) {
-			ConfigurationMetadataProperty property = allProperties.get(hint.getId());
+			String hintId = hint.getId();
+			ConfigurationMetadataProperty property = allProperties.get(hintId);
 			if (property != null) {
 				property.getValueHints().addAll(hint.getValueHints());
 				property.getValueProviders().addAll(hint.getValueProviders());
+			//STS CHANGE
+			} else {
+				String baseId = remove(hintId, ".keys");
+				if (baseId!=null) {
+					property = allProperties.get(baseId);
+					if (property!=null) {
+						property.getKeyValueHints().addAll(hint.getValueHints());
+						property.getKeyValueProviders().addAll(hint.getValueProviders());
+					}
+				} else {
+					baseId = remove(hintId, ".values");
+					if (baseId!=null) {
+						property = allProperties.get(baseId);
+						if (property!=null) {
+							property.getValueHints().addAll(hint.getValueHints());
+							property.getValueProviders().addAll(hint.getValueProviders());
+						}
+					}
+				}
+			//STS CHANGE END
 			}
 		}
 		return repository;
+	}
+
+	private String remove(String str, String postfix) {
+		if (str.endsWith(postfix)) {
+			return str.substring(0, str.length() - postfix.length());
+		}
+		return null;
 	}
 
 	private ConfigurationMetadataSource getSource(RawConfigurationMetadata metadata,

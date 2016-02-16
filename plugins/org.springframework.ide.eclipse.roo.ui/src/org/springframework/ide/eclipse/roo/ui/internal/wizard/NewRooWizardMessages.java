@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.roo.ui.internal.wizard;
 
 import org.eclipse.osgi.util.NLS;
-
+
 /**
  * @author Terry Denney
  */

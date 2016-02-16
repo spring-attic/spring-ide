@@ -17,7 +17,7 @@ import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.quickfix.proposals.RemoveDeprecatedQuickFixProposal;
 
-
+
 /**
  * @author Terry Denney
  */

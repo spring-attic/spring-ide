@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.quickfix.proposals.AddToConfigSetQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.tests.QuickfixTestUtil;
 
-
+
 /**
  * @author Terry Denney
  */

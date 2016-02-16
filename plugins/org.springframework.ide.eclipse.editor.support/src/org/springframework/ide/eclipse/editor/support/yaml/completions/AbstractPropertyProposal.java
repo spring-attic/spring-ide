@@ -20,12 +20,9 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
-import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
@@ -83,7 +80,7 @@ ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposa
 	@Override
 	public StyledString getStyledDisplayString() {
 		StyledString result = new StyledString();
-		highlightPattern(getHighlightPattern(), getBaseDisplayString(), result);
+		result = result.append(super.getStyledDisplayString());
 		YType type = getType();
 		if (type!=null) {
 			String typeStr = niceTypeName(type);
@@ -106,34 +103,6 @@ ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposa
 	protected abstract String getHighlightPattern();
 	protected abstract String getBaseDisplayString();
 	protected abstract String niceTypeName(YType type);
-
-	private void highlightPattern(String pattern, String data, StyledString result) {
-		Styler highlightStyle = CompletionFactory.HIGHLIGHT;
-		Styler plainStyle = isDeemphasized()?CompletionFactory.DEEMPHASIZE:CompletionFactory.NULL_STYLER;
-		if (isDeprecated()) {
-			highlightStyle = CompletionFactory.compose(highlightStyle, CompletionFactory.DEPRECATE);
-			plainStyle = CompletionFactory.compose(plainStyle, CompletionFactory.DEPRECATE);
-		}
-		if (StringUtils.hasText(pattern)) {
-			int dataPos = 0;	int dataLen = data.length();
-			int patternPos = 0; int patternLen = pattern.length();
-
-			while (dataPos<dataLen && patternPos<patternLen) {
-				int pChar = pattern.charAt(patternPos++);
-				int highlightPos = data.indexOf(pChar, dataPos);
-				if (dataPos<highlightPos) {
-					result.append(data.substring(dataPos, highlightPos), plainStyle);
-				}
-				result.append(data.charAt(highlightPos), highlightStyle);
-				dataPos = highlightPos+1;
-			}
-			if (dataPos<dataLen) {
-				result.append(data.substring(dataPos), plainStyle);
-			}
-		} else { //no pattern to highlight
-			result.append(data, plainStyle);
-		}
-	}
 
 	@Override
 	public String toString() {
