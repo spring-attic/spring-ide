@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.quickfix.proposals.AddStaticToFieldQuickF
 import org.springframework.ide.eclipse.quickfix.proposals.CreateNewClassQuickFixProposal;
 import org.springframework.ide.eclipse.quickfix.proposals.CreateNewFieldQuickFixProposal;
 
-
+
 /**
  * @author Terry Denney
  */

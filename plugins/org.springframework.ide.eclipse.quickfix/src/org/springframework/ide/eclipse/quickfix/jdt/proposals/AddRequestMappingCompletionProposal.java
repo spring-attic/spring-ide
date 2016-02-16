@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.quickfix.jdt.processors.JdtQuickfixUtils;
 import org.springframework.ide.eclipse.quickfix.jdt.processors.RequestMappingDialog;
 import org.springframework.ide.eclipse.quickfix.jdt.processors.RequestMappingDialog.Method;
 
-
+
 /**
  * @author Terry Denney
  */

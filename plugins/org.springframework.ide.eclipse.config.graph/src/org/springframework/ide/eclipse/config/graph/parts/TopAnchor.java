@@ -14,7 +14,7 @@ import org.eclipse.draw2d.AbstractConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
-
+
 /**
  * @author Leo Dos Santos
  * @author Christian Dupuis

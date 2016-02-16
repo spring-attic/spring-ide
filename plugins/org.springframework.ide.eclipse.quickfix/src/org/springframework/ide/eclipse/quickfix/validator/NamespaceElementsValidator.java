@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.quickfix.validator.helper.XmlValidationCo
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-
+
 /**
  * @author Terry Denney
  * @author Christian Dupuis

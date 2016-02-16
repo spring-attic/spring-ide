@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 
-
+
 /**
  * @author Terry Denney
  */

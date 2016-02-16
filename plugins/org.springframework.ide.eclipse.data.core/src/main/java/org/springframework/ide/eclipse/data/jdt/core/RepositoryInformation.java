@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2015 Spring IDE Developers
+ * Copyright (c) 2012, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -258,7 +258,8 @@ public class RepositoryInformation {
 
 	public boolean isMethodToValidate(IMethod method) throws JavaModelException {
 		if (isCrudMethod(method)) return false;
-		if (hasQueryAnnotation(method)) return false;
+		if (hasAnnotation(method, "Query")) return false;
+		if (hasAnnotation(method, "Procedure")) return false;
 		if (Flags.isDefaultMethod(method.getFlags())) return false;
 
 		String[] prefixes = new String[] {"find", "read", "get", "query", "count", "delete", "remove"};
@@ -276,14 +277,12 @@ public class RepositoryInformation {
 		return METHOD_NAMES.contains(method.getElementName());
 	}
 	
-	private boolean hasQueryAnnotation(IMethod method) throws JavaModelException {
-
+	private boolean hasAnnotation(IMethod method, String annotationName) throws JavaModelException {
 		for (IAnnotation annotation : method.getAnnotations()) {
-			if (annotation.getElementName().equals("Query")) {
+			if (annotation.getElementName().equals(annotationName)) {
 				return true;
 			}
 		}
-
 		return false;
 	}
 }

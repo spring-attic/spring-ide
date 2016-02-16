@@ -18,7 +18,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.quickfix.QuickfixUtils;
 
-
+
 /**
  * @author Terry Denney
  */

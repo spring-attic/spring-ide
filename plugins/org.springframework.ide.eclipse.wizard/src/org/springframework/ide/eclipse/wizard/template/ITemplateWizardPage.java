@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.wizard.template;
 
 import org.eclipse.jface.wizard.IWizardPage;
-
+
 /**
  * @author Terry Denney
  */
