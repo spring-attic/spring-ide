@@ -294,22 +294,20 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	private void fillContextMenu(IMenuManager contextMenu) {
 		if (tv.getStructuredSelection().size() == 1) {
 			final RequestMapping rm = (RequestMapping) tv.getStructuredSelection().getFirstElement();
-			if (rm.isUserDefined()) {
-				final BootDashElement bde = getBootDashElement();
-				Action makeDefaultAction = new Action("Make Default") {
-					@Override
-					public void run() {
-						bde.setDefaultRequestMappingPath(rm.getPath());
-						tv.refresh();
-						/*
-						 * Just refresh doesn't cause repaint for some reason
-						 */
-						tv.getTable().redraw();
-					}
-				};
-				makeDefaultAction.setEnabled(!rm.getPath().equals(bde.getDefaultRequestMappingPath()));
-				contextMenu.add(makeDefaultAction);
-			}
+			final BootDashElement bde = getBootDashElement();
+			Action makeDefaultAction = new Action("Make Default") {
+				@Override
+				public void run() {
+					bde.setDefaultRequestMappingPath(rm.getPath());
+					tv.refresh();
+					/*
+					 * Just refresh doesn't cause repaint for some reason
+					 */
+					tv.getTable().redraw();
+				}
+			};
+			makeDefaultAction.setEnabled(!rm.getPath().equals(bde.getDefaultRequestMappingPath()));
+			contextMenu.add(makeDefaultAction);
 		}
 	}
 
