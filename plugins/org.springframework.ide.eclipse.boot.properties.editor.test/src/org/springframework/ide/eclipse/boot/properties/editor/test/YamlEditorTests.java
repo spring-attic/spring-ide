@@ -2574,7 +2574,19 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				, // =>
 				"root : String"
 		);
+	}
 
+	public void testEscapeStringValueStartingWithStar() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+		assertCompletions(
+				"endpoints:\n"+
+				"  cors:\n"+
+				"    allowed-headers: <*>"
+				, // =>
+				"endpoints:\n"+
+				"  cors:\n"+
+				"    allowed-headers: '*'"
+		);
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////
