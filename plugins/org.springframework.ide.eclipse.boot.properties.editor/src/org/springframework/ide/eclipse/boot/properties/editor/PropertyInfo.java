@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * Information about a spring property, basically, this is the same as
@@ -67,8 +68,8 @@ public class PropertyInfo {
 	final private String description;
 	private List<PropertySource> sources;
 	private Deprecation deprecation;
-	final private ImmutableList<ValueHint> valueHints;
-	final private ImmutableList<ValueHint> keyHints;
+	private ImmutableList<ValueHint> valueHints;
+	private ImmutableList<ValueHint> keyHints;
 
 	public PropertyInfo(String id, String type, String name,
 			Object defaultValue, String description,
@@ -183,4 +184,16 @@ public class PropertyInfo {
 		return deprecation == null ? null : deprecation.getReplacement();
 	}
 
+	public void addValueHints(List<ValueHint> hints) {
+		Builder<ValueHint> builder = ImmutableList.builder();
+		builder.addAll(valueHints);
+		builder.addAll(hints);
+		valueHints = builder.build();
+	}
+	public void addKeyHints(List<ValueHint> hints) {
+		Builder<ValueHint> builder = ImmutableList.builder();
+		builder.addAll(keyHints);
+		builder.addAll(hints);
+		keyHints = builder.build();
+	}
 }

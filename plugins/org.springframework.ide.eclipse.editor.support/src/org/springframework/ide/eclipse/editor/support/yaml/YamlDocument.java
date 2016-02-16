@@ -168,7 +168,7 @@ public class YamlDocument {
 
 	@Override
 	public String toString() {
-		return "YamlDocument("+getDocument().get()+")";
+		return "YamlDocument(>>>>\n"+getDocument().get()+"\n<<<<)";
 	}
 
 }

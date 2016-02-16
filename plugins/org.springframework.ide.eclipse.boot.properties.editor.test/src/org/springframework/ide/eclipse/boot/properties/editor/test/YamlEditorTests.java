@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
+import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -2581,11 +2583,54 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertCompletions(
 				"endpoints:\n"+
 				"  cors:\n"+
-				"    allowed-headers: <*>"
+				"    allowed-headers: \n" +
+				"      - <*>"
 				, // =>
 				"endpoints:\n"+
 				"  cors:\n"+
-				"    allowed-headers: '*'"
+				"    allowed-headers: \n" +
+				"      - '*'<*>"
+		);
+	}
+
+	public void testEscapeStringValueWithAQuote() throws Exception {
+		data("foo.quote", "java.lang.String", null, "Character to used to surround quotes");
+		valueHints("foo.quote", "\"", "'", "`");
+
+		assertCompletions(
+				"foo:\n" +
+				"  quote: <*>"
+				, // =>
+				"foo:\n" +
+				"  quote: '\"'<*>"
+				,
+				"foo:\n" +
+				"  quote: ''''<*>"
+				,
+				"foo:\n" +
+				"  quote: '`'<*>"
+		);
+	}
+
+	public void testEscapeStringKeyWithAQuote() throws Exception {
+		data("foo.quote", "java.util.Map<java.lang.String,java.lang.String>", null, "Name of quote characters");
+		keyHints("foo.quote", "\"", "'", "`");
+
+		assertCompletions(
+				"foo:\n" +
+				"  quote: <*>"
+				, // =>
+				"foo:\n" +
+				"  quote: \n"+
+				"    '\"': <*>"
+				,
+				"foo:\n" +
+				"  quote: \n"+
+				"    '''': <*>"
+				,
+				"foo:\n" +
+				"  quote: \n"+
+				"    '`': <*>"
 		);
 	}
 

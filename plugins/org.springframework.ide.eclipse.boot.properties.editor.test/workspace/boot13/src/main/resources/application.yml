@@ -1,7 +1,9 @@
-logging:
-  level:
-    root: fatal
-    some.package: info
+foo:
+  quote:
+    '"': sdsdf
+    'Something with a ''single quote'' in it': holls
+    <: 
+    
     
     
     

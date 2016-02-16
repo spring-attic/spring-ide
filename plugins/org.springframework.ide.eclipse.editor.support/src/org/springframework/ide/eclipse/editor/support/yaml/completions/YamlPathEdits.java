@@ -100,7 +100,7 @@ public class YamlPathEdits extends DocumentEdits {
 				indentUtil.addNewlineWithIndent(indent, buf);
 			}
 			String key = path.getSegment(i).toPropString();
-			buf.append(key);
+			buf.append(YamlUtil.stringEscape(key));
 			buf.append(":");
 			indent += YamlIndentUtil.INDENT_BY;
 		}

@@ -15,6 +15,7 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.viewers.StyledString;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.Deprecation;
+import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
@@ -90,7 +92,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
 	}
 
-	public ConfigurationMetadataProperty data(String id, String type, Object deflt, String description,
+	public void data(String id, String type, Object deflt, String description,
 			String... source
 	) {
 		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
@@ -99,7 +101,29 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		item.setType(type);
 		item.setDefaultValue(deflt);
 		index.add(new PropertyInfo(item));
-		return item;
+//		return item;
+	}
+
+	public void keyHints(String id, String... hintValues) {
+		PropertyInfo info = index.get(id);
+		List<ValueHint> hints = new ArrayList<>(hintValues.length);
+		for (String value : hintValues) {
+			ValueHint hint = new ValueHint();
+			hint.setValue(value);
+			hints.add(hint);
+		}
+		info.addKeyHints(hints);
+	}
+
+	public void valueHints(String id, String... hintValues) {
+		PropertyInfo info = index.get(id);
+		List<ValueHint> hints = new ArrayList<>(hintValues.length);
+		for (String value : hintValues) {
+			ValueHint hint = new ValueHint();
+			hint.setValue(value);
+			hints.add(hint);
+		}
+		info.addValueHints(hints);
 	}
 
 	public void deprecate(String key, String replacedBy, String reason) {
