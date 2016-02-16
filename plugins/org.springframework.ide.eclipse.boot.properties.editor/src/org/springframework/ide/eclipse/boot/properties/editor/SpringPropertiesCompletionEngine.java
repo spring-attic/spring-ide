@@ -201,7 +201,6 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		HintProvider hintProvider = prop.getHints(typeUtil, false);
 		if (hintProvider!=null) {
 			String query = textBetween(doc, navOffset+1, offset);
-			System.out.println(query);
 			EnumCaseMode enumCaseMode = caseMode(query);
 			List<TypedProperty> hintProperties = hintProvider.getPropertyHints(enumCaseMode, BeanPropertyNameMode.HYPHENATED);
 			if (CollectionUtil.hasElements(hintProperties)) {
