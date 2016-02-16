@@ -293,7 +293,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	}
 
 	private void fillContextMenu(IMenuManager contextMenu) {
-		if (tv.getStructuredSelection().size() == 1) {
+		if (getStructuredSelection().size() == 1) {
 			final RequestMapping rm = (RequestMapping) getStructuredSelection().getFirstElement();
 			final BootDashElement bde = getBootDashElement();
 			Action makeDefaultAction = new Action("Make Default") {
