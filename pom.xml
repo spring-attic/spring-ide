@@ -140,6 +140,7 @@
 		<module>plugins/org.springframework.ide.eclipse.osgi</module>
 		<module>plugins/org.springframework.ide.eclipse.osgi.targetdefinition</module>
 		<module>plugins/org.springframework.ide.eclipse.osgi.runtime</module>
+		<module>plugins/org.springframework.ide.eclipse.osgi.blueprint</module>
 		<module>features/org.springframework.ide.eclipse.osgi.feature</module>
 
 		<!-- security -->

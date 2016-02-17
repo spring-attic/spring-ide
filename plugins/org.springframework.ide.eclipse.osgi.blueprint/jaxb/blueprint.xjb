@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.1">
+	<bindings schemaLocation="blueprint.xsd" version="1.0.1">
+		<!-- Customise the package name -->
+		<schemaBindings>
+			<package name="org.springframework.ide.eclipse.osgi.blueprint.jaxb" />
+		</schemaBindings>
+
+		<!-- rename the ref element -->
+		<bindings node="//xs:group[@name='GtargetComponent']">
+			<bindings node=".//xs:element[@name='ref']">
+				<property name="targetRef" />
+			</bindings>
+		</bindings>
+
+		<!-- rename the value element -->
+		<bindings node="//xs:complexType[@name='Tproperty']">
+			<bindings node=".//xs:attribute[@name='value']">
+				<property name="propertyValue" />
+			</bindings>
+		</bindings>
+
+		<bindings node="//xs:complexType[@name='TservicePropertyEntry']">
+			<bindings node=".//xs:attribute[@name='value']">
+				<property name="servicePropertyValue" />
+			</bindings>
+		</bindings>
+
+		<bindings node="//xs:complexType[@name='Targument']">
+			<bindings node=".//xs:attribute[@name='value']">
+				<property name="argumentValue" />
+			</bindings>
+		</bindings>
+
+		<bindings node="//xs:complexType[@name='TmapEntry']">
+			<bindings node=".//xs:attribute[@name='value']">
+				<property name="mapValue" />
+			</bindings>
+		</bindings>
+
+		<!-- rename the key element -->
+		<bindings node="//xs:complexType[@name='TmapEntry']">
+			<bindings node=".//xs:attribute[@name='key']">
+				<property name="mapKey" />
+			</bindings>
+		</bindings>
+	</bindings>
+</bindings>
