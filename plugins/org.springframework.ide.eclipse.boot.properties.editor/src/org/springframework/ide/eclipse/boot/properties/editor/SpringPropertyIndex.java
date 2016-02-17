@@ -18,10 +18,12 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 
 public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 
-	public SpringPropertyIndex(IJavaProject jp) {
+	public SpringPropertyIndex(IJavaProject jp, ValueProviderRegistry valueProviders) {
 		try {
 			StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
 			ConfigurationMetadataRepository metadata = loader.load(jp);
@@ -29,7 +31,7 @@ public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 
 			Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
 			for (ConfigurationMetadataProperty item : allEntries) {
-				add(new PropertyInfo(item));
+				add(new PropertyInfo(valueProviders, item));
 			}
 
 			for (ConfigurationMetadataGroup group : metadata.getAllGroups().values()) {

@@ -13,8 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.LoggerNameProvider;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -2569,12 +2568,16 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testPropertyMapKeyCompletions() throws Exception {
 		useProject(createPredefinedMavenProject("boot13"));
-		assertCompletionsDisplayString(
+		assertCompletionWithLabel(
 				"logging:\n" +
 				"  level:\n" +
 				"    <*>"
 				, // =>
 				"root : String"
+				,
+				"logging:\n" +
+				"  level:\n" +
+				"    root: <*>"
 		);
 	}
 
@@ -2632,6 +2635,42 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  quote: \n"+
 				"    '`': <*>"
 		);
+	}
+
+	public void testLoggerNameCompletion() throws Exception {
+		LoggerNameProvider.TIMEOUT = 15000; // the provider can't be reliably tested if its not allowed to
+											// fetch all its values (even though in 'production' you
+											// wouldn't want it to block the UI thread for this long.
+		try {
+			useProject(createPredefinedMavenProject("boot13"));
+			//Finds a package:
+			assertCompletionWithLabel(
+					"logging:\n" +
+					"  level:\n" +
+					"    boot.auto<*>"
+					, //-----------------
+					"org.springframework.boot.autoconfigure : String"
+					, // =>
+					"logging:\n" +
+					"  level:\n" +
+					"    org.springframework.boot.autoconfigure: <*>"
+			);
+
+			//Finds a type:
+			assertCompletionWithLabel(
+					"logging:\n" +
+					"  level:\n" +
+					"    MesgSource<*>"
+					, //-----------------
+					"org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration : String"
+					, // =>
+					"logging:\n" +
+					"  level:\n" +
+					"    org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration: <*>"
+			);
+		} finally {
+			LoggerNameProvider.restoreDefaults();
+		}
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////

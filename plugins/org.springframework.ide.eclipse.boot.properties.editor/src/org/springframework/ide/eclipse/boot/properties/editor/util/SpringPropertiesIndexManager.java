@@ -26,10 +26,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 
 /**
  * Support for Reconciling, Content Assist and Hover Text in spring properties
@@ -47,8 +48,10 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 	// Probably this is okay, since reading the data is pretty fast.
 
 	private Map<String, FuzzyMap<PropertyInfo>> indexes = null;
+	final private ValueProviderRegistry valueProviders;
 
-	public SpringPropertiesIndexManager() {
+	public SpringPropertiesIndexManager(ValueProviderRegistry valueProviders) {
+		this.valueProviders = valueProviders;
 		SpringPropertiesEditorPlugin.getClasspathListeners().addListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new LiveMetadataListener(), IResourceChangeEvent.POST_CHANGE);
 	}
@@ -60,7 +63,7 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 		}
 		FuzzyMap<PropertyInfo> index = indexes.get(key);
 		if (index==null) {
-			index = new SpringPropertyIndex(jp);
+			index = new SpringPropertyIndex(jp, valueProviders);
 			indexes.put(key, index);
 		}
 		return index;

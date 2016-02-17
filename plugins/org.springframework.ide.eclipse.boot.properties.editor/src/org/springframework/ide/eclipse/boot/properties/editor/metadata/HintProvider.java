@@ -8,13 +8,11 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
 import java.util.List;
 
 import org.springframework.boot.configurationmetadata.ValueHint;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
-import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 
@@ -22,8 +20,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
  * @author Kris De Volder
  */
 public interface HintProvider extends YamlNavigable<HintProvider> {
-
-	List<ValueHint> getValueHints();
-	List<TypedProperty> getPropertyHints(EnumCaseMode enumCaseMode, BeanPropertyNameMode beanMode);
-
+	List<ValueHint> getValueHints(String query);
+	List<TypedProperty> getPropertyHints(String query);
 }

@@ -1013,21 +1013,27 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testPropertyMapKeyCompletions() throws Exception {
 		useProject(createPredefinedMavenProject("boot13"));
-		assertCompletionsDisplayString(
+		assertCompletionWithLabel(
 				"logging.level.<*>"
-				, // =>
-				"root : String"
+				, //==============
+				"root : String",
+				//=>
+				"logging.level.root=<*>"
 		);
 
-		assertCompletionsDisplayString(
+		assertCompletionWithLabel(
 				"logging.level.r<*>"
-				, // =>
-				"root : String"
+				, //==============
+				"root : String",
+				//=>
+				"logging.level.root=<*>"
 		);
 
-		assertCompletions(
+		assertCompletionWithLabel(
 				"logging.level.ot<*>"
-				, // =>
+				, //==============
+				"root : String",
+				//=>
 				"logging.level.root=<*>"
 		);
 	}

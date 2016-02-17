@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor;
+package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,10 +18,10 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
-import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -70,12 +70,16 @@ public class PropertyInfo {
 	private Deprecation deprecation;
 	private ImmutableList<ValueHint> valueHints;
 	private ImmutableList<ValueHint> keyHints;
+	private ValueProviderStrategy valueProvider;
+	private ValueProviderStrategy keyProvider;
 
 	public PropertyInfo(String id, String type, String name,
 			Object defaultValue, String description,
 			Deprecation deprecation,
 			List<ValueHint> valueHints,
 			List<ValueHint> keyHints,
+			ValueProviderStrategy valueProvider,
+			ValueProviderStrategy keyProvider,
 			List<PropertySource> sources) {
 		super();
 		this.id = id;
@@ -86,9 +90,11 @@ public class PropertyInfo {
 		this.deprecation = deprecation;
 		this.valueHints = valueHints==null?null:ImmutableList.copyOf(valueHints);
 		this.keyHints = keyHints==null?null:ImmutableList.copyOf(keyHints);
+		this.valueProvider = valueProvider;
+		this.keyProvider = keyProvider;
 		this.sources = sources;
 	}
-	public PropertyInfo(ConfigurationMetadataProperty prop) {
+	public PropertyInfo(ValueProviderRegistry valueProviders, ConfigurationMetadataProperty prop) {
 		this(
 			prop.getId(),
 			prop.getType(),
@@ -98,6 +104,8 @@ public class PropertyInfo {
 			prop.getDeprecation(),
 			prop.getValueHints(),
 			prop.getKeyValueHints(),
+			valueProviders.resolve(prop.getValueProviders()),
+			valueProviders.resolve(prop.getKeyValueProviders()),
 			null
 		);
 	}
@@ -120,29 +128,29 @@ public class PropertyInfo {
 	public HintProvider getHints(TypeUtil typeUtil, boolean dimensionAware) {
 		Type type = TypeParser.parse(this.type);
 		if (TypeUtil.isMap(type)) {
-			if (CollectionUtil.hasElements(valueHints) || CollectionUtil.hasElements(keyHints)) {
-				return HintProviders.forMap(keyHints, valueHints, TypeUtil.getDomainType(type), dimensionAware);
-			}
+			return HintProviders.forMap(keyHints(typeUtil), valueHints(typeUtil), TypeUtil.getDomainType(type), dimensionAware);
 		} else if (TypeUtil.isSequencable(type)) {
-			if (CollectionUtil.hasElements(valueHints)) {
-				if (dimensionAware) {
-					if (TypeUtil.isSequencable(type)) {
-						return HintProviders.forDomainAt(valueHints, TypeUtil.getDimensionality(type));
-					} else {
-						return HintProviders.forHere(valueHints);
-					}
+			if (dimensionAware) {
+				if (TypeUtil.isSequencable(type)) {
+					return HintProviders.forDomainAt(valueHints(typeUtil), TypeUtil.getDimensionality(type));
 				} else {
-					return HintProviders.forAllValueContexts(valueHints);
+					return HintProviders.forHere(valueHints(typeUtil));
 				}
+			} else {
+				return HintProviders.forAllValueContexts(valueHints(typeUtil));
 			}
 		} else {
-			if (CollectionUtil.hasElements(valueHints)) {
-				return HintProviders.forHere(valueHints);
-			}
+			return HintProviders.forHere(valueHints(typeUtil));
 		}
-		return null;
 	}
 
+	private HintProvider keyHints(TypeUtil typeUtil) {
+		return HintProviders.basic(typeUtil.getJavaProject(), keyHints, keyProvider);
+	}
+
+	private HintProvider valueHints(TypeUtil typeUtil) {
+		return HintProviders.basic(typeUtil.getJavaProject(), valueHints, valueProvider);
+	}
 	public List<PropertySource> getSources() {
 		if (sources!=null) {
 			return sources;
@@ -165,7 +173,7 @@ public class PropertyInfo {
 		if (alias.equals(id)) {
 			return this;
 		}
-		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, valueHints, keyHints, sources);
+		return new PropertyInfo(alias, type, name, defaultValue, description, deprecation, valueHints, keyHints, valueProvider, keyProvider, sources);
 	}
 
 	public void setDeprecation(Deprecation d) {

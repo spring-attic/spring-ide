@@ -40,8 +40,9 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
@@ -75,6 +76,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		}
 	};
 
+	protected ValueProviderRegistry valueProviders = ValueProviderRegistry.getDefault();
 	protected SpringPropertyIndex index = new SpringPropertyIndex();
 	protected IJavaProject javaProject = null;
 	protected DocumentContextFinder documentContextFinder = new DocumentContextFinder() {
@@ -100,7 +102,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		item.setDescription(description);
 		item.setType(type);
 		item.setDefaultValue(deflt);
-		index.add(new PropertyInfo(item));
+		index.add(new PropertyInfo(valueProviders, item));
 //		return item;
 	}
 
@@ -136,7 +138,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	public void useProject(IJavaProject jp) throws Exception {
 		this.javaProject  = jp;
-		this.index = new SpringPropertyIndex(jp);
+		this.index = new SpringPropertyIndex(jp, valueProviders);
 	}
 
 	public void useProject(IProject p) throws Exception {
