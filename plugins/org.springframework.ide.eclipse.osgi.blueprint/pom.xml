@@ -9,7 +9,7 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
-	<artifactId>org.springframework.ide.eclipse.blueprint</artifactId>
+	<artifactId>org.springframework.ide.eclipse.osgi.blueprint</artifactId>
 	
 	<packaging>eclipse-plugin</packaging>
 
