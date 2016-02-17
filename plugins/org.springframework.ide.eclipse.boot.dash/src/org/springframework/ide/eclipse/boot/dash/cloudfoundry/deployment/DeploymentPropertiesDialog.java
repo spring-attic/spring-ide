@@ -46,8 +46,12 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.VerticalRuler;
@@ -607,10 +611,23 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 12, colorsCache);
-		VerticalRuler fileVerticalRuler = /*new VerticalRuler(16, mnualMarkerAnnotationAccess)*/null;
+		VerticalRuler fileVerticalRuler = new VerticalRuler(16, fileMarkerAnnotationAccess);
 		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		fileYamlViewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)));
+		ManifestYamlSourceViewerConfiguration manifestYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
+
+			@Override
+			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+				strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
+					super.createReconcilerStrategy(viewer),
+					new AppNameReconcilingStrategy(viewer, getAstProvider())
+				});
+				return strategy;
+			}
+
+		};
+		fileYamlViewer.configure(manifestYamlSourceViewerConfiguration);
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		fileYamlDecorationSupport = new SourceViewerDecorationSupport(fileYamlViewer, fileOverviewRuler, fileMarkerAnnotationAccess, colorsCache);
 
@@ -632,11 +649,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		DefaultMarkerAnnotationAccess manualMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 12, colorsCache);
-		VerticalRuler manualVerticalRuler = /*new VerticalRuler(16, mnualMarkerAnnotationAccess)*/null;
+		VerticalRuler manualVerticalRuler = new VerticalRuler(16, manualMarkerAnnotationAccess);
 		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
 				manualOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		manualYamlViewer.configure(new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)));
+		manualYamlViewer.configure(manifestYamlSourceViewerConfiguration);
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 		if (readOnly) {
 			manualYamlViewer.setEditable(false);
