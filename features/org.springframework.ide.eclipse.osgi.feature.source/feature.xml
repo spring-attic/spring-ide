@@ -37,4 +37,25 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.springframework.ide.eclipse.osgi.targetdefinition.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.osgi.runtime.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.osgi.blueprint.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
