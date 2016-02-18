@@ -414,11 +414,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			changed = getAppCache().replace(appInstances, project, preferedRunState);
 
 			projectAppStore.storeProjectToAppMapping(updated);
-		}
 
-		// These trigger events, therefore be sure to call them outside of the
-		// synch block to avoid deadlock
-		applications.replaceAll(updated);
+			//Should be okay to call inside synch block as the events are fired from a
+			// a Job now.
+			applications.replaceAll(updated);
+		}
 
 		if (changed) {
 			notifyElementChanged(addedElement);
@@ -472,17 +472,16 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				}
 
 				projectAppStore.storeProjectToAppMapping(updated.values());
+
+				//Okay to call in 'sync' block as events are fired from a job now
+				applications.replaceAll(updated.values());
+				// This only fires a model CHANGE event (adding/removing elements). It
+				// does not fire an event for app state changes that are tracked
+				// externally
+				// (runstate, instances, project) in the cache. The latter is handled
+				// separately
+				// below.
 			}
-
-			// Fire events outside of synch block to avoid deadlock
-
-			// This only fires a model CHANGE event (adding/removing elements). It
-			// does not fire an event for app state changes that are tracked
-			// externally
-			// (runstate, instances, project) in the cache. The latter is handled
-			// separately
-			// below.
-			applications.replaceAll(updated.values());
 
 			// Fire app state change based on changes to the app cache
 			if (toNotify != null) {
@@ -618,11 +617,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					} catch (Exception e) {
 						ui.errorPopup("Error saving project to application mappings", e.getMessage());
 					}
+					applications.replaceAll(updatedElements);
 				}
-
-				// do this outside the synch block
-
-				applications.replaceAll(updatedElements);
 			}
 		};
 
