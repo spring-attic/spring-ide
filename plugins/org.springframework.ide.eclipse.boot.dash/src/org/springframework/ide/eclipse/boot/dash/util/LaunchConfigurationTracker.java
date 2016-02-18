@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;
@@ -119,7 +120,7 @@ public class LaunchConfigurationTracker implements Disposable {
 	private LiveSetVariable<ILaunchConfiguration> getVar(IProject project) {
 		LiveSetVariable<ILaunchConfiguration> existing = configs.get(project);
 		if (existing==null) {
-			configs.put(project, existing = new LiveSetVariable<>());
+			configs.put(project, existing = new LiveSetVariable<>(AsyncMode.SYNC));
 		}
 		return existing;
 	}

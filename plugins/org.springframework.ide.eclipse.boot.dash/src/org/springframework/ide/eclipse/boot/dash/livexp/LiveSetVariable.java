@@ -15,8 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -41,8 +39,11 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 	private boolean dirty = false;
 	private Set<T> backingCollection;
 
-	public LiveSetVariable() {
-		this(new HashSet<T>());
+	/**
+	 * Instantiate a LiveSet that uses a HashSet as a backing collection.
+	 */
+	public LiveSetVariable(AsyncMode async) {
+		this(new HashSet<T>(), async);
 	}
 
 	/**
@@ -51,15 +52,19 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 	 * not retain references to the backing collection and should only modify the
 	 * collection via liveset operations.
 	 */
-	public LiveSetVariable(Set<T> backingCollection) {
+	public LiveSetVariable(Set<T> backingCollection, AsyncMode async) {
+		super(ImmutableSet.copyOf(backingCollection), async);
 		this.backingCollection = backingCollection;
-		this.value = compute();
 	}
 
 	@Override
-	public void refresh() {
-		//We override refresh methd so we can avoid doing set comparison by making
-		// us of a dirty flag instead.
+	protected void syncRefresh() {
+		//TODO: if we override 'refresh' as well we can avoid scheduling a job if not dirty.
+		// Or alternately we can add isDirty() method to the protocol of AsyncLiveExpression
+		// and buid this optimization into AsyncLiveExpression itself.
+
+		//We override refresh method so we can avoid doing set comparison by making
+		// use of a dirty flag instead.
 		boolean wasDirty;
 		synchronized (this) {
 			wasDirty = dirty;

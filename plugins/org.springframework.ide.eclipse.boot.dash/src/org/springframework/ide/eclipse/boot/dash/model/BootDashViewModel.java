@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -56,7 +57,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	 * added by adding them to the runTarget's LiveSet.
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
-		runTargets = new LiveSetVariable<RunTarget>(new LinkedHashSet<RunTarget>());
+		runTargets = new LiveSetVariable<RunTarget>(new LinkedHashSet<RunTarget>(), AsyncMode.SYNC);
 		this.context = context;
 		models = new BootDashModelManager(context, this, runTargets);
 

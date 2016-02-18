@@ -84,6 +84,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -132,8 +133,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	private CloudDashElementFactory elementFactory;
 
-	private final LiveSetVariable<CloudServiceDashElement> services = new LiveSetVariable<>();
-	private final LiveSetVariable<CloudAppDashElement> applications = new LiveSetVariable<>();
+	private final LiveSetVariable<CloudServiceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
+	private final LiveSetVariable<CloudAppDashElement> applications = new LiveSetVariable<>(AsyncMode.ASYNC);
 	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications, services);
 
 
