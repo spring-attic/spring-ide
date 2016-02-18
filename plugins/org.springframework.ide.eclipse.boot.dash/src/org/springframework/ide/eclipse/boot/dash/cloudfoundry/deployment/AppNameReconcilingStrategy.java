@@ -19,6 +19,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
@@ -65,20 +66,26 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		reconcile(subRegion);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
-	 */
-	public void reconcile(IRegion region) {
-		IAnnotationModel fAnnotationModel = fViewer.getAnnotationModel();
+	private IAnnotationModel getAppNameAnnotationModel() {
+		IAnnotationModel model = fViewer instanceof ISourceViewerExtension2 ? ((ISourceViewerExtension2)fViewer).getVisualAnnotationModel() : fViewer.getAnnotationModel();
+		if (model instanceof IAnnotationModelExtension) {
+			return ((IAnnotationModelExtension) model).getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY);
+		}
+		return model;
+	}
 
-		if (fAnnotationModel == null) {
+	@Override
+	public void reconcile(IRegion region) {
+		IAnnotationModel annotationModel = getAppNameAnnotationModel();
+
+		if (annotationModel == null) {
 			return;
 		}
 
 		List<Annotation> toRemove= new ArrayList<Annotation>();
 
 		@SuppressWarnings("unchecked")
-		Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
+		Iterator<Annotation> iter= annotationModel.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Annotation annotation= iter.next();
 			if (AppNameAnnotation.TYPE.equals(annotation.getType())) {
@@ -89,14 +96,14 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 
 		Map<Annotation, Position> annotationsToAdd = createAnnotations();
 
-		if (fAnnotationModel instanceof IAnnotationModelExtension)
-			((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(annotationsToRemove, annotationsToAdd);
+		if (annotationModel instanceof IAnnotationModelExtension)
+			((IAnnotationModelExtension)annotationModel).replaceAnnotations(annotationsToRemove, annotationsToAdd);
 		else {
 			for (int i= 0; i < annotationsToRemove.length; i++)
-				fAnnotationModel.removeAnnotation(annotationsToRemove[i]);
+				annotationModel.removeAnnotation(annotationsToRemove[i]);
 			for (iter= annotationsToAdd.keySet().iterator(); iter.hasNext();) {
 				Annotation annotation= iter.next();
-				fAnnotationModel.addAnnotation(annotation, annotationsToAdd.get(annotation));
+				annotationModel.addAnnotation(annotation, annotationsToAdd.get(annotation));
 			}
 		}
 

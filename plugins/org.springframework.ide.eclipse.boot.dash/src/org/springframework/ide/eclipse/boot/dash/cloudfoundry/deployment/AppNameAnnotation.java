@@ -40,7 +40,7 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 
 
 	/** The state of this annotation */
-	private boolean fIsCollapsed= false;
+	private boolean fIsSelected= false;
 	/** Indicates whether this annotation should be painted as range */
 	private boolean fIsRangeIndication= false;
 
@@ -59,7 +59,7 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 	 */
 	public AppNameAnnotation(boolean isCollapsed) {
 		super(TYPE, false, null);
-		fIsCollapsed= isCollapsed;
+		fIsSelected= isCollapsed;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 
 	private Image getImage(Display display) {
 		initializeImages(display);
-		return isCollapsed() ? fgCollapsedImage : fgExpandedImage;
+		return isSelected() ? fgCollapsedImage : fgExpandedImage;
 	}
 
 	private void initializeImages(Display display) {
@@ -129,21 +129,21 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 	 *
 	 * @return <code>true</code> if collapsed
 	 */
-	public boolean isCollapsed() {
-		return fIsCollapsed;
+	public boolean isSelected() {
+		return fIsSelected;
 	}
 
 	/**
 	 * Marks this annotation as being collapsed.
 	 */
-	public void markCollapsed() {
-		fIsCollapsed= true;
+	public void markSelected() {
+		fIsSelected= true;
 	}
 
 	/**
 	 * Marks this annotation as being unfolded.
 	 */
-	public void markExpanded() {
-		fIsCollapsed= false;
+	public void markUnselected() {
+		fIsSelected= false;
 	}
 }

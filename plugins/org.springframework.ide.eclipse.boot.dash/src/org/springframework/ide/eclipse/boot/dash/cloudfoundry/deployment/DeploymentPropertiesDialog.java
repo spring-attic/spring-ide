@@ -46,15 +46,16 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
+import org.eclipse.jface.text.source.AnnotationRulerColumn;
+import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -207,6 +208,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Sash appNamesSash;
 	private SourceViewer fileYamlViewer;
 	private SourceViewer manualYamlViewer;
+	private AppNameAnnotationSupport fileYamlAppNameAnnotationSupport;
+	private AppNameAnnotationSupport manualYamlAppNameAnnotationSupport;
 	private TreeViewer workspaceViewer;
 	private Button refreshButton;
 	private Button buttonFileManifest;
@@ -610,11 +613,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER).span(3, SWT.DEFAULT).create());
 
 		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
-		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 12, colorsCache);
-		VerticalRuler fileVerticalRuler = new VerticalRuler(16, fileMarkerAnnotationAccess);
+		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 10, colorsCache);
+		IVerticalRuler fileVerticalRuler = /*new VerticalRuler(16, fileMarkerAnnotationAccess)*/new CompositeRuler();
 		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		ManifestYamlSourceViewerConfiguration manifestYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
+		ManifestYamlSourceViewerConfiguration fileYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
 			@Override
 			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
@@ -627,9 +630,16 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			}
 
 		};
-		fileYamlViewer.configure(manifestYamlSourceViewerConfiguration);
+		fileYamlViewer.configure(fileYamlSourceViewerConfiguration);
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
+
+		AnnotationRulerColumn column = new AnnotationRulerColumn(12, fileMarkerAnnotationAccess);
+		column.addAnnotationType(Annotation.TYPE_UNKNOWN);
+		fileYamlViewer.addVerticalRulerColumn(column);
+		column.setModel(fileYamlViewer.getAnnotationModel());
+
 		fileYamlDecorationSupport = new SourceViewerDecorationSupport(fileYamlViewer, fileOverviewRuler, fileMarkerAnnotationAccess, colorsCache);
+		fileYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(fileYamlViewer, fileMarkerAnnotationAccess);
 
 		if (appName == null) {
 			createAppNamesSash(fileYamlComposite);
@@ -648,19 +658,41 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 
 		DefaultMarkerAnnotationAccess manualMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
-		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 12, colorsCache);
-		VerticalRuler manualVerticalRuler = new VerticalRuler(16, manualMarkerAnnotationAccess);
+		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 10, colorsCache);
+		IVerticalRuler manualVerticalRuler = /*new VerticalRuler(16, manualMarkerAnnotationAccess)*/new CompositeRuler();
 		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
 				manualOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		manualYamlViewer.configure(manifestYamlSourceViewerConfiguration);
+		ManifestYamlSourceViewerConfiguration manualSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
+
+			@Override
+			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+				strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
+					super.createReconcilerStrategy(viewer),
+					new AppNameReconcilingStrategy(viewer, getAstProvider())
+				});
+				return strategy;
+			}
+
+		};
+
+		manualYamlViewer.configure(manualSourceViewerConfiguration);
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
+
+		column = new AnnotationRulerColumn(12, manualMarkerAnnotationAccess);
+		column.addAnnotationType(Annotation.TYPE_UNKNOWN);
+		manualYamlViewer.addVerticalRulerColumn(column);
+		column.setModel(manualYamlViewer.getAnnotationModel());
+
 		if (readOnly) {
 			manualYamlViewer.setEditable(false);
 			manualYamlViewer.getTextWidget().setCaret(null);
 			manualYamlViewer.getTextWidget().setCursor(getShell().getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
 		}
 		manualYamlDecorationSupport = new SourceViewerDecorationSupport(manualYamlViewer, manualOverviewRuler, manualMarkerAnnotationAccess, colorsCache);
+		manualYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(manualYamlViewer, manualMarkerAnnotationAccess);
+
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml), new AnnotationModel());
 
 		/*
@@ -1068,6 +1100,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 		if (fileYamlDecorationSupport != null) {
 			fileYamlDecorationSupport.dispose();
+		}
+		if (manualYamlAppNameAnnotationSupport != null) {
+			manualYamlAppNameAnnotationSupport.dispose();
+		}
+		if (fileYamlAppNameAnnotationSupport != null) {
+			fileYamlAppNameAnnotationSupport.dispose();
 		}
 
 		/*
