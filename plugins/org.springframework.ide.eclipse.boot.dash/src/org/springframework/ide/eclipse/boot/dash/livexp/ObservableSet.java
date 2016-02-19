@@ -28,21 +28,15 @@ public abstract class ObservableSet<T> extends AsyncLiveExpression<ImmutableSet<
 	@Deprecated
 	public ObservableSet() {
 		//Make it synch as that is 'backwards' compatible. Just in case existing code expects it.
-		this(ImmutableSet.<T>of(), AsyncMode.SYNC);
+		this(ImmutableSet.<T>of(), AsyncMode.SYNC, AsyncMode.SYNC);
 	}
 
-	public ObservableSet(ImmutableSet<T> initialValue, String refreshJobName) {
-		super(initialValue, refreshJobName);
-	}
-
-	public ObservableSet(ImmutableSet<T> initialValue, AsyncMode async) {
-		super(initialValue, async);
+	public ObservableSet(ImmutableSet<T> initialValue, AsyncMode refreshMode, AsyncMode eventsMode) {
+		super(initialValue, refreshMode, eventsMode);
 	}
 
 	public static <T> ObservableSet<T> constant(ImmutableSet<T> value) {
-		//Since the refresh does nothing it matters little if we use async here.
-		// So use sync as its more efficient
-		return new ObservableSet<T>(value, AsyncMode.SYNC) {
+		return new ObservableSet<T>(value, AsyncMode.SYNC, AsyncMode.SYNC) {
 			@Override
 			protected ImmutableSet<T> compute() {
 				return value;
@@ -75,6 +69,4 @@ public abstract class ObservableSet<T> extends AsyncLiveExpression<ImmutableSet<
 	public boolean contains(T e) {
 		return getValues().contains(e);
 	}
-
-
 }

@@ -53,7 +53,10 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 	 * collection via liveset operations.
 	 */
 	public LiveSetVariable(Set<T> backingCollection, AsyncMode async) {
-		super(ImmutableSet.copyOf(backingCollection), async);
+		super(ImmutableSet.copyOf(backingCollection), AsyncMode.SYNC, async);
+		//Note the 'refresh' is done synchronously as its the most logical from user point of
+		// view. Notably: otherwise when replacing values and immediately thereafter calling 'getValues'
+		// you are not guaranteed to actually get the values you just inserted back.
 		this.backingCollection = backingCollection;
 	}
 
@@ -65,19 +68,15 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 
 		//We override refresh method so we can avoid doing set comparison by making
 		// use of a dirty flag instead.
-		boolean wasDirty;
 		synchronized (this) {
-			wasDirty = dirty;
+			if (!dirty) return; //bail out fast and don't copy the collection needlessly
 			value = compute();
-			dirty = false;
 		}
 		//Note... we are being careful here to put the 'changed' call outside synch block.
 		// only keep locks for short time while maniping the collection  / dirty state.
 		// but notify listeners without holding on to the lock while listeneres are
 		// doing their thing (which could be anything... and lead to deadlocks otherwise!)
-		if (wasDirty) {
-			changed();
-		}
+		changed();
 	}
 
 	@Override
