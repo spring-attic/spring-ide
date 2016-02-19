@@ -20,6 +20,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 
+import static org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode.*;
+
 /**
  * We use mostly use mockito to mock BootDashModel, but some test cases need
  * a more fleshed out mock (e.g. to test listeners attached to the model).
@@ -32,7 +34,7 @@ public class MockBootDashModel extends AbstractBootDashModel {
 		super(target, parent);
 	}
 
-	private LiveSetVariable<BootDashElement> elements = new LiveSetVariable<>();
+	private LiveSetVariable<BootDashElement> elements = new LiveSetVariable<>(SYNC);
 
 	@Override
 	public ObservableSet<BootDashElement> getElements() {
