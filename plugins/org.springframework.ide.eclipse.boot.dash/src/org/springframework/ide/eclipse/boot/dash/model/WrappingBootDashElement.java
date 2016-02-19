@@ -250,7 +250,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 							ActuatorClient client = new ActuatorClient(target, getTypeLookup());
 							List<RequestMapping> list = client.getRequestMappings();
 							if (list!=null) {
-								System.out.println("request mappings size = "+list.size());
 								return ImmutableList.copyOf(client.getRequestMappings());
 							}
 						}
