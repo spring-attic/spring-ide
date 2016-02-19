@@ -48,6 +48,20 @@ public class ManifestYmlSchema implements YamlSchema {
 		YBeanType application = f.ybean("Application");
 		YAtomicType t_path = f.yatomic("Path");
 
+		YAtomicType t_buildpack = f.yatomic("Buildpack");
+		t_buildpack.addHints(
+				//TODO: get these from CF somehow instead of hard-coding this list.
+				"go_buildpack",
+				"ruby_buildpack",
+				"staticfile_buildpack",
+				"nodejs_buildpack",
+				"python_buildpack",
+				"php_buildpack",
+				"liberty_buildpack",
+				"binary_buildpack",
+				"java_buildpack"
+		);
+
 		YAtomicType t_boolean = f.yenum("boolean", "true", "false");
 		YType t_string = f.yatomic("String");
 		YType t_strings = f.yseq(t_string);
@@ -69,7 +83,7 @@ public class ManifestYmlSchema implements YamlSchema {
 		TOPLEVEL_TYPE.addProperty("inherit", t_string, descriptionFor("inherit"));
 
 		YTypedPropertyImpl[] props = {
-			f.yprop("buildpack", t_string),
+			f.yprop("buildpack", t_buildpack),
 			f.yprop("command", t_string),
 			f.yprop("disk_quota", t_memory),
 			f.yprop("domain", t_string),
