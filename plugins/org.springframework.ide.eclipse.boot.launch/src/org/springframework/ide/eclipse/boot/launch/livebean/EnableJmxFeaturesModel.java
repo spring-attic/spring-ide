@@ -86,8 +86,8 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 					}
 					try {
 						int portValue = Integer.parseInt(portStr.trim());
-						if (portValue<=0) {
-							return error(portFieldName + " should be a positive integer");
+						if (portValue<0) {
+							return error(portFieldName + " should be a positive integer or 0");
 						} else if (portValue>MAX_PORT) {
 							return error(portFieldName + " should be smaller than "+MAX_PORT);
 						}

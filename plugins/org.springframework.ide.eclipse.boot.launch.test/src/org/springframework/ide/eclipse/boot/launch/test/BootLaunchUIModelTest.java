@@ -408,6 +408,9 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertFalse(liveBean.getValue());
 		assertError("should be a positive", validator);
 
+		port.setValue("0");
+		assertOk(validator); // 0 is acceptable as it means 'choose dynamically'.
+
 		port.setValue("  8888   ");
 		assertOk(validator); // tolerate spaces
 
