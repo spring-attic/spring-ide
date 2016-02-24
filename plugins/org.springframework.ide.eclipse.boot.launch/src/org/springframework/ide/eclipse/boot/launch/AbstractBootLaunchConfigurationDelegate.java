@@ -178,6 +178,10 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		}
 	}
 
+	public static String getMainType(ILaunchConfiguration config) throws CoreException {
+		return config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+	}
+
 	public static void setMainType(ILaunchConfigurationWorkingCopy config, String typeName) {
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, typeName);
 	}
