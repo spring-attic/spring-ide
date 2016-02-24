@@ -20,7 +20,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.assertLabelContains;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
@@ -91,6 +91,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * @author Kris De Volder
@@ -340,6 +342,31 @@ public class BootDashModelTest {
 			return e;
 		}
 		throw new IllegalStateException("This code should be unreachable");
+	}
+
+	@Test
+	public void startOldBootApp() throws Exception {
+		String projectName = "boot12";
+		createPredefinedMavenProject(projectName);
+		BootProjectDashElement element = getElement(projectName);
+		doStartOldBootAppTest(element, RunState.RUNNING);
+		doStartOldBootAppTest(element, RunState.DEBUGGING);
+	}
+
+	private void doStartOldBootAppTest(BootProjectDashElement element, RunState runOrDebug) throws Exception {
+		try {
+			waitForState(element, RunState.INACTIVE);
+			element.restart(runOrDebug, ui);
+			waitForState(element, RunState.RUNNING);
+		} finally {
+			element.stopAsync(ui);
+			waitForState(element, RunState.INACTIVE);
+			verifyZeroInteractions(ui);
+		}
+	}
+
+	private IProject createPredefinedMavenProject(String projectName) throws Exception {
+		return BootProjectTestHarness.createPredefinedMavenProject(projectName, "org.springframework.ide.eclipse.boot.dash.test");
 	}
 
 	/**

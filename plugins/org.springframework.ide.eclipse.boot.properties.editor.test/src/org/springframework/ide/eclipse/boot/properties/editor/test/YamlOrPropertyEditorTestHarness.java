@@ -10,26 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.waitForImportJob;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -43,18 +35,13 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import junit.framework.TestCase;
 
@@ -559,48 +546,8 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	protected IProject createPredefinedMavenProject(final String projectName) throws Exception {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		if (project.exists()) {
-			return project;
-		}
-		StsTestUtil.setAutoBuilding(false);
-		ImportConfiguration importConf = new ImportConfiguration() {
-
-			@Override
-			public String getProjectName() {
-				return projectName;
-			}
-
-			@Override
-			public String getLocation() {
-				return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(projectName).toString();
-			}
-
-			@Override
-			public CodeSet getCodeSet() {
-				File sourceWorkspace = new File(StsTestUtil.getSourceWorkspacePath(getBundleName()));
-				File sourceProject = new File(sourceWorkspace, projectName);
-				return new CopyFromFolder(projectName, sourceProject);
-			}
-		};
-		final IRunnableWithProgress importOp = BuildType.MAVEN.getDefaultStrategy().createOperation(importConf);
-		Job runner = new Job("Import "+projectName) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					importOp.run(monitor);
-				} catch (Throwable e) {
-					return ExceptionUtil.status(e);
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		runner.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		runner.schedule();
-
-		waitForImportJob(project, runner);
-//		BootProjectTestHarness.assertNoErrors(project);
-		return project;
+		final String bundleName = getBundleName();
+		return BootProjectTestHarness.createPredefinedMavenProject(projectName, bundleName);
 	}
 
 	public List<ReconcileProblem> reconcile(MockEditor editor) {

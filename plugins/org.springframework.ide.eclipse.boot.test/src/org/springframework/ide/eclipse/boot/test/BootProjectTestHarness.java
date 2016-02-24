@@ -13,12 +13,14 @@ package org.springframework.ide.eclipse.boot.test;
 import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,13 +28,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.test.util.CopyFromFolder;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
 import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
+import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -211,6 +218,52 @@ public class BootProjectTestHarness {
 	public IProject getProject(String projectName) {
 		return workspace.getRoot().getProject(projectName);
 	}
+
+	public static IProject createPredefinedMavenProject(final String projectName, final String bundleName)
+				throws CoreException, Exception {
+			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+			if (project.exists()) {
+				return project;
+			}
+			StsTestUtil.setAutoBuilding(false);
+			ImportConfiguration importConf = new ImportConfiguration() {
+
+				@Override
+				public String getProjectName() {
+					return projectName;
+				}
+
+				@Override
+				public String getLocation() {
+					return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(projectName).toString();
+				}
+
+				@Override
+				public CodeSet getCodeSet() {
+					File sourceWorkspace = new File(StsTestUtil.getSourceWorkspacePath(bundleName));
+					File sourceProject = new File(sourceWorkspace, projectName);
+					return new CopyFromFolder(projectName, sourceProject);
+				}
+			};
+			final IRunnableWithProgress importOp = BuildType.MAVEN.getDefaultStrategy().createOperation(importConf);
+			Job runner = new Job("Import "+projectName) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						importOp.run(monitor);
+					} catch (Throwable e) {
+						return ExceptionUtil.status(e);
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			runner.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+			runner.schedule();
+
+			waitForImportJob(project, runner);
+	//		BootProjectTestHarness.assertNoErrors(project);
+			return project;
+		}
 
 	public static void buildMavenProject(IProject p) throws CoreException {
 		ISpringBootProject bp = SpringBootCore.create(p);
