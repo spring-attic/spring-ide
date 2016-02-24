@@ -20,7 +20,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.assertLabelContains;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
@@ -79,8 +80,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
-import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
@@ -91,8 +92,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * @author Kris De Volder
@@ -345,19 +344,33 @@ public class BootDashModelTest {
 	}
 
 	@Test
+	public void startLifeCycleDisabledApp() throws Exception {
+		String projectName = "some-app";
+		IProject project = createBootProject(projectName, bootVersionAtLeast("1.3"));
+		ILaunchConfiguration conf = BootLaunchConfigurationDelegate.createConf(project);
+		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
+		wc.doSave();
+
+		BootProjectDashElement element = getElement(projectName);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.RUNNING);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.DEBUGGING);
+	}
+
+	@Test
 	public void startOldBootApp() throws Exception {
 		String projectName = "boot12";
 		createPredefinedMavenProject(projectName);
 		BootProjectDashElement element = getElement(projectName);
-		doStartOldBootAppTest(element, RunState.RUNNING);
-		doStartOldBootAppTest(element, RunState.DEBUGGING);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.RUNNING);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.DEBUGGING);
 	}
 
-	private void doStartOldBootAppTest(BootProjectDashElement element, RunState runOrDebug) throws Exception {
+	private void doStartBootAppWithoutLifeCycleTest(BootProjectDashElement element, RunState runOrDebug) throws Exception {
 		try {
 			waitForState(element, RunState.INACTIVE);
 			element.restart(runOrDebug, ui);
-			waitForState(element, RunState.RUNNING);
+			waitForState(element, runOrDebug);
 		} finally {
 			element.stopAsync(ui);
 			waitForState(element, RunState.INACTIVE);
@@ -1058,7 +1071,7 @@ public class BootDashModelTest {
 	}
 
 	private void waitForState(final BootDashElement element, final RunState state) throws Exception {
-		new ACondition("Wait for state", RUN_STATE_CHANGE_TIMEOUT) {
+		new ACondition("Wait for state "+state, RUN_STATE_CHANGE_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
 				return element.getRunState()==state;

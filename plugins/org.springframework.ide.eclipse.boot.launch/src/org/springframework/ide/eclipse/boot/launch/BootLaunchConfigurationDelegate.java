@@ -195,6 +195,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				&& BootLaunchConfigurationDelegate.supportsLifeCycleManagement(conf);
 	}
 
+	public static boolean canUseLifeCycle(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		return conf!=null && canUseLifeCycle(conf);
+	}
+
 	public static boolean supportsLifeCycleManagement(ILaunchConfiguration conf) {
 		IProject p = getProject(conf);
 		if (p!=null) {
