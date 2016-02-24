@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -73,6 +74,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBox
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -347,12 +349,19 @@ public class BootDashModelTest {
 	public void startLifeCycleDisabledApp() throws Exception {
 		String projectName = "some-app";
 		IProject project = createBootProject(projectName, bootVersionAtLeast("1.3"));
-		ILaunchConfiguration conf = BootLaunchConfigurationDelegate.createConf(project);
-		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
+
+		BootProjectDashElement element = getElement(projectName);
+		element.openConfig(ui); //Ensure that at least one launch config exists.
+		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui);
+
+		//Disable lifecycle mgmt on config
+		LaunchConfDashElement childElement = (LaunchConfDashElement) getSingleValue(element.getCurrentChildren());
+		ILaunchConfigurationWorkingCopy wc = childElement.getActiveConfig().getWorkingCopy();
+		assertNotNull(BootLaunchConfigurationDelegate.getMainType(wc));
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
 		wc.doSave();
 
-		BootProjectDashElement element = getElement(projectName);
 		doStartBootAppWithoutLifeCycleTest(element, RunState.RUNNING);
 		doStartBootAppWithoutLifeCycleTest(element, RunState.DEBUGGING);
 	}
@@ -1074,7 +1083,8 @@ public class BootDashModelTest {
 		new ACondition("Wait for state "+state, RUN_STATE_CHANGE_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
-				return element.getRunState()==state;
+				assertEquals(state, element.getRunState());
+				return true;
 			}
 		};
 	}
