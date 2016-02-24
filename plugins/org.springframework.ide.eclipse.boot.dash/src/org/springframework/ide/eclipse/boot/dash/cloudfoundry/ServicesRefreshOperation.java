@@ -26,13 +26,13 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 public class ServicesRefreshOperation extends CloudOperation{
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+//	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	private static void debug(String msg) {
-		if (DEBUG) {
-			System.out.println(msg);
-		}
-	}
+//	private static void debug(String msg) {
+//		if (DEBUG) {
+//			System.out.println(msg);
+//		}
+//	}
 
 	final private CloudDashElementFactory elementFactory;
 
@@ -48,7 +48,7 @@ public class ServicesRefreshOperation extends CloudOperation{
 			ClientRequests client = getClientRequests();
 			monitor.worked(1);
 			if (client!=null) {
-				debug("Resfres Services for connected client");
+//				debug("Resfres Services for connected client");
 				List<CFService> serviceInfos = client.getServices();
 				Builder<CloudServiceDashElement> services = ImmutableSet.builder();
 				for (CFService service : serviceInfos) {
@@ -56,7 +56,7 @@ public class ServicesRefreshOperation extends CloudOperation{
 				}
 				model.setServices(services.build());
 			} else {
-				debug("Resfresh Services for DISconnected client");
+//				debug("Resfresh Services for DISconnected client");
 				model.setServices(ImmutableSet.<CloudServiceDashElement>of());
 			}
 		} finally {
