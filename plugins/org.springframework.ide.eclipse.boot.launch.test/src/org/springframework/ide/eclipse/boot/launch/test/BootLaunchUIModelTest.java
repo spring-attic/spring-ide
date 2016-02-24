@@ -452,8 +452,8 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		eJmxModel.setDefaults(wc);
 		assertTrue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
 		assertTrue(BootLaunchConfigurationDelegate.getEnableLifeCycle(wc));
-		int randomPort = Integer.parseInt(BootLaunchConfigurationDelegate.getJMXPort(wc));
-		assertTrue(1000 <= randomPort && randomPort <= 65535);
+		int jmxPort = Integer.parseInt(BootLaunchConfigurationDelegate.getJMXPort(wc));
+		assertEquals(BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT, jmxPort);
 	}
 
 	public void testJmxInitializeFrom() throws Exception {
