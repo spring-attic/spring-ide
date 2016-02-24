@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ServicesRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -65,6 +66,7 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
 			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getRunTarget().isConnected(), ui));
 			connectable.getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(connectable, ui));
+			connectable.getOperationsExecution(ui).runOpAsynch(new ServicesRefreshOperation(connectable));
 		}
 	}
 

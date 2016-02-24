@@ -309,7 +309,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public void refresh(UserInteractions ui) {
 		getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(this, ui));
-		getOperationsExecution(ui).runOpAsynch(new ServicesRefreshOperation(this, elementFactory));
+		getOperationsExecution(ui).runOpAsynch(new ServicesRefreshOperation(this));
 	}
 
 	@Override
@@ -849,6 +849,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			cloudData.put(ApplicationManifestHandler.NAME_PROP, app.getName());
 		}
 		return cloudData;
+	}
+
+	public CloudDashElementFactory getElementFactory() {
+		return elementFactory;
 	}
 
 }

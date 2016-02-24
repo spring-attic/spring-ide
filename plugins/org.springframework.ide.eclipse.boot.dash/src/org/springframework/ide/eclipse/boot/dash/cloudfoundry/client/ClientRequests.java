@@ -57,7 +57,7 @@ public interface ClientRequests {
 	Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 			long timeToWait) throws Exception;
 	void uploadApplication(String appName, ApplicationArchive archive) throws Exception;
-	String getHealthCheck(UUID appGuid);
-	void setHealthCheck(UUID guid, String hcType);
+	String getHealthCheck(UUID appGuid) throws Exception;
+	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
 }

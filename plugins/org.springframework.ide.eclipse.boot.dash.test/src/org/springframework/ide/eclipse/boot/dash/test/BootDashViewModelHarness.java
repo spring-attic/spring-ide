@@ -63,6 +63,7 @@ public class BootDashViewModelHarness {
 	public BootDashViewModel model;
 	private RunTargetType[] types;
 	public final MockMultiSelection<BootDashElement> selection = new MockMultiSelection<>(BootDashElement.class);
+	public final LiveVariable<BootDashModel> sectionSelection = new LiveVariable<>();
 
 	public BootDashViewModelHarness(BootDashModelContext context, RunTargetType... types) throws Exception {
 		this.types = types;

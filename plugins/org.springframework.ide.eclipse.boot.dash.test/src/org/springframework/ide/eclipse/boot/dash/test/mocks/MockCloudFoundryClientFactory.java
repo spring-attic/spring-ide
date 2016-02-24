@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	private class MockClient implements ClientRequests {
 
 		private CFClientParams params;
+		private boolean connected = true;
 
 		public MockClient(CFClientParams params) {
 			this.params = params;
@@ -175,8 +177,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public void logout() {
-			notImplementedStub();
-
+			connected = false;
 		}
 
 		@Override
@@ -188,6 +189,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<CFSpace> getSpaces() throws Exception {
+			checkConnected();
 			@SuppressWarnings("rawtypes")
 			List hack = ImmutableList.copyOf(spacesByName.values());
 			return hack;
@@ -195,10 +197,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public List<CFService> getServices() throws Exception {
+			checkConnected();
 			return getSpace().getServices();
 		}
 
-		private MockCFSpace getSpace() {
+		private MockCFSpace getSpace() throws IOException {
+			checkConnected();
 			return spacesByName.get(params.getOrgName()+"/"+params.getSpaceName());
 		}
 
@@ -228,6 +232,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
+			checkConnected();
 			return getSpace().getApplicationsWithBasicInfo();
 		}
 
@@ -254,9 +259,16 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public String getHealthCheck(UUID appGuid) {
+		public String getHealthCheck(UUID appGuid) throws IOException {
+			checkConnected();
 			//Implemented as if hc is not supported
 			return null;
+		}
+
+		private void checkConnected() throws IOException {
+			if (!connected) {
+				throw new IOException("CF Client not Connected");
+			}
 		}
 
 		@Override
