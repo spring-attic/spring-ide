@@ -28,8 +28,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
@@ -38,6 +40,8 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
@@ -164,11 +168,16 @@ public class CloudFoundryBootDashModelMockingTest {
 		//For https://www.pivotaltracker.com/story/show/114408475
 		// Apps and services should disappear when target is disconnected
 
+		debugListener("applications", target.getApplications());
+		debugListener("services", target.getServices());
+		debugListener("all", target.getElements());
+
+
 		IAction toggleConnection = actions.getToggleTargetConnectionAction();
 		harness.sectionSelection.setValue(target);
 		toggleConnection.run();
 
-		new ACondition("wait for elements to disappear", 3000) {
+		new ACondition("wait for elements to disappear", 10000) {
 			@Override
 			public boolean test() throws Exception {
 				assertFalse(target.isConnected());
@@ -182,6 +191,21 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		};
 
+	}
+
+	private <T extends BootDashElement> void debugListener(final String name, ObservableSet<T> set) {
+		set.addListener(new ValueListener<ImmutableSet<T>>() {
+
+			@Override
+			public void gotValue(LiveExpression<ImmutableSet<T>> exp, ImmutableSet<T> value) {
+				StringBuilder elements = new StringBuilder();
+				for (BootDashElement e : exp.getValue()) {
+					elements.append(e.getName());
+					elements.append(" ");
+				}
+				System.out.println(name+" -> "+elements);
+			}
+		});
 	}
 
 	private void assertNames(ArrayList<BootDashElement> elements, String... expectNames) {
