@@ -139,6 +139,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		final CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
 		assertTrue(target.isConnected());
 
+		debugListener("applications", target.getApplications());
+		debugListener("services", target.getServices());
+		debugListener("all", target.getElements());
+
 		new ACondition("wait for elements to appear", 3000) {
 			@Override
 			public boolean test() throws Exception {
@@ -167,11 +171,6 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		//For https://www.pivotaltracker.com/story/show/114408475
 		// Apps and services should disappear when target is disconnected
-
-		debugListener("applications", target.getApplications());
-		debugListener("services", target.getServices());
-		debugListener("all", target.getElements());
-
 
 		IAction toggleConnection = actions.getToggleTargetConnectionAction();
 		harness.sectionSelection.setValue(target);
