@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -34,6 +35,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAcce
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Creates a Cloud Foundry target by prompting user for credentials and Cloud
@@ -165,7 +167,8 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				try {
 					spaces = wizardModel.resolveSpaces(getWizard().getContainer());
 				} catch (Exception e) {
-					setErrorMessage(e.getMessage());
+					BootActivator.log(e);
+					setErrorMessage(ExceptionUtil.getMessage(e));
 					refreshWizardUI();
 					return;
 				}
