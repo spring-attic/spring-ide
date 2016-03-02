@@ -70,8 +70,11 @@ public class DefaultClientRequests implements ClientRequests {
 				client.createApplication(deploymentProperties.getAppName(),
 						new Staging(deploymentProperties.getCommand(), deploymentProperties.getBuildpack(),
 								deploymentProperties.getStack(), deploymentProperties.getTimeout()),
-						deploymentProperties.getMemory(), new ArrayList<>(deploymentProperties.getUris()),
-						deploymentProperties.getServices());
+						deploymentProperties.getDiskQuota(),
+						deploymentProperties.getMemory(),
+						new ArrayList<>(deploymentProperties.getUris()),
+						deploymentProperties.getServices()
+				);
 			}
 		}.call();
 	}
