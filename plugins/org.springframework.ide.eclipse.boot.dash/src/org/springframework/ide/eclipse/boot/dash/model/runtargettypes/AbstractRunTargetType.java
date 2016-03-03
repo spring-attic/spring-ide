@@ -10,15 +10,25 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+
 /**
  * @author Kris De Volder
  */
 public abstract class AbstractRunTargetType implements RunTargetType {
 
 	private String name;
+	private IPropertyStore propertyStore;
 
-	public AbstractRunTargetType(String name) {
+	public AbstractRunTargetType(BootDashModelContext context, String name) {
 		this.name = name;
+		if (context!=null) {
+			this.propertyStore = PropertyStoreFactory.createSubStore(name, context.getViewProperties());
+		}
 	}
 
 	@Override
@@ -54,5 +64,18 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	@Override
+	public IPropertyStore getPropertyStore() {
+		return propertyStore;
+	}
+
+	@Override
+	public PropertyStoreApi getPersistentProperties() {
+		if (propertyStore!=null) {
+			return new PropertyStoreApi(getPropertyStore());
+		}
+		return null;
 	}
 }

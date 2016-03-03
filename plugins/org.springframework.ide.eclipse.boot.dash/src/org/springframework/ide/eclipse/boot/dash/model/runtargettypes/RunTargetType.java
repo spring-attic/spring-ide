@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
@@ -46,5 +48,16 @@ public interface RunTargetType extends Nameable {
 	RunTarget createRunTarget(TargetProperties properties);
 
 	ImageDescriptor getIcon();
+
+	/**
+	 * Provides a means to store persistent properties associated with this {@link RunTargetType}
+	 */
+	IPropertyStore getPropertyStore();
+
+	/**
+	 * A convenience method that provides access to the persisent property store returned by getPropertyStore
+	 * through more convenient API.
+	 */
+	PropertyStoreApi getPersistentProperties();
 
 }

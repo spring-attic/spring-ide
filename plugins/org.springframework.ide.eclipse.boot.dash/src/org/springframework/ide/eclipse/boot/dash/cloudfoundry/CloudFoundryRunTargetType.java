@@ -33,10 +33,11 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
 	private CloudFoundryClientFactory clientFactory;
-	private BootDashModelContext context;
+
+	private final BootDashModelContext context;
 
 	public CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
-		super("Cloud Foundry");
+		super(context, "Cloud Foundry");
 		this.context = context;
 		this.clientFactory = clientFactory;
 	}
