@@ -19,8 +19,10 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
@@ -39,11 +41,13 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClie
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -189,8 +193,64 @@ public class CloudFoundryBootDashModelMockingTest {
 				return true;
 			}
 		};
+	}
+
+
+	@Test
+	public void testDeployActionsSorted() throws Exception {
+		//Generate some random 'space' names.
+		String orgName = "CloudRunAMock";
+		String[] spaceNames = new String[6];
+		for (int i = 0; i < spaceNames.length; i++) {
+			spaceNames[i] = RandomStringUtils.randomAlphabetic(10).toLowerCase();
+		}
+
+		//Define the spaces in the 'mock' cloud:
+		for (String spaceName : spaceNames) {
+			//Since this is just a mock client we creating, the params don't matter all that much at all.
+			clientFactory.defSpace(orgName, spaceName);
+		}
+
+		//Create targets in the boot dash that connect to these spaces:
+		for (String spaceName : spaceNames) {
+			CFClientParams params = new CFClientParams(
+					"http://api.run.cloud.mock.com",
+					"some-user",  "his-password",
+					false,
+					orgName, spaceName
+			);
+			harness.createCfTarget(params);
+		}
+
+		{
+			ImmutableList<IAction> deployActions = actions.getDebugOnTargetActions();
+			assertEquals(spaceNames.length, deployActions.size());
+			assertSorted(deployActions);
+		}
+
+		{
+			ImmutableList<IAction> deployActions = actions.getRunOnTargetActions();
+			assertEquals(spaceNames.length, deployActions.size());
+			assertSorted(deployActions);
+		}
 
 	}
+
+	private void assertSorted(ImmutableList<IAction> actions) {
+		String[] actionNames = new String[actions.size()];
+		for (int i = 0; i < actionNames.length; i++) {
+			actionNames[i] = actions.get(i).getText();
+		}
+
+		String actual = StringUtils.arrayToDelimitedString(actionNames, "\n");
+
+		Arrays.sort(actionNames);
+		String expected = StringUtils.arrayToDelimitedString(actionNames, "\n");
+
+		assertEquals(expected, actual);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	private <T extends BootDashElement> void debugListener(final String name, ObservableSet<T> set) {
 		set.addListener(new ValueListener<ImmutableSet<T>>() {
@@ -222,70 +282,6 @@ public class CloudFoundryBootDashModelMockingTest {
 		}
 		return builder.build();
 	}
-
-//	/**
-//	 * Test that tests a bunch of things.
-//	 * TODO: It isn't good practice to create 'test everything' tests...
-//	 * but we do it anyway because ramping up a test that deploys an app takes about 90 seconds...
-//	 * Maybe we can factor this better somehow so we have separate tests, but only deploy app once?
-//	 */
-//	@Test
-//	public void testDeployAppAndDeleteAndStuff() throws Exception {
-//		harness.createCfTarget(CfTestTargetParams.fromEnv());
-//		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
-//
-//		final BootProjectDashElement project = harness.getElementFor(
-//				projects.createBootProject("to-deploy", withStarters("actuator", "web"))
-//		);
-//		final String appName = harness.randomAppName();
-//
-//		harness.answerDeploymentPrompt(ui, appName, appName);
-//		model.add(ImmutableList.<Object>of(project), ui);
-//
-//		//The resulting deploy is asynchronous
-//		new ACondition("wait for app '"+ appName +"'to appear", APP_IS_VISIBLE_TIMEOUT) {
-//			public boolean test() throws Exception {
-//				assertNotNull(model.getApplication(appName));
-//				return true;
-//			}
-//		};
-//
-//		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
-//			public boolean test() throws Exception {
-//				CloudAppDashElement element = model.getApplication(appName);
-//				assertEquals(RunState.RUNNING, element.getRunState());
-//				return true;
-//			}
-//		};
-//
-//		//Try to get request mappings
-//		new ACondition("wait for request mappings", FETCH_REQUEST_MAPPINGS_TIMEOUT) {
-//			public boolean test() throws Exception {
-//				CloudAppDashElement element = model.getApplication(appName);
-//				List<RequestMapping> mappings = element.getLiveRequestMappings();
-//				assertNotNull(mappings); //Why is the test sometimes failing here?
-//				assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
-//				                                 // for example an 'error' page.
-//				return true;
-//			}
-//		};
-//
-//		//Try to delete the app...
-//		reset(ui);
-//		when(ui.confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
-//
-//		CloudAppDashElement app = model.getApplication(appName);
-//		app.getCloudModel().delete(ImmutableList.<BootDashElement>of(app), ui);
-//
-//		new ACondition("wait for app to be deleted", APP_DELETE_TIMEOUT) {
-//
-//			@Override
-//			public boolean test() throws Exception {
-//				assertNull(model.getApplication(appName));
-//				return true;
-//			}
-//		};
-//	}
 
 	///////////////////////////////////////////////////////////////////////////////////
 
