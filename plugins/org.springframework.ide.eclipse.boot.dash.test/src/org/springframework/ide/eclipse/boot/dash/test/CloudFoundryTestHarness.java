@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
@@ -41,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -202,6 +204,15 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	public List<BootDashModel> getCfRunTargetModels() {
 		return getRunTargetModels(cfTargetType);
+	}
+
+	public CloudFoundryRunTargetType getCfTargetType() {
+		for (RunTargetType type : model.getRunTargetTypes()) {
+			if (type instanceof CloudFoundryRunTargetType) {
+				return (CloudFoundryRunTargetType) type;
+			}
+		}
+		return null;
 	}
 
 }

@@ -30,10 +30,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
@@ -232,6 +233,25 @@ public class CloudFoundryBootDashModelMockingTest {
 			ImmutableList<IAction> deployActions = actions.getRunOnTargetActions();
 			assertEquals(spaceNames.length, deployActions.size());
 			assertSorted(deployActions);
+		}
+
+	}
+
+	@Test
+	public void targetTypeProperties() throws Exception {
+		{
+			CloudFoundryRunTargetType cfTargetType = harness.getCfTargetType();
+			PropertyStoreApi props = cfTargetType.getPersistentProperties();
+			props.put("testkey", "testvalue");
+			assertEquals("testvalue", props.get("testkey"));
+		}
+
+		harness.reload();
+
+		{
+			CloudFoundryRunTargetType cfTargetType = harness.getCfTargetType();
+			PropertyStoreApi props = cfTargetType.getPersistentProperties();
+			assertEquals("testvalue", props.get("testkey"));
 		}
 
 	}
