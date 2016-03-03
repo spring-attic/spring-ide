@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
+import org.springframework.ide.eclipse.boot.properties.editor.test.ApplicationYamlEditorTestHarness.YamlEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
@@ -323,14 +324,13 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"security.user.role[1=foo\n" +
 				"security.user.role[1]crap=foo\n" +
 				"server.port[0]=8888\n" +
-				"spring.thymeleaf.view-names[1]=hello"
+				"spring.thymeleaf.view-names[1]=hello" //This is okay now. Boot handles this notation for arrays
 		);
 		assertProblems(editor,
 				"bork|Integer",
 				"[|matching ']'",
 				"crap|'.' or '['",
-				"[0]|Can't use '[..]'",
-				"[1]|Can't use '[..]'"
+				"[0]|Can't use '[..]'"
 				//no other problems
 		);
 	}
@@ -1037,6 +1037,52 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"logging.level.root=<*>"
 		);
 	}
+
+
+	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {
+		MockPropertiesEditor editor;
+		useProject(createPredefinedMavenProject("demo-sts-4335"));
+
+		editor = new MockPropertiesEditor(
+				"test-map.test-list-object.color-list[0]=not-a-color\n"+
+				"test-map.test-list-object.color-list[1]=RED\n"+
+				"test-map.test-list-object.color-list[2]=GREEN\n"
+		);
+		assertProblems(editor,
+				"not-a-color|Expecting 'com.wellsfargo.lendingplatform.web.config.Color"
+		);
+
+		editor = new MockPropertiesEditor(
+				"test-map.test-list-object.string-list[0]=not-a-color\n"+
+				"test-map.test-list-object.string-list[1]=RED\n"+
+				"test-map.test-list-object.string-list[2]=GREEN\n"
+		);
+		assertProblems(editor /*NONE*/);
+	}
+
+
+	public void test_STS_3335_completions_list_nested_in_Map_of_String() throws Exception {
+		useProject(createPredefinedMavenProject("demo-sts-4335"));
+
+		assertCompletions(
+				"test-map.some-string-key.col<*>"
+				, // =>
+				"test-map.some-string-key.color-list=<*>"
+		);
+
+		assertCompletionsDisplayString(
+				"test-map.some-string-key.color-list[0]=<*>\n"
+				, // =>
+				"red", "green", "blue"
+		);
+
+		assertCompletionsDisplayString(
+				"test-map.some-string-key.color-list[0]=<*>\n"
+				, // =>
+				"red", "green", "blue"
+		);
+	}
+
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)

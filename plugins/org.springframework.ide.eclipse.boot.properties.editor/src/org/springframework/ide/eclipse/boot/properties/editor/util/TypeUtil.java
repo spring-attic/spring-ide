@@ -383,12 +383,14 @@ public class TypeUtil {
 	 * for properties of this type.
 	 */
 	public static boolean isBracketable(Type type) {
-		//Note: map types are bracketable although the notation isn't really useful
-		// for them (and a bit broken see https://github.com/spring-projects/spring-boot/issues/2386).
-
-		//Note array types are no longer considered 'Bracketable'
+		//Note array types where once not considered 'Bracketable'
 		//see: STS-4031
-		return isList(type);
+
+		//However...
+		//Seems that in Boot 1.3 arrays are now 'Bracketable' and funcion much equivalnt to list (even including 'autogrowing' them).
+		//This is actually more logical too.
+		//So '[' notation in props file can be used for either list or arrays (at leats in recent versions of boot).
+		return isArray(type) || isList(type);
 	}
 
 	public static boolean isList(Type type) {
