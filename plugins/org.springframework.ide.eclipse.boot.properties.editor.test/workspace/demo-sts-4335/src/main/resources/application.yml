@@ -1,0 +1,5 @@
+test-map:
+  test-list-object:
+    string-list:
+      - abc
+      - def

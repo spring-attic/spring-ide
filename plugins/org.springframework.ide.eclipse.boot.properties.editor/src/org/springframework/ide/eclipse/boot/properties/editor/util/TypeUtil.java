@@ -472,7 +472,7 @@ public class TypeUtil {
 				return boxType;
 			}
 		}
-		return null;
+		return type;
 	}
 
 	public Type getKeyType(Type mapOrArrayType) {

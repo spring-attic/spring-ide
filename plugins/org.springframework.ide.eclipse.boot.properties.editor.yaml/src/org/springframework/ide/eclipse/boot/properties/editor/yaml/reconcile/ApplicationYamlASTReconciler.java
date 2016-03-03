@@ -214,8 +214,12 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 					Node value = entry.getValueNode();
 					Type nestedValueType = valueType;
 					if (value.getNodeId()==NodeId.mapping) {
-						if (TypeUtil.isObject(valueType) || TypeUtil.isString(keyType)) {
-							//See https://issuetracker.springsource.com/browse/STS-4254
+						//Some special cases to handle here!!
+						//   See https://issuetracker.springsource.com/browse/STS-4254
+						//   See https://issuetracker.springsource.com/browse/STS-4335
+						if (TypeUtil.isObject(valueType)) {
+							nestedValueType = type;
+						} else if (TypeUtil.isString(keyType) && typeUtil.isAtomic(valueType)) {
 							nestedValueType = type;
 						}
 					}
