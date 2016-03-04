@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 
@@ -271,12 +272,19 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		//check the default rendering is like it used to be before introducing templates.
 		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
-		assertEquals("your-org : bar - [http://api.some-cloud.com]", fooSpace.getDisplayName());
+		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
 
 		RunTargetType targetType = fooSpace.getRunTarget().getType();
 
 		//Let's try switching the order of org and space
 		targetType.setNameTemplate("%s - %o @ %a");
+		assertEquals("foo - my-org @ http://api.some-cloud.com", fooSpace.getDisplayName());
+		assertEquals("bar - your-org @ http://api.some-cloud.com", barSpace.getDisplayName());
+
+		//Let's try adding 'username' into the label
+		targetType.setNameTemplate("%u@%s");
+		assertEquals("freddy@foo", fooSpace.getDisplayName());
+		assertEquals("freddy@bar", barSpace.getDisplayName());
 	}
 
 	private void assertSorted(ImmutableList<IAction> actions) {
