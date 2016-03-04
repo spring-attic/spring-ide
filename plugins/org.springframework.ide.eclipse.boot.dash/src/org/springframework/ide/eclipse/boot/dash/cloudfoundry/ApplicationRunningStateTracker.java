@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationEventHandler;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
@@ -36,14 +37,14 @@ public class ApplicationRunningStateTracker {
 
 	private final String appName;
 
-	private final CloudFoundryBootDashModel model;
+	private final AbstractBootDashModel model;
 
 	private final long timeout;
 
 	private final ApplicationOperationEventHandler eventHandler;
 
 	public ApplicationRunningStateTracker(CloudAppDashElement element, ClientRequests requests,
-			CloudFoundryBootDashModel model, ApplicationOperationEventHandler eventHandler) {
+			AbstractBootDashModel model, ApplicationOperationEventHandler eventHandler) {
 		this.requests = requests;
 		this.appName = element.getName();
 		this.model = model;

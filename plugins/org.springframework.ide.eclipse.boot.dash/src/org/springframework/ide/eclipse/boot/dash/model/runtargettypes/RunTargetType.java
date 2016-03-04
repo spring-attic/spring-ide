@@ -69,4 +69,15 @@ public interface RunTargetType extends Nameable {
 	 * See also {@link AbstractRunTargetType}.getNameTemplateString()
 	 */
 	String getDefaultNameTemplate();
+
+	/**
+	 * Sets a persistent property that overrides the default name template.
+	 */
+	void setNameTemplate(String string) throws Exception;
+
+	/**
+	 * Gets the effective name template. May return null if there is neither a defaultNameTemplate nor
+	 * a template provided through setNameTemplate.
+	 */
+	String getNameTemplate();
 }

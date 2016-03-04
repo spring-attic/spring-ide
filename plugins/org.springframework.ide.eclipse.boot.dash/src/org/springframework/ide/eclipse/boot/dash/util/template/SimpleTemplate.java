@@ -22,7 +22,7 @@ package org.springframework.ide.eclipse.boot.dash.util.template;
  * A '%' that occurs at the end of the template is not substituted (i.e. it is automatically
  * 'escaped'.
  * <p>
- * If a template variable is not bound (i.e. TemplateEnv returns null for it) then it is
+ * If a template variable is not bound (i.e. {@link TemplateEnv} returns null for it) then it is
  * not substituted (the variable just remains in the output string unchanged).
  *
  * @author Kris De Volder

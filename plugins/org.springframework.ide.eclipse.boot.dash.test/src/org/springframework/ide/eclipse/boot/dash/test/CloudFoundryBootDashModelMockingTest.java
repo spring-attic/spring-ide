@@ -35,11 +35,14 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.util.StringUtils;
@@ -254,6 +257,26 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals("testvalue", props.get("testkey"));
 		}
 
+	}
+
+	@Test
+	public void templateDrivenTargetNames() throws Exception {
+		clientFactory.defSpace("my-org", "foo");
+		clientFactory.defSpace("your-org", "bar");
+
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = "whocares";
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
+
+		//check the default rendering is like it used to be before introducing templates.
+		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
+		assertEquals("your-org : bar - [http://api.some-cloud.com]", fooSpace.getDisplayName());
+
+		RunTargetType targetType = fooSpace.getRunTarget().getType();
+
+		//Let's try switching the order of org and space
+		targetType.setNameTemplate("%s - %o @ %a");
 	}
 
 	private void assertSorted(ImmutableList<IAction> actions) {

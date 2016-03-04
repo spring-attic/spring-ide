@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 
-	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 	private String id;
 	private String name;
 	private RunTargetType type;
@@ -109,14 +108,7 @@ public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 	}
 
 	protected String getNameTemplateString() {
-		PropertyStoreApi props = getType().getPersistentProperties();
-		if (props!=null) {
-			String customTemplate = props.get(NAME_TEMPLATE);
-			if (customTemplate!=null) {
-				return customTemplate;
-			}
-		}
-		return getType().getDefaultNameTemplate();
+		return getType().getNameTemplate();
 	}
 
 	@Override

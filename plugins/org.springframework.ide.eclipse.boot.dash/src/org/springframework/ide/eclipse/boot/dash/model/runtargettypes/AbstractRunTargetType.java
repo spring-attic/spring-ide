@@ -20,6 +20,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
  */
 public abstract class AbstractRunTargetType implements RunTargetType {
 
+	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
+
 	private String name;
 	private IPropertyStore propertyStore;
 
@@ -83,4 +85,20 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		return null;
 	}
 
+	@Override
+	public void setNameTemplate(String template) throws Exception {
+		getPersistentProperties().put(NAME_TEMPLATE, template);
+	}
+
+	@Override
+	public String getNameTemplate() {
+		PropertyStoreApi props = getPersistentProperties();
+		if (props!=null) {
+			String customTemplate = props.get(NAME_TEMPLATE);
+			if (customTemplate!=null) {
+				return customTemplate;
+			}
+		}
+		return getDefaultNameTemplate();
+	}
 }

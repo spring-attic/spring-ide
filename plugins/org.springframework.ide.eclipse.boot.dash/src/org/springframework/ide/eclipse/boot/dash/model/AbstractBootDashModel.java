@@ -100,4 +100,8 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 		return parent;
 	}
 
+	public String getDisplayName() {
+		return getRunTarget().getDisplayName();
+	}
+
 }

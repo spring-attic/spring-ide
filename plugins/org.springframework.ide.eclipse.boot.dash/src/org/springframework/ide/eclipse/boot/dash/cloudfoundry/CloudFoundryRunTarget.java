@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -155,7 +156,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public CloudFoundryBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
+	public AbstractBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
 		return new CloudFoundryBootDashModel(this, context, parent);
 	}
 

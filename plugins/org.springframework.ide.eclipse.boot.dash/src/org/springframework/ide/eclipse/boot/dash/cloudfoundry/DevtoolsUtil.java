@@ -32,6 +32,7 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -264,7 +265,7 @@ public class DevtoolsUtil {
 		});
 	}
 
-	public static DevtoolsDebugTargetDisconnector createDebugTargetDisconnector(CloudFoundryBootDashModel model) {
+	public static DevtoolsDebugTargetDisconnector createDebugTargetDisconnector(AbstractBootDashModel model) {
 		return new DevtoolsDebugTargetDisconnector(model);
 	}
 

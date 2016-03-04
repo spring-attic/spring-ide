@@ -14,6 +14,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -36,9 +37,9 @@ public class DevtoolsDebugTargetDisconnector implements Disposable {
 
 	private ElementStateListener listener;
 	private Map<BootDashElement, RunState> lastKnownState = new HashMap<BootDashElement, RunState>();
-	private CloudFoundryBootDashModel model;
+	private AbstractBootDashModel model;
 
-	public DevtoolsDebugTargetDisconnector(CloudFoundryBootDashModel model) {
+	public DevtoolsDebugTargetDisconnector(AbstractBootDashModel model) {
 		this.model = model;
 		model.addElementStateListener(listener = new ElementStateListener() {
 			public void stateChanged(BootDashElement e) {
