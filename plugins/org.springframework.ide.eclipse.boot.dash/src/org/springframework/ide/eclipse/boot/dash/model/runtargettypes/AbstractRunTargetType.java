@@ -101,4 +101,9 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		}
 		return getDefaultNameTemplate();
 	}
+
+	@Override
+	public String getTemplateHelpText() {
+		return null;
+	}
 }

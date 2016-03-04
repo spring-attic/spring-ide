@@ -60,4 +60,6 @@ public interface BootDashModel {
 
 	Comparator<BootDashElement> getElementComparator();
 
+	void notifyModelStateChanged();
+
 }

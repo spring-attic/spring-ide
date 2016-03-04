@@ -80,4 +80,10 @@ public interface RunTargetType extends Nameable {
 	 * a template provided through setNameTemplate.
 	 */
 	String getNameTemplate();
+
+	/**
+	 * Gets a short, helpful message describing the supported template language (i.e. at least list the
+	 * supported '%' template variables.
+	 */
+	String getTemplateHelpText();
 }

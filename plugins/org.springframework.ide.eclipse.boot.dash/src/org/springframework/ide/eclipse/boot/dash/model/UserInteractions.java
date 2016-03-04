@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -94,4 +96,9 @@ public interface UserInteractions {
 	 * @return yes/no/cancel ids yes - use updated manifest, no - stop using manifest
 	 */
 	int openManifestCompareDialog(CompareEditorInput input, IRunnableContext context) throws CoreException;
+
+	/**
+	 * Opens a {@link EditTemplateDialog} on given dialog model.
+	 */
+	void openEditTemplateDialog(EditTemplateDialogModel model);
 }

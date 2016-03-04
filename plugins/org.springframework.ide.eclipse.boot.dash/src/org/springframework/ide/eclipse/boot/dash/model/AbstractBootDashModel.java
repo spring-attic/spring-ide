@@ -45,7 +45,8 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 
 	ListenerList modelStateListeners = new ListenerList();
 
-	protected final void notifyModelStateChanged() {
+	@Override
+	public final void notifyModelStateChanged() {
 		for (Object l : modelStateListeners.getListeners()) {
 			((BootDashModel.ModelStateListener) l).stateChanged(this);
 		}

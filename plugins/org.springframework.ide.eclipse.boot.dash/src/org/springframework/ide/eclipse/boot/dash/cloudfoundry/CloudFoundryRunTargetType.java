@@ -78,4 +78,16 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	public String getDefaultNameTemplate() {
 		return "%o : %s - [%a]";
 	}
+
+	@Override
+	public String getTemplateHelpText() {
+		return
+				"Enter a template pattern. The following variable substitution are defined:\n" +
+				"   '%u': username\n" +
+				"   '%o': organization\n" +
+				"   '%s': space\n" +
+				"   '%a': API URL\n" +
+				"\n" +
+				"To escape a variable name simply repeat the '%' sign. E.g. '%%u'";
+	}
 }
