@@ -77,4 +77,10 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		}
 		return null;
 	}
+
+	@Override
+	public String getDefaultNameTemplate() {
+		return null;
+	}
+
 }

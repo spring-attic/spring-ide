@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,5 +77,10 @@ public interface RunTarget extends IdAble, Nameable {
 	 * @return true if applications can be deployed from this run target to other run targets. False otherwise.
 	 */
 	public abstract boolean canDeployAppsFrom();
+
+	/**
+	 * Return a nice name, suitable for displaying in a view to identify this target to the user.
+	 */
+	public abstract String getDisplayName();
 
 }

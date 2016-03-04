@@ -160,7 +160,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	}
 
 	@Override
-	public TargetProperties getTargetProperties() {
+	public CloudFoundryTargetProperties getTargetProperties() {
 		return targetProperties;
 	}
 
@@ -292,6 +292,22 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	public void setHealthCheck(UUID guid, String hcType) throws Exception {
 		getClient().setHealthCheck(guid, hcType);
+	}
+
+	@Override
+	public String getTemplateVar(char name) {
+		switch (name) {
+		case 'o':
+			return getTargetProperties().getOrganizationName();
+		case 's':
+			return getTargetProperties().getSpaceName();
+		case 'a':
+			return getTargetProperties().getUrl();
+		case 'u':
+			return getTargetProperties().getUsername();
+		default:
+			return super.getTemplateVar(name);
+		}
 	}
 
 }

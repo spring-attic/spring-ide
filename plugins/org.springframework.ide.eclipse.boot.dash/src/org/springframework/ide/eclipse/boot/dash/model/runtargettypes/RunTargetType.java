@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 
 /**
  * A run target type represents a type of 'deployment environment' to which
@@ -60,4 +61,12 @@ public interface RunTargetType extends Nameable {
 	 */
 	PropertyStoreApi getPersistentProperties();
 
+	/**
+	 * Provides a Default template (see {@link Templates}) for rendering the name of targets of this type.
+	 * This default can be overriden via a persisent property set on this target. (I.e. the default is
+	 * only used if the property isn't set.
+	 * <p>
+	 * See also {@link AbstractRunTargetType}.getNameTemplateString()
+	 */
+	String getDefaultNameTemplate();
 }

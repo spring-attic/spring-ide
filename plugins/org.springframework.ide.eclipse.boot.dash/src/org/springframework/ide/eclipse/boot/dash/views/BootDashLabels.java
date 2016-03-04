@@ -211,18 +211,15 @@ public class BootDashLabels implements Disposable {
 
 	public StyledString getStyledText(BootDashModel element, BootDashColumn column) {
 		if (element != null) {
-			//TODO: We don't care about columns (yet?)
 			if (element.getRunTarget() != null) {
-				//TODO: prettier labels ? Each target type could specify a way to render its target's labels more
-				// colorfully.
 				if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
 					StyledString prefix = new StyledString();
 					if (element.getRefreshState().getMessage() != null) {
 						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
 					}
-					return prefix.append(new StyledString(element.getRunTarget().getName(), stylers.italic()));
+					return prefix.append(new StyledString(element.getRunTarget().getDisplayName(), stylers.italic()));
 				} else {
-					return new StyledString(element.getRunTarget().getName(), stylers.bold());
+					return new StyledString(element.getRunTarget().getDisplayName(), stylers.bold());
 				}
 			} else {
 				return new StyledString(UNKNOWN_LABEL);

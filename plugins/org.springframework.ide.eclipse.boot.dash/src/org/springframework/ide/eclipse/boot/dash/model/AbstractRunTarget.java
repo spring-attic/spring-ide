@@ -10,11 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.util.template.Template;
+import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
+import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.util.StringUtils;
 
-public abstract class AbstractRunTarget implements RunTarget {
+public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 
+	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 	private String id;
 	private String name;
 	private RunTargetType type;
@@ -83,6 +89,39 @@ public abstract class AbstractRunTarget implements RunTarget {
 	@Override
 	public RunTargetType getType() {
 		return type;
+	}
+
+	@Override
+	public String getDisplayName() {
+		Template nameTemplate = getNameTemplate();
+		if (nameTemplate!=null) {
+			return nameTemplate.render(this);
+		}
+		return getName();
+	}
+
+	public Template getNameTemplate() {
+		String nameTemplate = getNameTemplateString();
+		if (StringUtils.hasText(nameTemplate)) {
+			return Templates.create(nameTemplate);
+		}
+		return null;
+	}
+
+	protected String getNameTemplateString() {
+		PropertyStoreApi props = getType().getPersistentProperties();
+		if (props!=null) {
+			String customTemplate = props.get(NAME_TEMPLATE);
+			if (customTemplate!=null) {
+				return customTemplate;
+			}
+		}
+		return getType().getDefaultNameTemplate();
+	}
+
+	@Override
+	public String getTemplateVar(char name) {
+		return null;
 	}
 
 }
