@@ -522,7 +522,7 @@
 				<repository>
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
-		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.6/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
