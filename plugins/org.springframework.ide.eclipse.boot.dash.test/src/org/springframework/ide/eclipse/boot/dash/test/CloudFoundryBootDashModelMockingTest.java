@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
@@ -302,10 +303,18 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
+		LocalBootDashModel local = harness.getLocalModel();
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
 		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
-
 		CustmomizeTargetLabelAction action = actions.getCustomizeTargetLabelAction();
+
+		//////////// not applicable for local targets:
+
+		harness.sectionSelection.setValue(local);
+		assertFalse(action.isEnabled());
+		assertFalse(action.isVisible());
+
+		//////////// for cf targets //////////////////////////////////////////////////
 
 		harness.sectionSelection.setValue(fooSpace);
 		assertTrue(action.isEnabled());
@@ -327,9 +336,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("foo - my-org @ http://api.some-cloud.com", fooSpace.getDisplayName());
 		assertEquals("bar - your-org @ http://api.some-cloud.com", barSpace.getDisplayName());
 
-		////////////////////////////////////////////////////////////////////////////
+		//Let's also try a user interaction that involves the 'Restore Defaults' button...
 
-		//Let's also try a user interaction that involves the 'Restore Defaults' button
 		reset(ui, modelStateListener);
 
 		doAnswer(restoreDefaultTemplate())

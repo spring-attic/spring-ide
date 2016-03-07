@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -238,6 +239,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	 */
 	public Map<String, String> fetchEnvironment(CloudFoundryBootDashModel model, String appName) throws Exception {
 		return model.getRunTarget().getClient().getApplication(appName).getEnvAsMap();
+	}
+
+	public LocalBootDashModel getLocalModel() {
+		return (LocalBootDashModel) getRunTargetModel(RunTargetTypes.LOCAL);
 	}
 
 }
