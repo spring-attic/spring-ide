@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getJMXPortAsInt;
 import java.util.EnumSet;
 
 import org.eclipse.core.resources.IProject;
@@ -53,8 +55,6 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @author Kris De Volder

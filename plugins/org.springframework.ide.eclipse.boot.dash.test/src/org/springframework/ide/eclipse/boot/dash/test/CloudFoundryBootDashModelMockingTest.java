@@ -16,7 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 
 import java.util.ArrayList;
@@ -31,19 +31,27 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
+import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
+import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.util.StringUtils;
@@ -287,6 +295,88 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("freddy@bar", barSpace.getDisplayName());
 	}
 
+	@Test
+	public void customizeTargetLabelAction() throws Exception {
+		clientFactory.defSpace("my-org", "foo");
+		clientFactory.defSpace("your-org", "bar");
+
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = "whocares";
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
+
+		CustmomizeTargetLabelAction action = actions.getCustomizeTargetLabelAction();
+
+		harness.sectionSelection.setValue(fooSpace);
+		assertTrue(action.isEnabled());
+		assertTrue(action.isVisible());
+
+		ModelStateListener modelStateListener = mock(ModelStateListener.class);
+		fooSpace.addModelStateListener(modelStateListener);
+		barSpace.addModelStateListener(modelStateListener);
+
+		doAnswer(editSetTemplate("%s - %o @ %a"))
+			.when(ui).openEditTemplateDialog(any(EditTemplateDialogModel.class));
+
+		action.run();
+
+		//Changing the template should result in modelStateListener firing on all the affected models
+		verify(modelStateListener).stateChanged(same(fooSpace));
+		verify(modelStateListener).stateChanged(same(barSpace));
+
+		assertEquals("foo - my-org @ http://api.some-cloud.com", fooSpace.getDisplayName());
+		assertEquals("bar - your-org @ http://api.some-cloud.com", barSpace.getDisplayName());
+
+		////////////////////////////////////////////////////////////////////////////
+
+		//Let's also try a user interaction that involves the 'Restore Defaults' button
+		reset(ui, modelStateListener);
+
+		doAnswer(restoreDefaultTemplate())
+			.when(ui).openEditTemplateDialog(any(EditTemplateDialogModel.class));
+
+		action.run();
+
+		verify(modelStateListener).stateChanged(same(fooSpace));
+		verify(modelStateListener).stateChanged(same(barSpace));
+
+		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
+		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
+	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	private Answer<Void> restoreDefaultTemplate() {
+		return new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				EditTemplateDialogModel dialog = (EditTemplateDialogModel) invocation.getArguments()[0];
+				dialog.restoreDefaultsHandler.call();
+				dialog.performOk();
+				return null;
+			}
+		};
+	}
+
+	/**
+	 * Create a mockito {@link Answer} that interacts with EditTemplateDialog by setting the template value and then
+	 * clicking the OK button.
+	 */
+	private Answer<Void> editSetTemplate(final String newText) {
+		return new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				EditTemplateDialogModel dialog = (EditTemplateDialogModel) invocation.getArguments()[0];
+				dialog.template.setValue(newText);
+				dialog.performOk();
+				return null;
+			}
+		};
+	}
+
 	private void assertSorted(ImmutableList<IAction> actions) {
 		String[] actionNames = new String[actions.size()];
 		for (int i = 0; i < actionNames.length; i++) {
@@ -300,8 +390,6 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertEquals(expected, actual);
 	}
-
-	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	private <T extends BootDashElement> void debugListener(final String name, ObservableSet<T> set) {
 		set.addListener(new ValueListener<ImmutableSet<T>>() {

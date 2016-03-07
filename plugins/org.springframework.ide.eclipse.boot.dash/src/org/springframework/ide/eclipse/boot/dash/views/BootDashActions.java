@@ -455,7 +455,7 @@ public class BootDashActions {
 		return toggleFilterActions;
 	}
 
-	public IAction getCustomizeTargetLabelAction() {
+	public CustmomizeTargetLabelAction getCustomizeTargetLabelAction() {
 		return customizeTargetLabelAction;
 	}
 
