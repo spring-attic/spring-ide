@@ -35,6 +35,12 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
+	//TODO: It looks like use of LiveVariable in here is pointless, and the BasicValidator that
+	//  appears to be using it is most likely broken (not recomputing). It is not really being
+	//  used anymore since the embedded manifest editor is 'validating' the editor contents instead.
+	//Consider removing use live variables and LiveSet in this class alltogether, as well as the
+	// validator related code.
+
 	protected final LiveSet<String> boundServices = new LiveSet<String>(new HashSet<String>());
 	protected final LiveVariable<Map<String, String>> environmentVariables = new LiveVariable<Map<String, String>>(
 			new HashMap<String, String>());
@@ -48,10 +54,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
 	protected final LiveVariable<LinkedHashSet<String>> urls = new LiveVariable<LinkedHashSet<String>>(new LinkedHashSet<String>());
-
-	protected final LiveVariable<String> host = new LiveVariable<>();
-
-	protected final LiveVariable<String> domain = new LiveVariable<>();
 
 	protected final LiveVariable<String> appName = new LiveVariable<>();
 
@@ -212,22 +214,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		this.writeManifest.setValue(writeManifest);
 	}
 
-	public void addValidator(Validator validator) {
-
-		this.validator = validator;
-
-		if (validator != null) {
-			validator.dependsOn(boundServices);
-			validator.dependsOn(environmentVariables);
-			validator.dependsOn(buildpack);
-			validator.dependsOn(memory);
-			validator.dependsOn(memory);
-			validator.dependsOn(appName);
-			validator.dependsOn(project);
-			validator.dependsOn(manifestFile);
-		}
-	}
-
 	/**
 	 *
 	 * @return never null
@@ -328,5 +314,4 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		}
 
 	}
-
 }
