@@ -105,7 +105,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		}
 
 		// once CDE is available, restart
-		this.operations.restartAndPush(cde, debugSupport, runningOrDebugging, ui).run(monitor);
+		this.operations.firstStartAndPush(cde, deploymentProperties, debugSupport, runningOrDebugging, ui).run(monitor);
 	}
 
 	private static BootDashElement findLocalBdeForProject(IProject project) {

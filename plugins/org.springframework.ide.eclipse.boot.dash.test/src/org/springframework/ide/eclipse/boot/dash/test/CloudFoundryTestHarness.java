@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
@@ -46,8 +45,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -202,6 +199,26 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) {
+		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+			@Override
+			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
+				Object[] args = invocation.getArguments();
+				@SuppressWarnings("unchecked")
+				List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				IProject project = (IProject) args[1];
+				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
+				deploymentProperties.setProject(project.getProject());
+				deploymentProperties.setAppName(appName);
+				deploymentProperties.setEnvironmentVariables(env);
+				String url = hostName + "." + domains.get(0).getName();
+				deploymentProperties.setUris(ImmutableList.of(url));
+				return deploymentProperties;
+			}
+		});
+	}
+
 	public List<BootDashModel> getCfRunTargetModels() {
 		return getRunTargetModels(cfTargetType);
 	}
@@ -213,6 +230,14 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Raw fetch of environment variables (makes a request through the CF client, rather then get the cached data
+	 * from the model).
+	 */
+	public Map<String, String> fetchEnvironment(CloudFoundryBootDashModel model, String appName) throws Exception {
+		return model.getRunTarget().getClient().getApplication(appName).getEnvAsMap();
 	}
 
 }

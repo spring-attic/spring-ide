@@ -25,9 +25,12 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;
@@ -39,7 +42,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -240,7 +242,34 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				return true;
 			}
 		};
+	}
 
+	@Test
+	public void testEnvVarsSetOnFirstDeploy() throws Exception {
+		CloudFoundryBootDashModel target = harness.createCfTarget(CfTestTargetParams.fromEnv());
+		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		final String appName = harness.randomAppName();
+
+		Map<String, String> env = new HashMap<>();
+		env.put("FOO", "something");
+		harness.answerDeploymentPrompt(ui, appName, appName, env);
+
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
+			public boolean test() throws Exception {
+				CloudAppDashElement element = model.getApplication(appName);
+				assertEquals(RunState.RUNNING, element.getRunState());
+				return true;
+			}
+		};
+
+		Map<String,String> actualEnv = harness.fetchEnvironment(target, appName);
+
+		assertEquals("something", actualEnv.get("FOO"));
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////

@@ -53,8 +53,7 @@ public class ProjectsDeployer extends CloudOperation {
 
 			try {
 				CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
-
-				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createRestartPush(project, properties, debugSupport, runOrDebug, ui, monitor);
+				CloudApplicationOperation op = model.getApplicationDeploymentOperations().createAddElement(project, properties, debugSupport, runOrDebug, ui, monitor);
 				model.getOperationsExecution(ui).runOpAsynch(op);
 			} catch (Exception e) {
 				if (!(e instanceof OperationCanceledException)) {

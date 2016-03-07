@@ -36,25 +36,28 @@ public class ApplicationDeploymentOperations {
 		this.model = model;
 	}
 
-	public Operation<?> restartAndPush(CloudAppDashElement element, DebugSupport debugSupport,
-			RunState runningOrDebugging, UserInteractions ui) throws Exception {
-		String opName = "Starting application '" + element.getName() + "' in "
+	private Operation<?> startAndPush(CloudAppDashElement cde, DebugSupport debugSupport,
+			RunState runningOrDebugging, UserInteractions ui, CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
+		String opName = "Starting application '" + cde.getName() + "' in "
 				+ (runningOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
 
-		Operation<?> restartExistingOp = new RestartExistingApplicationOperation(opName, model, element.getName(),
+		RestartExistingApplicationOperation restartExistingOp = new RestartExistingApplicationOperation(opName, model, cde.getName(),
 				debugSupport, runningOrDebugging, this, ui);
+		if (deploymentProperties!=null) {
+			restartExistingOp.setDeploymentProperties(deploymentProperties);
+		}
 
 		if (runningOrDebugging == RunState.DEBUGGING) {
 
-			if (debugSupport != null && debugSupport.isSupported(element)) {
-				Operation<?> debugOp = debugSupport.createOperation(element, opName, ui);
+			if (debugSupport != null && debugSupport.isSupported(cde)) {
+				Operation<?> debugOp = debugSupport.createOperation(cde, opName, ui);
 
-				CloudFoundryBootDashModel cloudModel = element.getCloudModel();
-				return new CompositeApplicationOperation(opName, cloudModel, element.getName(),
+				CloudFoundryBootDashModel cloudModel = cde.getCloudModel();
+				return new CompositeApplicationOperation(opName, cloudModel, cde.getName(),
 						Arrays.asList(new Operation<?>[] { restartExistingOp, debugOp }), RunState.STARTING);
 			} else {
-				String title = "Debugging is not supported for '" + element.getName() + "'";
-				String msg = debugSupport.getNotSupportedMessage(element);
+				String title = "Debugging is not supported for '" + cde.getName() + "'";
+				String msg = debugSupport.getNotSupportedMessage(cde);
 				if (msg == null) {
 					msg = title;
 				}
@@ -66,11 +69,17 @@ public class ApplicationDeploymentOperations {
 		}
 	}
 
+	public Operation<?> firstStartAndPush(CloudAppDashElement cde, CloudApplicationDeploymentProperties deploymentProperties,
+			DebugSupport debugSupport, RunState runningOrDebugging, UserInteractions ui) throws Exception {
+		return startAndPush(cde, debugSupport, runningOrDebugging, ui, deploymentProperties);
+	}
+
+
 	public CloudApplicationOperation restartOnly(IProject project, String appName, RunState preferredState) {
 		return new ApplicationRestartOnlyOp(appName, this.model, preferredState);
 	}
 
-	public CloudApplicationOperation createRestartPush(IProject project,
+	public CloudApplicationOperation createAddElement(IProject project,
 			CloudApplicationDeploymentProperties properties, DebugSupport debugSupport, RunState runOrDebug,
 			UserInteractions ui, IProgressMonitor monitor) throws Exception {
 
@@ -86,5 +95,10 @@ public class ApplicationDeploymentOperations {
 		return new AddElementOperation(properties, model, existingApp, initialRunstate, this, debugSupport, runOrDebug,
 				ui);
 	}
+
+	public Operation<?> restartAndPush(CloudAppDashElement cde, DebugSupport debugSupport, RunState runOrDebug, UserInteractions ui) throws Exception {
+		return startAndPush(cde, debugSupport, runOrDebug, ui, null);
+	}
+
 
 }

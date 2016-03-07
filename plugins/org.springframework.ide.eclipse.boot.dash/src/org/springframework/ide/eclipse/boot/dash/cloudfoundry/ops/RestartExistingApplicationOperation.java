@@ -42,6 +42,12 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 	private boolean isDebugging;
 	private ApplicationDeploymentOperations operations;
 
+	/**
+	 * Optional parameter of this operation. If set then it will be used instead of trying to 'resolve' deployment
+	 * properties.
+	 */
+	private CloudApplicationDeploymentProperties deploymentProperties;
+
 	public RestartExistingApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
 			DebugSupport debugSupport, RunState runState, ApplicationDeploymentOperations operations,
 			UserInteractions ui) {
@@ -50,6 +56,10 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 		this.isDebugging = runState == RunState.DEBUGGING;
 		this.ui = ui;
 		this.operations = operations;
+	}
+
+	public void setDeploymentProperties(CloudApplicationDeploymentProperties deploymentProperties) {
+		this.deploymentProperties = deploymentProperties;
 	}
 
 	@Override
@@ -70,8 +80,9 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 		}
 		IProject project = cde.getProject();
 
-		CloudApplicationDeploymentProperties properties = model.resolveDeploymentProperties(cde, ui,
-				monitor);
+		CloudApplicationDeploymentProperties properties = deploymentProperties==null
+				?model.resolveDeploymentProperties(cde, ui, monitor)
+				:deploymentProperties;
 
 		// Update JAVA_OPTS env variable with Remote DevTools Client secret
 		DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(), DevtoolsUtil.getSecret(project));
