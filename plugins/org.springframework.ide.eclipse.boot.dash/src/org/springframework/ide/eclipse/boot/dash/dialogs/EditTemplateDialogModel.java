@@ -10,13 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.dialogs;
 
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import java.util.concurrent.Callable;
+
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
 public abstract class EditTemplateDialogModel implements OkButtonHandler {
 
 	public final StringFieldModel template = new StringFieldModel("Template", getDefaultValue());
+	public Callable<Void> restoreDefaultsHandler = new Callable<Void>() {
+		public Void call() throws Exception {
+			template.getVariable().setValue(getDefaultValue());
+			return null;
+		}
+	};
 
 	public abstract String getTitle();
 	public abstract String getDefaultValue();

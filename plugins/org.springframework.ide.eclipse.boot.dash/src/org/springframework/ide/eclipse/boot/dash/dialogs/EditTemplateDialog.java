@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.boot.dash.livexp.ui.ButtonSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
@@ -34,6 +35,7 @@ public class EditTemplateDialog extends DialogWithSections {
 	protected List<WizardPageSection> createSections() throws CoreException {
 		Builder<WizardPageSection> sections = ImmutableList.builder();
 		sections.add(new StringFieldSection(this, model.template).tooltip(model.getHelpText()));
+		sections.add(new ButtonSection(this, "Restore Defaults", model.restoreDefaultsHandler));
 		return sections.build();
 	}
 
