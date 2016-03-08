@@ -117,7 +117,7 @@ public class LaunchConfigurationTracker implements Disposable {
 		return getVar(project);
 	}
 
-	private LiveSetVariable<ILaunchConfiguration> getVar(IProject project) {
+	private synchronized LiveSetVariable<ILaunchConfiguration> getVar(IProject project) {
 		LiveSetVariable<ILaunchConfiguration> existing = configs.get(project);
 		if (existing==null) {
 			configs.put(project, existing = new LiveSetVariable<>(AsyncMode.SYNC));
