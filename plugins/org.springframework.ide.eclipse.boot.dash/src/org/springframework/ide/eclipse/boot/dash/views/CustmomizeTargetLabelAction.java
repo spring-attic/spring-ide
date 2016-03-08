@@ -46,7 +46,7 @@ public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 	public void run() {
 		final BootDashModel section = sectionSelection.getValue();
 		if (isApplicable(section)) {
-			EditTemplateDialogModel model = new CustomizeTargetLabelDialogModel(section);
+			EditTemplateDialogModel model = CustomizeTargetLabelDialogModel.create(section);
 			ui.openEditTemplateDialog(model);
 		}
 	}

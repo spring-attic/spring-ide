@@ -20,73 +20,81 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
  *
  * @author Kris De Volder
  */
-public final class CustomizeTargetLabelDialogModel extends EditTemplateDialogModel {
+public final class CustomizeTargetLabelDialogModel {
 
 	//Note: there is no representation in this model of the 'cancel' button that exists in the
 	// real dialog. When cancel is clicked basically... nothing happens and the dialog just closes,
 	// there is no call to the model and this is fine as there is literally nothing for the model to
 	// do.
 
-	private final BootDashModel section;
-	private final RunTargetType type;
+	//Why not a 'real' class rather than this method that creates an anonymous class?
+	// Because the real class has troubles initializing itself because of the call to 'getDefaultValue'
+	// in the super constructor (it is called before the 'type' field is initialized!
+	//This static method is almost functionally equivalent but doesn't have that problem because
+	// the local variables exist before the class instance is constructed.
+	public static EditTemplateDialogModel create(final BootDashModel section ) {
+		final RunTargetType type = section.getRunTarget().getType();
+		return new EditTemplateDialogModel() {
 
-	public CustomizeTargetLabelDialogModel(BootDashModel section) {
-		this.section = section;
-		this.type = section.getRunTarget().getType();
-		template.setValue(section.getNameTemplate());
-	}
+			{
+				template.setValue(section.getNameTemplate());
+			}
 
-	@Override
-	public String getTitle() {
-		String type = section.getRunTarget().getType().getName();
-		return "Customize Labels for "+type+" Target(s)";
-	}
+			@Override
+			public String getTitle() {
+				String type = section.getRunTarget().getType().getName();
+				return "Customize Labels for "+type+" Target(s)";
+			}
 
-	@Override
-	public void performOk() throws Exception {
-		if (applyToAll.getValue()) {
-			section.getRunTarget().getType().setNameTemplate(template.getValue());
-			//To *really* apply the template to *all* targets of a given type, we must make sure
-			// that the targets do not override the value individually:
-			for (BootDashModel model : section.getViewModel().getSectionModels().getValue()) {
-				if (model.getRunTarget().getType().equals(type)) {
-					model.setNameTemplate(null);
-					model.notifyModelStateChanged();
+			@Override
+			public void performOk() throws Exception {
+				if (applyToAll.getValue()) {
+					section.getRunTarget().getType().setNameTemplate(template.getValue());
+					//To *really* apply the template to *all* targets of a given type, we must make sure
+					// that the targets do not override the value individually:
+					for (BootDashModel model : section.getViewModel().getSectionModels().getValue()) {
+						if (model.getRunTarget().getType().equals(type)) {
+							model.setNameTemplate(null);
+							model.notifyModelStateChanged();
+						}
+					}
+				} else {
+					section.setNameTemplate(template.getValue());
+					section.notifyModelStateChanged();
 				}
 			}
-		} else {
-			section.setNameTemplate(template.getValue());
-			section.notifyModelStateChanged();
-		}
-	}
 
-	@Override
-	public String getHelpText() {
-		return type.getTemplateHelpText();
-	}
-
-	@Override
-	public String getDefaultValue() {
-		return type.getDefaultNameTemplate();
-	}
-
-	@Override
-	public String getApplyToAllLabel() {
-		return "Apply to all "+type.getName()+" targets";
-	}
-
-	@Override
-	public boolean getApplyToAllDefault() {
-		//'apply to all' is enabled by default, unless there is at least one applicable model which already
-		// has an individually customized label.
-		for (BootDashModel section : section.getViewModel().getSectionModels().getValue()) {
-			if (
-					section.getRunTarget().getType().equals(type) &&
-					section.hasCustomNameTemplate()
-			) {
-				return false;
+			@Override
+			public String getHelpText() {
+				return type.getTemplateHelpText();
 			}
-		}
-		return true;
+
+			@Override
+			public String getDefaultValue() {
+				return type.getDefaultNameTemplate();
+			}
+
+			@Override
+			public String getApplyToAllLabel() {
+				return "Apply to all "+type.getName()+" targets";
+			}
+
+			@Override
+			public boolean getApplyToAllDefault() {
+				//'apply to all' is enabled by default, unless there is at least one applicable model which already
+				// has an individually customized label.
+				for (BootDashModel section : section.getViewModel().getSectionModels().getValue()) {
+					if (
+							section.getRunTarget().getType().equals(type) &&
+							section.hasCustomNameTemplate()
+					) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
 	}
+
+
 }

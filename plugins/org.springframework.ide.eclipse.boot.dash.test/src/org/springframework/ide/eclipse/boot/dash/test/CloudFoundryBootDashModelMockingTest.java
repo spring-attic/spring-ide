@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.mockito.verification.VerificationMode;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
@@ -58,12 +59,15 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+
+import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
 
 /**
  * @author Kris De Volder
@@ -351,6 +355,66 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
 		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
 	}
+
+	@Test
+	public void customizeTargetLabelDialog() throws Exception {
+		EditTemplateDialogModel dialog;
+		clientFactory.defSpace("my-org", "foo");
+		clientFactory.defSpace("your-org", "bar");
+
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = "whocares";
+
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
+
+		ModelStateListener modelStateListener = mock(ModelStateListener.class);
+		fooSpace.addModelStateListener(modelStateListener);
+		barSpace.addModelStateListener(modelStateListener);
+
+		// Check initial state of the dialog when no custom labels have yet been set at all:
+		dialog = CustomizeTargetLabelDialogModel.create(fooSpace);
+
+		assertTrue(dialog.applyToAll.getValue());
+		assertEquals("%o : %s - [%a]", dialog.template.getValue());
+
+		//Check performOk only changes the one label when 'apply to all' is disabled.
+		dialog.applyToAll.setValue(false);
+		dialog.template.setValue("CHANGED %s -> %o");
+		dialog.performOk();
+
+		verify(modelStateListener).stateChanged(same(fooSpace));
+		verify(modelStateListener, never()).stateChanged(same(barSpace));
+
+		assertEquals("CHANGED foo -> my-org", fooSpace.getDisplayName());
+		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
+
+		//Opening the dialog now should have 'apply to all' disabled to avoid accidentally overwriting
+		// existing individually customized labels...
+		dialog = CustomizeTargetLabelDialogModel.create(fooSpace);
+		assertFalse(dialog.applyToAll.getValue());
+		assertEquals("CHANGED %s -> %o", dialog.template.getValue());
+
+		//Also if we open the dialog on the other element!!!
+		dialog = CustomizeTargetLabelDialogModel.create(barSpace);
+		assertFalse(dialog.applyToAll.getValue());
+		assertEquals("%o : %s - [%a]", dialog.template.getValue());
+
+		//Selecting 'apply to all' should set the template on the type and erase custom templates on the
+		// individual targets.
+		dialog.applyToAll.setValue(true);
+		dialog.template.setValue("DIFFERENT %s -> %o");
+		dialog.performOk();
+
+		assertEquals("DIFFERENT %s -> %o", harness.getCfTargetType().getNameTemplate());
+		for (BootDashModel target : harness.getCfRunTargetModels()) {
+			assertFalse(target.hasCustomNameTemplate());
+			assertEquals("DIFFERENT %s -> %o", target.getNameTemplate());
+		}
+
+		assertEquals("DIFFERENT foo -> my-org", fooSpace.getDisplayName());
+		assertEquals("DIFFERENT bar -> your-org", barSpace.getDisplayName());
+ 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 

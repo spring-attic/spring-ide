@@ -84,4 +84,6 @@ public interface BootDashModel {
 	 * @return true if this model has a custom name template (false means it inherits name template from its target type).
 	 */
 	boolean hasCustomNameTemplate();
+
+	String getDisplayName();
 }

@@ -26,6 +26,7 @@ public abstract class EditTemplateDialogModel implements OkButtonHandler {
 	public final FieldModel<Boolean> applyToAll = new BooleanFieldModel(getApplyToAllLabel(), getApplyToAllDefault());
 
 
+	//TODO: This field can be a method once we adopt Java 8.
 	public Callable<Void> restoreDefaultsHandler = new Callable<Void>() {
 		public Void call() throws Exception {
 			template.getVariable().setValue(getDefaultValue());
