@@ -17,6 +17,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
+/**
+ * @author Kris De Volder
+ */
 public abstract class EditTemplateDialogModel implements OkButtonHandler {
 
 	public final StringFieldModel template = new StringFieldModel("Template", getDefaultValue());

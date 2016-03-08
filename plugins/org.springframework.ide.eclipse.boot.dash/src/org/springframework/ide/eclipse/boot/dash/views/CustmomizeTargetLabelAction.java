@@ -12,10 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
@@ -48,59 +46,7 @@ public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 	public void run() {
 		final BootDashModel section = sectionSelection.getValue();
 		if (isApplicable(section)) {
-			final RunTargetType type = section.getRunTarget().getType();
-			EditTemplateDialogModel model = new EditTemplateDialogModel() {
-				{
-					template.setValue(section.getNameTemplate());
-				}
-
-				@Override
-				public String getTitle() {
-					String type = section.getRunTarget().getType().getName();
-					return "Customize Labels for "+type+" Target(s)";
-				}
-				@Override
-				public void performOk() throws Exception {
-					if (applyToAll.getValue()) {
-						section.getRunTarget().getType().setNameTemplate(template.getValue());
-						//To *really* apply the template to *all* targets of a given type, we must make sure
-						// that the targets do not override the value individually:
-						for (BootDashModel model : section.getViewModel().getSectionModels().getValue()) {
-							if (model.getRunTarget().getType().equals(type)) {
-								model.setNameTemplate(null);
-								model.notifyModelStateChanged();
-							}
-						}
-					} else {
-						section.setNameTemplate(template.getValue());
-						section.notifyModelStateChanged();
-					}
-				}
-				@Override
-				public String getHelpText() {
-					return type.getTemplateHelpText();
-				}
-				@Override
-				public String getDefaultValue() {
-					return type.getDefaultNameTemplate();
-				}
-				@Override
-				public String getApplyToAllLabel() {
-					return "Apply to all "+type.getName()+" targets";
-				}
-				@Override
-				public boolean getApplyToAllDefault() {
-					for (BootDashModel section : section.getViewModel().getSectionModels().getValue()) {
-						if (
-								section.getRunTarget().getType().equals(type) &&
-								section.hasCustomNameTemplate()
-						) {
-							return false;
-						}
-					}
-					return true;
-				}
-			};
+			EditTemplateDialogModel model = new CustomizeTargetLabelDialogModel(section);
 			ui.openEditTemplateDialog(model);
 		}
 	}
