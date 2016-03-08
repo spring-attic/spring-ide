@@ -105,4 +105,18 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 		return getRunTarget().getDisplayName();
 	}
 
+	@Override
+	public String getNameTemplate() {
+		return getRunTarget().getNameTemplate();
+	}
+
+	@Override
+	public void setNameTemplate(String template) throws Exception {
+		getRunTarget().setNameTemplate(template);
+	}
+
+	@Override
+	public boolean hasCustomNameTemplate() {
+		return getRunTarget().hasCustomNameTemplate();
+	}
 }

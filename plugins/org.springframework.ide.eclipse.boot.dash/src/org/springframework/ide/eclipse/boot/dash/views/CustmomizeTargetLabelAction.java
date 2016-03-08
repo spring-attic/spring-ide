@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -50,7 +51,7 @@ public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 			final RunTargetType type = section.getRunTarget().getType();
 			EditTemplateDialogModel model = new EditTemplateDialogModel() {
 				{
-					template.setValue(type.getNameTemplate());
+					template.setValue(section.getNameTemplate());
 				}
 
 				@Override
@@ -60,11 +61,19 @@ public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 				}
 				@Override
 				public void performOk() throws Exception {
-					section.getRunTarget().getType().setNameTemplate(template.getValue());
-					for (BootDashModel model : section.getViewModel().getSectionModels().getValue()) {
-						if (model.getRunTarget().getType().equals(type)) {
-							model.notifyModelStateChanged();
+					if (applyToAll.getValue()) {
+						section.getRunTarget().getType().setNameTemplate(template.getValue());
+						//To *really* apply the template to *all* targets of a given type, we must make sure
+						// that the targets do not override the value individually:
+						for (BootDashModel model : section.getViewModel().getSectionModels().getValue()) {
+							if (model.getRunTarget().getType().equals(type)) {
+								model.setNameTemplate(null);
+								model.notifyModelStateChanged();
+							}
 						}
+					} else {
+						section.setNameTemplate(template.getValue());
+						section.notifyModelStateChanged();
 					}
 				}
 				@Override
@@ -74,6 +83,22 @@ public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 				@Override
 				public String getDefaultValue() {
 					return type.getDefaultNameTemplate();
+				}
+				@Override
+				public String getApplyToAllLabel() {
+					return "Apply to all "+type.getName()+" targets";
+				}
+				@Override
+				public boolean getApplyToAllDefault() {
+					for (BootDashModel section : section.getViewModel().getSectionModels().getValue()) {
+						if (
+								section.getRunTarget().getType().equals(type) &&
+								section.hasCustomNameTemplate()
+						) {
+							return false;
+						}
+					}
+					return true;
 				}
 			};
 			ui.openEditTemplateDialog(model);

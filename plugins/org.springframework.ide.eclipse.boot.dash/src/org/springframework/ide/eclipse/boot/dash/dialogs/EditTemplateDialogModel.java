@@ -12,12 +12,17 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 
 import java.util.concurrent.Callable;
 
+import org.springsource.ide.eclipse.commons.livexp.core.BooleanFieldModel;
+import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
 public abstract class EditTemplateDialogModel implements OkButtonHandler {
 
 	public final StringFieldModel template = new StringFieldModel("Template", getDefaultValue());
+	public final FieldModel<Boolean> applyToAll = new BooleanFieldModel(getApplyToAllLabel(), getApplyToAllDefault());
+
+
 	public Callable<Void> restoreDefaultsHandler = new Callable<Void>() {
 		public Void call() throws Exception {
 			template.getVariable().setValue(getDefaultValue());
@@ -28,4 +33,8 @@ public abstract class EditTemplateDialogModel implements OkButtonHandler {
 	public abstract String getTitle();
 	public abstract String getDefaultValue();
 	public abstract String getHelpText();
+
+	public abstract String getApplyToAllLabel();
+	public abstract boolean getApplyToAllDefault();
+
 }

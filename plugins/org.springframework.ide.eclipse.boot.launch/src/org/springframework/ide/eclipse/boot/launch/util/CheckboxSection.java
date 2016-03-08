@@ -16,6 +16,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -37,6 +38,10 @@ public class CheckboxSection extends WizardPageSection {
 	private boolean grabVer = false;
 	private boolean grabHor = false;
 
+	public CheckboxSection(IPageWithSections owner, FieldModel<Boolean> model) {
+		this(owner, new SelectionModel<>(model.getVariable(), model.getValidator()), model.getLabel());
+	}
+
 	public CheckboxSection(IPageWithSections owner, SelectionModel<Boolean> model, String label) {
 		super(owner);
 		this.model = model;
@@ -57,7 +62,7 @@ public class CheckboxSection extends WizardPageSection {
 	public void createContents(Composite page) {
 		button = new Button(page, SWT.CHECK);
 		button.setText(label);
-		GridDataFactory.fillDefaults().grab(grabHor, grabVer).applyTo(button);
+		applyLayoutData(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				model.selection.setValue(button.getSelection());
@@ -70,6 +75,10 @@ public class CheckboxSection extends WizardPageSection {
 				}
 			}
 		});
+	}
+
+	protected void applyLayoutData(Button button) {
+		GridDataFactory.fillDefaults().grab(grabHor, grabVer).applyTo(button);
 	}
 
 	@Override

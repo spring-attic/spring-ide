@@ -27,6 +27,9 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 
 	public AbstractRunTargetType(BootDashModelContext context, String name) {
 		this.name = name;
+		//TODO: there shouldn't be any exceptions to allow for target types that don't provide a context.
+		// However this requires a bunch of refactoring to get rid of the global constants related to the
+		// 'LOCAL' runtarget and type.
 		if (context!=null) {
 			this.propertyStore = PropertyStoreFactory.createSubStore(name, context.getViewProperties());
 		}
@@ -74,8 +77,9 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 
 	@Override
 	public PropertyStoreApi getPersistentProperties() {
-		if (propertyStore!=null) {
-			return new PropertyStoreApi(getPropertyStore());
+		IPropertyStore store = getPropertyStore();
+		if (store!=null) {
+			return new PropertyStoreApi(store);
 		}
 		return null;
 	}
