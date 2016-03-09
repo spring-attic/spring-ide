@@ -20,11 +20,13 @@ import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 import com.google.common.collect.ImmutableList;
 
 public class MockCFApplication extends CFApplicationData {
 	private List<InstanceStats> stats = new ArrayList<>();
+	private String healthCheck=HealthCheckSupport.HC_PORT;
 
 	public MockCFApplication(String name, UUID guid, int instances, int runningInstances, AppState state) {
 		super(name, guid, instances, runningInstances, state);
@@ -44,5 +46,13 @@ public class MockCFApplication extends CFApplicationData {
 		} else {
 			new IllegalStateException("Unable to start mock application. Existing list of instance stats: " + stats);
 		}
+	}
+
+	public String getHealthCheck() {
+		return healthCheck;
+	}
+
+	public void setHealthCheck(String healthCheck) {
+		this.healthCheck=healthCheck;
 	}
 }

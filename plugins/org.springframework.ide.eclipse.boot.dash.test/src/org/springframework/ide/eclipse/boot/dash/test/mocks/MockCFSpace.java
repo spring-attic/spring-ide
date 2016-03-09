@@ -63,4 +63,14 @@ public class MockCFSpace extends CFSpaceData {
 		return existing;
 	}
 
+	public MockCFApplication getApplication(UUID appGuid) {
+
+		for (CFApplication app : appsByName.values()) {
+			if (app.getGuid().equals(appGuid)) {
+				return (MockCFApplication) app;
+			}
+		}
+		return null;
+	}
+
 }
