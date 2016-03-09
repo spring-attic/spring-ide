@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -147,6 +148,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 					new CloudFoundryRunTargetType(context, CloudFoundryClientFactory.DEFAULT)
 					// RunTargetTypes.LATTICE
 			);
+//			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
+//			model.addDisposableChild(debugSelectionListener);
 		}
 		return model;
 	}
