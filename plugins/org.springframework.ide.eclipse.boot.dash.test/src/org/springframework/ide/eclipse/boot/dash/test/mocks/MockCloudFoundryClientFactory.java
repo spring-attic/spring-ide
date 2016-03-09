@@ -261,8 +261,16 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public String getHealthCheck(UUID appGuid) throws IOException {
 			checkConnected();
-			//Implemented as if hc is not supported
-			return null;
+			MockCFApplication app = getApplication(appGuid);
+			if (app == null) {
+				throw new IOException("Application not found: " + appGuid);
+			} else {
+				return app.getHealthCheck();
+			}
+		}
+
+		private MockCFApplication getApplication(UUID appGuid) throws IOException {
+			return getSpace().getApplication(appGuid);
 		}
 
 		private void checkConnected() throws IOException {

@@ -39,8 +39,8 @@ public class MockCFSpace extends CFSpaceData {
 		return ImmutableList.copyOf(appsByName.values());
 	}
 
-	public CFApplication defApp(String name) {
-		CFApplication existing = appsByName.get(name);
+	public MockCFApplication defApp(String name) {
+		MockCFApplication existing = (MockCFApplication) appsByName.get(name);
 		if (existing==null) {
 			appsByName.put(name, existing = new MockCFApplication(
 					name,
@@ -61,6 +61,16 @@ public class MockCFSpace extends CFSpaceData {
 			));
 		}
 		return existing;
+	}
+
+	public MockCFApplication getApplication(UUID appGuid) {
+
+		for (CFApplication app : appsByName.values()) {
+			if (app.getGuid().equals(appGuid)) {
+				return (MockCFApplication) app;
+			}
+		}
+		return null;
 	}
 
 }

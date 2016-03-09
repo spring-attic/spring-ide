@@ -15,15 +15,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.cloudfoundry.client.lib.domain.InstanceState;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
@@ -33,13 +44,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.mockito.verification.VerificationMode;
-import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -47,27 +56,27 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
+import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-
-import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
 
 /**
  * @author Kris De Volder
@@ -142,6 +151,152 @@ public class CloudFoundryBootDashModelMockingTest {
 			public boolean test() throws Exception {
 				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
 				assertEquals(ImmutableSet.of("foo", "bar"), appNames);
+				return true;
+			}
+		};
+	}
+	
+	@Test
+	public void testBasicRefreshApps() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		space.defApp("foo");
+		space.defApp("bar");
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+
+		waitForApps(target, "foo", "bar");
+
+		space.defApp("anotherfoo");
+		space.defApp("anotherbar");
+		target.refresh(ui);
+
+		waitForApps(target, "foo", "bar", "anotherfoo", "anotherbar");
+	}
+	
+	@Test
+	public void testRefreshAppsRunState() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		final MockCFApplication foo = space.defApp("foo");
+		space.defApp("bar");
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+
+		waitForApps(target, "foo", "bar");
+		
+		foo.setRunState(InstanceState.RUNNING);
+
+		target.refresh(ui);
+		
+		new ACondition("wait for app states", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
+				assertEquals(ImmutableSet.of("foo", "bar"), appNames);
+				CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
+				assertEquals(RunState.RUNNING, appElement.getRunState());
+
+				appElement = harness.getCfTargetModel().getApplication("bar");
+				assertEquals(RunState.INACTIVE, appElement.getRunState());
+
+				return true;
+			}
+		};
+	}
+	
+	@Test
+	public void testRefreshAppsHealthCheck() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		final MockCFApplication foo = space.defApp("foo");
+
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+
+		waitForApps(target, "foo");
+		
+		CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
+        assertEquals(HealthCheckSupport.HC_PORT, appElement.getHealthCheck());
+		
+
+        foo.setHealthCheck(HealthCheckSupport.HC_NONE);
+
+		target.refresh(ui);
+		
+		new ACondition("wait for app health check", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
+				assertEquals(ImmutableSet.of("foo"), appNames);
+				
+				CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
+		        assertEquals(HealthCheckSupport.HC_NONE, appElement.getHealthCheck());
+
+				return true;
+			}
+		};
+	}
+	
+	@Test
+	public void testRefreshServices() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		space.defApp("foo");
+		space.defService("elephantsql");
+		space.defService("cleardb");
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+
+		waitForApps(target, "foo");
+		waitForServices(target, "elephantsql", "cleardb");
+		waitForElements(target, "foo", "elephantsql", "cleardb");
+		
+		space.defService("rabbit");
+
+		target.refresh(ui);
+		waitForServices(target, "elephantsql", "cleardb", "rabbit");
+		waitForElements(target, "foo", "elephantsql", "cleardb", "rabbit");
+
+	}
+	
+	
+	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
+		new ACondition("wait for apps to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
+				assertEquals(ImmutableSet.copyOf(names), appNames);
+				return true;
+			}
+		};
+	}
+	
+	protected void waitForServices(final CloudFoundryBootDashModel target, final String... names) throws Exception {
+		new ACondition("wait for services to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> serviceNames = getNames(target.getServices().getValues());
+				assertEquals(ImmutableSet.copyOf(names), serviceNames);
+				return true;
+			}
+		};
+	}
+	
+	protected void waitForElements(final CloudFoundryBootDashModel target, final String... names) throws Exception {
+		new ACondition("wait for elements to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> elements = getNames(target.getElements().getValues());
+				assertEquals(ImmutableSet.copyOf(names), elements);
 				return true;
 			}
 		};
