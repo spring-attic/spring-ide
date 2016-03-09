@@ -39,8 +39,8 @@ public class MockCFSpace extends CFSpaceData {
 		return ImmutableList.copyOf(appsByName.values());
 	}
 
-	public CFApplication defApp(String name) {
-		CFApplication existing = appsByName.get(name);
+	public MockCFApplication defApp(String name) {
+		MockCFApplication existing = (MockCFApplication) appsByName.get(name);
 		if (existing==null) {
 			appsByName.put(name, existing = new MockCFApplication(
 					name,

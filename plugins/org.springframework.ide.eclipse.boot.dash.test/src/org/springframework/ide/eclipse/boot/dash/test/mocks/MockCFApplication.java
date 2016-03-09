@@ -11,11 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
+import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 
 import com.google.common.collect.ImmutableList;
@@ -29,5 +32,17 @@ public class MockCFApplication extends CFApplicationData {
 
 	public ApplicationStats getStats() {
 		return new ApplicationStats(ImmutableList.copyOf(stats));
+	}
+	
+	public void setRunState(InstanceState state)	throws Exception {
+		if (stats.isEmpty()) {
+			Map<String, Object> values = new HashMap<>();
+			
+			values.put("state", state.toString());
+			InstanceStats stat = new InstanceStats(UUID.randomUUID().toString(), values);
+			this.stats.add(stat);
+		} else {
+			new IllegalStateException("Unable to start mock application. Existing list of instance stats: " + stats);
+		}
 	}
 }
