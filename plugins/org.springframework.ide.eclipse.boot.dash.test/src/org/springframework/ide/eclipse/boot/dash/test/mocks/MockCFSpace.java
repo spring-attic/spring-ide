@@ -15,18 +15,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 public class MockCFSpace extends CFSpaceData {
 
+	//TODO: the methods in this class should prolly be synchronized somehow. It manipulates mutable
+	//  data and is called from multiple threads.
+
 	private Map<String, CFService> servicesByName = new HashMap<>();
-	private Map<String, CFApplication> appsByName = new HashMap<>();
+	private Map<String, MockCFApplication> appsByName = new HashMap<>();
 
 	public MockCFSpace(String name, UUID guid, CFOrganization org) {
 		super(name, guid, org);
@@ -37,19 +39,17 @@ public class MockCFSpace extends CFSpaceData {
 	}
 
 	public ImmutableList<CFApplication> getApplicationsWithBasicInfo() {
-		return ImmutableList.copyOf(appsByName.values());
+		Builder<CFApplication> builder = ImmutableList.builder();
+		for (MockCFApplication app : appsByName.values()) {
+			builder.add(app.getBasicInfo());
+		}
+		return builder.build();
 	}
 
 	public MockCFApplication defApp(String name) {
-		MockCFApplication existing = (MockCFApplication) appsByName.get(name);
+		MockCFApplication existing = appsByName.get(name);
 		if (existing==null) {
-			appsByName.put(name, existing = new MockCFApplication(
-					name,
-					UUID.randomUUID(),
-					1,
-					0,
-					AppState.STOPPED
-			));
+			appsByName.put(name, existing = new MockCFApplication(name));
 		}
 		return existing;
 	}
@@ -65,12 +65,34 @@ public class MockCFSpace extends CFSpaceData {
 	}
 
 	public MockCFApplication getApplication(UUID appGuid) {
-		for (CFApplication app : appsByName.values()) {
+		for (MockCFApplication app : appsByName.values()) {
 			if (app.getGuid().equals(appGuid)) {
-				return (MockCFApplication) app;
+				return app;
 			}
 		}
 		return null;
+	}
+
+	public MockCFApplication getApplication(String appName) {
+		MockCFApplication app = appsByName.get(appName);
+		if (app!=null) {
+			return app;
+		}
+		return null;
+	}
+
+
+	public boolean removeApp(String name) {
+		return appsByName.remove(name)!=null;
+	}
+
+	public boolean add(MockCFApplication app) {
+		String name = app.getName();
+		if (appsByName.get(name)==null) {
+			appsByName.put(name, app);
+			return true;
+		}
+		return false;
 	}
 
 }

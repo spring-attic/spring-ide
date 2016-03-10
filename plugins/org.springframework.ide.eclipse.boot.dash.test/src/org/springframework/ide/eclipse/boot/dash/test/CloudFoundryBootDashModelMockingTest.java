@@ -188,7 +188,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForApps(target, "foo", "bar");
 
-		foo.setRunState(InstanceState.RUNNING);
+		foo.start();
 
 		target.refresh(ui);
 
@@ -553,7 +553,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
-		new ACondition("wait for app '"+ appName +"'to be RUNNING", 3000) {
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) {
 			public boolean test() throws Exception {
 				CloudAppDashElement element = model.getApplication(appName);
 				assertEquals(RunState.RUNNING, element.getRunState());

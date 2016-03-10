@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,31 +23,42 @@ public class CFApplicationData implements CFApplication {
 	private final UUID guid;
 	private final int instances;
 	private final int runningInstances;
-
-	private Map<String, String> env = new HashMap<>();
-	private int memory = 1024;
-	private List<String> services = new ArrayList<>();
-	private String detectedBuildpack = null;
-	private String buildpackUrl = null;
-	private List<String> uris = new ArrayList<>();
-	private AppState state = AppState.STOPPED;
-	private int diskQuota = 1024;
-	private Integer timeout = null;
-	private String command = null;
-	private String stack = null;
+	private final AppState state;
+	private final int memory;
+	private final int diskQuota;
+	private final String detectedBuildpack;
+	private final String buildpackUrl;
+	private final Map<String, String> env;
+	private final List<String> services;
+	private final List<String> uris;
+	private final Integer timeout;
+	private final String command;
+	private final String stack;
 
 	@Override
 	public String getName() {
 		return name;
 	}
 
-	public CFApplicationData(String name, UUID guid, int instances, int runningInstances, AppState state) {
+	public CFApplicationData(String name, UUID guid, int instances, int runningInstances, AppState state, int memory,
+			int diskQuota, String detectedBuildpack, String buildpackUrl, Map<String, String> env,
+			List<String> services, List<String> uris, Integer timeout, String command, String stack) {
 		super();
 		this.name = name;
 		this.guid = guid;
 		this.instances = instances;
 		this.runningInstances = runningInstances;
 		this.state = state;
+		this.memory = memory;
+		this.diskQuota = diskQuota;
+		this.detectedBuildpack = detectedBuildpack;
+		this.buildpackUrl = buildpackUrl;
+		this.env = env;
+		this.services = services;
+		this.uris = uris;
+		this.timeout = timeout;
+		this.command = command;
+		this.stack = stack;
 	}
 
 	@Override
@@ -106,15 +115,15 @@ public class CFApplicationData implements CFApplication {
 	public int getDiskQuota() {
 		return diskQuota;
 	}
-	
+
 	public Integer getTimeout() {
 		return timeout;
 	}
-	
+
 	public String getCommand() {
 		return command;
 	}
-	
+
 	public String getStack() {
 		return stack;
 	}

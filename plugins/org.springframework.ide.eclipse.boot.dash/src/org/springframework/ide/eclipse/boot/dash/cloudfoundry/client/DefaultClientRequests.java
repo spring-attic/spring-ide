@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.HttpProxyConfiguration;
@@ -391,7 +392,8 @@ public class DefaultClientRequests implements ClientRequests {
 				clientParams.isSelfsigned());
 	}
 
-	public StreamingLogToken streamLogs(String appName, ApplicationLogConsole logConsole) {
+	@Override
+	public StreamingLogToken streamLogs(String appName, ApplicationLogListener logConsole) {
 		return client.streamLogs(appName, logConsole);
 	}
 
