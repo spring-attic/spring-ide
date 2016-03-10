@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,12 +20,13 @@ import java.util.UUID;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -33,7 +35,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
@@ -42,8 +43,11 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
-	private Map<String, CFOrganization> orgsByName = new HashMap<>();
-	private Map<String, MockCFSpace> spacesByName = new HashMap<>();
+	private Map<String, CFOrganization> orgsByName = new LinkedHashMap<>();
+	private Map<String, MockCFSpace> spacesByName = new LinkedHashMap<>();
+	private Map<String, MockCFDomain> domainsByName = new LinkedHashMap<>();
+	private Map<String, MockCFBuildpack> buildpacksByName = new LinkedHashMap<>();
+	private Map<String, MockCFStack> stacksByName = new LinkedHashMap<>();
 
 	/**
 	 * Becomes non-null if notImplementedStub is called, used to check that the tests
@@ -51,9 +55,33 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	 */
 	private Exception notImplementedStubCalled = null;
 
+	public MockCloudFoundryClientFactory() {
+		defDomain("cfmockapps.io"); //Lost of functionality may assume there's at least one domain so make sure we have one.
+		defBuildpacks("java-buildpack", "ruby-buildpack", "funky-buildpack", "another-buildpack");
+		defStacks("cflinuxfs2", "windows2012R2");
+	}
+
+	public void defStacks(String... names) {
+		for (String n : names) {
+			defStack(n);
+		}
+	}
+
+	public MockCFStack defStack(String name) {
+		MockCFStack stack = new MockCFStack(name);
+		stacksByName.put(name, stack);
+		return stack;
+	}
+
 	@Override
 	public ClientRequests getClient(CFClientParams params) throws Exception {
 		return new MockClient(params);
+	}
+
+	public MockCFDomain defDomain(String name) {
+		MockCFDomain it = new MockCFDomain(name);
+		domainsByName.put(name, it);
+		return it;
 	}
 
 	public MockCFSpace defSpace(String orgName, String spaceName) {
@@ -219,15 +247,15 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public List<CloudDomain> getDomains() throws Exception {
-			notImplementedStub();
-			return null;
+		public List<CFCloudDomain> getDomains() throws Exception {
+			checkConnected();
+			return ImmutableList.<CFCloudDomain>copyOf(domainsByName.values());
 		}
 
 		@Override
-		public List<Buildpack> getBuildpacks() throws Exception {
-			notImplementedStub();
-			return null;
+		public List<CFBuildpack> getBuildpacks() throws Exception {
+			checkConnected();
+			return ImmutableList.<CFBuildpack>copyOf(buildpacksByName.values());
 		}
 
 		@Override
@@ -291,9 +319,21 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public List<CFStack> getStacks() throws Exception {
-			notImplementedStub();
-			return null;
+			checkConnected();
+			return ImmutableList.<CFStack>copyOf(stacksByName.values());
 		}
-	};
+	}
+
+	public void defBuildpacks(String... names) {
+		for (String n : names) {
+			defBuildpack(n);
+		}
+	}
+
+	public MockCFBuildpack defBuildpack(String n) {
+		MockCFBuildpack it = new MockCFBuildpack(n);
+		buildpacksByName.put(n, it);
+		return it;
+	}
 
 }

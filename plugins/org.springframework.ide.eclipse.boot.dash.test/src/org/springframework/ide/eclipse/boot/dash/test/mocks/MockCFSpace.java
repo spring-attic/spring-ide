@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 
@@ -64,7 +65,6 @@ public class MockCFSpace extends CFSpaceData {
 	}
 
 	public MockCFApplication getApplication(UUID appGuid) {
-
 		for (CFApplication app : appsByName.values()) {
 			if (app.getGuid().equals(appGuid)) {
 				return (MockCFApplication) app;

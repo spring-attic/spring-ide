@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
@@ -188,7 +189,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
 				@SuppressWarnings("unchecked")
-				List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
 				IProject project = (IProject) args[1];
 				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 				deploymentProperties.setProject(project.getProject());
@@ -207,7 +208,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
 				@SuppressWarnings("unchecked")
-				List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
 				IProject project = (IProject) args[1];
 				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 				deploymentProperties.setProject(project.getProject());

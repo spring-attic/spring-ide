@@ -32,6 +32,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
@@ -606,7 +607,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
-		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+		List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
@@ -1163,7 +1164,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			return Collections.emptySet();
 		}
 
-		List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+		List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 		LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
 		LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 

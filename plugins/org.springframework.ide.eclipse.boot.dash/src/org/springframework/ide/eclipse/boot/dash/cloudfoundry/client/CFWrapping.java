@@ -18,12 +18,14 @@ import java.util.UUID;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudStack;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -53,6 +55,28 @@ public class CFWrapping {
 					return organization.getMeta().getGuid();
 				}
 			};
+		}
+		return null;
+	}
+
+	public static List<CFBuildpack> wrapBuildpacks(List<Buildpack> bps) {
+		if (bps!=null) {
+			Builder<CFBuildpack> builder = ImmutableList.builder();
+			for (Buildpack d : bps) {
+				builder.add(wrap(d));
+			}
+			return builder.build();
+		}
+		return null;
+	}
+
+	public static List<CFCloudDomain> wrapDomains(List<CloudDomain> domains) {
+		if (domains!=null) {
+			Builder<CFCloudDomain> builder = ImmutableList.builder();
+			for (CloudDomain d : domains) {
+				builder.add(wrap(d));
+			}
+			return builder.build();
 		}
 		return null;
 	}
@@ -283,7 +307,31 @@ public class CFWrapping {
 		return null;
 	}
 
-	private static CFSpace wrap(final CloudSpace s) {
+	private static CFBuildpack wrap(final Buildpack b) {
+		if (b!=null) {
+			return new CFBuildpack() {
+				@Override
+				public String getName() {
+					return b.getName();
+				}
+			};
+		}
+		return null;
+	}
+
+	public static CFCloudDomain wrap(final CloudDomain d) {
+		if (d!=null) {
+			return new CFCloudDomain() {
+				@Override
+				public String getName() {
+					return d.getName();
+				}
+			};
+		}
+		return null;
+	}
+
+	public static CFSpace wrap(final CloudSpace s) {
 		if (s!=null) {
 			return new CFSpace() {
 				private final CFOrganization org = wrap(s.getOrganization());

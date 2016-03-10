@@ -38,8 +38,8 @@ public interface ClientRequests {
 	void logout();
 	CFApplication getApplication(String appName) throws Exception;
 	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
-	List<Buildpack> getBuildpacks() throws Exception;
-	List<CloudDomain> getDomains() throws Exception;
+	List<CFBuildpack> getBuildpacks() throws Exception;
+	List<CFCloudDomain> getDomains() throws Exception;
 	CloudAppInstances getExistingAppInstances(String appName) throws Exception;
 	CloudAppInstances getExistingAppInstances(UUID guid) throws Exception;
 	List<CFService> getServices() throws Exception;

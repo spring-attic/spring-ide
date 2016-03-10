@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.Document;
@@ -31,34 +30,37 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.test.AllBootDashTests;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFDomain;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 /**
  * Manifest YAML file and Deployment properties compare and merge tests.
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class ManifestCompareMergeTests {
-	
+
 	public static final String DEFAULT_BUILDPACK = "java_buildpack_offline";
-	
-	public static final List<CloudDomain> SPRING_CLOUD_DOMAINS = Arrays.asList(
-			new CloudDomain(null, "springsource.org", null), new CloudDomain(null, "spring.io", null),
-			new CloudDomain(null, "spring.framework", null));
-	
+
+	public static final List<CFCloudDomain> SPRING_CLOUD_DOMAINS = Arrays.<CFCloudDomain>asList(
+			new MockCFDomain("springsource.org"),
+			new MockCFDomain("spring.io"),
+			new MockCFDomain("spring.framework"));
+
 	public static final List<CFStack> SPRING_CLOUD_STACKS = Arrays.asList(new CFStack[] { new CFStack() {
 		@Override
 		public String getName() {
 			return "stack1";
 		}
 	}});
-	
+
 	public static Map<String, Object> createCloudDataMap() {
 		Map<String, Object> cloudData = new HashMap<>();
 		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
@@ -66,7 +68,7 @@ public class ManifestCompareMergeTests {
 		cloudData.put(ApplicationManifestHandler.STACK_PROP, SPRING_CLOUD_STACKS);
 		return cloudData;
 	}
-	
+
 	private static void performMergeTest(File manifest, DeploymentProperties props, File expected) throws Exception {
 		FileInputStream manifestStream = null, expectedStream = null;
 		try {
@@ -89,7 +91,7 @@ public class ManifestCompareMergeTests {
 			}
 		}
 	}
-	
+
 	public static File getTestFile(String path) throws IOException {
 		Bundle bundle = Platform.getBundle(AllBootDashTests.PLUGIN_ID);
 		File bundleFile = FileLocator.getBundleFile(bundle);
@@ -98,7 +100,7 @@ public class ManifestCompareMergeTests {
 		return new File(bundleFile, path);
 	}
 
-	
+
 	@Test
 	public void test_memory_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
@@ -207,7 +209,7 @@ public class ManifestCompareMergeTests {
 		props.setEnvironmentVariables(env);
 		performMergeTest(getTestFile("mergeTestsData/map-2.yml"), props, getTestFile("mergeTestsData/map-2-expected.yml"));
 	}
-	
+
 	@Test
 	public void test_map_3() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
@@ -439,7 +441,7 @@ public class ManifestCompareMergeTests {
 		props.setMemory(2048);
 		performMergeTest(getTestFile("mergeTestsData/no-hostname-1.yml"), props, getTestFile("mergeTestsData/no-hostname-1-expected.yml"));
 	}
-	
+
 	@Test
 	public void test_no_hostname_2() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
@@ -579,7 +581,7 @@ public class ManifestCompareMergeTests {
 		props.setUris(Arrays.asList("app.springsource.org"));
 		performMergeTest(getTestFile("mergeTestsData/root-node-2.yml"), props, getTestFile("mergeTestsData/root-node-2-expected.yml"));
 	}
-	
+
 	@Test
 	public void test_root_list_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();

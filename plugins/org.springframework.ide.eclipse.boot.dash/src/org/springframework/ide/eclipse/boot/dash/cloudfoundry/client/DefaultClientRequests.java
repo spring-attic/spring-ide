@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrap;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapApps;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapBuildpacks;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapDomains;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,6 @@ import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.Staging;
@@ -39,7 +40,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.Applicatio
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
@@ -279,12 +279,12 @@ public class DefaultClientRequests implements ClientRequests {
 		}.call();
 	}
 
-	public List<CloudDomain> getDomains() throws Exception {
-		return new ClientRequest<List<CloudDomain>>(this.client, "Getting Cloud domains") {
+	public List<CFCloudDomain> getDomains() throws Exception {
+		return new ClientRequest<List<CFCloudDomain>>(this.client, "Getting Cloud domains") {
 
 			@Override
-			protected List<CloudDomain> doRun(CloudFoundryOperations client) throws Exception {
-				return client.getDomains();
+			protected List<CFCloudDomain> doRun(CloudFoundryOperations client) throws Exception {
+				return wrapDomains(client.getDomains());
 			}
 		}.call();
 	}
@@ -396,8 +396,8 @@ public class DefaultClientRequests implements ClientRequests {
 	}
 
 	@Override
-	public List<Buildpack> getBuildpacks() throws Exception {
-		return getBuildpackSupport().getBuildpacks();
+	public List<CFBuildpack> getBuildpacks() throws Exception {
+		return wrapBuildpacks(getBuildpackSupport().getBuildpacks());
 	}
 
 	@Override
