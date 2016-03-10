@@ -30,7 +30,6 @@ public class EditTemplateDialog extends DialogWithSections {
 	public EditTemplateDialog(EditTemplateDialogModel model, Shell shell) {
 		super(model.getTitle(), model, shell);
 		this.model = model;
-		this.setHelpAvailable(false);
 	}
 
 	@Override
