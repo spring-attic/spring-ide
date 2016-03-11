@@ -171,8 +171,6 @@ public class BootDashModelTest {
 
 		conf1.delete();
 
-		//When there is only one child (i.e. launch config), then it is not shown in the model (the parent subsumes all the
-		// child's functionality and we don't show the child to avoid cluttering the view)
 		assertEquals(1, projectEl.getCurrentChildren().size());
 	}
 
