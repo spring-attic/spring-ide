@@ -99,20 +99,20 @@ public class LiveSets {
 		};
 	}
 
-	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, AsyncMode asyncEvents, Function<A, R> function) {
+	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, AsyncMode asyncRefresh, AsyncMode asyncEvents, Function<A, R> function) {
 		if (input==EMPTY_SET) {
 			return EMPTY_SET;
 		}
-		return new MapSet<>(input, asyncEvents, function);
+		return new MapSet<>(input, asyncRefresh, asyncEvents, function);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Deprecated
-	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, Function<A, R> function) {
-		if (input==EMPTY_SET) {
-			return EMPTY_SET;
-		}
-		return new MapSet<>(input, function);
+	/**
+	 * Creates a {@link ObservableSet} by applying a mapping function to another ObservableSet.
+	 * <p>
+	 * The resulting set is synchronously updated when the input set changes.
+	 */
+	public static <A,R> ObservableSet<R> mapSync(ObservableSet<A> input, Function<A, R> function) {
+		return map(input, AsyncMode.SYNC, AsyncMode.SYNC, function);
 	}
 
 	/**
