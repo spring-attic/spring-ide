@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
  *   - ensuring that only a sinlge object exists to represent an element with a given identity.
  *
  * @author Kris De Volder
+ * @author Nieraj Singh
  */
 public class CloudDashApplications extends AbstractDisposable {
 
