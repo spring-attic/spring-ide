@@ -553,7 +553,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
-		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) {
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) { //why so long? JDT searching for main type.
 			public boolean test() throws Exception {
 				CloudAppDashElement element = model.getApplication(appName);
 				assertEquals(RunState.RUNNING, element.getRunState());
