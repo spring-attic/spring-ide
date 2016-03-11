@@ -38,8 +38,10 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 	ListenerList elementStateListeners = new ListenerList();
 
 	public void notifyElementChanged(BootDashElement element) {
-		for (Object l : elementStateListeners.getListeners()) {
-			((BootDashModel.ElementStateListener) l).stateChanged(element);
+		if (element!=null) {
+			for (Object l : elementStateListeners.getListeners()) {
+				((BootDashModel.ElementStateListener) l).stateChanged(element);
+			}
 		}
 	}
 

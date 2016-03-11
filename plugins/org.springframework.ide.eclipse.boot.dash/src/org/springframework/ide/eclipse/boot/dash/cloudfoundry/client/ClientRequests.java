@@ -21,7 +21,6 @@ import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 

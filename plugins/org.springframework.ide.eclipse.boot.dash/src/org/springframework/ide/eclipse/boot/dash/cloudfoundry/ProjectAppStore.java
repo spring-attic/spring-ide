@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
@@ -31,7 +30,7 @@ public class ProjectAppStore {
 	public synchronized Map<String, String> getMapping() {
 		Map<String, String> existingProjectToAppMappings = new HashMap<String, String>();
 		PropertiesMapper<Map<String, String>> propertiesMapper = new PropertiesMapper<Map<String, String>>();
-		String storedVal = this.modelStore.get(CloudFoundryBootDashModel.PROJECT_TO_APP_MAPPING);
+		String storedVal = this.modelStore.get(CloudFoundryBootDashModel.APP_TO_PROJECT_MAPPING);
 		if (storedVal != null) {
 			Map<String, String> mappings = propertiesMapper.convert(storedVal);
 			if (mappings != null) {
@@ -42,9 +41,7 @@ public class ProjectAppStore {
 	}
 
 	public synchronized void storeProjectToAppMapping(Collection<CloudAppDashElement> updated) throws Exception {
-		PropertiesMapper<Map<String, String>> propertiesMapper = new PropertiesMapper<Map<String, String>>();
 		Map<String, String> projectsToApps = new HashMap<String, String>();
-
 		if (updated != null) {
 			for (BootDashElement element : updated) {
 				IProject project = element.getProject();
@@ -53,8 +50,12 @@ public class ProjectAppStore {
 				}
 			}
 		}
+		storeProjectToAppMapping(projectsToApps);
+	}
 
+	public void storeProjectToAppMapping(Map<String, String> projectsToApps) throws Exception {
+		PropertiesMapper<Map<String, String>> propertiesMapper = new PropertiesMapper<Map<String, String>>();
 		String asValue = propertiesMapper.convertToString(projectsToApps);
-		modelStore.put(CloudFoundryBootDashModel.PROJECT_TO_APP_MAPPING, asValue);
+		modelStore.put(CloudFoundryBootDashModel.APP_TO_PROJECT_MAPPING, asValue);
 	}
 }

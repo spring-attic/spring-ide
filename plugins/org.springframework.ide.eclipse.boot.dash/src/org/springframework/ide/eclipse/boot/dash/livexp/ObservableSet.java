@@ -69,4 +69,5 @@ public abstract class ObservableSet<T> extends AsyncLiveExpression<ImmutableSet<
 	public boolean contains(T e) {
 		return getValues().contains(e);
 	}
+
 }

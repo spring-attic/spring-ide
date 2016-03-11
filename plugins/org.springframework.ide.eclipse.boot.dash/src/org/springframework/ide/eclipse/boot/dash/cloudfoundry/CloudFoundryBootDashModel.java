@@ -22,10 +22,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.compare.CompareConfiguration;
@@ -94,6 +92,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -105,7 +104,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	private CloudAppCache cloudAppCache;
 
-	public static final String PROJECT_TO_APP_MAPPING = "projectToAppMapping";
+	public static final String APP_TO_PROJECT_MAPPING = "projectToAppMapping";
 
 	private static final Comparator<BootDashElement> ELEMENT_COMPARATOR = new Comparator<BootDashElement>() {
 		@Override
@@ -134,9 +133,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	private CloudDashElementFactory elementFactory;
 
 	private final LiveSetVariable<CloudServiceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
-	private final LiveSetVariable<CloudAppDashElement> applications = new LiveSetVariable<>(AsyncMode.ASYNC);
-	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications, services);
-
+	private final CloudDashApplications applications = new CloudDashApplications(this);
+	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications.getApplications(), services);
 
 	private BootDashModelConsoleManager consoleManager;
 
@@ -195,7 +193,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				 * Update ProjectAppStore
 				 */
 				if (!appsToRefresh.isEmpty()) {
-					projectAppStore.storeProjectToAppMapping(applications.getValue());
+					projectAppStore.storeProjectToAppMapping(getApplicationValues());
 				}
 
 				/*
@@ -297,11 +295,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public void dispose() {
 		getRunTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
-		applications.dispose();
 		if (debugTargetDisconnector!=null) {
 			debugTargetDisconnector.dispose();
 			debugTargetDisconnector = null;
 		}
+		applications.dispose();
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		super.dispose();
 	}
@@ -390,45 +388,28 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project, RunState preferedRunState) throws Exception {
 		CloudAppDashElement addedElement = null;
-		Set<CloudAppDashElement> updated = new HashSet<CloudAppDashElement>();
 		boolean changed = false;
 		synchronized (this) {
-
-			ImmutableSet<CloudAppDashElement> existing = applications.getValues();
-
-			addedElement = elementFactory.createApp(appInstances.getApplication().getName());
-
-			updated.add(addedElement);
-
-			// Add any existing ones that weren't replaced by the new ones
-			// Replace the existing one with a new one for the given Cloud
-			// Application
-			for (CloudAppDashElement element : existing) {
-				if (!addedElement.getName().equals(element.getName())) {
-					updated.add(element);
-				}
-			}
+			addedElement = applications.addApplication(appInstances.getApplication().getName());
 
 			// Update the cache BEFORE updating the model, since the model
 			// elements are handles to the cache
 			changed = getAppCache().replace(appInstances, project, preferedRunState);
 
-			projectAppStore.storeProjectToAppMapping(updated);
+			Map<String, String> existing = projectAppStore.getMapping();
+			existing.put(project.getName(), addedElement.getName());
+			projectAppStore.storeProjectToAppMapping(existing);
 
 			//Should be okay to call inside synch block as the events are fired from a
 			// a Job now.
-			applications.replaceAll(updated);
 		}
-
 		if (changed) {
 			notifyElementChanged(addedElement);
 		}
-
 		return addedElement;
 	}
 
 	public CloudAppDashElement getApplication(String appName) {
-
 		synchronized (this) {
 			Set<CloudAppDashElement> apps = getApplications().getValues();
 
@@ -442,18 +423,15 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			}
 			return null;
 		}
-
 	}
 
 	public void updateElements(Map<CloudAppInstances, IProject> apps) throws Exception {
-
 		if (apps == null) {
 			/*
 			 * Error case: set empty list of BDEs don't modify state of local to CF artifacts mappings
 			 */
-			applications.replaceAll(Collections.<CloudAppDashElement>emptyList());
+			applications.setAppNames(ImmutableSet.<String>of());
 		} else {
-
 			Map<String, CloudAppDashElement> updated = new HashMap<>();
 			List<String> toNotify = null;
 			synchronized (this) {
@@ -463,18 +441,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				// app instances, and project mapping)
 				toNotify = getAppCache().updateAll(apps);
 
-				// Create new handles to the applications. Note that the cache
-				// should be updated first before creating elements
-				// as elements are handles to state in the cache
-				for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
-					CloudAppDashElement addedElement = elementFactory.createApp(entry.getKey().getApplication().getName());
-					updated.put(addedElement.getName(), addedElement);
-				}
-
+				applications.setAppNames(getNames(apps));
 				projectAppStore.storeProjectToAppMapping(updated.values());
 
-				//Okay to call in 'sync' block as events are fired from a job now
-				applications.replaceAll(updated.values());
 				// This only fires a model CHANGE event (adding/removing elements). It
 				// does not fire an event for app state changes that are tracked
 				// externally
@@ -486,13 +455,18 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			// Fire app state change based on changes to the app cache
 			if (toNotify != null) {
 				for (String appName : toNotify) {
-					BootDashElement updatedEl = updated.get(appName);
-					if (updatedEl != null) {
-						notifyElementChanged(updatedEl);
-					}
+					notifyElementChanged(applications.getApplication(appName));
 				}
 			}
 		}
+	}
+
+	private ImmutableList<String> getNames(Map<CloudAppInstances, IProject> apps) {
+		ImmutableList.Builder<String> builder = ImmutableList.builder();
+		for (CloudAppInstances app : apps.keySet()) {
+			builder.add(app.getApplication().getName());
+		}
+		return builder.build();
 	}
 
 	public ProjectAppStore getProjectToAppMappingStore() {
@@ -587,13 +561,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
 				model.getRunTarget().getClient().deleteApplication(appName);
-				Set<CloudAppDashElement> updatedElements = new HashSet<>();
 
 				synchronized (CloudFoundryBootDashModel.this) {
-					// Safe iterate via getValues(); a copy, instead of
-					// getValue()
-					ImmutableSet<CloudAppDashElement> existing = applications.getValues();
-
 					// Be sure it is removed from the cache as well as
 					// elements
 					// are handles to the cache
@@ -606,18 +575,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					// Replace the existing one with a new one for the given
 					// Cloud
 					// Application
-					for (CloudAppDashElement element : existing) {
-						if (!cloudElement.getName().equals(element.getName())) {
-							updatedElements.add(element);
-						}
-					}
-
 					try {
+						Map<String, String> updatedElements = projectAppStore.getMapping();
+						updatedElements.remove(appName);
 						projectAppStore.storeProjectToAppMapping(updatedElements);
 					} catch (Exception e) {
 						ui.errorPopup("Error saving project to application mappings", e.getMessage());
 					}
-					applications.replaceAll(updatedElements);
+					applications.removeApplication(cloudElement.getName());
 				}
 			}
 		};
@@ -626,7 +591,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		// operation
 		operation.setSchedulingRule(null);
 		getOperationsExecution(ui).runOpAsynch(operation);
-
 	}
 
 	@Override
@@ -833,7 +797,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	public ObservableSet<CloudAppDashElement> getApplications() {
-		return applications;
+		return applications.getApplications();
+	}
+
+	public ImmutableSet<CloudAppDashElement> getApplicationValues() {
+		return applications.getApplicationValues();
 	}
 
 	public ObservableSet<CloudServiceDashElement> getServices() {
@@ -853,6 +821,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public CloudDashElementFactory getElementFactory() {
 		return elementFactory;
+	}
+
+	public IPropertyStore getPropertyStore() {
+		return modelStore;
 	}
 
 }

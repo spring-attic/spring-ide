@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import com.google.common.base.Function;
@@ -98,7 +99,15 @@ public class LiveSets {
 		};
 	}
 
+	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, AsyncMode asyncEvents, Function<A, R> function) {
+		if (input==EMPTY_SET) {
+			return EMPTY_SET;
+		}
+		return new MapSet<>(input, asyncEvents, function);
+	}
+
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, Function<A, R> function) {
 		if (input==EMPTY_SET) {
 			return EMPTY_SET;
