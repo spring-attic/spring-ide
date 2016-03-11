@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -290,7 +291,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setStack(app == null ? null : app.getStack());
 
 		if (app == null) {
-			List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+			List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), domains.get(0).getName());
 			properties.setUris(Collections.singletonList(cloudAppUrl.getUrl()));
 		} else {

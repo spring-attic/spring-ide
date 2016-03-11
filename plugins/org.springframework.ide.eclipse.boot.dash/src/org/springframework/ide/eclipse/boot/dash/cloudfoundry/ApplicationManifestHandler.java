@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
@@ -120,9 +121,9 @@ public class ApplicationManifestHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<CloudDomain> getCloudDomains(Map<String, Object> cloudData) {
+	public static List<CFCloudDomain> getCloudDomains(Map<String, Object> cloudData) {
 		Object obj = cloudData == null ? null : cloudData.get(DOMAINS_PROP);
-		return obj instanceof List ? (List<CloudDomain>) obj : Collections.<CloudDomain>emptyList();
+		return obj instanceof List ? (List<CFCloudDomain>) obj : Collections.<CFCloudDomain>emptyList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -453,7 +454,7 @@ public class ApplicationManifestHandler {
 		Set<String> hosts = new LinkedHashSet<>();
 		Set<String> domains = new LinkedHashSet<>();
 
-		List<CloudDomain> cloudDomains = getCloudDomains(cloudData);
+		List<CFCloudDomain> cloudDomains = getCloudDomains(cloudData);
 		extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
 		for (String uri : properties.getUris()) {
 			try {
@@ -493,7 +494,7 @@ public class ApplicationManifestHandler {
 		return deploymentInfoYaml;
 	}
 
-	public static void extractHostsAndDomains(Collection<String> uris, List<CloudDomain> cloudDomains, Set<String> hostsSet, Set<String> domainsSet) {
+	public static void extractHostsAndDomains(Collection<String> uris, List<CFCloudDomain> cloudDomains, Set<String> hostsSet, Set<String> domainsSet) {
 		for (String uri : uris) {
 			try {
 				// Find the first valid URL
@@ -642,7 +643,7 @@ public class ApplicationManifestHandler {
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 
-		List<CloudDomain> domains = getCloudDomains(cloudData);
+		List<CFCloudDomain> domains = getCloudDomains(cloudData);
 
 		/*
 		 * Check for "no-route: true". If set then uris list should be empty
@@ -757,8 +758,8 @@ public class ApplicationManifestHandler {
 
 	}
 
-	public static boolean isDomainValid(String domain, List<CloudDomain> domains) {
-		for (CloudDomain cloudDomain : domains) {
+	public static boolean isDomainValid(String domain, List<CFCloudDomain> domains) {
+		for (CFCloudDomain cloudDomain : domains) {
 			if (cloudDomain.getName().equals(domain)) {
 				return true;
 			}

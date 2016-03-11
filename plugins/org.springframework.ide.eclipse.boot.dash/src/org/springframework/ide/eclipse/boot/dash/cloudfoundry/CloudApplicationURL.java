@@ -14,8 +14,8 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.runtime.CoreException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
@@ -84,7 +84,7 @@ public class CloudApplicationURL {
 		return url;
 	}
 
-	public static CloudApplicationURL getCloudApplicationURL(String url, List<CloudDomain> domains) throws Exception {
+	public static CloudApplicationURL getCloudApplicationURL(String url, List<CFCloudDomain> domains) throws Exception {
 
 		// String url = domain.getName();
 		// url = url.replace("http://", "");
@@ -99,7 +99,7 @@ public class CloudApplicationURL {
 		String parsedDomainName = null;
 		String parsedSubdomainName = null;
 		if (authority != null) {
-			for (CloudDomain domain : domains) {
+			for (CFCloudDomain domain : domains) {
 				// Be sure to check for last segment rather than last String
 				// value
 				// otherwise: Example: "validdomain" is a valid domain:

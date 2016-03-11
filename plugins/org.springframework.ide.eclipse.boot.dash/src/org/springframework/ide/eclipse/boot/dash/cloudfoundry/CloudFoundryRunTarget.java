@@ -26,7 +26,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -36,6 +35,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -58,9 +59,9 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private CloudFoundryTargetProperties targetProperties;
 
 	// Cache these to avoid frequent client calls
-	private List<CloudDomain> domains;
+	private List<CFCloudDomain> domains;
 	private List<CFSpace> spaces;
-	private List<Buildpack> buildpacks;
+	private List<CFBuildpack> buildpacks;
 	private List<CFStack> stacks;
 
 	private LiveVariable<ClientRequests> cachedClient;
@@ -191,7 +192,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return true;
 	}
 
-	public synchronized List<CloudDomain> getDomains( IProgressMonitor monitor)
+	public synchronized List<CFCloudDomain> getDomains( IProgressMonitor monitor)
 			throws Exception {
 		if (domains == null) {
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
@@ -261,7 +262,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 					// Only chose a java build iff ONE java buildpack exists
 					// that contains the java_buildpack pattern.
 
-					for (Buildpack bp : this.buildpacks) {
+					for (CFBuildpack bp : this.buildpacks) {
 						// iterate through all buildpacks to make sure only
 						// ONE java buildpack exists
 						if (bp.getName().contains("java_buildpack")) {

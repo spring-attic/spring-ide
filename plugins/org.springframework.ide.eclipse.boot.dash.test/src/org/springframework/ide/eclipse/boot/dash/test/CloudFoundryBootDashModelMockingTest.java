@@ -23,7 +23,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.util.ArrayList;
@@ -155,7 +154,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		};
 	}
-	
+
 	@Test
 	public void testBasicRefreshApps() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
@@ -175,7 +174,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForApps(target, "foo", "bar", "anotherfoo", "anotherbar");
 	}
-	
+
 	@Test
 	public void testRefreshAppsRunState() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
@@ -188,11 +187,11 @@ public class CloudFoundryBootDashModelMockingTest {
 		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
 
 		waitForApps(target, "foo", "bar");
-		
-		foo.setRunState(InstanceState.RUNNING);
+
+		foo.start();
 
 		target.refresh(ui);
-		
+
 		new ACondition("wait for app states", 3000) {
 			@Override
 			public boolean test() throws Exception {
@@ -208,7 +207,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		};
 	}
-	
+
 	@Test
 	public void testRefreshAppsHealthCheck() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
@@ -221,21 +220,21 @@ public class CloudFoundryBootDashModelMockingTest {
 		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
 
 		waitForApps(target, "foo");
-		
+
 		CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
         assertEquals(HealthCheckSupport.HC_PORT, appElement.getHealthCheck());
-		
+
 
         foo.setHealthCheck(HealthCheckSupport.HC_NONE);
 
 		target.refresh(ui);
-		
+
 		new ACondition("wait for app health check", 3000) {
 			@Override
 			public boolean test() throws Exception {
 				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
 				assertEquals(ImmutableSet.of("foo"), appNames);
-				
+
 				CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
 		        assertEquals(HealthCheckSupport.HC_NONE, appElement.getHealthCheck());
 
@@ -243,7 +242,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		};
 	}
-	
+
 	@Test
 	public void testRefreshServices() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
@@ -259,47 +258,12 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(target, "foo");
 		waitForServices(target, "elephantsql", "cleardb");
 		waitForElements(target, "foo", "elephantsql", "cleardb");
-		
+
 		space.defService("rabbit");
 
 		target.refresh(ui);
 		waitForServices(target, "elephantsql", "cleardb", "rabbit");
 		waitForElements(target, "foo", "elephantsql", "cleardb", "rabbit");
-
-	}
-	
-	
-	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
-		new ACondition("wait for apps to appear", 3000) {
-			@Override
-			public boolean test() throws Exception {
-				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
-				assertEquals(ImmutableSet.copyOf(names), appNames);
-				return true;
-			}
-		};
-	}
-	
-	protected void waitForServices(final CloudFoundryBootDashModel target, final String... names) throws Exception {
-		new ACondition("wait for services to appear", 3000) {
-			@Override
-			public boolean test() throws Exception {
-				ImmutableSet<String> serviceNames = getNames(target.getServices().getValues());
-				assertEquals(ImmutableSet.copyOf(names), serviceNames);
-				return true;
-			}
-		};
-	}
-	
-	protected void waitForElements(final CloudFoundryBootDashModel target, final String... names) throws Exception {
-		new ACondition("wait for elements to appear", 3000) {
-			@Override
-			public boolean test() throws Exception {
-				ImmutableSet<String> elements = getNames(target.getElements().getValues());
-				assertEquals(ImmutableSet.copyOf(names), elements);
-				return true;
-			}
-		};
 	}
 
 	@Test
@@ -571,10 +535,74 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("DIFFERENT bar -> your-org", barSpace.getDisplayName());
  	}
 
+
+	@Test
+	public void testEnvVarsSetOnFirstDeploy() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
+		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		final String appName = harness.randomAppName();
+
+		Map<String, String> env = new HashMap<>();
+		env.put("FOO", "something");
+		harness.answerDeploymentPrompt(ui, appName, appName, env);
+
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) { //why so long? JDT searching for main type.
+			public boolean test() throws Exception {
+				CloudAppDashElement element = model.getApplication(appName);
+				assertEquals(RunState.RUNNING, element.getRunState());
+				return true;
+			}
+		};
+
+		Map<String,String> actualEnv = harness.fetchEnvironment(target, appName);
+
+		assertEquals("something", actualEnv.get("FOO"));
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
 	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
+		new ACondition("wait for apps to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
+				assertEquals(ImmutableSet.copyOf(names), appNames);
+				return true;
+			}
+		};
+	}
+
+	protected void waitForServices(final CloudFoundryBootDashModel target, final String... names) throws Exception {
+		new ACondition("wait for services to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> serviceNames = getNames(target.getServices().getValues());
+				assertEquals(ImmutableSet.copyOf(names), serviceNames);
+				return true;
+			}
+		};
+	}
+
+	protected void waitForElements(final CloudFoundryBootDashModel target, final String... names) throws Exception {
+		new ACondition("wait for elements to appear", 3000) {
+			@Override
+			public boolean test() throws Exception {
+				ImmutableSet<String> elements = getNames(target.getElements().getValues());
+				assertEquals(ImmutableSet.copyOf(names), elements);
+				return true;
+			}
+		};
+	}
 
 	private Answer<Void> restoreDefaultTemplate() {
 		return new Answer<Void>() {

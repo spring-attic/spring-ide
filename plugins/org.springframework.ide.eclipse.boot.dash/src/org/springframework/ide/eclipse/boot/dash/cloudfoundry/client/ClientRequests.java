@@ -14,19 +14,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.archive.ApplicationArchive;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 public interface ClientRequests {
+
+	/**
+	 * Returns null if the application does not exist. Throws some kind of Exception if there's any other kind of problem.
+	 */
+	CFApplication getApplication(String appName) throws Exception;
 
 	//TODO: consider removing the getXXXSupport method and directly adding the apis that these support
 	// objects provide.
@@ -36,10 +40,10 @@ public interface ClientRequests {
 	void deleteApplication(String name) throws Exception;
 	Version getApiVersion();
 	void logout();
-	CFApplication getApplication(String appName) throws Exception;
+
 	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
-	List<Buildpack> getBuildpacks() throws Exception;
-	List<CloudDomain> getDomains() throws Exception;
+	List<CFBuildpack> getBuildpacks() throws Exception;
+	List<CFCloudDomain> getDomains() throws Exception;
 	CloudAppInstances getExistingAppInstances(String appName) throws Exception;
 	CloudAppInstances getExistingAppInstances(UUID guid) throws Exception;
 	List<CFService> getServices() throws Exception;
@@ -47,7 +51,7 @@ public interface ClientRequests {
 	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName) throws Exception;
 	void stopApplication(String appName) throws Exception;
-	StreamingLogToken streamLogs(String appName, ApplicationLogConsole logConsole);
+	StreamingLogToken streamLogs(String appName, ApplicationLogListener logConsole);
 	void updateApplicationEnvironment(String appName, Map<String, String> environmentVariables) throws Exception;
 	void updateApplicationInstances(String appName, int instances) throws Exception;
 	void updateApplicationMemory(String appName, int memory) throws Exception;
