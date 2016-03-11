@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationListener;
@@ -61,17 +62,30 @@ public class LaunchConfigurationTracker implements Disposable {
 		launchManager.addLaunchConfigurationListener(launchConfListener = new ILaunchConfigurationListener() {
 			@Override
 			public void launchConfigurationRemoved(ILaunchConfiguration configuration) {
+				//Careful, do not call 'refreshIfNeeded' here. It is impossible to determine
+				// the type of a deleted config (eclipse will throw an exeption if you try)
+				//So we have to call refresh directly here.
 				refresh();
 			}
 
 			@Override
 			public void launchConfigurationChanged(ILaunchConfiguration configuration) {
-				refresh();
+				refreshIfNeeded(configuration);
 			}
 
 			@Override
 			public void launchConfigurationAdded(ILaunchConfiguration configuration) {
-				refresh();
+				refreshIfNeeded(configuration);
+			}
+
+			private void refreshIfNeeded(ILaunchConfiguration configuration) {
+				try {
+					if (configuration!=null && launchType.equals(configuration.getType())) {
+						refresh();
+					}
+				} catch (CoreException e) {
+					BootActivator.log(e);
+				}
 			}
 		});
 		refresh();
