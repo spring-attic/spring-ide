@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IFile;
@@ -19,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -39,8 +41,6 @@ import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-import com.google.common.base.Objects;
-
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
  * application state as it may be discarded and created multiple times for the
@@ -51,6 +51,7 @@ import com.google.common.base.Objects;
 public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements LogSink {
 
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
+	private static final String PROJECT_NAME = "PROJECT_NAME";
 
 	private final CloudFoundryRunTarget cloudTarget;
 
@@ -138,7 +139,34 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public IProject getProject() {
-		return getCloudModel().getAppCache().getProject(getName());
+		String name = getPersistentProperties().get(PROJECT_NAME);
+		if (name!=null) {
+			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+			if (project.exists()) {
+				return project;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Set the project 'binding' for this element.
+	 * @return true if the element was changed by this operation.
+	 */
+	public boolean setProject(IProject project) {
+		try {
+			PropertyStoreApi props = getPersistentProperties();
+			String oldValue = props.get(PROJECT_NAME);
+			String newValue = project==null?null:project.getName();
+			if (!Objects.equals(oldValue, newValue)) {
+				props.put(PROJECT_NAME, newValue);
+				return true;
+			}
+			return false;
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return false;
+		}
 	}
 
 	@Override
@@ -206,7 +234,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	 */
 	public void setHealthCheck(String hc) {
 		String old = getHealthCheck();
-		if (!Objects.equal(old, hc)) {
+		if (!Objects.equals(old, hc)) {
 			CloudFoundryBootDashModel model = getCloudModel();
 			model.getAppCache().setHealthCheck(this, hc);
 			model.notifyElementChanged(this);

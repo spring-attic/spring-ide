@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,26 +62,13 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 
 				List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
 
-				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
+				List<CloudAppInstances> updatedApplications = new ArrayList<>();
 				if (apps != null) {
 
-					Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
-							.getMapping();
-
 					for (CFApplication app : apps) {
-
-						String projectName = existingProjectToAppMappings.get(app.getName());
-						IProject project = null;
-						if (projectName != null) {
-							project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-							if (project == null || !project.isAccessible()) {
-								project = null;
-							}
-						}
-
 						// No stats available at this stage. Just set stats to null
 						// for now.
-						updatedApplications.put(new CloudAppInstances(app, null), project);
+						updatedApplications.add(new CloudAppInstances(app, null));
 					}
 				}
 

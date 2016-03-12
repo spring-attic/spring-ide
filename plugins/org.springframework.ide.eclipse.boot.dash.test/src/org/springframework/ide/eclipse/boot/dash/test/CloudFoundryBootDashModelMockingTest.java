@@ -566,10 +566,102 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("something", actualEnv.get("FOO"));
 	}
 
+	@Test public void appToProjectBindingsPersisted() throws Exception {
+		final String appName = "foo";
+		String projectName = "to-deploy";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		final IProject project = projects.createBootProject(projectName, withStarters("actuator", "web"));
+
+		harness.createCfTarget(targetParams);
+		{
+			final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+			deployApp(model, appName, project);
+
+			CloudAppDashElement appByProject = getApplication(model, project);
+			CloudAppDashElement appByName = model.getApplication(appName);
+			assertNotNull(appByProject);
+			assertEquals(appByProject, appByName);
+		}
+
+		harness.reload();
+		{
+			final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+			waitForApps(model, appName);
+			CloudAppDashElement appByName = model.getApplication(appName);
+			CloudAppDashElement appByProject = getApplication(model, project);
+			assertNotNull(appByProject);
+			assertEquals(appByProject, appByName);
+		}
+	}
+
+	@Test public void appToProjectBindingsPersistedAfterDisconnectConnect() throws Exception {
+		final String appName = "foo";
+		String projectName = "to-deploy";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		final IProject project = projects.createBootProject(projectName, withStarters("actuator", "web"));
+
+		final CloudFoundryBootDashModel model = harness.createCfTarget(targetParams);
+		{
+			deployApp(model, appName, project);
+
+			CloudAppDashElement appByProject = getApplication(model, project);
+			CloudAppDashElement appByName = model.getApplication(appName);
+			assertNotNull(appByProject);
+			assertEquals(appByProject, appByName);
+		}
+
+		IAction toggleConnectionAction = actions.getToggleTargetConnectionAction();
+		harness.sectionSelection.setValue(model);
+
+		toggleConnectionAction.run();
+		waitForElements(model /*none*/);
+		toggleConnectionAction.run();
+		waitForElements(model, appName);
+
+		{
+			waitForApps(model, appName);
+			CloudAppDashElement appByName = model.getApplication(appName);
+			CloudAppDashElement appByProject = getApplication(model, project);
+			assertNotNull(appByProject);
+			assertEquals(appByProject, appByName);
+		}
+	}
+
+	//TODO: test that project binding reacts to project renames correctly (I supsect this may now be broken)
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
 	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	private CloudAppDashElement getApplication(CloudFoundryBootDashModel model, IProject project) {
+		for (CloudAppDashElement app : model.getApplicationValues()) {
+			IProject p = app.getProject();
+			if (project.equals(p)) {
+				return app;
+			}
+		}
+		return null;
+	}
+
+	protected void deployApp(final CloudFoundryBootDashModel model, final String appName, IProject project)
+			throws Exception {
+		harness.answerDeploymentPrompt(ui, appName, appName);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		waitForApps(model, appName);
+
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) { //why so long? JDT searching for main type.
+			public boolean test() throws Exception {
+				CloudAppDashElement element = model.getApplication(appName);
+				assertEquals(RunState.RUNNING, element.getRunState());
+				return true;
+			}
+		};
+	}
 
 	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
 		new ACondition("wait for apps to appear", 3000) {

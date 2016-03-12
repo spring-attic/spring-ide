@@ -43,26 +43,17 @@ public class RefreshApplications extends CloudOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		if (apps != null && !apps.isEmpty()) {
-			Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
-			Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore().getMapping();
+			List<CloudAppInstances> updatedApplications = new ArrayList<>();
 			List<CFApplication> toUpdateStats = new ArrayList<>();
 
 			for (CloudAppInstances instances : model.getAppCache().getAppInstances()) {
-				String projectName = existingProjectToAppMappings.get(instances.getApplication().getName());
-				IProject project = null;
-				if (projectName != null) {
-					project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-					if (project == null || !project.isAccessible()) {
-						project = null;
-					}
-				}
 				if (apps.contains(instances.getApplication())) {
 					CFApplication newApplication = model.getRunTarget().getClient()
 							.getApplication(instances.getApplication().getName());
-					updatedApplications.put(new CloudAppInstances(newApplication, instances.getStats()), project);
+					updatedApplications.add(new CloudAppInstances(newApplication, instances.getStats()));
 					toUpdateStats.add(newApplication);
 				} else {
-					updatedApplications.put(instances, project);
+					updatedApplications.add(instances);
 				}
 			}
 

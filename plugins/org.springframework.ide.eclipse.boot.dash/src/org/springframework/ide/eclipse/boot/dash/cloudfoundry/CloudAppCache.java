@@ -62,14 +62,12 @@ public class CloudAppCache {
 	 * @param apps
 	 * @return list of all applications that have changed.
 	 */
-	public synchronized List<String> updateAll(Map<CloudAppInstances, IProject> apps) {
+	public synchronized List<String> updateAll(Collection<CloudAppInstances> apps) {
 
 		Map<String, CacheItem> updatedCache = new HashMap<String, CacheItem>();
 		List<String> changedApps = new ArrayList<String>();
-		for (Entry<CloudAppInstances, IProject> entry : apps.entrySet()) {
+		for (CloudAppInstances appInstances : apps) {
 
-			CloudAppInstances appInstances = entry.getKey();
-			IProject project = entry.getValue();
 			CacheItem old = appCache.get(appInstances.getApplication().getName());
 
 			// Preserving any old state to avoid state briefly "flashing" to
@@ -77,7 +75,7 @@ public class CloudAppCache {
 			RunState runState = old != null && old.runState != null ? old.runState
 					: ApplicationRunningStateTracker.getRunState(appInstances);
 
-			CacheItem newItem = new CacheItem(appInstances, project, runState);
+			CacheItem newItem = new CacheItem(appInstances, runState);
 
 			if (!newItem.equals(old)) {
 				changedApps.add(newItem.appName);
@@ -105,9 +103,8 @@ public class CloudAppCache {
 		CacheItem oldItem = appCache.get(appName);
 		// can only update existing items
 		if (oldItem != null) {
-			IProject project = oldItem.project;
 			CloudAppInstances appInstances = oldItem.appInstances;
-			CacheItem newItem = new CacheItem(appInstances, project, runState);
+			CacheItem newItem = new CacheItem(appInstances, runState);
 			appCache.put(newItem.appName, newItem);
 			return !newItem.equals(oldItem);
 		}
@@ -123,10 +120,10 @@ public class CloudAppCache {
 	 *         (meaning the old and new state are identical even after
 	 *         replacing)
 	 */
-	public synchronized boolean replace(CloudAppInstances instances, IProject project, RunState runState) {
+	public synchronized boolean replace(CloudAppInstances instances, RunState runState) {
 		// Do a full replace as all the information is available to replace
 		CacheItem oldItem = appCache.get(instances.getApplication().getName());
-		CacheItem newItem = new CacheItem(instances, project, runState);
+		CacheItem newItem = new CacheItem(instances, runState);
 
 		appCache.put(newItem.appName, newItem);
 
@@ -146,8 +143,7 @@ public class CloudAppCache {
 
 		CacheItem old = appCache.get(instances.getApplication().getName());
 
-		IProject project = old != null ? old.project : null;
-		CacheItem newItem = new CacheItem(instances, project, runState);
+		CacheItem newItem = new CacheItem(instances, runState);
 
 		appCache.put(newItem.appName, newItem);
 
@@ -191,26 +187,6 @@ public class CloudAppCache {
 		return RunState.UNKNOWN;
 	}
 
-	public synchronized IProject getProject(String appName) {
-		CacheItem item = appCache.get(appName);
-		if (item != null) {
-			return item.project;
-		}
-		return null;
-	}
-
-	public synchronized Collection<String> replaceProject(IProject oldProject, IProject newProject) {
-		List<String> apps = new ArrayList<String>();
-		for (Map.Entry<String, CacheItem> entry : appCache.entrySet()) {
-			CacheItem item = entry.getValue();
-			if (item != null && item.project == oldProject) {
-				entry.setValue(new CacheItem(item.appInstances, newProject, item.runState));
-				apps.add(entry.getKey());
-			}
-		}
-		return apps;
-	}
-
 	/*
 	 *
 	 * TODO: replace with CloudApplicationDeploymentProperties to use one
@@ -221,13 +197,11 @@ public class CloudAppCache {
 		final CloudAppInstances appInstances;
 		final String appName;
 		final RunState runState;
-		final IProject project;
 		final int totalInstances;
 		final int runningInstances;
 
-		public CacheItem(CloudAppInstances appInstances, IProject project, RunState runState) {
+		public CacheItem(CloudAppInstances appInstances, RunState runState) {
 			this.appInstances = appInstances;
-			this.project = project;
 			this.runState = runState;
 			this.appName = appInstances.getApplication().getName();
 			this.totalInstances = appInstances.getApplication().getInstances();
@@ -243,7 +217,6 @@ public class CloudAppCache {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((appName == null) ? 0 : appName.hashCode());
-			result = prime * result + ((project == null) ? 0 : project.hashCode());
 			result = prime * result + ((runState == null) ? 0 : runState.hashCode());
 			result = prime * result + runningInstances;
 			result = prime * result + totalInstances;
@@ -264,11 +237,6 @@ public class CloudAppCache {
 					return false;
 			} else if (!appName.equals(other.appName))
 				return false;
-			if (project == null) {
-				if (other.project != null)
-					return false;
-			} else if (!project.equals(other.project))
-				return false;
 			if (runState != other.runState)
 				return false;
 			if (runningInstances != other.runningInstances)
@@ -277,6 +245,8 @@ public class CloudAppCache {
 				return false;
 			return true;
 		}
+
+
 	}
 
 }
