@@ -102,10 +102,10 @@ public class PropertyInfo {
 			prop.getDefaultValue(),
 			prop.getDescription(),
 			prop.getDeprecation(),
-			prop.getValueHints(),
-			prop.getKeyValueHints(),
-			valueProviders.resolve(prop.getValueProviders()),
-			valueProviders.resolve(prop.getKeyValueProviders()),
+			prop.getHints().getValueHints(),
+			prop.getHints().getKeyHints(),
+			valueProviders.resolve(prop.getHints().getValueProviders()),
+			valueProviders.resolve(prop.getHints().getKeyProviders()),
 			null
 		);
 	}
