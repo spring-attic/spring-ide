@@ -137,16 +137,28 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return delegate.getAppName();
 	}
 
-	@Override
-	public IProject getProject() {
+	/**
+	 * Returns the project associated with this element or null. If includeNonExistingProjects is
+	 * true, then the project is returned even it no longer exists.
+	 */
+	public IProject getProject(boolean includeNonExistingProjects) {
 		String name = getPersistentProperties().get(PROJECT_NAME);
 		if (name!=null) {
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-			if (project.exists()) {
+			if (includeNonExistingProjects || project.exists()) {
 				return project;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the project associated with this element or null. The project returned is
+	 * guaranteed to exist.
+	 */
+	@Override
+	public IProject getProject() {
+		return getProject(false);
 	}
 
 	/**
@@ -353,5 +365,6 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			BootDashActivator.log(e);
 		}
 	}
+
 
 }

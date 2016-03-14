@@ -417,12 +417,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	private CloudAppDashElement getApplication(IProject project) {
 		synchronized (this) {
 			Set<CloudAppDashElement> apps = getApplications().getValues();
-
-			// Add any existing ones that weren't replaced by the new ones
-			// Replace the existing one with a new one for the given Cloud
-			// Application
+			boolean includeNonExistingProjects = !project.exists();
 			for (CloudAppDashElement element : apps) {
-				if (project.equals(element.getProject())) {
+				if (project.equals(element.getProject(includeNonExistingProjects))) {
 					return element;
 				}
 			}

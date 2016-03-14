@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
@@ -53,6 +52,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -630,12 +630,47 @@ public class CloudFoundryBootDashModelMockingTest {
 		}
 	}
 
+	@Test public void appToProjectBindingChangedAfterProjectRename() throws Exception {
+		final String appName = "foo";
+		String projectName = "to-deploy";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp(appName);
+		final IProject project = projects.createProject(projectName);
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+		waitForApps(target, appName);
+		CloudAppDashElement app = target.getApplication(appName);
+		app.setProject(project);
+
+		assertAppToProjectBinding(target, project, appName);
+
+
+		ElementStateListener elementStateListener = mock(ElementStateListener.class);
+		target.addElementStateListener(elementStateListener);
+
+		final IProject newProject = projects.rename(project, projectName+"-RENAMED");
+		// resource listeners called synchronously by eclipse so we don't need ACondition
+
+		assertAppToProjectBinding(target, newProject, appName);
+
+		//state change event should have been fired (to update label of element in view)
+		verify(elementStateListener).stateChanged(same(app));
+	}
+
 	//TODO: test that project binding reacts to project renames correctly (I supsect this may now be broken)
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
 	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	private void assertAppToProjectBinding(CloudFoundryBootDashModel target, IProject project, String appName) throws Exception {
+		CloudAppDashElement appByProject = getApplication(target, project);
+		CloudAppDashElement appByName = target.getApplication(appName);
+		assertNotNull(appByProject);
+		assertEquals(appByProject, appByName);
+	}
 
 	private CloudAppDashElement getApplication(CloudFoundryBootDashModel model, IProject project) {
 		for (CloudAppDashElement app : model.getApplicationValues()) {

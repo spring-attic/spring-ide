@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -282,5 +283,24 @@ public class BootProjectTestHarness {
 		if (result==null || !result.isOK()) {
 			throw ExceptionUtil.coreException(result);
 		}
+	}
+
+	/**
+	 * Create the most basic project possible. It has no natures, no builders, not nothing.
+	 * This project is suitable as a test fixture for a test that only needs a project to
+	 * exist and nothing more.
+	 */
+	public IProject createProject(String projectName) throws Exception {
+		IProject project = workspace.getRoot().getProject(projectName);
+		project.create(new NullProgressMonitor());
+		project.open(new NullProgressMonitor());
+		return project;
+	}
+
+	public IProject rename(IProject project, String newName) throws Exception {
+		IProjectDescription description = project.getDescription();
+		description.setName(newName);
+		project.move(description, true, new NullProgressMonitor());
+		return workspace.getRoot().getProject(newName);
 	}
 }
