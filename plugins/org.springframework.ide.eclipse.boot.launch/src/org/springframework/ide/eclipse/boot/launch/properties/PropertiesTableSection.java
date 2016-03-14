@@ -183,7 +183,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 	public void createContents(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
 		label.setText("Override properties:");
-		tableViewer = CheckboxTableViewer.newCheckList(parent, SWT.NONE);
+		tableViewer = CheckboxTableViewer.newCheckList(parent, SWT.FULL_SELECTION);
 		tableViewer.setColumnProperties(COLUMN_NAMES);
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
