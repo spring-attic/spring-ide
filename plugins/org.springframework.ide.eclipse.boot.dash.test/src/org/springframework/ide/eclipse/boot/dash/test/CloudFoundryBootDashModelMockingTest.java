@@ -14,6 +14,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
@@ -34,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
 import org.junit.After;
@@ -658,7 +660,30 @@ public class CloudFoundryBootDashModelMockingTest {
 		verify(elementStateListener).stateChanged(same(app));
 	}
 
-	//TODO: test that project binding reacts to project renames correctly (I supsect this may now be broken)
+	@Test public void appToProjectBindingForgottenAfterDelete() throws Exception {
+		final String appName = "foo";
+		String projectName = "to-deploy";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp(appName);
+		final IProject project = projects.createProject(projectName);
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+		waitForApps(target, appName);
+		CloudAppDashElement app = target.getApplication(appName);
+		app.setProject(project);
+
+		assertAppToProjectBinding(target, project, appName);
+
+		ElementStateListener elementStateListener = mock(ElementStateListener.class);
+		target.addElementStateListener(elementStateListener);
+
+		project.delete(true, new NullProgressMonitor());
+
+		assertNull(app.getProject(true));
+		verify(elementStateListener).stateChanged(same(app));;
+
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
