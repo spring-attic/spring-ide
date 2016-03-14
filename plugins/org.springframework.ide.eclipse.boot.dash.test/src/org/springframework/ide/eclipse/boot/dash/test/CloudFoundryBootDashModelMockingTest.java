@@ -224,10 +224,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(target, "foo");
 
 		CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
-        assertEquals(HealthCheckSupport.HC_PORT, appElement.getHealthCheck());
+		assertEquals(HealthCheckSupport.HC_PORT, appElement.getHealthCheck());
 
 
-        foo.setHealthCheck(HealthCheckSupport.HC_NONE);
+		foo.setHealthCheck(HealthCheckSupport.HC_NONE);
 
 		target.refresh(ui);
 
@@ -238,7 +238,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				assertEquals(ImmutableSet.of("foo"), appNames);
 
 				CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
-		        assertEquals(HealthCheckSupport.HC_NONE, appElement.getHealthCheck());
+				assertEquals(HealthCheckSupport.HC_NONE, appElement.getHealthCheck());
 
 				return true;
 			}
@@ -291,10 +291,10 @@ public class CloudFoundryBootDashModelMockingTest {
 			public boolean test() throws Exception {
 				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
 				ImmutableSet<String> serviceNames = getNames(target.getServices().getValues());
- 				ImmutableSet<String> allNames = getNames(target.getElements().getValues());
- 				assertEquals(ImmutableSet.of("foo", "bar"), appNames);
- 				assertEquals(ImmutableSet.of("a-sql", "z-rabbit"), serviceNames);
- 				assertEquals(ImmutableSet.of("foo", "bar", "a-sql", "z-rabbit"), allNames);
+				ImmutableSet<String> allNames = getNames(target.getElements().getValues());
+				assertEquals(ImmutableSet.of("foo", "bar"), appNames);
+				assertEquals(ImmutableSet.of("a-sql", "z-rabbit"), serviceNames);
+				assertEquals(ImmutableSet.of("foo", "bar", "a-sql", "z-rabbit"), allNames);
 				return true;
 			}
 		};
@@ -535,8 +535,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertEquals("DIFFERENT foo -> my-org", fooSpace.getDisplayName());
 		assertEquals("DIFFERENT bar -> your-org", barSpace.getDisplayName());
- 	}
-
+	}
 
 	@Test
 	public void testEnvVarsSetOnFirstDeploy() throws Exception {
@@ -606,14 +605,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		final IProject project = projects.createBootProject(projectName, withStarters("actuator", "web"));
 
 		final CloudFoundryBootDashModel model = harness.createCfTarget(targetParams);
-		{
-			deployApp(model, appName, project);
-
-			CloudAppDashElement appByProject = getApplication(model, project);
-			CloudAppDashElement appByName = model.getApplication(appName);
-			assertNotNull(appByProject);
-			assertEquals(appByProject, appByName);
-		}
+		deployApp(model, appName, project);
+		assertAppToProjectBinding(model, project, appName);
 
 		IAction toggleConnectionAction = actions.getToggleTargetConnectionAction();
 		harness.sectionSelection.setValue(model);
@@ -623,13 +616,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		toggleConnectionAction.run();
 		waitForElements(model, appName);
 
-		{
-			waitForApps(model, appName);
-			CloudAppDashElement appByName = model.getApplication(appName);
-			CloudAppDashElement appByProject = getApplication(model, project);
-			assertNotNull(appByProject);
-			assertEquals(appByProject, appByName);
-		}
+		assertAppToProjectBinding(model, project, appName);
 	}
 
 	@Test public void appToProjectBindingChangedAfterProjectRename() throws Exception {
