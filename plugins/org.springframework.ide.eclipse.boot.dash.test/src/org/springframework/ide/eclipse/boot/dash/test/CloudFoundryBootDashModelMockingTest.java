@@ -681,8 +681,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		project.delete(true, new NullProgressMonitor());
 
 		assertNull(app.getProject(true));
-		verify(elementStateListener).stateChanged(same(app));;
-
+		verify(elementStateListener).stateChanged(same(app));
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
