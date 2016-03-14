@@ -434,7 +434,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			 */
 			applications.setAppNames(ImmutableSet.<String>of());
 		} else {
-			Map<String, CloudAppDashElement> updated = new HashMap<>();
 			List<String> toNotify = null;
 			synchronized (this) {
 
