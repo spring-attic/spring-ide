@@ -43,8 +43,8 @@ import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
 import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
