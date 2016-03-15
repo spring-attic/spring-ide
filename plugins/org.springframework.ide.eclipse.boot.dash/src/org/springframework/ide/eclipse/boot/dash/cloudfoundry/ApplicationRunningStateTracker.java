@@ -22,8 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationOperationEventHandler;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public class ApplicationRunningStateTracker {
@@ -37,19 +36,18 @@ public class ApplicationRunningStateTracker {
 
 	private final String appName;
 
-	private final AbstractBootDashModel model;
+	private final CloudFoundryBootDashModel model;
 
 	private final long timeout;
 
-	private final ApplicationOperationEventHandler eventHandler;
+	private CloudApplicationOperation op;
 
-	public ApplicationRunningStateTracker(CloudAppDashElement element, ClientRequests requests,
-			AbstractBootDashModel model, ApplicationOperationEventHandler eventHandler) {
-		this.requests = requests;
-		this.appName = element.getName();
-		this.model = model;
+	public ApplicationRunningStateTracker(CloudApplicationOperation op, CloudAppDashElement app) {
+		this.op = op;
+		this.model = app.getCloudModel();
+		this.requests = model.getClient();
+		this.appName = app.getName();
 		this.timeout = TIMEOUT;
-		this.eventHandler = eventHandler;
 	}
 
 	protected void checkTerminate(IProgressMonitor monitor, CloudAppInstances appInstances)
@@ -57,11 +55,13 @@ public class ApplicationRunningStateTracker {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		if (eventHandler != null) {
-			eventHandler.checkTerminate(appInstances);
-		}
+		op.checkTerminationRequested();
 	}
 
+	/**
+	 * Polls cloudfoundry until app has succeeded or failed to start. Sending updates to console
+	 * and return the final run state.
+	 */
 	public RunState startTracking(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		// fetch an updated Cloud Application that reflects changes that

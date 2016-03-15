@@ -64,6 +64,8 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		}
 	};
 
+	private ValueListener<?> elementNotifier;
+
 	@Override
 	public BootDashColumn[] getColumns() {
 		return getTarget().getDefaultColumns();
@@ -285,5 +287,29 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	public String getUrl() {
 		return Utils.createUrl(getLiveHost(), getLivePort(), getDefaultRequestMappingPath());
 	}
+
+	private synchronized ValueListener<?> getElementNotifier() {
+		if (elementNotifier==null) {
+			elementNotifier = new ValueListener<Object>() {
+				@Override
+				public void gotValue(LiveExpression<Object> exp, Object value) {
+					getBootDashModel().notifyElementChanged(WrappingBootDashElement.this);
+				}
+			};
+		}
+		return elementNotifier;
+	}
+
+	/**
+	 * Attach a listener to a given liveExp so that the model's 'notifyElementChanged' is called
+	 * any time the liveExps value changes.
+	 */
+	@SuppressWarnings("unchecked")
+	protected void addElementNotifier(LiveExpression<?> exp) {
+		@SuppressWarnings("rawtypes")
+		ValueListener notifier = getElementNotifier();
+		exp.addListener(notifier);
+	}
+
 
 }

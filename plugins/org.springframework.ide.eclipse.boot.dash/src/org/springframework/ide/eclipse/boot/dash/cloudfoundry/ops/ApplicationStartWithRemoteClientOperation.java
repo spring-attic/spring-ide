@@ -74,13 +74,13 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 			 * Restart and push op resets console anyway, no need to reset it again
 			 */
 		} else if (cde.getRunState() == RunState.INACTIVE) {
-			ops.add(operations.restartOnly(cde.getProject(), appName, RunState.STARTING));
+			ops.add(operations.restartOnly(cde));
 			resetConsole = true;
 		}
 
 		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
 
-		new CompositeApplicationOperation(getName(), model, appName, ops, null, resetConsole).run(monitor);
+		new CompositeApplicationOperation(getName(), model, appName, ops, resetConsole).run(monitor);
 	}
 
 }

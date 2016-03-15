@@ -70,12 +70,7 @@ public class CloudAppCache {
 
 			CacheItem old = appCache.get(appInstances.getApplication().getName());
 
-			// Preserving any old state to avoid state briefly "flashing" to
-			// UNKNOWN on refresh
-			RunState runState = old != null && old.runState != null ? old.runState
-					: ApplicationRunningStateTracker.getRunState(appInstances);
-
-			CacheItem newItem = new CacheItem(appInstances, runState);
+			CacheItem newItem = new CacheItem(appInstances);
 
 			if (!newItem.equals(old)) {
 				changedApps.add(newItem.appName);
@@ -96,15 +91,14 @@ public class CloudAppCache {
 	 * This method should only be used to update existing cache items.
 	 *
 	 * @param appName
-	 * @param runState
 	 * @return true if changed, false otherwise
 	 */
-	public synchronized boolean updateCache(String appName, RunState runState) {
+	public synchronized boolean updateCache(String appName) {
 		CacheItem oldItem = appCache.get(appName);
 		// can only update existing items
 		if (oldItem != null) {
 			CloudAppInstances appInstances = oldItem.appInstances;
-			CacheItem newItem = new CacheItem(appInstances, runState);
+			CacheItem newItem = new CacheItem(appInstances);
 			appCache.put(newItem.appName, newItem);
 			return !newItem.equals(oldItem);
 		}
@@ -112,41 +106,17 @@ public class CloudAppCache {
 	}
 
 	/**
-	 *
-	 * @param instances
-	 * @param project
-	 * @param runState
-	 * @return true if the application cached state changed. False otherwise
-	 *         (meaning the old and new state are identical even after
-	 *         replacing)
-	 */
-	public synchronized boolean replace(CloudAppInstances instances, RunState runState) {
-		// Do a full replace as all the information is available to replace
-		CacheItem oldItem = appCache.get(instances.getApplication().getName());
-		CacheItem newItem = new CacheItem(instances, runState);
-
-		appCache.put(newItem.appName, newItem);
-
-		return !newItem.equals(oldItem);
-	}
-
-	/**
-	 * Updates the cache with the given app instances and run state. If the item
+	 * Updates the cache with the given app instances. If the item
 	 * in the cache does not exist, it will create one for that application
 	 *
 	 * @param instances
-	 * @param runState
 	 * @return true if the application cached state changed. False otherwise
 	 *         (meaning the old and new state are identical)
 	 */
-	public synchronized boolean updateCache(CloudAppInstances instances, RunState runState) {
-
+	public synchronized boolean updateCache(CloudAppInstances instances) {
 		CacheItem old = appCache.get(instances.getApplication().getName());
-
-		CacheItem newItem = new CacheItem(instances, runState);
-
+		CacheItem newItem = new CacheItem(instances);
 		appCache.put(newItem.appName, newItem);
-
 		return !newItem.equals(old);
 	}
 
@@ -179,14 +149,6 @@ public class CloudAppCache {
 		return instances;
 	}
 
-	public synchronized RunState getRunState(String appName) {
-		CacheItem item = appCache.get(appName);
-		if (item != null) {
-			return item.runState;
-		}
-		return RunState.UNKNOWN;
-	}
-
 	/*
 	 *
 	 * TODO: replace with CloudApplicationDeploymentProperties to use one
@@ -196,28 +158,21 @@ public class CloudAppCache {
 
 		final CloudAppInstances appInstances;
 		final String appName;
-		final RunState runState;
 		final int totalInstances;
 		final int runningInstances;
 
-		public CacheItem(CloudAppInstances appInstances, RunState runState) {
+		public CacheItem(CloudAppInstances appInstances) {
 			this.appInstances = appInstances;
-			this.runState = runState;
 			this.appName = appInstances.getApplication().getName();
 			this.totalInstances = appInstances.getApplication().getInstances();
 			this.runningInstances = appInstances.getApplication().getRunningInstances();
 		}
-
-		// Don't use the CloudApplication to indicate equality. Only those
-		// properties
-		// that should trigger an app change event
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((appName == null) ? 0 : appName.hashCode());
-			result = prime * result + ((runState == null) ? 0 : runState.hashCode());
 			result = prime * result + runningInstances;
 			result = prime * result + totalInstances;
 			return result;
@@ -237,14 +192,16 @@ public class CloudAppCache {
 					return false;
 			} else if (!appName.equals(other.appName))
 				return false;
-			if (runState != other.runState)
-				return false;
 			if (runningInstances != other.runningInstances)
 				return false;
 			if (totalInstances != other.totalInstances)
 				return false;
 			return true;
 		}
+
+		// Don't use the CloudApplication to indicate equality. Only those
+		// properties
+		// that should trigger an app change event
 
 
 	}

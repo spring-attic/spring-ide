@@ -383,10 +383,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		boolean changed = false;
 		synchronized (this) {
 			addedElement = applications.addApplication(appInstances.getApplication().getName());
-
+			addedElement.setInstanceData(appInstances);
 			// Update the cache BEFORE updating the model, since the model
 			// elements are handles to the cache
-			changed = getAppCache().replace(appInstances, preferedRunState)
+			changed = getAppCache().updateCache(appInstances)
 				    | addedElement.setProject(project);
 
 			//Should be okay to call inside synch block as the events are fired from a
@@ -477,49 +477,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return new OperationsExecution(null);
 	}
 
-	public void updateElementRunState(CloudAppDashElement element, RunState runState) {
-
-		if (element != null && element.getRunState() != runState) {
-			if (runState == null) {
-				runState = RunState.UNKNOWN;
-			}
-
-			boolean notifyChanged = getAppCache().updateCache(element.getName(), runState);
-			if (notifyChanged) {
-				notifyElementChanged(element);
-			}
+	public void updateApplication(CloudAppInstances appInstances) {
+		CloudAppDashElement app = getApplication(appInstances.getApplication().getName());
+		if (app!=null) {
+			app.setInstanceData(appInstances);
 		}
-	}
-
-	public void updateApplication(String appName, RunState runState) {
-
-		CloudAppDashElement element = getApplication(appName);
-		updateElementRunState(element, runState);
-	}
-
-	/**
-	 *
-	 * @param appInstance
-	 * @param runState
-	 *            run state to set for the app. if null, the run state will be
-	 *            derived from the application instances
-	 */
-	public void updateApplication(CloudAppInstances appInstance, RunState runState) {
-		if (appInstance == null) {
-			return;
-		}
-		RunState updatedRunState = runState != null ? runState
-				: ApplicationRunningStateTracker.getRunState(appInstance);
-		CloudAppDashElement element = getApplication(appInstance.getApplication().getName());
-
-		boolean notifyChanged = getAppCache().updateCache(appInstance, updatedRunState);
-		if (notifyChanged && element != null) {
-			notifyElementChanged(element);
-		}
-	}
-
-	public void updateApplication(CloudAppInstances app) {
-		updateApplication(app, null);
 	}
 
 	@Override
@@ -823,6 +785,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public void connect() throws Exception {
 		getRunTarget().connect();
+	}
+
+	public ClientRequests getClient() {
+		return getRunTarget().getClient();
 	}
 
 }

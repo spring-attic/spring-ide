@@ -41,7 +41,7 @@ public class ApplicationDeploymentOperations {
 		String opName = "Starting application '" + cde.getName() + "' in "
 				+ (runningOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
 
-		RestartExistingApplicationOperation restartExistingOp = new RestartExistingApplicationOperation(opName, model, cde.getName(),
+		RestartExistingApplicationOperation restartExistingOp = new RestartExistingApplicationOperation(opName, cde,
 				debugSupport, runningOrDebugging, this, ui);
 		if (deploymentProperties!=null) {
 			restartExistingOp.setDeploymentProperties(deploymentProperties);
@@ -54,7 +54,7 @@ public class ApplicationDeploymentOperations {
 
 				CloudFoundryBootDashModel cloudModel = cde.getCloudModel();
 				return new CompositeApplicationOperation(opName, cloudModel, cde.getName(),
-						Arrays.asList(new Operation<?>[] { restartExistingOp, debugOp }), RunState.STARTING);
+						Arrays.asList(new Operation<?>[] { restartExistingOp, debugOp }));
 			} else {
 				String title = "Debugging is not supported for '" + cde.getName() + "'";
 				String msg = debugSupport.getNotSupportedMessage(cde);
@@ -74,9 +74,8 @@ public class ApplicationDeploymentOperations {
 		return startAndPush(cde, debugSupport, runningOrDebugging, ui, deploymentProperties);
 	}
 
-
-	public CloudApplicationOperation restartOnly(IProject project, String appName, RunState preferredState) {
-		return new ApplicationRestartOnlyOp(appName, this.model, preferredState);
+	public CloudApplicationOperation restartOnly(CloudAppDashElement app) {
+		return new ApplicationRestartOnlyOp(app);
 	}
 
 	public CloudApplicationOperation createAddElement(IProject project,

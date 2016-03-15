@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -27,26 +28,18 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 
 	private List<Operation<?>> operations;
 
-	private RunState preferredInitialRunState;
-
 	private boolean resetConsole;
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<Operation<?>> operations, RunState preferredInitialRunState, boolean resetConsole) {
+			List<Operation<?>> operations, boolean resetConsole) {
 		super(opName, model, appName);
 		this.operations = operations;
-		this.preferredInitialRunState = preferredInitialRunState;
 		this.resetConsole = resetConsole;
 	}
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<Operation<?>> operations, RunState preferredInitialRunState) {
-		this(opName, model, appName, operations, preferredInitialRunState, true);
-	}
-
-	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
 			List<Operation<?>> operations) {
-		this(opName, model, appName, operations, null);
+		this(opName, model, appName, operations, true);
 	}
 
 	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
@@ -58,16 +51,6 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 	}
 
 	@Override
-	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
-		super.addOperationEventHandler(eventHandler);
-		for (Operation<?> op : operations) {
-			if (op instanceof CloudApplicationOperation) {
-				((CloudApplicationOperation)op).addOperationEventHandler(eventHandler);
-			}
-		}
-	}
-
-	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		try {
 
@@ -75,11 +58,8 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			// possible the operation is performing
 			// steps where element doesn't yet exist (e.g an operation is
 			// creating it)
-			if (preferredInitialRunState != null && getDashElement() != null) {
-				boolean checkTermination = true;
-				this.eventHandler.fireEvent(
-						eventFactory.getUpdateRunStateEvent(getDashElement(), preferredInitialRunState),
-						checkTermination);
+			if (getDashElement() != null) {
+				checkTerminationRequested();
 			}
 
 			// Run ops in series
@@ -92,10 +72,7 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			}
 
 		} catch (Throwable t) {
-			if (!(t instanceof OperationCanceledException)) {
-				eventHandler.onError(appName, t);
-			}
-			throw t instanceof Exception ? (Exception) t : new CoreException(ExceptionUtil.status(t));
+			throw ExceptionUtil.exception(t);
 		}
 	}
 }

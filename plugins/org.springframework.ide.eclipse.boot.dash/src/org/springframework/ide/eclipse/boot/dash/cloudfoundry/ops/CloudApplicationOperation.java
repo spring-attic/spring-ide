@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
@@ -27,18 +28,9 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected String appName;
 	private ISchedulingRule schedulingRule;
-	protected ApplicationOperationEventHandler eventHandler;
-	protected ApplicationOperationEventFactory eventFactory;
 
 	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
-		this(opName, model, appName, new StartingOperationHandler(model));
-	}
-
-	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			ApplicationOperationEventHandler eventHandler) {
 		super(opName, model);
-		this.eventHandler = eventHandler;
-		this.eventFactory = new ApplicationOperationEventFactory(model);
 		this.appName = appName;
 		setSchedulingRule(new StartApplicationSchedulingRule(model.getRunTarget(), appName));
 	}
@@ -49,12 +41,6 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected CloudAppInstances getCachedApplicationInstances() {
 		return model.getAppCache().getAppInstances(appName);
-	}
-
-	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
-		if (eventHandler != null) {
-			this.eventHandler = eventHandler;
-		}
 	}
 
 	public ISchedulingRule getSchedulingRule() {
@@ -96,6 +82,11 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 	@Override
 	String getOpErrorPrefix() {
 		return "Error: " + appName + " in '" + model.getRunTarget().getName() + "'";
+	}
+
+	public void checkTerminationRequested() throws OperationCanceledException {
+		//TODO: Does nothing for now. But we need some mechanics to allow requesting an operation stops whatever it
+		// is doing.
 	}
 
 }

@@ -13,13 +13,13 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 
 public class ApplicationStopOperation extends CloudApplicationOperation {
 
 	private boolean updateElementRunState = true;
+	private CloudAppDashElement app;
 
 	/**
 	 * Note some stop operations are part of a larger composite operation that
@@ -35,8 +35,9 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 	 *            true if element run state in model should be updated. False
 	 *            otherwise.
 	 */
-	public ApplicationStopOperation(String appName, CloudFoundryBootDashModel model, boolean updateElementRunState) {
-		super("Stopping application", model, appName);
+	public ApplicationStopOperation(CloudAppDashElement app, boolean updateElementRunState) {
+		super("Stopping application", app.getCloudModel(), app.getName());
+		this.app = app;
 		this.updateElementRunState = updateElementRunState;
 	}
 
@@ -50,12 +51,9 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 			model.getElementConsoleManager().terminateConsole(this.appName);
 
 			CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(this.appName);
-
-			boolean checkTermination = false;
-			this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(),
-					ApplicationRunningStateTracker.getRunState(updatedInstances)), checkTermination);
+			app.setInstanceData(updatedInstances);
+			checkTerminationRequested();
 		}
-
 	}
 
 	public ISchedulingRule getSchedulingRule() {

@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -30,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationSto
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -40,6 +42,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -54,10 +58,53 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	private static final String PROJECT_NAME = "PROJECT_NAME";
 
 	private final CloudFoundryRunTarget cloudTarget;
-
 	private final CloudFoundryBootDashModel cloudModel;
-
 	private PropertyStoreApi persistentProperties;
+
+	private final LiveCounter startOperationInProgress = new LiveCounter(0);
+	private final LiveVariable<Throwable> error = new LiveVariable<>();
+
+	private final LiveVariable<CloudAppInstances> instanceData = new LiveVariable<>();
+	private final LiveExpression<RunState> baseRunState = new LiveExpression<RunState>() {
+		{
+			dependsOn(instanceData);
+			dependsOn(startOperationInProgress);
+			dependsOn(error);
+		}
+
+		@Override
+		protected RunState compute() {
+			if (error.getValue()!=null) {
+				return RunState.UNKNOWN;
+			}
+			if (startOperationInProgress.getValue() > 0) {
+				return RunState.STARTING;
+			}
+			CloudAppInstances instances = instanceData.getValue();
+			if (instances!=null) {
+				return ApplicationRunningStateTracker.getRunState(instances);
+			}
+			return RunState.UNKNOWN;
+		}
+	};
+
+	public void startOperationStarting() {
+		startOperationInProgress.increment();
+		setError(null);
+	}
+
+	public void startOperationEnded(Throwable error) throws Exception {
+		int level = startOperationInProgress.decrement();
+		if (level==0 && !(error instanceof OperationCanceledException)) {
+			setError(error);
+		}
+		//TODO: this kind of 'error handling' logic shouldn't be in here.
+		// But where should it be? Some kind of wrapper thing that goes around
+		// any kind of operation?
+		if (error != null) {
+			throw ExceptionUtil.exception(error);
+		}
+	}
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
@@ -65,6 +112,8 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		this.cloudModel = model;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
+		addElementNotifier(baseRunState);
+		this.addDisposableChild(baseRunState);
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
@@ -82,8 +131,9 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// run state IS indeed updated to show that
 		// it is stopped
 		boolean updateElementRunStateInModel = true;
-		CloudApplicationOperation op = new CompositeApplicationOperation(new ApplicationStopOperation(this.getName(),
-				(CloudFoundryBootDashModel) getBootDashModel(), updateElementRunStateInModel));
+		CloudApplicationOperation op = new CompositeApplicationOperation(
+				new ApplicationStopOperation(this, updateElementRunStateInModel)
+		);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
@@ -103,8 +153,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 					runingOrDebugging, ui);
 		} else {
 			// Set the initial run state as Starting
-			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
-					getName(), RunState.STARTING);
+			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(this);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -120,10 +169,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-
-		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
-				getName(), RunState.STARTING);
-
+		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(this);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(op));
 	}
 
@@ -183,11 +229,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public RunState getRunState() {
-		RunState state = getCloudModel().getAppCache().getRunState(getName());
-
+		RunState state = baseRunState.getValue();
 		if (state == RunState.RUNNING) {
 			DebugSupport debugSupport = getDebugSupport();
-			if (debugSupport.isDebuggerAttached(this)) {
+			if (debugSupport.isDebuggerAttached(CloudAppDashElement.this)) {
 //			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
 				state = RunState.DEBUGGING;
 			}
@@ -366,5 +411,11 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	}
 
+	public void setInstanceData(CloudAppInstances data) {
+		this.instanceData.setValue(data);
+	}
 
+	public void setError(Throwable t) {
+		error.setValue(t);
+	}
 }

@@ -97,15 +97,9 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		this.livePort = createLivePortExp(runState, "local.server.port");
 		this.actuatorPort = createLivePortExp(runState, "local.management.port");
 		this.actualInstances = createActualInstancesExp();
-		@SuppressWarnings("rawtypes")
-		ValueListener elementNotifier = new ValueListener() {
-			public void gotValue(LiveExpression exp, Object value) {
-				getBootDashModel().notifyElementChanged(AbstractLaunchConfigurationsDashElement.this);
-			}
-		};
-		livePort.addListener(elementNotifier);
-		runState.addListener(elementNotifier);
-		actualInstances.addListener(elementNotifier);
+		addElementNotifier(livePort);
+		addElementNotifier(runState);
+		addElementNotifier(actualInstances);
 	}
 
 	protected abstract IPropertyStore createPropertyStore();
@@ -467,7 +461,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	private LiveExpression<Integer> createLivePortExp(final LiveExpression<RunState> runState, final String propName) {
-		return new AsyncLiveExpression<Integer>(-1, "Refreshing port info ("+propName+") for "+getName()) {
+		AsyncLiveExpression<Integer> exp = new AsyncLiveExpression<Integer>(-1, "Refreshing port info ("+propName+") for "+getName()) {
 			{
 				//Doesn't really depend on runState, but should be recomputed when runState changes.
 				dependsOn(runState);
@@ -477,6 +471,8 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				return getLivePort(propName);
 			}
 		};
+		addDisposableChild(exp);
+		return exp;
 	}
 
 	private int getLivePort(String propName) {
