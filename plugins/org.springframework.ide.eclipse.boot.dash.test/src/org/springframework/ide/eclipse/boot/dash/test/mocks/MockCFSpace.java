@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
@@ -49,7 +50,7 @@ public class MockCFSpace extends CFSpaceData {
 	public MockCFApplication defApp(String name) {
 		MockCFApplication existing = appsByName.get(name);
 		if (existing==null) {
-			appsByName.put(name, existing = new MockCFApplication(name));
+			appsByName.put(name, existing = Mockito.spy(new MockCFApplication(name)));
 		}
 		return existing;
 	}

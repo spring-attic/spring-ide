@@ -166,13 +166,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public void updateApplicationStaging(String appName, Staging staging) throws Exception {
 			notImplementedStub();
-
 		}
 
 		@Override
 		public void updateApplicationServices(String appName, List<String> services) throws Exception {
 			notImplementedStub();
-
 		}
 
 		@Override
@@ -184,7 +182,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public void updateApplicationInstances(String appName, int instances) throws Exception {
 			notImplementedStub();
-
 		}
 
 		@Override

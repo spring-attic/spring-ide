@@ -22,10 +22,11 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,8 +43,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.omg.CORBA.UNKNOWN;
+import org.omg.PortableInterceptor.INACTIVE;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
@@ -63,6 +68,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
@@ -79,6 +85,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForState;
+
 /**
  * @author Kris De Volder
  */
@@ -90,7 +98,6 @@ public class CloudFoundryBootDashModelMockingTest {
 	private MockCloudFoundryClientFactory clientFactory;
 	private CloudFoundryTestHarness harness;
 	private BootDashActions actions;
-
 
 	////////////////////////////////////////////////////////////
 
@@ -669,6 +676,67 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertNull(app.getProject(true));
 		verify(elementStateListener).stateChanged(same(app));
+	}
+
+	@Test public void runstateBecomesUnknownWhenStartOperationFails() throws Exception {
+		final String appName = "foo";
+		String projectName = "to-deploy";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		MockCFApplication app = space.defApp(appName);
+		final IProject project = projects.createProject(projectName);
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+		waitForApps(target, appName);
+		CloudAppDashElement appElement = target.getApplication(appName);
+		appElement.setProject(project);
+
+		//The state refressh is asynch so until state becomes 'INACTIVE' it will be unknown.
+		waitForState(appElement, RunState.INACTIVE);
+		IAction restartAction = actions.getRestartOnlyApplicationAction();
+
+		@SuppressWarnings("unchecked")
+		RunStateHistory runstateHistory = new RunStateHistory();
+
+		appElement.getBaseRunStateExp().addListener(runstateHistory);
+		doThrow(IOException.class).when(app).start();
+
+		System.out.println("restarting application...");
+		harness.selection.setElements(appElement);
+		restartAction.run();
+
+		waitForState(appElement, RunState.UNKNOWN);
+
+		runstateHistory.assertHistoryContains(
+				RunState.INACTIVE,
+				RunState.STARTING
+		);
+		runstateHistory.assertLast(
+				RunState.UNKNOWN
+		);
+	}
+
+	@Test public void refreshClearsErrorState() throws Exception {
+		final String appName = "foo";
+		String projectName = "to-deploy";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		MockCFApplication app = space.defApp(appName);
+		final IProject project = projects.createProject(projectName);
+
+		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
+		waitForApps(target, appName);
+		CloudAppDashElement appElement = target.getApplication(appName);
+		appElement.setProject(project);
+
+		waitForState(appElement, RunState.INACTIVE);
+		//The state refressh is asynch so until state becomes 'INACTIVE' it will be unknown.
+		appElement.setError(new IOException("Something bad happened"));
+		waitForState(appElement, RunState.UNKNOWN);
+
+		target.refresh(ui);
+
+		waitForState(appElement, RunState.INACTIVE);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////

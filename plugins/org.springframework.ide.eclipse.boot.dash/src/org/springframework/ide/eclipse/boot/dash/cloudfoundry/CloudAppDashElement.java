@@ -240,6 +240,15 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return state;
 	}
 
+	/**
+	 * This method is mostly meant just for test purposes. The 'baseRunState' is really
+	 * part of how this class internally computes runstate. Clients should have no business
+	 * using it separate from the runtstate.
+	 */
+	public LiveExpression<RunState> getBaseRunStateExp() {
+		return baseRunState;
+	}
+
 	@Override
 	public CloudFoundryRunTarget getTarget() {
 		return cloudTarget;
@@ -418,4 +427,5 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	public void setError(Throwable t) {
 		error.setValue(t);
 	}
+
 }

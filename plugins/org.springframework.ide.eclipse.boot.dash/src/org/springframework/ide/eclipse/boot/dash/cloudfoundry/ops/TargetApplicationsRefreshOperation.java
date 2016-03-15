@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -54,6 +55,9 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
 		if (model.getRunTarget().isConnected()) {
 			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
+			for (CloudAppDashElement app : model.getApplicationValues()) {
+				app.setError(null); // clear old error states.
+			}
 			try {
 
 				// 1. Fetch basic list of applications. Should be the "faster" of
