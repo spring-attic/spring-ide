@@ -49,7 +49,7 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 
 			// Get the guid, as it is more efficient for lookup
 			UUID appGuid = appInstances.getApplication().getGuid();
-			checkTerminationRequested();
+			checkTerminationRequested(monitor);
 
 			// Use the cached Cloud app instead of fetching a new one to avoid
 			// unnecessary

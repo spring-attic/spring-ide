@@ -56,7 +56,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 			CloudAppDashElement element = getDashElement();
 			CloudAppInstances existingAppInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
 			element.setInstanceData(existingAppInstances);
-			checkTerminationRequested();
+			checkTerminationRequested(monitor);
 		}
 	}
 

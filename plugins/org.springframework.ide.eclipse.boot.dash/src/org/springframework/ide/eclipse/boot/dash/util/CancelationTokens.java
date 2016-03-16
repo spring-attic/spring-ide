@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test.mocks;
+package org.springframework.ide.eclipse.boot.dash.util;
 
 /**
  * Manages a set of CancelationTokens.
@@ -20,8 +20,8 @@ public class CancelationTokens {
 	//Note: we don't actually have to keep a set of tokens explicitly.
 	// The tokens use a 'id' which is incremented on each new token.
 	//So it is easy to cancel all existing tokens based on a their
-	//if simply by remembering the 'watermark id' where the cancelation
-	//occurred.
+	//id simply by remembering the 'watermark id' where the cancelation
+	//occurred. All ids 'older' than the current id are 'canceled'.
 
 	private final Object SYNC = CancelationTokens.this;
 

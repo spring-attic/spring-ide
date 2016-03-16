@@ -55,7 +55,7 @@ public class ApplicationRunningStateTracker {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		op.checkTerminationRequested();
+		op.checkTerminationRequested(monitor);
 	}
 
 	/**

@@ -84,9 +84,10 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 		return "Error: " + appName + " in '" + model.getRunTarget().getName() + "'";
 	}
 
-	public void checkTerminationRequested() throws OperationCanceledException {
-		//TODO: Does nothing for now. But we need some mechanics to allow requesting an operation stops whatever it
-		// is doing.
+	public void checkTerminationRequested(IProgressMonitor mon) throws OperationCanceledException {
+		if (mon!=null & mon.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 	}
 
 }

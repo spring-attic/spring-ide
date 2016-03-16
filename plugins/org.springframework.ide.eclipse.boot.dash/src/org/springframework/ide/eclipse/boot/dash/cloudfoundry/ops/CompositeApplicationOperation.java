@@ -13,12 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -59,7 +56,7 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			// steps where element doesn't yet exist (e.g an operation is
 			// creating it)
 			if (getDashElement() != null) {
-				checkTerminationRequested();
+				checkTerminationRequested(monitor);
 			}
 
 			// Run ops in series

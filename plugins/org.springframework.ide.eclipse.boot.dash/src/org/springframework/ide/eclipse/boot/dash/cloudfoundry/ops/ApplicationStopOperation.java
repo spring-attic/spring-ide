@@ -52,7 +52,7 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 
 			CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(this.appName);
 			app.setInstanceData(updatedInstances);
-			checkTerminationRequested();
+			checkTerminationRequested(monitor);
 		}
 	}
 

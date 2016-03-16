@@ -24,7 +24,8 @@ import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
