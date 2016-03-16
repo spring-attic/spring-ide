@@ -110,7 +110,7 @@ public class MockCFApplication {
 		}
 		if (cancelToken.isCanceled()) {
 			System.out.println("Starting "+getName()+" CANCELED");
-			throw new OperationCanceledException();
+			throw new IOException("Operation Canceled");
 		}
 		this.stats = builder.build();
 		this.state = AppState.STARTED;
