@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.eclipse.core.runtime.Assert;
-
 /**
  * Manages a set of CancelationTokens.
  *
@@ -22,56 +17,44 @@ import org.eclipse.core.runtime.Assert;
  */
 public class CancelationTokens {
 
-	/**
-	 * Holds on to all 'active' tokens. A token is active from the time it
-	 * is created until the time it is either canceled or disposed.
-	 * <p>
-	 * Once a token is canceled or disposed, it becomes 'inactive'. This means
-	 * its state can no longer be changed (but its still okay to read the state).
-	 */
-	private Set<CancelationToken> tokens = new HashSet<>();
+	//Note: we don't actually have to keep a set of tokens explicitly.
+	// The tokens use a 'id' which is incremented on each new token.
+	//So it is easy to cancel all existing tokens based on a their
+	//if simply by remembering the 'watermark id' where the cancelation
+	//occurred.
+
+	private final Object SYNC = CancelationTokens.this;
+
+	private int canceledAllBefore = 0;
+	private int nextId = 0;
+
+	public interface CancelationToken {
+		boolean isCanceled();
+	}
 
 	public synchronized CancelationToken create() {
-		CancelationToken token = new CancelationToken();
-		tokens.add(token);
+		CancelationToken token = new ManagedToken();
 		return token;
 	}
 
-	public class CancelationToken {
-		private boolean isCanceled = false;
-		private boolean isDisposed = false;
+	private class ManagedToken implements CancelationToken {
+		private int id;
 
-		private CancelationToken() {}
+		private ManagedToken() {
+			synchronized (SYNC) {
+				this.id = ++nextId;
+			}
+		}
 
 		public boolean isCanceled() {
-			synchronized (tokens) {
-				return isCanceled;
+			synchronized (SYNC) {
+				return id < canceledAllBefore;
 			}
 		}
 
-		public void cancel() {
-			synchronized (tokens) {
-				Assert.isLegal(!isDisposed); //Disposed tokens can not be canceled anymore.
-				this.isCanceled = true;
-				dispose();
-			}
-		}
-
-		public void dispose() {
-			synchronized (tokens) {
-				isDisposed = true;
-				remove(this);
-			}
-		}
-	}
-
-	private void remove(CancelationToken cancelationToken) {
-		tokens.remove(cancelationToken);
 	}
 
 	public synchronized void cancelAll() {
-		for (CancelationToken t : tokens) {
-			t.cancel();
-		}
+		canceledAllBefore = nextId-1;
 	}
 }
