@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
@@ -22,8 +25,12 @@ import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -46,8 +53,10 @@ public class MockCFApplication {
 	private Integer timeout = null;
 	private String command = null;
 	private String stack = null;
+	private MockCloudFoundryClientFactory owner;
 
-	public MockCFApplication(String name, UUID guid, int instances, AppState state) {
+	public MockCFApplication(MockCloudFoundryClientFactory owner, String name, UUID guid, int instances, AppState state) {
+		this.owner = owner;
 		this.name = name;
 		this.guid = guid;
 		this.instances = instances;
@@ -57,8 +66,11 @@ public class MockCFApplication {
 	private String healthCheck=HealthCheckSupport.HC_PORT;
 	private List<InstanceStats> stats = new ArrayList<>();
 
-	public MockCFApplication(String name) {
-		this(name,
+	private CancelationTokens cancelationTokens = new CancelationTokens();
+
+	public MockCFApplication(MockCloudFoundryClientFactory owner, String name) {
+		this(owner,
+				name,
 				UUID.randomUUID(),
 				1,
 				AppState.STOPPED
@@ -73,9 +85,21 @@ public class MockCFApplication {
 		return new ApplicationStats(ImmutableList.copyOf(stats));
 	}
 
-	public void start() {
+	public void start() throws Exception {
 		Assert.isLegal(AppState.STOPPED==state);
 		Assert.isLegal(stats.isEmpty());
+		this.state = AppState.UPDATING;
+		final long endTime = System.currentTimeMillis()+getStartDelay();
+		final CancelationToken cancelToken = cancelationTokens.create();
+		new ACondition("simulated app starting (waiting)", getStartDelay()+1000) {
+			@Override
+			public boolean test() throws Exception {
+				if (!cancelToken.isCanceled() && System.currentTimeMillis()<endTime) {
+					throw new IOException("App still starting");
+				}
+				return true;
+			}
+		};
 		Builder<InstanceStats> builder = ImmutableList.builder();
 		for (int i = 0; i < instances; i++) {
 			Map<String, Object> values = new HashMap<>();
@@ -83,8 +107,16 @@ public class MockCFApplication {
 			InstanceStats stat = new InstanceStats(UUID.randomUUID().toString(), values);
 			builder.add(stat);
 		}
+		if (cancelToken.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		this.stats = builder.build();
 		this.state = AppState.STARTED;
+		cancelToken.dispose();
+	}
+
+	private long getStartDelay() {
+		return owner.getStartDelay();
 	}
 
 	public String getHealthCheck() {
@@ -170,7 +202,7 @@ public class MockCFApplication {
 		env = ImmutableMap.copyOf(newEnv);
 	}
 
-	public void restart() {
+	public void restart() throws Exception {
 		//TODO: same comment as stop.
 		stop();
 		start();

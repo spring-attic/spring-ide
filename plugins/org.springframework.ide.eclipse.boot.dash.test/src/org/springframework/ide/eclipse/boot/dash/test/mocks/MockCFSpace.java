@@ -30,9 +30,11 @@ public class MockCFSpace extends CFSpaceData {
 
 	private Map<String, CFService> servicesByName = new HashMap<>();
 	private Map<String, MockCFApplication> appsByName = new HashMap<>();
+	private MockCloudFoundryClientFactory owner;
 
-	public MockCFSpace(String name, UUID guid, CFOrganization org) {
+	public MockCFSpace(MockCloudFoundryClientFactory owner, String name, UUID guid, CFOrganization org) {
 		super(name, guid, org);
+		this.owner = owner;
 	}
 
 	public List<CFService> getServices() {
@@ -50,7 +52,7 @@ public class MockCFSpace extends CFSpaceData {
 	public MockCFApplication defApp(String name) {
 		MockCFApplication existing = appsByName.get(name);
 		if (existing==null) {
-			appsByName.put(name, existing = Mockito.spy(new MockCFApplication(name)));
+			appsByName.put(name, existing = Mockito.spy(new MockCFApplication(owner, name)));
 		}
 		return existing;
 	}

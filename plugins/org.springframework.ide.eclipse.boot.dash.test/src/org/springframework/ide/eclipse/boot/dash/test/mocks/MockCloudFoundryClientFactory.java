@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
@@ -56,6 +57,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	 * only use parts of the mocking harness that are actually implemented.
 	 */
 	private Exception notImplementedStubCalled = null;
+	private long startDelay;
 
 	public MockCloudFoundryClientFactory() {
 		defDomain("cfmockapps.io"); //Lost of functionality may assume there's at least one domain so make sure we have one.
@@ -91,7 +93,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		MockCFSpace existing = spacesByName.get(key);
 		if (existing==null) {
 			CFOrganization org = defOrg(orgName);
-			spacesByName.put(key, existing= new MockCFSpace(
+			spacesByName.put(key, existing= new MockCFSpace(this,
 					spaceName,
 					UUID.randomUUID(),
 					org
@@ -342,7 +344,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 //			);
 
 			MockCFSpace space = getSpace();
-			MockCFApplication app = new MockCFApplication(appName);
+			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, appName);
 			app.setCommand(deploymentProperties.getCommand());
 			app.setBuildpackUrl(deploymentProperties.getBuildpack());
 			app.setStack(deploymentProperties.getStack());
@@ -430,6 +432,17 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	protected IOException errorAppAlreadyExists(String detail) {
 		return new IOException("App already exists: "+detail);
+	}
+
+	public void setAppStartDelay(TimeUnit timeUnit, int howMany) {
+		startDelay = timeUnit.toMillis(howMany);
+	}
+
+	/**
+	 * @return The delay that a simulated 'start' of an app should take before returning. Given in milliseconds.
+	 */
+	public long getStartDelay() {
+		return startDelay;
 	}
 
 }

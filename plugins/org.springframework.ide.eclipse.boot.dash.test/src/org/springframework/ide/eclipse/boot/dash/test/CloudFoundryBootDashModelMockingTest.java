@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.core.resources.IProject;
@@ -84,8 +85,6 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-
-import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForState;
 
 /**
  * @author Kris De Volder
@@ -692,10 +691,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		appElement.setProject(project);
 
 		//The state refressh is asynch so until state becomes 'INACTIVE' it will be unknown.
-		waitForState(appElement, RunState.INACTIVE);
+		waitForState(appElement, RunState.INACTIVE, 3000);
 		IAction restartAction = actions.getRestartOnlyApplicationAction();
 
-		@SuppressWarnings("unchecked")
 		RunStateHistory runstateHistory = new RunStateHistory();
 
 		appElement.getBaseRunStateExp().addListener(runstateHistory);
@@ -705,7 +703,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.selection.setElements(appElement);
 		restartAction.run();
 
-		waitForState(appElement, RunState.UNKNOWN);
+		waitForState(appElement, RunState.UNKNOWN, 3000);
 
 		runstateHistory.assertHistoryContains(
 				RunState.INACTIVE,
@@ -721,7 +719,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		String projectName = "to-deploy";
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
-		MockCFApplication app = space.defApp(appName);
+		space.defApp(appName);
 		final IProject project = projects.createProject(projectName);
 
 		final CloudFoundryBootDashModel target = harness.createCfTarget(targetParams);
@@ -729,14 +727,41 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudAppDashElement appElement = target.getApplication(appName);
 		appElement.setProject(project);
 
-		waitForState(appElement, RunState.INACTIVE);
+		waitForState(appElement, RunState.INACTIVE, 3000);
 		//The state refressh is asynch so until state becomes 'INACTIVE' it will be unknown.
 		appElement.setError(new IOException("Something bad happened"));
-		waitForState(appElement, RunState.UNKNOWN);
+		waitForState(appElement, RunState.UNKNOWN, 3000);
 
 		target.refresh(ui);
 
-		waitForState(appElement, RunState.INACTIVE);
+		waitForState(appElement, RunState.INACTIVE, 3000);
+	}
+
+	@Test public void stopCancelsDeploy() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
+		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		final String appName = harness.randomAppName();
+
+		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
+		harness.answerDeploymentPrompt(ui, appName, appName);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+
+		waitForState(app, RunState.STARTING, 3000);
+
+		app.stopAsync(ui);
+
+		waitForState(app, RunState.INACTIVE, 3000);
+
+		//TODO: can we check that deployment related jobs are really canceled/finished somehow?
+		//   can we check that they didn't pop errors?
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -761,7 +786,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		return null;
 	}
 
-	protected void deployApp(final CloudFoundryBootDashModel model, final String appName, IProject project)
+	protected CloudAppDashElement deployApp(final CloudFoundryBootDashModel model, final String appName, IProject project)
 			throws Exception {
 		harness.answerDeploymentPrompt(ui, appName, appName);
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -775,6 +800,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				return true;
 			}
 		};
+		return model.getApplication(appName);
 	}
 
 	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
@@ -881,6 +907,16 @@ public class CloudFoundryBootDashModelMockingTest {
 			builder.add(e.getName());
 		}
 		return builder.build();
+	}
+
+	public static void waitForState(final BootDashElement element, final RunState state, long timeOut) throws Exception {
+		new ACondition("Wait for state "+state, timeOut) {
+			@Override
+			public boolean test() throws Exception {
+				assertEquals(state, element.getRunState());
+				return true;
+			}
+		};
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////

@@ -1076,7 +1076,7 @@ public class BootDashModelTest {
 		return ImmutableSet.of();
 	}
 
-	public static void waitForState(final BootDashElement element, final RunState state) throws Exception {
+	private static void waitForState(final BootDashElement element, final RunState state) throws Exception {
 		new ACondition("Wait for state "+state, RUN_STATE_CHANGE_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
