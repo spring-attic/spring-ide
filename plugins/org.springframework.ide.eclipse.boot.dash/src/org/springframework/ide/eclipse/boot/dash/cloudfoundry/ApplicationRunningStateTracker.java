@@ -52,9 +52,6 @@ public class ApplicationRunningStateTracker {
 
 	protected void checkTerminate(IProgressMonitor monitor, CloudAppInstances appInstances)
 			throws OperationCanceledException {
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
 		op.checkTerminationRequested(monitor);
 	}
 
