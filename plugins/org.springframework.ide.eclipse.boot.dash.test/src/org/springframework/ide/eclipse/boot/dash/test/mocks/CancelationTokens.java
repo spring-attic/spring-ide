@@ -56,4 +56,10 @@ public class CancelationTokens {
 	private void remove(CancelationToken cancelationToken) {
 		tokens.remove(cancelationToken);
 	}
+
+	public synchronized void cancelAll() {
+		for (CancelationToken t : tokens) {
+			t.cancel();
+		}
+	}
 }

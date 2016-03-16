@@ -95,6 +95,7 @@ public class MockCFApplication {
 			@Override
 			public boolean test() throws Exception {
 				if (!cancelToken.isCanceled() && System.currentTimeMillis()<endTime) {
+					System.out.println("Starting "+getName()+"...");
 					throw new IOException("App still starting");
 				}
 				return true;
@@ -108,11 +109,13 @@ public class MockCFApplication {
 			builder.add(stat);
 		}
 		if (cancelToken.isCanceled()) {
+			System.out.println("Starting "+getName()+" CANCELED");
 			throw new OperationCanceledException();
 		}
 		this.stats = builder.build();
 		this.state = AppState.STARTED;
 		cancelToken.dispose();
+		System.out.println("Starting "+getName()+" SUCCESS");
 	}
 
 	private long getStartDelay() {
@@ -189,11 +192,7 @@ public class MockCFApplication {
 	}
 
 	public void stop() {
-		//TODO: in real CF this would not happen instantly so to be a 'good' simulation the stuff
-		// we do here should probably be done asynchly, but that opens up a whole new can of worms,
-		// such as ... who or what should controll the timing?
-		//If we do something smart with this, perhaps we could have some kind of harness that forces sequencings
-		// to expose race conditions in code.
+		cancelationTokens.cancelAll();
 		this.stats = ImmutableList.of();
 		this.state = AppState.STOPPED;
 	}
