@@ -40,7 +40,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class AddElementOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
-	private RunState preferedRunState;
 	private CFApplication existingApplication;
 	private ApplicationDeploymentOperations operations;
 	private DebugSupport debugSupport;
@@ -63,7 +62,6 @@ public class AddElementOperation extends CloudApplicationOperation {
 		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
 		this.deploymentProperties = deploymentProperties;
 		this.existingApplication = existingApplication;
-		this.preferedRunState = preferedRunState;
 		this.operations = operations;
 		this.debugSupport = debugSupport;
 		this.runningOrDebugging = runningOrDebugging;
@@ -88,11 +86,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 
 		IProject project = deploymentProperties.getProject();
 
-		if (preferedRunState == null) {
-			preferedRunState = ApplicationRunningStateTracker.getRunState(existingInstances);
-		}
-
-		CloudAppDashElement cde = this.model.addElement(existingInstances, project, preferedRunState);
+		CloudAppDashElement cde = this.model.addElement(existingInstances, project);
 		if (project != null && cde != null) {
 			BootDashElement localElement = findLocalBdeForProject(project);
 			if (localElement != null) {

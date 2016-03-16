@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -99,12 +98,6 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 			}
 
 			List<Operation<?>> deploymentOperations = new ArrayList<Operation<?>>();
-			// set the preferred runstate in the first op that gets executed. Not
-			// necessary to add it to any of the following ops
-			// as the app will remain in the preferred run state unless any one of
-			// the ops, or any other op running in parallel, changes the state to
-			// something else
-
 			// Stop application first to avoid issues when updating or restarting
 			// the app in case
 			// the app is in a "failed" state in CF. This is a work around to handle

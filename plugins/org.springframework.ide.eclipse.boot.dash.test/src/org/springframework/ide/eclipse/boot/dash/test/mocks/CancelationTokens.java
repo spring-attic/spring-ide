@@ -25,6 +25,9 @@ public class CancelationTokens {
 	/**
 	 * Holds on to all 'active' tokens. A token is active from the time it
 	 * is created until the time it is either canceled or disposed.
+	 * <p>
+	 * Once a token is canceled or disposed, it becomes 'inactive'. This means
+	 * its state can no longer be changed (but its still okay to read the state).
 	 */
 	private Set<CancelationToken> tokens = new HashSet<>();
 

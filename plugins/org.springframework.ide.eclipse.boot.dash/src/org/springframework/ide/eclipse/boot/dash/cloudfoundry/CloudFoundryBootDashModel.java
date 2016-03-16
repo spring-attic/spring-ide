@@ -378,7 +378,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport));
 	}
 
-	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project, RunState preferedRunState) throws Exception {
+	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project) throws Exception {
 		CloudAppDashElement addedElement = null;
 		boolean changed = false;
 		synchronized (this) {
