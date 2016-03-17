@@ -32,7 +32,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
  * Uses ssh tunnelling on Diego to support debugging of app running on CF.

@@ -198,7 +198,6 @@ public class MockCFApplication {
 	}
 
 	public void restart() throws Exception {
-		//TODO: same comment as stop.
 		stop();
 		start();
 	}

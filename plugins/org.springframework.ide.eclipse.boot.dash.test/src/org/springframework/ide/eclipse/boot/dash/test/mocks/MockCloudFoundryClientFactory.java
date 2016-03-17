@@ -36,7 +36,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
@@ -57,7 +56,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	 * only use parts of the mocking harness that are actually implemented.
 	 */
 	private Exception notImplementedStubCalled = null;
-	private long startDelay;
+	private long startDelay = 0;
 
 	public MockCloudFoundryClientFactory() {
 		defDomain("cfmockapps.io"); //Lost of functionality may assume there's at least one domain so make sure we have one.

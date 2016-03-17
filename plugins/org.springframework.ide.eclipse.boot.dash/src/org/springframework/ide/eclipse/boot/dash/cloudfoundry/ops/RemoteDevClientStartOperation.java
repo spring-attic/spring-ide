@@ -45,6 +45,7 @@ public class RemoteDevClientStartOperation extends CloudApplicationOperation {
 			throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Local project not associated to CF app '" + appName + "'"));
 		}
 		DevtoolsUtil.disconnectDevtoolsClientsFor(cde);
+		//TODO: create a 'monitor' that is aware of cancelation token to apss to the launch operation.
 		DevtoolsUtil.launchDevtools(cde, DevtoolsUtil.getSecret(cde.getProject()), startMode == RunState.DEBUGGING ? ILaunchManager.DEBUG_MODE : ILaunchManager.RUN_MODE , monitor);
 	}
 
