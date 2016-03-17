@@ -287,18 +287,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return null;
 	}
 
-	public String getHealthCheck(UUID appGuid) throws Exception {
-		ClientRequests client = getClient();
-		if (client!=null) {
-			return getClient().getHealthCheck(appGuid);
-		}
-		return null;
-	}
-
-	public void setHealthCheck(UUID guid, String hcType) throws Exception {
-		getClient().setHealthCheck(guid, hcType);
-	}
-
 	@Override
 	public String getTemplateVar(char name) {
 		switch (name) {

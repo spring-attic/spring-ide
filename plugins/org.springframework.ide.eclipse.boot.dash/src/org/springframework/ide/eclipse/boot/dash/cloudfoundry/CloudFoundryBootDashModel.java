@@ -82,10 +82,12 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -100,8 +102,6 @@ import com.google.common.collect.ImmutableSet.Builder;
 public class CloudFoundryBootDashModel extends AbstractBootDashModel implements ModifiableModel {
 
 	private IPropertyStore modelStore;
-
-	private CloudAppCache cloudAppCache;
 
 	public static final String APP_TO_PROJECT_MAPPING = "projectToAppMapping";
 
@@ -223,7 +223,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		RunTargetType type = target.getType();
 		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
 		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
-		this.cloudAppCache = new CloudAppCache();
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
@@ -233,10 +232,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
 			getOperationsExecution().runOpAsynch(new ConnectOperation(this, true));
 		}
-	}
-
-	public CloudAppCache getAppCache() {
-		return cloudAppCache;
 	}
 
 	@Override

@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -61,6 +62,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	private CancelationTokens cancelationTokens = new CancelationTokens();
 
+	private final LiveVariable<String> healthCheck = new LiveVariable<>(HealthCheckSupport.HC_PORT);
 	private final CloudFoundryRunTarget cloudTarget;
 	private final CloudFoundryBootDashModel cloudModel;
 	private PropertyStoreApi persistentProperties;
@@ -118,6 +120,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 		addElementNotifier(baseRunState);
 		addElementNotifier(instanceData);
+		addElementNotifier(healthCheck);
 		this.addDisposableChild(baseRunState);
 	}
 
@@ -307,7 +310,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public String getHealthCheck() {
-		return getCloudModel().getAppCache().getHealthCheck(this);
+		return this.healthCheck.getValue();
 	}
 
 	/**
@@ -315,12 +318,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	 * doesn *not* change the real value of the health-check.
 	 */
 	public void setHealthCheck(String hc) {
-		String old = getHealthCheck();
-		if (!Objects.equals(old, hc)) {
-			CloudFoundryBootDashModel model = getCloudModel();
-			model.getAppCache().setHealthCheck(this, hc);
-			model.notifyElementChanged(this);
-		}
+		this.healthCheck.setValue(hc);
 	}
 
 	public UUID getAppGuid() {

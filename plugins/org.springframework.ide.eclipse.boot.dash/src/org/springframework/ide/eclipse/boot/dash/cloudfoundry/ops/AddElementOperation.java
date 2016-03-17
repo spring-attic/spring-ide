@@ -98,7 +98,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 			}
 			// Persist the manifest path when creating the bde
 			cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
-			String hc = cde.getTarget().getHealthCheck(cde.getAppGuid());
+			String hc = getClientRequests().getHealthCheck(cde.getAppGuid());
 			cde.setHealthCheck(hc);
 		}
 
