@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 
@@ -43,7 +44,7 @@ public abstract class DebugSupport {
 	/**
 	 * Creates operation that does whatever is needed to get debugger connected to the targetted app.
 	 */
-	public abstract Operation<?> createOperation(CloudAppDashElement app, String opName, UserInteractions ui);
+	public abstract Operation<?> createOperation(CloudAppDashElement app, String opName, UserInteractions ui, CancelationToken cancelToken);
 
 	/**
 	 * Called to allow debug support to muck around with environment variables so that it can

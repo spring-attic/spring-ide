@@ -40,6 +40,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -56,6 +58,8 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT_NAME";
+
+	private CancelationTokens cancelationTokens = new CancelationTokens();
 
 	private final CloudFoundryRunTarget cloudTarget;
 	private final CloudFoundryBootDashModel cloudModel;
@@ -131,16 +135,19 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// run state IS indeed updated to show that
 		// it is stopped
 		boolean updateElementRunStateInModel = true;
+		cancelOperations();
+		CancelationToken cancelationToken = createCancelationToken();
 		CloudApplicationOperation op = new CompositeApplicationOperation(
-				new ApplicationStopOperation(this, updateElementRunStateInModel)
+				new ApplicationStopOperation(this, updateElementRunStateInModel, cancelationToken)
 		);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
 	@Override
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-
+		cancelOperations();
 		Operation<?> op = null;
+		CancelationToken cancelToken = createCancelationToken();
 		// TODO: Only do full upload on restart. Not on debug
 		if (getProject() != null
 		// TODO: commenting out for now as restarting doesnt seem to restage.
@@ -150,10 +157,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// && runingOrDebugging == RunState.RUNNING
 		) {
 			op = cloudModel.getApplicationDeploymentOperations().restartAndPush(this, getDebugSupport(),
-					runingOrDebugging, ui);
+					runingOrDebugging, ui, cancelToken);
 		} else {
 			// Set the initial run state as Starting
-			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(this);
+			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(this, cancelToken);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -169,7 +176,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(this);
+		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(this, createCancelationToken());
 		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(op));
 	}
 
@@ -426,6 +433,14 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	public void setError(Throwable t) {
 		error.setValue(t);
+	}
+
+	public CancelationToken createCancelationToken() {
+		return cancelationTokens.create();
+	}
+
+	public void cancelOperations() {
+		cancelationTokens.cancelAll();
 	}
 
 }

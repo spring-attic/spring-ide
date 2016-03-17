@@ -758,7 +758,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		app.stopAsync(ui);
 
-		waitForState(app, RunState.INACTIVE, 3000);
+		waitForState(app, RunState.INACTIVE, 20000);
 
 		//TODO: can we check that deployment related jobs are really canceled/finished somehow?
 		//   can we check that they didn't pop errors?

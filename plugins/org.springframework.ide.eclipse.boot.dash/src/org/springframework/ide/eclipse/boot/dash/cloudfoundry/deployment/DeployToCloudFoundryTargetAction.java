@@ -36,7 +36,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAction {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private static void debug(String msg) {
 		if (DEBUG) {
 			System.out.println(msg);

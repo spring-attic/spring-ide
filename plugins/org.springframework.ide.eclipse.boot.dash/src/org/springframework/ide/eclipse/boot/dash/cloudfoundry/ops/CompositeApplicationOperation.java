@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -28,19 +29,19 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 	private boolean resetConsole;
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<Operation<?>> operations, boolean resetConsole) {
-		super(opName, model, appName);
+			List<Operation<?>> operations, boolean resetConsole, CancelationToken cancelationToken) {
+		super(opName, model, appName, cancelationToken);
 		this.operations = operations;
 		this.resetConsole = resetConsole;
 	}
 
 	public CompositeApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			List<Operation<?>> operations) {
-		this(opName, model, appName, operations, true);
+			List<Operation<?>> operations, CancelationToken cancelationToken) {
+		this(opName, model, appName, operations, true, cancelationToken);
 	}
 
 	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
-		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName);
+		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName, enclosedOp.getCancelationToken());
 
 		this.operations = new ArrayList<Operation<?>>();
 		this.operations.add(enclosedOp);

@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
@@ -30,16 +31,16 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 	private boolean confirmChange;
 	private static final String CONFIRM_CHANGE_KEY = SetHealthCheckOperation.class.getName()+".confirm";
 
-	public SetHealthCheckOperation(CloudAppDashElement app, String hcType, UserInteractions ui, boolean confirmChange) {
-		super("set-health-check "+app.getName()+" "+hcType, app.getCloudModel(), app.getName());
+	public SetHealthCheckOperation(CloudAppDashElement app, String hcType, UserInteractions ui, boolean confirmChange, CancelationToken cancelationToken) {
+		super("set-health-check "+app.getName()+" "+hcType, app.getCloudModel(), app.getName(), cancelationToken);
 		this.app = app;
 		this.hcType = hcType;
 		this.ui = ui;
 		this.confirmChange = confirmChange;
 	}
 
-	public SetHealthCheckOperation(CloudAppDashElement app, String hcType) {
-		this(app, hcType, null, false);
+	public SetHealthCheckOperation(CloudAppDashElement app, String hcType, CancelationToken cancelationToken) {
+		this(app, hcType, null, false, cancelationToken);
 	}
 
 	@Override

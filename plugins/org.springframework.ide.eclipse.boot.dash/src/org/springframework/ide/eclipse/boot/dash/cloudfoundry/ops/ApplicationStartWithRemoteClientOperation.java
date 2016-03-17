@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 
 /**
@@ -44,8 +45,8 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 	private ApplicationDeploymentOperations operations;
 
 	public ApplicationStartWithRemoteClientOperation(String opName, CloudAppDashElement app, RunState runOrDebug,
-			ApplicationDeploymentOperations operations, UserInteractions ui) {
-		super(opName, app.getCloudModel(), app.getName());
+			ApplicationDeploymentOperations operations, UserInteractions ui, CancelationToken cancelationToken) {
+		super(opName, app.getCloudModel(), app.getName(), cancelationToken);
 		this.app = app;
 		this.runOrDebug = runOrDebug;
 		this.ui = ui;
@@ -55,6 +56,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+		CancelationToken cancelToken = getCancelationToken();
 		List<Operation<?>> ops = new ArrayList<Operation<?>>();
 
 		CloudAppInstances instances = getCachedApplicationInstances();
@@ -67,20 +69,20 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 		}
 
 		boolean resetConsole = false;
-		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true));
+		ops.add(new SetHealthCheckOperation(app, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true, cancelToken));
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(cde.getProject()))) {
-			ops.add(operations.restartAndPush(cde, debugSupport, runOrDebug, ui));
+			ops.add(operations.restartAndPush(cde, debugSupport, runOrDebug, ui, cancelToken));
 			/*
 			 * Restart and push op resets console anyway, no need to reset it again
 			 */
 		} else if (cde.getRunState() == RunState.INACTIVE) {
-			ops.add(operations.restartOnly(cde));
+			ops.add(operations.restartOnly(cde, cancelToken));
 			resetConsole = true;
 		}
 
-		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug));
+		ops.add(new RemoteDevClientStartOperation(model, appName, runOrDebug, cancelToken));
 
-		new CompositeApplicationOperation(getName(), model, appName, ops, resetConsole).run(monitor);
+		new CompositeApplicationOperation(getName(), model, appName, ops, resetConsole, cancelToken).run(monitor);
 	}
 
 }

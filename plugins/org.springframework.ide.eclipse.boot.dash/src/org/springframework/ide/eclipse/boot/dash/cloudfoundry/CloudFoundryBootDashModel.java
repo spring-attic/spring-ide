@@ -79,6 +79,7 @@ import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -510,9 +511,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	protected void delete(final CloudAppDashElement cloudElement, final UserInteractions ui) throws Exception {
-
+		cloudElement.cancelOperations();
+		CancelationToken cancelToken = cloudElement.createCancelationToken();
 		CloudApplicationOperation operation = new CloudApplicationOperation("Deleting: " + cloudElement.getName(), this,
-				cloudElement.getName()) {
+				cloudElement.getName(), cancelToken) {
 
 			@Override
 			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {

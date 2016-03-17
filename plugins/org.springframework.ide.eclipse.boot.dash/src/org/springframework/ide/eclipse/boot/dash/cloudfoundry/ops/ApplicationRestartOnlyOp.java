@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * Restarts the application in Cloud Foundry. Does not create, update or push the
@@ -31,8 +32,8 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 
 	private CloudAppDashElement app;
 
-	public ApplicationRestartOnlyOp(CloudAppDashElement cde) {
-		super("Starting application: " + cde.getName(), cde.getCloudModel(), cde.getName());
+	public ApplicationRestartOnlyOp(CloudAppDashElement cde, CancelationToken cancelationToken) {
+		super("Starting application: " + cde.getName(), cde.getCloudModel(), cde.getName(), cancelationToken);
 		this.app = cde;
 	}
 

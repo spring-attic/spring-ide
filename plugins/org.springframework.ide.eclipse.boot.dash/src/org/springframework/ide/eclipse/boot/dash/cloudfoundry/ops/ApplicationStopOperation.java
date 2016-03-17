@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 public class ApplicationStopOperation extends CloudApplicationOperation {
 
@@ -34,9 +35,10 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 	 * @param updateElementRunState
 	 *            true if element run state in model should be updated. False
 	 *            otherwise.
+	 * @param cancelationToken
 	 */
-	public ApplicationStopOperation(CloudAppDashElement app, boolean updateElementRunState) {
-		super("Stopping application", app.getCloudModel(), app.getName());
+	public ApplicationStopOperation(CloudAppDashElement app, boolean updateElementRunState, CancelationToken cancelationToken) {
+		super("Stopping application", app.getCloudModel(), app.getName(), cancelationToken);
 		this.app = app;
 		this.updateElementRunState = updateElementRunState;
 	}

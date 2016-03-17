@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * Operation for (re)starting existing CF app with associated project
@@ -50,8 +51,13 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 
 	public RestartExistingApplicationOperation(String opName, CloudAppDashElement app,
 			DebugSupport debugSupport, RunState runState, ApplicationDeploymentOperations operations,
-			UserInteractions ui) {
-		super(opName == null ? "Re-deploying and re-starting app: " + app.getName() : opName, app.getCloudModel(), app.getName());
+			UserInteractions ui, CancelationToken cancelationToken) {
+		super(
+				opName == null ? "Re-deploying and re-starting app: " + app.getName() : opName,
+				app.getCloudModel(),
+				app.getName(),
+				cancelationToken
+		);
 		this.app = app;
 		this.debugSupport = debugSupport;
 		this.isDebugging = runState == RunState.DEBUGGING;
@@ -105,14 +111,14 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 			// may result when the underlying client indirectly fetches app instance
 			// stats that may not
 			// be available (and thus throw 503)
-			deploymentOperations.add(new ApplicationStopOperation(cde, false));
-			deploymentOperations.add(new ApplicationPropertiesUpdateOperation(properties, model));
-			deploymentOperations.add(new ApplicationPushOperation(properties, model, ui));
-			deploymentOperations.add(this.operations.restartOnly(cde));
-
+			CancelationToken cancelTok = getCancelationToken();
+			deploymentOperations.add(new ApplicationStopOperation(cde, false, cancelTok));
+			deploymentOperations.add(new ApplicationPropertiesUpdateOperation(properties, model, cancelTok));
+			deploymentOperations.add(new ApplicationPushOperation(properties, model, ui, cancelTok));
+			deploymentOperations.add(this.operations.restartOnly(cde, cancelTok));
 
 			CloudApplicationOperation op = new CompositeApplicationOperation(opName, model, properties.getAppName(),
-					deploymentOperations);
+					deploymentOperations, cancelTok);
 
 			op.run(monitor);
 			app.startOperationEnded(null);
@@ -120,5 +126,6 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 			app.startOperationEnded(e);
 		}
 	}
+
 
 }

@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * A cloud operation that is performed on a Cloud application (for example,
@@ -28,9 +29,11 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected String appName;
 	private ISchedulingRule schedulingRule;
+	private final CancelationToken cancelationToken;
 
-	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
+	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName, CancelationToken cancelationToken) {
 		super(opName, model);
+		this.cancelationToken = cancelationToken;
 		this.appName = appName;
 		setSchedulingRule(new StartApplicationSchedulingRule(model.getRunTarget(), appName));
 	}
@@ -85,9 +88,16 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 	}
 
 	public void checkTerminationRequested(IProgressMonitor mon) throws OperationCanceledException {
-		if (mon!=null & mon.isCanceled()) {
+		if (
+				mon!=null && mon.isCanceled() ||
+				cancelationToken!=null && cancelationToken.isCanceled()
+		) {
 			throw new OperationCanceledException();
 		}
+	}
+
+	protected CancelationToken getCancelationToken() {
+		return cancelationToken;
 	}
 
 }

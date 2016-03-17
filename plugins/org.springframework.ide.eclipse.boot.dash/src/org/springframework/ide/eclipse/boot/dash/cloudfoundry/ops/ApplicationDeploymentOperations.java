@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 public class ApplicationDeploymentOperations {
 
@@ -37,12 +38,12 @@ public class ApplicationDeploymentOperations {
 	}
 
 	private Operation<?> startAndPush(CloudAppDashElement cde, DebugSupport debugSupport,
-			RunState runningOrDebugging, UserInteractions ui, CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
+			RunState runningOrDebugging, UserInteractions ui, CloudApplicationDeploymentProperties deploymentProperties, CancelationToken cancelationToken) throws Exception {
 		String opName = "Starting application '" + cde.getName() + "' in "
 				+ (runningOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
 
 		RestartExistingApplicationOperation restartExistingOp = new RestartExistingApplicationOperation(opName, cde,
-				debugSupport, runningOrDebugging, this, ui);
+				debugSupport, runningOrDebugging, this, ui, cancelationToken);
 		if (deploymentProperties!=null) {
 			restartExistingOp.setDeploymentProperties(deploymentProperties);
 		}
@@ -50,11 +51,13 @@ public class ApplicationDeploymentOperations {
 		if (runningOrDebugging == RunState.DEBUGGING) {
 
 			if (debugSupport != null && debugSupport.isSupported(cde)) {
-				Operation<?> debugOp = debugSupport.createOperation(cde, opName, ui);
+				Operation<?> debugOp = debugSupport.createOperation(cde, opName, ui, cancelationToken);
 
 				CloudFoundryBootDashModel cloudModel = cde.getCloudModel();
 				return new CompositeApplicationOperation(opName, cloudModel, cde.getName(),
-						Arrays.asList(new Operation<?>[] { restartExistingOp, debugOp }));
+						Arrays.asList(new Operation<?>[] { restartExistingOp, debugOp }),
+						cancelationToken
+				);
 			} else {
 				String title = "Debugging is not supported for '" + cde.getName() + "'";
 				String msg = debugSupport.getNotSupportedMessage(cde);
@@ -70,12 +73,12 @@ public class ApplicationDeploymentOperations {
 	}
 
 	public Operation<?> firstStartAndPush(CloudAppDashElement cde, CloudApplicationDeploymentProperties deploymentProperties,
-			DebugSupport debugSupport, RunState runningOrDebugging, UserInteractions ui) throws Exception {
-		return startAndPush(cde, debugSupport, runningOrDebugging, ui, deploymentProperties);
+			DebugSupport debugSupport, RunState runningOrDebugging, UserInteractions ui, CancelationToken cancelationToken) throws Exception {
+		return startAndPush(cde, debugSupport, runningOrDebugging, ui, deploymentProperties, cancelationToken);
 	}
 
-	public CloudApplicationOperation restartOnly(CloudAppDashElement app) {
-		return new ApplicationRestartOnlyOp(app);
+	public CloudApplicationOperation restartOnly(CloudAppDashElement app, CancelationToken cancelationToken) {
+		return new ApplicationRestartOnlyOp(app, cancelationToken);
 	}
 
 	public CloudApplicationOperation createAddElement(IProject project,
@@ -95,8 +98,8 @@ public class ApplicationDeploymentOperations {
 				ui);
 	}
 
-	public Operation<?> restartAndPush(CloudAppDashElement cde, DebugSupport debugSupport, RunState runOrDebug, UserInteractions ui) throws Exception {
-		return startAndPush(cde, debugSupport, runOrDebug, ui, null);
+	public Operation<?> restartAndPush(CloudAppDashElement cde, DebugSupport debugSupport, RunState runOrDebug, UserInteractions ui, CancelationToken cancelationToken) throws Exception {
+		return startAndPush(cde, debugSupport, runOrDebug, ui, null, cancelationToken);
 	}
 
 

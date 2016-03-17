@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -58,8 +60,10 @@ public class AddElementOperation extends CloudApplicationOperation {
 	 *            exists
 	 */
 	public AddElementOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState, ApplicationDeploymentOperations operations, DebugSupport debugSupport, RunState runningOrDebugging, UserInteractions ui) {
-		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
+			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState,
+			ApplicationDeploymentOperations operations, DebugSupport debugSupport, RunState runningOrDebugging,
+			UserInteractions ui) {
+		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName(), CancelationTokens.NULL);
 		this.deploymentProperties = deploymentProperties;
 		this.existingApplication = existingApplication;
 		this.operations = operations;
@@ -99,7 +103,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		}
 
 		// once CDE is available, restart
-		this.operations.firstStartAndPush(cde, deploymentProperties, debugSupport, runningOrDebugging, ui).run(monitor);
+		this.operations.firstStartAndPush(cde, deploymentProperties, debugSupport, runningOrDebugging, ui, cde.createCancelationToken()).run(monitor);
 	}
 
 	private static BootDashElement findLocalBdeForProject(IProject project) {

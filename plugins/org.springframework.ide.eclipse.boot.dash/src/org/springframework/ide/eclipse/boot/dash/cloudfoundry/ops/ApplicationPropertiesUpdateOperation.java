@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.base.Objects;
@@ -39,9 +40,9 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 
 	public ApplicationPropertiesUpdateOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model) {
+			CloudFoundryBootDashModel model, CancelationToken cancelationToken) {
 		super("Updating application deployment properties - " + deploymentProperties.getAppName(), model,
-				deploymentProperties.getAppName());
+				deploymentProperties.getAppName(), cancelationToken);
 		this.deploymentProperties = deploymentProperties;
 	}
 

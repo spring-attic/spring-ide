@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,19 @@ public class CancelationTokens {
 	//Note: we don't actually have to keep a set of tokens explicitly.
 	// The tokens use a 'id' which is incremented on each new token.
 	//So it is easy to cancel all existing tokens based on a their
-	//id simply by remembering the 'watermark id' where the cancelation
+	//id simply by remembering the 'id' where the cancelation
 	//occurred. All ids 'older' than the current id are 'canceled'.
+
+	/**
+	 * An uncancelable token that can be used by operations that don't
+	 * need cancelation support.
+	 */
+	public static final CancelationToken NULL = new CancelationToken() {
+		@Override
+		public boolean isCanceled() {
+			return false;
+		}
+	};
 
 	private final Object SYNC = CancelationTokens.this;
 
@@ -42,7 +53,7 @@ public class CancelationTokens {
 
 		private ManagedToken() {
 			synchronized (SYNC) {
-				this.id = ++nextId;
+				this.id = nextId++;
 			}
 		}
 
@@ -52,9 +63,13 @@ public class CancelationTokens {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "CancelToken("+id+")";
+		}
 	}
 
 	public synchronized void cancelAll() {
-		canceledAllBefore = nextId-1;
+		canceledAllBefore = nextId;
 	}
 }
