@@ -231,12 +231,10 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				assertNull(model.getApplication(preexistingAppName).getProject());
 
 				// check the actual CloudApplication
-				CFApplication actualNewApp = model.getApplication(newAppName).getCloudModel().getAppCache()
-						.getApp(newAppName);
+				CFApplication actualNewApp = model.getApplication(newAppName).getSummaryData();
 				assertEquals("No CloudApplication mapping found", actualNewApp.getName(), newAppName);
 
-				CFApplication actualPreexistingApp = model.getApplication(preexistingAppName).getCloudModel()
-						.getAppCache().getApp(preexistingAppName);
+				CFApplication actualPreexistingApp = model.getApplication(preexistingAppName).getSummaryData();
 				assertEquals("No CloudApplication mapping found", actualPreexistingApp.getName(), preexistingAppName);
 
 				return true;

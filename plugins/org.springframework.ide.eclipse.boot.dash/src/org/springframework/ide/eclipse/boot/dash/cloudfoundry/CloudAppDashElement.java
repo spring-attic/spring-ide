@@ -117,6 +117,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 		addElementNotifier(baseRunState);
+		addElementNotifier(instanceData);
 		this.addDisposableChild(baseRunState);
 	}
 
@@ -268,7 +269,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public String getLiveHost() {
-		CFApplication app = getCloudModel().getAppCache().getApp(getName());
+		CFApplication app = getSummaryData();
 		if (app != null) {
 			List<String> uris = app.getUris();
 			if (uris != null) {
@@ -280,6 +281,14 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return null;
 	}
 
+	public CFApplication getSummaryData() {
+		CloudAppInstances data = instanceData.getValue();
+		if (data!=null) {
+			return data.getApplication();
+		}
+		return null;
+	}
+
 	@Override
 	public ILaunchConfiguration getActiveConfig() {
 		return null;
@@ -287,14 +296,14 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public int getActualInstances() {
-		return getCloudModel().getAppCache().getApp(getName()) != null
-				? getCloudModel().getAppCache().getApp(getName()).getRunningInstances() : 0;
+		CFApplication data = getSummaryData();
+		return data != null ? data.getRunningInstances() : 0;
 	}
 
 	@Override
 	public int getDesiredInstances() {
-		return getCloudModel().getAppCache().getApp(getName()) != null
-				? getCloudModel().getAppCache().getApp(getName()).getInstances() : 0;
+		CFApplication data = getSummaryData();
+		return data != null ? data.getInstances() : 0;
 	}
 
 	public String getHealthCheck() {
@@ -315,7 +324,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public UUID getAppGuid() {
-		CFApplication app = getCloudModel().getAppCache().getApp(getName());
+		CFApplication app = getSummaryData();
 		if (app!=null) {
 			return app.getGuid();
 		}
@@ -429,6 +438,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	public void setInstanceData(CloudAppInstances data) {
 		this.instanceData.setValue(data);
+	}
+
+	public CloudAppInstances getInstanceData() {
+		return this.instanceData.getValue();
 	}
 
 	public void setError(Throwable t) {

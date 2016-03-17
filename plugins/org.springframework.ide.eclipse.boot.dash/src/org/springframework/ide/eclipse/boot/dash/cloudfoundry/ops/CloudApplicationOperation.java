@@ -42,10 +42,6 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 		return model.getApplication(appName);
 	}
 
-	protected CloudAppInstances getCachedApplicationInstances() {
-		return model.getAppCache().getAppInstances(appName);
-	}
-
 	public ISchedulingRule getSchedulingRule() {
 		return this.schedulingRule;
 	}

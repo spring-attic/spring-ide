@@ -63,7 +63,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshApplications;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSomeApplications;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
@@ -387,8 +387,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			addedElement.setInstanceData(appInstances);
 			// Update the cache BEFORE updating the model, since the model
 			// elements are handles to the cache
-			changed = getAppCache().updateCache(appInstances)
-				    | addedElement.setProject(project);
+			changed = addedElement.setProject(project);
 
 			//Should be okay to call inside synch block as the events are fired from a
 			// a Job now.
@@ -435,28 +434,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			 */
 			applications.setAppNames(ImmutableSet.<String>of());
 		} else {
-			List<String> toNotify = null;
 			synchronized (this) {
-
-				// Update external cache that keeps track of additional element
-				// state (e.g the running state,
-				// app instances, and project mapping)
-				toNotify = getAppCache().updateAll(apps);
-
 				applications.setAppNames(getNames(apps));
-
-				// This only fires a model CHANGE event (adding/removing elements). It
-				// does not fire an event for app state changes that are tracked
-				// externally
-				// (runstate, instances, project) in the cache. The latter is handled
-				// separately
-				// below.
-			}
-
-			// Fire app state change based on changes to the app cache
-			if (toNotify != null) {
-				for (String appName : toNotify) {
-					notifyElementChanged(applications.getApplication(appName));
+				for (CloudAppInstances instanceData : apps) {
+					CloudAppDashElement app = applications.getApplication(instanceData.getApplication().getName());
+					app.setInstanceData(instanceData);
 				}
 			}
 		}
@@ -523,11 +505,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				model.getRunTarget().getClient().deleteApplication(appName);
 
 				synchronized (CloudFoundryBootDashModel.this) {
-					// Be sure it is removed from the cache as well as
-					// elements
-					// are handles to the cache
-					getAppCache().remove(cloudElement.getName());
-
 					getElementConsoleManager().terminateConsole(cloudElement.getName());
 
 					// Add any existing ones that weren't replaced by the new
@@ -579,9 +556,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		 * Refresh the cloud application first to get the latest deployment properties changes
 		 */
 		IProject project = cde.getProject();
-		CFApplication app = getAppCache().getApp(cde.getName());
+		CFApplication app = cde.getSummaryData();
 
-		new RefreshApplications(this, Collections.singletonList(app)).run(monitor);
+		new RefreshSomeApplications(this, Collections.singletonList(app)).run(monitor);
 		/*
 		 * Now construct deployment properties object
 		 */

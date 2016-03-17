@@ -10,20 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Operation for refreshing existing cloud applications.
@@ -31,35 +28,31 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
  * @author Alex Boyko
  *
  */
-public class RefreshApplications extends CloudOperation {
+public class RefreshSomeApplications extends CloudOperation {
 
 	private Collection<CFApplication> apps;
 
-	public RefreshApplications(CloudFoundryBootDashModel model, Collection<CFApplication> apps) {
+	public RefreshSomeApplications(CloudFoundryBootDashModel model, Collection<CFApplication> appsToRefresh) {
 		super("Refreshing applications", model);
-		this.apps = apps;
+		this.apps = appsToRefresh;
 	}
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		if (apps != null && !apps.isEmpty()) {
-			List<CloudAppInstances> updatedApplications = new ArrayList<>();
-			List<CFApplication> toUpdateStats = new ArrayList<>();
-
-			for (CloudAppInstances instances : model.getAppCache().getAppInstances()) {
-				if (apps.contains(instances.getApplication())) {
-					CFApplication newApplication = model.getRunTarget().getClient()
-							.getApplication(instances.getApplication().getName());
-					updatedApplications.add(new CloudAppInstances(newApplication, instances.getStats()));
-					toUpdateStats.add(newApplication);
-				} else {
-					updatedApplications.add(instances);
+			this.model.setRefreshState(RefreshState.loading("Fetching App Instances..."));
+			try {
+				ClientRequests client = model.getRunTarget().getClient();
+				for (CloudAppDashElement app : model.getApplicationValues()) {
+					String appName = app.getName();
+					CloudAppInstances newDetails = client.getExistingAppInstances(appName);
+					app.setInstanceData(newDetails);
 				}
+				model.setRefreshState(RefreshState.READY);
+			} catch (Throwable e) {
+				model.setRefreshState(RefreshState.error(e));
+				throw ExceptionUtil.exception(e);
 			}
-
-			model.updateElements(updatedApplications);
-
-			new AppInstancesRefreshOperation(model, toUpdateStats).run(monitor);
 		}
 	}
 

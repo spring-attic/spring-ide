@@ -70,7 +70,7 @@ public class CloudDashApplications extends AbstractDisposable {
 		return applications.getValues();
 	}
 
-	public BootDashElement getApplication(String appName) {
+	public CloudAppDashElement getApplication(String appName) {
 		return factory.createOrGet(appName);
 	}
 

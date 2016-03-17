@@ -59,8 +59,7 @@ public class ApplicationStartWithRemoteClientOperation extends CloudApplicationO
 		CancelationToken cancelToken = getCancelationToken();
 		List<Operation<?>> ops = new ArrayList<Operation<?>>();
 
-		CloudAppInstances instances = getCachedApplicationInstances();
-		Map<String, String> envVars = instances.getApplication().getEnvAsMap();
+		Map<String, String> envVars = app.getSummaryData().getEnvAsMap();
 
 		CloudAppDashElement cde = model.getApplication(appName);
 		if (cde == null || cde.getProject() == null) {
