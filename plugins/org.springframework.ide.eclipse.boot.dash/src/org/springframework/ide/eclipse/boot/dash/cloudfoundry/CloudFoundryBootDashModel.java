@@ -82,12 +82,10 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;

@@ -18,6 +18,7 @@ import java.util.UUID;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -99,8 +100,13 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		setError(null);
 	}
 
-	public void startOperationEnded(Throwable error) throws Exception {
+	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
 		int level = startOperationInProgress.decrement();
+		if (cancelationToken.isCanceled() || monitor.isCanceled()) {
+			//Avoid setting error results for canceled operation. If an op is canceled
+			// its errors should simply be ignored.
+			throw new OperationCanceledException();
+		}
 		if (level==0 && !(error instanceof OperationCanceledException)) {
 			setError(error);
 		}

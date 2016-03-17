@@ -121,9 +121,9 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 					deploymentOperations, cancelTok);
 
 			op.run(monitor);
-			app.startOperationEnded(null);
+			app.startOperationEnded(null, getCancelationToken(), monitor);
 		} catch (Throwable e) {
-			app.startOperationEnded(e);
+			app.startOperationEnded(e, getCancelationToken(), monitor);
 		}
 	}
 

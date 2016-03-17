@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ApplicationDeploymentOperations {
 
@@ -65,7 +66,7 @@ public class ApplicationDeploymentOperations {
 					msg = title;
 				}
 				ui.errorPopup(title, msg);
-				throw org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil.coreException(msg);
+				throw ExceptionUtil.coreException(msg);
 			}
 		} else {
 			return restartExistingOp;

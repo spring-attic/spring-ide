@@ -17,7 +17,6 @@ import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 
 import com.google.common.base.Function;

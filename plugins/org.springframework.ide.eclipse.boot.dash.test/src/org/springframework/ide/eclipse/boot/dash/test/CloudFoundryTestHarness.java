@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.mockito.invocation.InvocationOnMock;

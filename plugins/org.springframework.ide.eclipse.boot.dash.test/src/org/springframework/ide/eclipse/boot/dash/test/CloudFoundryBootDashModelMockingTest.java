@@ -760,6 +760,62 @@ public class CloudFoundryBootDashModelMockingTest {
 		//   can we check that they didn't pop errors?
 	}
 
+	@Test public void stopCancelsStart() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		final String appName = "foo";
+		space.defApp(appName);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setProject(project);
+
+		waitForApps(model, appName);
+
+		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
+
+		app.getBaseRunStateExp().addListener(new ValueListener<RunState>() {
+			@Override
+			public void gotValue(LiveExpression<RunState> exp, RunState value) {
+				System.out.println("Runstate -> "+value);
+			}
+		});
+		System.out.println("Restaring app...");
+		app.restart(RunState.RUNNING, ui);
+		waitForState(app, RunState.STARTING, 30000);
+
+		System.out.println("Stopping app...");
+		app.stopAsync(ui);
+
+		waitForState(app, RunState.INACTIVE, 20000);
+		System.out.println("Stopped!");
+	}
+
+	@Test public void stopCancelsRestartOnly() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createProject("to-deploy");
+		final String appName = "foo";
+		space.defApp(appName);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setProject(project);
+
+		waitForApps(model, appName);
+
+		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
+		app.restartOnly(RunState.RUNNING, ui);
+		waitForState(app, RunState.STARTING, 3000);
+
+		app.stopAsync(ui);
+
+		waitForState(app, RunState.INACTIVE, 20000);
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
