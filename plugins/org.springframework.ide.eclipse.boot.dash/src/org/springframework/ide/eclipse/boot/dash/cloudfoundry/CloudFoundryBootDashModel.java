@@ -422,6 +422,16 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 	}
 
+	/**
+	 * Perform a 'shallow' update of the application elements in this model. This only
+	 * ensures that elements with the right names exist, creating needed ones and
+	 * disposing removed ones, but reusing existing ones. The state of the existing elements
+	 * is not updated in any way.
+	 */
+	public void updateAppNames(Collection<String> names) {
+		applications.setAppNames(names);
+	}
+
 	public void updateElements(Collection<CloudAppInstances> apps) throws Exception {
 		if (apps == null) {
 			/*

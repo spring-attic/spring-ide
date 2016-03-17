@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * This performs a "two-tier" refresh as fetching list of
@@ -65,18 +71,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// two refresh operations
 
 				List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
-
-				List<CloudAppInstances> updatedApplications = new ArrayList<>();
-				if (apps != null) {
-
-					for (CFApplication app : apps) {
-						// No stats available at this stage. Just set stats to null
-						// for now.
-						updatedApplications.add(new CloudAppInstances(app, null));
-					}
-				}
-
-				this.model.updateElements(updatedApplications);
+				this.model.updateAppNames(getNames(apps));
 
 				// 2. Launch the slower app stats/instances refresh operation.
 				this.model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(this.model, apps));
@@ -93,6 +88,14 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 		} else {
 			model.updateElements(null);
 		}
+	}
+
+	private Collection<String> getNames(List<CFApplication> apps) {
+		Builder<String> builder = ImmutableList.builder();
+		for (CFApplication app : apps) {
+			builder.add(app.getName());
+		}
+		return builder.build();
 	}
 
 	public ISchedulingRule getSchedulingRule() {
