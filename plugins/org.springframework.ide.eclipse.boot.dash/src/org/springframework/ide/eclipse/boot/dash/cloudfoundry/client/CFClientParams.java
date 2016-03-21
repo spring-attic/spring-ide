@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import java.net.URI;
+
 import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 
 /**
@@ -92,6 +95,16 @@ public class CFClientParams {
 
 	public void setSpaceName(String spaceName) {
 		this.spaceName = spaceName;
+	}
+
+	public String getHost() {
+		try {
+			URI uri = new URI(getApiUrl());
+			return uri.getHost();
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+		return null;
 	}
 
 }

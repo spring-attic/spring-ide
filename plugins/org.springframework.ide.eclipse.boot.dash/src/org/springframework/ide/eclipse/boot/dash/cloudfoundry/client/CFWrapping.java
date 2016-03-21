@@ -17,7 +17,6 @@ import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.cloudfoundry.client.lib.domain.CloudOrganization;
 import org.cloudfoundry.client.lib.domain.CloudService;
@@ -229,8 +228,8 @@ public class CFWrapping {
 		}
 
 		@Override
-		public AppState getState() {
-			return a.getState();
+		public CFAppState getState() {
+			return CFAppState.valueOf(a.getState().toString());
 		}
 
 		@Override

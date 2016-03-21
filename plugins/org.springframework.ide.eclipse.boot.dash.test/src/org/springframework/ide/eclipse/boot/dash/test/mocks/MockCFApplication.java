@@ -23,6 +23,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
@@ -45,14 +46,14 @@ public class MockCFApplication {
 	private String detectedBuildpack = null;
 	private String buildpackUrl = null;
 	private List<String> uris = new ArrayList<>();
-	private AppState state = AppState.STOPPED;
+	private CFAppState state = CFAppState.STOPPED;
 	private int diskQuota = 1024;
 	private Integer timeout = null;
 	private String command = null;
 	private String stack = null;
 	private MockCloudFoundryClientFactory owner;
 
-	public MockCFApplication(MockCloudFoundryClientFactory owner, String name, UUID guid, int instances, AppState state) {
+	public MockCFApplication(MockCloudFoundryClientFactory owner, String name, UUID guid, int instances, CFAppState state) {
 		this.owner = owner;
 		this.name = name;
 		this.guid = guid;
@@ -70,7 +71,7 @@ public class MockCFApplication {
 				name,
 				UUID.randomUUID(),
 				1,
-				AppState.STOPPED
+				CFAppState.STOPPED
 		);
 	}
 
@@ -83,9 +84,9 @@ public class MockCFApplication {
 	}
 
 	public void start() throws Exception {
-		Assert.isLegal(AppState.STOPPED==state);
+		Assert.isLegal(CFAppState.STOPPED==state);
 		Assert.isLegal(stats.isEmpty());
-		this.state = AppState.UPDATING;
+		this.state = CFAppState.UNKNOWN;
 		final long endTime = System.currentTimeMillis()+getStartDelay();
 		final CancelationToken cancelToken = cancelationTokens.create();
 		new ACondition("simulated app starting (waiting)", getStartDelay()+1000) {
@@ -110,7 +111,7 @@ public class MockCFApplication {
 			throw new IOException("Operation Canceled");
 		}
 		this.stats = builder.build();
-		this.state = AppState.STARTED;
+		this.state = CFAppState.STARTED;
 		System.out.println("Starting "+getName()+" SUCCESS");
 	}
 
@@ -190,7 +191,7 @@ public class MockCFApplication {
 	public void stop() {
 		cancelationTokens.cancelAll();
 		this.stats = ImmutableList.of();
-		this.state = AppState.STOPPED;
+		this.state = CFAppState.STOPPED;
 	}
 
 	public void setEnv(Map<String, String> newEnv) {

@@ -13,12 +13,12 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
@@ -167,7 +167,7 @@ public class ApplicationRunningStateTracker {
 			CFApplication app = instances.getApplication();
 			// if app desired state is "Stopped", return inactive
 			if ((stats == null || stats.getRecords() == null || stats.getRecords().isEmpty())
-					&& app.getState() == CloudApplication.AppState.STOPPED) {
+					&& app.getState() == CFAppState.STOPPED) {
 				runState = RunState.INACTIVE;
 			} else {
 				runState = getRunState(stats);

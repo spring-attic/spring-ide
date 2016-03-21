@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrap;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapApps;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.CloudCredentials;
@@ -37,7 +38,20 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.ApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.AllApplicationInstancesRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ApplicationInstanceRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ApplicationRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.BasicRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
@@ -184,12 +198,12 @@ public class DefaultClientRequests implements ClientRequests {
 	}
 
 	@Override
-	public void uploadApplication(final String appName, final ApplicationArchive archive) throws Exception {
+	public void uploadApplication(final String appName, final ZipFile archive) throws Exception {
 
 		new BasicRequest(this.client, appName, "Uploading application archive") {
 			@Override
 			protected void runRequest(CloudFoundryOperations client) throws Exception {
-				client.uploadApplication(appName, archive);
+				client.uploadApplication(appName, new CloudZipApplicationArchive(archive));
 			}
 		}.call();
 	}

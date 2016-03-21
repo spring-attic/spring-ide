@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 
 public class CFApplicationData implements CFApplication {
@@ -23,7 +24,7 @@ public class CFApplicationData implements CFApplication {
 	private final UUID guid;
 	private final int instances;
 	private final int runningInstances;
-	private final AppState state;
+	private final CFAppState state;
 	private final int memory;
 	private final int diskQuota;
 	private final String detectedBuildpack;
@@ -40,7 +41,7 @@ public class CFApplicationData implements CFApplication {
 		return name;
 	}
 
-	public CFApplicationData(String name, UUID guid, int instances, int runningInstances, AppState state, int memory,
+	public CFApplicationData(String name, UUID guid, int instances, int runningInstances, CFAppState state, int memory,
 			int diskQuota, String detectedBuildpack, String buildpackUrl, Map<String, String> env,
 			List<String> services, List<String> uris, Integer timeout, String command, String stack) {
 		super();
@@ -107,7 +108,7 @@ public class CFApplicationData implements CFApplication {
 	}
 
 	@Override
-	public AppState getState() {
+	public CFAppState getState() {
 		return state;
 	}
 

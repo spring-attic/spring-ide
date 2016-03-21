@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
@@ -66,7 +66,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 		}
 
 		// Upload the application
-		CloudZipApplicationArchive archive = null;
+		ZipFile archive = null;
 		String appName = deploymentProperties.getAppName();
 
 		try {
@@ -76,7 +76,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 				ICloudApplicationArchiver archiver = getArchiver(monitor);
 				if (archiver != null) {
 					logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
-					archive = new CloudZipApplicationArchive(new ZipFile(archiver.getApplicationArchive(monitor)));
+					archive = new ZipFile(archiver.getApplicationArchive(monitor));
 					monitor.worked(2);
 				}
 			}

@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
 import java.net.URL;
 import java.util.Properties;
@@ -17,6 +17,9 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 
 public class DefaultCloudFoundryClientFactory extends CloudFoundryClientFactory {
 

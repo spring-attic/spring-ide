@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
@@ -59,7 +60,7 @@ public interface ClientRequests {
 	void updateApplicationUris(String appName, List<String> urls) throws Exception;
 	Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 			long timeToWait) throws Exception;
-	void uploadApplication(String appName, ApplicationArchive archive) throws Exception;
+	void uploadApplication(String appName, ZipFile archive) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;

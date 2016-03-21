@@ -26,7 +26,7 @@ public interface CFApplication extends CFEntity {
 	String getDetectedBuildpack();
 	String getBuildpackUrl();
 	List<String> getUris();
-	AppState getState();
+	CFAppState getState();
 	int getDiskQuota();
 	Integer getTimeout();
 	String getCommand();
