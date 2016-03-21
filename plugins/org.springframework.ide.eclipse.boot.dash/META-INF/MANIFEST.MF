@@ -42,14 +42,9 @@ Require-Bundle: org.eclipse.ui,
  org.yaml.snakeyaml,
  org.eclipse.compare,
  org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
- org.cloudfoundry.client-spring;bundle-version="2.0.0",
- org.cloudfoundry.operations;bundle-version="2.0.0",
- io.projectreactor.reactor-core;bundle-version="2.5.0",
- org.cloudfoundry.client;bundle-version="2.0.0",
- org.reactivestreams.reactive-streams,
+ org.springsource.ide.eclipse.commons.cloudfoundry.client;bundle-version="3.8.0",
  com.fasterxml.jackson.core.jackson-databind,
- com.fasterxml.jackson.core.jackson-core,
- org.springsource.ide.eclipse.commons.cloudfoundry.client;bundle-version="3.8.0"
+ com.fasterxml.jackson.core.jackson-core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

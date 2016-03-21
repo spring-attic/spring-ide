@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,17 @@ import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudStack;
+import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
 
 import com.google.common.collect.ImmutableList;
@@ -361,15 +371,24 @@ public class CFWrapping {
 		return null;
 	}
 
-	public static Map<CFApplication, ApplicationStats> wrap(Map<CloudApplication, ApplicationStats> stats) {
+	public static Map<CFApplication, CFApplicationStats> wrap(Map<CloudApplication, ApplicationStats> stats) {
 		if (stats!=null) {
-			ImmutableMap.Builder<CFApplication, ApplicationStats> builder = ImmutableMap.builder();
+			ImmutableMap.Builder<CFApplication, CFApplicationStats> builder = ImmutableMap.builder();
 			for (Entry<CloudApplication, ApplicationStats> e : stats.entrySet()) {
-				builder.put(wrap(e.getKey()), e.getValue());
+				builder.put(wrap(e.getKey()), wrap(e.getValue()));
 			}
 			return builder.build();
 		}
 		return null;
+	}
+
+	public static CFApplicationStats wrap(ApplicationStats stats) {
+		return new CFApplicationStats() {
+			@Override
+			public List<InstanceStats> getRecords() {
+				return stats.getRecords();
+			}
+		};
 	}
 
 }

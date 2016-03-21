@@ -26,6 +26,7 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -135,9 +136,9 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
+		public Map<CFApplication, CFApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 				long timeToWait) throws Exception {
-			Builder<CFApplication, ApplicationStats> builder = ImmutableMap.builder();
+			Builder<CFApplication, CFApplicationStats> builder = ImmutableMap.builder();
 			for (CFApplication app : appsToLookUp) {
 				builder.put(app, getSpace().getApplication(app.getGuid()).getStats());
 			}

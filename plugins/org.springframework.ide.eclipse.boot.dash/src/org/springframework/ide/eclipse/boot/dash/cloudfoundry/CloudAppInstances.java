@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 
 /**
  * A Cloud application with additional stats and instances information
@@ -22,9 +22,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 public class CloudAppInstances {
 
 	private final CFApplication app;
-	private final ApplicationStats stats;
+	private final CFApplicationStats stats;
 
-	public CloudAppInstances(CFApplication app, ApplicationStats stats) {
+	public CloudAppInstances(CFApplication app, CFApplicationStats stats) {
 		Assert.isNotNull(app);
 		this.app = app;
 		this.stats = stats;
@@ -34,7 +34,7 @@ public class CloudAppInstances {
 		return app;
 	}
 
-	public ApplicationStats getStats() {
+	public CFApplicationStats getStats() {
 		return stats;
 	}
 }

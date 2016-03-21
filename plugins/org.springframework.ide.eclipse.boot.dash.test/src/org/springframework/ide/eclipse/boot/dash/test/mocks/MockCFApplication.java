@@ -25,6 +25,7 @@ import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
@@ -79,8 +80,8 @@ public class MockCFApplication {
 		return name;
 	}
 
-	public ApplicationStats getStats() {
-		return new ApplicationStats(ImmutableList.copyOf(stats));
+	public CFApplicationStats getStats() {
+		return new MockCFApplicationStats(ImmutableList.copyOf(stats));
 	}
 
 	public void start() throws Exception {

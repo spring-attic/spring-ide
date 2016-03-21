@@ -17,8 +17,6 @@ import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.archive.ApplicationArchive;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
@@ -58,7 +56,7 @@ public interface ClientRequests {
 	void updateApplicationServices(String appName, List<String> services) throws Exception;
 	void updateApplicationStaging(String appName, Staging staging) throws Exception;
 	void updateApplicationUris(String appName, List<String> urls) throws Exception;
-	Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
+	Map<CFApplication, CFApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 			long timeToWait) throws Exception;
 	void uploadApplication(String appName, ZipFile archive) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;

@@ -8,19 +8,21 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
+
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.unwrapApps;
 
 import java.util.List;
 import java.util.Map;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.RequestErrorHandler;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.*;
-
-public class AllApplicationInstancesRequest extends ClientRequest<Map<CFApplication, ApplicationStats>> {
+public class AllApplicationInstancesRequest extends ClientRequest<Map<CFApplication, CFApplicationStats>> {
 
 	private final List<CFApplication> appsToLookUp;
 
@@ -29,7 +31,7 @@ public class AllApplicationInstancesRequest extends ClientRequest<Map<CFApplicat
 		this.appsToLookUp = appsToLookUp;
 	}
 
-	protected Map<CFApplication, ApplicationStats> doRun(CloudFoundryOperations client) throws Exception {
+	protected Map<CFApplication, CFApplicationStats> doRun(CloudFoundryOperations client) throws Exception {
 		return CFWrapping.wrap(client.getApplicationStats(unwrapApps(this.appsToLookUp)));
 	}
 

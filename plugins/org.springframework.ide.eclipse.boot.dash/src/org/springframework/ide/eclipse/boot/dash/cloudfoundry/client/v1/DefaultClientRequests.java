@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrap;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapApps;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapBuildpacks;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping.wrapDomains;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrap;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapApps;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapBuildpacks;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapDomains;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,6 @@ import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.archive.ApplicationArchive;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudService;
@@ -38,18 +36,16 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.AllApplicationInstancesRequest;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ApplicationInstanceRequest;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ApplicationRequest;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.BasicRequest;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFWrapping;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequest;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -177,13 +173,13 @@ public class DefaultClientRequests implements ClientRequests {
 		}.call();
 	}
 
-	public ApplicationStats getApplicationStats(final String appName) throws Exception {
-		return new ApplicationInstanceRequest(this.client, appName).call();
+	public CFApplicationStats getApplicationStats(final String appName) throws Exception {
+		return CFWrapping.wrap(new ApplicationInstanceRequest(this.client, appName).call());
 	}
 
-	public Map<CFApplication, ApplicationStats> waitForApplicationStats(final List<CFApplication> appsToLookUp,
+	public Map<CFApplication, CFApplicationStats> waitForApplicationStats(final List<CFApplication> appsToLookUp,
 			final long timeout) throws Exception {
-		Callable<Map<CFApplication, ApplicationStats>> task = new AllApplicationInstancesRequest(this.client,
+		Callable<Map<CFApplication, CFApplicationStats>> task = new AllApplicationInstancesRequest(this.client,
 				appsToLookUp);
 		return RetryUtil.retry(2000, timeout, task);
 	}
@@ -355,7 +351,7 @@ public class DefaultClientRequests implements ClientRequests {
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
 				CFApplication app = getApplication(guid);
 				if (app != null) {
-					ApplicationStats stats = getApplicationStats(app.getName());
+					CFApplicationStats stats = getApplicationStats(app.getName());
 					return new CloudAppInstances(app, stats);
 				}
 				return null;
@@ -369,7 +365,7 @@ public class DefaultClientRequests implements ClientRequests {
 			protected CloudAppInstances doRun(CloudFoundryOperations client) throws Exception {
 				CFApplication app = getApplication(appName);
 				if (app != null) {
-					ApplicationStats stats = getApplicationStats(appName);
+					CFApplicationStats stats = getApplicationStats(appName);
 					return new CloudAppInstances(app, stats);
 				}
 				return null;

@@ -8,11 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequest;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.RequestErrorHandler;
 
 public class ApplicationInstanceRequest extends ClientRequest<ApplicationStats> {
 

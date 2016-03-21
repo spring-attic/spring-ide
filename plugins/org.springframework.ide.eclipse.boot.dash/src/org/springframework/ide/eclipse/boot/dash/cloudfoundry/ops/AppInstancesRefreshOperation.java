@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 
 /**
@@ -44,8 +44,8 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		try {
 			if (!appsToLookUp.isEmpty()) {
 				long timeToWait = 1000*30;
-				Map<CFApplication, ApplicationStats> stats = model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait);
-				for (Entry<CFApplication, ApplicationStats> entry : stats.entrySet()) {
+				Map<CFApplication, CFApplicationStats> stats = model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait);
+				for (Entry<CFApplication, CFApplicationStats> entry : stats.entrySet()) {
 					CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
 					this.model.updateApplication(instances);
 				}
