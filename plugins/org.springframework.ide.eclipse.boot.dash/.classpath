@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry excluding="org/springframework/ide/eclipse/boot/dash/cloudfoundry/client/v2/" kind="src" path="src"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-boot-loader-tools-1.2.3.RELEASE.jar" sourcepath="lib/spring-boot-loader-tools-1.2.3.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-core-4.1.6.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/springframework/spring-core/4.1.6.RELEASE/spring-core-4.1.6.RELEASE-sources.jar"/>

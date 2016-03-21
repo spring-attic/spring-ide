@@ -23,13 +23,17 @@ import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudStack;
+import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -385,10 +389,40 @@ public class CFWrapping {
 	public static CFApplicationStats wrap(ApplicationStats stats) {
 		return new CFApplicationStats() {
 			@Override
-			public List<InstanceStats> getRecords() {
-				return stats.getRecords();
+			public List<CFInstanceStats> getRecords() {
+				return wrapInstanceStats(stats.getRecords());
+			}
+
+		};
+	}
+
+	public static List<CFInstanceStats> wrapInstanceStats(List<InstanceStats> records) {
+		if (records!=null) {
+			Builder<CFInstanceStats> builder = ImmutableList.builder();
+			for (InstanceStats r : records) {
+				builder.add(wrap(r));
+			}
+			return builder.build();
+		}
+		return null;
+	}
+
+	public static CFInstanceStats wrap(InstanceStats r) {
+		return new CFInstanceStats() {
+			@Override
+			public CFInstanceState getState() {
+				return wrap(r.getState());
 			}
 		};
+	}
+
+	public static CFInstanceState wrap(InstanceState state) {
+		try {
+			return CFInstanceState.valueOf(state.toString());
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return CFInstanceState.UNKNOWN;
+		}
 	}
 
 }

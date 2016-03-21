@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.InstanceStats;
-
 public interface CFApplicationStats {
-	List<InstanceStats> getRecords();
+	List<CFInstanceStats> getRecords();
 }

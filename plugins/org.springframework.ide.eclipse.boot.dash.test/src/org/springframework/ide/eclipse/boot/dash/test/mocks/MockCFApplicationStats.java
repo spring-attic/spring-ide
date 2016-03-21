@@ -14,18 +14,20 @@ import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping;
 
 public class MockCFApplicationStats implements CFApplicationStats {
 
-	private List<InstanceStats> records;
+	private List<CFInstanceStats> records;
 
 	public MockCFApplicationStats(List<InstanceStats> records) {
 		super();
-		this.records = records;
+		this.records = CFWrapping.wrapInstanceStats(records);
 	}
 
 	@Override
-	public List<InstanceStats> getRecords() {
+	public List<CFInstanceStats> getRecords() {
 		return records;
 	}
 

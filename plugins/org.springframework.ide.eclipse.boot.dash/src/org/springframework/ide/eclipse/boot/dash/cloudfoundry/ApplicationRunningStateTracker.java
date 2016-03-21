@@ -12,15 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.InstanceState;
-import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
@@ -132,7 +131,7 @@ public class ApplicationRunningStateTracker {
 		return runState;
 	}
 
-	public static RunState getRunState(InstanceState instanceState) {
+	public static RunState getRunState(CFInstanceState instanceState) {
 		RunState runState = null;
 		if (instanceState != null) {
 			switch (instanceState) {
@@ -182,7 +181,7 @@ public class ApplicationRunningStateTracker {
 		RunState runState = RunState.UNKNOWN;
 
 		if (stats != null && stats.getRecords() != null) {
-			for (InstanceStats stat : stats.getRecords()) {
+			for (CFInstanceStats stat : stats.getRecords()) {
 
 				RunState instanceState = getRunState(stat.getState());
 				runState = instanceState != null ? runState.merge(instanceState) : null;
