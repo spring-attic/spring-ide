@@ -167,11 +167,15 @@ public class BootDashModelTest {
 		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		assertFalse(conf1.equals(conf2));
 
-		assertEquals(2, projectEl.getCurrentChildren().size());
+		ACondition.waitFor("Children to appear", 3000, () -> {
+			assertEquals(2, projectEl.getCurrentChildren().size());
+		});
 
 		conf1.delete();
 
-		assertEquals(1, projectEl.getCurrentChildren().size());
+		ACondition.waitFor("Child to disappear", 3000, () -> {
+			assertEquals(1, projectEl.getCurrentChildren().size());
+		});
 	}
 
 
@@ -299,6 +303,9 @@ public class BootDashModelTest {
 		element.openConfig(ui); //Ensure that at least one launch config exists.
 		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
 		verifyNoMoreInteractions(ui);
+		ACondition.waitFor("child", 3000, () -> {
+			assertNotNull(getSingleValue(element.getCurrentChildren()));
+		});
 		BootDashElement childElement = getSingleValue(element.getCurrentChildren());
 
 		ElementStateListener listener = mock(ElementStateListener.class);
@@ -353,6 +360,9 @@ public class BootDashModelTest {
 		verifyNoMoreInteractions(ui);
 
 		//Disable lifecycle mgmt on config
+		ACondition.waitFor("child", 3000, () -> {
+			assertNotNull(getSingleValue(element.getCurrentChildren()));
+		});
 		LaunchConfDashElement childElement = (LaunchConfDashElement) getSingleValue(element.getCurrentChildren());
 		ILaunchConfigurationWorkingCopy wc = childElement.getActiveConfig().getWorkingCopy();
 		assertNotNull(BootLaunchConfigurationDelegate.getMainType(wc));
