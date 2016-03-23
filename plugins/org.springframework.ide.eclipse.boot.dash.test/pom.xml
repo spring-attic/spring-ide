@@ -11,6 +11,11 @@
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.boot.dash.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
 
 	<build>
 		<plugins>

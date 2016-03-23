@@ -167,11 +167,15 @@ public class BootDashModelTest {
 		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		assertFalse(conf1.equals(conf2));
 
-		assertEquals(2, projectEl.getCurrentChildren().size());
+		ACondition.waitFor("Children to appear", 3000, () -> {
+			assertEquals(2, projectEl.getCurrentChildren().size());
+		});
 
 		conf1.delete();
 
-		assertEquals(1, projectEl.getCurrentChildren().size());
+		ACondition.waitFor("Child to disappear", 3000, () -> {
+			assertEquals(1, projectEl.getCurrentChildren().size());
+		});
 	}
 
 
