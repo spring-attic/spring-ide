@@ -455,7 +455,9 @@ public class BootDashActionTests {
 		//Check initial conditions are as expected:
 		assertTrue(selection.isEmpty());
 		assertFalse(action.isEnabled());
-		assertEquals(2, element.getChildren().getValues().size());
+		ACondition.waitFor("children", 3000, () -> {
+			assertEquals(2, element.getChildren().getValues().size());
+		});
 
 		//Check action enablement for the children
 		for (BootDashElement child : element.getChildren().getValues()) {
