@@ -5,18 +5,28 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
+import org.cloudfoundry.client.v2.serviceplans.GetServicePlanRequest;
+import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
+import org.cloudfoundry.client.v2.serviceplans.ServicePlanEntity;
+import org.cloudfoundry.client.v2.serviceplans.ServicePlanResource;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
+import org.cloudfoundry.operations.spaces.GetSpaceRequest;
+import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
+import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
+import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -30,36 +40,94 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientS
 
 import com.google.common.collect.ImmutableList;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactory {
+
+	private static String getSpaceId(CloudFoundryOperations operations, CFClientParams params) {
+		return operations.spaces().get(
+				GetSpaceRequest.builder()
+					.name(params.getSpaceName())
+					.build())
+				.map(SpaceDetail::getId)
+				.get();
+	}
 
 	@Override
 	public ClientRequests getClient(CFClientParams params) throws Exception {
 
-		SpringCloudFoundryClient _client = SpringCloudFoundryClient.builder()
+		SpringCloudFoundryClient client = SpringCloudFoundryClient.builder()
 				.username(params.getUsername())
 				.password(params.getPassword())
 				.host(params.getHost())
 				.build();
 
-		final CloudFoundryOperations client = new CloudFoundryOperationsBuilder()
-			.cloudFoundryClient(_client)
+		final CloudFoundryOperations operations = new CloudFoundryOperationsBuilder()
+			.cloudFoundryClient(client)
 			.target(params.getOrgName(), params.getSpaceName())
 			.build();
+
+		final String spaceId = getSpaceId(operations, params);
 
 		return new ClientRequests() {
 
 			@Override
 			public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
-				return ImmutableList.copyOf(
-					client.applications()
-						.list()
-						.map(CFWrappingV2::wrap)
-						.toIterable()
-				);
+				return operations.applications()
+				.list()
+				.map(CFWrappingV2::wrap)
+				.toList()
+				.map(ImmutableList::copyOf)
+				.get();
 			}
 
 			@Override
-			public Map<CFApplication, ApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
+			public List<CFService> getServices() throws Exception {
+				return PaginationUtils.requestResources((page) -> {
+					ListServiceInstancesRequest request = ListServiceInstancesRequest.builder()
+						.spaceId(spaceId)
+						.page(page)
+						.build();
+					return client.serviceInstances()
+							.list(request);
+				})
+				.flatMap((ServiceInstanceResource instance) -> fetchPlan(client, instance))
+				.toList()
+				.map(ImmutableList::copyOf)
+				.get();
+			}
+
+			protected Publisher<CFService> fetchPlan(SpringCloudFoundryClient client,
+					ServiceInstanceResource instance) {
+				String planId = instance.getEntity().getServicePlanId();
+				return client.servicePlans().get(
+						GetServicePlanRequest.builder()
+						.servicePlanId(planId)
+						.build()
+				)
+				.map((GetServicePlanResponse response) -> {
+					ServicePlanResource plan = ServicePlanResource.builder()
+						.entity(response.getEntity())
+						.metadata(response.getMetadata())
+						.build();
+
+					return CFWrappingV2.wrap(plan, instance);
+				});
+			}
+
+			//XXX CF V2
+//			return ImmutableList.copyOf(
+//				client.services()
+//					.list()
+//					.map(CFWrappingV2::wrap)
+//					.toIterable()
+//			);
+//			return ImmutableList.of();
+
+
+			@Override
+			public Map<CFApplication, CFApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
 					long timeToWait) throws Exception {
 				Assert.isLegal(false, "Not implemented");
 				return null;
@@ -123,25 +191,21 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			@Override
 			public void stopApplication(String appName) throws Exception {
 				Assert.isLegal(false, "Not implemented");
-
 			}
 
 			@Override
 			public void setHealthCheck(UUID guid, String hcType) throws Exception {
 				Assert.isLegal(false, "Not implemented");
-
 			}
 
 			@Override
 			public void restartApplication(String appName) throws Exception {
 				Assert.isLegal(false, "Not implemented");
-
 			}
 
 			@Override
 			public void logout() {
 				Assert.isLegal(false, "Not implemented");
-
 			}
 
 			@Override
@@ -158,12 +222,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFSpace> getSpaces() throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
-			}
-
-			@Override
-			public List<CFService> getServices() throws Exception {
 				Assert.isLegal(false, "Not implemented");
 				return null;
 			}
@@ -224,9 +282,5 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 		};
 	}
 
-	private String getHost(String apiUrl) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }

@@ -4,10 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
+import org.cloudfoundry.client.v2.serviceplans.ServicePlanEntity;
+import org.cloudfoundry.client.v2.serviceplans.ServicePlanResource;
+import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -101,6 +106,46 @@ public class CFWrappingV2 {
 			public String getBuildpackUrl() {
 				//XXX CF V2
 				return null;
+			}
+		};
+	}
+
+	public static CFService wrap(final ServicePlanResource plan, final ServiceInstanceResource instance) {
+		return new CFService() {
+			public String getName() {
+				return instance.getEntity().getName();
+			}
+
+			@Override
+			@Deprecated
+			public String getVersion() {
+				return null;
+			}
+
+			@Override
+			public String getType() {
+				return instance.getEntity().getType();
+			}
+
+			/**
+			 * This info is deprecated, client probably doesn't even return it anymore!
+			 */
+			@Override
+			@Deprecated
+			public String getProvider() {
+				return null;
+//				return service.getEntity().getProvider();
+			}
+
+			@Override
+			public String getPlan() {
+				//XXX CF V2 an id is probably not what the caller expects
+				return plan.getEntity().getName();
+			}
+
+			@Override
+			public String getDashboardUrl() {
+				return instance.getEntity().getDashboardUrl();
 			}
 		};
 	}
