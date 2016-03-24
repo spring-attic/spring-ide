@@ -12,7 +12,6 @@ import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
-import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
@@ -258,14 +257,16 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public CFApplication getApplication(String appName) throws Exception {
-				return operations.applications().get(GetApplicationRequest.builder()
-					.name(appName)
-					.build()
-				)
-				.map((ApplicationDetail appDetail) -> {
-
-				})
-				.get();
+				Assert.isLegal(false, "Not implemented");
+				return null;
+//				return operations.applications().get(GetApplicationRequest.builder()
+//					.name(appName)
+//					.build()
+//				)
+//				.map((ApplicationDetail appDetail) -> {
+//
+//				})
+//				.get();
 			}
 
 			@Override
