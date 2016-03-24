@@ -5,25 +5,16 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
-import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
-import org.cloudfoundry.client.v2.serviceplans.GetServicePlanRequest;
-import org.cloudfoundry.client.v2.serviceplans.GetServicePlanResponse;
-import org.cloudfoundry.client.v2.serviceplans.ServicePlanEntity;
-import org.cloudfoundry.client.v2.serviceplans.ServicePlanResource;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
-import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
-import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
@@ -39,9 +30,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactory {
 
@@ -84,46 +72,49 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFService> getServices() throws Exception {
-				return PaginationUtils.requestResources((page) -> {
-					ListServiceInstancesRequest request = ListServiceInstancesRequest.builder()
-						.spaceId(spaceId)
-						.page(page)
-						.build();
-					return client.serviceInstances()
-							.list(request);
-				})
-				.flatMap((ServiceInstanceResource instance) -> fetchPlan(client, instance))
+				return operations
+				.services()
+				.listInstances()
+				.map(CFWrappingV2::wrap)
 				.toList()
 				.map(ImmutableList::copyOf)
 				.get();
 			}
 
-			protected Publisher<CFService> fetchPlan(SpringCloudFoundryClient client,
-					ServiceInstanceResource instance) {
-				String planId = instance.getEntity().getServicePlanId();
-				return client.servicePlans().get(
-						GetServicePlanRequest.builder()
-						.servicePlanId(planId)
-						.build()
-				)
-				.map((GetServicePlanResponse response) -> {
-					ServicePlanResource plan = ServicePlanResource.builder()
-						.entity(response.getEntity())
-						.metadata(response.getMetadata())
-						.build();
+//			@Override
+//			public List<CFService> getServices() throws Exception {
+//				return PaginationUtils.requestResources((page) -> {
+//					ListServiceInstancesRequest request = ListServiceInstancesRequest.builder()
+//						.spaceId(spaceId)
+//						.page(page)
+//						.build();
+//					return client.serviceInstances()
+//							.list(request);
+//				})
+//				.flatMap((ServiceInstanceResource instance) -> fetchPlan(client, instance))
+//				.toList()
+//				.map(ImmutableList::copyOf)
+//				.get();
+//			}
+//
+//			protected Publisher<CFService> fetchPlan(SpringCloudFoundryClient client,
+//					ServiceInstanceResource instance) {
+//				String planId = instance.getEntity().getServicePlanId();
+//				return client.servicePlans().get(
+//						GetServicePlanRequest.builder()
+//						.servicePlanId(planId)
+//						.build()
+//				)
+//				.map((GetServicePlanResponse response) -> {
+//					ServicePlanResource plan = ServicePlanResource.builder()
+//						.entity(response.getEntity())
+//						.metadata(response.getMetadata())
+//						.build();
+//
+//					return CFWrappingV2.wrap(plan, instance);
+//				});
+//			}
 
-					return CFWrappingV2.wrap(plan, instance);
-				});
-			}
-
-			//XXX CF V2
-//			return ImmutableList.copyOf(
-//				client.services()
-//					.list()
-//					.map(CFWrappingV2::wrap)
-//					.toIterable()
-//			);
-//			return ImmutableList.of();
 
 
 			@Override

@@ -19,13 +19,14 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OrgsAndSpaces;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultCloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
 public abstract class CloudFoundryClientFactory {
 
-	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactory();
+//	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactory();
 
-//	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactoryV2();
+	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactoryV2();
 
 	public abstract ClientRequests getClient(CFClientParams params) throws Exception;
 

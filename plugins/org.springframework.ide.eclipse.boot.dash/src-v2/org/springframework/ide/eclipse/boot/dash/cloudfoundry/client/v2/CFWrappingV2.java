@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
-import org.cloudfoundry.client.v2.serviceplans.ServicePlanEntity;
-import org.cloudfoundry.client.v2.serviceplans.ServicePlanResource;
-import org.cloudfoundry.client.v2.services.ServiceResource;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
+import org.cloudfoundry.operations.services.ServiceInstance;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -34,17 +31,8 @@ public class CFWrappingV2 {
 
 			@Override
 			public Integer getTimeout() {
+				//XXX CF V2
 				return null;
-			}
-
-			@Override
-			public CFAppState getState() {
-				try {
-					return CFAppState.valueOf(app.getRequestedState());
-				} catch (Exception e) {
-					BootActivator.log(e);
-					return CFAppState.UNKNOWN;
-				}
 			}
 
 			@Override
@@ -57,6 +45,40 @@ public class CFWrappingV2 {
 			public List<String> getServices() {
 				//XXX CF V2
 				return ImmutableList.of();
+			}
+
+			@Override
+			public Map<String, String> getEnvAsMap() {
+				//XXX CF V2
+				return ImmutableMap.of();
+			}
+
+			@Override
+			public String getDetectedBuildpack() {
+				//XXX CF V2
+				return null;
+			}
+
+			@Override
+			public String getCommand() {
+				//XXX CF V2
+				return null;
+			}
+
+			@Override
+			public String getBuildpackUrl() {
+				//XXX CF V2
+				return null;
+			}
+
+			@Override
+			public CFAppState getState() {
+				try {
+					return CFAppState.valueOf(app.getRequestedState());
+				} catch (Exception e) {
+					BootActivator.log(e);
+					return CFAppState.UNKNOWN;
+				}
 			}
 
 			@Override
@@ -80,42 +102,25 @@ public class CFWrappingV2 {
 			}
 
 			@Override
-			public Map<String, String> getEnvAsMap() {
-				//XXX CF V2
-				return ImmutableMap.of();
-			}
-
-			@Override
 			public int getDiskQuota() {
 				return app.getDiskQuota();
-			}
-
-			@Override
-			public String getDetectedBuildpack() {
-				//XXX CF V2
-				return null;
-			}
-
-			@Override
-			public String getCommand() {
-				//XXX CF V2
-				return null;
-			}
-
-			@Override
-			public String getBuildpackUrl() {
-				//XXX CF V2
-				return null;
 			}
 		};
 	}
 
-	public static CFService wrap(final ServicePlanResource plan, final ServiceInstanceResource instance) {
+	public static CFService wrap(final ServiceInstance service) {
 		return new CFService() {
+
+			@Override
 			public String getName() {
-				return instance.getEntity().getName();
+				return service.getName();
 			}
 
+			/**
+			 * Deprecated because this information is not available in recent
+			 * versions of CF. We should replace this info in our views with information
+			 * similar to what CF CLI displays instead.
+			 */
 			@Override
 			@Deprecated
 			public String getVersion() {
@@ -124,30 +129,73 @@ public class CFWrappingV2 {
 
 			@Override
 			public String getType() {
-				return instance.getEntity().getType();
+				//XXX CF V2: does this really mean the same thing as what it meant when we got it from v1?
+				return service.getType();
 			}
 
 			/**
-			 * This info is deprecated, client probably doesn't even return it anymore!
+			 * Deprecated because this information is not available in recent
+			 * versions of CF. We should replace this info in our views with information
+			 * similar to what CF CLI displays instead.
 			 */
 			@Override
 			@Deprecated
 			public String getProvider() {
 				return null;
-//				return service.getEntity().getProvider();
 			}
 
 			@Override
 			public String getPlan() {
-				//XXX CF V2 an id is probably not what the caller expects
-				return plan.getEntity().getName();
+				return service.getPlan();
 			}
 
 			@Override
 			public String getDashboardUrl() {
-				return instance.getEntity().getDashboardUrl();
+				//TODO: see https://github.com/cloudfoundry/cf-java-client/issues/426
+				//Actually... the issue was resolved and then the commit fixing it reverted again
+				return null;
 			}
 		};
 	}
+
+//	public static CFService wrap(final ServicePlanResource plan, final ServiceInstanceResource instance) {
+//		return new CFService() {
+//			public String getName() {
+//				return instance.getEntity().getName();
+//			}
+//
+//			@Override
+//			@Deprecated
+//			public String getVersion() {
+//				return null;
+//			}
+//
+//			@Override
+//			public String getType() {
+//				return instance.getEntity().getType();
+//			}
+//
+//			/**
+//			 * This info is deprecated, client probably doesn't even return it anymore!
+//			 */
+//			@Override
+//			@Deprecated
+//			public String getProvider() {
+//				return null;
+////				return service.getEntity().getProvider();
+//			}
+//
+//			@Override
+//			public String getPlan() {
+//				//XXX CF V2 an id is probably not what the caller expects
+//				return plan.getEntity().getName();
+//			}
+//
+//			@Override
+//			public String getDashboardUrl() {
+//				return instance.getEntity().getDashboardUrl();
+//			}
+//		};
+//	}
 
 }
