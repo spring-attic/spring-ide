@@ -23,6 +23,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
+import reactor.core.publisher.Flux;
+
 public interface ClientRequests {
 
 	/**
@@ -56,8 +58,7 @@ public interface ClientRequests {
 	void updateApplicationServices(String appName, List<String> services) throws Exception;
 	void updateApplicationStaging(String appName, Staging staging) throws Exception;
 	void updateApplicationUris(String appName, List<String> urls) throws Exception;
-	Map<CFApplication, CFApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
-			long timeToWait) throws Exception;
+	List<CloudAppInstances> waitForApplicationStats(List<CFApplication> appsToLookUp, long timeToWait) throws Exception;
 	void uploadApplication(String appName, ZipFile archive) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;

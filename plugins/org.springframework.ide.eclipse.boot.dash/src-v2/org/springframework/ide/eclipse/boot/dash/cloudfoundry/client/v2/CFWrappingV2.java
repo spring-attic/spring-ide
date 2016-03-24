@@ -3,18 +3,55 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationDetail.InstanceDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 public class CFWrappingV2 {
+
+	public static CloudAppInstances wrap(CFApplication app, ApplicationDetail details) {
+		return new CloudAppInstances(app, wrap(details));
+	}
+
+	public static CFApplicationStats wrap(ApplicationDetail details) {
+		return new CFApplicationStats() {
+			@Override
+			public List<CFInstanceStats> getRecords() {
+				return details.getInstanceDetails()
+				.stream()
+				.map((instanceDetail) -> wrap(instanceDetail))
+				.collect(Collectors.toList());
+			}
+		};
+	}
+
+	public static CFInstanceStats wrap(InstanceDetail instanceDetail) {
+		return new CFInstanceStats() {
+			@Override
+			public CFInstanceState getState() {
+				try {
+					return CFInstanceState.valueOf(instanceDetail.getState());
+				} catch (Exception e) {
+					BootActivator.log(e);
+					return CFInstanceState.UNKNOWN;
+				}
+			}
+		};
+	}
 
 	public static CFApplication wrap(ApplicationSummary app) {
 		return new CFApplication() {

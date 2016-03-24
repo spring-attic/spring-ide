@@ -20,13 +20,10 @@ import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationArchive;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -40,8 +37,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
@@ -136,11 +131,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Map<CFApplication, CFApplicationStats> waitForApplicationStats(List<CFApplication> appsToLookUp,
+		public List<CloudAppInstances> waitForApplicationStats(List<CFApplication> appsToLookUp,
 				long timeToWait) throws Exception {
-			Builder<CFApplication, CFApplicationStats> builder = ImmutableMap.builder();
+			ImmutableList.Builder<CloudAppInstances> builder = ImmutableList.builder();
 			for (CFApplication app : appsToLookUp) {
-				builder.put(app, getSpace().getApplication(app.getGuid()).getStats());
+				builder.add(new CloudAppInstances(app, getSpace().getApplication(app.getGuid()).getStats()));
 			}
 			return builder.build();
 		}
@@ -151,7 +146,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			if (app==null) {
 				throw errorAppNotFound(appName);
 			}
-			//TODO: we just ignore the data. If/when we have tests that wanna do something with this may not be
+			//TODO: we just ignore the data. If/when we have tests that wanna do something with this, this may not be
 			// good enough anymore.
 		}
 

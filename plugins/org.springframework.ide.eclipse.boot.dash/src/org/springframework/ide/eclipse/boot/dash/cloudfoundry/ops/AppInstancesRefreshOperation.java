@@ -44,10 +44,8 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		try {
 			if (!appsToLookUp.isEmpty()) {
 				long timeToWait = 1000*30;
-				Map<CFApplication, CFApplicationStats> stats = model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait);
-				for (Entry<CFApplication, CFApplicationStats> entry : stats.entrySet()) {
-					CloudAppInstances instances = new CloudAppInstances(entry.getKey(), entry.getValue());
-					this.model.updateApplication(instances);
+				for (CloudAppInstances appDetails : model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait)) {
+					this.model.updateApplication(appDetails);
 				}
 			}
 			model.setRefreshState(RefreshState.READY);

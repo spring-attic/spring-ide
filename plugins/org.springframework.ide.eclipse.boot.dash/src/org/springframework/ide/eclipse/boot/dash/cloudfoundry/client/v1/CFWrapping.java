@@ -27,6 +27,7 @@ import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
@@ -365,7 +366,6 @@ public class CFWrapping {
 					return org;
 				}
 
-
 				@Override
 				public UUID getGuid() {
 					return s.getMeta().getGuid();
@@ -375,11 +375,11 @@ public class CFWrapping {
 		return null;
 	}
 
-	public static Map<CFApplication, CFApplicationStats> wrap(Map<CloudApplication, ApplicationStats> stats) {
+	public static List<CloudAppInstances> wrap(Map<CloudApplication, ApplicationStats> stats) {
 		if (stats!=null) {
-			ImmutableMap.Builder<CFApplication, CFApplicationStats> builder = ImmutableMap.builder();
+			ImmutableList.Builder<CloudAppInstances> builder = ImmutableList.builder();
 			for (Entry<CloudApplication, ApplicationStats> e : stats.entrySet()) {
-				builder.put(wrap(e.getKey()), wrap(e.getValue()));
+				builder.add(new CloudAppInstances(wrap(e.getKey()), wrap(e.getValue())));
 			}
 			return builder.build();
 		}

@@ -177,9 +177,9 @@ public class DefaultClientRequests implements ClientRequests {
 		return CFWrapping.wrap(new ApplicationInstanceRequest(this.client, appName).call());
 	}
 
-	public Map<CFApplication, CFApplicationStats> waitForApplicationStats(final List<CFApplication> appsToLookUp,
+	public List<CloudAppInstances> waitForApplicationStats(final List<CFApplication> appsToLookUp,
 			final long timeout) throws Exception {
-		Callable<Map<CFApplication, CFApplicationStats>> task = new AllApplicationInstancesRequest(this.client,
+		Callable<List<CloudAppInstances>> task = new AllApplicationInstancesRequest(this.client,
 				appsToLookUp);
 		return RetryUtil.retry(2000, timeout, task);
 	}

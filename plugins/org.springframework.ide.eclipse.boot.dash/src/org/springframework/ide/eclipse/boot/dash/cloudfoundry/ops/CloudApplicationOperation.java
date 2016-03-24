@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
@@ -23,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 /**
  * A cloud operation that is performed on a Cloud application (for example,
  * creating, starting, or stopping an application)
- *
  */
 public abstract class CloudApplicationOperation extends CloudOperation {
 
