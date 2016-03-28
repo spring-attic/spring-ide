@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -131,7 +132,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 //			}
 
 			@Override
-			public List<CloudAppInstances> waitForApplicationStats(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
+			public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
 				return Flux.fromIterable(appsToLookUp)
 				.flatMap((CFApplication appSummary) -> {
 					return operations.applications().get(GetApplicationRequest.builder()
@@ -140,7 +141,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 					)
 					.and(Mono.just(appSummary));
 				})
-				.map(function((appDetail, appSummary) -> CFWrappingV2.wrap(appSummary, appDetail)))
+				.map(function((appDetail, appSummary) -> CFWrappingV2.wrap(appDetail)))
 				.toList()
 				.get(timeToWait);
 			}
@@ -242,18 +243,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			}
 
 			@Override
-			public CloudAppInstances getExistingAppInstances(UUID guid) throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
-			}
-
-			@Override
-			public CloudAppInstances getExistingAppInstances(String appName) throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
-			}
-
-			@Override
 			public List<CFCloudDomain> getDomains() throws Exception {
 				Assert.isLegal(false, "Not implemented");
 				return null;
@@ -266,17 +255,13 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			}
 
 			@Override
-			public CFApplication getApplication(String appName) throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
-//				return operations.applications().get(GetApplicationRequest.builder()
-//					.name(appName)
-//					.build()
-//				)
-//				.map((ApplicationDetail appDetail) -> {
-//
-//				})
-//				.get();
+			public CFApplicationDetail getApplication(String appName) throws Exception {
+				return operations.applications().get(GetApplicationRequest.builder()
+					.name(appName)
+					.build()
+				)
+				.map(CFWrappingV2::wrap)
+				.get();
 			}
 
 			@Override

@@ -19,6 +19,7 @@ import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -86,7 +87,7 @@ public class ApplicationDeploymentOperations {
 			CloudApplicationDeploymentProperties properties, DebugSupport debugSupport, RunState runOrDebug,
 			UserInteractions ui, IProgressMonitor monitor) throws Exception {
 
-		CFApplication existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
+		CFApplicationDetail existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
 
 		if (existingApp != null && !ui.confirmOperation(APP_FOUND_TITLE,
 				NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(), properties.getProject().getName()))) {

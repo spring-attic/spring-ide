@@ -23,14 +23,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
-import reactor.core.publisher.Flux;
-
 public interface ClientRequests {
 
 	/**
 	 * Returns null if the application does not exist. Throws some kind of Exception if there's any other kind of problem.
 	 */
-	CFApplication getApplication(String appName) throws Exception;
+	CFApplicationDetail getApplication(String appName) throws Exception;
 
 	//TODO: consider removing the getXXXSupport method and directly adding the apis that these support
 	// objects provide.
@@ -44,8 +42,6 @@ public interface ClientRequests {
 	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
 	List<CFBuildpack> getBuildpacks() throws Exception;
 	List<CFCloudDomain> getDomains() throws Exception;
-	CloudAppInstances getExistingAppInstances(String appName) throws Exception;
-	CloudAppInstances getExistingAppInstances(UUID guid) throws Exception;
 	List<CFService> getServices() throws Exception;
 	List<CFSpace> getSpaces() throws Exception;
 	List<CFStack> getStacks() throws Exception;
@@ -58,7 +54,7 @@ public interface ClientRequests {
 	void updateApplicationServices(String appName, List<String> services) throws Exception;
 	void updateApplicationStaging(String appName, Staging staging) throws Exception;
 	void updateApplicationUris(String appName, List<String> urls) throws Exception;
-	List<CloudAppInstances> waitForApplicationStats(List<CFApplication> appsToLookUp, long timeToWait) throws Exception;
+	List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception;
 	void uploadApplication(String appName, ZipFile archive) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;

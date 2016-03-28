@@ -13,7 +13,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
@@ -23,20 +23,8 @@ import com.google.common.collect.ImmutableMap;
 
 public class CFWrappingV2 {
 
-	public static CloudAppInstances wrap(CFApplication app, ApplicationDetail details) {
-		return new CloudAppInstances(app, wrap(details));
-	}
-
-	public static CFApplicationStats wrap(ApplicationDetail details) {
-		return new CFApplicationStats() {
-			@Override
-			public List<CFInstanceStats> getRecords() {
-				return details.getInstanceDetails()
-				.stream()
-				.map((instanceDetail) -> wrap(instanceDetail))
-				.collect(Collectors.toList());
-			}
-		};
+	public static CFApplicationDetail wrap(ApplicationDetail details) {
+		return new CFApplicationDetailData(details);
 	}
 
 	public static CFInstanceStats wrap(InstanceDetail instanceDetail) {
@@ -193,6 +181,15 @@ public class CFWrappingV2 {
 				return null;
 			}
 		};
+	}
+
+	public static CFAppState wrapAppState(String s) {
+		try {
+			return CFAppState.valueOf(s);
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return CFAppState.UNKNOWN;
+		}
 	}
 
 //	public static CFService wrap(final ServicePlanResource plan, final ServiceInstanceResource instance) {

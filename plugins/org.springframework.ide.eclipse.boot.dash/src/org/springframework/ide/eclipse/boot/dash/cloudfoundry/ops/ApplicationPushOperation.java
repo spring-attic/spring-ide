@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
@@ -55,11 +56,11 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 		// unintelligible
 		// error that does not indicate that the app is missing (e.g. it does
 		// not indicate 404 error)
-		CloudAppInstances appInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
+		CFApplicationDetail appDetails = model.getRunTarget().getClient().getApplication(appName);
 
 		monitor.worked(3);
 
-		if (appInstances == null) {
+		if (appDetails == null) {
 			throw BootDashActivator.asCoreException(
 					"Unable to upload application archive. Application does not exist anymore in Cloud Foundry: "
 							+ deploymentProperties.getAppName());

@@ -18,8 +18,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
@@ -42,14 +41,12 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		app.startOperationStarting();
 		try {
-			CloudAppInstances appInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
+			CFApplicationDetail appInstances = model.getRunTarget().getClient().getApplication(appName);
 			if (appInstances == null) {
 				throw BootDashActivator.asCoreException(
 						"Unable to start the application. Application does not exist anymore in Cloud Foundry: " + appName);
 			}
 
-			// Get the guid, as it is more efficient for lookup
-			UUID appGuid = appInstances.getApplication().getGuid();
 			checkTerminationRequested(monitor);
 
 			// Use the cached Cloud app instead of fetching a new one to avoid
@@ -62,8 +59,8 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 
 			RunState runState = new ApplicationRunningStateTracker(this, app)
 					.startTracking(monitor);
-			CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(appGuid);
-			app.setInstanceData(updatedInstances);
+			CFApplicationDetail updatedInstances = model.getRunTarget().getClient().getApplication(app.getName());
+			app.setDetailedData(updatedInstances);
 			app.startOperationEnded(null, getCancelationToken(), monitor);
 		} catch (Throwable e) {
 			app.startOperationEnded(e, getCancelationToken(), monitor);

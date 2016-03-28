@@ -26,6 +26,8 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -71,9 +73,11 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	private final LiveCounter startOperationInProgress = new LiveCounter(0);
 	private final LiveVariable<Throwable> error = new LiveVariable<>();
 
-	private final LiveVariable<CloudAppInstances> instanceData = new LiveVariable<>();
+	private final LiveVariable<CFApplication> appData = new LiveVariable<>();
+	private final LiveVariable<List<CFInstanceStats>> instanceData = new LiveVariable<>();
 	private final LiveExpression<RunState> baseRunState = new LiveExpression<RunState>() {
 		{
+			dependsOn(appData);
 			dependsOn(instanceData);
 			dependsOn(startOperationInProgress);
 			dependsOn(error);
@@ -87,9 +91,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			if (startOperationInProgress.getValue() > 0) {
 				return RunState.STARTING;
 			}
-			CloudAppInstances instances = instanceData.getValue();
-			if (instances!=null) {
-				return ApplicationRunningStateTracker.getRunState(instances);
+			CFApplication app = appData.getValue();
+			List<CFInstanceStats> instances = instanceData.getValue();
+			if (instances!=null && app!=null) {
+				return ApplicationRunningStateTracker.getRunState(app, instances);
 			}
 			return RunState.UNKNOWN;
 		}
@@ -125,7 +130,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 		addElementNotifier(baseRunState);
-		addElementNotifier(instanceData);
+		addElementNotifier(appData);
 		addElementNotifier(healthCheck);
 		this.addDisposableChild(baseRunState);
 	}
@@ -291,11 +296,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public CFApplication getSummaryData() {
-		CloudAppInstances data = instanceData.getValue();
-		if (data!=null) {
-			return data.getApplication();
-		}
-		return null;
+		return appData.getValue();
 	}
 
 	@Override
@@ -440,11 +441,17 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	}
 
-	public void setInstanceData(CloudAppInstances data) {
-		this.instanceData.setValue(data);
+	public void setDetailedData(CFApplicationDetail appDetails) {
+		if (appDetails!=null) {
+			this.appData.setValue(appDetails);
+			this.instanceData.setValue(appDetails.getInstanceDetails());
+		} else {
+			this.appData.setValue(null);
+			this.instanceData.setValue(null);
+		}
 	}
 
-	public CloudAppInstances getInstanceData() {
+	public List<CFInstanceStats> getInstanceData() {
 		return this.instanceData.getValue();
 	}
 

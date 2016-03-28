@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
-
 public interface CFApplication extends CFEntity {
+	//TODO: lots of this infos should be moved to application details
+
 	int getInstances();
 	int getRunningInstances();
 	Map<String, String> getEnvAsMap();

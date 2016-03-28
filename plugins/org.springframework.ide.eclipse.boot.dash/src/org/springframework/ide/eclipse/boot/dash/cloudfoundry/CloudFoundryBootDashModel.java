@@ -50,6 +50,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -372,12 +373,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport));
 	}
 
-	public CloudAppDashElement addElement(CloudAppInstances appInstances, IProject project) throws Exception {
+	public CloudAppDashElement addElement(CFApplicationDetail appDetail, IProject project) throws Exception {
 		CloudAppDashElement addedElement = null;
 		boolean changed = false;
 		synchronized (this) {
-			addedElement = applications.addApplication(appInstances.getApplication().getName());
-			addedElement.setInstanceData(appInstances);
+			addedElement = applications.addApplication(appDetail.getName());
+			addedElement.setDetailedData(appDetail);
 			// Update the cache BEFORE updating the model, since the model
 			// elements are handles to the cache
 			changed = addedElement.setProject(project);
@@ -430,7 +431,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		applications.setAppNames(names);
 	}
 
-	public void updateElements(Collection<CloudAppInstances> apps) throws Exception {
+	public void updateElements(Collection<CFApplicationDetail> apps) throws Exception {
 		if (apps == null) {
 			/*
 			 * Error case: set empty list of BDEs don't modify state of local to CF artifacts mappings
@@ -439,18 +440,18 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		} else {
 			synchronized (this) {
 				applications.setAppNames(getNames(apps));
-				for (CloudAppInstances instanceData : apps) {
-					CloudAppDashElement app = applications.getApplication(instanceData.getApplication().getName());
-					app.setInstanceData(instanceData);
+				for (CFApplicationDetail appDetails : apps) {
+					CloudAppDashElement app = applications.getApplication(appDetails.getName());
+					app.setDetailedData(appDetails);
 				}
 			}
 		}
 	}
 
-	private ImmutableList<String> getNames(Collection<CloudAppInstances> apps) {
+	private ImmutableList<String> getNames(Collection<CFApplicationDetail> apps) {
 		ImmutableList.Builder<String> builder = ImmutableList.builder();
-		for (CloudAppInstances app : apps) {
-			builder.add(app.getApplication().getName());
+		for (CFApplicationDetail app : apps) {
+			builder.add(app.getName());
 		}
 		return builder.build();
 	}
@@ -463,10 +464,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return new OperationsExecution(null);
 	}
 
-	public void updateApplication(CloudAppInstances appInstances) {
-		CloudAppDashElement app = getApplication(appInstances.getApplication().getName());
+	public void updateApplication(CFApplicationDetail appDetails) {
+		CloudAppDashElement app = getApplication(appDetails.getName());
 		if (app!=null) {
-			app.setInstanceData(appInstances);
+			app.setDetailedData(appDetails);
 		}
 	}
 

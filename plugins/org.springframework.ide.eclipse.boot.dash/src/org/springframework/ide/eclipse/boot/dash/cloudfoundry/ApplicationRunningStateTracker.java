@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,7 +18,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -50,7 +51,7 @@ public class ApplicationRunningStateTracker {
 		this.timeout = TIMEOUT;
 	}
 
-	protected void checkTerminate(IProgressMonitor monitor, CloudAppInstances appInstances)
+	protected void checkTerminate(IProgressMonitor monitor)
 			throws OperationCanceledException {
 		op.checkTerminationRequested(monitor);
 	}
@@ -82,14 +83,14 @@ public class ApplicationRunningStateTracker {
 		model.getElementConsoleManager().writeToConsole(appName, checkingMessage + ". Please wait...",
 				LogType.LOCALSTDOUT);
 
-		CloudAppInstances appInstances = requests.getExistingAppInstances(appName);
+		CFApplicationDetail app = requests.getApplication(appName);
 
-		if (appInstances == null) {
+		if (app == null) {
 			throw new OperationCanceledException();
 		}
 
 		// Get the guid, as it is more efficient for lookup
-		UUID appGuid = appInstances.getApplication().getGuid();
+		//UUID appGuid = app.getGuid();
 
 		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && runState != RunState.CRASHED
 				&& currentTime < totalTime) {
@@ -98,20 +99,20 @@ public class ApplicationRunningStateTracker {
 			// Don't log this. Only update the monitor
 			monitor.setTaskName(checkingMessage + ". Time left before timeout: " + timeLeft + 's');
 
-			checkTerminate(monitor, appInstances);
+			checkTerminate(monitor);
 
 			monitor.worked(1);
 
-			runState = getRunState(appInstances);
+			runState = getRunState(app.getInstanceDetails());
 			try {
 				Thread.sleep(WAIT_TIME);
 			} catch (InterruptedException e) {
 
 			}
 
-			appInstances = requests.getExistingAppInstances(appGuid);
+			app = requests.getApplication(app.getName());
 			// App no longer exists
-			if (appInstances == null) {
+			if (app == null) {
 				throw new OperationCanceledException();
 			}
 
@@ -159,33 +160,25 @@ public class ApplicationRunningStateTracker {
 		return runState;
 	}
 
-	public static RunState getRunState(CloudAppInstances instances) {
+	public static RunState getRunState(CFApplication app, List<CFInstanceStats> instances) {
 
 		RunState runState = RunState.UNKNOWN;
-		if (instances != null) {
-			CFApplicationStats stats = instances.getStats();
-			CFApplication app = instances.getApplication();
-			// if app desired state is "Stopped", return inactive
-			if ((stats == null || stats.getRecords() == null || stats.getRecords().isEmpty())
-					&& app.getState() == CFAppState.STOPPED) {
-				runState = RunState.INACTIVE;
-			} else {
-				runState = getRunState(stats);
-			}
+		// if app desired state is "Stopped", return inactive
+		if ((instances == null || instances.isEmpty())
+				&& app.getState() == CFAppState.STOPPED) {
+			runState = RunState.INACTIVE;
+		} else {
+			runState = getRunState(instances);
 		}
-
 		return runState;
 	}
 
-	private static RunState getRunState(CFApplicationStats stats) {
+	private static RunState getRunState(List<CFInstanceStats> stats) {
 		RunState runState = RunState.UNKNOWN;
-
-		if (stats != null && stats.getRecords() != null) {
-			for (CFInstanceStats stat : stats.getRecords()) {
-
+		if (stats!=null && !stats.isEmpty()) {
+			for (CFInstanceStats stat : stats) {
 				RunState instanceState = getRunState(stat.getState());
 				runState = instanceState != null ? runState.merge(instanceState) : null;
-
 			}
 		}
 		return runState;

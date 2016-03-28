@@ -10,21 +10,26 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 
 /**
  * A Cloud application with additional stats and instances information
  *
- *
+ * This should be removed. Use {@link CFApplicationDetail} instead. It contains
+ * all the same infos.
  */
+@Deprecated
 public class CloudAppInstances {
 
 	private final CFApplication app;
-	private final CFApplicationStats stats;
+	private final List<CFInstanceStats> stats;
 
-	public CloudAppInstances(CFApplication app, CFApplicationStats stats) {
+	public CloudAppInstances(CFApplication app, List<CFInstanceStats> stats) {
 		Assert.isNotNull(app);
 		this.app = app;
 		this.stats = stats;
@@ -34,7 +39,7 @@ public class CloudAppInstances {
 		return app;
 	}
 
-	public CFApplicationStats getStats() {
+	public List<CFInstanceStats> getStats() {
 		return stats;
 	}
 }

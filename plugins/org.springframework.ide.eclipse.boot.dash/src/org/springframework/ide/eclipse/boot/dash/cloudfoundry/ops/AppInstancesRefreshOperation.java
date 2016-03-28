@@ -11,15 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 
 /**
@@ -44,7 +41,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		try {
 			if (!appsToLookUp.isEmpty()) {
 				long timeToWait = 1000*30;
-				for (CloudAppInstances appDetails : model.getRunTarget().getClient().waitForApplicationStats(appsToLookUp, timeToWait)) {
+				for (CFApplicationDetail appDetails : model.getRunTarget().getClient().waitForApplicationDetails(appsToLookUp, timeToWait)) {
 					this.model.updateApplication(appDetails);
 				}
 			}

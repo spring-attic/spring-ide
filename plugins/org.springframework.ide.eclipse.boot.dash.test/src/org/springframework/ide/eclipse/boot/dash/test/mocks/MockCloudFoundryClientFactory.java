@@ -24,6 +24,7 @@ import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -131,11 +132,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public List<CloudAppInstances> waitForApplicationStats(List<CFApplication> appsToLookUp,
+		public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp,
 				long timeToWait) throws Exception {
-			ImmutableList.Builder<CloudAppInstances> builder = ImmutableList.builder();
+			ImmutableList.Builder<CFApplicationDetail> builder = ImmutableList.builder();
 			for (CFApplication app : appsToLookUp) {
-				builder.add(new CloudAppInstances(app, getSpace().getApplication(app.getGuid()).getStats()));
+				builder.add(getSpace().getApplication(app.getGuid()).getDetailedInfo());
 			}
 			return builder.build();
 		}
@@ -260,24 +261,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public CloudAppInstances getExistingAppInstances(UUID guid) throws Exception {
-			MockCFApplication app = getSpace().getApplication(guid);
-			if (app!=null) {
-				return new CloudAppInstances(app.getBasicInfo(), app.getStats());
-			}
-			return null;
-		}
-
-		@Override
-		public CloudAppInstances getExistingAppInstances(String appName) throws Exception {
-			MockCFApplication app = getSpace().getApplication(appName);
-			if (app!=null) {
-				return new CloudAppInstances(app.getBasicInfo(), app.getStats());
-			}
-			return null;
-		}
-
-		@Override
 		public List<CFCloudDomain> getDomains() throws Exception {
 			checkConnected();
 			return ImmutableList.<CFCloudDomain>copyOf(domainsByName.values());
@@ -296,11 +279,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public CFApplication getApplication(String appName) throws Exception {
+		public CFApplicationDetail getApplication(String appName) throws Exception {
 			checkConnected();
 			MockCFApplication app = getSpace().getApplication(appName);
 			if (app!=null) {
-				return app.getBasicInfo();
+				return app.getDetailedInfo();
 			}
 			return null;
 		}

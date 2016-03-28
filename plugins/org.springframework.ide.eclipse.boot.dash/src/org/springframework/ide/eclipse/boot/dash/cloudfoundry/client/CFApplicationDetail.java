@@ -11,7 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.util.List;
+import java.util.Map;
 
-public interface CFApplicationStats {
-	List<CFInstanceStats> getRecords();
+public interface CFApplicationDetail extends CFApplication {
+	Map<String, String> getEnvAsMap();
+	String getName();
+	List<CFInstanceStats> getInstanceDetails();
 }

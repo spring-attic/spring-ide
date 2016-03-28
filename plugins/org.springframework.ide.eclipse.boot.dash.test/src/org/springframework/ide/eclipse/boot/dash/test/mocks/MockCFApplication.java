@@ -18,14 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.ApplicationStats;
-import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
 import org.cloudfoundry.client.lib.domain.InstanceState;
-import org.cloudfoundry.client.lib.domain.InstanceStats;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
@@ -36,6 +35,25 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 
 public class MockCFApplication {
+
+	private static class MockCFInstanceStats implements CFInstanceStats {
+
+		private CFInstanceState state;
+
+		public MockCFInstanceStats(CFInstanceState state) {
+			this.state = state;
+		}
+
+		@Override
+		public CFInstanceState getState() {
+			return state;
+		}
+
+		@Override
+		public String toString() {
+			return "CFInstanceState("+state+")";
+		}
+	}
 
 	private final String name;
 	private final UUID guid;
@@ -63,7 +81,7 @@ public class MockCFApplication {
 	}
 
 	private String healthCheck=HealthCheckSupport.HC_PORT;
-	private List<InstanceStats> stats = new ArrayList<>();
+	private List<CFInstanceStats> stats = new ArrayList<>();
 
 	private CancelationTokens cancelationTokens = new CancelationTokens();
 
@@ -80,8 +98,8 @@ public class MockCFApplication {
 		return name;
 	}
 
-	public CFApplicationStats getStats() {
-		return new MockCFApplicationStats(ImmutableList.copyOf(stats));
+	public List<CFInstanceStats> getStats() {
+		return ImmutableList.copyOf(stats);
 	}
 
 	public void start() throws Exception {
@@ -100,11 +118,11 @@ public class MockCFApplication {
 				return true;
 			}
 		};
-		Builder<InstanceStats> builder = ImmutableList.builder();
+		Builder<CFInstanceStats> builder = ImmutableList.builder();
 		for (int i = 0; i < instances; i++) {
 			Map<String, Object> values = new HashMap<>();
 			values.put("state", InstanceState.RUNNING.toString());
-			InstanceStats stat = new InstanceStats(UUID.randomUUID().toString(), values);
+			CFInstanceStats stat = new MockCFInstanceStats(CFInstanceState.RUNNING);
 			builder.add(stat);
 		}
 		if (cancelToken.isCanceled()) {
@@ -134,8 +152,8 @@ public class MockCFApplication {
 
 	public int getRunningInstances() {
 		int runningInstances = 0;
-		for (InstanceStats instance : stats) {
-			if (instance.getState()==InstanceState.RUNNING) {
+		for (CFInstanceStats instance : stats) {
+			if (instance.getState()==CFInstanceState.RUNNING) {
 				runningInstances++;
 			}
 		}
@@ -182,6 +200,10 @@ public class MockCFApplication {
 		return new CFApplicationData(name, guid, instances, getRunningInstances(),
 				state, memory, diskQuota, detectedBuildpack, buildpackUrl,
 				env, services, uris, timeout, command, stack);
+	}
+
+	public CFApplicationDetail getDetailedInfo() {
+		return new CFApplicationDetailData(getBasicInfo(), ImmutableList.copyOf(stats));
 	}
 
 	@Override

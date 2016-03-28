@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -45,8 +46,8 @@ public class RefreshSomeApplications extends CloudOperation {
 				ClientRequests client = model.getRunTarget().getClient();
 				for (CloudAppDashElement app : model.getApplicationValues()) {
 					String appName = app.getName();
-					CloudAppInstances newDetails = client.getExistingAppInstances(appName);
-					app.setInstanceData(newDetails);
+					CFApplicationDetail newDetails = client.getApplication(appName);
+					app.setDetailedData(newDetails);
 				}
 				model.setRefreshState(RefreshState.READY);
 			} catch (Throwable e) {

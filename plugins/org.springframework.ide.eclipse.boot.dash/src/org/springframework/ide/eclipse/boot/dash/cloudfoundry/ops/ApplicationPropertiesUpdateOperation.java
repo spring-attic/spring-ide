@@ -17,9 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -55,8 +54,8 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 
 		if (updateExistingApplicationInCloud(deploymentProperties, monitor)) {
 			CloudAppDashElement element = getDashElement();
-			CloudAppInstances existingAppInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
-			element.setInstanceData(existingAppInstances);
+			CFApplicationDetail existingAppInstances = model.getRunTarget().getClient().getApplication(appName);
+			element.setDetailedData(existingAppInstances);
 			checkTerminationRequested(monitor);
 		}
 	}
@@ -64,7 +63,7 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	protected boolean updateExistingApplicationInCloud(CloudApplicationDeploymentProperties properties,
 			IProgressMonitor monitor) throws Exception {
 
-		CFApplication app = model.getRunTarget().getClient().getApplication(appName);
+		CFApplicationDetail app = model.getRunTarget().getClient().getApplication(appName);
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 5);
 		boolean updated = false;
 

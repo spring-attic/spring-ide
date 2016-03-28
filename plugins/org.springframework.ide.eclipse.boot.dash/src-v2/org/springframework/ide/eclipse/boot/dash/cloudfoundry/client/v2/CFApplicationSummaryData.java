@@ -1,3 +1,12 @@
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+
 /*******************************************************************************
  * Copyright (c) 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
@@ -8,57 +17,50 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test.mocks;
+public class CFApplicationSummaryData implements CFApplication {
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+	private String name;
+	private int instances;
+	private int runningInstances;
+	private Map<String, String> env;
+	private int memory;
+	private UUID guid;
+	private List<String> services;
+	private String detectedBuildpack;
+	private String buildpackUrl;
+	private List<String> uris;
+	private CFAppState state;
+	private int diskQuota;
+	private Integer timeout;
+	private String command;
+	private String stack;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 
-public class CFApplicationData implements CFApplication {
 
-	private final String name;
-	private final UUID guid;
-	private final int instances;
-	private final int runningInstances;
-	private final CFAppState state;
-	private final int memory;
-	private final int diskQuota;
-	private final String detectedBuildpack;
-	private final String buildpackUrl;
-	private final Map<String, String> env;
-	private final List<String> services;
-	private final List<String> uris;
-	private final Integer timeout;
-	private final String command;
-	private final String stack;
+	public CFApplicationSummaryData(String name, int instances, int runningInstances, Map<String, String> env,
+			int memory, UUID guid, List<String> services, String detectedBuildpack, String buildpackUrl,
+			List<String> uris, CFAppState state, int diskQuota, Integer timeout, String command, String stack) {
+		super();
+		this.name = name;
+		this.instances = instances;
+		this.runningInstances = runningInstances;
+		this.env = env;
+		this.memory = memory;
+		this.guid = guid;
+		this.services = services;
+		this.detectedBuildpack = detectedBuildpack;
+		this.buildpackUrl = buildpackUrl;
+		this.uris = uris;
+		this.state = state;
+		this.diskQuota = diskQuota;
+		this.timeout = timeout;
+		this.command = command;
+		this.stack = stack;
+	}
 
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	public CFApplicationData(String name, UUID guid, int instances, int runningInstances, CFAppState state, int memory,
-			int diskQuota, String detectedBuildpack, String buildpackUrl, Map<String, String> env,
-			List<String> services, List<String> uris, Integer timeout, String command, String stack) {
-		super();
-		this.name = name;
-		this.guid = guid;
-		this.instances = instances;
-		this.runningInstances = runningInstances;
-		this.state = state;
-		this.memory = memory;
-		this.diskQuota = diskQuota;
-		this.detectedBuildpack = detectedBuildpack;
-		this.buildpackUrl = buildpackUrl;
-		this.env = env;
-		this.services = services;
-		this.uris = uris;
-		this.timeout = timeout;
-		this.command = command;
-		this.stack = stack;
 	}
 
 	@Override
@@ -116,14 +118,17 @@ public class CFApplicationData implements CFApplication {
 		return diskQuota;
 	}
 
+	@Override
 	public Integer getTimeout() {
 		return timeout;
 	}
 
+	@Override
 	public String getCommand() {
 		return command;
 	}
 
+	@Override
 	public String getStack() {
 		return stack;
 	}

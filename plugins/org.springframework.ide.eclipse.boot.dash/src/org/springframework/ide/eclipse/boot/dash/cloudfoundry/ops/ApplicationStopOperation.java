@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 public class ApplicationStopOperation extends CloudApplicationOperation {
@@ -52,8 +52,8 @@ public class ApplicationStopOperation extends CloudApplicationOperation {
 		if (updateElementRunState) {
 			model.getElementConsoleManager().terminateConsole(this.appName);
 
-			CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(this.appName);
-			app.setInstanceData(updatedInstances);
+			CFApplicationDetail updatedInstances = model.getRunTarget().getClient().getApplication(this.appName);
+			app.setDetailedData(updatedInstances);
 			checkTerminationRequested(monitor);
 		}
 	}

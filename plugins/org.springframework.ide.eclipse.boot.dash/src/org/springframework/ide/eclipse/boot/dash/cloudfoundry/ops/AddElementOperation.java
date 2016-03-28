@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -40,7 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class AddElementOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
-	private CFApplication existingApplication;
+	private CFApplicationDetail existingApplication;
 	private ApplicationDeploymentOperations operations;
 	private DebugSupport debugSupport;
 	private RunState runningOrDebugging;
@@ -58,7 +59,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 	 *            exists
 	 */
 	public AddElementOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState,
+			CloudFoundryBootDashModel model, CFApplicationDetail existingApplication, RunState preferedRunState,
 			ApplicationDeploymentOperations operations, DebugSupport debugSupport, RunState runningOrDebugging,
 			UserInteractions ui) {
 		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName(), CancelationTokens.NULL);
@@ -72,11 +73,11 @@ public class AddElementOperation extends CloudApplicationOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
-		CloudAppInstances existingInstances = null;
+		CFApplicationDetail existingInstances = null;
 		if (existingApplication == null) {
 			existingInstances = createApplication(monitor);
 		} else {
-			existingInstances = model.getRunTarget().getClient().getExistingAppInstances(existingApplication.getGuid());
+			existingInstances = model.getRunTarget().getClient().getApplication(existingApplication.getName());
 		}
 
 		monitor.worked(20);
@@ -128,7 +129,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 		}
 	}
 
-	protected CloudAppInstances createApplication(IProgressMonitor monitor) throws Exception {
+	protected CFApplicationDetail createApplication(IProgressMonitor monitor) throws Exception {
 
 		monitor.beginTask("Creating application: " + deploymentProperties.getAppName(), 10);
 		try {
@@ -141,7 +142,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 			// Clean-up: If app creation failed, check if the app was created
 			// anyway
 			// and delete it to allow users to redeploy
-			CFApplication toCleanUp = model.getRunTarget().getClient().getApplication(deploymentProperties.getAppName());
+			CFApplicationDetail toCleanUp = model.getRunTarget().getClient().getApplication(deploymentProperties.getAppName());
 			if (toCleanUp != null) {
 				model.getRunTarget().getClient().deleteApplication(toCleanUp.getName());
 			}
@@ -151,10 +152,10 @@ public class AddElementOperation extends CloudApplicationOperation {
 		logAndUpdateMonitor(
 				"Verifying that the application was created successfully: " + deploymentProperties.getAppName(),
 				monitor);
-		CloudAppInstances instances = model.getRunTarget().getClient().getExistingAppInstances(deploymentProperties.getAppName());
+		CFApplicationDetail appDetails = model.getRunTarget().getClient().getApplication(deploymentProperties.getAppName());
 		monitor.worked(5);
 
-		return instances;
+		return appDetails;
 	}
 
 }
