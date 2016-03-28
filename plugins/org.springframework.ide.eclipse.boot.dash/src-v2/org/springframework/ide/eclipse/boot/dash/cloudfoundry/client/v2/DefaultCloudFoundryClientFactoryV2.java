@@ -23,13 +23,15 @@ import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
+import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
@@ -49,15 +51,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactory {
-
-	private static String getSpaceId(CloudFoundryOperations operations, CFClientParams params) {
-		return operations.spaces().get(
-				GetSpaceRequest.builder()
-					.name(params.getSpaceName())
-					.build())
-				.map(SpaceDetail::getId)
-				.get();
-	}
 
 	@Override
 	public ClientRequests getClient(CFClientParams params) throws Exception {
@@ -98,15 +91,18 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
+				System.out.println("waitForApplicationDetails: "+appsToLookUp);
 				return Flux.fromIterable(appsToLookUp)
 				.flatMap((CFApplication appSummary) -> {
 					return operations.applications().get(GetApplicationRequest.builder()
 							.name(appSummary.getName())
 							.build()
 					)
-					.and(Mono.just(appSummary));
+					.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap(appSummary, appDetails))
+					.otherwise((error) -> {
+						return Mono.just(CFWrappingV2.wrap(appSummary, null));
+					});
 				})
-				.map(function((appDetail, appSummary) -> CFWrappingV2.wrap(appDetail)))
 				.toList()
 				.get(timeToWait);
 			}
@@ -190,10 +186,25 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				return null;
 			}
 
+			private CloudFoundryOperations operatationsFor(OrganizationSummary org) {
+				return new CloudFoundryOperationsBuilder()
+				.cloudFoundryClient(client)
+				.target(org.getName())
+				.build();
+			}
+
 			@Override
 			public List<CFSpace> getSpaces() throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
+				return operations.organizations()
+				.list()
+				.flatMap((OrganizationSummary org) -> {
+					return operatationsFor(org)
+					.spaces()
+					.list()
+					.map((space) -> CFWrappingV2.wrap(org, space));
+				})
+				.toList()
+				.get();
 			}
 
 			@Override

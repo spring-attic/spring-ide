@@ -7,14 +7,18 @@ import java.util.UUID;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationDetail.InstanceDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
+import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
+import org.cloudfoundry.operations.spaces.SpaceSummary;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -22,7 +26,19 @@ import com.google.common.collect.ImmutableMap;
 public class CFWrappingV2 {
 
 	public static CFApplicationDetail wrap(ApplicationDetail details) {
-		return new CFApplicationDetailData(details);
+		if (details!=null) {
+			return new CFApplicationDetailData(details);
+		}
+		return null;
+	}
+
+	public static CFApplicationDetail wrap(CFApplication summary, ApplicationDetail details) {
+		if (details==null) {
+			//Detail lookup failed. App may not be running and we can't fetch instance data
+			return new CFApplicationDetailData(summary);
+		} else {
+			return new CFApplicationDetailData(details);
+		}
 	}
 
 	public static CFInstanceStats wrap(InstanceDetail instanceDetail) {
@@ -128,6 +144,11 @@ public class CFWrappingV2 {
 			public int getDiskQuota() {
 				return app.getDiskQuota();
 			}
+
+			@Override
+			public String toString() {
+				return "CFApplication("+getName()+")";
+			}
 		};
 	}
 
@@ -193,5 +214,42 @@ public class CFWrappingV2 {
 			return CFAppState.UNKNOWN;
 		}
 	}
+
+	public static CFSpace wrap(OrganizationSummary org, SpaceSummary space) {
+		return new CFSpace() {
+			@Override
+			public String getName() {
+				return space.getName();
+			}
+			@Override
+			public CFOrganization getOrganization() {
+				return wrap(org);
+			}
+			@Override
+			public UUID getGuid() {
+				return UUID.fromString(space.getId());
+			}
+
+			@Override
+			public String toString() {
+				return "CFSpace("+org.getName()+" / "+getName()+")";
+			}
+		};
+	}
+
+	public static CFOrganization wrap(OrganizationSummary org) {
+		return new CFOrganization() {
+			@Override
+			public String getName() {
+				return org.getName();
+			}
+
+			@Override
+			public UUID getGuid() {
+				return UUID.fromString(org.getId());
+			}
+		};
+	}
+
 
 }

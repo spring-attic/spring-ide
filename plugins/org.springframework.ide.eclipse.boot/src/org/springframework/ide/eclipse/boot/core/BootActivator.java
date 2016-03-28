@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -74,7 +73,7 @@ public class BootActivator extends AbstractUIPlugin {
 	public static IStatus createInfoStatus(String msg) {
 		return new Status(IStatus.INFO, PLUGIN_ID, msg);
 	}
-	
+
 	public static void log(Throwable e) {
 		getDefault().getLog().log(createErrorStatus(e));
 	}
