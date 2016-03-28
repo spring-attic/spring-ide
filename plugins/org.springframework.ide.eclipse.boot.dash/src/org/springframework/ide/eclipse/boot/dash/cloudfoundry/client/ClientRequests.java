@@ -59,4 +59,6 @@ public interface ClientRequests {
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
+
+	boolean applicationExists(String appName);
 }

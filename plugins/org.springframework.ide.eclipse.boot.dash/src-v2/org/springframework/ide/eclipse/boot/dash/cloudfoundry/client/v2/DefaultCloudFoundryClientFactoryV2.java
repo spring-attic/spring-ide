@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import static org.cloudfoundry.util.tuple.TupleUtils.function;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,18 +18,19 @@ import java.util.zip.ZipFile;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.v2.applications.ApplicationResource;
+import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
+import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
-import org.cloudfoundry.operations.spaces.GetSpaceRequest;
-import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
@@ -55,18 +54,17 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 	@Override
 	public ClientRequests getClient(CFClientParams params) throws Exception {
 
-		SpringCloudFoundryClient client = SpringCloudFoundryClient.builder()
-				.username(params.getUsername())
-				.password(params.getPassword())
-				.host(params.getHost())
-				.build();
-
-		final CloudFoundryOperations operations = new CloudFoundryOperationsBuilder()
-			.cloudFoundryClient(client)
-			.target(params.getOrgName(), params.getSpaceName())
-			.build();
-
 		return new ClientRequests() {
+			SpringCloudFoundryClient client = SpringCloudFoundryClient.builder()
+					.username(params.getUsername())
+					.password(params.getPassword())
+					.host(params.getHost())
+					.build();
+
+			 CloudFoundryOperations operations = new CloudFoundryOperationsBuilder()
+				.cloudFoundryClient(client)
+				.target(params.getOrgName(), params.getSpaceName())
+				.build();
 
 			@Override
 			public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
@@ -91,7 +89,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
-				System.out.println("waitForApplicationDetails: "+appsToLookUp);
 				return Flux.fromIterable(appsToLookUp)
 				.flatMap((CFApplication appSummary) -> {
 					return operations.applications().get(GetApplicationRequest.builder()
@@ -100,6 +97,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 					)
 					.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap(appSummary, appDetails))
 					.otherwise((error) -> {
+
 						return Mono.just(CFWrappingV2.wrap(appSummary, null));
 					});
 				})
@@ -166,12 +164,17 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public void restartApplication(String appName) throws Exception {
-				Assert.isLegal(false, "Not implemented");
+				operations.applications().restart(RestartApplicationRequest.builder()
+						.name(appName)
+						.build())
+				.get();
+
 			}
 
 			@Override
 			public void logout() {
-				Assert.isLegal(false, "Not implemented");
+				operations = null;
+				client = null;
 			}
 
 			@Override
@@ -247,12 +250,18 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public CFApplicationDetail getApplication(String appName) throws Exception {
-				return operations.applications().get(GetApplicationRequest.builder()
-					.name(appName)
-					.build()
-				)
-				.map(CFWrappingV2::wrap)
-				.get();
+				try {
+					return operations.applications().get(GetApplicationRequest.builder()
+						.name(appName)
+						.build()
+					)
+					.map(CFWrappingV2::wrap)
+					.get();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					throw e;
+				}
 			}
 
 			@Override
@@ -271,6 +280,19 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
 				Assert.isLegal(false, "Not implemented");
 
+			}
+
+			@Override
+			public boolean applicationExists(String appName) {
+				return client.applicationsV2().list(ListApplicationsRequest.builder()
+					.name(appName)
+					.build()
+				)
+				.map((ListApplicationsResponse response) -> {
+					List<ApplicationResource> resource = response.getResources();
+					return resource != null && !resource.isEmpty();
+				})
+				.get();
 			}
 		};
 	}

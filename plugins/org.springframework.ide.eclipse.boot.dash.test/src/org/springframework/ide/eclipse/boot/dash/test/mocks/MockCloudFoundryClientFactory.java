@@ -370,6 +370,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			checkConnected();
 			return ImmutableList.<CFStack>copyOf(stacksByName.values());
 		}
+
+		@Override
+		public boolean applicationExists(String appName) {
+			notImplementedStub();
+			return false;
+		}
 	}
 
 	public void defBuildpacks(String... names) {

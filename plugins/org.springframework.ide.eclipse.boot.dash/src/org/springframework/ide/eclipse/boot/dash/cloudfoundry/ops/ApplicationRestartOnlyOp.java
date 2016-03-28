@@ -41,8 +41,7 @@ public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		app.startOperationStarting();
 		try {
-			CFApplicationDetail appInstances = model.getRunTarget().getClient().getApplication(appName);
-			if (appInstances == null) {
+			if(!model.getRunTarget().getClient().applicationExists(appName) ) {
 				throw BootDashActivator.asCoreException(
 						"Unable to start the application. Application does not exist anymore in Cloud Foundry: " + appName);
 			}
