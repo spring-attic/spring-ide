@@ -20,6 +20,7 @@ import java.util.zip.ZipFile;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
@@ -72,8 +73,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			.target(params.getOrgName(), params.getSpaceName())
 			.build();
 
-		final String spaceId = getSpaceId(operations, params);
-
 		return new ClientRequests() {
 
 			@Override
@@ -96,40 +95,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				.map(ImmutableList::copyOf)
 				.get();
 			}
-
-//			@Override
-//			public List<CFService> getServices() throws Exception {
-//				return PaginationUtils.requestResources((page) -> {
-//					ListServiceInstancesRequest request = ListServiceInstancesRequest.builder()
-//						.spaceId(spaceId)
-//						.page(page)
-//						.build();
-//					return client.serviceInstances()
-//							.list(request);
-//				})
-//				.flatMap((ServiceInstanceResource instance) -> fetchPlan(client, instance))
-//				.toList()
-//				.map(ImmutableList::copyOf)
-//				.get();
-//			}
-//
-//			protected Publisher<CFService> fetchPlan(SpringCloudFoundryClient client,
-//					ServiceInstanceResource instance) {
-//				String planId = instance.getEntity().getServicePlanId();
-//				return client.servicePlans().get(
-//						GetServicePlanRequest.builder()
-//						.servicePlanId(planId)
-//						.build()
-//				)
-//				.map((GetServicePlanResponse response) -> {
-//					ServicePlanResource plan = ServicePlanResource.builder()
-//						.entity(response.getEntity())
-//						.metadata(response.getMetadata())
-//						.build();
-//
-//					return CFWrappingV2.wrap(plan, instance);
-//				});
-//			}
 
 			@Override
 			public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
@@ -204,11 +169,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			}
 
 			@Override
-			public void setHealthCheck(UUID guid, String hcType) throws Exception {
-				Assert.isLegal(false, "Not implemented");
-			}
-
-			@Override
 			public void restartApplication(String appName) throws Exception {
 				Assert.isLegal(false, "Not implemented");
 			}
@@ -238,8 +198,28 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public String getHealthCheck(UUID appGuid) throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
+				//XXX CF V2: getHealthcheck (via operations API)
+				// See: https://www.pivotaltracker.com/story/show/116462215
+				return client.applicationsV2()
+				.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
+					.applicationId(appGuid.toString())
+					.build()
+				)
+				.map((response) -> response.getEntity().getHealthCheckType())
+				.get();
+			}
+
+			@Override
+			public void setHealthCheck(UUID guid, String hcType) throws Exception {
+				//XXX CF V2: setHealthCheck (via operations API)
+				// See: https://www.pivotaltracker.com/story/show/116462369
+				client.applicationsV2()
+				.update(UpdateApplicationRequest.builder()
+					.applicationId(guid.toString())
+					.healthCheckType(hcType)
+					.build()
+				)
+				.get(); //To force synchronous execution
 			}
 
 			@Override

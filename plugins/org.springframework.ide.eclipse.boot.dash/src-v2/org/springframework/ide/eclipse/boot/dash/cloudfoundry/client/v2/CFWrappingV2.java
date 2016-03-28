@@ -3,14 +3,12 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationDetail.InstanceDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -135,6 +133,10 @@ public class CFWrappingV2 {
 
 	public static CFService wrap(final ServiceInstance service) {
 		return new CFService() {
+
+			//XXX CF V2: cf service properties
+			// Realign these properties and the corresponding properties page in the GUI as well
+			// so that it displays similar infos as what is shown by 'cf service' UI.
 
 			@Override
 			public String getName() {
