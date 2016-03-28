@@ -56,43 +56,43 @@ public class CFWrappingV2 {
 
 			@Override
 			public Integer getTimeout() {
-				//XXX CF V2
+				//XXX CF V2: getTimeout
 				return null;
 			}
 
 			@Override
 			public String getStack() {
-				//XXX CF V2
+				//XXX CF V2: getStack
 				return null;
 			}
 
 			@Override
 			public List<String> getServices() {
-				//XXX CF V2
+				//XXX CF V2: Application.getServices
 				return ImmutableList.of();
 			}
 
 			@Override
 			public Map<String, String> getEnvAsMap() {
-				//XXX CF V2
+				//XXX CF V2: Application.getEnv
 				return ImmutableMap.of();
 			}
 
 			@Override
 			public String getDetectedBuildpack() {
-				//XXX CF V2
+				//XXX CF V2: Application.getDetectedBuildpack
 				return null;
 			}
 
 			@Override
 			public String getCommand() {
-				//XXX CF V2
+				//XXX CF V2: Application.getCommand
 				return null;
 			}
 
 			@Override
 			public String getBuildpackUrl() {
-				//XXX CF V2
+				//XXX CF V2: Application.getBuildpackUrl
 				return null;
 			}
 
@@ -191,45 +191,5 @@ public class CFWrappingV2 {
 			return CFAppState.UNKNOWN;
 		}
 	}
-
-//	public static CFService wrap(final ServicePlanResource plan, final ServiceInstanceResource instance) {
-//		return new CFService() {
-//			public String getName() {
-//				return instance.getEntity().getName();
-//			}
-//
-//			@Override
-//			@Deprecated
-//			public String getVersion() {
-//				return null;
-//			}
-//
-//			@Override
-//			public String getType() {
-//				return instance.getEntity().getType();
-//			}
-//
-//			/**
-//			 * This info is deprecated, client probably doesn't even return it anymore!
-//			 */
-//			@Override
-//			@Deprecated
-//			public String getProvider() {
-//				return null;
-////				return service.getEntity().getProvider();
-//			}
-//
-//			@Override
-//			public String getPlan() {
-//				//XXX CF V2 an id is probably not what the caller expects
-//				return plan.getEntity().getName();
-//			}
-//
-//			@Override
-//			public String getDashboardUrl() {
-//				return instance.getEntity().getDashboardUrl();
-//			}
-//		};
-//	}
 
 }
