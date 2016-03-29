@@ -250,18 +250,12 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public CFApplicationDetail getApplication(String appName) throws Exception {
-				try {
-					return operations.applications().get(GetApplicationRequest.builder()
+				return operations.applications().get(GetApplicationRequest.builder()
 						.name(appName)
 						.build()
 					)
 					.map(CFWrappingV2::wrap)
 					.get();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					throw e;
-				}
 			}
 
 			@Override
