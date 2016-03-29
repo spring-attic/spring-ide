@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
 
@@ -58,10 +59,17 @@ import reactor.core.publisher.Mono;
 
 public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactory {
 
-	private static <T> Function<T, T> debug(String msg) {
-		return (it) -> {
-			System.out.println(msg+it);
-			return it;
+	private static <T> Function<Mono<T>, Mono<T>> debugMono(String msg) {
+		return (mono) -> {
+			return mono
+			.then((value) -> {
+				System.out.println(msg+" => "+value);
+				return Mono.just(value);
+			})
+			.otherwise((error) -> {
+				System.out.println(msg+" ERROR => "+ ExceptionUtil.getMessage(error));
+				return Mono.error(error);
+			});
 		};
 	}
 
@@ -272,7 +280,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				return orgId.flatMap(this::requestDomains)
 				.map(CFWrappingV2::wrap)
 				.toList()
-				.map(debug("domain: "))
+				.as(debugMono("domains"))
 				.get();
 			}
 
@@ -280,7 +288,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				return PaginationUtils.requestResources((page) ->
 					client.domains().list(ListDomainsRequest.builder()
 						.page(page)
-						.owningOrganizationId(orgId)
+//						.owningOrganizationId(orgId)
 						.build()
 					)
 				);
