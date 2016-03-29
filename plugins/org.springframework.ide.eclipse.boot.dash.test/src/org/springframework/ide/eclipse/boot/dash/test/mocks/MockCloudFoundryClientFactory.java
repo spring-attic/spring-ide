@@ -372,9 +372,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public boolean applicationExists(String appName) {
-			notImplementedStub();
-			return false;
+		public boolean applicationExists(String appName) throws IOException {
+			return getSpace().getApplication(appName) !=null;
 		}
 	}
 

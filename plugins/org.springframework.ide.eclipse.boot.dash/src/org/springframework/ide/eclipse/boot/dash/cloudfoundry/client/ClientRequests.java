@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,6 +60,5 @@ public interface ClientRequests {
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
-
-	boolean applicationExists(String appName);
+	boolean applicationExists(String appName) throws Exception;
 }
