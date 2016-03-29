@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationDetail.InstanceDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
@@ -14,6 +15,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
@@ -39,6 +41,22 @@ public class CFWrappingV2 {
 		} else {
 			return new CFApplicationDetailData(details);
 		}
+	}
+
+	public static CFCloudDomain wrap(DomainResource domainRsrc) {
+		if (domainRsrc!=null) {
+			String name = domainRsrc.getEntity().getName();
+			return new CFCloudDomain() {
+				public String getName() {
+					return name;
+				}
+				@Override
+				public String toString() {
+					return "CFCloudDomain("+name+")";
+				}
+			};
+		}
+		return null;
 	}
 
 	public static CFInstanceStats wrap(InstanceDetail instanceDetail) {

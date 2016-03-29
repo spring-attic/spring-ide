@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
@@ -22,13 +24,18 @@ import org.cloudfoundry.client.v2.applications.ApplicationResource;
 import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
+import org.cloudfoundry.client.v2.domains.DomainResource;
+import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
+import org.cloudfoundry.operations.organizations.OrganizationDetail;
+import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
+import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -51,6 +58,13 @@ import reactor.core.publisher.Mono;
 
 public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactory {
 
+	private static <T> Function<T, T> debug(String msg) {
+		return (it) -> {
+			System.out.println(msg+it);
+			return it;
+		};
+	}
+
 	@Override
 	public ClientRequests getClient(CFClientParams params) throws Exception {
 
@@ -65,6 +79,22 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				.cloudFoundryClient(client)
 				.target(params.getOrgName(), params.getSpaceName())
 				.build();
+
+			Mono<String> orgId = getOrgId();
+
+			private Mono<String> getOrgId() {
+				String orgName = params.getOrgName();
+				if (orgName==null) {
+					return Mono.error(new IOException("No organization targetted"));
+				} else {
+					return operations.organizations().get(OrganizationInfoRequest.builder()
+							.name(params.getOrgName())
+							.build()
+					)
+					.map(OrganizationDetail::getId)
+					.cache();
+				}
+			}
 
 			@Override
 			public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
@@ -238,8 +268,22 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFCloudDomain> getDomains() throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
+				//XXX CF V2: list domains using 'operations' api.
+				return orgId.flatMap(this::requestDomains)
+				.map(CFWrappingV2::wrap)
+				.toList()
+				.map(debug("domain: "))
+				.get();
+			}
+
+			private Flux<DomainResource> requestDomains(String orgId) {
+				return PaginationUtils.requestResources((page) ->
+					client.domains().list(ListDomainsRequest.builder()
+						.page(page)
+						.owningOrganizationId(orgId)
+						.build()
+					)
+				);
 			}
 
 			@Override

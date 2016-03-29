@@ -270,6 +270,9 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		assertEquals("something", actualEnv.get("FOO"));
 	}
 
+	//XXX CF V2: Add a test for 'dashboard url'. I.e. a test that verifies the double-click action on a service
+	// works.
+
 	///////////////////////////////////////////////////////////////////////////////////
 
 
