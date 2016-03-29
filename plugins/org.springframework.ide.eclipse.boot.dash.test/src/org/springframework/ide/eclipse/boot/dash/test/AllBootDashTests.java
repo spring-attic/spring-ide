@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.DeploymentProperties2Yaml;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeTests;
@@ -23,6 +22,8 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 @SuiteClasses({
 	//Tests suites are put in order roughly based on
 	// how long it takes to run them. Faster ones at the top.
+
+	CloudFoundryClientTest.class,
 
 	//Added by Alex:
 	DeploymentProperties2Yaml.class,
