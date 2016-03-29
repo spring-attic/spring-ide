@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="/home/kdvolder/git/cf-java-client/cloudfoundry-client/target/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
@@ -20,7 +23,6 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/protobuf-java-2.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/reactive-streams-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/reactor-core-2.5.0.M2.jar" sourcepath="/home/kdvolder/.m2/repository/io/projectreactor/reactor-core/2.5.0.M2/reactor-core-2.5.0.M2-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-aop-4.2.5.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-beans-4.2.5.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-context-4.2.5.RELEASE.jar"/>
@@ -35,8 +37,6 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/tomcat-embed-core-8.0.32.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/tomcat-embed-logging-juli-8.0.32.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/tomcat-embed-websocket-8.0.32.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.16.jar" sourcepath="sources/slf4j-api-1.7.16-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
