@@ -87,7 +87,6 @@ public class CloudFoundryClientTest {
 		);
 	}
 
-
 	private void assertContains(Set<String> strings, String... expecteds) {
 		for (String e : expecteds) {
 			assertContains(e, strings);

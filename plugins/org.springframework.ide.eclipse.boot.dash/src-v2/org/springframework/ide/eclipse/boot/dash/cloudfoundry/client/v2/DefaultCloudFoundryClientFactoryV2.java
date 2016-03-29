@@ -29,7 +29,9 @@ import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
@@ -186,7 +188,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			@Override
 			public void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception {
 				Assert.isLegal(false, "Not implemented");
-
 			}
 
 			@Override
@@ -283,7 +284,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				return orgId.flatMap(this::requestDomains)
 				.map(CFWrappingV2::wrap)
 				.toList()
-				.as(debugMono("domains"))
+//				.as(debugMono("domains"))
 				.get();
 			}
 
@@ -309,12 +310,31 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public CFApplicationDetail getApplication(String appName) throws Exception {
-				return operations.applications().get(GetApplicationRequest.builder()
-					.name(appName)
-					.build()
-				)
-				.map(CFWrappingV2::wrap)
-				.get();
+				return ReactorUtils.get(
+					operations.applications().get(GetApplicationRequest.builder()
+						.name(appName)
+						.build()
+					)
+					.map(CFWrappingV2::wrap)
+					.otherwise((error) -> {
+						//XXX CF V2: remove workaround for bug in CF V2 operations (no details for stopped app)
+						// See https://www.pivotaltracker.com/story/show/116463023
+						//Because there's presently a bug preventing us from retrieving details for stopped apps...
+						// we shall have to make do with a summary pulled from the list of app summaries instead.
+						return operations.applications().list()
+						.filter((ApplicationSummary app) -> app.getName().equals(appName))
+						.elementAt(0)
+						.otherwise((outOfBounds) -> {
+							if (outOfBounds instanceof IndexOutOfBoundsException) {
+								return Mono.empty();
+							}
+							return Mono.error(outOfBounds);
+						})
+						.map(CFWrappingV2::wrap)
+						.map((CFApplication summary) -> CFWrappingV2.wrap(summary, null));
+					})
+					.log("getApplication("+appName+")")
+				);
 			}
 
 			@Override
@@ -332,6 +352,21 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 			@Override
 			public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
 				Assert.isLegal(false, "Not implemented");
+
+// What the old client did:
+//				new BasicRequest(this.client, deploymentProperties.getAppName(), "Creating application") {
+//				@Override
+//				protected void runRequest(CloudFoundryOperations client) throws Exception {
+//					client.createApplication(deploymentProperties.getAppName(),
+//							new Staging(deploymentProperties.getCommand(), deploymentProperties.getBuildpack(),
+//									deploymentProperties.getStack(), deploymentProperties.getTimeout()),
+//							deploymentProperties.getDiskQuota(),
+//							deploymentProperties.getMemory(),
+//							new ArrayList<>(deploymentProperties.getUris()),
+//							deploymentProperties.getServices()
+//					);
+//				}
+//			}.call();
 
 			}
 

@@ -89,7 +89,8 @@ public class ApplicationDeploymentOperations {
 
 		CFApplicationDetail existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
 
-		if (existingApp != null && !ui.confirmOperation(APP_FOUND_TITLE,
+		if (existingApp != null &&
+				!ui.confirmOperation(APP_FOUND_TITLE,
 				NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(), properties.getProject().getName()))) {
 			throw new OperationCanceledException();
 		}
