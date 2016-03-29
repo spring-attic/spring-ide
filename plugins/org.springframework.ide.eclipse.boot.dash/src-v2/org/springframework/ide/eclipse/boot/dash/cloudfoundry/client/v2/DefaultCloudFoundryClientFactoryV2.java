@@ -217,8 +217,11 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFStack> getStacks() throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
+				return operations.stacks()
+				.list()
+				.map(CFWrappingV2::wrap)
+				.toList()
+				.get();
 			}
 
 			@Override
@@ -296,18 +299,22 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 
 			@Override
 			public List<CFBuildpack> getBuildpacks() throws Exception {
-				Assert.isLegal(false, "Not implemented");
-				return null;
+				//XXX CF V2 getBuildpacks (not yet implemented in V2 client or operations)
+				return ImmutableList.of(
+						CFWrappingV2.buildpack("java_buildpack"),
+						CFWrappingV2.buildpack("staticfile_buildpack"),
+						CFWrappingV2.buildpack("ruby_buildpack")
+				);
 			}
 
 			@Override
 			public CFApplicationDetail getApplication(String appName) throws Exception {
 				return operations.applications().get(GetApplicationRequest.builder()
-						.name(appName)
-						.build()
-					)
-					.map(CFWrappingV2::wrap)
-					.get();
+					.name(appName)
+					.build()
+				)
+				.map(CFWrappingV2::wrap)
+				.get();
 			}
 
 			@Override

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.util.List;
@@ -11,25 +21,53 @@ import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.spaces.SpaceSummary;
+import org.cloudfoundry.operations.stacks.Stack;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * Various helper methods to 'wrap' objects returned by CF client into
+ * our own types, so that we do not directly expose library types to our
+ * code.
+ *
+ * @author Kris De Volder
+ */
 public class CFWrappingV2 {
 
 	public static CFApplicationDetail wrap(ApplicationDetail details) {
 		if (details!=null) {
 			return new CFApplicationDetailData(details);
+		}
+		return null;
+	}
+
+	public static CFStack wrap(Stack stack) {
+		if (stack!=null) {
+			String name = stack.getName();
+			return new CFStack() {
+				@Override
+				public String getName() {
+					return name;
+				}
+
+				@Override
+				public String toString() {
+					return "CFStack("+name+")";
+				}
+			};
 		}
 		return null;
 	}
@@ -269,5 +307,12 @@ public class CFWrappingV2 {
 		};
 	}
 
-
+	public static CFBuildpack buildpack(String name) {
+		return new CFBuildpack() {
+			@Override
+			public String getName() {
+				return name;
+			}
+		};
+	}
 }

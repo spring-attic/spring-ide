@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 
@@ -69,6 +70,23 @@ public class CloudFoundryClientTest {
 			"ruby_buildpack"
 		);
 	}
+
+	@Test
+	public void testGetStacks() throws Exception {
+		ClientRequests client = createClient(CfTestTargetParams.fromEnv());
+		List<CFStack> stacks = client.getStacks();
+
+		Set<String> names = Flux.fromIterable(stacks)
+			.map(CFStack::getName)
+			.toList()
+			.map(ImmutableSet::copyOf)
+			.get();
+
+		assertContains(names,
+				"cflinuxfs2"
+		);
+	}
+
 
 	private void assertContains(Set<String> strings, String... expecteds) {
 		for (String e : expecteds) {
