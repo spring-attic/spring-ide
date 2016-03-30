@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
@@ -84,6 +85,8 @@ public class JdtAnnotationMetadataTest {
 		javaProject = JdtUtils.getJavaProject(project);
 		classloader = JdtUtils.getClassLoader(project, ApplicationContext.class.getClassLoader());
 		factory = new JdtMetadataReaderFactory(javaProject, classloader);
+		StsTestUtil.waitForAutoBuild();
+		StsTestUtil.waitForJobFamily(ResourcesPlugin.FAMILY_AUTO_REFRESH);
 	}
 	
 	@After

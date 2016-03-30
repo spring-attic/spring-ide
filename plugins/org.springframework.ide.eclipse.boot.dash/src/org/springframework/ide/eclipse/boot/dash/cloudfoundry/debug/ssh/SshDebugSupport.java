@@ -28,10 +28,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 /**
  * Uses ssh tunnelling on Diego to support debugging of app running on CF.
@@ -98,8 +98,8 @@ public class SshDebugSupport extends DebugSupport {
 	}
 
 	@Override
-	public Operation<?> createOperation(CloudAppDashElement app, String opName, UserInteractions ui) {
-		return new SshDebugStartOperation(app, this);
+	public Operation<?> createOperation(CloudAppDashElement app, String opName, UserInteractions ui, CancelationToken cancelationToken) {
+		return new SshDebugStartOperation(app, this, cancelationToken);
 	}
 
 	@Override

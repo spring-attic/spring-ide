@@ -16,9 +16,12 @@ import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.base.Objects;
@@ -37,9 +40,9 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 	private final CloudApplicationDeploymentProperties deploymentProperties;
 
 	public ApplicationPropertiesUpdateOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model) {
+			CloudFoundryBootDashModel model, CancelationToken cancelationToken) {
 		super("Updating application deployment properties - " + deploymentProperties.getAppName(), model,
-				deploymentProperties.getAppName());
+				deploymentProperties.getAppName(), cancelationToken);
 		this.deploymentProperties = deploymentProperties;
 	}
 
@@ -51,10 +54,10 @@ public class ApplicationPropertiesUpdateOperation extends CloudApplicationOperat
 		}
 
 		if (updateExistingApplicationInCloud(deploymentProperties, monitor)) {
-			boolean checkTermination = true;
-			this.eventHandler.fireEvent(
-					eventFactory.getUpdateRunStateEvent(model.getRunTarget().getClient().getExistingAppInstances(appName), getDashElement(), null),
-					checkTermination);
+			CloudAppDashElement element = getDashElement();
+			CloudAppInstances existingAppInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
+			element.setInstanceData(existingAppInstances);
+			checkTerminationRequested(monitor);
 		}
 	}
 

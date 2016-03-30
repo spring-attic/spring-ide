@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -40,7 +42,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class AddElementOperation extends CloudApplicationOperation {
 
 	private final CloudApplicationDeploymentProperties deploymentProperties;
-	private RunState preferedRunState;
 	private CFApplication existingApplication;
 	private ApplicationDeploymentOperations operations;
 	private DebugSupport debugSupport;
@@ -59,11 +60,12 @@ public class AddElementOperation extends CloudApplicationOperation {
 	 *            exists
 	 */
 	public AddElementOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState, ApplicationDeploymentOperations operations, DebugSupport debugSupport, RunState runningOrDebugging, UserInteractions ui) {
-		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
+			CloudFoundryBootDashModel model, CFApplication existingApplication, RunState preferedRunState,
+			ApplicationDeploymentOperations operations, DebugSupport debugSupport, RunState runningOrDebugging,
+			UserInteractions ui) {
+		super("Deploying application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName(), CancelationTokens.NULL);
 		this.deploymentProperties = deploymentProperties;
 		this.existingApplication = existingApplication;
-		this.preferedRunState = preferedRunState;
 		this.operations = operations;
 		this.debugSupport = debugSupport;
 		this.runningOrDebugging = runningOrDebugging;
@@ -88,11 +90,7 @@ public class AddElementOperation extends CloudApplicationOperation {
 
 		IProject project = deploymentProperties.getProject();
 
-		if (preferedRunState == null) {
-			preferedRunState = ApplicationRunningStateTracker.getRunState(existingInstances);
-		}
-
-		CloudAppDashElement cde = this.model.addElement(existingInstances, project, preferedRunState);
+		CloudAppDashElement cde = this.model.addElement(existingInstances, project);
 		if (project != null && cde != null) {
 			BootDashElement localElement = findLocalBdeForProject(project);
 			if (localElement != null) {
@@ -100,12 +98,12 @@ public class AddElementOperation extends CloudApplicationOperation {
 			}
 			// Persist the manifest path when creating the bde
 			cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
-			String hc = cde.getTarget().getHealthCheck(cde.getAppGuid());
+			String hc = getClientRequests().getHealthCheck(cde.getAppGuid());
 			cde.setHealthCheck(hc);
 		}
 
 		// once CDE is available, restart
-		this.operations.restartAndPush(cde, debugSupport, runningOrDebugging, ui).run(monitor);
+		this.operations.firstStartAndPush(cde, deploymentProperties, debugSupport, runningOrDebugging, ui, cde.createCancelationToken()).run(monitor);
 	}
 
 	private static BootDashElement findLocalBdeForProject(IProject project) {

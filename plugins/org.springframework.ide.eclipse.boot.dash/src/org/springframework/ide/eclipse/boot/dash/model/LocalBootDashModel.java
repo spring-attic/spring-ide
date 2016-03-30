@@ -31,6 +31,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathL
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -84,7 +85,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	void init() {
 		if (elements==null) {
-			this.elements = new LiveSetVariable<BootDashElement>();
+			this.elements = new LiveSetVariable<BootDashElement>(AsyncMode.SYNC);
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);

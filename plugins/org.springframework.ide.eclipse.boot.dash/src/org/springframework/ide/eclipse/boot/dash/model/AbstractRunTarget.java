@@ -10,19 +10,32 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.util.template.Template;
+import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
+import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-public abstract class AbstractRunTarget implements RunTarget {
+public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
+
+	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 
 	private String id;
 	private String name;
 	private RunTargetType type;
+	private IPropertyStore propertyStore;
 
 	public AbstractRunTarget(RunTargetType type, String id, String name) {
 		this.id = id;
 		this.name = name;
 		this.type = type;
+		IPropertyStore typeStore = type.getPropertyStore();
+		if (typeStore!=null) {
+			propertyStore = PropertyStoreFactory.createSubStore(id, typeStore);
+		}
 	}
 
 	public AbstractRunTarget(RunTargetType type, String idAndName) {
@@ -85,4 +98,57 @@ public abstract class AbstractRunTarget implements RunTarget {
 		return type;
 	}
 
+	@Override
+	public String getNameTemplate() {
+		PropertyStoreApi props = getPersistentProperties();
+		if (props!=null) {
+			String localTemplate = props.get(NAME_TEMPLATE);
+			if (localTemplate!=null) {
+				return localTemplate;
+			}
+		}
+		return getType().getNameTemplate();
+	}
+
+	@Override
+	public void setNameTemplate(String template) throws Exception {
+		getPersistentProperties().put(NAME_TEMPLATE, template);
+	}
+
+	@Override
+	public String getDisplayName() {
+		Template template = Templates.create(getNameTemplate());
+		if (template!=null) {
+			return template.render(this);
+		}
+		return getName();
+	}
+
+	@Override
+	public String getTemplateVar(char name) {
+		return null;
+	}
+
+	@Override
+	public boolean hasCustomNameTemplate() {
+		PropertyStoreApi props = getPersistentProperties();
+		if (props!=null) {
+			return props.get(NAME_TEMPLATE)!=null;
+		}
+		return false;
+	}
+
+	@Override
+	public IPropertyStore getPropertyStore() {
+		return propertyStore;
+	}
+
+	@Override
+	public PropertyStoreApi getPersistentProperties() {
+		IPropertyStore store = getPropertyStore();
+		if (store!=null) {
+			return new PropertyStoreApi(store);
+		}
+		return null;
+	}
 }

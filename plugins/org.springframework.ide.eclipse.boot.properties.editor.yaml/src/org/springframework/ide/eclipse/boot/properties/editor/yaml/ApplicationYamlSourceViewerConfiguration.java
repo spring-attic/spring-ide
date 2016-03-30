@@ -34,12 +34,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFin
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinders;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesHyperlinkDetector;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesReconcilerFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.SpringPropertyProblemQuickAssistProcessor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;

@@ -80,6 +80,7 @@ public class BootDashActions {
 
 	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
 	private ToggleFilterAction[] toggleFilterActions;
+	private CustmomizeTargetLabelAction customizeTargetLabelAction;
 
 	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
@@ -172,6 +173,7 @@ public class BootDashActions {
 			updatePasswordAction = new UpdatePasswordAction(sectionSelection, ui);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
 			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
+			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
@@ -200,6 +202,7 @@ public class BootDashActions {
 
 		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
 		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
+
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -452,6 +455,10 @@ public class BootDashActions {
 		return toggleFilterActions;
 	}
 
+	public CustmomizeTargetLabelAction getCustomizeTargetLabelAction() {
+		return customizeTargetLabelAction;
+	}
+
 	public ImmutableList<IAction> getDebugOnTargetActions() {
 		return getDeployAndStartOnTargetActions(debugOnTargetActions);
 	}
@@ -481,4 +488,5 @@ public class BootDashActions {
 			}
 		};
 	}
+
 }

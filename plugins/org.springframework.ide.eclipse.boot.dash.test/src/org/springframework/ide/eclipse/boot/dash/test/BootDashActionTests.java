@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getJMXPortAsInt;
 import java.util.EnumSet;
 
 import org.eclipse.core.resources.IProject;
@@ -53,8 +55,6 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
-
-import static org.mockito.Mockito.*;
 
 /**
  * @author Kris De Volder
@@ -279,9 +279,9 @@ public class BootDashActionTests {
 
 		ILaunchConfiguration conf1 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
-		assertEquals(2, element.getLaunchConfigs().size());
 		new ACondition("Wait for elements", 3000) {
 			public boolean test() throws Exception {
+				assertEquals(2, element.getLaunchConfigs().size());
 				assertEquals(2, element.getCurrentChildren().size());
 				return true;
 			}
@@ -331,11 +331,11 @@ public class BootDashActionTests {
 
 		// b) if project has exactly one launch config ...
 		BootLaunchConfigurationDelegate.createConf(javaProject);
-		assertEquals(1, element.getLaunchConfigs().size());
 		// action enablement is updated as response to some asynchronous state changes
 		// so may not happen immediately
 		new ACondition("Wait for enablement", 3000) {
 			public boolean test() throws Exception {
+				assertEquals(1, element.getLaunchConfigs().size());
 				assertTrue(action.isEnabled());
 				return true;
 			}
@@ -343,7 +343,9 @@ public class BootDashActionTests {
 
 		// c) if project has more than one launch config...
 		BootLaunchConfigurationDelegate.createConf(javaProject);
-		assertEquals(2, element.getLaunchConfigs().size());
+		ACondition.waitFor("Launch conf elements", 3000, () -> {
+			assertEquals(2, element.getLaunchConfigs().size());
+		});
 		// ... async update may not happen right away...
 		new ACondition("Wait for disablement", 3000) {
 			public boolean test() throws Exception {
@@ -426,7 +428,9 @@ public class BootDashActionTests {
 		//Check initial conditions are as expected:
 		assertTrue(selection.isEmpty());
 		assertFalse(action.isEnabled());
-		assertEquals(2, element.getChildren().getValues().size());
+		ACondition.waitFor("children to appear", 3000, () -> {
+			assertEquals(2, element.getChildren().getValues().size());
+		});
 
 		//Check action enablement for the children
 		for (BootDashElement child : element.getChildren().getValues()) {
@@ -451,7 +455,9 @@ public class BootDashActionTests {
 		//Check initial conditions are as expected:
 		assertTrue(selection.isEmpty());
 		assertFalse(action.isEnabled());
-		assertEquals(2, element.getChildren().getValues().size());
+		ACondition.waitFor("children", 3000, () -> {
+			assertEquals(2, element.getChildren().getValues().size());
+		});
 
 		//Check action enablement for the children
 		for (BootDashElement child : element.getChildren().getValues()) {
@@ -568,7 +574,9 @@ public class BootDashActionTests {
 		ImmutableSet<BootDashElement> theChildren = ImmutableSet.of(
 				child1, child2
 		);
-		assertEquals(theChildren, element.getChildren().getValues());
+		ACondition.waitFor("children to appear", 3000, () -> {
+			assertEquals(theChildren, element.getChildren().getValues());
+		});
 
 		for (RunState runOrDebug: EnumSet.of(RunState.RUNNING, RunState.DEBUGGING)) {
 			final RunOrDebugStateAction action = (RunOrDebugStateAction) getRunStateAction(runOrDebug);

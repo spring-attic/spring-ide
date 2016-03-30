@@ -12,8 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 
 /**
  * A run target type represents a type of 'deployment environment' to which
@@ -47,4 +50,40 @@ public interface RunTargetType extends Nameable {
 
 	ImageDescriptor getIcon();
 
+	/**
+	 * Provides a means to store persistent properties associated with this {@link RunTargetType}
+	 */
+	IPropertyStore getPropertyStore();
+
+	/**
+	 * A convenience method that provides access to the persisent property store returned by getPropertyStore
+	 * through more convenient API.
+	 */
+	PropertyStoreApi getPersistentProperties();
+
+	/**
+	 * Provides a Default template (see {@link Templates}) for rendering the name of targets of this type.
+	 * This default can be overriden via a persisent property set on this target. (I.e. the default is
+	 * only used if the property isn't set.
+	 * <p>
+	 * See also {@link AbstractRunTargetType}.getNameTemplateString()
+	 */
+	String getDefaultNameTemplate();
+
+	/**
+	 * Sets a persistent property that overrides the default name template.
+	 */
+	void setNameTemplate(String string) throws Exception;
+
+	/**
+	 * Gets the effective name template. May return null if there is neither a defaultNameTemplate nor
+	 * a template provided through setNameTemplate.
+	 */
+	String getNameTemplate();
+
+	/**
+	 * Gets a short, helpful message describing the supported template language (i.e. at least list the
+	 * supported '%' template variables.
+	 */
+	String getTemplateHelpText();
 }

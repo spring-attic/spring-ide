@@ -472,55 +472,17 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 		manager.add(new Separator());
 
-		IAction removeTargetAction = actions.getRemoveRunTargetAction();
-		if (removeTargetAction != null) {
-			addVisible(manager, removeTargetAction);
-		}
-
-		IAction refreshAction = actions.getRefreshRunTargetAction();
-		if (refreshAction != null) {
-			addVisible(manager, refreshAction);
-		}
-
-		IAction restartOnlyAction = actions.getRestartOnlyApplicationAction();
-		if (restartOnlyAction != null) {
-			addVisible(manager, restartOnlyAction);
-		}
-
-		IAction selectManifestAction = actions.getSelectManifestAction();
-		if (selectManifestAction != null) {
-			addVisible(manager, selectManifestAction);
-		}
-
-		IAction restartWithRemoteDevClientAction = actions.getRestartWithRemoteDevClientAction();
-		if (restartWithRemoteDevClientAction != null) {
-			addVisible(manager, actions.getRestartWithRemoteDevClientAction());
-		}
-
-		IAction deleteAppsAction = actions.getDeleteAppsAction();
-		if (deleteAppsAction != null) {
-			addVisible(manager, deleteAppsAction);
-		}
-
-		IAction updatePasswordAction = actions.getUpdatePasswordAction();
-		if (updatePasswordAction != null) {
-			addVisible(manager, updatePasswordAction);
-		}
-
-		IAction openCloudAdminConsoleAction = actions.getOpenCloudAdminConsoleAction();
-		if (openCloudAdminConsoleAction != null) {
-			addVisible(manager, openCloudAdminConsoleAction);
-		}
-
-		IAction toggleCloudConnectAction = actions.getToggleTargetConnectionAction();
-		if (toggleCloudConnectAction != null) {
-			addVisible(manager, toggleCloudConnectAction);
-		}
-
-		IAction reconnectConsole = actions.getReconnectCloudConsole();
-		if (reconnectConsole != null) {
-			addVisible(manager, reconnectConsole);
-		}
+		addVisible(manager, actions.getCustomizeTargetLabelAction());
+		addVisible(manager, actions.getRemoveRunTargetAction());
+		addVisible(manager, actions.getRefreshRunTargetAction());
+		addVisible(manager, actions.getRestartOnlyApplicationAction());
+		addVisible(manager, actions.getSelectManifestAction());
+		addVisible(manager, actions.getRestartWithRemoteDevClientAction());
+		addVisible(manager, actions.getDeleteAppsAction());
+		addVisible(manager, actions.getUpdatePasswordAction());
+		addVisible(manager, actions.getOpenCloudAdminConsoleAction());
+		addVisible(manager, actions.getToggleTargetConnectionAction());
+		addVisible(manager, actions.getReconnectCloudConsole());
 
 //		manager.add
 //		addVisible(manager, new Separator());
@@ -551,7 +513,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	}
 
 	private boolean addVisible(IMenuManager manager, IAction a) {
-		if (isVisible(a)) {
+		if (a!=null && isVisible(a)) {
 			manager.add(a);
 			return true;
 		}

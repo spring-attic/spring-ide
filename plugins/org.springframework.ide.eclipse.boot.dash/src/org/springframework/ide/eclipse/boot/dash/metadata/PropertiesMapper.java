@@ -12,9 +12,10 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 
 import java.io.IOException;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 public class PropertiesMapper<T> {
 

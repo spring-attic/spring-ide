@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppCache;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 
 /**
  * TODO: when we use v2 java client then this should probably be removed as the
@@ -35,17 +32,18 @@ public class HealthCheckRefreshOperation extends CloudOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-		for (CloudAppDashElement cde : model.getApplications().getValues()) {
-			CloudFoundryRunTarget target = model.getRunTarget();
-			CloudAppCache cache = model.getAppCache();
-			UUID guid = cde.getAppGuid();
+		OperationsExecution exec = model.getOperationsExecution();
+		for (final CloudAppDashElement cde : model.getApplications().getValues()) {
+			final UUID guid = cde.getAppGuid();
 			if (guid!=null) {
-				String newHc = target.getHealthCheck(guid);
-				String oldHc = cache.getHealthCheck(cde);
-				if (!Objects.equals(newHc, oldHc)) {
-					cache.setHealthCheck(cde, newHc);
-					cde.getBootDashModel().notifyElementChanged(cde);
-				}
+				CloudApplicationOperation singleAppRefresh = new CloudApplicationOperation("Refresh healthcheck for '"+cde.getName(), model, cde.getName(), cde.createCancelationToken()) {
+					@Override
+					protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+						ClientRequests client = getClientRequests();
+						cde.setHealthCheck(client.getHealthCheck(guid));
+					}
+				};
+				exec.runOpAsynch(singleAppRefresh);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,41 +125,36 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 		Map<String, ConfigurationMetadataProperty> allProperties = repository
 				.getAllProperties();
 		for (ConfigurationMetadataHint hint : metadata.getHints()) {
-			String hintId = hint.getId();
-			ConfigurationMetadataProperty property = allProperties.get(hintId);
+			ConfigurationMetadataProperty property = allProperties.get(hint.getId());
 			if (property != null) {
-				property.getValueHints().addAll(hint.getValueHints());
-				property.getValueProviders().addAll(hint.getValueProviders());
-			//STS CHANGE
-			} else {
-				String baseId = remove(hintId, ".keys");
-				if (baseId!=null) {
-					property = allProperties.get(baseId);
-					if (property!=null) {
-						property.getKeyValueHints().addAll(hint.getValueHints());
-						property.getKeyValueProviders().addAll(hint.getValueProviders());
+				addValueHints(property, hint);
+			}
+			else {
+				String id = hint.resolveId();
+				property = allProperties.get(id);
+				if (property != null) {
+					if (hint.isMapKeyHints()) {
+						addMapHints(property, hint);
 					}
-				} else {
-					baseId = remove(hintId, ".values");
-					if (baseId!=null) {
-						property = allProperties.get(baseId);
-						if (property!=null) {
-							property.getValueHints().addAll(hint.getValueHints());
-							property.getValueProviders().addAll(hint.getValueProviders());
-						}
+					else {
+						addValueHints(property, hint);
 					}
 				}
-			//STS CHANGE END
 			}
 		}
 		return repository;
 	}
 
-	private String remove(String str, String postfix) {
-		if (str.endsWith(postfix)) {
-			return str.substring(0, str.length() - postfix.length());
-		}
-		return null;
+	private void addValueHints(ConfigurationMetadataProperty property,
+			ConfigurationMetadataHint hint) {
+		property.getHints().getValueHints().addAll(hint.getValueHints());
+		property.getHints().getValueProviders().addAll(hint.getValueProviders());
+	}
+
+	private void addMapHints(ConfigurationMetadataProperty property,
+			ConfigurationMetadataHint hint) {
+		property.getHints().getKeyHints().addAll(hint.getValueHints());
+		property.getHints().getKeyProviders().addAll(hint.getValueProviders());
 	}
 
 	private ConfigurationMetadataSource getSource(RawConfigurationMetadata metadata,

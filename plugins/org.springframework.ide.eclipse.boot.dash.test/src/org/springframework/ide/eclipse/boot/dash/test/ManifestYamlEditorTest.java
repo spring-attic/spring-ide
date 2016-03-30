@@ -259,7 +259,7 @@ public class ManifestYamlEditorTest {
 		);
 		editor.assertProblems(
 				"- bad sequence|Expecting a 'Memory' but found a 'Sequence'",
-				"bad: map|Expecting a 'String' but found a 'Map'"
+				"bad: map|Expecting a 'Buildpack' but found a 'Map'"
 		);
 	}
 

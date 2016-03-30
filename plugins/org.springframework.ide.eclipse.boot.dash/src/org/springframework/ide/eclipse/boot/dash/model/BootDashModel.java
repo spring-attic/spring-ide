@@ -60,4 +60,30 @@ public interface BootDashModel {
 
 	Comparator<BootDashElement> getElementComparator();
 
+	void notifyModelStateChanged();
+
+	/**
+	 * Gets the current name template associated with this model. This may either be
+	 * a custom template set via the 'setNameTemplate' method, or it might be a
+	 * template inherited from the runtarget type, or it may be null (if the runtarget
+	 * type does not provide a name template.
+	 *
+	 * @return The effective name template or null.
+	 */
+	String getNameTemplate();
+
+	/**
+	 * Set a custom name template for this model. Note that this only works on models who's target provides support for
+	 * persistent properties (since that's where this value is ultimately stored).
+	 * <p>
+	 * Setting the template to null makes the effective template be inherited from the runtarget type.
+	 */
+	void setNameTemplate(String template) throws Exception;
+
+	/**
+	 * @return true if this model has a custom name template (false means it inherits name template from its target type).
+	 */
+	boolean hasCustomNameTemplate();
+
+	String getDisplayName();
 }

@@ -57,6 +57,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
 
 	private static final String JMX_PORT = "spring.boot.livebean.port";
+	public static final int DEFAULT_JMX_PORT = 0; //means pick it dynamically
 
 	public static final String ANSI_CONSOLE_OUTPUT = "spring.boot.ansi.console";
 
@@ -195,6 +196,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				&& BootLaunchConfigurationDelegate.supportsLifeCycleManagement(conf);
 	}
 
+	public static boolean canUseLifeCycle(ILaunch launch) {
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		return conf!=null && canUseLifeCycle(conf);
+	}
+
 	public static boolean supportsLifeCycleManagement(ILaunchConfiguration conf) {
 		IProject p = getProject(conf);
 		if (p!=null) {
@@ -218,7 +224,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
-		setJMXPort(wc, "0");
+		setJMXPort(wc, ""+DEFAULT_JMX_PORT);
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
 		}

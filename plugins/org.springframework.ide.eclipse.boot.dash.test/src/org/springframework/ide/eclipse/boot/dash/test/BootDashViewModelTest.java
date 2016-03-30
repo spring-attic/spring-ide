@@ -70,11 +70,13 @@ import com.google.common.collect.ImmutableSet;
  */
 public class BootDashViewModelTest {
 
+	private BootDashModelContext context;
 	private BootDashViewModelHarness harness = null;
 	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 
 	@Before
 	public void setup() throws Exception {
+		context = new BootDashViewModelHarness.MockContext();
 		StsTestUtil.cleanUpProjects();
 	}
 
@@ -87,7 +89,7 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testCreate() throws Exception {
-		harness = new BootDashViewModelHarness(RunTargetTypes.LOCAL);
+		harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		BootDashModel localModel = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		assertNotNull(localModel);
 
@@ -99,7 +101,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testGetTargetTypes() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -117,7 +119,7 @@ public class BootDashViewModelTest {
 		RunTarget target = mock(RunTarget.class);
 		BootDashModel bootDashModel = mock(BootDashModel.class);
 
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -156,7 +158,7 @@ public class BootDashViewModelTest {
 	public void testElementStateListenerAddedAfterModel() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -206,7 +208,7 @@ public class BootDashViewModelTest {
 	public void testElementStateListenerAddedBeforeModel() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -245,7 +247,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testRemoveTargetToleratesNull() throws Exception {
 		UserInteractions ui = mock(UserInteractions.class);
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL
 		);
 		harness.model.removeTarget(null, ui);
@@ -257,7 +259,7 @@ public class BootDashViewModelTest {
 	public void testRemoveTargetCanceled() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -296,7 +298,7 @@ public class BootDashViewModelTest {
 	public void testRemoveTargetConfirmed() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -338,7 +340,7 @@ public class BootDashViewModelTest {
 		RunTarget target = mock(RunTarget.class);
 		RunTarget otherTarget = mock(RunTarget.class);
 
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -386,7 +388,7 @@ public class BootDashViewModelTest {
 		// filter matches elements. So it only does some basic test cases.
 		//There are more in-depth tests for the filters elsewhere.
 
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL
 		);
 
@@ -410,7 +412,7 @@ public class BootDashViewModelTest {
 		// filter matches elements. So it only does some basic test cases.
 		//There are more in-depth tests for the filters elsewhere.
 
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL
 		);
 
@@ -433,7 +435,7 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testFilterIsTreeAware() throws Exception {
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL
 		);
 
@@ -520,10 +522,11 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testRestoreSingleRunTarget() throws Exception {
-		RunTargetType targetType = new MockRunTargetType("MOCK");
+		RunTargetType targetType = new MockRunTargetType(context, "MOCK");
 		String targetId = "foo";
 
 		harness = new BootDashViewModelHarness(
+				context,
 				RunTargetTypes.LOCAL,
 				targetType
 		);
@@ -553,10 +556,10 @@ public class BootDashViewModelTest {
 		// the list of target-types it is initialized with. It should sort
 		//models based on type first then runtarget id second.
 
-		RunTargetType fooType = new MockRunTargetType("foo-type");
-		RunTargetType barType = new MockRunTargetType("bar-type");
+		RunTargetType fooType = new MockRunTargetType(context, "foo-type");
+		RunTargetType barType = new MockRunTargetType(context, "bar-type");
 
-		harness = new BootDashViewModelHarness(
+		harness = new BootDashViewModelHarness(context,
 				RunTargetTypes.LOCAL,
 				fooType,
 				barType
@@ -611,8 +614,8 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testUpdatePropertiesInStore() throws Exception {
-		MockRunTargetType targetType = new MockRunTargetType("mock-type");
-		harness = new BootDashViewModelHarness(targetType);
+		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
+		harness = new BootDashViewModelHarness(context, targetType);
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
 		properties.setPassword("secret");

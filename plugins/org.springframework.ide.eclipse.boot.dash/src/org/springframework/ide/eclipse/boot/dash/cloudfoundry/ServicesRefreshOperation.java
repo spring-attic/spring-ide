@@ -14,20 +14,30 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
 public class ServicesRefreshOperation extends CloudOperation{
 
+//	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+//	private static void debug(String msg) {
+//		if (DEBUG) {
+//			System.out.println(msg);
+//		}
+//	}
+
 	final private CloudDashElementFactory elementFactory;
 
-	public ServicesRefreshOperation(CloudFoundryBootDashModel model, CloudDashElementFactory elementFactory) {
+	public ServicesRefreshOperation(CloudFoundryBootDashModel model) {
 		super("Refresh Cloud Services", model);
-		this.elementFactory = elementFactory;
+		this.elementFactory = model.getElementFactory();
 	}
 
 	@Override
@@ -37,16 +47,24 @@ public class ServicesRefreshOperation extends CloudOperation{
 			ClientRequests client = getClientRequests();
 			monitor.worked(1);
 			if (client!=null) {
+//				debug("Resfres Services for connected client");
 				List<CFService> serviceInfos = client.getServices();
 				Builder<CloudServiceDashElement> services = ImmutableSet.builder();
 				for (CFService service : serviceInfos) {
 					services.add(elementFactory.createService(service));
 				}
 				model.setServices(services.build());
+			} else {
+//				debug("Resfresh Services for DISconnected client");
+				model.setServices(ImmutableSet.<CloudServiceDashElement>of());
 			}
 		} finally {
 			monitor.done();
 		}
+	}
+
+	public ISchedulingRule getSchedulingRule() {
+		return new RefreshSchedulingRule(model.getRunTarget());
 	}
 
 }

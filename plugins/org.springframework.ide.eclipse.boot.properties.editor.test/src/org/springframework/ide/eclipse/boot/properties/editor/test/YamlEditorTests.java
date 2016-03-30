@@ -13,8 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.LoggerNameProvider;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -2569,12 +2568,16 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testPropertyMapKeyCompletions() throws Exception {
 		useProject(createPredefinedMavenProject("boot13"));
-		assertCompletionsDisplayString(
+		assertCompletionWithLabel(
 				"logging:\n" +
 				"  level:\n" +
 				"    <*>"
 				, // =>
 				"root : String"
+				,
+				"logging:\n" +
+				"  level:\n" +
+				"    root: <*>"
 		);
 	}
 
@@ -2631,6 +2634,94 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"foo:\n" +
 				"  quote: \n"+
 				"    '`': <*>"
+		);
+	}
+
+	public void testLoggerNameCompletion() throws Exception {
+		LoggerNameProvider.TIMEOUT = 15000; // the provider can't be reliably tested if its not allowed to
+											// fetch all its values (even though in 'production' you
+											// wouldn't want it to block the UI thread for this long.
+		try {
+			useProject(createPredefinedMavenProject("boot13"));
+			//Finds a package:
+			assertCompletionWithLabel(
+					"logging:\n" +
+					"  level:\n" +
+					"    boot.auto<*>"
+					, //-----------------
+					"org.springframework.boot.autoconfigure : String"
+					, // =>
+					"logging:\n" +
+					"  level:\n" +
+					"    org.springframework.boot.autoconfigure: <*>"
+			);
+
+			//Finds a type:
+			assertCompletionWithLabel(
+					"logging:\n" +
+					"  level:\n" +
+					"    MesgSource<*>"
+					, //-----------------
+					"org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration : String"
+					, // =>
+					"logging:\n" +
+					"  level:\n" +
+					"    org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration: <*>"
+			);
+		} finally {
+			LoggerNameProvider.restoreDefaults();
+		}
+	}
+
+	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {
+		YamlEditor editor;
+		useProject(createPredefinedMavenProject("demo-sts-4335"));
+
+		editor = new YamlEditor(
+				"test-map:\n" +
+				"  test-list-object:\n" +
+				"    color-list:\n" +
+				"      - not-a-color\n"+
+				"      - RED\n" +
+				"      - GREEN\n"
+		);
+		assertProblems(editor,
+				"not-a-color|Expecting a 'com.wellsfargo.lendingplatform.web.config.Color"
+		);
+
+		editor = new YamlEditor(
+				"test-map:\n" +
+				"  test-list-object:\n" +
+				"    string-list:\n" +
+				"      - abc\n" +
+				"      - def\n"
+		);
+		assertProblems(editor /*NONE*/);
+
+	}
+
+
+	public void test_STS_3335_completions_list_nested_in_Map_of_String() throws Exception {
+		useProject(createPredefinedMavenProject("demo-sts-4335"));
+
+		assertCompletions(
+				"test-map:\n" +
+				"  some-string-key:\n" +
+				"    col<*>"
+				, // =>
+				"test-map:\n" +
+				"  some-string-key:\n" +
+				"    color-list:\n" +
+				"      - <*>"
+		);
+
+		assertCompletionsDisplayString(
+				"test-map:\n" +
+				"  some-string-key:\n" +
+				"    color-list:\n" +
+				"      - <*>"
+				, // =>
+				"red", "green", "blue"
 		);
 	}
 

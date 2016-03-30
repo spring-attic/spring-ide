@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.mockito.invocation.InvocationOnMock;
@@ -33,14 +32,17 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -67,7 +69,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	/**
 	 * How long to wait for a deployed app to transition to running state.
 	 */
-	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
+	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
 
 	/**
 	 * How long to wait on retrieving request mappings from a CF app.
@@ -186,7 +188,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				Object[] args = invocation.getArguments();
 				@SuppressWarnings("unchecked")
-				List<CloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
 				IProject project = (IProject) args[1];
 				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
 				deploymentProperties.setProject(project.getProject());
@@ -198,8 +200,49 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) {
+		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+			@Override
+			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
+				Object[] args = invocation.getArguments();
+				@SuppressWarnings("unchecked")
+				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				IProject project = (IProject) args[1];
+				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
+				deploymentProperties.setProject(project.getProject());
+				deploymentProperties.setAppName(appName);
+				deploymentProperties.setEnvironmentVariables(env);
+				String url = hostName + "." + domains.get(0).getName();
+				deploymentProperties.setUris(ImmutableList.of(url));
+				return deploymentProperties;
+			}
+		});
+	}
+
 	public List<BootDashModel> getCfRunTargetModels() {
 		return getRunTargetModels(cfTargetType);
+	}
+
+	public CloudFoundryRunTargetType getCfTargetType() {
+		for (RunTargetType type : model.getRunTargetTypes()) {
+			if (type instanceof CloudFoundryRunTargetType) {
+				return (CloudFoundryRunTargetType) type;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Raw fetch of environment variables (makes a request through the CF client, rather then get the cached data
+	 * from the model).
+	 */
+	public Map<String, String> fetchEnvironment(CloudFoundryBootDashModel model, String appName) throws Exception {
+		return model.getRunTarget().getClient().getApplication(appName).getEnvAsMap();
+	}
+
+	public LocalBootDashModel getLocalModel() {
+		return (LocalBootDashModel) getRunTargetModel(RunTargetTypes.LOCAL);
 	}
 
 }

@@ -21,12 +21,13 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudZipApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CloudZipApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * Operation that pushes an application's archive. The application must have an
@@ -39,8 +40,8 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 	private final UserInteractions ui;
 
 	public ApplicationPushOperation(CloudApplicationDeploymentProperties deploymentProperties,
-			CloudFoundryBootDashModel model, UserInteractions ui) {
-		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName());
+			CloudFoundryBootDashModel model, UserInteractions ui, CancelationToken cancelationToken) {
+		super("Uploading application: " + deploymentProperties.getAppName(), model, deploymentProperties.getAppName(), cancelationToken);
 		this.deploymentProperties = deploymentProperties;
 		this.ui = ui;
 	}
@@ -65,7 +66,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 		}
 
 		// Upload the application
-		CloudZipApplicationArchive archive = null;
+		ZipFile archive = null;
 		String appName = deploymentProperties.getAppName();
 
 		try {
@@ -75,7 +76,7 @@ public class ApplicationPushOperation extends CloudApplicationOperation {
 				ICloudApplicationArchiver archiver = getArchiver(monitor);
 				if (archiver != null) {
 					logAndUpdateMonitor("Generating archive for application: " + appName, monitor);
-					archive = new CloudZipApplicationArchive(new ZipFile(archiver.getApplicationArchive(monitor)));
+					archive = new ZipFile(archiver.getApplicationArchive(monitor));
 					monitor.worked(2);
 				}
 			}

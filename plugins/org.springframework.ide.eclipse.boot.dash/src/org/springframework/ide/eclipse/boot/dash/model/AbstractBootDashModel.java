@@ -38,14 +38,17 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 	ListenerList elementStateListeners = new ListenerList();
 
 	public void notifyElementChanged(BootDashElement element) {
-		for (Object l : elementStateListeners.getListeners()) {
-			((BootDashModel.ElementStateListener) l).stateChanged(element);
+		if (element!=null) {
+			for (Object l : elementStateListeners.getListeners()) {
+				((BootDashModel.ElementStateListener) l).stateChanged(element);
+			}
 		}
 	}
 
 	ListenerList modelStateListeners = new ListenerList();
 
-	protected final void notifyModelStateChanged() {
+	@Override
+	public final void notifyModelStateChanged() {
 		for (Object l : modelStateListeners.getListeners()) {
 			((BootDashModel.ModelStateListener) l).stateChanged(this);
 		}
@@ -100,4 +103,23 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 		return parent;
 	}
 
+	@Override
+	public String getDisplayName() {
+		return getRunTarget().getDisplayName();
+	}
+
+	@Override
+	public String getNameTemplate() {
+		return getRunTarget().getNameTemplate();
+	}
+
+	@Override
+	public void setNameTemplate(String template) throws Exception {
+		getRunTarget().setNameTemplate(template);
+	}
+
+	@Override
+	public boolean hasCustomNameTemplate() {
+		return getRunTarget().hasCustomNameTemplate();
+	}
 }

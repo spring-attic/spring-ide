@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
@@ -28,7 +29,7 @@ public class CloudServiceDashElement extends WrappingBootDashElement<String> {
 	private final CFService service;
 	private final PropertyStoreApi persistentProperties;
 
-	public CloudServiceDashElement(CloudFoundryBootDashModel parent, CFService service, IPropertyStore modelStore) {
+	public CloudServiceDashElement(AbstractBootDashModel parent, CFService service, IPropertyStore modelStore) {
 		super(parent, service.getName()+"@"+parent.getRunTarget().getId());
 		this.service = service;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("S"+getName(), modelStore);

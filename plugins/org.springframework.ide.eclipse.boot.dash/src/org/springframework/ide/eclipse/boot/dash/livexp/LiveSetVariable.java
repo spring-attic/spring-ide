@@ -15,8 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -41,8 +39,11 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 	private boolean dirty = false;
 	private Set<T> backingCollection;
 
-	public LiveSetVariable() {
-		this(new HashSet<T>());
+	/**
+	 * Instantiate a LiveSet that uses a HashSet as a backing collection.
+	 */
+	public LiveSetVariable(AsyncMode async) {
+		this(new HashSet<T>(), async);
 	}
 
 	/**
@@ -51,28 +52,31 @@ public class LiveSetVariable<T> extends ObservableSet<T> {
 	 * not retain references to the backing collection and should only modify the
 	 * collection via liveset operations.
 	 */
-	public LiveSetVariable(Set<T> backingCollection) {
+	public LiveSetVariable(Set<T> backingCollection, AsyncMode async) {
+		super(ImmutableSet.copyOf(backingCollection), AsyncMode.SYNC, async);
+		//Note the 'refresh' is done synchronously as its the most logical from user point of
+		// view. Notably: otherwise when replacing values and immediately thereafter calling 'getValues'
+		// you are not guaranteed to actually get the values you just inserted back.
 		this.backingCollection = backingCollection;
-		this.value = compute();
 	}
 
 	@Override
-	public void refresh() {
-		//We override refresh methd so we can avoid doing set comparison by making
-		// us of a dirty flag instead.
-		boolean wasDirty;
+	protected void syncRefresh() {
+		//TODO: if we override 'refresh' as well we can avoid scheduling a job if not dirty.
+		// Or alternately we can add isDirty() method to the protocol of AsyncLiveExpression
+		// and buid this optimization into AsyncLiveExpression itself.
+
+		//We override refresh method so we can avoid doing set comparison by making
+		// use of a dirty flag instead.
 		synchronized (this) {
-			wasDirty = dirty;
+			if (!dirty) return; //bail out fast and don't copy the collection needlessly
 			value = compute();
-			dirty = false;
 		}
 		//Note... we are being careful here to put the 'changed' call outside synch block.
 		// only keep locks for short time while maniping the collection  / dirty state.
 		// but notify listeners without holding on to the lock while listeneres are
 		// doing their thing (which could be anything... and lead to deadlocks otherwise!)
-		if (wasDirty) {
-			changed();
-		}
+		changed();
 	}
 
 	@Override

@@ -21,10 +21,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -150,9 +148,11 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private boolean updateInProgress;
 
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
-		int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
-		if (jmxPort>0) {
-			return new SpringApplicationReadyStateMonitor(jmxPort);
+		if (BootLaunchConfigurationDelegate.canUseLifeCycle(l)) {
+			int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+			if (jmxPort>0) {
+				return new SpringApplicationReadyStateMonitor(jmxPort);
+			}
 		}
 		return DummyReadyStateMonitor.create();
 	}

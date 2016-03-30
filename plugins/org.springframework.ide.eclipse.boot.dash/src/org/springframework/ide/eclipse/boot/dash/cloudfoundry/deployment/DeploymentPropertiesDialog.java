@@ -338,7 +338,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-	    setTitle("Select Deployment Manifest");
+		setTitle("Select Deployment Manifest for '"+project.getName()+"'");
 		Composite container = (Composite) super.createDialogArea(parent);
 		final Composite composite = new Composite(container, parent.getStyle());
 		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());

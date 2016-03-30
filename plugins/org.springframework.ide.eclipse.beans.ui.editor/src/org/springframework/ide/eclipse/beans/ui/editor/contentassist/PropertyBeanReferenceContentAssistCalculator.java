@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 - 2013 Spring IDE Developers
+ * Copyright (c) 2008, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 /**
  * {@link IContentAssistCalculator} that extends {@link BeanReferenceContentAssistCalculator} in
  * order to give bean reference proposals that have a matching types a higher proposal priority.
+ * 
  * @author Christian Dupuis
  * @since 2.0.4
  */
@@ -57,10 +59,7 @@ public class PropertyBeanReferenceContentAssistCalculator extends
 							String parameterTypeName = JdtUtils.resolveClassNameBySignature(method
 									.getParameterTypes()[0], type);
 							if (parameterTypeName != null) {
-								IType parameterType = JdtUtils.getJavaType(context.getFile()
-										.getProject(), parameterTypeName);
-								return JdtUtils
-										.getFlatListOfClassAndInterfaceNames(parameterType, type);
+								return Arrays.asList(new String[] { parameterTypeName });
 							}
 						}
 					}

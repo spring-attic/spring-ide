@@ -10,20 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * This performs a "two-tier" refresh as fetching list of
@@ -53,6 +53,9 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
 		if (model.getRunTarget().isConnected()) {
 			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
+			for (CloudAppDashElement app : model.getApplicationValues()) {
+				app.setError(null); // clear old error states.
+			}
 			try {
 
 				// 1. Fetch basic list of applications. Should be the "faster" of
@@ -60,31 +63,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// two refresh operations
 
 				List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
-
-				Map<CloudAppInstances, IProject> updatedApplications = new HashMap<CloudAppInstances, IProject>();
-				if (apps != null) {
-
-					Map<String, String> existingProjectToAppMappings = this.model.getProjectToAppMappingStore()
-							.getMapping();
-
-					for (CFApplication app : apps) {
-
-						String projectName = existingProjectToAppMappings.get(app.getName());
-						IProject project = null;
-						if (projectName != null) {
-							project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-							if (project == null || !project.isAccessible()) {
-								project = null;
-							}
-						}
-
-						// No stats available at this stage. Just set stats to null
-						// for now.
-						updatedApplications.put(new CloudAppInstances(app, null), project);
-					}
-				}
-
-				this.model.updateElements(updatedApplications);
+				this.model.updateAppNames(getNames(apps));
 
 				// 2. Launch the slower app stats/instances refresh operation.
 				this.model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(this.model, apps));
@@ -101,6 +80,14 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 		} else {
 			model.updateElements(null);
 		}
+	}
+
+	private Collection<String> getNames(List<CFApplication> apps) {
+		Builder<String> builder = ImmutableList.builder();
+		for (CFApplication app : apps) {
+			builder.add(app.getName());
+		}
+		return builder.build();
 	}
 
 	public ISchedulingRule getSchedulingRule() {

@@ -40,6 +40,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.MergeManifestDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -320,5 +322,14 @@ public class DefaultUserInteractions implements UserInteractions {
 			throw ExceptionUtil.coreException(exception[0]);
 		}
 		return result[0];
+	}
+
+	@Override
+	public void openEditTemplateDialog(final EditTemplateDialogModel model) {
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				new EditTemplateDialog(model, getShell()).open();
+			}
+		});
 	}
 }

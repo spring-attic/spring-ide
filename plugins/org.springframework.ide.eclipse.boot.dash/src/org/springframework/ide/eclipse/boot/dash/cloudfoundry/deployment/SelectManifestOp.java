@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -60,11 +61,12 @@ public class SelectManifestOp extends CloudOperation {
 //		 */
 //		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
-		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project, model.getAppCache().getApp(cde.getName()));
+		CFApplication summaryData = cde.getSummaryData();
+		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project, summaryData);
 
 		try {
 			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, cloudData,
-					model.getAppCache().getApp(cde.getName())), cloudData);
+					summaryData), cloudData);
 		} catch (Exception e) {
 			// ignore
 		}

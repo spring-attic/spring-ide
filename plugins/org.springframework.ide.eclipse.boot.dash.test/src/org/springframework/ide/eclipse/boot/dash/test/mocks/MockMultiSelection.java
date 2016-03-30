@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -26,7 +27,7 @@ import com.google.common.collect.ImmutableSet;
 public class MockMultiSelection<T> {
 
 	private final MultiSelection<T> readableSelection;
-	private final LiveSetVariable<T> writableSelection = new LiveSetVariable<>();
+	private final LiveSetVariable<T> writableSelection = new LiveSetVariable<>(AsyncMode.SYNC);
 
 	public MockMultiSelection(Class<T> klass) {
 		readableSelection = new MultiSelection<>(klass, writableSelection);

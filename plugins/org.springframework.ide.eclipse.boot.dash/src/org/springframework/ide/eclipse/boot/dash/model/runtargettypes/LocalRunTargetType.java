@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
  */
 public class LocalRunTargetType extends AbstractRunTargetType {
 	LocalRunTargetType(String name) {
-		super(name);
+		super(null, name);
 	}
 
 	@Override

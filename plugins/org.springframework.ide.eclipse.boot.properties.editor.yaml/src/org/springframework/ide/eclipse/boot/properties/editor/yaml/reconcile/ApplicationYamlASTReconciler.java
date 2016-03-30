@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -214,8 +214,12 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 					Node value = entry.getValueNode();
 					Type nestedValueType = valueType;
 					if (value.getNodeId()==NodeId.mapping) {
-						if (TypeUtil.isObject(valueType) || TypeUtil.isString(keyType)) {
-							//See https://issuetracker.springsource.com/browse/STS-4254
+						//Some special cases to handle here!!
+						//   See https://issuetracker.springsource.com/browse/STS-4254
+						//   See https://issuetracker.springsource.com/browse/STS-4335
+						if (TypeUtil.isObject(valueType)) {
+							nestedValueType = type;
+						} else if (TypeUtil.isString(keyType) && typeUtil.isAtomic(valueType)) {
 							nestedValueType = type;
 						}
 					}

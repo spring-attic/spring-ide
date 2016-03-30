@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,12 +18,10 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.RunTargetWizard;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 
 /**
  * @author Kris De Volder
@@ -33,10 +31,11 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
 	private CloudFoundryClientFactory clientFactory;
-	private BootDashModelContext context;
+
+	private final BootDashModelContext context;
 
 	public CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
-		super("Cloud Foundry");
+		super(context, "Cloud Foundry");
 		this.context = context;
 		this.clientFactory = clientFactory;
 	}
@@ -73,5 +72,22 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 	@Override
 	public ImageDescriptor getIcon() {
 		return SMALL_ICON;
+	}
+
+	@Override
+	public String getDefaultNameTemplate() {
+		return "%o : %s - [%a]";
+	}
+
+	@Override
+	public String getTemplateHelpText() {
+		return
+				"Enter a template pattern. The following variable substitution are defined:\n" +
+				"   '%u': username\n" +
+				"   '%o': organization\n" +
+				"   '%s': space\n" +
+				"   '%a': API URL\n" +
+				"\n" +
+				"To escape a variable name simply repeat the '%' sign. E.g. '%%u'";
 	}
 }

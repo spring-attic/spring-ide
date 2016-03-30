@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.DeploymentProperties2Yaml;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeTests;
@@ -37,9 +38,9 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	BootDashElementTagsTests.class,
 	ActuatorClientTest.class,
 	ToggleFiltersModelTest.class,
-	CloudFoundryBootDashModelMockingTest.class,
 
 	//Medium length (less than 30 seconds):
+	CloudFoundryBootDashModelMockingTest.class,
 	JarNameGeneratorTest.class,
 	BootJarPackagingTest.class,
 	BootDashViewModelTest.class,

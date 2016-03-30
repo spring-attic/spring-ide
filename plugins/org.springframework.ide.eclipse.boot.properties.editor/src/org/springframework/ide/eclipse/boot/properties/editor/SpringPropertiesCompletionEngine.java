@@ -41,6 +41,9 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProviders;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -199,10 +202,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private Collection<ICompletionProposal> getKeyHintProposals(IDocument doc, PropertyInfo prop, int navOffset, int offset) {
 		HintProvider hintProvider = prop.getHints(typeUtil, false);
-		if (hintProvider!=null) {
+		if (!HintProviders.isNull(hintProvider)) {
 			String query = textBetween(doc, navOffset+1, offset);
-			EnumCaseMode enumCaseMode = caseMode(query);
-			List<TypedProperty> hintProperties = hintProvider.getPropertyHints(enumCaseMode, BeanPropertyNameMode.HYPHENATED);
+			List<TypedProperty> hintProperties = hintProvider.getPropertyHints(query);
 			if (CollectionUtil.hasElements(hintProperties)) {
 				return createPropertyProposals(doc, TypeParser.parse(prop.getType()), navOffset, offset, query, hintProperties);
 			}
@@ -342,7 +344,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				Collection<String> valueCompletions = getValueHints(propertyName, caseMode);
+				Collection<String> valueCompletions = getValueHints(query, propertyName, caseMode);
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (String valueCandidate : valueCompletions) {
@@ -366,7 +368,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		return Collections.emptyList();
 	}
 
-	private Collection<String> getValueHints(String propertyName, EnumCaseMode caseMode) {
+	private Collection<String> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
 		Type type = getValueType(propertyName);
 		HashSet<String> allHints = new HashSet<>();
 		{
@@ -379,8 +381,8 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			PropertyInfo prop = getIndex().findLongestCommonPrefixEntry(propertyName);
 			if (prop!=null) {
 				HintProvider hintProvider = prop.getHints(typeUtil, false);
-				if (hintProvider!=null) {
-					List<ValueHint> hints = hintProvider.getValueHints();
+				if (!HintProviders.isNull(hintProvider)) {
+					List<ValueHint> hints = hintProvider.getValueHints(query);
 					if (CollectionUtil.hasElements(hints)) {
 						for (ValueHint h : hints) {
 							allHints.add(""+h.getValue());

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
@@ -18,20 +18,25 @@ import com.google.common.collect.ImmutableSet;
 /**
  * This is like LiveSet, but it can only be 'observed' not mutated.
  */
-public abstract class ObservableSet<T> extends LiveExpression<ImmutableSet<T>> {
+public abstract class ObservableSet<T> extends AsyncLiveExpression<ImmutableSet<T>> {
 
 	//TODO: this class should replace 'LiveSet' and 'LiveSet' should be renamed to 'LiveSetVariable'
 
+	/**
+	 * Deprecated use one of the constructors that controls synch versus async behavior explicitly.
+	 */
+	@Deprecated
 	public ObservableSet() {
-		this(ImmutableSet.<T>of());
+		//Make it synch as that is 'backwards' compatible. Just in case existing code expects it.
+		this(ImmutableSet.<T>of(), AsyncMode.SYNC, AsyncMode.SYNC);
 	}
 
-	public ObservableSet(ImmutableSet<T> initialValue) {
-		super(initialValue);
+	public ObservableSet(ImmutableSet<T> initialValue, AsyncMode refreshMode, AsyncMode eventsMode) {
+		super(initialValue, refreshMode, eventsMode);
 	}
 
 	public static <T> ObservableSet<T> constant(ImmutableSet<T> value) {
-		return new ObservableSet<T>(value) {
+		return new ObservableSet<T>(value, AsyncMode.SYNC, AsyncMode.SYNC) {
 			@Override
 			protected ImmutableSet<T> compute() {
 				return value;
@@ -50,7 +55,7 @@ public abstract class ObservableSet<T> extends LiveExpression<ImmutableSet<T>> {
 			}
 
 			@Override
-			public void refresh() {
+			public void syncRefresh() {
 				//Ignore all refreshes... no need to refresh anything since
 				//constants can't change
 			}
@@ -64,6 +69,5 @@ public abstract class ObservableSet<T> extends LiveExpression<ImmutableSet<T>> {
 	public boolean contains(T e) {
 		return getValues().contains(e);
 	}
-
 
 }

@@ -17,9 +17,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * Restarts the application in Cloud Foundry. Does not create, update or push the
@@ -28,46 +30,44 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
  */
 public class ApplicationRestartOnlyOp extends CloudApplicationOperation {
 
-	private final RunState preferredState;
+	private CloudAppDashElement app;
 
-	public ApplicationRestartOnlyOp(String appName, CloudFoundryBootDashModel model, RunState preferredState) {
-		super("Starting application: " + appName, model, appName);
-		addOperationEventHandler(new StartingOperationHandler(model));
-		this.preferredState = preferredState;
+	public ApplicationRestartOnlyOp(CloudAppDashElement cde, CancelationToken cancelationToken) {
+		super("Starting application: " + cde.getName(), cde.getCloudModel(), cde.getName(), cancelationToken);
+		this.app = cde;
 	}
 
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+		app.startOperationStarting();
+		try {
+			CloudAppInstances appInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
+			if (appInstances == null) {
+				throw BootDashActivator.asCoreException(
+						"Unable to start the application. Application does not exist anymore in Cloud Foundry: " + appName);
+			}
 
-		CloudAppInstances appInstances = model.getRunTarget().getClient().getExistingAppInstances(appName);
-		if (appInstances == null) {
-			throw BootDashActivator.asCoreException(
-					"Unable to start the application. Application does not exist anymore in Cloud Foundry: " + appName);
+			// Get the guid, as it is more efficient for lookup
+			UUID appGuid = appInstances.getApplication().getGuid();
+			checkTerminationRequested(monitor);
+
+			// Use the cached Cloud app instead of fetching a new one to avoid
+			// unnecessary
+			// network I/O. An updated Cloud application will be fetched when the op
+			// completes
+			logAndUpdateMonitor("Starting application: " + appName, monitor);
+
+			model.getRunTarget().getClient().restartApplication(appName);
+
+			RunState runState = new ApplicationRunningStateTracker(this, app)
+					.startTracking(monitor);
+			CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(appGuid);
+			app.setInstanceData(updatedInstances);
+			app.startOperationEnded(null, getCancelationToken(), monitor);
+		} catch (Throwable e) {
+			app.startOperationEnded(e, getCancelationToken(), monitor);
 		}
-
-		// Get the guid, as it is more efficient for lookup
-		UUID appGuid = appInstances.getApplication().getGuid();
-
-		boolean checkTermination = true;
-		this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(appInstances, getDashElement(), preferredState),
-				checkTermination);
-
-		// Use the cached Cloud app instead of fetching a new one to avoid
-		// unnecessary
-		// network I/O. An updated Cloud application will be fetched when the op
-		// completes
-		logAndUpdateMonitor("Starting application: " + appName, monitor);
-
-		model.getRunTarget().getClient().restartApplication(appName);
-
-		RunState runState = new ApplicationRunningStateTracker(getDashElement(), model.getRunTarget().getClient(), model, eventHandler)
-				.startTracking(monitor);
-		CloudAppInstances updatedInstances = model.getRunTarget().getClient().getExistingAppInstances(appGuid);
-
-		checkTermination = false;
-		this.eventHandler.fireEvent(eventFactory.getUpdateRunStateEvent(updatedInstances, getDashElement(), runState),
-				checkTermination);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

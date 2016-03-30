@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -20,8 +21,8 @@ public class MockRunTargetType extends AbstractRunTargetType {
 
 	private boolean requiresCredentials;
 
-	public MockRunTargetType(String name) {
-		super(name);
+	public MockRunTargetType(BootDashModelContext context, String name) {
+		super(context, name);
 	}
 
 	@Override

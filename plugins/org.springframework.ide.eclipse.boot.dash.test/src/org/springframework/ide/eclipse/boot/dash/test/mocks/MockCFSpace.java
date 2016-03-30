@@ -15,20 +15,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication.AppState;
+import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 public class MockCFSpace extends CFSpaceData {
 
-	private Map<String, CFService> servicesByName = new HashMap<>();
-	private Map<String, CFApplication> appsByName = new HashMap<>();
+	//TODO: the methods in this class should prolly be synchronized somehow. It manipulates mutable
+	//  data and is called from multiple threads.
 
-	public MockCFSpace(String name, UUID guid, CFOrganization org) {
+	private Map<String, CFService> servicesByName = new HashMap<>();
+	private Map<String, MockCFApplication> appsByName = new HashMap<>();
+	private MockCloudFoundryClientFactory owner;
+
+	public MockCFSpace(MockCloudFoundryClientFactory owner, String name, UUID guid, CFOrganization org) {
 		super(name, guid, org);
+		this.owner = owner;
 	}
 
 	public List<CFService> getServices() {
@@ -36,19 +42,17 @@ public class MockCFSpace extends CFSpaceData {
 	}
 
 	public ImmutableList<CFApplication> getApplicationsWithBasicInfo() {
-		return ImmutableList.copyOf(appsByName.values());
+		Builder<CFApplication> builder = ImmutableList.builder();
+		for (MockCFApplication app : appsByName.values()) {
+			builder.add(app.getBasicInfo());
+		}
+		return builder.build();
 	}
 
-	public CFApplication defApp(String name) {
-		CFApplication existing = appsByName.get(name);
+	public MockCFApplication defApp(String name) {
+		MockCFApplication existing = appsByName.get(name);
 		if (existing==null) {
-			appsByName.put(name, existing = new MockCFApplication(
-					name,
-					UUID.randomUUID(),
-					1,
-					0,
-					AppState.STOPPED
-			));
+			appsByName.put(name, existing = Mockito.spy(new MockCFApplication(owner, name)));
 		}
 		return existing;
 	}
@@ -61,6 +65,37 @@ public class MockCFSpace extends CFSpaceData {
 			));
 		}
 		return existing;
+	}
+
+	public MockCFApplication getApplication(UUID appGuid) {
+		for (MockCFApplication app : appsByName.values()) {
+			if (app.getGuid().equals(appGuid)) {
+				return app;
+			}
+		}
+		return null;
+	}
+
+	public MockCFApplication getApplication(String appName) {
+		MockCFApplication app = appsByName.get(appName);
+		if (app!=null) {
+			return app;
+		}
+		return null;
+	}
+
+
+	public boolean removeApp(String name) {
+		return appsByName.remove(name)!=null;
+	}
+
+	public boolean add(MockCFApplication app) {
+		String name = app.getName();
+		if (appsByName.get(name)==null) {
+			appsByName.put(name, app);
+			return true;
+		}
+		return false;
 	}
 
 }

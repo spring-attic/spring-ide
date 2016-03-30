@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-	<version>3.7.3-SNAPSHOT</version>
+	<version>3.8.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<organization>
@@ -82,8 +82,9 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<encoding>UTF-8</encoding>
-		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=http://start-development.cfapps.io</test.vmargs>
 		<test.osvmargs></test.osvmargs>
+		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=http://start-development.cfapps.io</test.vmargs>
+<!--		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=http://start.spring.io</test.vmargs> -->
 	</properties>
 
 	<modules>
@@ -108,7 +109,9 @@
 		<module>plugins/org.springframework.ide.eclipse.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
+		<!--
 		<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>
+		 -->
 		<module>plugins/org.springframework.ide.eclipse.beans.core.metadata</module>
 		<module>plugins/org.springframework.ide.eclipse.ui</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui</module>
@@ -522,7 +525,7 @@
 				<repository>
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
-		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.6/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>

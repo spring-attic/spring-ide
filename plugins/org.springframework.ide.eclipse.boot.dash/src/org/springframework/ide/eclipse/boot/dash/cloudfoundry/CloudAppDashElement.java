@@ -12,13 +12,17 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -28,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationSto
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -36,10 +41,13 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-
-import com.google.common.base.Objects;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -51,12 +59,64 @@ import com.google.common.base.Objects;
 public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements LogSink {
 
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
+	private static final String PROJECT_NAME = "PROJECT_NAME";
 
+	private CancelationTokens cancelationTokens = new CancelationTokens();
+
+	private final LiveVariable<String> healthCheck = new LiveVariable<>(HealthCheckSupport.HC_PORT);
 	private final CloudFoundryRunTarget cloudTarget;
-
 	private final CloudFoundryBootDashModel cloudModel;
-
 	private PropertyStoreApi persistentProperties;
+
+	private final LiveCounter startOperationInProgress = new LiveCounter(0);
+	private final LiveVariable<Throwable> error = new LiveVariable<>();
+
+	private final LiveVariable<CloudAppInstances> instanceData = new LiveVariable<>();
+	private final LiveExpression<RunState> baseRunState = new LiveExpression<RunState>() {
+		{
+			dependsOn(instanceData);
+			dependsOn(startOperationInProgress);
+			dependsOn(error);
+		}
+
+		@Override
+		protected RunState compute() {
+			if (error.getValue()!=null) {
+				return RunState.UNKNOWN;
+			}
+			if (startOperationInProgress.getValue() > 0) {
+				return RunState.STARTING;
+			}
+			CloudAppInstances instances = instanceData.getValue();
+			if (instances!=null) {
+				return ApplicationRunningStateTracker.getRunState(instances);
+			}
+			return RunState.UNKNOWN;
+		}
+	};
+
+	public void startOperationStarting() {
+		startOperationInProgress.increment();
+		setError(null);
+	}
+
+	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
+		int level = startOperationInProgress.decrement();
+		if (cancelationToken.isCanceled() || monitor.isCanceled()) {
+			//Avoid setting error results for canceled operation. If an op is canceled
+			// its errors should simply be ignored.
+			throw new OperationCanceledException();
+		}
+		if (level==0 && !(error instanceof OperationCanceledException)) {
+			setError(error);
+		}
+		//TODO: this kind of 'error handling' logic shouldn't be in here.
+		// But where should it be? Some kind of wrapper thing that goes around
+		// any kind of operation?
+		if (error != null) {
+			throw ExceptionUtil.exception(error);
+		}
+	}
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
@@ -64,6 +124,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		this.cloudModel = model;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
+		addElementNotifier(baseRunState);
+		addElementNotifier(instanceData);
+		addElementNotifier(healthCheck);
+		this.addDisposableChild(baseRunState);
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
@@ -81,15 +145,19 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// run state IS indeed updated to show that
 		// it is stopped
 		boolean updateElementRunStateInModel = true;
-		CloudApplicationOperation op = new CompositeApplicationOperation(new ApplicationStopOperation(this.getName(),
-				(CloudFoundryBootDashModel) getBootDashModel(), updateElementRunStateInModel));
+		cancelOperations();
+		CancelationToken cancelationToken = createCancelationToken();
+		CloudApplicationOperation op = new CompositeApplicationOperation(
+				new ApplicationStopOperation(this, updateElementRunStateInModel, cancelationToken)
+		);
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
 	@Override
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-
+		cancelOperations();
 		Operation<?> op = null;
+		CancelationToken cancelToken = createCancelationToken();
 		// TODO: Only do full upload on restart. Not on debug
 		if (getProject() != null
 		// TODO: commenting out for now as restarting doesnt seem to restage.
@@ -99,11 +167,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// && runingOrDebugging == RunState.RUNNING
 		) {
 			op = cloudModel.getApplicationDeploymentOperations().restartAndPush(this, getDebugSupport(),
-					runingOrDebugging, ui);
+					runingOrDebugging, ui, cancelToken);
 		} else {
 			// Set the initial run state as Starting
-			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
-					getName(), RunState.STARTING);
+			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(this, cancelToken);
 		}
 
 		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
@@ -119,10 +186,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-
-		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(getProject(),
-				getName(), RunState.STARTING);
-
+		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(this, createCancelationToken());
 		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(op));
 	}
 
@@ -136,23 +200,70 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return delegate.getAppName();
 	}
 
+	/**
+	 * Returns the project associated with this element or null. If includeNonExistingProjects is
+	 * true, then the project is returned even it no longer exists.
+	 */
+	public IProject getProject(boolean includeNonExistingProjects) {
+		String name = getPersistentProperties().get(PROJECT_NAME);
+		if (name!=null) {
+			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+			if (includeNonExistingProjects || project.exists()) {
+				return project;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the project associated with this element or null. The project returned is
+	 * guaranteed to exist.
+	 */
 	@Override
 	public IProject getProject() {
-		return getCloudModel().getAppCache().getProject(getName());
+		return getProject(false);
+	}
+
+	/**
+	 * Set the project 'binding' for this element.
+	 * @return true if the element was changed by this operation.
+	 */
+	public boolean setProject(IProject project) {
+		try {
+			PropertyStoreApi props = getPersistentProperties();
+			String oldValue = props.get(PROJECT_NAME);
+			String newValue = project==null?null:project.getName();
+			if (!Objects.equals(oldValue, newValue)) {
+				props.put(PROJECT_NAME, newValue);
+				return true;
+			}
+			return false;
+		} catch (Exception e) {
+			BootActivator.log(e);
+			return false;
+		}
 	}
 
 	@Override
 	public RunState getRunState() {
-		RunState state = getCloudModel().getAppCache().getRunState(getName());
-
+		RunState state = baseRunState.getValue();
 		if (state == RunState.RUNNING) {
 			DebugSupport debugSupport = getDebugSupport();
-			if (debugSupport.isDebuggerAttached(this)) {
+			if (debugSupport.isDebuggerAttached(CloudAppDashElement.this)) {
 //			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.DEBUG_MODE)) {
 				state = RunState.DEBUGGING;
 			}
 		}
 		return state;
+	}
+
+	/**
+	 * This method is mostly meant just for test purposes. The 'baseRunState' is really
+	 * part of how this class internally computes runstate. Clients should have no business
+	 * using it separate from the runtstate.
+	 */
+	public LiveExpression<RunState> getBaseRunStateExp() {
+		return baseRunState;
 	}
 
 	@Override
@@ -167,7 +278,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public String getLiveHost() {
-		CFApplication app = getCloudModel().getAppCache().getApp(getName());
+		CFApplication app = getSummaryData();
 		if (app != null) {
 			List<String> uris = app.getUris();
 			if (uris != null) {
@@ -179,6 +290,14 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return null;
 	}
 
+	public CFApplication getSummaryData() {
+		CloudAppInstances data = instanceData.getValue();
+		if (data!=null) {
+			return data.getApplication();
+		}
+		return null;
+	}
+
 	@Override
 	public ILaunchConfiguration getActiveConfig() {
 		return null;
@@ -186,18 +305,18 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public int getActualInstances() {
-		return getCloudModel().getAppCache().getApp(getName()) != null
-				? getCloudModel().getAppCache().getApp(getName()).getRunningInstances() : 0;
+		CFApplication data = getSummaryData();
+		return data != null ? data.getRunningInstances() : 0;
 	}
 
 	@Override
 	public int getDesiredInstances() {
-		return getCloudModel().getAppCache().getApp(getName()) != null
-				? getCloudModel().getAppCache().getApp(getName()).getInstances() : 0;
+		CFApplication data = getSummaryData();
+		return data != null ? data.getInstances() : 0;
 	}
 
 	public String getHealthCheck() {
-		return getCloudModel().getAppCache().getHealthCheck(this);
+		return this.healthCheck.getValue();
 	}
 
 	/**
@@ -205,16 +324,11 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	 * doesn *not* change the real value of the health-check.
 	 */
 	public void setHealthCheck(String hc) {
-		String old = getHealthCheck();
-		if (!Objects.equal(old, hc)) {
-			CloudFoundryBootDashModel model = getCloudModel();
-			model.getAppCache().setHealthCheck(this, hc);
-			model.notifyElementChanged(this);
-		}
+		this.healthCheck.setValue(hc);
 	}
 
 	public UUID getAppGuid() {
-		CFApplication app = getCloudModel().getAppCache().getApp(getName());
+		CFApplication app = getSummaryData();
 		if (app!=null) {
 			return app.getGuid();
 		}
@@ -324,6 +438,26 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
+	}
+
+	public void setInstanceData(CloudAppInstances data) {
+		this.instanceData.setValue(data);
+	}
+
+	public CloudAppInstances getInstanceData() {
+		return this.instanceData.getValue();
+	}
+
+	public void setError(Throwable t) {
+		error.setValue(t);
+	}
+
+	public CancelationToken createCancelationToken() {
+		return cancelationTokens.create();
+	}
+
+	public void cancelOperations() {
+		cancelationTokens.cancelAll();
 	}
 
 }

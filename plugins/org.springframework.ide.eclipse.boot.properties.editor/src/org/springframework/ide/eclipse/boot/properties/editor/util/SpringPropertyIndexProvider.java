@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.util;
 
 import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
-import org.springframework.ide.eclipse.boot.properties.editor.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 
 
 public abstract class SpringPropertyIndexProvider {

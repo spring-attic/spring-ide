@@ -150,7 +150,7 @@ public abstract class HoverInfo extends BrowserInformationControlInput {
 		try {
 			if (location!=null) {
 				URI uri = new URI(location);
-				if (uri.getHost().equals(ACTION_HOST)) {
+				if (ACTION_HOST.equals(uri.getHost())) {
 					String path = URLDecoder.decode(uri.getPath(), "utf8");
 					while (path.startsWith("/")) {
 						path = path.substring(1);

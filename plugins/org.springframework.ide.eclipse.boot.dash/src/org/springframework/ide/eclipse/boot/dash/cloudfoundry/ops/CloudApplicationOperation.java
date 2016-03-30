@@ -11,12 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * A cloud operation that is performed on a Cloud application (for example,
@@ -27,34 +29,17 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected String appName;
 	private ISchedulingRule schedulingRule;
-	protected ApplicationOperationEventHandler eventHandler;
-	protected ApplicationOperationEventFactory eventFactory;
+	private final CancelationToken cancelationToken;
 
-	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName) {
-		this(opName, model, appName, new StartingOperationHandler(model));
-	}
-
-	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName,
-			ApplicationOperationEventHandler eventHandler) {
+	public CloudApplicationOperation(String opName, CloudFoundryBootDashModel model, String appName, CancelationToken cancelationToken) {
 		super(opName, model);
-		this.eventHandler = eventHandler;
-		this.eventFactory = new ApplicationOperationEventFactory(model);
+		this.cancelationToken = cancelationToken;
 		this.appName = appName;
 		setSchedulingRule(new StartApplicationSchedulingRule(model.getRunTarget(), appName));
 	}
 
 	protected CloudAppDashElement getDashElement() {
 		return model.getApplication(appName);
-	}
-
-	protected CloudAppInstances getCachedApplicationInstances() {
-		return model.getAppCache().getAppInstances(appName);
-	}
-
-	public void addOperationEventHandler(ApplicationOperationEventHandler eventHandler) {
-		if (eventHandler != null) {
-			this.eventHandler = eventHandler;
-		}
 	}
 
 	public ISchedulingRule getSchedulingRule() {
@@ -96,6 +81,19 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 	@Override
 	String getOpErrorPrefix() {
 		return "Error: " + appName + " in '" + model.getRunTarget().getName() + "'";
+	}
+
+	public void checkTerminationRequested(IProgressMonitor mon) throws OperationCanceledException {
+		if (
+				mon!=null && mon.isCanceled() ||
+				cancelationToken!=null && cancelationToken.isCanceled()
+		) {
+			throw new OperationCanceledException();
+		}
+	}
+
+	protected CancelationToken getCancelationToken() {
+		return cancelationToken;
 	}
 
 }

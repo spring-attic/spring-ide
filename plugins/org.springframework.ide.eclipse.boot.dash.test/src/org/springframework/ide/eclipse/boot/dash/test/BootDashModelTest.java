@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.assertLabelContains;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
@@ -72,6 +73,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBox
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -79,8 +81,8 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
-import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
@@ -165,13 +167,15 @@ public class BootDashModelTest {
 		ILaunchConfiguration conf2 = BootLaunchConfigurationDelegate.createConf(javaProject);
 		assertFalse(conf1.equals(conf2));
 
-		assertEquals(2, projectEl.getCurrentChildren().size());
+		ACondition.waitFor("Children to appear", 3000, () -> {
+			assertEquals(2, projectEl.getCurrentChildren().size());
+		});
 
 		conf1.delete();
 
-		//When there is only one child (i.e. launch config), then it is not shown in the model (the parent subsumes all the
-		// child's functionality and we don't show the child to avoid cluttering the view)
-		assertEquals(1, projectEl.getCurrentChildren().size());
+		ACondition.waitFor("Child to disappear", 3000, () -> {
+			assertEquals(1, projectEl.getCurrentChildren().size());
+		});
 	}
 
 
@@ -299,6 +303,9 @@ public class BootDashModelTest {
 		element.openConfig(ui); //Ensure that at least one launch config exists.
 		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
 		verifyNoMoreInteractions(ui);
+		ACondition.waitFor("child", 3000, () -> {
+			assertNotNull(getSingleValue(element.getCurrentChildren()));
+		});
 		BootDashElement childElement = getSingleValue(element.getCurrentChildren());
 
 		ElementStateListener listener = mock(ElementStateListener.class);
@@ -340,6 +347,55 @@ public class BootDashModelTest {
 			return e;
 		}
 		throw new IllegalStateException("This code should be unreachable");
+	}
+
+	@Test
+	public void startLifeCycleDisabledApp() throws Exception {
+		String projectName = "some-app";
+		IProject project = createBootProject(projectName, bootVersionAtLeast("1.3"));
+
+		BootProjectDashElement element = getElement(projectName);
+		element.openConfig(ui); //Ensure that at least one launch config exists.
+		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui);
+
+		//Disable lifecycle mgmt on config
+		ACondition.waitFor("child", 3000, () -> {
+			assertNotNull(getSingleValue(element.getCurrentChildren()));
+		});
+		LaunchConfDashElement childElement = (LaunchConfDashElement) getSingleValue(element.getCurrentChildren());
+		ILaunchConfigurationWorkingCopy wc = childElement.getActiveConfig().getWorkingCopy();
+		assertNotNull(BootLaunchConfigurationDelegate.getMainType(wc));
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
+		wc.doSave();
+
+		doStartBootAppWithoutLifeCycleTest(element, RunState.RUNNING);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.DEBUGGING);
+	}
+
+	@Test
+	public void startOldBootApp() throws Exception {
+		String projectName = "boot12";
+		createPredefinedMavenProject(projectName);
+		BootProjectDashElement element = getElement(projectName);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.RUNNING);
+		doStartBootAppWithoutLifeCycleTest(element, RunState.DEBUGGING);
+	}
+
+	private void doStartBootAppWithoutLifeCycleTest(BootProjectDashElement element, RunState runOrDebug) throws Exception {
+		try {
+			waitForState(element, RunState.INACTIVE);
+			element.restart(runOrDebug, ui);
+			waitForState(element, runOrDebug);
+		} finally {
+			element.stopAsync(ui);
+			waitForState(element, RunState.INACTIVE);
+			verifyZeroInteractions(ui);
+		}
+	}
+
+	private IProject createPredefinedMavenProject(String projectName) throws Exception {
+		return BootProjectTestHarness.createPredefinedMavenProject(projectName, "org.springframework.ide.eclipse.boot.dash.test");
 	}
 
 	/**
@@ -1030,11 +1086,12 @@ public class BootDashModelTest {
 		return ImmutableSet.of();
 	}
 
-	private void waitForState(final BootDashElement element, final RunState state) throws Exception {
-		new ACondition("Wait for state", RUN_STATE_CHANGE_TIMEOUT) {
+	private static void waitForState(final BootDashElement element, final RunState state) throws Exception {
+		new ACondition("Wait for state "+state, RUN_STATE_CHANGE_TIMEOUT) {
 			@Override
 			public boolean test() throws Exception {
-				return element.getRunState()==state;
+				assertEquals(state, element.getRunState());
+				return true;
 			}
 		};
 	}

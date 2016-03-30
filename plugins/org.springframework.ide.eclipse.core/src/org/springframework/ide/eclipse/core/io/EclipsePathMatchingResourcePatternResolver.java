@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2014 Spring IDE Developers
+ * Copyright (c) 2008, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,25 +138,25 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 	}
 
 	public Resource[] getResources(String locationPattern) throws IOException {
-		// long start = System.currentTimeMillis();
-		try {
+		// Check cache first
+		if (resolvedResources.containsKey(locationPattern)) {
+			return resolvedResources.get(locationPattern);
+		}
 
-			// Check cache first
-			if (resolvedResources.containsKey(locationPattern)) {
-				return resolvedResources.get(locationPattern);
+		Resource[] resources = patternResolver.getResources(locationPattern);
+		Set<Resource> foundResources = new HashSet<Resource>();
+
+		try {
+			// initialize and cache javaProject and package fragment roots
+			// because they are expensive at runtime
+			if (javaProject == null) {
+				javaProject = JdtUtils.getJavaProject(project);
+			}
+			if (roots == null && javaProject != null) {
+				roots = javaProject.getAllPackageFragmentRoots();
 			}
 
-			Resource[] resources = patternResolver.getResources(locationPattern);
-			Set<Resource> foundResources = new HashSet<Resource>();
-
-			try {
-				// initialize and cache javaProject and package fragment roots
-				// because they are expensive at runtime
-				if (javaProject == null || roots == null) {
-					javaProject = JdtUtils.getJavaProject(project);
-					roots = javaProject.getAllPackageFragmentRoots();
-				}
-
+			if (roots != null) {
 				for (Resource resource : resources) {
 					Resource newResource = processRawResource(roots, resource);
 					if (newResource != null) {
@@ -167,19 +167,15 @@ public class EclipsePathMatchingResourcePatternResolver implements ResourcePatte
 					}
 				}
 			}
-			catch (JavaModelException e) {
-				// The implementation is called too often to log
-			}
-
-			Resource[] result = foundResources.toArray(new Resource[foundResources.size()]);
-			resolvedResources.put(locationPattern, result);
-
-			return result;
 		}
-		finally {
-			// System.out.println(String.format("--- resolving resource pattern '%s' took '%s'ms", locationPattern,
-			// (System.currentTimeMillis() - start)));
+		catch (JavaModelException e) {
+			// The implementation is called too often to log
 		}
+
+		Resource[] result = foundResources.toArray(new Resource[foundResources.size()]);
+		resolvedResources.put(locationPattern, result);
+
+		return result;
 	}
 
 	/**

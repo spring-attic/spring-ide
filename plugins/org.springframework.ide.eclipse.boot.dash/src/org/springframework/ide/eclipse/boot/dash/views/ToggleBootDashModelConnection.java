@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ServicesRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -22,7 +23,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  * Action for toggling Boot Dash model connection
  *
  * @author Alex Boyko
- *
  */
 public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 
@@ -65,6 +65,7 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
 			connectable.getOperationsExecution(ui).runOpAsynch(new ConnectOperation(connectable, !connectable.getRunTarget().isConnected(), ui));
 			connectable.getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(connectable, ui));
+			connectable.getOperationsExecution(ui).runOpAsynch(new ServicesRefreshOperation(connectable));
 		}
 	}
 

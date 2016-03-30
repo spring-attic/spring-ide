@@ -63,7 +63,11 @@ public class BootDashViewModelHarness {
 	public BootDashViewModel model;
 	private RunTargetType[] types;
 	public final MockMultiSelection<BootDashElement> selection = new MockMultiSelection<>(BootDashElement.class);
+	public final LiveVariable<BootDashModel> sectionSelection = new LiveVariable<>();
 
+	/**
+	 * This is private now. Use the Builder instead for a convenient way to create a harness with some targets in it.
+	 */
 	public BootDashViewModelHarness(BootDashModelContext context, RunTargetType... types) throws Exception {
 		this.types = types;
 		this.context = context;
@@ -77,10 +81,6 @@ public class BootDashViewModelHarness {
 	public void reload() {
 		dispose();
 		this.model = new BootDashViewModel(context, types);
-	}
-
-	public BootDashViewModelHarness(RunTargetType... types) throws Exception {
-		this(new MockContext(), types);
 	}
 
 	public static class MockContext implements BootDashModelContext {

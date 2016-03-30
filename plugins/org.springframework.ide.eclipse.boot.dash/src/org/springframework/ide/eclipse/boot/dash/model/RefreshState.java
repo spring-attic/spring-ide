@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.base.Objects;
 
@@ -29,7 +29,7 @@ public class RefreshState {
 		return new RefreshState(ERROR.id, msg);
 	}
 
-	public static RefreshState error(Exception e) {
+	public static RefreshState error(Throwable e) {
 		return error(ExceptionUtil.getMessage(e));
 	}
 

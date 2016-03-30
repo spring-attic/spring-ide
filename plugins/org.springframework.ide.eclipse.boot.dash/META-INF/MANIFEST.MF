@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring Boot Dashboard View
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash;singleton:=true
-Bundle-Version: 3.7.3.qualifier
+Bundle-Version: 3.8.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.BootDashActivator
 Bundle-Vendor: Pivotal Inc
 Require-Bundle: org.eclipse.ui,
@@ -26,10 +26,7 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.lang,
  org.json,
  org.springframework.ide.eclipse.boot.properties.editor,
- org.springsource.ide.eclipse.commons.cloudfoundry.client,
  com.google.guava;bundle-version="15.0.0",
- org.codehaus.jackson.mapper,
- org.codehaus.jackson.core,
  org.eclipse.equinox.security,
  org.eclipse.ui.views.properties.tabbed,
  org.eclipse.wst.server.core,
@@ -44,8 +41,11 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.editor.support,
  org.yaml.snakeyaml,
  org.eclipse.compare,
- org.springframework.ide.eclipse.cloudfoundry.manifest.editor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+ org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
+ org.springsource.ide.eclipse.commons.cloudfoundry.client;bundle-version="3.8.0",
+ com.fasterxml.jackson.core.jackson-databind,
+ com.fasterxml.jackson.core.jackson-core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/commons-logging-1.2.jar,

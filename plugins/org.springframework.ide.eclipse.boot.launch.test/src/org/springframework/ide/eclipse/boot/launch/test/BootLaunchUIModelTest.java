@@ -408,6 +408,9 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		assertFalse(liveBean.getValue());
 		assertError("should be a positive", validator);
 
+		port.setValue("0");
+		assertOk(validator); // 0 is acceptable as it means 'choose dynamically'.
+
 		port.setValue("  8888   ");
 		assertOk(validator); // tolerate spaces
 
@@ -449,8 +452,8 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		eJmxModel.setDefaults(wc);
 		assertTrue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
 		assertTrue(BootLaunchConfigurationDelegate.getEnableLifeCycle(wc));
-		int randomPort = Integer.parseInt(BootLaunchConfigurationDelegate.getJMXPort(wc));
-		assertTrue(1000 <= randomPort && randomPort <= 65535);
+		int jmxPort = Integer.parseInt(BootLaunchConfigurationDelegate.getJMXPort(wc));
+		assertEquals(BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT, jmxPort);
 	}
 
 	public void testJmxInitializeFrom() throws Exception {

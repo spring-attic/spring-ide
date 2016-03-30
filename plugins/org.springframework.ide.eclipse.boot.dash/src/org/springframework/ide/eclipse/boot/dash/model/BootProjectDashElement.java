@@ -179,7 +179,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public ObservableSet<BootDashElement> getChildren() {
 		if (children==null) {
-			children = LiveSets.map(getBootDashModel().launchConfTracker.getConfigs(delegate),
+			children = LiveSets.mapSync(getBootDashModel().launchConfTracker.getConfigs(delegate),
 					new Function<ILaunchConfiguration, BootDashElement>() {
 						public BootDashElement apply(ILaunchConfiguration input) {
 							return childFactory.createOrGet(input);

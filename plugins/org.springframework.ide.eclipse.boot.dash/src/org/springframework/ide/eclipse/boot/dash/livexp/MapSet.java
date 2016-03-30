@@ -23,10 +23,19 @@ public class MapSet<S, T> extends ObservableSet<T> {
 	private ObservableSet<S> input;
 	private Function<S, T> function;
 
-	public MapSet(ObservableSet<S> input, Function<S, T> function) {
+	public MapSet(ObservableSet<S> input, AsyncMode asyncRefresh, AsyncMode asyncEvents, Function<S, T> function) {
+		super(ImmutableSet.<T>of(), asyncRefresh, asyncEvents);
 		this.input = input;
 		this.function = function;
 		dependsOn(input);
+	}
+
+	/**
+	 * Deprecated. Use the constructor that explicitly allows choosing async versus sync behavior.
+	 */
+	@Deprecated
+	public MapSet(ObservableSet<S> input, Function<S, T> function) {
+		this(input, AsyncMode.SYNC, AsyncMode.SYNC, function);
 	}
 
 	@Override

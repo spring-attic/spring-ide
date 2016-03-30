@@ -10,15 +10,29 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+
 /**
  * @author Kris De Volder
  */
 public abstract class AbstractRunTargetType implements RunTargetType {
 
-	private String name;
+	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 
-	public AbstractRunTargetType(String name) {
+	private String name;
+	private IPropertyStore propertyStore;
+
+	public AbstractRunTargetType(BootDashModelContext context, String name) {
 		this.name = name;
+		//TODO: there shouldn't be any exceptions to allow for target types that don't provide a context.
+		// However this requires a bunch of refactoring to get rid of the global constants related to the
+		// 'LOCAL' runtarget and type.
+		if (context!=null) {
+			this.propertyStore = PropertyStoreFactory.createSubStore(name, context.getViewProperties());
+		}
 	}
 
 	@Override
@@ -54,5 +68,46 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	@Override
+	public IPropertyStore getPropertyStore() {
+		return propertyStore;
+	}
+
+	@Override
+	public PropertyStoreApi getPersistentProperties() {
+		IPropertyStore store = getPropertyStore();
+		if (store!=null) {
+			return new PropertyStoreApi(store);
+		}
+		return null;
+	}
+
+	@Override
+	public String getDefaultNameTemplate() {
+		return null;
+	}
+
+	@Override
+	public void setNameTemplate(String template) throws Exception {
+		getPersistentProperties().put(NAME_TEMPLATE, template);
+	}
+
+	@Override
+	public String getNameTemplate() {
+		PropertyStoreApi props = getPersistentProperties();
+		if (props!=null) {
+			String customTemplate = props.get(NAME_TEMPLATE);
+			if (customTemplate!=null) {
+				return customTemplate;
+			}
+		}
+		return getDefaultNameTemplate();
+	}
+
+	@Override
+	public String getTemplateHelpText() {
+		return null;
 	}
 }

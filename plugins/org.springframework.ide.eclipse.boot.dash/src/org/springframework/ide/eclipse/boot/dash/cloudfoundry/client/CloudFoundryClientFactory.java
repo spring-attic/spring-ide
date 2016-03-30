@@ -18,11 +18,14 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OrgsAndSpaces;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
 public abstract class CloudFoundryClientFactory {
 
 	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactory();
+
+//	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactoryV2();
 
 	public abstract ClientRequests getClient(CFClientParams params) throws Exception;
 
