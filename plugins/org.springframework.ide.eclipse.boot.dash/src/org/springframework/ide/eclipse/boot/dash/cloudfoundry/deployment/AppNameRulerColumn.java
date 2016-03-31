@@ -169,7 +169,7 @@ public class AppNameRulerColumn extends AnnotationRulerColumn {
 						redraw= true;
 					}
 					fCurrentAnnotation= annotation;
-					if (fCurrentAnnotation != null /*&& !fCurrentAnnotation.isSelected()*/) {
+					if (fCurrentAnnotation != null) {
 						fCurrentAnnotation.setRangeIndication(true);
 						redraw= true;
 					}

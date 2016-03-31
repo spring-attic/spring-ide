@@ -31,14 +31,16 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
 	private ISourceViewer fViewer;
-	private YamlASTProvider parser;
+	private YamlASTProvider fParser;
+	final private String fAppName;
 
 	private IDocument fDocument;
 	private IProgressMonitor fProgressMonitor;
 
-	public AppNameReconcilingStrategy(ISourceViewer viewer, YamlASTProvider parser) {
-		this.fViewer = viewer;
-		this.parser = parser;
+	public AppNameReconcilingStrategy(ISourceViewer viewer, YamlASTProvider parser, String appName) {
+		fViewer = viewer;
+		fParser = parser;
+		fAppName = appName;
 	}
 
 	/*
@@ -125,7 +127,7 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		Map<AppNameAnnotation, Position> annotationsMap = new LinkedHashMap<>();
 		fProgressMonitor.beginTask("Calculating application names", 100);
 		try {
-			YamlFileAST ast = parser.getAST(fDocument);
+			YamlFileAST ast = fParser.getAST(fDocument);
 			List<Node> rootList = ast.getNodes();
 			fProgressMonitor.worked(70);
 			if (rootList.size() == 1) {
@@ -149,26 +151,11 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 				}
 				fProgressMonitor.worked(20);
 				if (!annotationsMap.isEmpty()) {
-					AppNameAnnotation selected = annotationModel.getSelectedAppAnnotation();
-					Map.Entry<AppNameAnnotation, Position> newSelected = null;
-					if (selected != null) {
-						Position selectedPosition = annotationModel.getPosition(selected);
-						for (Map.Entry<AppNameAnnotation, Position> entry : annotationsMap.entrySet()) {
-							if (entry.getKey().getText().equals(selected.getText())) {
-								if (newSelected == null) {
-									newSelected = entry;
-								} else if (Math.abs(newSelected.getValue().getOffset() - selectedPosition.getOffset()) > Math.abs(entry.getValue().getOffset() - selectedPosition.getOffset())){
-									newSelected = entry;
-								}
-							} else if (entry.getValue().getOffset() == selectedPosition.getOffset() && newSelected == null) {
-								newSelected = entry;
-							}
-						}
+					if (fAppName == null) {
+						reselectAnnotation(annotationModel, annotationsMap);
+					} else {
+						selectAnnotationByAppName(annotationsMap);
 					}
-					if (newSelected == null) {
-						newSelected = annotationsMap.entrySet().iterator().next();
-					}
-					newSelected.getKey().markSelected();
 					fProgressMonitor.worked(10);
 				}
 			}
@@ -180,8 +167,43 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		return annotationsMap;
 	}
 
+	private void reselectAnnotation(AppNameAnnotationModel annotationModel, Map<AppNameAnnotation, Position> annotationsMap) {
+		AppNameAnnotation selected = annotationModel.getSelectedAppAnnotation();
+		Map.Entry<AppNameAnnotation, Position> newSelected = null;
+		if (selected != null) {
+			Position selectedPosition = annotationModel.getPosition(selected);
+			for (Map.Entry<AppNameAnnotation, Position> entry : annotationsMap.entrySet()) {
+				if (entry.getKey().getText().equals(selected.getText())) {
+					if (newSelected == null) {
+						newSelected = entry;
+					} else if (Math.abs(newSelected.getValue().getOffset() - selectedPosition.getOffset()) > Math.abs(entry.getValue().getOffset() - selectedPosition.getOffset())){
+						newSelected = entry;
+					}
+				} else if (entry.getValue().getOffset() == selectedPosition.getOffset() && newSelected == null) {
+					newSelected = entry;
+				}
+			}
+		}
+		if (newSelected == null) {
+			newSelected = annotationsMap.entrySet().iterator().next();
+		}
+		newSelected.getKey().markSelected();
+	}
+
+	private void selectAnnotationByAppName(Map<AppNameAnnotation, Position> annotationsMap) {
+		for (Map.Entry<AppNameAnnotation, Position> entry : annotationsMap.entrySet()) {
+			if (entry.getKey().getText().equals(fAppName)) {
+				entry.getKey().markSelected();
+				return;
+			}
+		}
+	}
+
 	private static int getLastWhiteCharIndex(String text, int index) {
-		int i = index < text.length() ? index : index - 1;
+		if (index == text.length()) {
+			return index;
+		}
+		int i = index;
 		for (; i >=  0 && Character.isWhitespace(text.charAt(i)); i--) {
 			// Nothing to do
 		}

@@ -45,22 +45,17 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
-import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -558,37 +553,25 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 10, colorsCache);
-		IVerticalRuler fileVerticalRuler = appName == null ? new CompositeRuler() : new VerticalRuler(16, fileMarkerAnnotationAccess);
+		IVerticalRuler fileVerticalRuler = appName == null ? new CompositeRuler() : /*new VerticalRuler(16, fileMarkerAnnotationAccess)*/ null;
 		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		ManifestYamlSourceViewerConfiguration fileYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
 			@Override
 			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-				if (appName == null) {
-					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-					strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
-						super.createReconcilerStrategy(viewer),
-						new AppNameReconcilingStrategy(viewer, getAstProvider())
-					});
-					return strategy;
-				}
-				return super.createReconcilerStrategy(viewer);
+				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+				strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
+						new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
+				return strategy;
 			}
 
 		};
 		fileYamlViewer.configure(fileYamlSourceViewerConfiguration);
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 
-		if (appName == null) {
-			AnnotationRulerColumn column = new AnnotationRulerColumn(12, fileMarkerAnnotationAccess);
-			column.addAnnotationType(Annotation.TYPE_UNKNOWN);
-			fileYamlViewer.addVerticalRulerColumn(column);
-			column.setModel(fileYamlViewer.getAnnotationModel());
-		}
-
 		fileYamlDecorationSupport = new SourceViewerDecorationSupport(fileYamlViewer, fileOverviewRuler, fileMarkerAnnotationAccess, colorsCache);
-		fileYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(fileYamlViewer, fileMarkerAnnotationAccess);
+		fileYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(fileYamlViewer, fileMarkerAnnotationAccess, colorsCache);
 
 		manualYamlComposite = new Composite(yamlGroup, SWT.NONE);
 		manualYamlComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -603,7 +586,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		DefaultMarkerAnnotationAccess manualMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 10, colorsCache);
-		IVerticalRuler manualVerticalRuler = appName == null ? new CompositeRuler() : new VerticalRuler(16, manualMarkerAnnotationAccess);
+		IVerticalRuler manualVerticalRuler = appName == null ? new CompositeRuler() : /*new VerticalRuler(16, manualMarkerAnnotationAccess)*/ null;
 		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
 				manualOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
@@ -611,15 +594,10 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 			@Override
 			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-				if (appName == null) {
-					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-					strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
-						super.createReconcilerStrategy(viewer),
-						new AppNameReconcilingStrategy(viewer, getAstProvider())
-					});
-					return strategy;
-				}
-				return super.createReconcilerStrategy(viewer);
+				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+				strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
+						new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
+				return strategy;
 			}
 
 		};
@@ -627,20 +605,13 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlViewer.configure(manualSourceViewerConfiguration);
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 
-		if (appName == null) {
-			AnnotationRulerColumn column = new AnnotationRulerColumn(12, manualMarkerAnnotationAccess);
-			column.addAnnotationType(Annotation.TYPE_UNKNOWN);
-			manualYamlViewer.addVerticalRulerColumn(column);
-			column.setModel(manualYamlViewer.getAnnotationModel());
-		}
-
 		if (readOnly) {
 			manualYamlViewer.setEditable(false);
 			manualYamlViewer.getTextWidget().setCaret(null);
 			manualYamlViewer.getTextWidget().setCursor(getShell().getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
 		}
 		manualYamlDecorationSupport = new SourceViewerDecorationSupport(manualYamlViewer, manualOverviewRuler, manualMarkerAnnotationAccess, colorsCache);
-		manualYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(manualYamlViewer, manualMarkerAnnotationAccess);
+		manualYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(manualYamlViewer, manualMarkerAnnotationAccess, colorsCache);
 
 		manualYamlViewer.setDocument(new Document(defaultYaml == null ? "" : defaultYaml), new AnnotationModel());
 
@@ -891,17 +862,21 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				error = "Unable to load deployment manifest YAML file";
 			}
 		}
-		AppNameAnnotationModel appNamesModel = getAppNameAnnotationModel(viewer);
+		AppNameAnnotationModel appNamesModel = AppNameAnnotationSupport.getAppNameAnnotationModel(viewer);
 		if (appNamesModel == null) {
 			error = "Application name(s) cannot be found.";
 		}
 		if (error == null) {
 			if (!appNamesModel.getAnnotationIterator().hasNext()) {
 				error = "Manifest file does not have any application name defined";
-			} else if (appNamesModel.getSelectedAppAnnotation() == null) {
-				error = "Application name not selected";
-			} else if (appName != null && !appName.equals(appNamesModel.getSelectedAppAnnotation().getText())) {
-				error = "Manifest does not contain deployment properties for application with name '" + appName + "'";
+			} else if (appName == null) {
+				if (appNamesModel.getSelectedAppAnnotation() == null) {
+					error = "Application name not selected";
+				}
+			} else {
+				if (appNamesModel.getSelectedAppAnnotation() == null || !appName.equals(appNamesModel.getSelectedAppAnnotation().getText())) {
+					error = "Manifest does not contain deployment properties for application with name '" + appName + "'";
+				}
 			}
 		}
 		setErrorMessage(error);
@@ -1036,7 +1011,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			 * but we should allow for any manifest file selected for now. Hence
 			 * set the applicationName var to null in that case
 			 */
-			String applicationName = appName == null ? getAppNameAnnotationModel(manifestTypeModel.getValue() ? fileYamlViewer : manualYamlViewer).getSelectedAppAnnotation().getText() : appName;
+			String applicationName = appName == null ? AppNameAnnotationSupport.getAppNameAnnotationModel(manifestTypeModel.getValue() ? fileYamlViewer : manualYamlViewer).getSelectedAppAnnotation().getText() : appName;
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
@@ -1168,18 +1143,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		return yamlFile;
 	}
 
-	private AppNameAnnotationModel getAppNameAnnotationModel(ISourceViewer viewer) {
-		IAnnotationModel model = viewer instanceof ISourceViewerExtension2
-				? ((ISourceViewerExtension2) viewer).getVisualAnnotationModel() : viewer.getAnnotationModel();
-		AppNameAnnotationModel appNameModel = null;
-		if (model instanceof IAnnotationModelExtension) {
-			appNameModel = (AppNameAnnotationModel) ((IAnnotationModelExtension) model)
-					.getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY);
-		} else if (model instanceof AppNameAnnotationModel) {
-			appNameModel = (AppNameAnnotationModel) model;
-		}
-		return appNameModel;
-	}
 
 	private class AnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
 
@@ -1190,10 +1153,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		@Override
 		public void modelChanged(AnnotationModelEvent event) {
-			if (event.getAnnotationModel() instanceof AppNameAnnotationModel) {
+			if (!getShell().isDisposed() && event.getAnnotationModel() instanceof AppNameAnnotationModel) {
 				getShell().getDisplay().asyncExec(new Runnable() {
 					public void run() {
-						validate();
+						if (getShell() != null && !getShell().isDisposed()) {
+							validate();
+						}
 					}
 				});
 			}

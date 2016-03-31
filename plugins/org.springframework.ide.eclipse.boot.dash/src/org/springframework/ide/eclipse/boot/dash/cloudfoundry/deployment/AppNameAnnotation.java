@@ -106,16 +106,17 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 	}
 
 	/**
-	 * Marks this annotation as being collapsed.
+	 * Marks this annotation as being selected.
 	 */
 	public void markSelected() {
 		fIsSelected= true;
 	}
 
 	/**
-	 * Marks this annotation as being unfolded.
+	 * Marks this annotation as being unselected.
 	 */
 	public void markUnselected() {
 		fIsSelected= false;
 	}
+
 }
