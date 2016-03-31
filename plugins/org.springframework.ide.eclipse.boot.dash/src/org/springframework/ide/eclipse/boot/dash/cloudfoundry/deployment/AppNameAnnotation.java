@@ -1,43 +1,23 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
-import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
 public class AppNameAnnotation extends Annotation implements IAnnotationPresentation {
-	private static class DisplayDisposeRunnable implements Runnable {
-
-		public void run() {
-			if (fgCollapsedImage != null) {
-				fgCollapsedImage.dispose();
-				fgCollapsedImage= null;
-			}
-			if (fgExpandedImage != null) {
-				fgExpandedImage.dispose();
-				fgExpandedImage= null;
-			}
-		}
-	}
-
 	/**
 	 * The type of projection annotations.
 	 */
-	public static final String TYPE= "cf.app.name"; //$NON-NLS-1$
-
+	public static final String TYPE = "cf.app.name"; //$NON-NLS-1$
 
 	private static final int COLOR= SWT.COLOR_GRAY;
-	private static Image fgCollapsedImage;
-	private static Image fgExpandedImage;
-
 
 	/** The state of this annotation */
 	private boolean fIsSelected= false;
@@ -45,21 +25,24 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 	private boolean fIsRangeIndication= false;
 
 	/**
-	 * Creates a new expanded projection annotation.
+	 * Creates a new annotation. When <code>isSelected</code>
+	 * is <code>true</code> the annotation is initially selected.
+	 *
+	 * @param isSelected <code>true</code> if the annotation should initially be selected, <code>false</code> otherwise
 	 */
-	public AppNameAnnotation() {
-		this(false);
+	public AppNameAnnotation(String text) {
+		super(TYPE, false, text);
 	}
 
 	/**
-	 * Creates a new projection annotation. When <code>isCollapsed</code>
-	 * is <code>true</code> the annotation is initially collapsed.
+	 * Creates a new annotation.
 	 *
-	 * @param isCollapsed <code>true</code> if the annotation should initially be collapsed, <code>false</code> otherwise
+	 * @param text the app name
+	 * @param selected selected or unselected
 	 */
-	public AppNameAnnotation(boolean isCollapsed) {
-		super(TYPE, false, null);
-		fIsSelected= isCollapsed;
+	public AppNameAnnotation(String text, boolean selected) {
+		this(text);
+		fIsSelected = selected;
 	}
 
 	/**
@@ -88,7 +71,7 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 	 * @see org.eclipse.jface.text.source.IAnnotationPresentation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
 	 */
 	public void paint(GC gc, Canvas canvas, Rectangle rectangle) {
-		Image image= getImage(canvas.getDisplay());
+		Image image= getImage();
 		if (image != null) {
 			ImageUtilities.drawImage(image, gc, canvas, rectangle, SWT.CENTER, SWT.TOP);
 			if (fIsRangeIndication) {
@@ -108,20 +91,9 @@ public class AppNameAnnotation extends Annotation implements IAnnotationPresenta
 		return IAnnotationPresentation.DEFAULT_LAYER;
 	}
 
-	private Image getImage(Display display) {
-		initializeImages(display);
-		return isSelected() ? fgCollapsedImage : fgExpandedImage;
-	}
-
-	private void initializeImages(Display display) {
-		if (fgCollapsedImage == null) {
-
-			ImageDescriptor descriptor= ImageDescriptor.createFromFile(ProjectionAnnotation.class, "images/collapsed.png"); //$NON-NLS-1$
-			fgCollapsedImage= descriptor.createImage(display);
-			descriptor= ImageDescriptor.createFromFile(ProjectionAnnotation.class, "images/expanded.png"); //$NON-NLS-1$
-			fgExpandedImage= descriptor.createImage(display);
-			display.disposeExec(new DisplayDisposeRunnable());
-		}
+	private Image getImage() {
+		return isSelected() ? BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CHECK_ICON)
+				: BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CHECK_GREYSCALE_ICON);
 	}
 
 	/**

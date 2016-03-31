@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;

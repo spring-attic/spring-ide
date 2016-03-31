@@ -14,10 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,13 +47,20 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
+import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.VerticalRuler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -107,8 +112,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.yaml.snakeyaml.composer.Composer;
 import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.parser.ParserImpl;
 import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.resolver.Resolver;
@@ -123,7 +126,6 @@ import org.yaml.snakeyaml.resolver.Resolver;
 public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	final static private String DIALOG_LIST_HEIGHT_SETTING = "ManifestFileDialog.listHeight"; //$NON-NLS-1$
-	final static private String DIALOG_APP_NAMES_WIDTH_SETTING = "ManifestFileDialog.namesWidth"; //$NON-NLS-1$
 	final static private String NO_MANIFEST_SELECETED_LABEL = "Deployment manifest file not selected"; //$NON-NLS-1$
 	final static private String YML_EXTENSION = "yml"; //$NON-NLS-1$
 	final static private String[] FILE_FILTER_NAMES = new String[] {"Manifest YAML files - *manifest*.yml", "YAML files - *.yml", "All files - *.*"};
@@ -197,7 +199,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private String defaultYaml;
 	private LiveVariable<FileEditorInput> fileModel;
 	private LiveVariable<Boolean> manifestTypeModel;
-	private LiveVariable<LinkedHashMap<String, Node>> appNames;
 	private Set<FileEditorInput> mustSaveFiles;
 	private Set<TextFileDocumentProvider> docProviders;
 
@@ -205,7 +206,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private SourceViewerDecorationSupport manualYamlDecorationSupport;
 	private Label fileLabel;
 	private Sash resizeSash;
-	private Sash appNamesSash;
 	private SourceViewer fileYamlViewer;
 	private SourceViewer manualYamlViewer;
 	private AppNameAnnotationSupport fileYamlAppNameAnnotationSupport;
@@ -214,12 +214,10 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private Button refreshButton;
 	private Button buttonFileManifest;
 	private Button buttonManualManifest;
-	protected Group fileGroup;
+	private Group fileGroup;
 	private Group yamlGroup;
 	private Composite fileYamlComposite;
 	private Composite manualYamlComposite;
-	private Composite appNameComposite;
-	private /*ListViewer*/TreeViewer appNamesList;
 	private Combo fileFilterCombo;
 	private IHandlerService service;
 	private List<IHandlerActivation> activations;
@@ -316,6 +314,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 	};
 
+	private AnnotationModelListener annotationModelListener = new AnnotationModelListener();
+
 	public DeploymentPropertiesDialog(Shell parentShell, Map<String, Object> cloudData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
 		super(parentShell);
 		this.cloudData = cloudData;
@@ -333,7 +333,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileModel = new LiveVariable<>();
 		IFile foundManifest = findManifestYamlFile(project);
 		fileModel.setValue(manifest == null ? (foundManifest == null ? null : new FileEditorInput(foundManifest)) : new FileEditorInput(manifest));
-		appNames = new LiveVariable<>();
 	}
 
 	@Override
@@ -353,37 +352,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		createYamlContentsGroup(composite);
 
 		activateHanlders();
-
-		if (appName == null) {
-			appNames.addListener(new ValueListener<LinkedHashMap<String, Node>>() {
-				@Override
-				public void gotValue(LiveExpression<LinkedHashMap<String, Node>> exp, LinkedHashMap<String, Node> names) {
-					boolean showNames = names != null && names.size() > 1;
-					GridData gridData = (GridData) appNameComposite.getLayoutData();
-					gridData = GridDataFactory.copyData(gridData);
-					gridData.exclude = !showNames;
-					appNameComposite.setLayoutData(gridData);
-					appNameComposite.setVisible(showNames);
-					if (names == null || names.isEmpty()) {
-						appNamesList.setInput(Collections.<String>emptyList());
-					} else {
-						appNamesList.setInput(new ArrayList<>(names.keySet()));
-						if (appNamesList.getSelection().isEmpty()) {
-							appNamesList.setSelection(new StructuredSelection(Collections.singletonList(names.keySet().iterator().next())), true);
-						}
-						revealAppTextInYamlFile();
-					}
-
-					gridData = GridDataFactory.copyData((GridData) appNamesSash.getLayoutData());
-					gridData.exclude = !showNames;
-					appNamesSash.setVisible(showNames);
-					appNamesSash.setLayoutData(gridData);
-
-					fileYamlComposite.layout();
-					yamlGroup.layout();
-				}
-			});
-		}
 
 		fileModel.addListener(new ValueListener<FileEditorInput>() {
 			@Override
@@ -572,30 +540,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		});
 	}
 
-	private void createAppNamesSash(Composite composite) {
-		appNamesSash = new Sash(composite, SWT.VERTICAL);
-		appNamesSash.setLayoutData(GridDataFactory.fillDefaults().hint(4, SWT.DEFAULT).grab(false, true).create());
-		appNamesSash.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				int parentWidth = appNameComposite.getParent().getBounds().width;
-				if (e.x > parentWidth) {
-					e.doit = false;
-					return;
-				}
-				GridData layoutData = (GridData) appNameComposite.getLayoutData();
-				int newWidth = layoutData.widthHint - (e.x - appNamesSash.getBounds().x);
-				if (newWidth < layoutData.minimumWidth) {
-					newWidth = layoutData.minimumWidth;
-					e.doit = false;
-				}
-				layoutData.widthHint = newWidth;
-				appNameComposite.setLayoutData(layoutData);
-				appNameComposite.getParent().layout();
-			}
-		});
-	}
-
 	@SuppressWarnings("unchecked")
 	private void createYamlContentsGroup(Composite composite) {
 		yamlGroup = new Group(composite, SWT.NONE);
@@ -614,37 +558,37 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 10, colorsCache);
-		IVerticalRuler fileVerticalRuler = /*new VerticalRuler(16, fileMarkerAnnotationAccess)*/new CompositeRuler();
+		IVerticalRuler fileVerticalRuler = appName == null ? new CompositeRuler() : new VerticalRuler(16, fileMarkerAnnotationAccess);
 		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		ManifestYamlSourceViewerConfiguration fileYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
 			@Override
 			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-				strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
-					super.createReconcilerStrategy(viewer),
-					new AppNameReconcilingStrategy(viewer, getAstProvider())
-				});
-				return strategy;
+				if (appName == null) {
+					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+					strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
+						super.createReconcilerStrategy(viewer),
+						new AppNameReconcilingStrategy(viewer, getAstProvider())
+					});
+					return strategy;
+				}
+				return super.createReconcilerStrategy(viewer);
 			}
 
 		};
 		fileYamlViewer.configure(fileYamlSourceViewerConfiguration);
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 
-		AnnotationRulerColumn column = new AnnotationRulerColumn(12, fileMarkerAnnotationAccess);
-		column.addAnnotationType(Annotation.TYPE_UNKNOWN);
-		fileYamlViewer.addVerticalRulerColumn(column);
-		column.setModel(fileYamlViewer.getAnnotationModel());
+		if (appName == null) {
+			AnnotationRulerColumn column = new AnnotationRulerColumn(12, fileMarkerAnnotationAccess);
+			column.addAnnotationType(Annotation.TYPE_UNKNOWN);
+			fileYamlViewer.addVerticalRulerColumn(column);
+			column.setModel(fileYamlViewer.getAnnotationModel());
+		}
 
 		fileYamlDecorationSupport = new SourceViewerDecorationSupport(fileYamlViewer, fileOverviewRuler, fileMarkerAnnotationAccess, colorsCache);
 		fileYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(fileYamlViewer, fileMarkerAnnotationAccess);
-
-		if (appName == null) {
-			createAppNamesSash(fileYamlComposite);
-			createAppicationNamesComposite(fileYamlComposite);
-		}
 
 		manualYamlComposite = new Composite(yamlGroup, SWT.NONE);
 		manualYamlComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -659,7 +603,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		DefaultMarkerAnnotationAccess manualMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 10, colorsCache);
-		IVerticalRuler manualVerticalRuler = /*new VerticalRuler(16, manualMarkerAnnotationAccess)*/new CompositeRuler();
+		IVerticalRuler manualVerticalRuler = appName == null ? new CompositeRuler() : new VerticalRuler(16, manualMarkerAnnotationAccess);
 		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
 				manualOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
@@ -667,12 +611,15 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 			@Override
 			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-				strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
-					super.createReconcilerStrategy(viewer),
-					new AppNameReconcilingStrategy(viewer, getAstProvider())
-				});
-				return strategy;
+				if (appName == null) {
+					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+					strategy.setReconcilingStrategies(new IReconcilingStrategy[] {
+						super.createReconcilerStrategy(viewer),
+						new AppNameReconcilingStrategy(viewer, getAstProvider())
+					});
+					return strategy;
+				}
+				return super.createReconcilerStrategy(viewer);
 			}
 
 		};
@@ -680,10 +627,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlViewer.configure(manualSourceViewerConfiguration);
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 
-		column = new AnnotationRulerColumn(12, manualMarkerAnnotationAccess);
-		column.addAnnotationType(Annotation.TYPE_UNKNOWN);
-		manualYamlViewer.addVerticalRulerColumn(column);
-		column.setModel(manualYamlViewer.getAnnotationModel());
+		if (appName == null) {
+			AnnotationRulerColumn column = new AnnotationRulerColumn(12, manualMarkerAnnotationAccess);
+			column.addAnnotationType(Annotation.TYPE_UNKNOWN);
+			manualYamlViewer.addVerticalRulerColumn(column);
+			column.setModel(manualYamlViewer.getAnnotationModel());
+		}
 
 		if (readOnly) {
 			manualYamlViewer.setEditable(false);
@@ -710,70 +659,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		 */
 		fileYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
 		manualYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
-	}
-
-	private void createAppicationNamesComposite(Composite fileYamlComposite) {
-		GridLayout layout = new GridLayout(2, false);
-		appNameComposite = new Composite(fileYamlComposite, SWT.NONE);
-		appNameComposite.setLayout(layout);
-		/*
-		 * Set app names composite layout data at the bottom of the method body
-		 * since it requires min size based on preferred size of other widgets
-		 */
-		Label appNameDescription = new Label(appNameComposite, SWT.WRAP);
-		appNameDescription.setText("Select application name:");
-		appNameDescription.setLayoutData(GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).create());
-		Button refreshButton = new Button(appNameComposite, SWT.PUSH);
-		refreshButton.setImage(BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.REFRESH_ICON));
-		refreshButton.setText("Refresh");
-		refreshButton.setToolTipText("Update application names");
-		refreshButton.setLayoutData(GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).create());
-		refreshButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileEditorInput file = fileModel.getValue();
-				TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
-				if (file != null && docProvider != null) {
-					IDocument doc = docProvider.getDocument(file);
-					Composer composer;
-					try {
-						composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(
-								doc == null ? file.getFile().getContents() : new ByteArrayInputStream(doc.get().getBytes())))),
-								new Resolver());
-						appNames.setValue(createAppToNodeMap(composer.getSingleNode()));
-					} catch (Throwable t) {
-						BootDashActivator.log(t);
-						MessageDialog.openError(getShell(), "Error Parsing Manifest",
-								"Parsing error has ocurred while parsing manifest YAML (See error log for details). Fix all errors in the manifest YAML before refreshing application names.");
-					}
-				}
-			}
-		});
-		appNamesList = new /*ListViewer*/TreeViewer(appNameComposite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		appNamesList.setContentProvider(ArrayTreeContentProvider.getInstance());
-		appNamesList.getControl().setLayoutData(GridDataFactory.fillDefaults().span(2, SWT.DEFAULT).grab(true, false).create());
-		appNamesList.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent e) {
-				revealAppTextInYamlFile();
-				validate();
-			}
-		});
 
 		/*
-		 * Ensure that min width of the app names composite is at least description string + refresh button + paddings
+		 * Add annotation model listener to manual YAML viewer now because document input is already set on the viewer
 		 */
-		int width = 300;
-		try {
-			width = getDialogBoundsSettings().getInt(DIALOG_APP_NAMES_WIDTH_SETTING);
-		} catch (NumberFormatException e) {
-			// ignore exception
-		}
-		int minWidth = refreshButton.computeSize(SWT.DEFAULT, SWT.DEFAULT).x
-				+ appNameDescription.computeSize(SWT.DEFAULT, SWT.DEFAULT).x
-				+ 2 * (layout.marginLeft + layout.marginRight) + 2 * layout.horizontalSpacing;
-		appNameComposite.setLayoutData(GridDataFactory.fillDefaults().grab(false, true).minSize(minWidth, SWT.DEFAULT).hint(Math.max(width, minWidth), SWT.DEFAULT).create());
-
+		manualYamlViewer.getVisualAnnotationModel().addAnnotationModelListener(annotationModelListener);
 	}
 
 	private boolean saveOrDiscardIfNeeded(boolean cancellable) {
@@ -857,16 +747,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 //		}
 //	}
 
-	private void revealAppTextInYamlFile() {
-		LinkedHashMap<String, Node> names = appNames.getValue();
-		if (names != null) {
-			Node n = names.get(getStructuredSelection(appNamesList).getFirstElement());
-			if (n != null) {
-				fileYamlViewer.revealRange(n.getStartMark().getIndex(), n.getEndMark().getIndex() - n.getStartMark().getIndex());
-			}
-		}
-	}
-
 	private void activateHanlders() {
 		if (service != null) {
 			for (EditorActionHandler handler : handlers) {
@@ -915,12 +795,14 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	}
 
 	private void updateManifestFile() {
+		if (fileYamlViewer.getVisualAnnotationModel() != null) {
+			fileYamlViewer.getVisualAnnotationModel().removeAnnotationModelListener(annotationModelListener);
+		}
 		fileYamlViewer.setDocument(new Document(""));
 		final FileEditorInput input = fileModel.getValue();
 		if (input == null) {
 			fileLabel.setText(NO_MANIFEST_SELECETED_LABEL);
 			fileYamlViewer.getControl().setEnabled(false);
-			appNames.setValue(null);
 			validate();
 		} else {
 			final IFile file = input.getFile();
@@ -934,7 +816,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 					} else {
 						try {
 							IDocument doc = docProvider.getDocument(input);
-							final LinkedHashMap<String, Node> newAppNames = new LinkedHashMap<String, Node>();
 							if (doc == null) {
 								docProvider.connect(input);
 								doc = docProvider.getDocument(input);
@@ -946,7 +827,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 									doc == null ? file.getContents() : new ByteArrayInputStream(doc.get().getBytes())))),
 									new Resolver());
 							final Node root = composer.getSingleNode();
-							newAppNames.putAll(createAppToNodeMap(root));
 							getShell().getDisplay().asyncExec(new Runnable() {
 								@Override
 								public void run() {
@@ -956,8 +836,10 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 									} else {
 										fileYamlViewer.setDocument(docProvider.getDocument(input), docProvider.getAnnotationModel(input));
 										fileLabel.setText(file.getFullPath().toOSString() + (docProvider.canSaveDocument(input) ? "*" : ""));
+										if (fileYamlViewer.getVisualAnnotationModel() != null) {
+											fileYamlViewer.getVisualAnnotationModel().addAnnotationModelListener(annotationModelListener);
+										}
 									}
-									appNames.setValue(newAppNames);
 									validate();
 								}
 							});
@@ -979,24 +861,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			public void run() {
 				fileYamlViewer.setDocument(new Document(""));
 				fileYamlViewer.getControl().setEnabled(false);
-				appNames.setValue(null);
 				validate();
 			}
 		});
-	}
-
-	private LinkedHashMap<String, Node> createAppToNodeMap(Node root) {
-		LinkedHashMap<String, Node> map = new LinkedHashMap<>();
-		SequenceNode applicationsNode = YamlGraphDeploymentProperties.getNode(root, ApplicationManifestHandler.APPLICATIONS_PROP, SequenceNode.class);
-		if (applicationsNode != null) {
-			for (Node n : applicationsNode.getValue()) {
-				ScalarNode scalar = YamlGraphDeploymentProperties.getNode(n, ApplicationManifestHandler.NAME_PROP, ScalarNode.class);
-				if (scalar != null) {
-					map.put(scalar.getValue(), n);
-				}
-			}
-		}
-		return map;
 	}
 
 	@Override
@@ -1016,15 +883,25 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 
 		String error = null;
+		SourceViewer viewer = manifestTypeModel.getValue() ? fileYamlViewer : manualYamlViewer;
 		if (manifestTypeModel.getValue()) {
 			if (fileModel.getValue() == null) {
 				error = "Deployment manifest file not selected";
-			} else if (fileYamlViewer.getDocument().get().isEmpty()) {
+			} else if (fileYamlViewer.getDocument() != null && fileYamlViewer.getDocument().get().isEmpty()) {
 				error = "Unable to load deployment manifest YAML file";
-			} else if (appNames.getValue() == null) {
+			}
+		}
+		AppNameAnnotationModel appNamesModel = getAppNameAnnotationModel(viewer);
+		if (appNamesModel == null) {
+			error = "Application name(s) cannot be found.";
+		}
+		if (error == null) {
+			if (!appNamesModel.getAnnotationIterator().hasNext()) {
 				error = "Manifest file does not have any application name defined";
-			} else if (appNames.getValue() != null && appNames.getValue().size() > 1 && appName == null && appNamesList.getSelection().isEmpty()) {
-				error = "Manifest file contains deployment properties for multiple applications, but appplication name is not selected.";
+			} else if (appNamesModel.getSelectedAppAnnotation() == null) {
+				error = "Application name not selected";
+			} else if (appName != null && !appName.equals(appNamesModel.getSelectedAppAnnotation().getText())) {
+				error = "Manifest does not contain deployment properties for application with name '" + appName + "'";
 			}
 		}
 		setErrorMessage(error);
@@ -1060,9 +937,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	@Override
 	public boolean close() {
 		getDialogBoundsSettings().put(DIALOG_LIST_HEIGHT_SETTING, ((GridData)fileGroup.getLayoutData()).heightHint);
-		if (appNameComposite != null) {
-			getDialogBoundsSettings().put(DIALOG_APP_NAMES_WIDTH_SETTING, ((GridData)appNameComposite.getLayoutData()).widthHint);
-		}
 		boolean close = super.close();
 		dispose();
 		return close;
@@ -1140,22 +1014,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			try {
 				docProvider.saveDocument(new NullProgressMonitor(), value, docProvider.getDocument(value), true);
 				mustSaveFiles.remove(value);
-				/*
-				 * Update app names as well
-				 */
-				Composer composer = new Composer(
-						new ParserImpl(new StreamReader(new InputStreamReader(
-								new ByteArrayInputStream(docProvider.getDocument(value).get().getBytes())))),
-						new Resolver());
-				LinkedHashMap<String, Node> appsToNodes = createAppToNodeMap(composer.getSingleNode());
-				if (appNamesList != null && !appsToNodes.containsKey(getStructuredSelection(appNamesList).getFirstElement())) {
-					String selectedName = (String) getStructuredSelection(appNamesList).getFirstElement();
-					appNames.setValue(appsToNodes);
-					MessageDialog.openError(getShell(), "Invalid Application Name",
-							"Application names are out of sync with manifest file contents. Current manifest file does not contain deployment properties for application '"
-									+ selectedName + "'.");
-					return;
-				}
 			} catch (CoreException e) {
 				BootDashActivator.log(e);
 				MessageDialog.openError(getShell(), "Error Saving Manifest", "Error occurred saving the manifest file '" + value.getFile().getFullPath().toOSString() + "'.\nError: " + e.getMessage());
@@ -1178,14 +1036,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			 * but we should allow for any manifest file selected for now. Hence
 			 * set the applicationName var to null in that case
 			 */
-			String applicationName = null;
-			if (manifestTypeModel.getValue()) {
-				if (appNamesList != null) {
-					if (!getStructuredSelection(appNamesList).isEmpty()) {
-						applicationName = (String) getStructuredSelection(appNamesList).getFirstElement();
-					}
-				}
-			}
+			String applicationName = appName == null ? getAppNameAnnotationModel(manifestTypeModel.getValue() ? fileYamlViewer : manualYamlViewer).getSelectedAppAnnotation().getText() : appName;
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
@@ -1260,27 +1111,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				size.y += fileGroupLayoutData.heightHint;
 			}
 		}
-		/*
-		 * Same goes for app names composite contributing to the width of the dialog
-		 */
-		if (appNameComposite != null) {
-			GridData appNamesLayoutData = (GridData)appNameComposite.getLayoutData();
-			if (appNamesLayoutData.exclude) {
-				try {
-					/*
-					 * Hack: check if dialog height was persisted. If
-					 * persisted then no need to calculate dialog size
-					 */
-					getDialogBoundsSettings().getInt("DIALOG_WIDTH");
-				} catch (NumberFormatException e) {
-					/*
-					 * Exception is thrown if dialog height cannot be read
-					 * from storage
-					 */
-					size.x += appNamesLayoutData.widthHint;
-				}
-			}
-		}
 		return size;
 	}
 
@@ -1338,4 +1168,36 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		return yamlFile;
 	}
 
+	private AppNameAnnotationModel getAppNameAnnotationModel(ISourceViewer viewer) {
+		IAnnotationModel model = viewer instanceof ISourceViewerExtension2
+				? ((ISourceViewerExtension2) viewer).getVisualAnnotationModel() : viewer.getAnnotationModel();
+		AppNameAnnotationModel appNameModel = null;
+		if (model instanceof IAnnotationModelExtension) {
+			appNameModel = (AppNameAnnotationModel) ((IAnnotationModelExtension) model)
+					.getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY);
+		} else if (model instanceof AppNameAnnotationModel) {
+			appNameModel = (AppNameAnnotationModel) model;
+		}
+		return appNameModel;
+	}
+
+	private class AnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
+
+		@Override
+		public void modelChanged(IAnnotationModel model) {
+			// Leave empty. AnnotationModelEvent method is the one that will be called
+		}
+
+		@Override
+		public void modelChanged(AnnotationModelEvent event) {
+			if (event.getAnnotationModel() instanceof AppNameAnnotationModel) {
+				getShell().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						validate();
+					}
+				});
+			}
+		}
+
+	}
 }

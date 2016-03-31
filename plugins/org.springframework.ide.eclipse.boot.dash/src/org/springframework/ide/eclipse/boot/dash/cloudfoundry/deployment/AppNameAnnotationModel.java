@@ -56,4 +56,20 @@ public class AppNameAnnotationModel extends AnnotationModel {
 		return null;
 	}
 
+	public AppNameAnnotation getAnnotation(String text) {
+		if (text != null) {
+			Iterator<?> iterator= getAnnotationIterator();
+			while(iterator.hasNext()) {
+				Object o = iterator.next();
+				if (o instanceof AppNameAnnotation) {
+					AppNameAnnotation a = (AppNameAnnotation) o;
+					if (text.equals(a.getText())) {
+						return a;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 }

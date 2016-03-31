@@ -1,8 +1,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,17 +66,17 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		reconcile(subRegion);
 	}
 
-	private IAnnotationModel getAppNameAnnotationModel() {
+	private AppNameAnnotationModel getAppNameAnnotationModel() {
 		IAnnotationModel model = fViewer instanceof ISourceViewerExtension2 ? ((ISourceViewerExtension2)fViewer).getVisualAnnotationModel() : fViewer.getAnnotationModel();
 		if (model instanceof IAnnotationModelExtension) {
-			return ((IAnnotationModelExtension) model).getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY);
+			return (AppNameAnnotationModel) ((IAnnotationModelExtension) model).getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY);
 		}
-		return model;
+		return (AppNameAnnotationModel) model;
 	}
 
 	@Override
 	public void reconcile(IRegion region) {
-		IAnnotationModel annotationModel = getAppNameAnnotationModel();
+		AppNameAnnotationModel annotationModel = getAppNameAnnotationModel();
 
 		if (annotationModel == null) {
 			return;
@@ -85,7 +85,7 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		List<Annotation> toRemove= new ArrayList<Annotation>();
 
 		@SuppressWarnings("unchecked")
-		Iterator<Annotation> iter= annotationModel.getAnnotationIterator();
+		Iterator<? extends Annotation> iter= annotationModel.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Annotation annotation= iter.next();
 			if (AppNameAnnotation.TYPE.equals(annotation.getType())) {
@@ -94,7 +94,7 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		}
 		Annotation[] annotationsToRemove= toRemove.toArray(new Annotation[toRemove.size()]);
 
-		Map<Annotation, Position> annotationsToAdd = createAnnotations();
+		Map<AppNameAnnotation, Position> annotationsToAdd = createAnnotations(annotationModel);
 
 		if (annotationModel instanceof IAnnotationModelExtension)
 			((IAnnotationModelExtension)annotationModel).replaceAnnotations(annotationsToRemove, annotationsToAdd);
@@ -121,30 +121,71 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 		fDocument= document;
 	}
 
-	private Map<Annotation, Position> createAnnotations() {
-		Map<Annotation, Position> annotationsMap = new HashMap<>();
+	private Map<AppNameAnnotation, Position> createAnnotations(AppNameAnnotationModel annotationModel) {
+		Map<AppNameAnnotation, Position> annotationsMap = new LinkedHashMap<>();
+		fProgressMonitor.beginTask("Calculating application names", 100);
 		try {
 			YamlFileAST ast = parser.getAST(fDocument);
 			List<Node> rootList = ast.getNodes();
+			fProgressMonitor.worked(70);
 			if (rootList.size() == 1) {
 				Node root = rootList.get(0);
 				SequenceNode applicationsNode = YamlGraphDeploymentProperties.getNode(root, ApplicationManifestHandler.APPLICATIONS_PROP, SequenceNode.class);
 				if (applicationsNode == null) {
-					if (YamlGraphDeploymentProperties.getPropertyValue(root, ApplicationManifestHandler.NAME_PROP, ScalarNode.class) != null) {
-						annotationsMap.put(new AppNameAnnotation(true), new Position(root.getStartMark().getIndex(), root.getEndMark().getIndex() - root.getStartMark().getIndex()));
+					ScalarNode node = YamlGraphDeploymentProperties.getPropertyValue(root, ApplicationManifestHandler.NAME_PROP, ScalarNode.class);
+					if (node != null) {
+						annotationsMap.put(new AppNameAnnotation(node.getValue(), true),
+								new Position(root.getStartMark().getIndex(),
+										getLastWhiteCharIndex(fDocument.get(), root.getEndMark().getIndex())
+												- root.getStartMark().getIndex()));
 					}
 				} else {
 					for (Node appNode : applicationsNode.getValue()) {
-						if (YamlGraphDeploymentProperties.getNode(appNode, ApplicationManifestHandler.NAME_PROP, ScalarNode.class) != null) {
-							annotationsMap.put(new AppNameAnnotation(true), new Position(appNode.getStartMark().getIndex(), appNode.getEndMark().getIndex() - appNode.getStartMark().getIndex()));
+						ScalarNode node = YamlGraphDeploymentProperties.getNode(appNode, ApplicationManifestHandler.NAME_PROP, ScalarNode.class);
+						if (node != null) {
+							annotationsMap.put(new AppNameAnnotation(node.getValue()), new Position(appNode.getStartMark().getIndex(), getLastWhiteCharIndex(fDocument.get(), appNode.getEndMark().getIndex()) - appNode.getStartMark().getIndex()));
 						}
 					}
+				}
+				fProgressMonitor.worked(20);
+				if (!annotationsMap.isEmpty()) {
+					AppNameAnnotation selected = annotationModel.getSelectedAppAnnotation();
+					Map.Entry<AppNameAnnotation, Position> newSelected = null;
+					if (selected != null) {
+						Position selectedPosition = annotationModel.getPosition(selected);
+						for (Map.Entry<AppNameAnnotation, Position> entry : annotationsMap.entrySet()) {
+							if (entry.getKey().getText().equals(selected.getText())) {
+								if (newSelected == null) {
+									newSelected = entry;
+								} else if (Math.abs(newSelected.getValue().getOffset() - selectedPosition.getOffset()) > Math.abs(entry.getValue().getOffset() - selectedPosition.getOffset())){
+									newSelected = entry;
+								}
+							} else if (entry.getValue().getOffset() == selectedPosition.getOffset() && newSelected == null) {
+								newSelected = entry;
+							}
+						}
+					}
+					if (newSelected == null) {
+						newSelected = annotationsMap.entrySet().iterator().next();
+					}
+					newSelected.getKey().markSelected();
+					fProgressMonitor.worked(10);
 				}
 			}
 		} catch (Throwable t) {
 			BootDashActivator.log(t);
+		} finally {
+			fProgressMonitor.done();
 		}
 		return annotationsMap;
+	}
+
+	private static int getLastWhiteCharIndex(String text, int index) {
+		int i = index < text.length() ? index : index - 1;
+		for (; i >=  0 && Character.isWhitespace(text.charAt(i)); i--) {
+			// Nothing to do
+		}
+		return i == index ? i : i + 1;
 	}
 
 }
