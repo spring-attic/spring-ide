@@ -235,8 +235,8 @@ public class CFWrappingV2 {
 
 			@Override
 			public String getType() {
-				//XXX CF V2: does this really mean the same thing as what it meant when we got it from v1?
-				return service.getType();
+				//XXX CF V2 CFService.getType
+				return null;
 			}
 
 			/**
@@ -331,8 +331,6 @@ public class CFWrappingV2 {
 		.buildpack(params.getBuildpack())
 		.command(params.getCommand())
 		.stack(params.getStack())
-		//.env(params.getEnv()) //XXX CF V2: pass env variables to cf push
-		//.services(params.getServices()) //XXX CF V2: pass bound services to cf push
 		.instances(params.getInstances())
 		.application(params.getApplicationData());
 	}

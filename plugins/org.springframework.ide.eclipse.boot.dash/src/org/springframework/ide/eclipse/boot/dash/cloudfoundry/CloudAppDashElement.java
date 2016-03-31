@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -488,7 +489,9 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	 */
 	public void print(String msg, LogType type) {
 		try {
-			getCloudModel().getElementConsoleManager().writeToConsole(this, msg+"\n", type);
+			BootDashModelConsoleManager consoles = getCloudModel().getElementConsoleManager();
+			consoles.showConsole(this);
+			consoles.writeToConsole(this, msg+"\n", type);
 		} catch (Exception e) {
 			BootActivator.log(e);
 		}

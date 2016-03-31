@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 
 import com.google.common.collect.ImmutableSet;
@@ -30,9 +31,16 @@ import reactor.core.publisher.Flux;
 
 public class CloudFoundryClientTest {
 
-	private ClientRequests createClient(CFClientParams fromEnv) throws Exception {
+	private DefaultClientRequestsV2 createClient(CFClientParams fromEnv) throws Exception {
 		DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
-		return factory.getClient(fromEnv);
+		return (DefaultClientRequestsV2) factory.getClient(fromEnv);
+	}
+
+	@Test
+	public void testPush() throws Exception {
+		DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
+//		client.createService
+//
 	}
 
 	@Test
