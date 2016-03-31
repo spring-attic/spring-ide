@@ -11,8 +11,11 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.zip.ZipFile;
@@ -31,8 +34,9 @@ import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
-import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
+import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
+import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
@@ -207,7 +211,6 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 						.name(appName)
 						.build())
 				.get();
-
 			}
 
 			@Override
@@ -382,6 +385,38 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 				})
 				.get();
 			}
+
+			@Override
+			public void push(CFPushArguments params) throws Exception {
+				List<Mono<Void>> setEnvVars = new ArrayList<>();
+				for (Entry<String, String> entry : params.getEnv().entrySet()) {
+					setEnvVars.add(operations.applications()
+					.setEnvironmentVariable(SetEnvironmentVariableApplicationRequest.builder()
+							.name(params.getAppName())
+							.variableName(entry.getKey())
+							.variableValue(entry.getValue())
+							.build()
+					));
+				}
+				Mono<Void[]> setAllEnvVars = Mono.when(setEnvVars);
+
+				operations.applications()
+				.push(CFWrappingV2.toPushRequest(params)
+						.noStart(true)
+						.build()
+				)
+				.after(() -> setAllEnvVars)
+				.after(() ->  {
+					return operations.applications()
+					.start(StartApplicationRequest.builder()
+						.name(params.getAppName())
+						.build()
+					);
+				})
+				.log("pushing")
+				.get(Duration.ofMinutes(5)); //TODO XXX CF V2: real value for this timeout
+			}
+
 		};
 	}
 

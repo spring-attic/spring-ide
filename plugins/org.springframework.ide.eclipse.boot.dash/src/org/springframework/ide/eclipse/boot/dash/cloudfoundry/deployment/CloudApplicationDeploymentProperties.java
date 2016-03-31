@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,14 +21,22 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -71,6 +80,11 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	protected final LiveVariable<String> command = new LiveVariable<>();
 
 	protected final LiveVariable<String> stack = new LiveVariable<>();
+
+	/**
+	 * Path to a zipFile containing the contents of the stuff to deploy.
+	 */
+	private File archive;
 
 	protected Validator validator;
 
@@ -216,7 +230,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	}
 
 	/**
-	 *
 	 * @return never null
 	 */
 	public Map<String, String> getEnvironmentVariables() {
@@ -314,5 +327,54 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 			return CloudApplicationDeploymentProperties.this;
 		}
 
+	}
+
+	public CFPushArguments toPushArguments(List<CFCloudDomain> cloudDomains) throws Exception {
+		Set<String> uris = getUris();
+		Set<String> hostsSet = new LinkedHashSet<>();
+		Set<String> domainsSet = new LinkedHashSet<>();
+		ApplicationManifestHandler.extractHostsAndDomains(uris, cloudDomains, hostsSet, domainsSet);
+
+		boolean noRoute = uris.isEmpty();
+		boolean noHost = hostsSet.isEmpty();
+
+		CFPushArguments args = new CFPushArguments();
+		if (!noHost) {
+			args.setHost(getSingle("host", hostsSet));
+		}
+		if (!domainsSet.isEmpty()) {
+			args.setDomain(getSingle("domain", domainsSet));
+		}
+		args.setNoHost(noHost);
+		args.setNoRoute(noRoute);
+		args.setAppName(getAppName());
+		args.setMemory(getMemory());
+		args.setDiskQuota(getDiskQuota());
+		args.setTimeout(getTimeout());
+		args.setBuildpack(getBuildpack());
+		args.setCommand(getCommand());
+		args.setStack(getStack());
+		args.setEnv(getEnvironmentVariables());
+		args.setInstances(getInstances());
+		args.setServices(getServices());
+		args.setApplicationData(getArchive());
+		return args;
+	}
+
+	public File getArchive() {
+		return archive;
+	}
+
+	private String getSingle(String propertyName, Set<String> values) {
+		if (values.isEmpty()) {
+			Assert.isLegal(false, "No '"+propertyName+"' provided");
+		} else if (values.size()>1) {
+			Assert.isLegal(false, "Multiple "+propertyName+" not currently supported");
+		}
+		return values.iterator().next();
+	}
+
+	public void setArchive(File archive) {
+		this.archive = archive;
 	}
 }

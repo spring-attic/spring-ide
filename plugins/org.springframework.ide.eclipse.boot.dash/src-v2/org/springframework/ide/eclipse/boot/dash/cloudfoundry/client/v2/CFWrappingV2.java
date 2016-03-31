@@ -18,6 +18,8 @@ import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationDetail.InstanceDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
+import org.cloudfoundry.operations.applications.PushApplicationRequest;
+import org.cloudfoundry.operations.applications.PushApplicationRequest.PushApplicationRequestBuilder;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.spaces.SpaceSummary;
@@ -314,5 +316,24 @@ public class CFWrappingV2 {
 				return name;
 			}
 		};
+	}
+
+	public static PushApplicationRequestBuilder toPushRequest(CFPushArguments params) {
+		return PushApplicationRequest.builder()
+		.name(params.getAppName())
+		.host(params.getHost())
+		.domain(params.getDomain())
+		.noRoute(params.isNoRoute())
+		.noHostname(params.isNoHost())
+		.memory(params.getMemory())
+		.diskQuota(params.getDiskQuota())
+		.timeout(params.getTimeout())
+		.buildpack(params.getBuildpack())
+		.command(params.getCommand())
+		.stack(params.getStack())
+		//.env(params.getEnv()) //XXX CF V2: pass env variables to cf push
+		//.services(params.getServices()) //XXX CF V2: pass bound services to cf push
+		.instances(params.getInstances())
+		.application(params.getApplicationData());
 	}
 }

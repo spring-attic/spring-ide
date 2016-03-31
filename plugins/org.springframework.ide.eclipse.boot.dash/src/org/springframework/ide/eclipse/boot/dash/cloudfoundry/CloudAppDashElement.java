@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
@@ -100,9 +101,10 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	};
 
-	public void startOperationStarting() {
+	public CancelationToken startOperationStarting() {
 		startOperationInProgress.increment();
 		setError(null);
+		return createCancelationToken();
 	}
 
 	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
@@ -465,6 +467,44 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	public void cancelOperations() {
 		cancelationTokens.cancelAll();
+	}
+
+	/**
+	 * Print a message to the console associated with this application.
+	 */
+	public void print(String msg) {
+		print(msg, LogType.LOCALSTDOUT);
+	}
+
+	/**
+	 * Print a message to the console associated with this application.
+	 */
+	public void printError(String string) {
+		print(string, LogType.LOCALSTDERROR);
+	}
+
+	/**
+	 * Print a message to the console associated with this application.
+	 */
+	public void print(String msg, LogType type) {
+		try {
+			getCloudModel().getElementConsoleManager().writeToConsole(this, msg+"\n", type);
+		} catch (Exception e) {
+			BootActivator.log(e);
+		}
+	}
+
+	public void refresh() {
+		try {
+			CFApplicationDetail data = getClient().getApplication(getName());
+			getCloudModel().updateApplication(data);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
+	private ClientRequests getClient() {
+		return getTarget().getClient();
 	}
 
 }

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import static org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement.READY_STATES;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -51,6 +52,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -66,6 +68,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExec
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSomeApplications;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
@@ -392,6 +397,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return addedElement;
 	}
 
+
 	public CloudAppDashElement getApplication(String appName) {
 		synchronized (this) {
 			Set<CloudAppDashElement> apps = getApplications().getValues();
@@ -418,6 +424,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				}
 			}
 			return null;
+		}
+	}
+
+	public CloudAppDashElement ensureApplication(String appName) {
+		synchronized (this) {
+			return applications.addApplication(appName);
 		}
 	}
 
@@ -707,9 +719,55 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					element == null ? DeploymentPropertiesDialog.findManifestYamlFile(project)
 							: element.getDeploymentManifestFile(),
 					defaultManifest, false, false);
+
+			ICloudApplicationArchiver archiver = getArchiver(props, cloudData, ui, monitor);
+			if (archiver!=null) {
+				File archive = archiver.getApplicationArchive(monitor);
+				props.setArchive(archive);
+			}
 		}
 		return props;
 	}
+
+	protected ICloudApplicationArchiver getArchiver(
+			CloudApplicationDeploymentProperties deploymentProperties,
+			Map<String, Object> cloudData,
+			UserInteractions ui,
+			IProgressMonitor mon
+	) {
+		try {
+			for (CloudApplicationArchiverStrategy s : getArchiverStrategies(deploymentProperties, cloudData, ui, mon)) {
+				ICloudApplicationArchiver a = s.getArchiver(mon);
+				if (a != null) {
+					return a;
+				}
+			}
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+		return null;
+	}
+
+	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(
+			CloudApplicationDeploymentProperties deploymentProperties,
+			Map<String, Object> cloudData,
+			UserInteractions ui,
+			IProgressMonitor mon
+	) throws Exception {
+		IProject project = deploymentProperties.getProject();
+
+//		Map<String, Object> cloudData = model.buildOperationCloudData(mon, project, null);
+
+		IFile manifestFile =  deploymentProperties.getManifestFile();
+		String appName = deploymentProperties.getAppName();
+		ApplicationManifestHandler parser = new ApplicationManifestHandler(project, cloudData, manifestFile);
+
+		return new CloudApplicationArchiverStrategy[] {
+				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),
+				CloudApplicationArchiverStrategies.packageAsJar(project, ui)
+		};
+	}
+
 
 	@Override
 	public boolean canDelete(BootDashElement element) {
@@ -774,4 +832,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return getRunTarget().getClient();
 	}
 
+	public List<CFCloudDomain> getCloudDomains(IProgressMonitor monitor) throws Exception {
+		return getRunTarget().getDomains(monitor);
+	}
 }

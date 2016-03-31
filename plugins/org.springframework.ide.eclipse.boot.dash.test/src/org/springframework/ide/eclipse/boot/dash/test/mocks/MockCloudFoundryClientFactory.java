@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
@@ -374,6 +375,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public boolean applicationExists(String appName) throws IOException {
 			return getSpace().getApplication(appName) !=null;
+		}
+
+		@Override
+		public void push(CFPushArguments properties) throws Exception {
+			notImplementedStub();
 		}
 	}
 

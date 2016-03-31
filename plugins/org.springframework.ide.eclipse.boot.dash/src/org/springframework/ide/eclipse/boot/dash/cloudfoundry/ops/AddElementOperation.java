@@ -72,62 +72,43 @@ public class AddElementOperation extends CloudApplicationOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-
-		CFApplicationDetail existingInstances = null;
-		if (existingApplication == null) {
-			existingInstances = createApplication(monitor);
-		} else {
-			existingInstances = model.getRunTarget().getClient().getApplication(existingApplication.getName());
-		}
-
-		monitor.worked(20);
-
-		if (existingInstances == null) {
-			throw ExceptionUtil.coreException("Failed to create a Cloud application for : "
-					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
-		}
-
-		IProject project = deploymentProperties.getProject();
-
-		CloudAppDashElement cde = this.model.addElement(existingInstances, project);
-		if (project != null && cde != null) {
-			BootDashElement localElement = findLocalBdeForProject(project);
-			if (localElement != null) {
-				copyTags(localElement, cde);
-			}
-			// Persist the manifest path when creating the bde
-			cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
-			String hc = getClientRequests().getHealthCheck(cde.getAppGuid());
-			cde.setHealthCheck(hc);
-		}
-
-		// once CDE is available, restart
-		this.operations.firstStartAndPush(cde, deploymentProperties, debugSupport, runningOrDebugging, ui, cde.createCancelationToken()).run(monitor);
+		//model.
 	}
 
-	private static BootDashElement findLocalBdeForProject(IProject project) {
-		BootDashModel localModel = BootDashActivator.getDefault().getModel()
-				.getSectionByTargetId(LocalRunTarget.INSTANCE.getId());
-		if (localModel != null) {
-			for (BootDashElement bde : localModel.getElements().getValue()) {
-				if (project.equals(bde.getProject())) {
-					return bde;
-				}
-			}
-		}
-		return null;
-	}
-
-	private static void copyTags(BootDashElement sourceBde, BootDashElement targetBde) {
-		LinkedHashSet<String> tagsToCopy = sourceBde.getTags();
-		if (tagsToCopy != null && !tagsToCopy.isEmpty()) {
-			LinkedHashSet<String> targetTags = targetBde.getTags();
-			for (String tag : tagsToCopy) {
-				targetTags.add(tag);
-			}
-			targetBde.setTags(targetTags);
-		}
-	}
+//	@Override
+//	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+//
+//		CFApplicationDetail existingInstances = null;
+//		if (existingApplication == null) {
+//			existingInstances = createApplication(monitor);
+//		} else {
+//			existingInstances = model.getRunTarget().getClient().getApplication(existingApplication.getName());
+//		}
+//
+//		monitor.worked(20);
+//
+//		if (existingInstances == null) {
+//			throw ExceptionUtil.coreException("Failed to create a Cloud application for : "
+//					+ deploymentProperties.getAppName() + ". Please try to redeploy again or check your connection.");
+//		}
+//
+//		IProject project = deploymentProperties.getProject();
+//
+//		CloudAppDashElement cde = this.model.addElement(existingInstances, project);
+//		if (project != null && cde != null) {
+//			BootDashElement localElement = findLocalBdeForProject(project);
+//			if (localElement != null) {
+//				copyTags(localElement, cde);
+//			}
+//			// Persist the manifest path when creating the bde
+//			cde.setDeploymentManifestFile(deploymentProperties.getManifestFile());
+//			String hc = getClientRequests().getHealthCheck(cde.getAppGuid());
+//			cde.setHealthCheck(hc);
+//		}
+//
+//		// once CDE is available, restart
+//		this.operations.firstStartAndPush(cde, deploymentProperties, debugSupport, runningOrDebugging, ui, cde.createCancelationToken()).run(monitor);
+//	}
 
 	protected CFApplicationDetail createApplication(IProgressMonitor monitor) throws Exception {
 

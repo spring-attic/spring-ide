@@ -12,14 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
 import java.util.Arrays;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -28,10 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ApplicationDeploymentOperations {
-
-	private final static String APP_FOUND_TITLE = "Replace Existing Application";
-
-	private final static String APP_FOUND_MESSAGE = "Replace the existing application - {0} - with project: {1}?";
 
 	private final CloudFoundryBootDashModel model;
 
@@ -81,24 +71,6 @@ public class ApplicationDeploymentOperations {
 
 	public CloudApplicationOperation restartOnly(CloudAppDashElement app, CancelationToken cancelationToken) {
 		return new ApplicationRestartOnlyOp(app, cancelationToken);
-	}
-
-	public CloudApplicationOperation createAddElement(IProject project,
-			CloudApplicationDeploymentProperties properties, DebugSupport debugSupport, RunState runOrDebug,
-			UserInteractions ui, IProgressMonitor monitor) throws Exception {
-
-		CFApplicationDetail existingApp = model.getRunTarget().getClient().getApplication(properties.getAppName());
-
-		if (existingApp != null &&
-				!ui.confirmOperation(APP_FOUND_TITLE,
-				NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(), properties.getProject().getName()))) {
-			throw new OperationCanceledException();
-		}
-
-		RunState initialRunstate = RunState.STARTING;
-
-		return new AddElementOperation(properties, model, existingApp, initialRunstate, this, debugSupport, runOrDebug,
-				ui);
 	}
 
 	public Operation<?> restartAndPush(CloudAppDashElement cde, DebugSupport debugSupport, RunState runOrDebug, UserInteractions ui, CancelationToken cancelationToken) throws Exception {

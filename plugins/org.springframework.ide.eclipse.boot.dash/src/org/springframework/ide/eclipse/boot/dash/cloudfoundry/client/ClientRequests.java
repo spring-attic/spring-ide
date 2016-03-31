@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,7 +19,7 @@ import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
@@ -61,4 +60,5 @@ public interface ClientRequests {
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
 	boolean applicationExists(String appName) throws Exception;
+	void push(CFPushArguments properties) throws Exception;
 }
