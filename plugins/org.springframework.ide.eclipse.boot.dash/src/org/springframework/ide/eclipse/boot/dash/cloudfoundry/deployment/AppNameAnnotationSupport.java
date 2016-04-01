@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.Iterator;
@@ -24,17 +34,53 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
+/**
+ * Application name annotation support for the {@link ISourceViewer}
+ *
+ * @author Alex Boyko
+ *
+ */
 public class AppNameAnnotationSupport {
 
+	/**
+	 * Unselected application name annotation line color
+	 */
 	private static final RGB APP_NAME_COLOR = new RGB(0xBB, 0xBB, 0xBB);
+
+	/**
+	 * Selected application name annotation line color
+	 */
 	private static final RGB SELECTED_APP_NAME_COLOR = new RGB(0x00, 0x87, 0x00);
+
+	/**
+	 * Alpha value for painting application name annotations line highlighting
+	 * (Must be close to 0 to ensure the text behind is visible enough)
+	 */
 	private static final int APP_NAME_ANNOTATION_ALPHA = 0x17;
 
+	/**
+	 * Width of the application name annotations vertical ruler control
+	 */
 	private static final int ANNOTATION_COLUMN_WIDTH = 12;
 
+	/**
+	 * The source viewer
+	 */
 	private SourceViewer fViewer = null;
+
+	/**
+	 * Application name annotations vertical ruler
+	 */
 	private AppNameRulerColumn fColumn = null;
+
+	/**
+	 * Constant colors cache (passed in)
+	 */
 	private ISharedTextColors fColorsCache;
+
+	/**
+	 * Listen to viewer input changes to attach the application name annotations model if necessary
+	 */
 	private ITextInputListener textInputListener = new ITextInputListener() {
 
 		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
@@ -62,6 +108,10 @@ public class AppNameAnnotationSupport {
 		fColorsCache = colorsCache;
 		fColumn = new AppNameRulerColumn(ANNOTATION_COLUMN_WIDTH, annotationAccess);
 		fColumn.addAnnotationType(AppNameAnnotation.TYPE);
+
+		/*
+		 * Setup tooltip for application name annotations
+		 */
 		fColumn.setHover(new IAnnotationHover() {
 			@Override
 			public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
@@ -88,12 +138,18 @@ public class AppNameAnnotationSupport {
 
 		});
 
+		/*
+		 * Setup application name line highlight painting on the viewer's text widget
+		 */
 		AppNameAnnotationsPainter annotationPainter= new AppNameAnnotationsPainter(fViewer, annotationAccess);
 		annotationPainter.addDrawingStrategy(AppNameAnnotationModel.APP_NAME_MODEL_KEY, new AppNameDrawingStrategy());
 		annotationPainter.addAnnotationType(AppNameAnnotation.TYPE, AppNameAnnotationModel.APP_NAME_MODEL_KEY);
 		annotationPainter.setAnnotationTypeColor(AppNameAnnotation.TYPE, fViewer.getControl().getDisplay().getSystemColor(SWT.COLOR_GRAY));
 		fViewer.addPainter(annotationPainter);
 
+		/*
+		 * Attach application annotations ruler to the viewer
+		 */
 		fViewer.addVerticalRulerColumn(fColumn);
 	}
 
@@ -101,6 +157,12 @@ public class AppNameAnnotationSupport {
 		fViewer.removeTextInputListener(textInputListener);
 	}
 
+	/**
+	 * Finds and returns viewer's application name annotations model
+	 *
+	 * @param viewer Source viewer
+	 * @return Viewer's application name annotations model
+	 */
 	public static AppNameAnnotationModel getAppNameAnnotationModel(ISourceViewer viewer) {
 		IAnnotationModel model = viewer instanceof ISourceViewerExtension2
 				? ((ISourceViewerExtension2) viewer).getVisualAnnotationModel() : viewer.getAnnotationModel();
@@ -151,11 +213,24 @@ public class AppNameAnnotationSupport {
 				StyledTextContent content = textWidget.getContent();
 				final int line = content.getLineAtOffset(offset);
 				if (gc == null) {
+					/*
+					 * Clear off highlighting case
+					 */
 					textWidget.setLineBackground(line, 1, null);
 					textWidget.redrawRange(offset, length, true);
 				} else {
+					/*
+					 * Show highlighting case IMPORTANT: do not modify
+					 * 'textWidget' graphical parameters! It would start
+					 * scheduling async updates indefinitely! Hence other parts
+					 * of the UI won't have a chance to repaint themselves
+					 */
 					Position p = fColumn.getModel().getPosition(annotation);
 					if (p != null && line == content.getLineAtOffset(p.getOffset())) {
+						/*
+						 * Draw transparent line highlight rectangle. Ensure
+						 * it's transparent such that text behind it is visible
+						 */
 						Color lineColor = a.isSelected() ? fColorsCache.getColor(SELECTED_APP_NAME_COLOR)
 								: fColorsCache.getColor(APP_NAME_COLOR);
 						Color c = gc.getBackground();

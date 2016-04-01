@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.Iterator;
@@ -5,8 +15,17 @@ import java.util.Iterator;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
 
+/**
+ * Application Name annotations model
+ *
+ * @author Alex Boyko
+ *
+ */
 public class AppNameAnnotationModel extends AnnotationModel {
 
+	/**
+	 * Annotation model key for attachment to viewer visual annotations model
+	 */
 	public static final Object APP_NAME_MODEL_KEY = new Object();
 
 	/**
@@ -42,6 +61,11 @@ public class AppNameAnnotationModel extends AnnotationModel {
 		}
 	}
 
+	/**
+	 * Finds the first selected annotation
+	 *
+	 * @return the selected annotation
+	 */
 	public AppNameAnnotation getSelectedAppAnnotation() {
 		Iterator<?> iterator= getAnnotationIterator();
 		while(iterator.hasNext()) {
@@ -56,6 +80,13 @@ public class AppNameAnnotationModel extends AnnotationModel {
 		return null;
 	}
 
+	/**
+	 * Finds application name annotation corresponding to the passed in
+	 * application name text parameter
+	 *
+	 * @param text Application name text
+	 * @return annotation corresponding to the application name text
+	 */
 	public AppNameAnnotation getAnnotation(String text) {
 		if (text != null) {
 			Iterator<?> iterator= getAnnotationIterator();

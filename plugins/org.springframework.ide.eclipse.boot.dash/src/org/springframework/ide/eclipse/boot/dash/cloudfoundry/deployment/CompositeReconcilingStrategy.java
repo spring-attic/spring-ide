@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -7,6 +17,14 @@ import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 
+/**
+ * Reconciling strategy composed of a number of reconciling strategies producing
+ * various types of annotations that can be seen in different parts of the UI.
+ * Implementation is based on JDT's CompositeReconcilingStrategy
+ *
+ * @author Alex Boyko
+ *
+ */
 public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
 	/** The list of internal reconciling strategies. */

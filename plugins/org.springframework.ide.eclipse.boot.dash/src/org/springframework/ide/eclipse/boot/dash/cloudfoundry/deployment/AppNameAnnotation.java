@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import org.eclipse.jface.text.source.Annotation;
@@ -11,9 +21,16 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
+/**
+ * Annotation for application name. Can be selected and unselected. Based on JDT
+ * projection annotation
+ *
+ * @author Alex Boyko
+ *
+ */
 public class AppNameAnnotation extends Annotation implements IAnnotationPresentation {
 	/**
-	 * The type of projection annotations.
+	 * The type of CF application name annotations.
 	 */
 	public static final String TYPE = "cf.app.name"; //$NON-NLS-1$
 
