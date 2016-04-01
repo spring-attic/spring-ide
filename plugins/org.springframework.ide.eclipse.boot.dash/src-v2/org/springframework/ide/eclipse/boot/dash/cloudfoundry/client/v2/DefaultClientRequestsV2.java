@@ -16,20 +16,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.cloudfoundry.client.v2.Resource;
 import org.cloudfoundry.client.v2.applications.ApplicationResource;
 import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
-import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
@@ -64,6 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
@@ -79,22 +77,26 @@ import reactor.core.publisher.Mono;
 public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private CFClientParams params;
-	SpringCloudFoundryClient client ;
-	CloudFoundryOperations operations;
-	Mono<String> orgId;
+	private SpringCloudFoundryClient client ;
+	private CloudFoundryOperations operations;
+	private Mono<String> orgId;
 
-	public DefaultClientRequestsV2(CFClientParams params) {
+	@Deprecated
+	private DefaultClientRequestsV1 v1;
+
+	public DefaultClientRequestsV2(CFClientParams params) throws Exception {
 		this.params = params;
-		client = SpringCloudFoundryClient.builder()
+		this.v1 = new DefaultClientRequestsV1(params);
+		this.client = SpringCloudFoundryClient.builder()
 				.username(params.getUsername())
 				.password(params.getPassword())
 				.host(params.getHost())
 				.build();
-		operations = new CloudFoundryOperationsBuilder()
+		this.operations = new CloudFoundryOperationsBuilder()
 			.cloudFoundryClient(client)
 			.target(params.getOrgName(), params.getSpaceName())
 			.build();
-		orgId = getOrgId();
+		this.orgId = getOrgId();
 	}
 
 	private Mono<String> getOrgId() {
@@ -152,53 +154,52 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void uploadApplication(String appName, ZipFile archive) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.uploadApplication(appName, archive);
 	}
 
 	@Override
 	public void updateApplicationUris(String appName, List<String> urls) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.updateApplicationUris(appName, urls);
 	}
 
 	@Override
 	public void updateApplicationStaging(String appName, Staging staging) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.updateApplicationStaging(appName, staging);
 	}
 
 	@Override
 	public void updateApplicationServices(String appName, List<String> services) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.updateApplicationServices(appName, services);
 	}
 
 	@Override
 	public void updateApplicationMemory(String appName, int memory) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.updateApplicationMemory(appName, memory);
 	}
 
 	@Override
 	public void updateApplicationInstances(String appName, int instances) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.updateApplicationInstances(appName, instances);
 	}
 
 	@Override
-	public void updateApplicationEnvironment(String appName, Map<String, String> environmentVariables) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+	public void updateApplicationEnvironment(String appName, Map<String, String> environment) throws Exception {
+		setEnvVars(appName, environment).get();
 	}
 
 	@Override
 	public void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.updateApplicationDiskQuota(appName, diskQuota);
 	}
 
 	@Override
 	public StreamingLogToken streamLogs(String appName, ApplicationLogListener logConsole) {
-		Assert.isLegal(false, "Not implemented");
-		return null;
+		return v1.streamLogs(appName, logConsole);
 	}
 
 	@Override
 	public void stopApplication(String appName) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.stopApplication(appName);
 	}
 
 	@Override
@@ -213,6 +214,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		operations = null;
 		client = null;
+		if (v1!=null) {
+			v1.logout();
+			v1 = null;
+		}
 	}
 
 	@Override
@@ -226,8 +231,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public SshClientSupport getSshClientSupport() throws Exception {
-		Assert.isLegal(false, "Not implemented");
-		return null;
+		return v1.getSshClientSupport();
 	}
 
 	private CloudFoundryOperations operatationsFor(OrganizationSummary org) {
@@ -346,34 +350,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public Version getApiVersion() {
-		Assert.isLegal(false, "Not implemented");
-		return null;
+		return v1.getApiVersion();
 	}
 
 	@Override
 	public void deleteApplication(String name) throws Exception {
-		Assert.isLegal(false, "Not implemented");
+		v1.deleteApplication(name);
 	}
 
 	@Override
 	public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
-		Assert.isLegal(false, "Not implemented");
-
-		// What the old client did:
-		//				new BasicRequest(this.client, deploymentProperties.getAppName(), "Creating application") {
-		//				@Override
-		//				protected void runRequest(CloudFoundryOperations client) throws Exception {
-		//					client.createApplication(deploymentProperties.getAppName(),
-		//							new Staging(deploymentProperties.getCommand(), deploymentProperties.getBuildpack(),
-		//									deploymentProperties.getStack(), deploymentProperties.getTimeout()),
-		//							deploymentProperties.getDiskQuota(),
-		//							deploymentProperties.getMemory(),
-		//							new ArrayList<>(deploymentProperties.getUris()),
-		//							deploymentProperties.getServices()
-		//					);
-		//				}
-		//			}.call();
-
+		v1.createApplication(deploymentProperties);
 	}
 
 	@Override

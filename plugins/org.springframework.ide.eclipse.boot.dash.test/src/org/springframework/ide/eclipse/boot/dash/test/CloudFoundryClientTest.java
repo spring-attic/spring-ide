@@ -91,7 +91,7 @@ public class CloudFoundryClientTest {
 			assertEquals(2, env.size());
 		}
 
-		client.setEnvVars(appName, ImmutableMap.of("other", "value")).get();
+		client.updateApplicationEnvironment(appName, ImmutableMap.of("other", "value"));
 		{
 			Map<String, Object> env = client.getEnv(appName).get();
 			assertEquals("value", env.get("other"));
@@ -102,7 +102,7 @@ public class CloudFoundryClientTest {
 		// The last var doesn't get removed. Not sure how to fix it.
 		// But eventually we won't even be using 'setEnvVars' it will be part of the push.
 		// and its not going to be our problem to fix that.
-//		client.setEnvVars(appName, ImmutableMap.of()).get();
+//		client.updateApplicationEnvironment(appName, ImmutableMap.of()).get();
 //		{
 //			Map<String, Object> env = client.getEnv(appName).get();
 //			assertEquals(0, env.size());
