@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultC
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -64,6 +65,38 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test
+	public void testPushAndBindServices() throws Exception {
+		String appName = appHarness.randomAppName();
+
+		String service1 = createTestService();
+		String service2 = createTestService();
+		String service3 = createTestService(); //An extra unused service (makes this a better test).
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setServices(ImmutableList.of(service1, service2));
+		client.push(params);
+
+		assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
+
+		client.bindAndUnbindServices(appName, ImmutableList.of(service1)).get();
+		assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
+
+		client.bindAndUnbindServices(appName, ImmutableList.of(service2)).get();
+		assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
+
+		client.bindAndUnbindServices(appName, ImmutableList.of()).get();
+		assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
+
+	}
+
+	private Set<String> getBoundServiceNames(String appName) throws Exception {
+		return client.getBoundServices(appName).get();
+	}
+
+	@Test
 	public void testPushAndSetEnv() throws Exception {
 		String appName = appHarness.randomAppName();
 
@@ -75,7 +108,6 @@ public class CloudFoundryClientTest {
 				"foo", "foo_value",
 				"bar", "bar_value"
 		));
-
 		client.push(params);
 
 		CFApplicationDetail app = client.getApplication(appName);
@@ -108,6 +140,8 @@ public class CloudFoundryClientTest {
 //			assertEquals(0, env.size());
 //		}
 	}
+
+	//TODO: unbind services during 'bindAndUnbindServices'
 
 	@Test
 	public void testServiceCreateAndDelete() throws Exception {
@@ -200,4 +234,11 @@ public class CloudFoundryClientTest {
 		Assert.isTrue(file.exists(), ""+ file);
 		return file;
 	}
+
+	private String createTestService() {
+		String name = services.randomServiceName();
+		client.createService(name, "cloudamqp", "lemur").get();
+		return name;
+	}
+
 }

@@ -50,6 +50,7 @@ import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -66,6 +67,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -75,6 +78,14 @@ import reactor.core.publisher.Mono;
  * @author Nieraj Singh
  */
 public class DefaultClientRequestsV2 implements ClientRequests {
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 	private CFClientParams params;
 	private SpringCloudFoundryClient client ;
@@ -387,28 +398,47 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.after(() -> setEnvVars(params.getAppName(), params.getEnv()))
 		.after(() -> bindAndUnbindServices(params.getAppName(), params.getServices()))
 		.after(() ->  startApp(params.getAppName()))
-		.log("pushing")
+//		.log("pushing")
 		.get(Duration.ofMinutes(5)); //TODO XXX CF V2: real value for push timeout
 	}
 
-	public Mono<Void> bindAndUnbindServices(String appName, List<String> services) {
+	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {
+		debug("bindAndUnbindServices "+_services);
+		Set<String> services = ImmutableSet.copyOf(_services);
 		try {
-			Set<String> toUnbind = getServices().stream()
-					.map(CFService::getName)
-					.filter((boundService) -> services.contains(boundService))
-					.collect(Collectors.toSet());
-
-			return Flux.merge(
-					bindServices(appName, services),
-					unbindServices(appName, toUnbind)
-					)
-					.after();
+			return getBoundServices(appName)
+			.flatMap((boundServices) -> {
+				debug("boundServices = "+boundServices);
+				Set<String> toUnbind = Sets.difference(boundServices, services);
+				Set<String> toBind = Sets.difference(services, boundServices);
+				debug("toBind = "+toBind);
+				debug("toUnbind = "+toUnbind);
+				return Flux.merge(
+						bindServices(appName, toBind),
+						unbindServices(appName, toUnbind)
+				);
+			})
+			.after();
 		} catch (Exception e) {
 			return Mono.error(e);
 		}
 	}
 
-	private Flux<Void> bindServices(String appName, List<String> services) {
+	public Mono<Set<String>> getBoundServices(String appName) {
+		return operations.services()
+		.listInstances()
+		.filter((service) -> isBoundTo(service, appName))
+		.map(ServiceInstance::getName)
+		.toList()
+		.map(ImmutableSet::copyOf);
+	}
+
+	private boolean isBoundTo(ServiceInstance service, String appName) {
+		return service.getApplications().stream()
+				.anyMatch((boundAppName) -> boundAppName.equals(appName));
+	}
+
+	private Flux<Void> bindServices(String appName, Set<String> services) {
 		return Flux.fromIterable(services)
 				.flatMap((service) -> {
 					return operations.services().bind(BindServiceInstanceRequest.builder()
