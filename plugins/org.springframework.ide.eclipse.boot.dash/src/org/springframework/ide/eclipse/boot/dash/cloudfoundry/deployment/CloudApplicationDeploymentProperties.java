@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipFile;
 
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
