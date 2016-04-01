@@ -14,13 +14,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
@@ -28,7 +26,6 @@ import org.cloudfoundry.client.v2.applications.ApplicationResource;
 import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
-import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
@@ -36,6 +33,7 @@ import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
+import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
@@ -50,7 +48,6 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
-import org.cloudfoundry.util.ResourceUtils;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
@@ -450,7 +447,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.map((app) -> app.getGuid().toString());
 	}
 
-	private Mono<Void> setEnvVars(String appName, Map<String, String> environment) {
+	public Mono<Void> setEnvVars(String appName, Map<String, String> environment) {
 		return getApplicationId(appName)
 		.then(applicationId -> {
 			return client.applicationsV2()
@@ -497,5 +494,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.build());
 		})
 		.after();
+	}
+
+	public Mono<Map<String,Object>> getEnv(String appName) {
+		return operations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder()
+				.name(appName)
+				.build()
+		).map((envs) -> envs.getUserProvided());
 	}
 }
