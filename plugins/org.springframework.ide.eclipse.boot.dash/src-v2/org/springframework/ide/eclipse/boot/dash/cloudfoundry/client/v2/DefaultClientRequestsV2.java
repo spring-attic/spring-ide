@@ -28,6 +28,7 @@ import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
+import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
@@ -41,6 +42,8 @@ import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
+import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
+import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
@@ -70,21 +73,23 @@ import reactor.core.publisher.Mono;
 public class DefaultClientRequestsV2 implements ClientRequests {
 
 		private CFClientParams params;
+		SpringCloudFoundryClient client ;
+		CloudFoundryOperations operations;
+		Mono<String> orgId;
 
 		public DefaultClientRequestsV2(CFClientParams params) {
 			this.params = params;
-		}
-
-		SpringCloudFoundryClient client = SpringCloudFoundryClient.builder()
-				.username(params.getUsername())
-				.password(params.getPassword())
-				.host(params.getHost())
+			client = SpringCloudFoundryClient.builder()
+					.username(params.getUsername())
+					.password(params.getPassword())
+					.host(params.getHost())
+					.build();
+			operations = new CloudFoundryOperationsBuilder()
+				.cloudFoundryClient(client)
+				.target(params.getOrgName(), params.getSpaceName())
 				.build();
-		CloudFoundryOperations operations = new CloudFoundryOperationsBuilder()
-			.cloudFoundryClient(client)
-			.target(params.getOrgName(), params.getSpaceName())
-			.build();
-		Mono<String> orgId = getOrgId();
+			orgId = getOrgId();
+		}
 
 		private Mono<String> getOrgId() {
 			String orgName = params.getOrgName();
@@ -469,5 +474,18 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.planName(plan)
 					.build()
 			);
+		}
+
+		public Mono<Void> deleteService(String serviceName) {
+			return operations.services().get(GetServiceInstanceRequest.builder()
+					.name(serviceName)
+					.build())
+			.map(ServiceInstance::getId)
+			.then((serviceId) -> {
+				 return client.serviceInstances().delete(DeleteServiceInstanceRequest.builder()
+						.serviceInstanceId(serviceId)
+						.build());
+			})
+			.after();
 		}
 	}

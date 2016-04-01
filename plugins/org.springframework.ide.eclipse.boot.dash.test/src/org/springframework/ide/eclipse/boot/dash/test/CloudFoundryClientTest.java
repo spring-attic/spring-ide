@@ -11,43 +11,92 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.core.runtime.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
 
 import reactor.core.publisher.Flux;
 
 public class CloudFoundryClientTest {
+	
+	private static final String CFAPPS_IO = "cfapps.io";
 
-	private DefaultClientRequestsV2 createClient(CFClientParams fromEnv) throws Exception {
-		DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
-		return (DefaultClientRequestsV2) factory.getClient(fromEnv);
+	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
+
+	@Rule
+	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
+	
+	@Rule
+	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
+	
+	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
+		try {
+			DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
+			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
 	}
 
 	@Test
 	public void testPush() throws Exception {
-		DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
-//		client.createService
-//
+		String appName = appHarness.randomAppName();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+
+		client.push(params);
+		
+		CFApplicationDetail app = client.getApplication(appName);
+		assertNotNull("Expected application to exist after push: " + appName, app);
+		String content = IOUtils.toString(new URI("http://" + appName + '.' + CFAPPS_IO + "/test.txt"));
+		assertTrue(content.length() > 0);
+		assertTrue(content.contains("content"));
 	}
+	
+
+	@Test
+	public void testService() throws Exception {
+		String serviceName = services.randomServiceName();
+		client.createService(serviceName, "cloudamqp", "lemur").get();
+		List<CFService> services = client.getServices();
+		assertServices(services, serviceName);
+		client.deleteService(serviceName).get();
+		
+		assertNoServices(client.getServices(), serviceName);
+	}
+	
 
 	@Test
 	public void testGetDomains() throws Exception {
-		ClientRequests client = createClient(CfTestTargetParams.fromEnv());
+		client = createClient(CfTestTargetParams.fromEnv());
 		List<CFCloudDomain> domains = client.getDomains();
-		assertEquals("cfapps.io", domains.get(0).getName());
+		assertEquals(CFAPPS_IO, domains.get(0).getName());
 
 		Set<String> names = Flux.fromIterable(domains)
 			.map(CFCloudDomain::getName)
@@ -63,7 +112,7 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testGetBuildpacks() throws Exception {
-		ClientRequests client = createClient(CfTestTargetParams.fromEnv());
+		client = createClient(CfTestTargetParams.fromEnv());
 		List<CFBuildpack> buildpacks = client.getBuildpacks();
 
 		Set<String> names = Flux.fromIterable(buildpacks)
@@ -81,7 +130,7 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testGetStacks() throws Exception {
-		ClientRequests client = createClient(CfTestTargetParams.fromEnv());
+		client = createClient(CfTestTargetParams.fromEnv());
 		List<CFStack> stacks = client.getStacks();
 
 		Set<String> names = Flux.fromIterable(stacks)
@@ -104,6 +153,22 @@ public class CloudFoundryClientTest {
 	private void assertContains(String expected, Set<String> names) {
 		assertTrue("Expected '"+expected+"' not found in: "+names, names.contains(expected));
 	}
+	
+	private void assertNoServices(List<CFService> services, String serviceName) throws Exception {
+		Set<String> names = services.stream().map(CFService::getName).collect(Collectors.toSet());
+		assertFalse(names.contains(serviceName));
+	}
 
-
+	private void assertServices(List<CFService> services, String... serviceNames) throws Exception {
+		Set<String> names = services.stream().map(CFService::getName).collect(Collectors.toSet());
+		assertContains(names, serviceNames);
+	}
+	
+	private File getTestZip(String fileName) {
+		File sourceWorkspace = new File(
+				StsTestUtil.getSourceWorkspacePath("org.springframework.ide.eclipse.boot.dash.test"));
+		File file = new File(sourceWorkspace, fileName + ".zip");
+		Assert.isTrue(file.exists(), ""+ file);
+		return file;
+	}
 }

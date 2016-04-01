@@ -16,9 +16,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Assert;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Arguments passed to push operation.
@@ -38,9 +40,9 @@ public class CFPushArguments implements AutoCloseable {
 	private String buildpack;
 	private String command;
 	private String stack;
-	private Map<String, String> env;
-	private int instances;
-	private List<String> services;
+	private Map<String, String> env = ImmutableMap.of();
+	private Integer instances;
+	private List<String> services = ImmutableList.of();
 	private InputStream applicationData;
 
 	public String getHost() {
@@ -73,10 +75,10 @@ public class CFPushArguments implements AutoCloseable {
 	public void setAppName(String appName) {
 		this.appName = appName;
 	}
-	public int getMemory() {
+	public Integer getMemory() {
 		return memory;
 	}
-	public void setMemory(int memory) {
+	public void setMemory(Integer memory) {
 		this.memory = memory;
 	}
 	public Integer getDiskQuota() {
@@ -115,10 +117,10 @@ public class CFPushArguments implements AutoCloseable {
 	public void setEnv(Map<String, String> env) {
 		this.env = env;
 	}
-	public int getInstances() {
+	public Integer getInstances() {
 		return instances;
 	}
-	public void setInstances(int instances) {
+	public void setInstances(Integer instances) {
 		this.instances = instances;
 	}
 	public List<String> getServices() {
