@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.cloudfoundry.client.v2.buildpacks.BuildpackResource;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationDetail.InstanceDetail;
@@ -48,6 +49,16 @@ import com.google.common.collect.ImmutableMap;
  * @author Kris De Volder
  */
 public class CFWrappingV2 {
+
+	public static CFBuildpack wrap(BuildpackResource rsrc) {
+		String name = rsrc.getEntity().getName();
+		return new CFBuildpack() {
+			@Override
+			public String getName() {
+				return name;
+			}
+		};
+	}
 
 	public static CFApplicationDetail wrap(ApplicationDetail details) {
 		if (details!=null) {

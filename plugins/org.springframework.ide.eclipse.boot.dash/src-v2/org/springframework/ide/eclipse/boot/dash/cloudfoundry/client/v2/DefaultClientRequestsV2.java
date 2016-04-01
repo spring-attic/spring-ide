@@ -16,16 +16,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.v2.Resource;
 import org.cloudfoundry.client.v2.applications.ApplicationResource;
 import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
+import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
+import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
@@ -295,12 +299,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFBuildpack> getBuildpacks() throws Exception {
-		//XXX CF V2 getBuildpacks (not yet implemented in V2 client or operations)
-		return ImmutableList.of(
-				CFWrappingV2.buildpack("java_buildpack"),
-				CFWrappingV2.buildpack("staticfile_buildpack"),
-				CFWrappingV2.buildpack("ruby_buildpack")
-		);
+		//XXX CF V2: getBuilpacks using 'operations' API.
+		return PaginationUtils.requestResources((page) -> {
+			return client.buildpacks()
+			.list(ListBuildpacksRequest.builder()
+				.page(page)
+				.build()
+			);
+		})
+		.map(CFWrappingV2::wrap)
+		.toList()
+		.get();
 	}
 
 	@Override
