@@ -77,6 +77,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Sash;
@@ -101,6 +102,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
+import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -564,6 +566,17 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
 						new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
 				return strategy;
+			}
+
+			@Override
+			protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
+				IReconcilingStrategy strategy = createReconcilerStrategy(sourceViewer);
+				if (strategy!=null) {
+					InstantForceableReconciler reconciler = new InstantForceableReconciler(strategy);
+					reconciler.setDelay(500);
+					return reconciler;
+				}
+				return null;
 			}
 
 		};
@@ -1153,14 +1166,20 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		@Override
 		public void modelChanged(AnnotationModelEvent event) {
-			if (!getShell().isDisposed() && event.getAnnotationModel() instanceof AppNameAnnotationModel) {
-				getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						if (getShell() != null && !getShell().isDisposed()) {
-							validate();
-						}
+			if (getShell() != null && !getShell().isDisposed() && event.getAnnotationModel() instanceof AppNameAnnotationModel) {
+				if (Display.getCurrent() != null) {
+					if (getShell() != null && !getShell().isDisposed()) {
+						validate();
 					}
-				});
+				} else {
+					getShell().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							if (getShell() != null && !getShell().isDisposed()) {
+								validate();
+							}
+						}
+					});
+				}
 			}
 		}
 
