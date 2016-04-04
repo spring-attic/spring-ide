@@ -305,39 +305,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
-			String appName = deploymentProperties.getAppName();
-			CFApplication existing = getApplication(appName);
-			if (existing!=null) {
-				throw errorAppAlreadyExists(appName);
-			}
-			//TODO: should check that services exist (and pretend to bind them to that app).
-
-			//Code in the 'real' client does this:
-//			client.createApplication(deploymentProperties.getAppName(),
-//					new Staging(deploymentProperties.getCommand(), deploymentProperties.getBuildpack(),
-//							deploymentProperties.getStack(), deploymentProperties.getTimeout()),
-//					deploymentProperties.getDiskQuota(),
-//					deploymentProperties.getMemory(),
-//					new ArrayList<>(deploymentProperties.getUris()),
-//					deploymentProperties.getServices()
-//			);
-
-			MockCFSpace space = getSpace();
-			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, appName);
-			app.setCommand(deploymentProperties.getCommand());
-			app.setBuildpackUrl(deploymentProperties.getBuildpack());
-			app.setStack(deploymentProperties.getStack());
-			app.setTimeout(deploymentProperties.getTimeout());
-			app.setDiskQuota(deploymentProperties.getDiskQuota());
-			app.setMemory(deploymentProperties.getMemory());
-			app.setUris(deploymentProperties.getUris());
-			app.setServices(deploymentProperties.getServices());
-
-			space.add(app);
-		}
-
-		@Override
 		public String getHealthCheck(UUID appGuid) throws IOException {
 			checkConnected();
 			MockCFApplication app = getApplication(appGuid);

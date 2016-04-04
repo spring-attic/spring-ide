@@ -164,9 +164,6 @@ public class ProjectsDeployer extends CloudOperation {
 				runnable.run(monitor);
 			}
 		});
-
-		// TODO Auto-generated method stub
-
 	}
 
 	private boolean confirmOverwriteExisting(CloudApplicationDeploymentProperties properties) {

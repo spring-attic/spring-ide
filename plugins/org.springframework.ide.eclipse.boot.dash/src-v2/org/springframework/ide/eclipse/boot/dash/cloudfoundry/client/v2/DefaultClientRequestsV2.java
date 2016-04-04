@@ -387,11 +387,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {
-		v1.createApplication(deploymentProperties);
-	}
-
-	@Override
 	public boolean applicationExists(String appName) throws Exception {
 		return ReactorUtils.get(
 			client.applicationsV2().list(ListApplicationsRequest.builder()

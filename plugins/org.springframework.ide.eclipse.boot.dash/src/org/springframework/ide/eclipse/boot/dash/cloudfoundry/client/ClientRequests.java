@@ -20,7 +20,6 @@ import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 public interface ClientRequests {
@@ -34,7 +33,7 @@ public interface ClientRequests {
 	// objects provide.
 	SshClientSupport getSshClientSupport() throws Exception;
 
-	void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception;
+
 	void deleteApplication(String name) throws Exception;
 	Version getApiVersion();
 	void logout();
@@ -61,8 +60,10 @@ public interface ClientRequests {
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
 	boolean applicationExists(String appName) throws Exception;
 
-	//Added since v2:
+	//Removed in V2
+	//void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception;
 
+	//Added since v2:
 	void push(CFPushArguments properties) throws Exception;
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
 
