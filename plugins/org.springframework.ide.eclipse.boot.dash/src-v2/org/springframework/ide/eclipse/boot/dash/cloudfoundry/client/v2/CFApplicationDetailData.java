@@ -11,17 +11,11 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 
 import com.google.common.collect.ImmutableList;
-
-import reactor.core.publisher.Mono;
 
 public class CFApplicationDetailData extends CFApplicationSummaryData implements CFApplicationDetail {
 

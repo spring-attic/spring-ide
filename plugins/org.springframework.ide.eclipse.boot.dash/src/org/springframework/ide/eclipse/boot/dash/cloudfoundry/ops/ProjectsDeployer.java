@@ -94,7 +94,6 @@ public class ProjectsDeployer extends CloudOperation {
 		runAsync("Deploy project '"+project.getName()+"'", properties.getAppName(), (IProgressMonitor progressMonitor) -> {
 			ClientRequests client = model.getRunTarget().getClient();
 			CancelationToken cancelToken = cde.startOperationStarting();
-			//TODO: refresh healtcheck info in model.
 			Exception error = null;
 			try {
 				if (client.applicationExists(properties.getAppName())) {
@@ -104,6 +103,9 @@ public class ProjectsDeployer extends CloudOperation {
 				}
 				cde.print("Pushing project '"+project.getName()+"'");
 				try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
+					if (isDebugEnabled()) {
+						debugSupport.setupEnvVars(args.getEnv());
+					}
 					client.push(args);
 					cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
 				}
@@ -123,7 +125,18 @@ public class ProjectsDeployer extends CloudOperation {
 				cde.refresh();
 				cde.startOperationEnded(error, cancelToken, monitor);
 			}
+			//Careful, we do this at the very end because if we do it before the refresh, then creating the SSH tunnel will fail as
+			// we have not yet obtained the app's info and will fail to determine app guid to connect to.
+			if (error==null) {
+				if (isDebugEnabled()) {
+					debugSupport.createOperation(cde, "Connect Debugger for "+cde.getName() , ui, cancelToken).runOp(progressMonitor);
+				}
+			}
 		});
+	}
+
+	private boolean isDebugEnabled() {
+		return runOrDebug==RunState.DEBUGGING && debugSupport!=null;
 	}
 
 	private void copyTags(IProject project, CloudAppDashElement cde) {
