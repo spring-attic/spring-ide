@@ -68,9 +68,9 @@ public class CloudFoundryClientTest {
 	public void testPushAndBindServices() throws Exception {
 		String appName = appHarness.randomAppName();
 
-		String service1 = createTestService();
-		String service2 = createTestService();
-		String service3 = createTestService(); //An extra unused service (makes this a better test).
+		String service1 = services.createTestService();
+		String service2 = services.createTestService();
+		String service3 = services.createTestService(); //An extra unused service (makes this a better test).
 
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
@@ -233,12 +233,6 @@ public class CloudFoundryClientTest {
 		File file = new File(sourceWorkspace, fileName + ".zip");
 		Assert.isTrue(file.exists(), ""+ file);
 		return file;
-	}
-
-	private String createTestService() {
-		String name = services.randomServiceName();
-		client.createService(name, "cloudamqp", "lemur").get();
-		return name;
 	}
 
 }

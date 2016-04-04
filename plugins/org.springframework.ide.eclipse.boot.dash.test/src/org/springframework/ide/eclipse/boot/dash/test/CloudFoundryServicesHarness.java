@@ -22,7 +22,7 @@ import org.junit.runners.model.Statement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 
 public class CloudFoundryServicesHarness implements TestRule {
-	
+
 	private DefaultClientRequestsV2 client;
 
 	public CloudFoundryServicesHarness(DefaultClientRequestsV2 client) {
@@ -48,7 +48,13 @@ public class CloudFoundryServicesHarness implements TestRule {
 			}
 		};
 	}
-	
+
+	public String createTestService() {
+		String name = randomServiceName();
+		client.createService(name, "cloudamqp", "lemur").get();
+		return name;
+	}
+
 	protected void deleteOwnedServices() {
 		if (!ownedServiceNames.isEmpty()) {
 

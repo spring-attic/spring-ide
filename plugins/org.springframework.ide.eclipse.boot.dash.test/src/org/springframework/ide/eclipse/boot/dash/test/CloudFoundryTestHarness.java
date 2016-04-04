@@ -200,7 +200,31 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) {
+		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
+		// so that it can add additional infos to it.
+		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+			@Override
+			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
+				Object[] args = invocation.getArguments();
+				@SuppressWarnings("unchecked")
+				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
+				IProject project = (IProject) args[1];
+				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
+				deploymentProperties.setProject(project.getProject());
+				deploymentProperties.setAppName(appName);
+				deploymentProperties.setServices(bindServices);
+				String url = hostName + "." + domains.get(0).getName();
+				deploymentProperties.setUris(ImmutableList.of(url));
+				return deploymentProperties;
+			}
+		});
+	}
+
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) {
+		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
+		// so that it can add additional infos to it.
 		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override

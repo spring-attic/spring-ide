@@ -407,6 +407,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void push(CFPushArguments params) throws Exception {
+		debug("Pushing app starting: "+params.getAppName());
 		//XXX CF V2: push should use 'manifest' in a future version of V2
 		ReactorUtils.get(APP_START_TIMEOUT,
 			operations.applications()
@@ -419,6 +420,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.after(() ->  startApp(params.getAppName()))
 	//		.log("pushing")
 		);
+		debug("Pushing app succeeded: "+params.getAppName());
 	}
 
 	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {

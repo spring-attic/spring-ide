@@ -397,34 +397,29 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return addedElement;
 	}
 
-
 	public CloudAppDashElement getApplication(String appName) {
-		synchronized (this) {
-			Set<CloudAppDashElement> apps = getApplications().getValues();
+		Set<CloudAppDashElement> apps = getApplications().getValues();
 
-			// Add any existing ones that weren't replaced by the new ones
-			// Replace the existing one with a new one for the given Cloud
-			// Application
-			for (CloudAppDashElement element : apps) {
-				if (appName.equals(element.getName())) {
-					return element;
-				}
+		// Add any existing ones that weren't replaced by the new ones
+		// Replace the existing one with a new one for the given Cloud
+		// Application
+		for (CloudAppDashElement element : apps) {
+			if (appName.equals(element.getName())) {
+				return element;
 			}
-			return null;
 		}
+		return null;
 	}
 
 	private CloudAppDashElement getApplication(IProject project) {
-		synchronized (this) {
-			Set<CloudAppDashElement> apps = getApplications().getValues();
-			boolean includeNonExistingProjects = !project.exists();
-			for (CloudAppDashElement element : apps) {
-				if (project.equals(element.getProject(includeNonExistingProjects))) {
-					return element;
-				}
+		Set<CloudAppDashElement> apps = getApplications().getValues();
+		boolean includeNonExistingProjects = !project.exists();
+		for (CloudAppDashElement element : apps) {
+			if (project.equals(element.getProject(includeNonExistingProjects))) {
+				return element;
 			}
-			return null;
 		}
+		return null;
 	}
 
 	public CloudAppDashElement ensureApplication(String appName) {

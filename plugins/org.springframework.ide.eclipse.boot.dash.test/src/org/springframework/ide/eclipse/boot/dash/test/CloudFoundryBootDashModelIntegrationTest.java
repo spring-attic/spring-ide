@@ -28,6 +28,7 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.w
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -39,8 +40,11 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
@@ -72,6 +76,21 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	@Rule
 	public TestBracketter testBracketter = new TestBracketter();
+
+
+	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
+
+	@Rule
+	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
+
+	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
+		try {
+			DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
+			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+	}
 
 	@Before
 	public void setup() throws Exception {
@@ -270,12 +289,41 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		assertEquals("something", actualEnv.get("FOO"));
 	}
 
+
+	@Test
+	public void testServicesBoundOnFirstDeploy() throws Exception {
+		CloudFoundryBootDashModel target = harness.createCfTarget(CfTestTargetParams.fromEnv());
+		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		List<String> bindServices = ImmutableList.of(
+				services.createTestService(), services.createTestService()
+		);
+
+		final String appName = harness.randomAppName();
+
+		harness.answerDeploymentPrompt(ui, appName, appName, bindServices);
+
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
+			public boolean test() throws Exception {
+				CloudAppDashElement element = model.getApplication(appName);
+				assertEquals(RunState.RUNNING, element.getRunState());
+				return true;
+			}
+		};
+
+		Set<String> actualServices = client.getBoundServices(appName).get();
+
+		assertEquals(ImmutableSet.copyOf(bindServices), actualServices);
+	}
+
+
 	//XXX CF V2:
 	//  - Add a test for 'dashboard url'. I.e. a test that verifies the double-click action on a service
 	//    works.
-	//  - test for binding services
-	//       - unbinds services implicitly
-	//       - binds more than one services
 
 	///////////////////////////////////////////////////////////////////////////////////
 
