@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 public class ApplicationRunningStateTracker {
 	// Give time for Diego-enabled apps with health check that may take a while to start
 	// Users can always manually stop the app if it is taking too long to check the run state of the app
-	public static final long TIMEOUT = 1000 * 60 * 10;
+	public static final long APP_START_TIMEOUT = 1000 * 60 * 10;
 
 	public static final long WAIT_TIME = 1000;
 
@@ -48,7 +48,7 @@ public class ApplicationRunningStateTracker {
 		this.model = app.getCloudModel();
 		this.requests = model.getClient();
 		this.appName = app.getName();
-		this.timeout = TIMEOUT;
+		this.timeout = APP_START_TIMEOUT;
 	}
 
 	protected void checkTerminate(IProgressMonitor monitor)

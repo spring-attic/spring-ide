@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,8 @@ import java.util.zip.ZipFile;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
@@ -39,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
@@ -378,8 +380,58 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void push(CFPushArguments properties) throws Exception {
-			notImplementedStub();
+		public void push(CFPushArguments args) throws Exception {
+			//TODO: should check services exist and raise an error because non-existant services cannot be bound.
+			MockCFSpace space = getSpace();
+			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, args.getAppName());
+			app.setBuildpackUrlMaybe(args.getBuildpack());
+			app.setUris(getUris(args));
+			app.setCommandMaybe(args.getCommand());
+			app.setDiskQuotaMaybe(args.getDiskQuota());
+			app.setEnvMaybe(args.getEnv());
+			app.setMemoryMaybe(args.getMemory());
+			app.setServicesMaybe(args.getServices());
+			app.setStackMaybe(args.getStack());
+			app.setTimeoutMaybe(args.getTimeout());
+			space.add(app);
+
+			app.start();
+		}
+
+		/**
+		 * Computes the list of 'uris' for this app based on some of the push
+		 * arguments (such as 'noroute', 'nohost', 'host' and 'domain' ...).
+		 */
+		private Collection<String> getUris(CFPushArguments args) {
+			if (args.isNoRoute()) {
+				return ImmutableList.of();
+			} else if (args.isNoHost()) {
+				return ImmutableList.of(getDomain(args));
+			} else {
+				String host = args.getHost();
+				Assert.isNotNull(host);
+				String domain= getDomain(args);
+				Assert.isNotNull(domain);
+				return ImmutableList.of(host+"."+domain);
+			}
+		}
+
+		private String getDomain(CFPushArguments args) {
+			String domain = args.getDomain();
+			if (domain!=null) {
+				return domain;
+			}
+			//Use first domain as a default.
+			return domainsByName.keySet().iterator().next();
+		}
+
+		@Override
+		public Map<String, String> getApplicationEnvironment(String appName) throws Exception {
+			MockCFApplication app = getSpace().getApplication(appName);
+			if (app==null) {
+				throw errorAppNotFound(appName);
+			}
+			return ImmutableMap.copyOf(app.getEnv());
 		}
 	}
 

@@ -42,6 +42,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
+import com.google.common.collect.ImmutableList;
+
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
 	//TODO: It looks like use of LiveVariable in here is pointless, and the BasicValidator that

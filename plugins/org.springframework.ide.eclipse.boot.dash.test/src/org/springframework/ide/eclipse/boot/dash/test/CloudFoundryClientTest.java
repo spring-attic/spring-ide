@@ -117,7 +117,7 @@ public class CloudFoundryClientTest {
 		assertTrue(content.contains("content"));
 
 		{
-			Map<String, Object> env = client.getEnv(appName).get();
+			Map<String, String> env = client.getEnv(appName).get();
 			assertEquals("foo_value", env.get("foo"));
 			assertEquals("bar_value", env.get("bar"));
 			assertEquals(2, env.size());
@@ -125,7 +125,7 @@ public class CloudFoundryClientTest {
 
 		client.updateApplicationEnvironment(appName, ImmutableMap.of("other", "value"));
 		{
-			Map<String, Object> env = client.getEnv(appName).get();
+			Map<String, String> env = client.getEnv(appName).get();
 			assertEquals("value", env.get("other"));
 			assertEquals(1, env.size());
 		}

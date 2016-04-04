@@ -60,5 +60,10 @@ public interface ClientRequests {
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
 	boolean applicationExists(String appName) throws Exception;
+
+	//Added since v2:
+
 	void push(CFPushArguments properties) throws Exception;
+	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
+
 }

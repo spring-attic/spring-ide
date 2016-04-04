@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.eclipse.core.runtime.Assert;
@@ -25,6 +26,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
@@ -33,6 +36,8 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
+
+import reactor.core.publisher.Mono;
 
 public class MockCFApplication {
 
@@ -67,7 +72,7 @@ public class MockCFApplication {
 	private List<String> uris = new ArrayList<>();
 	private CFAppState state = CFAppState.STOPPED;
 	private int diskQuota = 1024;
-	private Integer timeout = null;
+	private int timeout = (int)TimeUnit.MINUTES.toMillis(2);
 	private String command = null;
 	private String stack = null;
 	private MockCloudFoundryClientFactory owner;
@@ -81,7 +86,7 @@ public class MockCFApplication {
 	}
 
 	private String healthCheck=HealthCheckSupport.HC_PORT;
-	private List<CFInstanceStats> stats = new ArrayList<>();
+	private ImmutableList<CFInstanceStats> stats = ImmutableList.of();
 
 	private CancelationTokens cancelationTokens = new CancelationTokens();
 
@@ -99,7 +104,7 @@ public class MockCFApplication {
 	}
 
 	public List<CFInstanceStats> getStats() {
-		return ImmutableList.copyOf(stats);
+		return stats;
 	}
 
 	public void start() throws Exception {
@@ -152,7 +157,7 @@ public class MockCFApplication {
 
 	public int getRunningInstances() {
 		int runningInstances = 0;
-		for (CFInstanceStats instance : stats) {
+		for (CFInstanceStats instance : getStats()) {
 			if (instance.getState()==CFInstanceState.RUNNING) {
 				runningInstances++;
 			}
@@ -176,7 +181,7 @@ public class MockCFApplication {
 		this.stack = stack;
 	}
 
-	public void setTimeout(Integer timeout) {
+	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 	}
 
@@ -197,13 +202,47 @@ public class MockCFApplication {
 	}
 
 	public CFApplication getBasicInfo() {
-		return new CFApplicationData(name, guid, instances, getRunningInstances(),
-				state, memory, diskQuota, detectedBuildpack, buildpackUrl,
-				env, services, uris, timeout, command, stack);
+		return new CFApplicationSummaryData(
+				name,
+				instances,
+				getRunningInstances(),
+				memory,
+				guid,
+				services,
+				detectedBuildpack,
+				buildpackUrl,
+				uris,
+				state,
+				diskQuota,
+				timeout,
+				command,
+				stack,
+				Mono.just(env)
+		);
 	}
 
 	public CFApplicationDetail getDetailedInfo() {
-		return new CFApplicationDetailData(getBasicInfo(), ImmutableList.copyOf(stats));
+		return new CFApplicationDetailData(
+				new CFApplicationSummaryData(
+						name,
+						instances,
+						getRunningInstances(),
+						memory,
+						guid,
+						services,
+						detectedBuildpack,
+						buildpackUrl,
+						uris,
+						state,
+						diskQuota,
+						timeout,
+						command,
+						stack,
+						Mono.just(env)
+				),
+				ImmutableList.copyOf(stats)
+		);
+//		return new CFApplicationDetailData(getBasicInfo(), ImmutableList.copyOf(stats));
 	}
 
 	@Override
@@ -217,6 +256,10 @@ public class MockCFApplication {
 		this.state = CFAppState.STOPPED;
 	}
 
+	public Map<String, String> getEnv() {
+		return env;
+	}
+
 	public void setEnv(Map<String, String> newEnv) {
 		env = ImmutableMap.copyOf(newEnv);
 	}
@@ -224,6 +267,54 @@ public class MockCFApplication {
 	public void restart() throws Exception {
 		stop();
 		start();
+	}
+
+	public void setBuildpackUrlMaybe(String buildpack) {
+		if (buildpack!=null) {
+			setBuildpackUrl(buildpack);
+		}
+	}
+
+	public void setCommandMaybe(String command) {
+		if (command!=null) {
+			setCommand(command);
+		}
+	}
+
+	public void setDiskQuotaMaybe(Integer diskQuota) {
+		if (diskQuota!=null) {
+			setDiskQuota(diskQuota);
+		}
+	}
+
+	public void setEnvMaybe(Map<String, String> env) {
+		if (env!=null) {
+			setEnv(env);
+		}
+	}
+
+	public void setMemoryMaybe(Integer memory) {
+		if (memory!=null) {
+			setMemory(memory);
+		}
+	}
+
+	public void setServicesMaybe(List<String> services) {
+		if (services!=null) {
+			setServices(services);
+		}
+	}
+
+	public void setStackMaybe(String stack) {
+		if (stack!=null) {
+			setStack(stack);
+		}
+	}
+
+	public void setTimeoutMaybe(Integer timeout) {
+		if (timeout!=null) {
+			setTimeout(timeout);
+		}
 	}
 
 }

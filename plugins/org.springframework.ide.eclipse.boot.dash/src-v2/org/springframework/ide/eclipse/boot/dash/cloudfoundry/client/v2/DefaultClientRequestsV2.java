@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
@@ -49,10 +49,11 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
@@ -67,6 +68,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -78,6 +81,8 @@ import reactor.core.publisher.Mono;
  * @author Nieraj Singh
  */
 public class DefaultClientRequestsV2 implements ClientRequests {
+
+	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -126,23 +131,26 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
-		return operations.applications()
+		return ReactorUtils.get(operations.applications()
 		.list()
-		.map(CFWrappingV2::wrap)
+		.map((appSummary) ->
+			CFWrappingV2.wrap(appSummary, getEnv(appSummary.getName()))
+		)
 		.toList()
 		.map(ImmutableList::copyOf)
-		.get();
+		);
 	}
 
 	@Override
 	public List<CFService> getServices() throws Exception {
-		return operations
-		.services()
-		.listInstances()
-		.map(CFWrappingV2::wrap)
-		.toList()
-		.map(ImmutableList::copyOf)
-		.get();
+		return ReactorUtils.get(
+			operations
+			.services()
+			.listInstances()
+			.map(CFWrappingV2::wrap)
+			.toList()
+			.map(ImmutableList::copyOf)
+		);
 	}
 
 	@Override
@@ -153,10 +161,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.name(appSummary.getName())
 					.build()
 			)
-			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap(appSummary, appDetails))
+			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails))
 			.otherwise((error) -> {
-
-				return Mono.just(CFWrappingV2.wrap(appSummary, null));
+				return Mono.just(CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, null));
 			});
 		})
 		.toList()
@@ -195,7 +202,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void updateApplicationEnvironment(String appName, Map<String, String> environment) throws Exception {
-		setEnvVars(appName, environment).get();
+		ReactorUtils.get(
+			setEnvVars(appName, environment)
+		);
 	}
 
 	@Override
@@ -215,10 +224,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void restartApplication(String appName) throws Exception {
-		operations.applications().restart(RestartApplicationRequest.builder()
-				.name(appName)
-				.build())
-		.get();
+		ReactorUtils.get(APP_START_TIMEOUT,
+			operations.applications().restart(RestartApplicationRequest.builder()
+					.name(appName)
+					.build())
+		);
 	}
 
 	@Override
@@ -233,11 +243,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFStack> getStacks() throws Exception {
-		return operations.stacks()
-				.list()
-				.map(CFWrappingV2::wrap)
-				.toList()
-				.get();
+		return ReactorUtils.get(
+			operations.stacks()
+			.list()
+			.map(CFWrappingV2::wrap)
+			.toList()
+		);
 	}
 
 	@Override
@@ -254,62 +265,65 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
-		return operations.organizations()
-				.list()
-				.flatMap((OrganizationSummary org) -> {
-					return operatationsFor(org)
-							.spaces()
-							.list()
-							.map((space) -> CFWrappingV2.wrap(org, space));
-				})
-				.toList()
-				.get();
+		return ReactorUtils.get(
+			operations.organizations()
+			.list()
+			.flatMap((OrganizationSummary org) -> {
+				return operatationsFor(org)
+						.spaces()
+						.list()
+						.map((space) -> CFWrappingV2.wrap(org, space));
+			})
+			.toList()
+		);
 	}
 
 	@Override
 	public String getHealthCheck(UUID appGuid) throws Exception {
 		//XXX CF V2: getHealthcheck (via operations API)
 		// See: https://www.pivotaltracker.com/story/show/116462215
-		return client.applicationsV2()
-				.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
-						.applicationId(appGuid.toString())
-						.build()
-						)
-				.map((response) -> response.getEntity().getHealthCheckType())
-				.get();
+		return ReactorUtils.get(
+			client.applicationsV2()
+			.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
+					.applicationId(appGuid.toString())
+					.build()
+					)
+			.map((response) -> response.getEntity().getHealthCheckType())
+		);
 	}
 
 	@Override
 	public void setHealthCheck(UUID guid, String hcType) throws Exception {
 		//XXX CF V2: setHealthCheck (via operations API)
 		// See: https://www.pivotaltracker.com/story/show/116462369
-		client.applicationsV2()
-		.update(UpdateApplicationRequest.builder()
-				.applicationId(guid.toString())
-				.healthCheckType(hcType)
-				.build()
-				)
-		.get(); //To force synchronous execution
+		ReactorUtils.get(
+			client.applicationsV2()
+			.update(UpdateApplicationRequest.builder()
+					.applicationId(guid.toString())
+					.healthCheckType(hcType)
+					.build()
+			)
+		);
 	}
 
 	@Override
 	public List<CFCloudDomain> getDomains() throws Exception {
 		//XXX CF V2: list domains using 'operations' api.
-		return orgId.flatMap(this::requestDomains)
-				.map(CFWrappingV2::wrap)
-				.toList()
-				//				.as(debugMono("domains"))
-				.get();
+		return ReactorUtils.get(
+			orgId.flatMap(this::requestDomains)
+			.map(CFWrappingV2::wrap)
+			.toList()
+		);
 	}
 
 	private Flux<DomainResource> requestDomains(String orgId) {
 		return PaginationUtils.requestResources((page) ->
-		client.domains().list(ListDomainsRequest.builder()
+			client.domains().list(ListDomainsRequest.builder()
 				.page(page)
 				//						.owningOrganizationId(orgId)
 				.build()
-				)
-				);
+			)
+		);
 	}
 
 	@Override
@@ -329,17 +343,20 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public CFApplicationDetail getApplication(String appName) throws Exception {
-		return getApplicationMono(appName)
-//		.log("getApplication("+appName+")")
-		.get();
+		return ReactorUtils.get(
+				getApplicationMono(appName)
+				//		.log("getApplication("+appName+")")
+		);
 	}
 
 	private Mono<CFApplicationDetail> getApplicationMono(String appName) {
 		return operations.applications().get(GetApplicationRequest.builder()
 				.name(appName)
 				.build()
-				)
-		.map(CFWrappingV2::wrap)
+		)
+		.map((appDetail) -> {
+			return CFWrappingV2.wrap(appDetail, getEnv(appName));
+		})
 		.otherwise((error) -> {
 			//XXX CF V2: remove workaround for bug in CF V2 operations (no details for stopped app)
 			// See https://www.pivotaltracker.com/story/show/116463023
@@ -354,8 +371,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				}
 				return Mono.error(outOfBounds);
 			})
-			.map(CFWrappingV2::wrap)
-			.map((CFApplication summary) -> CFWrappingV2.wrap(summary, null));
+			.map((appSummary) -> CFWrappingV2.wrap(appSummary, getEnv(appSummary.getName())))
+			.map((CFApplication summary) -> CFWrappingV2.wrap((CFApplicationSummaryData)summary, (ApplicationDetail)null));
 		});
 	}
 
@@ -375,31 +392,33 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public boolean applicationExists(String appName) {
-		return client.applicationsV2().list(ListApplicationsRequest.builder()
-				.name(appName)
-				.build()
-				)
-				.map((ListApplicationsResponse response) -> {
-					List<ApplicationResource> resource = response.getResources();
-					return resource != null && !resource.isEmpty();
-				})
-				.get();
+	public boolean applicationExists(String appName) throws Exception {
+		return ReactorUtils.get(
+			client.applicationsV2().list(ListApplicationsRequest.builder()
+			.name(appName)
+			.build()
+			)
+			.map((ListApplicationsResponse response) -> {
+				List<ApplicationResource> resource = response.getResources();
+				return resource != null && !resource.isEmpty();
+			})
+		);
 	}
 
 	@Override
 	public void push(CFPushArguments params) throws Exception {
 		//XXX CF V2: push should use 'manifest' in a future version of V2
-		operations.applications()
-		.push(CFWrappingV2.toPushRequest(params)
-				.noStart(true)
-				.build()
-		)
-		.after(() -> setEnvVars(params.getAppName(), params.getEnv()))
-		.after(() -> bindAndUnbindServices(params.getAppName(), params.getServices()))
-		.after(() ->  startApp(params.getAppName()))
-//		.log("pushing")
-		.get(Duration.ofMinutes(5)); //TODO XXX CF V2: real value for push timeout
+		ReactorUtils.get(APP_START_TIMEOUT,
+			operations.applications()
+			.push(CFWrappingV2.toPushRequest(params)
+					.noStart(true)
+					.build()
+			)
+			.after(() -> setEnvVars(params.getAppName(), params.getEnv()))
+			.after(() -> bindAndUnbindServices(params.getAppName(), params.getServices()))
+			.after(() ->  startApp(params.getAppName()))
+	//		.log("pushing")
+		);
 	}
 
 	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {
@@ -522,10 +541,29 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.after();
 	}
 
-	public Mono<Map<String,Object>> getEnv(String appName) {
+	public Mono<Map<String,String>> getEnv(String appName) {
 		return operations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder()
 				.name(appName)
 				.build()
-		).map((envs) -> envs.getUserProvided());
+		)
+		.map((envs) -> envs.getUserProvided())
+		.map(this::dropObjectsFromMap);
+	}
+
+	@Override
+	public Map<String, String> getApplicationEnvironment(String appName) {
+		return getEnv(appName).get();
+	}
+
+	private Map<String, String> dropObjectsFromMap(Map<String, Object> map) {
+		Builder<String, String> builder = ImmutableMap.builder();
+		for (Entry<String, Object> entry : map.entrySet()) {
+			try {
+				builder.put(entry.getKey(), (String) entry.getValue());
+			} catch (ClassCastException e) {
+				BootActivator.log(e);
+			}
+		}
+		return builder.build();
 	}
 }

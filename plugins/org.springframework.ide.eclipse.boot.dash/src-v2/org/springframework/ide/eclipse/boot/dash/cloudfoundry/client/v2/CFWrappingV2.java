@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.cloudfoundry.client.v2.buildpacks.BuildpackResource;
 import org.cloudfoundry.client.v2.domains.DomainResource;
@@ -39,7 +41,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+
+import reactor.core.publisher.Mono;
 
 /**
  * Various helper methods to 'wrap' objects returned by CF client into
@@ -60,9 +63,19 @@ public class CFWrappingV2 {
 		};
 	}
 
-	public static CFApplicationDetail wrap(ApplicationDetail details) {
+	public static CFApplicationDetail wrap(ApplicationDetail details, Mono<Map<String,String>> env) {
 		if (details!=null) {
-			return new CFApplicationDetailData(details);
+			List<CFInstanceStats> instances = ImmutableList.copyOf(
+				details.getInstanceDetails()
+				.stream()
+				.map(CFWrappingV2::wrap)
+				.collect(Collectors.toList())
+			);
+			CFApplicationSummaryData summary = wrapSummary(details, env);
+			return new CFApplicationDetailData(
+					summary,
+					instances
+			);
 		}
 		return null;
 	}
@@ -85,12 +98,22 @@ public class CFWrappingV2 {
 		return null;
 	}
 
-	public static CFApplicationDetail wrap(CFApplication summary, ApplicationDetail details) {
+	public static CFApplicationDetail wrap(
+			CFApplicationSummaryData summary,
+			ApplicationDetail details
+	) {
 		if (details==null) {
 			//Detail lookup failed. App may not be running and we can't fetch instance data
 			return new CFApplicationDetailData(summary);
 		} else {
-			return new CFApplicationDetailData(details);
+			List<CFInstanceStats> instanceDetails = ImmutableList.copyOf(
+					details
+					.getInstanceDetails()
+					.stream()
+					.map(CFWrappingV2::wrap)
+					.collect(Collectors.toList())
+			);
+			return new CFApplicationDetailData(summary, instanceDetails);
 		}
 	}
 
@@ -124,101 +147,60 @@ public class CFWrappingV2 {
 		};
 	}
 
-	public static CFApplication wrap(ApplicationSummary app) {
-		return new CFApplication() {
+	private static CFApplicationSummaryData wrapSummary(ApplicationDetail app, Mono<Map<String, String>> env) {
+		CFAppState state;
+		try {
+			state = CFAppState.valueOf(app.getRequestedState());
+		} catch (Exception e) {
+			BootActivator.log(e);
+			state = CFAppState.UNKNOWN;
+		}
 
-			@Override
-			public String getName() {
-				return app.getName();
-			}
+		return new CFApplicationSummaryData(
+				app.getName(),
+				app.getInstances(),
+				app.getRunningInstances(),
+				app.getMemoryLimit(),
+				UUID.fromString(app.getId()),
+				ImmutableList.of(), //XXX CF V2: Application.getServices
+				null, //XXX CF V2: Application.getDetectedBuildpack
+				null, //XXX CF V2: Application.getBuildpackUrl
+				app.getUrls(),
+				state,
+				app.getDiskQuota(),
+				null, //XXX CF V2: getTimeout
+				null, //XXX CF V2: Application.getCommand
+				null, //XXX CF V2: getStack
+				env
+		);
+	}
 
-			@Override
-			public List<String> getUris() {
-				return app.getUrls();
-			}
+	public static CFApplication wrap(ApplicationSummary app, Mono<Map<String,String>> env) {
+		CFAppState state;
+		try {
+			state = CFAppState.valueOf(app.getRequestedState());
+		} catch (Exception e) {
+			BootActivator.log(e);
+			state = CFAppState.UNKNOWN;
+		}
 
-			@Override
-			public Integer getTimeout() {
-				//XXX CF V2: getTimeout
-				return null;
-			}
-
-			@Override
-			public String getStack() {
-				//XXX CF V2: getStack
-				return null;
-			}
-
-			@Override
-			public List<String> getServices() {
-				//XXX CF V2: Application.getServices
-				return ImmutableList.of();
-			}
-
-			@Override
-			public Map<String, String> getEnvAsMap() {
-				//XXX CF V2: Application.getEnv
-				return ImmutableMap.of();
-			}
-
-			@Override
-			public String getDetectedBuildpack() {
-				//XXX CF V2: Application.getDetectedBuildpack
-				return null;
-			}
-
-			@Override
-			public String getCommand() {
-				//XXX CF V2: Application.getCommand
-				return null;
-			}
-
-			@Override
-			public String getBuildpackUrl() {
-				//XXX CF V2: Application.getBuildpackUrl
-				return null;
-			}
-
-			@Override
-			public CFAppState getState() {
-				try {
-					return CFAppState.valueOf(app.getRequestedState());
-				} catch (Exception e) {
-					BootActivator.log(e);
-					return CFAppState.UNKNOWN;
-				}
-			}
-
-			@Override
-			public int getRunningInstances() {
-				return app.getRunningInstances();
-			}
-
-			@Override
-			public int getMemory() {
-				return app.getMemoryLimit();
-			}
-
-			@Override
-			public int getInstances() {
-				return app.getInstances();
-			}
-
-			@Override
-			public UUID getGuid() {
-				return UUID.fromString(app.getId());
-			}
-
-			@Override
-			public int getDiskQuota() {
-				return app.getDiskQuota();
-			}
-
-			@Override
-			public String toString() {
-				return "CFApplication("+getName()+")";
-			}
-		};
+		return new CFApplicationSummaryData(
+				app.getName(),
+				app.getInstances(),
+				app.getRunningInstances(),
+				app.getMemoryLimit(),
+				UUID.fromString(app.getId()),
+				ImmutableList.of(), //XXX CF V2: Application.getServices
+				null, //XXX CF V2: Application.getDetectedBuildpack
+				null, //XXX CF V2: Application.getBuildpackUrl
+				app.getUrls(),
+				state,
+				app.getDiskQuota(),
+				null, //XXX CF V2: getTimeout
+				null, //XXX CF V2: Application.getCommand
+				null, //XXX CF V2: getStack
+				env
+		);
 	}
 
 	public static CFService wrap(final ServiceInstance service) {

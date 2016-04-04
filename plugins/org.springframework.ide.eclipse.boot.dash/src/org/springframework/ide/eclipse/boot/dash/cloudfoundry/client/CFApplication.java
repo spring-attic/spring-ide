@@ -19,7 +19,6 @@ public interface CFApplication extends CFEntity {
 
 	int getInstances();
 	int getRunningInstances();
-	Map<String, String> getEnvAsMap();
 	int getMemory();
 	UUID getGuid();
 	List<String> getServices();
@@ -31,4 +30,6 @@ public interface CFApplication extends CFEntity {
 	Integer getTimeout();
 	String getCommand();
 	String getStack();
+
+	Map<String,String> getEnvAsMap();
 }

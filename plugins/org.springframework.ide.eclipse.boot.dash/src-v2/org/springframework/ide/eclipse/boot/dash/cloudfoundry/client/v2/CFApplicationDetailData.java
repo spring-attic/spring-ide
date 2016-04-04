@@ -11,59 +11,53 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.cloudfoundry.operations.applications.ApplicationDetail;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 
 import com.google.common.collect.ImmutableList;
 
-class CFApplicationDetailData extends CFApplicationSummaryData implements CFApplicationDetail {
+import reactor.core.publisher.Mono;
+
+public class CFApplicationDetailData extends CFApplicationSummaryData implements CFApplicationDetail {
 
 	private List<CFInstanceStats> instanceDetails;
 
-	public CFApplicationDetailData(ApplicationDetail app) {
+	public CFApplicationDetailData(
+			CFApplicationSummaryData app,
+			List<CFInstanceStats> instanceDetails
+	) {
 		super(
 				app.getName(),
 				app.getInstances(),
 				app.getRunningInstances(),
-				//XXX CF V2: env
-				null,
-				app.getMemoryLimit(),
-				UUID.fromString(app.getId()),
-				//XXX CF V2: services,
-				ImmutableList.of(),
-				//XXX CF V2: detectedBuildpack,
-				null,
-				app.getBuildpack(),
-				app.getUrls(),
-				CFWrappingV2.wrapAppState(app.getRequestedState()),
+				app.getMemory(),
+				app.getGuid(),
+				app.getServices(),
+				app.getDetectedBuildpack(),
+				app.getBuildpackUrl(),
+				app.getUris(),
+				app.getState(),
 				app.getDiskQuota(),
-				//XXX CF V2: timeout
-				null,
-				//XXX CF V2: command
-				null,
-				//XXX CF V2: stack
-				null
+				app.getTimeout(),
+				app.getCommand(),
+				app.getStack(),
+				app.getEnvAsMapMono()
 		);
-		this.instanceDetails = ImmutableList.copyOf(app.getInstanceDetails().stream()
-				.map(CFWrappingV2::wrap)
-				.collect(Collectors.toList())
-		);
+		this.instanceDetails = instanceDetails;
 	}
 
-	public CFApplicationDetailData(CFApplication app) {
+	public CFApplicationDetailData(CFApplicationSummaryData app) {
 		//TODO: this constructor should not exist. We use it to create 'detailed' data when
 		/// its not possible to get details.
 		super(
 				app.getName(),
 				app.getInstances(),
 				app.getRunningInstances(),
-				//XXX CF V2: env
-				null,
 				app.getMemory(),
 				app.getGuid(),
 				//XXX CF V2: services,
@@ -79,7 +73,8 @@ class CFApplicationDetailData extends CFApplicationSummaryData implements CFAppl
 				//XXX CF V2: command
 				null,
 				//XXX CF V2: stack
-				null
+				null,
+				app.getEnvAsMapMono()
 		);
 		this.instanceDetails = ImmutableList.of();
 	}

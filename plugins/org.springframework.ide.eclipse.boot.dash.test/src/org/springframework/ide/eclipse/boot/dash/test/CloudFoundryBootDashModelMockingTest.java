@@ -734,6 +734,24 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(appElement, RunState.INACTIVE, 3000);
 	}
 
+	@Test public void simpleDeploy() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		final String appName = harness.randomAppName();
+
+		harness.answerDeploymentPrompt(ui, appName, appName);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+
+		waitForState(app, RunState.RUNNING, 10000);
+	}
+
 	@Test public void stopCancelsDeploy() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
@@ -856,7 +874,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
-		new ACondition("wait for apps to appear", 3000) {
+		new ACondition("wait for apps to appear", 10000) {
 			@Override
 			public boolean test() throws Exception {
 				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());

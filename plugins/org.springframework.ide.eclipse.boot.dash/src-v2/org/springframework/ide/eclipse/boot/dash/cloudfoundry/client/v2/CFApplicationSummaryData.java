@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+
+import reactor.core.publisher.Mono;
 
 /*******************************************************************************
  * Copyright (c) 2016 Pivotal, Inc.
@@ -22,7 +25,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	private String name;
 	private int instances;
 	private int runningInstances;
-	private Map<String, String> env;
 	private int memory;
 	private UUID guid;
 	private List<String> services;
@@ -34,17 +36,30 @@ public class CFApplicationSummaryData implements CFApplication {
 	private Integer timeout;
 	private String command;
 	private String stack;
+	private Mono<Map<String,String>> env;
 
-
-
-	public CFApplicationSummaryData(String name, int instances, int runningInstances, Map<String, String> env,
-			int memory, UUID guid, List<String> services, String detectedBuildpack, String buildpackUrl,
-			List<String> uris, CFAppState state, int diskQuota, Integer timeout, String command, String stack) {
+	public CFApplicationSummaryData(
+			String name,
+			int instances,
+			int runningInstances,
+			int memory,
+			UUID guid,
+			List<String> services,
+			String detectedBuildpack,
+			String buildpackUrl,
+			List<String> uris,
+			CFAppState state,
+			int diskQuota,
+			Integer timeout,
+			String command,
+			String stack,
+			Mono<Map<String,String>> env
+	) {
 		super();
+		Assert.isNotNull(env);
 		this.name = name;
 		this.instances = instances;
 		this.runningInstances = runningInstances;
-		this.env = env;
 		this.memory = memory;
 		this.guid = guid;
 		this.services = services;
@@ -56,6 +71,7 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.timeout = timeout;
 		this.command = command;
 		this.stack = stack;
+		this.env = env;
 	}
 
 	@Override
@@ -71,11 +87,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	@Override
 	public int getRunningInstances() {
 		return runningInstances;
-	}
-
-	@Override
-	public Map<String, String> getEnvAsMap() {
-		return env;
 	}
 
 	@Override
@@ -131,6 +142,15 @@ public class CFApplicationSummaryData implements CFApplication {
 	@Override
 	public String getStack() {
 		return stack;
+	}
+
+	public Mono<Map<String, String>> getEnvAsMapMono() {
+		return env;
+	}
+
+	@Override
+	public Map<String, String> getEnvAsMap() {
+		return env.get();
 	}
 
 }

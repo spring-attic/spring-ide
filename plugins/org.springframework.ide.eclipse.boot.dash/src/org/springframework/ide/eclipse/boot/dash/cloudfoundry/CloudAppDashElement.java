@@ -78,6 +78,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	private final LiveVariable<CFApplication> appData = new LiveVariable<>();
 	private final LiveVariable<List<CFInstanceStats>> instanceData = new LiveVariable<>();
 	private final LiveExpression<RunState> baseRunState = new LiveExpression<RunState>() {
+
 		{
 			dependsOn(appData);
 			dependsOn(instanceData);
