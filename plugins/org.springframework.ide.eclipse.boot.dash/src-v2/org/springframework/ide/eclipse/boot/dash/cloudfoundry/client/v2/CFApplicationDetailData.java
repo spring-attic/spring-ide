@@ -31,7 +31,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getRunningInstances(),
 				app.getMemory(),
 				app.getGuid(),
-				app.getServices(),
 				app.getDetectedBuildpack(),
 				app.getBuildpackUrl(),
 				app.getUris(),
@@ -40,7 +39,8 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getTimeout(),
 				app.getCommand(),
 				app.getStack(),
-				app.getEnvAsMapMono()
+				app.getEnvAsMapMono(),
+				app.getServicesMono()
 		);
 		this.instanceDetails = instanceDetails;
 	}
@@ -54,8 +54,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getRunningInstances(),
 				app.getMemory(),
 				app.getGuid(),
-				//XXX CF V2: services,
-				ImmutableList.of(),
 				//XXX CF V2: detectedBuildpack,
 				null,
 				null,
@@ -68,7 +66,8 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				null,
 				//XXX CF V2: stack
 				null,
-				app.getEnvAsMapMono()
+				app.getEnvAsMapMono(),
+				app.getServicesMono()
 		);
 		this.instanceDetails = ImmutableList.of();
 	}

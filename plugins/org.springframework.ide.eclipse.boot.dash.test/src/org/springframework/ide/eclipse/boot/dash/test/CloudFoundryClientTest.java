@@ -26,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
@@ -93,7 +94,7 @@ public class CloudFoundryClientTest {
 	}
 
 	private Set<String> getBoundServiceNames(String appName) throws Exception {
-		return client.getBoundServices(appName).get();
+		return client.getBoundServicesSet(appName).get();
 	}
 
 	@Test
@@ -141,8 +142,6 @@ public class CloudFoundryClientTest {
 //		}
 	}
 
-	//TODO: unbind services during 'bindAndUnbindServices'
-
 	@Test
 	public void testServiceCreateAndDelete() throws Exception {
 		String serviceName = services.randomServiceName();
@@ -152,6 +151,34 @@ public class CloudFoundryClientTest {
 		client.deleteService(serviceName).get();
 
 		assertNoServices(client.getServices(), serviceName);
+	}
+
+
+	@Test
+	public void testGetBoundServices() throws Exception {
+		String appName = appHarness.randomAppName();
+		String service1 = services.createTestService();
+		String service2 = services.createTestService();
+		String service3 = services.createTestService();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setServices(ImmutableList.of(service1, service2));
+		client.push(params);
+
+		List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+		CFApplication app = null;
+		for (CFApplication a : allApps) {
+			if (a.getName().equals(appName)) {
+				app = a;
+			}
+		}
+		assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
+
+		app = client.getApplication(appName);
+		assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
 	}
 
 

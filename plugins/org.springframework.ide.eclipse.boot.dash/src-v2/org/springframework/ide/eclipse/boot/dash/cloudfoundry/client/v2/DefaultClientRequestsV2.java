@@ -134,11 +134,26 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return ReactorUtils.get(operations.applications()
 		.list()
 		.map((appSummary) ->
-			CFWrappingV2.wrap(appSummary, getEnv(appSummary.getName()))
+			CFWrappingV2.wrap(appSummary, getApplicationExtras(appSummary.getName()))
 		)
 		.toList()
 		.map(ImmutableList::copyOf)
 		);
+	}
+
+	private ApplicationExtras getApplicationExtras(String appName) {
+		return new ApplicationExtras() {
+
+			@Override
+			public Mono<List<String>> getServices() {
+				return getBoundServicesList(appName);
+			}
+
+			@Override
+			public Mono<Map<String, String>> getEnv() {
+				return DefaultClientRequestsV2.this.getEnv(appName);
+			}
+		};
 	}
 
 	@Override
@@ -355,7 +370,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build()
 		)
 		.map((appDetail) -> {
-			return CFWrappingV2.wrap(appDetail, getEnv(appName));
+			return CFWrappingV2.wrap(appDetail, getApplicationExtras(appName));
 		})
 		.otherwise((error) -> {
 			//XXX CF V2: remove workaround for bug in CF V2 operations (no details for stopped app)
@@ -371,7 +386,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				}
 				return Mono.error(outOfBounds);
 			})
-			.map((appSummary) -> CFWrappingV2.wrap(appSummary, getEnv(appSummary.getName())))
+			.map((appSummary) -> CFWrappingV2.wrap(appSummary, getApplicationExtras(appName)))
 			.map((CFApplication summary) -> CFWrappingV2.wrap((CFApplicationSummaryData)summary, (ApplicationDetail)null));
 		});
 	}
@@ -422,7 +437,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		debug("bindAndUnbindServices "+_services);
 		Set<String> services = ImmutableSet.copyOf(_services);
 		try {
-			return getBoundServices(appName)
+			return getBoundServicesSet(appName)
 			.flatMap((boundServices) -> {
 				debug("boundServices = "+boundServices);
 				Set<String> toUnbind = Sets.difference(boundServices, services);
@@ -440,13 +455,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		}
 	}
 
-	public Mono<Set<String>> getBoundServices(String appName) {
+	public Flux<String> getBoundServices(String appName) {
 		return operations.services()
 		.listInstances()
 		.filter((service) -> isBoundTo(service, appName))
-		.map(ServiceInstance::getName)
+		.map(ServiceInstance::getName);
+	}
+
+	public Mono<Set<String>> getBoundServicesSet(String appName) {
+		return getBoundServices(appName)
 		.toList()
 		.map(ImmutableSet::copyOf);
+	}
+
+	public Mono<List<String>> getBoundServicesList(String appName) {
+		return getBoundServices(appName)
+		.toList()
+		.map(ImmutableList::copyOf);
 	}
 
 	private boolean isBoundTo(ServiceInstance service, String appName) {

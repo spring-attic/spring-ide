@@ -63,7 +63,7 @@ public class CFWrappingV2 {
 		};
 	}
 
-	public static CFApplicationDetail wrap(ApplicationDetail details, Mono<Map<String,String>> env) {
+	public static CFApplicationDetail wrap(ApplicationDetail details, ApplicationExtras extras) {
 		if (details!=null) {
 			List<CFInstanceStats> instances = ImmutableList.copyOf(
 				details.getInstanceDetails()
@@ -71,7 +71,7 @@ public class CFWrappingV2 {
 				.map(CFWrappingV2::wrap)
 				.collect(Collectors.toList())
 			);
-			CFApplicationSummaryData summary = wrapSummary(details, env);
+			CFApplicationSummaryData summary = wrapSummary(details, extras);
 			return new CFApplicationDetailData(
 					summary,
 					instances
@@ -147,7 +147,7 @@ public class CFWrappingV2 {
 		};
 	}
 
-	private static CFApplicationSummaryData wrapSummary(ApplicationDetail app, Mono<Map<String, String>> env) {
+	private static CFApplicationSummaryData wrapSummary(ApplicationDetail app, ApplicationExtras extras) {
 		CFAppState state;
 		try {
 			state = CFAppState.valueOf(app.getRequestedState());
@@ -162,7 +162,6 @@ public class CFWrappingV2 {
 				app.getRunningInstances(),
 				app.getMemoryLimit(),
 				UUID.fromString(app.getId()),
-				ImmutableList.of(), //XXX CF V2: Application.getServices
 				null, //XXX CF V2: Application.getDetectedBuildpack
 				null, //XXX CF V2: Application.getBuildpackUrl
 				app.getUrls(),
@@ -171,11 +170,12 @@ public class CFWrappingV2 {
 				null, //XXX CF V2: getTimeout
 				null, //XXX CF V2: Application.getCommand
 				null, //XXX CF V2: getStack
-				env
+				extras.getEnv(),
+				extras.getServices()
 		);
 	}
 
-	public static CFApplication wrap(ApplicationSummary app, Mono<Map<String,String>> env) {
+	public static CFApplication wrap(ApplicationSummary app, ApplicationExtras extras) {
 		CFAppState state;
 		try {
 			state = CFAppState.valueOf(app.getRequestedState());
@@ -190,7 +190,6 @@ public class CFWrappingV2 {
 				app.getRunningInstances(),
 				app.getMemoryLimit(),
 				UUID.fromString(app.getId()),
-				ImmutableList.of(), //XXX CF V2: Application.getServices
 				null, //XXX CF V2: Application.getDetectedBuildpack
 				null, //XXX CF V2: Application.getBuildpackUrl
 				app.getUrls(),
@@ -199,7 +198,8 @@ public class CFWrappingV2 {
 				null, //XXX CF V2: getTimeout
 				null, //XXX CF V2: Application.getCommand
 				null, //XXX CF V2: getStack
-				env
+				extras.getEnv(),
+				extras.getServices()
 		);
 	}
 

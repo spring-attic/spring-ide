@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.util.List;
@@ -10,16 +20,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 
 import reactor.core.publisher.Mono;
 
-/*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Pivotal, Inc. - initial API and implementation
- *******************************************************************************/
 public class CFApplicationSummaryData implements CFApplication {
 
 	private String name;
@@ -27,7 +27,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	private int runningInstances;
 	private int memory;
 	private UUID guid;
-	private List<String> services;
 	private String detectedBuildpack;
 	private String buildpackUrl;
 	private List<String> uris;
@@ -37,6 +36,7 @@ public class CFApplicationSummaryData implements CFApplication {
 	private String command;
 	private String stack;
 	private Mono<Map<String,String>> env;
+	private Mono<List<String>> services;
 
 	public CFApplicationSummaryData(
 			String name,
@@ -44,7 +44,6 @@ public class CFApplicationSummaryData implements CFApplication {
 			int runningInstances,
 			int memory,
 			UUID guid,
-			List<String> services,
 			String detectedBuildpack,
 			String buildpackUrl,
 			List<String> uris,
@@ -53,7 +52,8 @@ public class CFApplicationSummaryData implements CFApplication {
 			Integer timeout,
 			String command,
 			String stack,
-			Mono<Map<String,String>> env
+			Mono<Map<String,String>> env,
+			Mono<List<String>> services
 	) {
 		super();
 		Assert.isNotNull(env);
@@ -62,7 +62,6 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.runningInstances = runningInstances;
 		this.memory = memory;
 		this.guid = guid;
-		this.services = services;
 		this.detectedBuildpack = detectedBuildpack;
 		this.buildpackUrl = buildpackUrl;
 		this.uris = uris;
@@ -72,6 +71,7 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.command = command;
 		this.stack = stack;
 		this.env = env;
+		this.services = services;
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public List<String> getServices() {
-		return services;
+		return services.get();
 	}
 
 	@Override
@@ -151,6 +151,10 @@ public class CFApplicationSummaryData implements CFApplication {
 	@Override
 	public Map<String, String> getEnvAsMap() {
 		return env.get();
+	}
+
+	public Mono<List<String>> getServicesMono() {
+		return services;
 	}
 
 }

@@ -208,7 +208,6 @@ public class MockCFApplication {
 				getRunningInstances(),
 				memory,
 				guid,
-				services,
 				detectedBuildpack,
 				buildpackUrl,
 				uris,
@@ -217,7 +216,8 @@ public class MockCFApplication {
 				timeout,
 				command,
 				stack,
-				Mono.just(env)
+				Mono.just(env),
+				Mono.just(services)
 		);
 	}
 
@@ -229,7 +229,6 @@ public class MockCFApplication {
 						getRunningInstances(),
 						memory,
 						guid,
-						services,
 						detectedBuildpack,
 						buildpackUrl,
 						uris,
@@ -238,7 +237,8 @@ public class MockCFApplication {
 						timeout,
 						command,
 						stack,
-						Mono.just(env)
+						Mono.just(env),
+						Mono.just(services)
 				),
 				ImmutableList.copyOf(stats)
 		);
