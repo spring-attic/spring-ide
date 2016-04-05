@@ -14,6 +14,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.net.URI;
@@ -23,7 +27,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.cloudfoundry.client.lib.ApplicationLogListener;
+import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -36,6 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JobBody;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -232,6 +243,42 @@ public class CloudFoundryClientTest {
 		assertContains(names,
 				"cflinuxfs2"
 		);
+	}
+	
+	@Test
+	public void testApplicationLogConnection() throws Exception {
+		String appName = appHarness.randomAppName();
+		client = createClient(CfTestTargetParams.fromEnv());
+		
+		ApplicationLogListener listener = mock(ApplicationLogListener.class);
+		StreamingLogToken token = client.streamLogs(appName, listener).get();
+		assertNotNull(token);
+		
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		client.push(params);
+
+		BootDashModelTest.waitForJobsToComplete();
+		verify(listener, atLeastOnce()).onMessage(any());
+	}
+
+	private void runAsynch(final JobBody body) {
+		Job job = new Job("Pushing app") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					body.run(monitor);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		job.schedule(3000);		
 	}
 
 	private void assertContains(Set<String> strings, String... expecteds) {

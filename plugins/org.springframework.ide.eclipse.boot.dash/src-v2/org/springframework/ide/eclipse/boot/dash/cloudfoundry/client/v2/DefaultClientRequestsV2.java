@@ -64,7 +64,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
@@ -75,6 +74,7 @@ import com.google.common.collect.Sets;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SchedulerGroup;
 
 /**
  * @author Kris De Volder
@@ -228,8 +228,28 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public StreamingLogToken streamLogs(String appName, ApplicationLogListener logConsole) {
-		return v1.streamLogs(appName, logConsole);
+	public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception{
+		final Mono<StreamingLogToken> result = Mono.defer(() -> {
+			return Mono.just(v1.streamLogs(appName, logConsole));
+		})
+		.retry()
+		.cache();
+		result.publishOn(SchedulerGroup.async()).consume((token) -> {});
+
+		return result;
+
+//		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+//		try {
+//
+//			// TODO: Retain this from old code. Not sure what bug it addresses
+//			Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+//
+//		} catch (Exception e) {
+//			BootDashActivator.log(e);
+//		} finally {
+//			Thread.currentThread().setContextClassLoader(contextClassLoader);
+//		}
+//		return null;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
 
 import java.io.StringWriter;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
-import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -22,7 +19,6 @@ import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -83,7 +79,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 					String idToCheck = getConsoleId(targetProperties, appName);
 					if (idToCheck.equals(id)) {
 						ApplicationLogConsole appConsole = (ApplicationLogConsole) console;
-						checkIfLoggregatorStreamingIsPresent(appConsole, appName);
+						connectLoggregator(appConsole, appName);
 						return appConsole;
 					}
 				}
@@ -129,40 +125,24 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 
 			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { appConsole });
 
-			checkIfLoggregatorStreamingIsPresent(appConsole, appName);
+			connectLoggregator(appConsole, appName);
 		}
 
 		return appConsole;
 	}
 
-	protected void checkIfLoggregatorStreamingIsPresent(ApplicationLogConsole logConsole, String appName) {
+	protected void connectLoggregator(ApplicationLogConsole logConsole, String appName) {
 		if (logConsole == null) {
 			return;
 		}
 		if (logConsole.getLoggregatorToken() == null) {
 
-			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 			try {
 				ClientRequests client = runTarget.getClient();
-				Thread.currentThread().setContextClassLoader(client.getClass().getClassLoader());
-
-				// Must verify that the application exists before attaching
-				// loggregator listener
-				CFApplication app = null;
-				try {
-					app = client.getApplication(appName);
-				} catch (Throwable e) {
-					// Ignore. checks on loggregator connection may occur before the app is created
-				}
-				if (app != null) {
-					StreamingLogToken token = client.streamLogs(appName, logConsole);
-					logConsole.setLoggregatorToken(token);
-				}
+				logConsole.setLoggregatorToken(client.streamLogs(appName, logConsole));
 			} catch (Exception e) {
 				logConsole.writeApplicationLog("Failed to stream contents from Cloud Foundry due to: " + e.getMessage(),
 						LogType.LOCALSTDERROR);
-			} finally {
-				Thread.currentThread().setContextClassLoader(contextClassLoader);
 			}
 		}
 	}
@@ -211,7 +191,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		String appName = element.getName();
 		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), appName);
 		console.clearConnection();
-		checkIfLoggregatorStreamingIsPresent(console, appName);
+		connectLoggregator(console, appName);
 		consoleManager.showConsoleView(console);
 	}
 }

@@ -36,10 +36,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 
 public class ProjectsDeployer extends CloudOperation {
 
-	public interface JobBody {
-		public void run(IProgressMonitor mon) throws Exception;
-	}
-
 	private final static String APP_FOUND_TITLE = "Replace Existing Application";
 
 	private final static String APP_FOUND_MESSAGE = "Replace the existing application - {0} - with project: {1}?";

@@ -22,6 +22,8 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
+import reactor.core.publisher.Mono;
+
 public interface ClientRequests {
 
 	/**
@@ -46,7 +48,7 @@ public interface ClientRequests {
 	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName) throws Exception;
 	void stopApplication(String appName) throws Exception;
-	StreamingLogToken streamLogs(String appName, ApplicationLogListener logConsole);
+	Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception;
 	void updateApplicationEnvironment(String appName, Map<String, String> environmentVariables) throws Exception;
 	void updateApplicationInstances(String appName, int instances) throws Exception;
 	void updateApplicationMemory(String appName, int memory) throws Exception;

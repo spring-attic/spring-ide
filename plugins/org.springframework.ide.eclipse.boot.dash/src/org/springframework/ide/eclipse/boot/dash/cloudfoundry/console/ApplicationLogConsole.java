@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,12 +30,14 @@ import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 
+import reactor.core.publisher.Mono;
+
 @SuppressWarnings("restriction")
 public class ApplicationLogConsole extends MessageConsole implements ApplicationLogListener, IPropertyChangeListener {
 
-	private Map<LogType, IOConsoleOutputStream> activeStreams = new HashMap<LogType, IOConsoleOutputStream>();
+	private Map<LogType, IOConsoleOutputStream> activeStreams = new HashMap<>();
 
-	private StreamingLogToken loggregatorToken;
+	private Mono<StreamingLogToken> loggregatorToken;
 
 	public ApplicationLogConsole(String name, String type) {
 		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
@@ -49,14 +51,14 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 		}
 	}
 
-	public synchronized void setLoggregatorToken(StreamingLogToken loggregatorToken) {
+	public synchronized void setLoggregatorToken(Mono<StreamingLogToken> loggregatorToken) {
 		if (this.loggregatorToken != null) {
-			this.loggregatorToken.cancel();
+			this.loggregatorToken.consume(StreamingLogToken::cancel);
 		}
 		this.loggregatorToken = loggregatorToken;
 	}
 
-	public synchronized StreamingLogToken getLoggregatorToken() {
+	public synchronized Mono<StreamingLogToken> getLoggregatorToken() {
 		return this.loggregatorToken;
 	}
 
