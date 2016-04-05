@@ -86,6 +86,7 @@ public class ProjectsDeployer extends CloudOperation {
 	}
 
 	private void deployProject(IProject project, IProgressMonitor monitor) throws Exception {
+		//XXX CF V2: on first push connect console just after creating element in stopped mode.
 		CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 		CloudAppDashElement cde = model.ensureApplication(properties.getAppName());
 		cde.setProject(project);
