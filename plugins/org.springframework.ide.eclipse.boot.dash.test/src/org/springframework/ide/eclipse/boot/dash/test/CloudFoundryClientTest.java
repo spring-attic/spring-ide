@@ -245,16 +245,16 @@ public class CloudFoundryClientTest {
 				"cflinuxfs2"
 		);
 	}
-	
+
 	@Test
 	public void testApplicationLogConnection() throws Exception {
-		String appName = appHarness.randomAppName();
 		client = createClient(CfTestTargetParams.fromEnv());
-		
+
+		String appName = appHarness.randomAppName();
 		ApplicationLogListener listener = mock(ApplicationLogListener.class);
 		Mono<StreamingLogToken> token = client.streamLogs(appName, listener);
 		assertNotNull(token);
-		
+
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
 		params.setApplicationData(getTestZip("testapp"));
@@ -265,22 +265,37 @@ public class CloudFoundryClientTest {
 		verify(listener, atLeastOnce()).onMessage(any());
 	}
 
-	private void runAsynch(final JobBody body) {
-		Job job = new Job("Pushing app") {
+	@Test
+	public void testGetApplicationBuildpack() throws Exception {
+		String appName = appHarness.randomAppName();
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					body.run(monitor);
-				} catch (Exception e) {
-					e.printStackTrace();
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		client.push(params);
+
+		//Note we try to get the app two different ways because retrieving the info in
+		// each case is slightly different.
+
+		{
+			CFApplicationDetail app = client.getApplication(appName);
+			assertEquals("staticfile_buildpack", app.getBuildpackUrl());
+		}
+
+		{
+			List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+			CFApplication app = null;
+			for (CFApplication a : allApps) {
+				if (a.getName().equals(appName)) {
+					app = a;
 				}
-				return Status.OK_STATUS;
 			}
-			
-		};
-		job.schedule(3000);		
+			assertEquals("staticfile_buildpack", app.getBuildpackUrl());
+		}
 	}
+
+	/////////////////////////////////////////////////////////////////////////////
 
 	private void assertContains(Set<String> strings, String... expecteds) {
 		for (String e : expecteds) {

@@ -166,19 +166,45 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private ApplicationExtras getApplicationExtras(String appName) {
+		Mono<String> appIdMono = getApplicationId(appName);
 		return new ApplicationExtras() {
 
 			@Override
 			public Mono<List<String>> getServices() {
-				return getBoundServicesList(appName);
+				return prefetch(getBoundServicesList(appName));
 			}
 
 			@Override
 			public Mono<Map<String, String>> getEnv() {
-				return DefaultClientRequestsV2.this.getEnv(appName);
+				return prefetch(DefaultClientRequestsV2.this.getEnv(appName));
+			}
+
+			@Override
+			public Mono<String> getBuildpack() {
+				return prefetch(
+					appIdMono.then((appId) ->
+						client.applicationsV2().get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
+								.applicationId(appId)
+								.build()
+						)
+					)
+					.map((appResource) -> appResource.getEntity().getBuildpack())
+				);
 			}
 		};
 	}
+
+
+	private <T> Mono<T> prefetch(Mono<T> toFetch) {
+		Mono<T> result = toFetch
+		.cache(); // It should only be fetched once.
+
+		result
+		.publishOn(SCHEDULER_GROUP) //We must consume call is async or it will block here.
+		.consume((dont_care) -> {}); //We must consume the result otherwise it will not be fetched until someone else tries to use it later.
+		return result;
+	}
+
 
 	@Override
 	public List<CFService> getServices() throws Exception {
@@ -555,7 +581,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<String> getApplicationId(String appName) {
 		return getApplicationMono(appName)
-		.map((app) -> app.getGuid().toString());
+		.map((app) -> app.getGuid().toString())
+		.cache();
 	}
 
 	public Mono<Void> setEnvVars(String appName, Map<String, String> environment) {

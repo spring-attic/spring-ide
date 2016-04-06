@@ -158,15 +158,13 @@ public class CFWrappingV2 {
 				app.getRunningInstances(),
 				app.getMemoryLimit(),
 				UUID.fromString(app.getId()),
-				null, //XXX CF V2: Application.getBuildpackUrl
 				app.getUrls(),
 				state,
 				app.getDiskQuota(),
 				null, //XXX CF V2: getTimeout
 				null, //XXX CF V2: Application.getCommand
 				null, //XXX CF V2: getStack
-				extras.getEnv(),
-				extras.getServices()
+				extras
 		);
 	}
 
@@ -185,15 +183,13 @@ public class CFWrappingV2 {
 				app.getRunningInstances(),
 				app.getMemoryLimit(),
 				UUID.fromString(app.getId()),
-				null, //XXX CF V2: Application.getBuildpackUrl
 				app.getUrls(),
 				state,
 				app.getDiskQuota(),
 				null, //XXX CF V2: getTimeout
 				null, //XXX CF V2: Application.getCommand
 				null, //XXX CF V2: getStack
-				extras.getEnv(),
-				extras.getServices()
+				extras
 		);
 	}
 

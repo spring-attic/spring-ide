@@ -27,15 +27,13 @@ public class CFApplicationSummaryData implements CFApplication {
 	private int runningInstances;
 	private int memory;
 	private UUID guid;
-	private String buildpackUrl;
 	private List<String> uris;
 	private CFAppState state;
 	private int diskQuota;
 	private Integer timeout;
 	private String command;
 	private String stack;
-	private Mono<Map<String,String>> env;
-	private Mono<List<String>> services;
+	protected ApplicationExtras extras;
 
 	public CFApplicationSummaryData(
 			String name,
@@ -43,32 +41,27 @@ public class CFApplicationSummaryData implements CFApplication {
 			int runningInstances,
 			int memory,
 			UUID guid,
-			String buildpackUrl,
 			List<String> uris,
 			CFAppState state,
 			int diskQuota,
 			Integer timeout,
 			String command,
 			String stack,
-			Mono<Map<String,String>> env,
-			Mono<List<String>> services
+			ApplicationExtras extras
 	) {
 		super();
-		Assert.isNotNull(env);
 		this.name = name;
 		this.instances = instances;
 		this.runningInstances = runningInstances;
 		this.memory = memory;
 		this.guid = guid;
-		this.buildpackUrl = buildpackUrl;
 		this.uris = uris;
 		this.state = state;
 		this.diskQuota = diskQuota;
 		this.timeout = timeout;
 		this.command = command;
 		this.stack = stack;
-		this.env = env;
-		this.services = services;
+		this.extras = extras;
 	}
 
 	@Override
@@ -98,12 +91,12 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public List<String> getServices() {
-		return services.get();
+		return extras.getServices().get();
 	}
 
 	@Override
 	public String getBuildpackUrl() {
-		return buildpackUrl;
+		return extras.getBuildpack().get();
 	}
 
 	@Override
@@ -137,16 +130,16 @@ public class CFApplicationSummaryData implements CFApplication {
 	}
 
 	public Mono<Map<String, String>> getEnvAsMapMono() {
-		return env;
+		return extras.getEnv();
 	}
 
 	@Override
 	public Map<String, String> getEnvAsMap() {
-		return env.get();
+		return extras.getEnv().get();
 	}
 
 	public Mono<List<String>> getServicesMono() {
-		return services;
+		return extras.getServices();
 	}
 
 }
