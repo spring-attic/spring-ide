@@ -11,9 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.cloudfoundry.client.v2.buildpacks.BuildpackResource;
@@ -41,8 +39,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 
 import com.google.common.collect.ImmutableList;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Various helper methods to 'wrap' objects returned by CF client into
@@ -162,7 +158,6 @@ public class CFWrappingV2 {
 				app.getRunningInstances(),
 				app.getMemoryLimit(),
 				UUID.fromString(app.getId()),
-				null, //XXX CF V2: Application.getDetectedBuildpack
 				null, //XXX CF V2: Application.getBuildpackUrl
 				app.getUrls(),
 				state,
@@ -190,7 +185,6 @@ public class CFWrappingV2 {
 				app.getRunningInstances(),
 				app.getMemoryLimit(),
 				UUID.fromString(app.getId()),
-				null, //XXX CF V2: Application.getDetectedBuildpack
 				null, //XXX CF V2: Application.getBuildpackUrl
 				app.getUrls(),
 				state,

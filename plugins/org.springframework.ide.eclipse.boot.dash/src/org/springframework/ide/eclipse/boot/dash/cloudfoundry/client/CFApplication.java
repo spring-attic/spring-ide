@@ -22,7 +22,6 @@ public interface CFApplication extends CFEntity {
 	int getMemory();
 	UUID getGuid();
 	List<String> getServices();
-	String getDetectedBuildpack();
 	String getBuildpackUrl();
 	List<String> getUris();
 	CFAppState getState();

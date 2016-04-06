@@ -27,7 +27,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	private int runningInstances;
 	private int memory;
 	private UUID guid;
-	private String detectedBuildpack;
 	private String buildpackUrl;
 	private List<String> uris;
 	private CFAppState state;
@@ -44,7 +43,6 @@ public class CFApplicationSummaryData implements CFApplication {
 			int runningInstances,
 			int memory,
 			UUID guid,
-			String detectedBuildpack,
 			String buildpackUrl,
 			List<String> uris,
 			CFAppState state,
@@ -62,7 +60,6 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.runningInstances = runningInstances;
 		this.memory = memory;
 		this.guid = guid;
-		this.detectedBuildpack = detectedBuildpack;
 		this.buildpackUrl = buildpackUrl;
 		this.uris = uris;
 		this.state = state;
@@ -102,11 +99,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	@Override
 	public List<String> getServices() {
 		return services.get();
-	}
-
-	@Override
-	public String getDetectedBuildpack() {
-		return detectedBuildpack;
 	}
 
 	@Override

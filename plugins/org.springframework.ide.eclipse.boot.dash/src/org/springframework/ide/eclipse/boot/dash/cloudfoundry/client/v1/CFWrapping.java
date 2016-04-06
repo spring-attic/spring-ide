@@ -211,15 +211,6 @@ public class CFWrapping {
 		}
 
 		@Override
-		public String getDetectedBuildpack() {
-			Staging s = a.getStaging();
-			if (s!=null) {
-				return s.getDetectedBuildpack();
-			}
-			return null;
-		}
-
-		@Override
 		public Integer getTimeout() {
 			Staging s = a.getStaging();
 			if (s!=null) {

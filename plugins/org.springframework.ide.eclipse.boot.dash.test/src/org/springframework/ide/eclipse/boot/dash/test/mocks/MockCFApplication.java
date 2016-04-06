@@ -67,7 +67,6 @@ public class MockCFApplication {
 	private Map<String, String> env = new HashMap<>();
 	private int memory = 1024;
 	private List<String> services = new ArrayList<>();
-	private String detectedBuildpack = null;
 	private String buildpackUrl = null;
 	private List<String> uris = new ArrayList<>();
 	private CFAppState state = CFAppState.STOPPED;
@@ -208,7 +207,6 @@ public class MockCFApplication {
 				getRunningInstances(),
 				memory,
 				guid,
-				detectedBuildpack,
 				buildpackUrl,
 				uris,
 				state,
@@ -229,7 +227,6 @@ public class MockCFApplication {
 						getRunningInstances(),
 						memory,
 						guid,
-						detectedBuildpack,
 						buildpackUrl,
 						uris,
 						state,
