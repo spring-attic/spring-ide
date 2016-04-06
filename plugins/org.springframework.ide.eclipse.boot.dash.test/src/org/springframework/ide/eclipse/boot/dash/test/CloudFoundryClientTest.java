@@ -54,6 +54,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class CloudFoundryClientTest {
 
@@ -251,7 +252,7 @@ public class CloudFoundryClientTest {
 		client = createClient(CfTestTargetParams.fromEnv());
 		
 		ApplicationLogListener listener = mock(ApplicationLogListener.class);
-		StreamingLogToken token = client.streamLogs(appName, listener).get();
+		Mono<StreamingLogToken> token = client.streamLogs(appName, listener);
 		assertNotNull(token);
 		
 		CFPushArguments params = new CFPushArguments();
