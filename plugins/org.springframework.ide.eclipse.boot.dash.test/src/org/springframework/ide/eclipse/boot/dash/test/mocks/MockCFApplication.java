@@ -211,7 +211,6 @@ public class MockCFApplication {
 				uris,
 				state,
 				diskQuota,
-				timeout,
 				command,
 				getExtras()
 		);
@@ -241,6 +240,10 @@ public class MockCFApplication {
 			public Mono<String> getBuildpack() {
 				return just(buildpackUrl);
 			}
+			@Override
+			public Mono<Integer> getTimeout() {
+				return just(timeout);
+			}
 		};
 	}
 
@@ -255,7 +258,6 @@ public class MockCFApplication {
 						uris,
 						state,
 						diskQuota,
-						timeout,
 						command,
 						getExtras()
 				),

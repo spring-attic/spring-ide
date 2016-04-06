@@ -34,7 +34,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getUris(),
 				app.getState(),
 				app.getDiskQuota(),
-				app.getTimeout(),
 				app.getCommand(),
 				app.extras
 		);
@@ -53,8 +52,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getUris(),
 				app.getState(),
 				app.getDiskQuota(),
-				//XXX CF V2: timeout
-				null,
 				//XXX CF V2: command
 				null,
 				app.extras

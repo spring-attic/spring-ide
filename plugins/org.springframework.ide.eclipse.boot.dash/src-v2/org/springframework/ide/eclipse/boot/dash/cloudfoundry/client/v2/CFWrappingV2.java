@@ -161,7 +161,6 @@ public class CFWrappingV2 {
 				app.getUrls(),
 				state,
 				app.getDiskQuota(),
-				null, //XXX CF V2: getTimeout
 				null, //XXX CF V2: Application.getCommand
 				extras
 		);
@@ -185,7 +184,6 @@ public class CFWrappingV2 {
 				app.getUrls(),
 				state,
 				app.getDiskQuota(),
-				null, //XXX CF V2: getTimeout
 				null, //XXX CF V2: Application.getCommand
 				extras
 		);

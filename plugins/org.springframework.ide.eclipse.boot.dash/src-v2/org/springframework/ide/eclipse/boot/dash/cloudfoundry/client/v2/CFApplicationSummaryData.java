@@ -30,7 +30,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	private List<String> uris;
 	private CFAppState state;
 	private int diskQuota;
-	private Integer timeout;
 	private String command;
 	protected ApplicationExtras extras;
 
@@ -43,7 +42,6 @@ public class CFApplicationSummaryData implements CFApplication {
 			List<String> uris,
 			CFAppState state,
 			int diskQuota,
-			Integer timeout,
 			String command,
 			ApplicationExtras extras
 	) {
@@ -56,7 +54,6 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.uris = uris;
 		this.state = state;
 		this.diskQuota = diskQuota;
-		this.timeout = timeout;
 		this.command = command;
 		this.extras = extras;
 	}
@@ -113,7 +110,7 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public Integer getTimeout() {
-		return timeout;
+		return extras.getTimeout().get();
 	}
 
 	@Override
@@ -126,17 +123,9 @@ public class CFApplicationSummaryData implements CFApplication {
 		return extras.getStack().get();
 	}
 
-	public Mono<Map<String, String>> getEnvAsMapMono() {
-		return extras.getEnv();
-	}
-
 	@Override
 	public Map<String, String> getEnvAsMap() {
 		return extras.getEnv().get();
-	}
-
-	public Mono<List<String>> getServicesMono() {
-		return extras.getServices();
 	}
 
 }

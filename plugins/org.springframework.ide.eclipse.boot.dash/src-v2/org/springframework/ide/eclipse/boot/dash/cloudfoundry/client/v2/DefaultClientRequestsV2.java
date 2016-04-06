@@ -212,6 +212,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					})
 				);
 			}
+
+			public Mono<Integer> getTimeout() {
+				return prefetch(
+						entity
+						.map(ApplicationEntity::getHealthCheckTimeout)
+				);
+			}
 		};
 	}
 

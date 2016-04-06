@@ -30,10 +30,6 @@ import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -46,7 +42,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JobBody;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -326,6 +321,38 @@ public class CloudFoundryClientTest {
 				}
 			}
 			assertEquals(stackName, app.getStack());
+		}
+	}
+
+	@Test
+	public void testGetApplicationTimeout() throws Exception {
+		String appName = appHarness.randomAppName();
+		int timeout = 67;
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setTimeout(timeout);
+		client.push(params);
+
+		//Note we try to get the app two different ways because retrieving the info in
+		// each case is slightly different.
+
+		{
+			CFApplicationDetail app = client.getApplication(appName);
+			assertEquals(timeout, (int)app.getTimeout());
+		}
+
+		{
+			List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+			CFApplication app = null;
+			for (CFApplication a : allApps) {
+				if (a.getName().equals(appName)) {
+					app = a;
+				}
+			}
+			assertEquals(timeout, (int)app.getTimeout());
 		}
 	}
 
