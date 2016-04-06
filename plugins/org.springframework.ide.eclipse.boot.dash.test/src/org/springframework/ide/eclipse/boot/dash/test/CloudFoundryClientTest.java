@@ -144,6 +144,8 @@ public class CloudFoundryClientTest {
 		}
 
 		//This last piece is commented because it fails.
+		//See: https://www.pivotaltracker.com/story/show/116804259
+
 		// The last var doesn't get removed. Not sure how to fix it.
 		// But eventually we won't even be using 'setEnvVars' it will be part of the push.
 		// and its not going to be our problem to fix that.
@@ -292,6 +294,38 @@ public class CloudFoundryClientTest {
 				}
 			}
 			assertEquals("staticfile_buildpack", app.getBuildpackUrl());
+		}
+	}
+
+	@Test
+	public void testGetApplicationStack() throws Exception {
+		String appName = appHarness.randomAppName();
+		String stackName = "cflinuxfs2";
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setStack(stackName);
+		client.push(params);
+
+		//Note we try to get the app two different ways because retrieving the info in
+		// each case is slightly different.
+
+		{
+			CFApplicationDetail app = client.getApplication(appName);
+			assertEquals(stackName, app.getStack());
+		}
+
+		{
+			List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+			CFApplication app = null;
+			for (CFApplication a : allApps) {
+				if (a.getName().equals(appName)) {
+					app = a;
+				}
+			}
+			assertEquals(stackName, app.getStack());
 		}
 	}
 

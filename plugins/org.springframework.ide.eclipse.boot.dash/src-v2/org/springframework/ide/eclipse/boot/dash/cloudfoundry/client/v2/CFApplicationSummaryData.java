@@ -32,7 +32,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	private int diskQuota;
 	private Integer timeout;
 	private String command;
-	private String stack;
 	protected ApplicationExtras extras;
 
 	public CFApplicationSummaryData(
@@ -46,7 +45,6 @@ public class CFApplicationSummaryData implements CFApplication {
 			int diskQuota,
 			Integer timeout,
 			String command,
-			String stack,
 			ApplicationExtras extras
 	) {
 		super();
@@ -60,7 +58,6 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.diskQuota = diskQuota;
 		this.timeout = timeout;
 		this.command = command;
-		this.stack = stack;
 		this.extras = extras;
 	}
 
@@ -126,7 +123,7 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public String getStack() {
-		return stack;
+		return extras.getStack().get();
 	}
 
 	public Mono<Map<String, String>> getEnvAsMapMono() {

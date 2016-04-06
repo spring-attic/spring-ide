@@ -25,4 +25,5 @@ public interface ApplicationExtras {
 	Mono<Map<String,String>> getEnv();
 	Mono<List<String>> getServices();
 	Mono<String> getBuildpack();
+	Mono<String> getStack();
 }

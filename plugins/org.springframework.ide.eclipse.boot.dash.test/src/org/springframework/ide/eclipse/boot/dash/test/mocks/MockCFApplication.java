@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ApplicationExtras;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
@@ -207,16 +208,40 @@ public class MockCFApplication {
 				getRunningInstances(),
 				memory,
 				guid,
-				buildpackUrl,
 				uris,
 				state,
 				diskQuota,
 				timeout,
 				command,
-				stack,
-				Mono.just(env),
-				Mono.just(services)
+				getExtras()
 		);
+	}
+
+	private static <T> Mono<T> just(T it) {
+		return it == null ? Mono.empty() : Mono.just(it);
+	}
+
+	private ApplicationExtras getExtras() {
+		return new ApplicationExtras() {
+			@Override
+			public Mono<String> getStack() {
+				return just(stack);
+			}
+			@Override
+			public Mono<List<String>> getServices() {
+				return just(services);
+			}
+
+			@Override
+			public Mono<Map<String, String>> getEnv() {
+				return just(env);
+			}
+
+			@Override
+			public Mono<String> getBuildpack() {
+				return just(buildpackUrl);
+			}
+		};
 	}
 
 	public CFApplicationDetail getDetailedInfo() {
@@ -227,15 +252,12 @@ public class MockCFApplication {
 						getRunningInstances(),
 						memory,
 						guid,
-						buildpackUrl,
 						uris,
 						state,
 						diskQuota,
 						timeout,
 						command,
-						stack,
-						Mono.just(env),
-						Mono.just(services)
+						getExtras()
 				),
 				ImmutableList.copyOf(stats)
 		);

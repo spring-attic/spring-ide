@@ -24,6 +24,7 @@ import java.util.zip.ZipFile;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.ApplicationResource;
 import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
 import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
@@ -32,6 +33,7 @@ import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
+import org.cloudfoundry.client.v2.stacks.GetStackRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
@@ -167,6 +169,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private ApplicationExtras getApplicationExtras(String appName) {
 		Mono<String> appIdMono = getApplicationId(appName);
+		Mono<ApplicationEntity> entity = appIdMono
+			.then((appId) ->
+				client.applicationsV2().get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
+					.applicationId(appId)
+					.build()
+				)
+			)
+			.map((appResource) -> appResource.getEntity())
+			.cache();
+
 		return new ApplicationExtras() {
 
 			@Override
@@ -182,13 +194,22 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			@Override
 			public Mono<String> getBuildpack() {
 				return prefetch(
-					appIdMono.then((appId) ->
-						client.applicationsV2().get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
-								.applicationId(appId)
+					entity.map(ApplicationEntity::getBuildpack)
+				);
+			}
+
+			@Override
+			public Mono<String> getStack() {
+				return prefetch(
+					entity.map(ApplicationEntity::getStackId)
+					.then((stackId) -> {
+						return client.stacks().get(GetStackRequest.builder()
+								.stackId(stackId)
 								.build()
-						)
-					)
-					.map((appResource) -> appResource.getEntity().getBuildpack())
+						);
+					}).map((stack) -> {
+						return stack.getEntity().getName();
+					})
 				);
 			}
 		};

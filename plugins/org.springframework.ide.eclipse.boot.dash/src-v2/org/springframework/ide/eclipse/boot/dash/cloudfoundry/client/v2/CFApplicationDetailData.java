@@ -36,7 +36,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getDiskQuota(),
 				app.getTimeout(),
 				app.getCommand(),
-				app.getStack(),
 				app.extras
 		);
 		this.instanceDetails = instanceDetails;
@@ -57,8 +56,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				//XXX CF V2: timeout
 				null,
 				//XXX CF V2: command
-				null,
-				//XXX CF V2: stack
 				null,
 				app.extras
 		);
