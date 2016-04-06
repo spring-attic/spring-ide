@@ -220,12 +220,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		Mono<T> result = toFetch
 		.cache(); // It should only be fetched once.
 
+		//We must ensure the 'result' is being consumed by something to force its execution:
 		result
-		.publishOn(SCHEDULER_GROUP) //We must consume call is async or it will block here.
-		.consume((dont_care) -> {}); //We must consume the result otherwise it will not be fetched until someone else tries to use it later.
+		.publishOn(SCHEDULER_GROUP) //Ensure the consume is truly async or it may block here.
+		.consume((dont_care) -> {});
+
 		return result;
 	}
-
 
 	@Override
 	public List<CFService> getServices() throws Exception {
