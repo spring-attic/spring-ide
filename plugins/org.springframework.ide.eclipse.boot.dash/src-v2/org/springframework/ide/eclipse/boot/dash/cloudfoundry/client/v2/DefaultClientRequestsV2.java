@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
@@ -49,7 +51,11 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -65,6 +71,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -85,6 +92,28 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static final Callable<? extends Consumer<Runnable>> SCHEDULER_GROUP = SchedulerGroup.async();
+
+// TODO: it would be good not to create another 'threadpool' and use something like the below code
+//  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below
+//  may not be 100% correct.
+//	private static final Callable<? extends Consumer<Runnable>> SCHEDULER_GROUP = () -> {
+//		return (Runnable task) -> {
+//			Job job = new Job("CF Client background task") {
+//				@Override
+//				protected IStatus run(IProgressMonitor monitor) {
+//					if (task!=null) {
+//						task.run();
+//					}
+//					return Status.OK_STATUS;
+//				}
+//			};
+//			job.setRule(JobUtil.lightRule("reactor-job-rule"));
+//			job.setSystem(true);
+//			job.schedule();
+//		};
+//	};
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -234,7 +263,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		})
 		.retry()
 		.cache();
-		result.publishOn(SchedulerGroup.async()).consume((token) -> {});
+		result.publishOn(SCHEDULER_GROUP).consume((token) -> {});
 
 		return result;
 
