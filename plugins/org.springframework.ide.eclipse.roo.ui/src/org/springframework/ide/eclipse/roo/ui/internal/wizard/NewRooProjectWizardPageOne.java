@@ -151,7 +151,8 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 
 				public void modifyText(ModifyEvent e) {
 					ProjectType type = getProjectType();
-					fdescriptionField.setEnabled(type != ProjectType.PROJECT);
+					fdescriptionField.setEnabled(type != ProjectType.PROJECT && type != ProjectType.MULTIMODULE_BASIC
+							&& type != ProjectType.MULTIMODULE_STANDARD);
 					if (packagingProviderGroup != null) {
 						packagingProviderGroup.updateEnablement();
 					}
@@ -485,16 +486,22 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 				}
 			}
 			
-			// Roo Addon Suite generation and multimodule generation 
-			// is only available on Spring Roo 2.0+ version
-			if(!version.startsWith("2") && 
-					(getProjectType().equals(ProjectType.ADDON_SUITE) || 
-							getProjectType().equals(ProjectType.MULTIMODULE_BASIC) || 
-							getProjectType().equals(ProjectType.MULTIMODULE_STANDARD))){
-				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to use a functionality that is only available on Spring Roo 2.0+ versions."
+			// Roo Addon Suite generation is only available on Spring Roo 2.0+ version
+			if(!version.startsWith("2") && getProjectType().equals(ProjectType.ADDON_SUITE)){
+				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to generate an Spring Roo Addon Suite, but this functionality is only available on Spring Roo 2.0+ versions."
 						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
 				fNameGroup.fTemplateField.selectItem(0);
 			}
+			
+			// Multimodule generation is only available on Spring Roo 2.0+ version
+			if (!version.startsWith("2") && (getProjectType().equals(ProjectType.MULTIMODULE_BASIC)
+					|| getProjectType().equals(ProjectType.MULTIMODULE_STANDARD))) {
+				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to generate multimodule project, but this functionality is only available on Spring Roo 2.0+ versions."
+						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
+				fNameGroup.fTemplateField.selectItem(0);
+			}
+			
+			
 			
 			
 		}

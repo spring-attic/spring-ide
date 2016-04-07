@@ -378,6 +378,12 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			if (display.equals("Standard")) {
 				return PROJECT;
 			}
+			else if (display.equals("Multimodule Standard")) {
+				return MULTIMODULE_STANDARD;
+			}
+			else if (display.equals("Multimodule Basic")) {
+				return MULTIMODULE_BASIC;
+			}
 			else if (display.equals("Add-on simple")) {
 				return ADDON_SIMPLE;
 			}
