@@ -14,11 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-
-import reactor.core.publisher.Mono;
 
 public class CFApplicationSummaryData implements CFApplication {
 
@@ -30,7 +27,6 @@ public class CFApplicationSummaryData implements CFApplication {
 	private List<String> uris;
 	private CFAppState state;
 	private int diskQuota;
-	private String command;
 	protected ApplicationExtras extras;
 
 	public CFApplicationSummaryData(
@@ -42,7 +38,6 @@ public class CFApplicationSummaryData implements CFApplication {
 			List<String> uris,
 			CFAppState state,
 			int diskQuota,
-			String command,
 			ApplicationExtras extras
 	) {
 		super();
@@ -54,7 +49,6 @@ public class CFApplicationSummaryData implements CFApplication {
 		this.uris = uris;
 		this.state = state;
 		this.diskQuota = diskQuota;
-		this.command = command;
 		this.extras = extras;
 	}
 
@@ -115,7 +109,7 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public String getCommand() {
-		return command;
+		return extras.getCommand().get();
 	}
 
 	@Override

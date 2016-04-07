@@ -31,8 +31,8 @@ import com.google.common.collect.ImmutableMap;
 public class CFPushArguments implements AutoCloseable {
 	private String host;
 	private String domain;
-	private boolean noRoute;
-	private boolean noHost;
+	private boolean noRoute = false;
+	private boolean noHost = false;
 	private String appName;
 	private Integer memory;
 	private Integer diskQuota;
@@ -44,6 +44,7 @@ public class CFPushArguments implements AutoCloseable {
 	private Integer instances;
 	private List<String> services = ImmutableList.of();
 	private InputStream applicationData;
+	private boolean noStart = false;
 
 	public String getHost() {
 		return host;
@@ -141,5 +142,11 @@ public class CFPushArguments implements AutoCloseable {
 	public void setApplicationData(File archive) throws FileNotFoundException {
 		Assert.isLegal(applicationData==null, "Can only set this once");
 		this.applicationData = new FileInputStream(archive);
+	}
+	public boolean isNoStart() {
+		return noStart;
+	}
+	public void setNoStart(boolean noStart) {
+		this.noStart = noStart;
 	}
 }

@@ -211,7 +211,6 @@ public class MockCFApplication {
 				uris,
 				state,
 				diskQuota,
-				command,
 				getExtras()
 		);
 	}
@@ -244,6 +243,10 @@ public class MockCFApplication {
 			public Mono<Integer> getTimeout() {
 				return just(timeout);
 			}
+			@Override
+			public Mono<String> getCommand() {
+				return just(command);
+			}
 		};
 	}
 
@@ -258,7 +261,6 @@ public class MockCFApplication {
 						uris,
 						state,
 						diskQuota,
-						command,
 						getExtras()
 				),
 				ImmutableList.copyOf(stats)

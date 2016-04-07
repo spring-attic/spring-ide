@@ -34,7 +34,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getUris(),
 				app.getState(),
 				app.getDiskQuota(),
-				app.getCommand(),
 				app.extras
 		);
 		this.instanceDetails = instanceDetails;
@@ -52,8 +51,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.getUris(),
 				app.getState(),
 				app.getDiskQuota(),
-				//XXX CF V2: command
-				null,
 				app.extras
 		);
 		this.instanceDetails = ImmutableList.of();

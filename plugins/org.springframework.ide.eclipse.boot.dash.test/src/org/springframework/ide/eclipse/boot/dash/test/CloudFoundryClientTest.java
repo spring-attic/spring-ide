@@ -292,6 +292,7 @@ public class CloudFoundryClientTest {
 		}
 	}
 
+
 	@Test
 	public void testGetApplicationStack() throws Exception {
 		String appName = appHarness.randomAppName();
@@ -353,6 +354,39 @@ public class CloudFoundryClientTest {
 				}
 			}
 			assertEquals(timeout, (int)app.getTimeout());
+		}
+	}
+
+	@Test
+	public void testGetApplicationCommand() throws Exception {
+		String appName = appHarness.randomAppName();
+		String command = "something interesting";
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setCommand(command);
+		params.setNoStart(true); // Our command is bogus so starting won't work
+		client.push(params);
+
+		//Note we try to get the app two different ways because retrieving the info in
+		// each case is slightly different.
+
+		{
+			CFApplicationDetail app = client.getApplication(appName);
+			assertEquals(command, app.getCommand());
+		}
+
+		{
+			List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+			CFApplication app = null;
+			for (CFApplication a : allApps) {
+				if (a.getName().equals(appName)) {
+					app = a;
+				}
+			}
+			assertEquals(command, app.getCommand());
 		}
 	}
 

@@ -219,6 +219,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						.map(ApplicationEntity::getHealthCheckTimeout)
 				);
 			}
+
+			@Override
+			public Mono<String> getCommand() {
+				return prefetch(
+						entity
+						.map(ApplicationEntity::getCommand)
+				);
+			}
 		};
 	}
 
@@ -526,7 +534,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			)
 			.after(() -> setEnvVars(params.getAppName(), params.getEnv()))
 			.after(() -> bindAndUnbindServices(params.getAppName(), params.getServices()))
-			.after(() ->  startApp(params.getAppName()))
+			.after(() -> {
+				if (!params.isNoStart()) {
+					return startApp(params.getAppName());
+				} else {
+					return Mono.empty();
+				}
+			})
 	//		.log("pushing")
 		);
 		debug("Pushing app succeeded: "+params.getAppName());

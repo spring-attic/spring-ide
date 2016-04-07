@@ -27,4 +27,5 @@ public interface ApplicationExtras {
 	Mono<String> getBuildpack();
 	Mono<String> getStack();
 	Mono<Integer> getTimeout();
+	Mono<String> getCommand();
 }
