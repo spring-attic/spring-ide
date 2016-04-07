@@ -19,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 
 import java.io.File;
 import java.net.URI;
@@ -33,6 +34,7 @@ import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.eclipse.core.runtime.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
@@ -43,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -168,6 +171,37 @@ public class CloudFoundryClientTest {
 		client.deleteApplication(appName);
 		app = client.getApplication(appName);
 		assertNull("Expected application to be deleted after delete: " + appName, app);
+	}
+	
+	@Test
+	public void testStopApplication()	 throws Exception {
+		String appName = appHarness.randomAppName();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		client.push(params);
+
+		final CFApplicationDetail runningApp = client.getApplication(appName);
+		assertNotNull("Expected application to exist after push: " + appName, runningApp);
+
+		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertAppRunState(1, runningApp.getRunningInstances(), CFAppState.STARTED, runningApp.getState());
+				return true;
+			}
+		};
+		
+		client.stopApplication(appName);
+		final CFApplicationDetail stoppedApp = client.getApplication(appName);
+		
+		new ACondition("wait for app '"+ appName +"'to be STOPPED", APP_DEPLOY_TIMEOUT) {
+			public boolean test() throws Exception {
+				assertAppRunState(0, stoppedApp.getRunningInstances(), CFAppState.STOPPED, stoppedApp.getState());
+				return true;
+			}
+		};	
 	}
 
 	@Test
@@ -429,6 +463,11 @@ public class CloudFoundryClientTest {
 	private void assertServices(List<CFService> services, String... serviceNames) throws Exception {
 		Set<String> names = services.stream().map(CFService::getName).collect(Collectors.toSet());
 		assertContains(names, serviceNames);
+	}
+	
+	private void assertAppRunState(int expectedInstances, int actualInstances, CFAppState expectedRequestedState, CFAppState actualRequestedState) {
+		assertEquals("Expected running instances does not match actual running instances: ", expectedInstances, actualInstances);
+		assertEquals("Expected requested app state does not match actual requested app state: ", expectedRequestedState, actualRequestedState);
 	}
 
 	private File getTestZip(String fileName) {
