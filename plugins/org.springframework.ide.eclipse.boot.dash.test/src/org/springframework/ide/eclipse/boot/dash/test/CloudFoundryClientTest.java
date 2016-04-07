@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -149,6 +150,24 @@ public class CloudFoundryClientTest {
 //			Map<String, Object> env = client.getEnv(appName).get();
 //			assertEquals(0, env.size());
 //		}
+	}
+	
+	@Test
+	public void testDeleteApplication()	 throws Exception {
+		String appName = appHarness.randomAppName();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		client.push(params);
+
+		CFApplicationDetail app = client.getApplication(appName);
+		assertNotNull("Expected application to exist after push: " + appName, app);
+		
+		client.deleteApplication(appName);
+		app = client.getApplication(appName);
+		assertNull("Expected application to be deleted after delete: " + appName, app);
 	}
 
 	@Test
