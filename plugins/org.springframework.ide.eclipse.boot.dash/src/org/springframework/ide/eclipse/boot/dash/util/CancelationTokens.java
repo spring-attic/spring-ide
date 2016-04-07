@@ -17,6 +17,8 @@ package org.springframework.ide.eclipse.boot.dash.util;
  */
 public class CancelationTokens {
 
+	private String DEBUG = null;
+
 	//Note: we don't actually have to keep a set of tokens explicitly.
 	// The tokens use a 'id' which is incremented on each new token.
 	//So it is easy to cancel all existing tokens based on a their
@@ -38,6 +40,13 @@ public class CancelationTokens {
 
 	private int canceledAllBefore = 0;
 	private int nextId = 0;
+
+	public CancelationTokens() {
+	}
+
+	public CancelationTokens(String debug) {
+		this.DEBUG = debug;
+	}
 
 	public interface CancelationToken {
 		boolean isCanceled();
@@ -71,5 +80,12 @@ public class CancelationTokens {
 
 	public synchronized void cancelAll() {
 		canceledAllBefore = nextId;
+		debug("CancelationTokens < "+canceledAllBefore+" are Canceled");
+	}
+
+	private void debug(String string) {
+		if (DEBUG!=null) {
+			System.out.println(DEBUG+": "+string);
+		}
 	}
 }

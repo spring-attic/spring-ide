@@ -187,7 +187,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 		//The stuff returned from the getters of 'extras'...
 		Mono<List<String>> services = prefetch(getBoundServicesList(appName));
-		Mono<Map<String, String>> prefetch = prefetch(DefaultClientRequestsV2.this.getEnv(appName));
+		Mono<Map<String, String>> env = prefetch(DefaultClientRequestsV2.this.getEnv(appName));
 		Mono<String> buildpack = prefetch(entity.map(ApplicationEntity::getBuildpack));
 		Mono<String> stack = prefetch(
 			entity.map(ApplicationEntity::getStackId)
@@ -213,7 +213,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 			@Override
 			public Mono<Map<String, String>> getEnv() {
-				return prefetch;
+				return env;
 			}
 
 			@Override

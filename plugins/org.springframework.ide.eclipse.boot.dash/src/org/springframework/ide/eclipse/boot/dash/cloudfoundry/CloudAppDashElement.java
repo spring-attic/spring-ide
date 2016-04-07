@@ -104,9 +104,15 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	};
 
 	public CancelationToken startOperationStarting() {
-		startOperationInProgress.increment();
+		//Note: make sure to create the token *before* changing the state.
+		// That way as soon as the state is 'starting' the operation is already
+		// guaranteed to be cancelable. (If token is create just after changing the
+		// state it introduces a race condition where it looks like the state is 'starting'
+		// but its not actually 'cancelable' yet.
+		CancelationToken token = createCancelationToken();
 		setError(null);
-		return createCancelationToken();
+		startOperationInProgress.increment();
+		return token;
 	}
 
 	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {

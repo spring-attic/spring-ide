@@ -73,12 +73,8 @@ public class ProjectsDeployer extends CloudOperation {
 	}
 
 	private void deployProject(IProject project, IProgressMonitor monitor) throws Exception {
-		//XXX CF V2: on first push connect console just after creating element in stopped mode.
 		CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 		CloudAppDashElement cde = model.ensureApplication(properties.getAppName());
-		cde.setProject(project);
-		cde.setDeploymentManifestFile(properties.getManifestFile());
-		copyTags(project, cde);
 		runAsync("Deploy project '"+project.getName()+"'", properties.getAppName(), (IProgressMonitor progressMonitor) -> {
 			ClientRequests client = model.getRunTarget().getClient();
 			CancelationToken cancelToken = cde.startOperationStarting();
@@ -89,6 +85,9 @@ public class ProjectsDeployer extends CloudOperation {
 						throw new OperationCanceledException();
 					}
 				}
+				cde.setDeploymentManifestFile(properties.getManifestFile());
+				cde.setProject(project);
+				copyTags(project, cde);
 				cde.print("Pushing project '"+project.getName()+"'");
 				try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
 					if (isDebugEnabled()) {

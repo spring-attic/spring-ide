@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -68,6 +69,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
@@ -773,9 +775,10 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForState(app, RunState.STARTING, 3000);
 
-		app.stopAsync(ui);
-
-		waitForState(app, RunState.INACTIVE, 20000);
+		ACondition.waitFor("stop hammering", 20000, () -> {
+			app.stopAsync(ui);
+			assertEquals(RunState.INACTIVE, app.getRunState());
+		});
 
 		//TODO: can we check that deployment related jobs are really canceled/finished somehow?
 		//   can we check that they didn't pop errors?
@@ -840,7 +843,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Test public void acceptDeployOfExistingApp() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
-		IProject project = projects.createProject("to-deploy");
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
 		final String appName = "foo";
 		MockCFApplication deployedApp = space.defApp(appName);
 
@@ -869,7 +872,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Test public void cancelDeployOfExistingApp() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
-		IProject project = projects.createProject("to-deploy");
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 		final String appName = "foo";
 		MockCFApplication deployedApp = space.defApp(appName);
 
@@ -880,7 +883,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNull(app.getProject());
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
-		Mockito.doReturn(true).when(ui).confirmOperation(same("Replace Existing Application"), any());
+		doReturn(false).when(ui).confirmOperation(same("Replace Existing Application"), any());
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
 		waitForJobsToComplete();

@@ -87,12 +87,13 @@ public class MockCFApplication {
 		this.guid = guid;
 		this.instances = instances;
 		this.state = state;
+		this.cancelationTokens = new CancelationTokens(name);
 	}
 
 	private String healthCheck=HealthCheckSupport.HC_PORT;
 	private ImmutableList<CFInstanceStats> stats = ImmutableList.of();
 
-	private CancelationTokens cancelationTokens = new CancelationTokens();
+	private CancelationTokens cancelationTokens;
 
 	public MockCFApplication(MockCloudFoundryClientFactory owner,  MockCFSpace space, String name) {
 		this(owner,
@@ -121,6 +122,7 @@ public class MockCFApplication {
 		new ACondition("simulated app starting (waiting)", getStartDelay()+1000) {
 			@Override
 			public boolean test() throws Exception {
+				System.out.println("Checking token: "+cancelToken);
 				if (!cancelToken.isCanceled() && System.currentTimeMillis()<endTime) {
 					System.out.println("Starting "+getName()+"...");
 					throw new IOException("App still starting");
