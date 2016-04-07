@@ -485,12 +485,17 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 				}
 			}
 			
-			// Roo Addon Suite generation only is available on Spring Roo 2.0+ version
-			if(!version.startsWith("2") && getProjectType().equals(ProjectType.ADDON_SUITE)){
+			// Roo Addon Suite generation and multimodule generation 
+			// is only available on Spring Roo 2.0+ version
+			if(!version.startsWith("2") && 
+					(getProjectType().equals(ProjectType.ADDON_SUITE) || 
+							getProjectType().equals(ProjectType.MULTIMODULE_BASIC) || 
+							getProjectType().equals(ProjectType.MULTIMODULE_STANDARD))){
 				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to use a functionality that is only available on Spring Roo 2.0+ versions."
 						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
 				fNameGroup.fTemplateField.selectItem(0);
 			}
+			
 			
 		}
 
