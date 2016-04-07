@@ -42,6 +42,7 @@ import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
+import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
@@ -522,8 +523,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public void deleteApplication(String name) throws Exception {
-		v1.deleteApplication(name);
+	public void deleteApplication(String appName) throws Exception {
+		ReactorUtils.get(operations.applications().delete(DeleteApplicationRequest
+				.builder()
+				.name(appName)
+				.build()
+		));
 	}
 
 	@Override
