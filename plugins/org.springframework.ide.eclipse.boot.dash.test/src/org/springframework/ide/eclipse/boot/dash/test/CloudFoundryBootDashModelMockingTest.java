@@ -45,6 +45,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
@@ -736,7 +737,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void simpleDeploy() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
-		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
 		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
@@ -750,6 +751,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudAppDashElement app = model.getApplication(appName);
 
 		waitForState(app, RunState.RUNNING, 10000);
+
+		assertEquals((Integer)1, space.getPushCount(appName).getValue());
 	}
 
 	@Test public void stopCancelsDeploy() throws Exception {
@@ -832,6 +835,59 @@ public class CloudFoundryBootDashModelMockingTest {
 		app.stopAsync(ui);
 
 		waitForState(app, RunState.INACTIVE, 20000);
+	}
+
+	@Test public void acceptDeployOfExistingApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createProject("to-deploy");
+		final String appName = "foo";
+		MockCFApplication deployedApp = space.defApp(appName);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setProject(null);
+		assertNull(app.getProject());
+
+		assertEquals(RunState.INACTIVE, app.getRunState());
+
+		harness.answerDeploymentPrompt(ui, appName, appName);
+		Mockito.doReturn(true).when(ui).confirmOperation(same("Replace Existing Application"), any());
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		System.out.println(app.getRunState());
+		waitForJobsToComplete();
+		System.out.println(app.getRunState());
+		assertEquals(project, app.getProject());
+		assertEquals(1, deployedApp.getNumberOfPushes());
+
+		verify(ui).confirmOperation(any(), any());
+	}
+
+
+	@Test public void cancelDeployOfExistingApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createProject("to-deploy");
+		final String appName = "foo";
+		MockCFApplication deployedApp = space.defApp(appName);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setProject(null);
+		assertNull(app.getProject());
+
+		harness.answerDeploymentPrompt(ui, appName, appName);
+		Mockito.doReturn(true).when(ui).confirmOperation(same("Replace Existing Application"), any());
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		waitForJobsToComplete();
+		assertNull(app.getProject()); // since op was canceled it should not have set the project on the app.
+		assertEquals(0, deployedApp.getNumberOfPushes());							  // since op was canceled it should not have deployed the app.
+
+		verify(ui).confirmOperation(any(), any());
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////

@@ -172,6 +172,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private ApplicationExtras getApplicationExtras(String appName) {
+		//Stuff used in computing the 'extras'...
 		Mono<String> appIdMono = getApplicationId(appName);
 		Mono<ApplicationEntity> entity = appIdMono
 			.then((appId) ->
@@ -183,59 +184,69 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.map((appResource) -> appResource.getEntity())
 			.cache();
 
-		return new ApplicationExtras() {
+		//The stuff returned from the getters of 'extras'...
+		Mono<List<String>> services = prefetch(getBoundServicesList(appName));
+		Mono<Map<String, String>> prefetch = prefetch(DefaultClientRequestsV2.this.getEnv(appName));
+		Mono<String> buildpack = prefetch(entity.map(ApplicationEntity::getBuildpack));
+		Mono<String> stack = prefetch(
+			entity.map(ApplicationEntity::getStackId)
+			.then((stackId) -> {
+				return client.stacks().get(GetStackRequest.builder()
+						.stackId(stackId)
+						.build()
+				);
+			}).map((response) -> {
+				return response.getEntity().getName();
+			})
+		);
+		Mono<Integer> timeout = prefetch(
+				entity
+				.map(ApplicationEntity::getHealthCheckTimeout)
+		);
 
+		return new ApplicationExtras() {
 			@Override
 			public Mono<List<String>> getServices() {
-				return prefetch(getBoundServicesList(appName));
+				return services;
 			}
 
 			@Override
 			public Mono<Map<String, String>> getEnv() {
-				return prefetch(DefaultClientRequestsV2.this.getEnv(appName));
+				return prefetch;
 			}
 
 			@Override
 			public Mono<String> getBuildpack() {
-				return prefetch(
-					entity.map(ApplicationEntity::getBuildpack)
-				);
+				return buildpack;
 			}
 
 			@Override
 			public Mono<String> getStack() {
-				return prefetch(
-					entity.map(ApplicationEntity::getStackId)
-					.then((stackId) -> {
-						return client.stacks().get(GetStackRequest.builder()
-								.stackId(stackId)
-								.build()
-						);
-					}).map((stack) -> {
-						return stack.getEntity().getName();
-					})
-				);
+				return stack;
 			}
 
 			public Mono<Integer> getTimeout() {
-				return prefetch(
-						entity
-						.map(ApplicationEntity::getHealthCheckTimeout)
-				);
+				return timeout;
 			}
 
 			@Override
 			public Mono<String> getCommand() {
-				return prefetch(
+				Mono<String> command = prefetch(
 						entity
 						.map(ApplicationEntity::getCommand)
 				);
+				return command;
 			}
 		};
 	}
 
 	private <T> Mono<T> prefetch(Mono<T> toFetch) {
-		return toFetch.subscribe();
+		return toFetch
+		.otherwise((error) -> {
+			BootActivator.log(new IOException("Failed prefectch", error));
+			return Mono.empty();
+		})
+		.subscribe();
 	}
 
 //	private <T> Mono<T> prefetch(Mono<T> toFetch) {

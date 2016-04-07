@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -31,6 +32,7 @@ public class MockCFSpace extends CFSpaceData {
 	private Map<String, CFService> servicesByName = new HashMap<>();
 	private Map<String, MockCFApplication> appsByName = new HashMap<>();
 	private MockCloudFoundryClientFactory owner;
+	private Map<String, LiveCounter> pushCounts = new HashMap<>();
 
 	public MockCFSpace(MockCloudFoundryClientFactory owner, String name, UUID guid, CFOrganization org) {
 		super(name, guid, org);
@@ -52,7 +54,7 @@ public class MockCFSpace extends CFSpaceData {
 	public MockCFApplication defApp(String name) {
 		MockCFApplication existing = appsByName.get(name);
 		if (existing==null) {
-			appsByName.put(name, existing = Mockito.spy(new MockCFApplication(owner, name)));
+			appsByName.put(name, existing = Mockito.spy(new MockCFApplication(owner, this, name)));
 		}
 		return existing;
 	}
@@ -96,6 +98,14 @@ public class MockCFSpace extends CFSpaceData {
 			return true;
 		}
 		return false;
+	}
+
+	public synchronized LiveCounter getPushCount(String name) {
+		LiveCounter counter = pushCounts.get(name);
+		if (counter==null) {
+			pushCounts.put(name, counter = new LiveCounter());
+		}
+		return counter;
 	}
 
 }

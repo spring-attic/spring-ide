@@ -52,4 +52,8 @@ public class ReactorUtils {
 			throw e;
 		}
 	}
+
+	public static <T> Mono<T> just(T it) {
+		return it == null ? Mono.empty() : Mono.just(it);
+	}
 }

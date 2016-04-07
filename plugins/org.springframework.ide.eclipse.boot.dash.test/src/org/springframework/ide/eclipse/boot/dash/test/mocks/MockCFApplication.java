@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,9 +78,11 @@ public class MockCFApplication {
 	private String command = null;
 	private String stack = null;
 	private MockCloudFoundryClientFactory owner;
+	private MockCFSpace space;
 
-	public MockCFApplication(MockCloudFoundryClientFactory owner, String name, UUID guid, int instances, CFAppState state) {
+	public MockCFApplication(MockCloudFoundryClientFactory owner, MockCFSpace space, String name, UUID guid, int instances, CFAppState state) {
 		this.owner = owner;
+		this.space = space;
 		this.name = name;
 		this.guid = guid;
 		this.instances = instances;
@@ -90,8 +94,9 @@ public class MockCFApplication {
 
 	private CancelationTokens cancelationTokens = new CancelationTokens();
 
-	public MockCFApplication(MockCloudFoundryClientFactory owner, String name) {
+	public MockCFApplication(MockCloudFoundryClientFactory owner,  MockCFSpace space, String name) {
 		this(owner,
+				space,
 				name,
 				UUID.randomUUID(),
 				1,
@@ -215,10 +220,6 @@ public class MockCFApplication {
 		);
 	}
 
-	private static <T> Mono<T> just(T it) {
-		return it == null ? Mono.empty() : Mono.just(it);
-	}
-
 	private ApplicationExtras getExtras() {
 		return new ApplicationExtras() {
 			@Override
@@ -338,6 +339,10 @@ public class MockCFApplication {
 		if (timeout!=null) {
 			setTimeout(timeout);
 		}
+	}
+
+	public int getNumberOfPushes() {
+		return space.getPushCount(name).getValue();
 	}
 
 }
