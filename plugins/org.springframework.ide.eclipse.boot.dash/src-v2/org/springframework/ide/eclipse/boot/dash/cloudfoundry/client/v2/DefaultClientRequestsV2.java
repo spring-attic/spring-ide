@@ -33,6 +33,10 @@ import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
+import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
+import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
+import org.cloudfoundry.client.v2.services.GetServiceRequest;
 import org.cloudfoundry.client.v2.stacks.GetStackRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
@@ -230,18 +234,21 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		};
 	}
 
-
 	private <T> Mono<T> prefetch(Mono<T> toFetch) {
-		Mono<T> result = toFetch
-		.cache(); // It should only be fetched once.
-
-		//We must ensure the 'result' is being consumed by something to force its execution:
-		result
-		.publishOn(SCHEDULER_GROUP) //Ensure the consume is truly async or it may block here.
-		.consume((dont_care) -> {});
-
-		return result;
+		return toFetch.subscribe();
 	}
+
+//	private <T> Mono<T> prefetch(Mono<T> toFetch) {
+//		Mono<T> result = toFetch
+//		.cache(); // It should only be fetched once.
+//
+//		//We must ensure the 'result' is being consumed by something to force its execution:
+//		result
+//		.publishOn(SCHEDULER_GROUP) //Ensure the consume is truly async or it may block here.
+//		.consume((dont_care) -> {});
+//
+//		return result;
+//	}
 
 	@Override
 	public List<CFService> getServices() throws Exception {
@@ -316,7 +323,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception{
-		final Mono<StreamingLogToken> result = Mono.defer(() -> {
+		Mono<StreamingLogToken> result = Mono.defer(() -> {
 			return Mono.just(v1.streamLogs(appName, logConsole));
 		})
 		.retry()
@@ -665,16 +672,27 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	public Mono<Void> deleteService(String serviceName) {
-		return operations.services().get(GetServiceInstanceRequest.builder()
-				.name(serviceName)
-				.build())
-		.map(ServiceInstance::getId)
+		return getServiceId(serviceName)
 		.then((serviceId) -> {
 			 return client.serviceInstances().delete(DeleteServiceInstanceRequest.builder()
-					.serviceInstanceId(serviceId)
-					.build());
+			.serviceInstanceId(serviceId)
+			.build());
 		})
 		.after();
+	}
+
+	protected Mono<String> getServiceId(String serviceName) {
+		return client.serviceInstances().list(ListServiceInstancesRequest.builder()
+				.name(serviceName)
+				.build()
+		).then((ListServiceInstancesResponse response) -> {
+			List<ServiceInstanceResource> resources = response.getResources();
+			if (resources.isEmpty()) {
+				return Mono.error(new IOException("Service instance not found: "+serviceName));
+			} else {
+				return Mono.just(resources.get(0).getMetadata().getId());
+			}
+		});
 	}
 
 	public Mono<Map<String,String>> getEnv(String appName) {

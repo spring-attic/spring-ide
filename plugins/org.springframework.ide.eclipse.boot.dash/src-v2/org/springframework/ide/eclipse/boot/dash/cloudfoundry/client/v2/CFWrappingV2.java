@@ -234,7 +234,8 @@ public class CFWrappingV2 {
 
 			@Override
 			public String getDashboardUrl() {
-				//TODO: see https://github.com/cloudfoundry/cf-java-client/issues/426
+				//XXX CF V2: Service.getDasboardUrl
+				//see https://github.com/cloudfoundry/cf-java-client/issues/426
 				//Actually... the issue was resolved and then the commit fixing it reverted again
 				return null;
 			}
