@@ -48,6 +48,7 @@ import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
+import org.cloudfoundry.operations.applications.StopApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
@@ -360,7 +361,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void stopApplication(String appName) throws Exception {
-		v1.stopApplication(appName);
+		ReactorUtils.get(
+			operations.applications().stop(StopApplicationRequest.builder()
+					.name(appName)
+					.build()
+					)
+			);
 	}
 
 	@Override
