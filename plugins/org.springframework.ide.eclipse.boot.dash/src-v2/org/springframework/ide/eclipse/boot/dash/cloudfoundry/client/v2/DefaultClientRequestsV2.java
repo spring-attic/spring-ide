@@ -512,25 +512,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build()
 		)
 		.map((appDetail) -> {
+			//TODO: we have 'real' appdetails now so we could get most of the 'application extras' info from that.
 			return CFWrappingV2.wrap(appDetail, getApplicationExtras(appName));
 		})
-		.otherwise((error) -> {
-			//XXX CF V2: remove workaround for bug in CF V2 operations (no details for stopped app)
-			// See https://www.pivotaltracker.com/story/show/116463023
-			//Because there's presently a bug preventing us from retrieving details for stopped apps...
-			// we shall have to make do with a summary pulled from the list of app summaries instead.
-			return operations.applications().list()
-			.filter((ApplicationSummary app) -> app.getName().equals(appName))
-			.elementAt(0)
-			.otherwise((outOfBounds) -> {
-				if (outOfBounds instanceof IndexOutOfBoundsException) {
-					return Mono.empty();
-				}
-				return Mono.error(outOfBounds);
-			})
-			.map((appSummary) -> CFWrappingV2.wrap(appSummary, getApplicationExtras(appName)))
-			.map((CFApplication summary) -> CFWrappingV2.wrap((CFApplicationSummaryData)summary, (ApplicationDetail)null));
-		});
+		.otherwise(ReactorUtils.suppressException(IllegalArgumentException.class));
 	}
 
 	@Override
@@ -550,14 +535,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public boolean applicationExists(String appName) throws Exception {
 		return ReactorUtils.get(
-			client.applicationsV2().list(ListApplicationsRequest.builder()
-			.name(appName)
-			.build()
-			)
-			.map((ListApplicationsResponse response) -> {
-				List<ApplicationResource> resource = response.getResources();
-				return resource != null && !resource.isEmpty();
-			})
+				getApplicationMono(appName)
+				.map((app) -> true)
+				.otherwiseIfEmpty(Mono.just(false))
 		);
 	}
 

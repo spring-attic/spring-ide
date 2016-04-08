@@ -204,11 +204,13 @@ public class CloudFoundryClientTest {
 		client.push(params);
 
 		CFApplicationDetail app = client.getApplication(appName);
+		assertTrue(client.applicationExists(appName));
 		assertNotNull("Expected application to exist after push: " + appName, app);
 
 		client.deleteApplication(appName);
 		app = client.getApplication(appName);
 		assertNull("Expected application to be deleted after delete: " + appName, app);
+		assertFalse(client.applicationExists(appName));
 	}
 
 	@Test
