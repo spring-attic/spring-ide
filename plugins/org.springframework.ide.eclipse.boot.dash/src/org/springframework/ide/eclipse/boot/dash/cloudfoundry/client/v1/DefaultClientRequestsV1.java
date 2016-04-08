@@ -467,6 +467,7 @@ public class DefaultClientRequestsV1 {
 				public void cancel() {
 					tokenDisposed();
 					debug("streamLogs "+appName+" canceled token : "+orgToken);
+					orgToken.cancel();
 				}
 			};
 		} else {
