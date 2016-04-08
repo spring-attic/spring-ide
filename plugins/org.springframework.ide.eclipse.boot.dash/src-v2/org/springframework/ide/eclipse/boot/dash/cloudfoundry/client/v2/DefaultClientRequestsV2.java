@@ -293,10 +293,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.name(appSummary.getName())
 					.build()
 			)
-			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails))
-			.otherwise((error) -> {
-				return Mono.just(CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, null));
-			});
+			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails));
 		})
 		.toList()
 		.get(timeToWait);

@@ -15,8 +15,6 @@ import java.util.List;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 
-import com.google.common.collect.ImmutableList;
-
 public class CFApplicationDetailData extends CFApplicationSummaryData implements CFApplicationDetail {
 
 	private List<CFInstanceStats> instanceDetails;
@@ -37,23 +35,6 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 				app.extras
 		);
 		this.instanceDetails = instanceDetails;
-	}
-
-	public CFApplicationDetailData(CFApplicationSummaryData app) {
-		//TODO: this constructor should not exist. We use it to create 'detailed' data when
-		/// its not possible to get details.
-		super(
-				app.getName(),
-				app.getInstances(),
-				app.getRunningInstances(),
-				app.getMemory(),
-				app.getGuid(),
-				app.getUris(),
-				app.getState(),
-				app.getDiskQuota(),
-				app.extras
-		);
-		this.instanceDetails = ImmutableList.of();
 	}
 
 	@Override

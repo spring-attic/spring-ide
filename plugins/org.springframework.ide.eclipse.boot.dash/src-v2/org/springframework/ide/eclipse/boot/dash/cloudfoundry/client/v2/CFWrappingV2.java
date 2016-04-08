@@ -98,19 +98,14 @@ public class CFWrappingV2 {
 			CFApplicationSummaryData summary,
 			ApplicationDetail details
 	) {
-		if (details==null) {
-			//Detail lookup failed. App may not be running and we can't fetch instance data
-			return new CFApplicationDetailData(summary);
-		} else {
-			List<CFInstanceStats> instanceDetails = ImmutableList.copyOf(
-					details
-					.getInstanceDetails()
-					.stream()
-					.map(CFWrappingV2::wrap)
-					.collect(Collectors.toList())
-			);
-			return new CFApplicationDetailData(summary, instanceDetails);
-		}
+		List<CFInstanceStats> instanceDetails = ImmutableList.copyOf(
+				details
+				.getInstanceDetails()
+				.stream()
+				.map(CFWrappingV2::wrap)
+				.collect(Collectors.toList())
+		);
+		return new CFApplicationDetailData(summary, instanceDetails);
 	}
 
 	public static CFCloudDomain wrap(DomainResource domainRsrc) {
