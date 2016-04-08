@@ -38,7 +38,6 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	public CloudAppLogManager(CloudFoundryRunTarget runTarget) {
 		this.runTarget = runTarget;
 		consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-
 	}
 
 	@Override
@@ -194,4 +193,5 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		connectLoggregator(console, appName);
 		consoleManager.showConsoleView(console);
 	}
+
 }

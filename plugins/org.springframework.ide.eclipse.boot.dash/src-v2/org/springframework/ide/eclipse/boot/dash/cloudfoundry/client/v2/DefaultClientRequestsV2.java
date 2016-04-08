@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
@@ -20,8 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.zip.ZipFile;
-
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
@@ -38,7 +38,6 @@ import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
-import org.cloudfoundry.client.v2.services.GetServiceRequest;
 import org.cloudfoundry.client.v2.stacks.GetStackRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
@@ -56,7 +55,6 @@ import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
-import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
@@ -98,7 +96,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	private static final Callable<? extends Consumer<Runnable>> SCHEDULER_GROUP = SchedulerGroup.async();
+	private static final SchedulerGroup SCHEDULER_GROUP = SchedulerGroup.async();
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
 //  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below

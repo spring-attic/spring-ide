@@ -33,6 +33,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
@@ -64,6 +65,15 @@ public class DefaultClientRequestsV1 {
 	 * otherwise or omit as a system property
 	 */
 	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+ 	}
+
 
 	protected final CloudFoundryOperations client;
 	private CloudInfoV2 cachedCloudInfo;
@@ -344,7 +354,6 @@ public class DefaultClientRequestsV1 {
 
 	public List<CFService> getServices() throws Exception {
 		return new ClientRequest<List<CFService>>(this.client, "Getting Cloud Services") {
-
 			@Override
 			protected List<CFService> doRun(CloudFoundryOperations client) throws Exception {
 				List<CloudService> services = client.getServices();
@@ -445,7 +454,21 @@ public class DefaultClientRequestsV1 {
 	}
 
 	public StreamingLogToken streamLogs(String appName, ApplicationLogListener logConsole) {
-		return client.streamLogs(appName, logConsole);
+		debug("streamLogs "+appName);
+		StreamingLogToken orgToken = client.streamLogs(appName, logConsole);
+		debug("streamLogs "+appName+" got token : "+ orgToken);
+		StreamingLogToken token;
+		if (DEBUG) {
+			token =  new StreamingLogToken() {
+				@Override
+				public void cancel() {
+					debug("streamLogs "+appName+" canceled token : "+orgToken);
+				}
+			};
+		} else {
+			token = orgToken;
+		}
+		return token;
 	}
 
 	public List<CFBuildpack> getBuildpacks() throws Exception {

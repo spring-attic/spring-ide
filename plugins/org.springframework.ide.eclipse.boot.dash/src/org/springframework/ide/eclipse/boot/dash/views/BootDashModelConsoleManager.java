@@ -112,4 +112,5 @@ public abstract class BootDashModelConsoleManager {
 		writer.append('\n');
 		return writer.toString();
 	}
+
 }
