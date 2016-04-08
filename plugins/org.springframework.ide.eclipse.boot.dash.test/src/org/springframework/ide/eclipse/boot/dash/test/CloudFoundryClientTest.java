@@ -78,6 +78,33 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test
+	public void testGetApplicationDetails() throws Exception {
+		String appName = appHarness.randomAppName();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setNoStart(true);
+		client.push(params);
+
+		{
+			CFApplicationDetail appDetails = client.getApplication(appName);
+			assertEquals(0, appDetails.getRunningInstances());
+			assertEquals(CFAppState.STOPPED, appDetails.getState());
+			assertEquals(ImmutableList.of(), appDetails.getInstanceDetails());
+		}
+
+		client.restartApplication(appName);
+		{
+			CFApplicationDetail appDetails = client.getApplication(appName);
+			assertEquals(1, appDetails.getRunningInstances());
+			assertEquals(CFAppState.STARTED, appDetails.getState());
+			assertEquals(1, appDetails.getInstanceDetails().size());
+		}
+	}
+
+	@Test
 	public void testPushAndBindServices() throws Exception {
 		//This test fails occasionally because service binding is 'unreliable'. Had a long discussion
 		// with Ben Hale. The gist is errors happen and should be expected in distributed world.
