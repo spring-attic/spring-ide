@@ -638,8 +638,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 							.applicationName(appName)
 							.serviceInstanceName(service)
 							.build()
-							);
-				});
+					);
+		});
 	}
 
 	private Flux<Void> unbindServices(String appName, Set<String> toUnbind) {

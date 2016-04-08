@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -78,30 +79,40 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testPushAndBindServices() throws Exception {
-		String appName = appHarness.randomAppName();
+		//This test fails occasionally because service binding is 'unreliable'. Had a long discussion
+		// with Ben Hale. The gist is errors happen and should be expected in distributed world.
+		//They are coming from 'AppDirect' which manages the services. The errors are mediated through cloudfoundry
+		// which doesn't knwow how it should handle them. So it passed the buck onto the its callers.
+		//In this case.... cf-java-client which does the same thing and passes them to us.
+		//All the reasons why they can't handle these errors also apply to us, which means that
+		//the operation is simply unreliable and so failure is an expected outcome even when everything
+		//works correctly.
+		//To avoid this test case from failing too often we retry it a few times.
+		RetryUtil.retryTimes("testPushAndBindServices", 4, () -> {
+			String appName = appHarness.randomAppName();
 
-		String service1 = services.createTestService();
-		String service2 = services.createTestService();
-		String service3 = services.createTestService(); //An extra unused service (makes this a better test).
+			String service1 = services.createTestService();
+			String service2 = services.createTestService();
+			String service3 = services.createTestService(); //An extra unused service (makes this a better test).
 
-		CFPushArguments params = new CFPushArguments();
-		params.setAppName(appName);
-		params.setApplicationData(getTestZip("testapp"));
-		params.setBuildpack("staticfile_buildpack");
-		params.setServices(ImmutableList.of(service1, service2));
-		client.push(params);
+			CFPushArguments params = new CFPushArguments();
+			params.setAppName(appName);
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			params.setServices(ImmutableList.of(service1, service2));
+			client.push(params);
 
-		assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
+			assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
 
-		client.bindAndUnbindServices(appName, ImmutableList.of(service1)).get();
-		assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
+			client.bindAndUnbindServices(appName, ImmutableList.of(service1)).get();
+			assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
 
-		client.bindAndUnbindServices(appName, ImmutableList.of(service2)).get();
-		assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
+			client.bindAndUnbindServices(appName, ImmutableList.of(service2)).get();
+			assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
 
-		client.bindAndUnbindServices(appName, ImmutableList.of()).get();
-		assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
-
+			client.bindAndUnbindServices(appName, ImmutableList.of()).get();
+			assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
+		});
 	}
 
 	private Set<String> getBoundServiceNames(String appName) throws Exception {
@@ -154,7 +165,7 @@ public class CloudFoundryClientTest {
 //			assertEquals(0, env.size());
 //		}
 	}
-	
+
 	@Test
 	public void testDeleteApplication()	 throws Exception {
 		String appName = appHarness.randomAppName();
@@ -167,12 +178,12 @@ public class CloudFoundryClientTest {
 
 		CFApplicationDetail app = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, app);
-		
+
 		client.deleteApplication(appName);
 		app = client.getApplication(appName);
 		assertNull("Expected application to be deleted after delete: " + appName, app);
 	}
-	
+
 	@Test
 	public void testStopApplication()	 throws Exception {
 		String appName = appHarness.randomAppName();
@@ -192,16 +203,16 @@ public class CloudFoundryClientTest {
 				return true;
 			}
 		};
-		
+
 		client.stopApplication(appName);
 		final CFApplicationDetail stoppedApp = client.getApplication(appName);
-		
+
 		new ACondition("wait for app '"+ appName +"'to be STOPPED", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertAppRunState(0, stoppedApp.getRunningInstances(), CFAppState.STOPPED, stoppedApp.getState());
 				return true;
 			}
-		};	
+		};
 	}
 
 	@Test
@@ -464,7 +475,7 @@ public class CloudFoundryClientTest {
 		Set<String> names = services.stream().map(CFService::getName).collect(Collectors.toSet());
 		assertContains(names, serviceNames);
 	}
-	
+
 	private void assertAppRunState(int expectedInstances, int actualInstances, CFAppState expectedRequestedState, CFAppState actualRequestedState) {
 		assertEquals("Expected running instances does not match actual running instances: ", expectedInstances, actualInstances);
 		assertEquals("Expected requested app state does not match actual requested app state: ", expectedRequestedState, actualRequestedState);
