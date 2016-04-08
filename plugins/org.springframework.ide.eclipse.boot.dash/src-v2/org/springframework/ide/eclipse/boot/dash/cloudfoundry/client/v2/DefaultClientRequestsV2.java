@@ -21,6 +21,8 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.zip.ZipFile;
 
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
+
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
@@ -187,11 +189,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.cache();
 
 		//The stuff returned from the getters of 'extras'...
-		Mono<List<String>> services = prefetch(getBoundServicesList(appName));
-		Mono<Map<String, String>> env = prefetch(DefaultClientRequestsV2.this.getEnv(appName));
-		Mono<String> buildpack = prefetch(entity.map(ApplicationEntity::getBuildpack));
-		Mono<String> stack = prefetch(
-			entity.map(ApplicationEntity::getStackId)
+		Mono<List<String>> services = prefetch("services", getBoundServicesList(appName));
+		Mono<Map<String, String>> env = prefetch("env",
+				DefaultClientRequestsV2.this.getEnv(appName)
+		);
+		Mono<String> buildpack = prefetch("buildpack",
+				entity.then((e) -> just(e.getBuildpack()))
+		);
+
+		Mono<String> stack = prefetch("stack",
+			entity.then((e) -> just(e.getStackId()))
 			.then((stackId) -> {
 				return client.stacks().get(GetStackRequest.builder()
 						.stackId(stackId)
@@ -201,9 +208,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				return response.getEntity().getName();
 			})
 		);
-		Mono<Integer> timeout = prefetch(
+		Mono<Integer> timeout = prefetch("timeout",
 				entity
-				.map(ApplicationEntity::getHealthCheckTimeout)
+				.then((v) -> just(v.getHealthCheckTimeout()))
+		);
+
+		Mono<String> command = prefetch("command",
+				entity.then((e) -> just(e.getCommand()))
 		);
 
 		return new ApplicationExtras() {
@@ -233,22 +244,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 			@Override
 			public Mono<String> getCommand() {
-				Mono<String> command = prefetch(
-						entity
-						.map(ApplicationEntity::getCommand)
-				);
 				return command;
 			}
 		};
 	}
 
-	private <T> Mono<T> prefetch(Mono<T> toFetch) {
+	private <T> Mono<T> prefetch(String id, Mono<T> toFetch) {
+//		IOException e = new IOException("Failed prefetch '"+id+"'");
+//		e.fillInStackTrace();
 		return toFetch
+		.log(id + " before error handler")
 		.otherwise((error) -> {
-			BootActivator.log(new IOException("Failed prefectch", error));
+			BootActivator.log(new IOException("Failed prefetch '"+id+"'", error));
 			return Mono.empty();
 		})
-		.subscribe();
+		.log(id + " after error handler")
+		.cache()
+		.log(id + "after cache");
 	}
 
 //	private <T> Mono<T> prefetch(Mono<T> toFetch) {
@@ -727,8 +739,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public Map<String, String> getApplicationEnvironment(String appName) {
-		return getEnv(appName).get();
+	public Map<String, String> getApplicationEnvironment(String appName) throws Exception {
+		return ReactorUtils.get(getEnv(appName));
 	}
 
 	private Map<String, String> dropObjectsFromMap(Map<String, Object> map) {
