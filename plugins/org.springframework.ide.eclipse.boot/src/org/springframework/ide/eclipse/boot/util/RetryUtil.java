@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.util;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**

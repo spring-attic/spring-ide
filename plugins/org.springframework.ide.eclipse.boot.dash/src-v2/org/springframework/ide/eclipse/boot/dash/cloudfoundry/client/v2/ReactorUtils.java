@@ -30,7 +30,7 @@ public class ReactorUtils {
 	 */
 	public static <T> T get(Mono<T> mono) throws Exception {
 		try {
-			return mono.get();
+			return mono.get(Duration.ofMinutes(1));
 		} catch (Exception e) {
 			BootActivator.log(new Exception(e));
 			throw e;
