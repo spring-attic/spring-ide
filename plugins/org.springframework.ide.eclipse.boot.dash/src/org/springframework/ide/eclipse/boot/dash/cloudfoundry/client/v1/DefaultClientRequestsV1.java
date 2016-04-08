@@ -79,6 +79,8 @@ public class DefaultClientRequestsV1 {
 	private CloudInfoV2 cachedCloudInfo;
 	private CFClientParams clientParams;
 
+	private int tokens;
+
 	public DefaultClientRequestsV1(CFClientParams params) throws Exception {
 		this.client = createClient(params);
 		this.clientParams = params;
@@ -457,11 +459,13 @@ public class DefaultClientRequestsV1 {
 		debug("streamLogs "+appName);
 		StreamingLogToken orgToken = client.streamLogs(appName, logConsole);
 		debug("streamLogs "+appName+" got token : "+ orgToken);
+		tokenCreated();
 		StreamingLogToken token;
 		if (DEBUG) {
 			token =  new StreamingLogToken() {
 				@Override
 				public void cancel() {
+					tokenDisposed();
 					debug("streamLogs "+appName+" canceled token : "+orgToken);
 				}
 			};
@@ -469,6 +473,20 @@ public class DefaultClientRequestsV1 {
 			token = orgToken;
 		}
 		return token;
+	}
+
+	synchronized void tokenCreated() {
+		if (DEBUG) {
+			tokens++;
+			debug("Active Log Token Count = "+tokens);
+		}
+	}
+
+	synchronized void tokenDisposed() {
+		if (DEBUG) {
+			tokens--;
+			debug("Active Log Token Count = "+tokens);
+		}
 	}
 
 	public List<CFBuildpack> getBuildpacks() throws Exception {
