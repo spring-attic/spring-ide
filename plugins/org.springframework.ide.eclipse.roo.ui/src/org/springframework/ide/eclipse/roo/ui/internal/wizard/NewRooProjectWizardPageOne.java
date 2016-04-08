@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2015 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -1000,11 +1001,16 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		final Composite composite = new Composite(parent, SWT.NULL);
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(parent, SWT.BORDER | SWT.V_SCROLL);
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+		scrolledComposite.setAlwaysShowScrollBars(true);
+		
+		Composite composite = new Composite(scrolledComposite, SWT.NULL);
 		composite.setFont(parent.getFont());
 		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
+		
 		// create UI elements
 		Control nameControl = createNameControl(composite);
 		nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -1025,15 +1031,16 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 
 		Control workingSetControl = createWorkingSetControl(composite);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		scrolledComposite.setContent(composite);
+		scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		setControl(composite);
 	}
 
 	protected void setControl(Control newControl) {
 		Dialog.applyDialogFont(newControl);
-
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newControl, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
-
 		super.setControl(newControl);
 	}
 

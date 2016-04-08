@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2015 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.PlatformUI;
@@ -88,9 +89,19 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 	public NewRooProjectWizard() {
 		super();
+		
+		// Check if exists some Spring Roo installation before continue
+		while(RooCoreActivator.getDefault().getInstallManager().getDefaultRooInstall() == null) {
+			MessageDialog.openInformation(getShell(), "Spring Roo Alert",
+					"You are trying to generate an Spring Roo project, but you don't have any Spring Roo distribution installed."
+							+ "Include some Spring Roo distribution before continue.");
+			RooUiUtil.openPreferences(getShell());
+		}
+		
 		setWindowTitle("New Roo Project");
 		setDefaultPageImageDescriptor(RooUiActivator.getImageDescriptor("icons/full/wizban/roo_wizban.png"));
 		setNeedsProgressMonitor(true);
+		
 	}
 
 	@Override
