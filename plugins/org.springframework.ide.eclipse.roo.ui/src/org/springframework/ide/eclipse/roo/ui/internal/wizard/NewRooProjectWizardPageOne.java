@@ -58,11 +58,15 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -1001,41 +1005,52 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		final ScrolledComposite scrolledComposite = new ScrolledComposite(parent, SWT.BORDER | SWT.V_SCROLL);
+		final Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new FillLayout());
+		
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.BORDER | SWT.V_SCROLL);
+		scrolledComposite.setLayout(new FillLayout());
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
 		scrolledComposite.setAlwaysShowScrollBars(true);
 		
-		Composite composite = new Composite(scrolledComposite, SWT.NULL);
-		composite.setFont(parent.getFont());
-		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
-		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		final Composite subContainer = new Composite(scrolledComposite, SWT.NONE);
+		subContainer.setFont(parent.getFont());
+		subContainer.setLayout(initGridLayout(new GridLayout(1, false), true));
+		subContainer.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		
 		// create UI elements
-		Control nameControl = createNameControl(composite);
+		Control nameControl = createNameControl(subContainer);
 		nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control rooHomeControl = rooInstallGroup.createControl(composite);
+		Control rooHomeControl = rooInstallGroup.createControl(subContainer);
 		rooHomeControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT || DependencyManagementUtils.IS_STS_MAVEN_PRESENT) {
-			Control dependencyManagementControl = dependencyManagementGroup.createControl(composite);
+			Control dependencyManagementControl = dependencyManagementGroup.createControl(subContainer);
 			dependencyManagementControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 		
-		Control providerControl = packagingProviderGroup.createControl(composite);
+		Control providerControl = packagingProviderGroup.createControl(subContainer);
 		providerControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control locationControl = createLocationControl(composite);
+		Control locationControl = createLocationControl(subContainer);
 		locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control workingSetControl = createWorkingSetControl(composite);
+		Control workingSetControl = createWorkingSetControl(subContainer);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		scrolledComposite.setContent(composite);
-		scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scrolledComposite.setContent(subContainer);
+		
+		scrolledComposite.addControlListener(new ControlAdapter() {
+		    public void controlResized(ControlEvent e) {
+		        Rectangle r = scrolledComposite.getClientArea();
+		        scrolledComposite.setMinSize(subContainer
+		                .computeSize(r.width, SWT.DEFAULT));
+		    }
+		});
 
-		setControl(composite);
+		setControl(container);
 	}
 
 	protected void setControl(Control newControl) {
