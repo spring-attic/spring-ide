@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2015 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.PlatformUI;
@@ -65,11 +66,13 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 		ROO_JAVA_VERSION_MAPPING.put("1.5", "5");
 		ROO_JAVA_VERSION_MAPPING.put("1.6", "6");
 		ROO_JAVA_VERSION_MAPPING.put("1.7", "7");
+		ROO_JAVA_VERSION_MAPPING.put("1.8", "8");
 
 		FACET_JAVA_VERSION_MAPPING = new HashMap<String, String>();
 		FACET_JAVA_VERSION_MAPPING.put("1.5", "5.0");
 		FACET_JAVA_VERSION_MAPPING.put("1.6", "6.0");
 		FACET_JAVA_VERSION_MAPPING.put("1.7", "7.0");
+		FACET_JAVA_VERSION_MAPPING.put("1.8", "8.0");
 	}
 
 	private static final String CLASSPATH_FILE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -86,9 +89,19 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 	public NewRooProjectWizard() {
 		super();
+		
+		// Check if exists some Spring Roo installation before continue
+		while(RooCoreActivator.getDefault().getInstallManager().getDefaultRooInstall() == null) {
+			MessageDialog.openInformation(getShell(), "Spring Roo Alert",
+					"You are trying to generate an Spring Roo project, but you don't have any Spring Roo distribution installed."
+							+ "Include some Spring Roo distribution before continue.");
+			RooUiUtil.openPreferences(getShell());
+		}
+		
 		setWindowTitle("New Roo Project");
 		setDefaultPageImageDescriptor(RooUiActivator.getImageDescriptor("icons/full/wizban/roo_wizban.png"));
 		setNeedsProgressMonitor(true);
+		
 	}
 
 	@Override
@@ -138,7 +151,7 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					String javaVersion = JavaCore.getOption("org.eclipse.jdt.core.compiler.compliance");
 					String rooJavaVersion = (ROO_JAVA_VERSION_MAPPING.containsKey(javaVersion) ? ROO_JAVA_VERSION_MAPPING
 							.get(javaVersion)
-							: "6");
+							: "8");
 
 					// Create Roo project by launching Roo and invoking the
 					// create project command
@@ -172,6 +185,16 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						if (RooUiUtil.isRoo120OrGreater(install)) {
 							builder.append(" --packaging ").append(packagingProvider);
 						}
+					}
+					else if(type == ProjectType.MULTIMODULE_STANDARD){
+						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --java ").append(rooJavaVersion);
+						builder.append(" --multimodule STANDARD");
+					}
+					else if(type == ProjectType.MULTIMODULE_BASIC){
+						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --java ").append(rooJavaVersion);
+						builder.append(" --multimodule BASIC");
 					}
 					else if(type == ProjectType.ADDON_SUITE){
 						builder.append(" --projectName ").append(projectPage.getProjectName());
@@ -322,10 +345,10 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 	public enum ProjectType {
 
-		PROJECT, ADDON_SIMPLE, ADDON_ADVANCED, ADDON_SUITE;
+		PROJECT, MULTIMODULE_STANDARD, MULTIMODULE_BASIC, ADDON_SIMPLE, ADDON_ADVANCED, ADDON_SUITE;
 
 		public String getCommand() {
-			if (this == PROJECT) {
+			if (this == PROJECT || this == MULTIMODULE_STANDARD || this == MULTIMODULE_BASIC) {
 				return "project";
 			}
 			else if (this == ADDON_SIMPLE) {
@@ -344,6 +367,12 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 			if (this == PROJECT) {
 				return "Standard";
 			}
+			else if (this == MULTIMODULE_STANDARD) {
+				return "Multimodule Standard";
+			}
+			else if (this == MULTIMODULE_BASIC) {
+				return "Multimodule Basic";
+			}
 			else if (this == ADDON_SIMPLE) {
 				return "Add-on simple";
 			}
@@ -359,6 +388,12 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 		public static ProjectType fromDisplayString(String display) {
 			if (display.equals("Standard")) {
 				return PROJECT;
+			}
+			else if (display.equals("Multimodule Standard")) {
+				return MULTIMODULE_STANDARD;
+			}
+			else if (display.equals("Multimodule Basic")) {
+				return MULTIMODULE_BASIC;
 			}
 			else if (display.equals("Add-on simple")) {
 				return ADDON_SIMPLE;

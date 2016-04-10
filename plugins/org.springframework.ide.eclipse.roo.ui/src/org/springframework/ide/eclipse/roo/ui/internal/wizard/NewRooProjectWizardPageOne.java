@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2015 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -57,11 +57,16 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -151,7 +156,8 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 
 				public void modifyText(ModifyEvent e) {
 					ProjectType type = getProjectType();
-					fdescriptionField.setEnabled(type != ProjectType.PROJECT);
+					fdescriptionField.setEnabled(type != ProjectType.PROJECT && type != ProjectType.MULTIMODULE_BASIC
+							&& type != ProjectType.MULTIMODULE_STANDARD);
 					if (packagingProviderGroup != null) {
 						packagingProviderGroup.updateEnablement();
 					}
@@ -485,12 +491,23 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 				}
 			}
 			
-			// Roo Addon Suite generation only is available on Spring Roo 2.0+ version
+			// Roo Addon Suite generation is only available on Spring Roo 2.0+ version
 			if(!version.startsWith("2") && getProjectType().equals(ProjectType.ADDON_SUITE)){
-				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to use a functionality that is only available on Spring Roo 2.0+ versions."
+				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to generate an Spring Roo Addon Suite, but this functionality is only available on Spring Roo 2.0+ versions."
 						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
 				fNameGroup.fTemplateField.selectItem(0);
 			}
+			
+			// Multimodule generation is only available on Spring Roo 2.0+ version
+			if (!version.startsWith("2") && (getProjectType().equals(ProjectType.MULTIMODULE_BASIC)
+					|| getProjectType().equals(ProjectType.MULTIMODULE_STANDARD))) {
+				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to generate multimodule project, but this functionality is only available on Spring Roo 2.0+ versions."
+						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
+				fNameGroup.fTemplateField.selectItem(0);
+			}
+			
+			
+			
 			
 		}
 
@@ -988,40 +1005,57 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		final Composite composite = new Composite(parent, SWT.NULL);
-		composite.setFont(parent.getFont());
-		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
-		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-
+		final Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new FillLayout());
+		
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.BORDER | SWT.V_SCROLL);
+		scrolledComposite.setLayout(new FillLayout());
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+		scrolledComposite.setAlwaysShowScrollBars(true);
+		
+		final Composite subContainer = new Composite(scrolledComposite, SWT.NONE);
+		subContainer.setFont(parent.getFont());
+		subContainer.setLayout(initGridLayout(new GridLayout(1, false), true));
+		subContainer.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		
 		// create UI elements
-		Control nameControl = createNameControl(composite);
+		Control nameControl = createNameControl(subContainer);
 		nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control rooHomeControl = rooInstallGroup.createControl(composite);
+		Control rooHomeControl = rooInstallGroup.createControl(subContainer);
 		rooHomeControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT || DependencyManagementUtils.IS_STS_MAVEN_PRESENT) {
-			Control dependencyManagementControl = dependencyManagementGroup.createControl(composite);
+			Control dependencyManagementControl = dependencyManagementGroup.createControl(subContainer);
 			dependencyManagementControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 		
-		Control providerControl = packagingProviderGroup.createControl(composite);
+		Control providerControl = packagingProviderGroup.createControl(subContainer);
 		providerControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control locationControl = createLocationControl(composite);
+		Control locationControl = createLocationControl(subContainer);
 		locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control workingSetControl = createWorkingSetControl(composite);
+		Control workingSetControl = createWorkingSetControl(subContainer);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		scrolledComposite.setContent(subContainer);
+		
+		scrolledComposite.addControlListener(new ControlAdapter() {
+		    public void controlResized(ControlEvent e) {
+		        Rectangle r = scrolledComposite.getClientArea();
+		        scrolledComposite.setMinSize(subContainer
+		                .computeSize(r.width, SWT.DEFAULT));
+		    }
+		});
 
-		setControl(composite);
+		setControl(container);
 	}
 
 	protected void setControl(Control newControl) {
 		Dialog.applyDialogFont(newControl);
-
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newControl, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
-
 		super.setControl(newControl);
 	}
 
