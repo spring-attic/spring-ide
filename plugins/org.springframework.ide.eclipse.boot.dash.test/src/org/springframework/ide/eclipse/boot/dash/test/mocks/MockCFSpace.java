@@ -39,6 +39,10 @@ public class MockCFSpace extends CFSpaceData {
 		this.owner = owner;
 	}
 
+	public String getDefaultDomain() {
+		return owner.getDefaultDomain();
+	}
+
 	public List<CFService> getServices() {
 		return ImmutableList.copyOf(servicesByName.values());
 	}

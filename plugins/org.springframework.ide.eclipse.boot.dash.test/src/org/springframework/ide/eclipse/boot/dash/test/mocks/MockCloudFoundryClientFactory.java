@@ -87,6 +87,10 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		return it;
 	}
 
+	public String getDefaultDomain() {
+		return domainsByName.keySet().iterator().next();
+	}
+
 	public MockCFSpace defSpace(String orgName, String spaceName) {
 		String key = orgName+"/"+spaceName;
 		MockCFSpace existing = spacesByName.get(key);

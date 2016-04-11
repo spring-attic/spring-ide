@@ -428,6 +428,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 	}
 
+	public void removeApplication(String appName) {
+		synchronized (this) {
+			applications.removeApplication(appName);
+		}
+	}
+
 	/**
 	 * Perform a 'shallow' update of the application elements in this model. This only
 	 * ensures that elements with the right names exist, creating needed ones and
@@ -563,16 +569,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             properties
 	 */
 	public CloudApplicationDeploymentProperties resolveDeploymentProperties(CloudAppDashElement cde, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		/*
-		 * Refresh the cloud application first to get the latest deployment properties changes
-		 */
 		IProject project = cde.getProject();
 		CFApplication app = cde.getSummaryData();
 
-		new RefreshSomeApplications(this, Collections.singletonList(app)).run(monitor);
-		/*
-		 * Now construct deployment properties object
-		 */
 		Map<String, Object> cloudData = buildOperationCloudData(monitor, project, app);
 
 		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);

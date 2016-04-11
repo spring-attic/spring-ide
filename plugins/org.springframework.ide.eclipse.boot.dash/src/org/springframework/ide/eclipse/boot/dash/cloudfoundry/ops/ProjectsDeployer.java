@@ -109,13 +109,13 @@ public class ProjectsDeployer extends CloudOperation {
 					}
 				}
 			} finally {
-				cde.refresh();
 				cde.startOperationEnded(error, cancelToken, monitor);
 			}
-			//Careful, we do this at the very end because if we do it before the refresh, then creating the SSH tunnel will fail as
-			// we have not yet obtained the app's info and will fail to determine app guid to connect to.
-			if (error==null) {
-				if (isDebugEnabled()) {
+			//Don't forget to refresh the element in the model after pushing it.
+			if (cde.refresh()!=null) {
+				//Careful... connectting the debugger must be done after the refresh because it needs the app guid which
+				// won't be available for a newly created element if its not yet been populated with data from CF.
+				if (error==null && isDebugEnabled()) {
 					debugSupport.createOperation(cde, "Connect Debugger for "+cde.getName() , ui, cancelToken).runOp(progressMonitor);
 				}
 			}

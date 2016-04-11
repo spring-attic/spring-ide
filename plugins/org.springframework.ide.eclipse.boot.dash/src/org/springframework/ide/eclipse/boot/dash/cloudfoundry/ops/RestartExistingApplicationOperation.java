@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -73,24 +74,22 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		app.startOperationStarting();
 		try {
-			CFApplication application = model.getRunTarget().getClient().getApplication(appName);
-			// Check that the application actually exists in Cloud Foundry
-			if (application == null) {
+			//Refresh app data and check that the application (still) exists in Cloud Foundry
+			// This also ensures that the 'diff change dialog' will pick up on the latest changes.
+			//TODO: should this refresh be moved closer to the where we actually compute the diff?
+			app = app.refresh();
+			if (app==null) {
 				throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 						"No Cloud Application found for '" + appName + "'"));
 			}
-			CloudAppDashElement cde = model.getApplication(appName);
-			if (cde == null) {
-				throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
-						"CF App not found '" + appName + "'"));
-			} else if (cde.getProject()==null) {
+			IProject project = app.getProject();
+			if (project==null) {
 				throw new CoreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
 						"Local project not associated to CF app '" + appName + "'"));
 			}
-			IProject project = cde.getProject();
 
 			CloudApplicationDeploymentProperties properties = deploymentProperties==null
-					?model.resolveDeploymentProperties(cde, ui, monitor)
+					?model.resolveDeploymentProperties(app, ui, monitor)
 					:deploymentProperties;
 
 			// Update JAVA_OPTS env variable with Remote DevTools Client secret
@@ -112,10 +111,10 @@ public class RestartExistingApplicationOperation extends CloudApplicationOperati
 			// stats that may not
 			// be available (and thus throw 503)
 			CancelationToken cancelTok = getCancelationToken();
-			deploymentOperations.add(new ApplicationStopOperation(cde, false, cancelTok));
+			deploymentOperations.add(new ApplicationStopOperation(app, false, cancelTok));
 			deploymentOperations.add(new ApplicationPropertiesUpdateOperation(properties, model, cancelTok));
 			deploymentOperations.add(new ApplicationPushOperation(properties, model, ui, cancelTok));
-			deploymentOperations.add(this.operations.restartOnly(cde, cancelTok));
+			deploymentOperations.add(this.operations.restartOnly(app, cancelTok));
 
 			CloudApplicationOperation op = new CompositeApplicationOperation(opName, model, properties.getAppName(),
 					deploymentOperations, cancelTok);

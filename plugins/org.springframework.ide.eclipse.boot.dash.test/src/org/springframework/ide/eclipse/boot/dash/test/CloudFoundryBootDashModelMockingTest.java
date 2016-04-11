@@ -24,9 +24,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
+
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -891,6 +893,72 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(0, deployedApp.getNumberOfPushes());							  // since op was canceled it should not have deployed the app.
 
 		verify(ui).confirmOperation(any(), any());
+	}
+
+	@Test public void manifestDiffDialogNotShownWhenNothingChanged() throws Exception {
+		final String appName = "foo";
+
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		MockCFApplication deployedApp = space.defApp(appName);
+		deployedApp.start();
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setDeploymentManifestFile(project.getFile("manifest.yml"));
+		app.setProject(project);
+		assertEquals(1, app.getActualInstances());
+
+//		deployedApp.scaleInstances(2); // change it 'externally'
+		assertEquals(1, app.getActualInstances()); //The model doesn't know yet that it has changed!
+
+//		harness.answerDeploymentPrompt(ui, appName, appName);
+
+		app.restart(RunState.RUNNING, ui);
+
+		waitForJobsToComplete();
+
+		//If no change was detected the manfiest compare dialog shouldn't have popped.
+		verify(ui, never()).openManifestCompareDialog(any(), any());
+	}
+
+	@Test public void manifestDiffDialogShownWhenInstancesChangedExternally() throws Exception {
+		final String appName = "foo";
+
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		MockCFApplication deployedApp = space.defApp(appName);
+		deployedApp.start();
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setDeploymentManifestFile(project.getFile("manifest.yml"));
+		app.setProject(project);
+		assertEquals(1, app.getActualInstances());
+
+		deployedApp.scaleInstances(2); // change it 'externally'
+		assertEquals(1, app.getActualInstances()); //The model doesn't know yet that it has changed!
+
+		app.restart(RunState.RUNNING, ui);
+
+		waitForJobsToComplete();
+
+		//If the change was detected the deployment props dialog should have popped exactly once.
+		verify(ui).openManifestCompareDialog(any(), any());
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////

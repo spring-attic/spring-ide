@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.eclipse.core.runtime.Assert;
@@ -65,7 +66,7 @@ public class MockCFApplication {
 
 	private final String name;
 	private final UUID guid;
-	private final int instances;
+	private int instances;
 
 	private Map<String, String> env = new HashMap<>();
 	private int memory = 1024;
@@ -74,7 +75,7 @@ public class MockCFApplication {
 	private List<String> uris = new ArrayList<>();
 	private CFAppState state = CFAppState.STOPPED;
 	private int diskQuota = 1024;
-	private int timeout = (int)TimeUnit.MINUTES.toMillis(2);
+	private Integer timeout = null;
 	private String command = null;
 	private String stack = null;
 	private MockCloudFoundryClientFactory owner;
@@ -103,6 +104,7 @@ public class MockCFApplication {
 				1,
 				CFAppState.STOPPED
 		);
+		setUris(ImmutableList.of(name+"."+space.getDefaultDomain()));
 	}
 
 	public String getName() {
@@ -294,6 +296,18 @@ public class MockCFApplication {
 		stop();
 		start();
 	}
+
+	public void scaleInstances(int desiredInstances) {
+		Assert.isLegal(desiredInstances>0);
+		Builder<CFInstanceStats> builder = ImmutableList.builder();
+		builder.addAll(stats);
+		for (int i = 0; i < desiredInstances; i++) {
+			builder.add(new MockCFInstanceStats(CFInstanceState.RUNNING));
+		}
+		stats = builder.build();
+		this.instances = desiredInstances;
+	}
+
 
 	public void setBuildpackUrlMaybe(String buildpack) {
 		if (buildpack!=null) {

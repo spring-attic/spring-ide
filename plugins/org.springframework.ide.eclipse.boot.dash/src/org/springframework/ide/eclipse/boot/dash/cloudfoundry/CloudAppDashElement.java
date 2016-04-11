@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -504,13 +505,21 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	}
 
-	public void refresh() {
-		try {
-			CFApplicationDetail data = getClient().getApplication(getName());
-			getCloudModel().updateApplication(data);
-		} catch (Exception e) {
-			BootDashActivator.log(e);
+	/**
+	 * Attempt to refresh the data associated with this app in the model. Returns the
+	 * refreshed element if this was succesful, null if the element was deleted (because during the
+	 * refresh we discovered it not longer exists) and if something failed trying to refresh the element.
+	 */
+	public CloudAppDashElement refresh() throws Exception {
+		CFApplicationDetail data = getClient().getApplication(getName());
+		if (data==null) {
+			//Looks like element no longer exist in CF so remove it from the model
+			CloudFoundryBootDashModel model = getCloudModel();
+			model.removeApplication(getName());
+			return null;
 		}
+		getCloudModel().updateApplication(data);
+		return this;
 	}
 
 	private ClientRequests getClient() {
