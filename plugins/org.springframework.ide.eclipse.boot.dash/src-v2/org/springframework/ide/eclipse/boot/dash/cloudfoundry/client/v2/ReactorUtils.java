@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Function;
 
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
-
 import reactor.core.publisher.Mono;
 
 /**
