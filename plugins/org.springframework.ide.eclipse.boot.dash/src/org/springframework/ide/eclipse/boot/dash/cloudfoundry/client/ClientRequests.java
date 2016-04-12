@@ -21,6 +21,7 @@ import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
 
 import reactor.core.publisher.Mono;
 

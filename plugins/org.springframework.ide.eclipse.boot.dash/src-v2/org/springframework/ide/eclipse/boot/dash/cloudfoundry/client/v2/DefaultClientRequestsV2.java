@@ -75,6 +75,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
