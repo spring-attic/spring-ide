@@ -453,7 +453,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 			@Override
 			public String getSshCode() throws Exception {
-				throw new OperationNotSupportedException("CF V2 client doesn't support SSH access yet");
+				return v1.getSshClientSupport().getSshCode();
+//				throw new OperationNotSupportedException("CF V2 client doesn't support SSH access yet");
 			}
 		};
 	}
