@@ -54,6 +54,7 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -391,7 +392,7 @@ public class DefaultClientRequests implements ClientRequests {
 
 	public SshClientSupport getSshClientSupport() throws Exception {
 		HttpProxyConfiguration proxyConf = getProxyConf();
-		return new SshClientSupport(client, getCloudInfoV2(), clientParams.isSelfsigned(), proxyConf);
+		return new SshClientSupportV1(client, getCloudInfoV2(), clientParams.isSelfsigned(), proxyConf);
 	}
 
 	private BuildpackSupport getBuildpackSupport() throws Exception {
