@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.zip.ZipFile;
 
 import javax.naming.OperationNotSupportedException;
@@ -355,9 +356,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		Mono<StreamingLogToken> result = Mono.defer(() -> {
 			return Mono.just(v1.streamLogs(appName, logConsole));
 		})
-		.retry()
+		.log("streamLog before retry")
+		.retry(falseAfter(Duration.ofMinutes(1)))
+		.log("streamLog after retry")
 		.cache();
-		result.publishOn(SCHEDULER_GROUP).consume((token) -> {});
+		result.subscribeOn(SCHEDULER_GROUP).consume((token) -> {});
 
 		return result;
 
@@ -373,6 +376,24 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //			Thread.currentThread().setContextClassLoader(contextClassLoader);
 //		}
 //		return null;
+	}
+
+	private Predicate<Throwable> falseAfter(Duration timeToWait) {
+		return new Predicate<Throwable>() {
+
+			private Long firstCalledAt;
+
+			@Override
+			public boolean test(Throwable t) {
+				if (firstCalledAt==null) {
+					firstCalledAt = System.currentTimeMillis();
+				}
+				long waitedTime = System.currentTimeMillis() - firstCalledAt;
+				debug("falseAfter: remaining = "+(timeToWait.toMillis() - waitedTime));
+				return waitedTime < timeToWait.toMillis();
+			}
+
+		};
 	}
 
 	@Override
@@ -425,30 +446,32 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 			@Override
 			public String getSshUser(String appName, int instance) throws Exception {
-				return getApplicationId(appName)
-				.map((guid) -> getSshUser(UUID.fromString(guid), instance))
-				.get();
+				return ReactorUtils.get(
+						getApplicationId(appName)
+						.map((guid) -> getSshUser(UUID.fromString(guid), instance))
+				);
 			}
 
 			@Override
 			public SshHost getSshHost() throws Exception {
-				return info.then((i) -> {
-					String fingerPrint = i.getApplicationSshHostKeyFingerprint();
-					String host = i.getApplicationSshEndpoint();
-					int port = 22; //Default ssh port
-					if (host!=null) {
-						if (host.contains(":")) {
-							String[] pieces = host.split(":");
-							host = pieces[0];
-							port = Integer.parseInt(pieces[1]);
+				return ReactorUtils.get(
+					info.then((i) -> {
+						String fingerPrint = i.getApplicationSshHostKeyFingerprint();
+						String host = i.getApplicationSshEndpoint();
+						int port = 22; //Default ssh port
+						if (host!=null) {
+							if (host.contains(":")) {
+								String[] pieces = host.split(":");
+								host = pieces[0];
+								port = Integer.parseInt(pieces[1]);
+							}
 						}
-					}
-					if (host!=null) {
-						return Mono.just(new SshHost(host, port, fingerPrint));
-					}
-					return Mono.empty();
-				})
-				.get();
+						if (host!=null) {
+							return Mono.just(new SshHost(host, port, fingerPrint));
+						}
+						return Mono.empty();
+					})
+				);
 			}
 
 			@Override
@@ -532,16 +555,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public List<CFBuildpack> getBuildpacks() throws Exception {
 		//XXX CF V2: getBuilpacks using 'operations' API.
-		return PaginationUtils.requestResources((page) -> {
-			return client.buildpacks()
-			.list(ListBuildpacksRequest.builder()
-				.page(page)
-				.build()
-			);
-		})
-		.map(CFWrappingV2::wrap)
-		.toList()
-		.get();
+		return ReactorUtils.get(
+			PaginationUtils.requestResources((page) -> {
+				return client.buildpacks()
+				.list(ListBuildpacksRequest.builder()
+					.page(page)
+					.build()
+				);
+			})
+			.map(CFWrappingV2::wrap)
+			.toList()
+		);
 	}
 
 	@Override
