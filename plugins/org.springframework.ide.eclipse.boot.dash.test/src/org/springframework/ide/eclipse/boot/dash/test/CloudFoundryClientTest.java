@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -46,6 +47,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -481,6 +485,33 @@ public class CloudFoundryClientTest {
 			}
 			assertEquals(command, app.getCommand());
 		}
+	}
+
+	@Test
+	public void testSshSupport() throws Exception {
+		String appName = appHarness.randomAppName();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		client.push(params);
+
+		SshClientSupport sshSupport = client.getSshClientSupport();
+		SshHost sshHost = sshSupport.getSshHost();
+		System.out.println(sshHost);
+		assertEquals("ssh.run.pivotal.io", sshHost.getHost());
+		assertEquals(2222, sshHost.getPort());
+		assertTrue(StringUtil.hasText(sshHost.getFingerPrint()));
+
+		assertTrue(StringUtil.hasText(sshSupport.getSshCode()));
+		UUID appGuid = client.getApplication(appName).getGuid();
+		String sshUser = sshSupport.getSshUser(appGuid, 0);
+		System.out.println("sshUser = "+sshUser);
+		assertTrue(StringUtil.hasText(sshUser));
+
+		String code = sshSupport.getSshCode();
+		System.out.println("sshCode = "+code);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

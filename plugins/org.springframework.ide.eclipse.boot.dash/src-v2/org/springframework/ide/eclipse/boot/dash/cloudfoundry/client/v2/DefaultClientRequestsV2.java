@@ -23,6 +23,8 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.zip.ZipFile;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
@@ -34,6 +36,8 @@ import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
+import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
@@ -76,6 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -130,6 +135,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private CloudFoundryOperations operations;
 	private Mono<String> orgId;
 
+	private Mono<GetInfoResponse> info;
+
 	@Deprecated
 	private DefaultClientRequestsV1 v1;
 
@@ -146,6 +153,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.target(params.getOrgName(), params.getSpaceName())
 			.build();
 		this.orgId = getOrgId();
+		this.info = client.info().get(GetInfoRequest.builder().build()).cache();
 	}
 
 	private Mono<String> getOrgId() {
@@ -408,7 +416,46 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public SshClientSupport getSshClientSupport() throws Exception {
-		return v1.getSshClientSupport();
+		return new SshClientSupport() {
+
+			@Override
+			public String getSshUser(UUID appGuid, int instance) {
+				return "cf:"+appGuid+"/" + instance;
+			}
+
+			@Override
+			public String getSshUser(String appName, int instance) throws Exception {
+				return getApplicationId(appName)
+				.map((guid) -> getSshUser(UUID.fromString(guid), instance))
+				.get();
+			}
+
+			@Override
+			public SshHost getSshHost() throws Exception {
+				return info.then((i) -> {
+					String fingerPrint = i.getApplicationSshHostKeyFingerprint();
+					String host = i.getApplicationSshEndpoint();
+					int port = 22; //Default ssh port
+					if (host!=null) {
+						if (host.contains(":")) {
+							String[] pieces = host.split(":");
+							host = pieces[0];
+							port = Integer.parseInt(pieces[1]);
+						}
+					}
+					if (host!=null) {
+						return Mono.just(new SshHost(host, port, fingerPrint));
+					}
+					return Mono.empty();
+				})
+				.get();
+			}
+
+			@Override
+			public String getSshCode() throws Exception {
+				throw new OperationNotSupportedException("CF V2 client doesn't support SSH access yet");
+			}
+		};
 	}
 
 	private CloudFoundryOperations operatationsFor(OrganizationSummary org) {
