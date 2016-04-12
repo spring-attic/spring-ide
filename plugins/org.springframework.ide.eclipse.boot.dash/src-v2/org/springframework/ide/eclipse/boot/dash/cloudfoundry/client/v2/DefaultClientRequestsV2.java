@@ -60,6 +60,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -285,19 +286,26 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.map(ImmutableList::copyOf)
 		);
 	}
-
+	/**
+	 * Get details for a given list of applications. This does a 'best' effort getting the details for
+	 * as many apps as possible but it does not guarantee that it will return details for each app in the
+	 * list. This is to avoid one 'bad apple' from spoiling the whole batch. (I.e if failing to fetch details for
+	 * some apps we can still return details for the others rather than throw an exception).
+	 */
 	@Override
-	public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
+	public Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception {
 		return Flux.fromIterable(appsToLookUp)
 		.flatMap((CFApplication appSummary) -> {
 			return operations.applications().get(GetApplicationRequest.builder()
 					.name(appSummary.getName())
 					.build()
 			)
+			.otherwise((error) -> {
+				BootDashActivator.log(error);
+				return Mono.empty();
+			})
 			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails));
-		})
-		.toList()
-		.get(timeToWait);
+		});
 	}
 
 	@Override

@@ -36,11 +36,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
@@ -140,13 +142,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp,
-				long timeToWait) throws Exception {
-			ImmutableList.Builder<CFApplicationDetail> builder = ImmutableList.builder();
-			for (CFApplication app : appsToLookUp) {
-				builder.add(getSpace().getApplication(app.getGuid()).getDetailedInfo());
-			}
-			return builder.build();
+		public Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception {
+			MockCFSpace space = getSpace();
+			return Flux.fromIterable(appsToLookUp)
+			.flatMap((app) -> {
+				return ReactorUtils.just(space.getApplication(app.getGuid()).getDetailedInfo());
+			});
 		}
 
 		@Override
