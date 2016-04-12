@@ -486,7 +486,7 @@
 				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
-					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -530,7 +530,7 @@
 				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
-					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
