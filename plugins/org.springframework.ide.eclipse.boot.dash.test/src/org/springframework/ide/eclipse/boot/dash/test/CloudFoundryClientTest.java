@@ -67,6 +67,9 @@ public class CloudFoundryClientTest {
 	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
 	@Rule
+	public TestBracketter bracketer = new TestBracketter();
+
+	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
 
 	@Rule
