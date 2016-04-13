@@ -515,6 +515,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						.map((space) -> CFWrappingV2.wrap(org, space));
 			})
 			.toList()
+			.log("getSpaces")
 		);
 	}
 

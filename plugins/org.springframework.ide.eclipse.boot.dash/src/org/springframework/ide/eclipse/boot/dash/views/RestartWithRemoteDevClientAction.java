@@ -19,12 +19,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStartWithRemoteClientOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
@@ -81,10 +79,7 @@ public class RestartWithRemoteDevClientAction extends AbstractCloudAppDashElemen
 		for (BootDashElement _e : getSelectedElements()) {
 			if (_e instanceof CloudAppDashElement && _e.getBootDashModel() instanceof CloudFoundryBootDashModel && _e.getProject() != null) {
 				CloudAppDashElement e = (CloudAppDashElement) _e;
-				CloudFoundryBootDashModel model = (CloudFoundryBootDashModel) e.getBootDashModel();
-				String opName = "Restart Remote DevTools Client for application '" + e.getName() + "'";
-				model.getOperationsExecution().runOpAsynch(new ApplicationStartWithRemoteClientOperation(opName, e,
-						RunState.RUNNING, model.getApplicationDeploymentOperations(), ui, e.createCancelationToken()));
+				e.restartWithRemoteClient(ui, e.createCancelationToken());
 			}
 		}
 	}

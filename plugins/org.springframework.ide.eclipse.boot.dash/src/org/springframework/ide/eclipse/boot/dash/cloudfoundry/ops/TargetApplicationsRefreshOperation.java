@@ -66,8 +66,8 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				this.model.updateAppNames(getNames(apps));
 
 				// 2. Launch the slower app stats/instances refresh operation.
-				this.model.getOperationsExecution(ui).runOpAsynch(new AppInstancesRefreshOperation(this.model, apps));
-				this.model.getOperationsExecution(ui).runOpAsynch(new HealthCheckRefreshOperation(this.model));
+				this.model.runAsynch(new AppInstancesRefreshOperation(this.model, apps), ui);
+				this.model.runAsynch(new HealthCheckRefreshOperation(this.model), ui);
 				model.setRefreshState(RefreshState.READY);
 			} catch (Exception e) {
 				/*

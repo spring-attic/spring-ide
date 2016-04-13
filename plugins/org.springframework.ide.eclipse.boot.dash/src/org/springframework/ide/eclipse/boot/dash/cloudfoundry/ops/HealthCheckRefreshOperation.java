@@ -43,7 +43,7 @@ public class HealthCheckRefreshOperation extends CloudOperation {
 						cde.setHealthCheck(client.getHealthCheck(guid));
 					}
 				};
-				exec.runOpAsynch(singleAppRefresh);
+				exec.runAsynch(singleAppRefresh);
 			}
 		}
 	}

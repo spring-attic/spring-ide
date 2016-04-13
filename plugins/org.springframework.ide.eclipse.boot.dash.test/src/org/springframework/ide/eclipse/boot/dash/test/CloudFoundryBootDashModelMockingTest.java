@@ -24,10 +24,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
-
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
 import java.io.IOException;
@@ -71,7 +70,6 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
-import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
@@ -834,11 +832,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
-		app.restartOnly(RunState.RUNNING, ui);
+		app.restartOnlyAsynch(ui, app.createCancelationToken());
 		waitForState(app, RunState.STARTING, 3000);
 
 		app.stopAsync(ui);
-
 		waitForState(app, RunState.INACTIVE, 20000);
 	}
 

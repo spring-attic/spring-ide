@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 public class ProjectsDeployer extends CloudOperation {
@@ -75,51 +74,57 @@ public class ProjectsDeployer extends CloudOperation {
 	private void deployProject(IProject project, IProgressMonitor monitor) throws Exception {
 		CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 		CloudAppDashElement cde = model.ensureApplication(properties.getAppName());
-		runAsync("Deploy project '"+project.getName()+"'", properties.getAppName(), (IProgressMonitor progressMonitor) -> {
-			ClientRequests client = model.getRunTarget().getClient();
-			CancelationToken cancelToken = cde.startOperationStarting();
-			Exception error = null;
-			try {
-				if (client.applicationExists(properties.getAppName())) {
-					if (!confirmOverwriteExisting(properties)) {
-						throw new OperationCanceledException();
-					}
-				}
-				cde.setDeploymentManifestFile(properties.getManifestFile());
-				cde.setProject(project);
-				copyTags(project, cde);
-				cde.print("Pushing project '"+project.getName()+"'");
-				try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
-					if (isDebugEnabled()) {
-						debugSupport.setupEnvVars(args.getEnv());
-					}
-					client.push(args);
-					cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
-				}
-			} catch (Exception e) {
-				cde.printError("Pushing FAILED!");
-				error = e;
-				if (!(e instanceof OperationCanceledException)) {
-					BootDashActivator.log(e);
-					if (ui != null) {
-						String message = e.getMessage() != null && e.getMessage().trim().length() > 0 ? e.getMessage()
-								: "Error type: " + e.getClass().getName()
-										+ ". Check Error Log view for further details.";
-						ui.errorPopup("Operation Failure", message);
-					}
-				}
-			} finally {
-				cde.startOperationEnded(error, cancelToken, monitor);
-			}
-			//Don't forget to refresh the element in the model after pushing it.
-			if (cde.refresh()!=null) {
-				//Careful... connectting the debugger must be done after the refresh because it needs the app guid which
-				// won't be available for a newly created element if its not yet been populated with data from CF.
-				if (error==null && isDebugEnabled()) {
-					debugSupport.createOperation(cde, "Connect Debugger for "+cde.getName() , ui, cancelToken).runOp(progressMonitor);
+		model.runAsynch("Deploy project '"+project.getName()+"'", properties.getAppName(), (IProgressMonitor progressMonitor) -> {
+			doDeployProject(cde, properties, project, progressMonitor);
+		}, ui);
+	}
+
+	protected void doDeployProject(CloudAppDashElement cde, CloudApplicationDeploymentProperties properties,
+			IProject project, IProgressMonitor monitor) throws Exception {
+		ClientRequests client = model.getRunTarget().getClient();
+		CancelationToken cancelToken = cde.createCancelationToken();
+		cde.startOperationStarting();
+		Exception error = null;
+		try {
+			if (client.applicationExists(properties.getAppName())) {
+				if (!confirmOverwriteExisting(properties)) {
+					throw new OperationCanceledException();
 				}
 			}
-		});
+			cde.setDeploymentManifestFile(properties.getManifestFile());
+			cde.setProject(project);
+			copyTags(project, cde);
+			cde.print("Pushing project '"+project.getName()+"'");
+			try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
+				if (isDebugEnabled()) {
+					debugSupport.setupEnvVars(args.getEnv());
+				}
+				client.push(args);
+				cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
+			}
+		} catch (Exception e) {
+			cde.printError("Pushing FAILED!");
+			error = e;
+			if (!(e instanceof OperationCanceledException)) {
+				BootDashActivator.log(e);
+				if (ui != null) {
+					String message = e.getMessage() != null && e.getMessage().trim().length() > 0 ? e.getMessage()
+							: "Error type: " + e.getClass().getName()
+									+ ". Check Error Log view for further details.";
+					ui.errorPopup("Operation Failure", message);
+				}
+			}
+		} finally {
+			cde.startOperationEnded(error, cancelToken, monitor);
+		}
+		//Don't forget to refresh the element in the model after pushing it.
+		if (cde.refresh()!=null) {
+			//Careful... connectting the debugger must be done after the refresh because it needs the app guid which
+			// won't be available for a newly created element if its not yet been populated with data from CF.
+			if (error==null && isDebugEnabled()) {
+				debugSupport.createOperation(cde, "Connect Debugger for "+cde.getName() , ui, cancelToken).runOp(monitor);
+			}
+		}
 	}
 
 	private boolean isDebugEnabled() {
@@ -154,16 +159,6 @@ public class ProjectsDeployer extends CloudOperation {
 			}
 			targetBde.setTags(targetTags);
 		}
-	}
-
-
-	private void runAsync(String opName, String appName, JobBody runnable) {
-		model.getOperationsExecution(ui).runOpAsynch(new CloudApplicationOperation(opName, model, appName, CancelationTokens.NULL) {
-			@Override
-			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				runnable.run(monitor);
-			}
-		});
 	}
 
 	private boolean confirmOverwriteExisting(CloudApplicationDeploymentProperties properties) {
