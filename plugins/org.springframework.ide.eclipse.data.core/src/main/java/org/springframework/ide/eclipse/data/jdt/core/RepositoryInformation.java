@@ -262,7 +262,7 @@ public class RepositoryInformation {
 		if (hasAnnotation(method, "Procedure")) return false;
 		if (Flags.isDefaultMethod(method.getFlags())) return false;
 
-		String[] prefixes = new String[] {"find", "read", "get", "query", "count", "delete", "remove"};
+		String[] prefixes = new String[] {"findBy", "read", "get", "query", "count", "delete", "remove"};
 		String methodName = method.getElementName();
 		for (int i = 0; i < prefixes.length; i++) {
 			if (methodName.startsWith(prefixes[i])) {

@@ -14,26 +14,25 @@ import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.R
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
-import org.cloudfoundry.client.v2.applications.ApplicationResource;
-import org.cloudfoundry.client.v2.applications.ListApplicationsRequest;
-import org.cloudfoundry.client.v2.applications.ListApplicationsResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
+import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
@@ -42,10 +41,11 @@ import org.cloudfoundry.client.v2.stacks.GetStackRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
-import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.operations.applications.PushApplicationRequest;
+import org.cloudfoundry.operations.applications.PushApplicationRequest.PushApplicationRequestBuilder;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
@@ -53,6 +53,14 @@ import org.cloudfoundry.operations.applications.StopApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
+import org.cloudfoundry.operations.routes.CreateRouteRequest;
+import org.cloudfoundry.operations.routes.DeleteRouteRequest;
+import org.cloudfoundry.operations.routes.ListRoutesRequest;
+import org.cloudfoundry.operations.routes.ListRoutesRequest.Level;
+import org.cloudfoundry.operations.routes.MapRouteRequest;
+import org.cloudfoundry.operations.routes.Route;
+import org.cloudfoundry.operations.routes.Route.RouteBuilder;
+import org.cloudfoundry.operations.routes.UnmapRouteRequest;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
@@ -63,6 +71,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -74,7 +83,11 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -129,6 +142,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private CloudFoundryOperations operations;
 	private Mono<String> orgId;
 
+	private Mono<GetInfoResponse> info;
+
 	@Deprecated
 	private DefaultClientRequestsV1 v1;
 
@@ -145,6 +160,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.target(params.getOrgName(), params.getSpaceName())
 			.build();
 		this.orgId = getOrgId();
+		this.info = client.info().get(GetInfoRequest.builder().build()).cache();
 	}
 
 	private Mono<String> getOrgId() {
@@ -248,17 +264,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private <T> Mono<T> prefetch(String id, Mono<T> toFetch) {
-//		IOException e = new IOException("Failed prefetch '"+id+"'");
-//		e.fillInStackTrace();
 		return toFetch
-		.log(id + " before error handler")
+//		.log(id + " before error handler")
 		.otherwise((error) -> {
 			BootActivator.log(new IOException("Failed prefetch '"+id+"'", error));
 			return Mono.empty();
 		})
-		.log(id + " after error handler")
+//		.log(id + " after error handler")
 		.cache()
-		.log(id + "after cache");
+//		.log(id + "after cache")
+		;
 	}
 
 //	private <T> Mono<T> prefetch(Mono<T> toFetch) {
@@ -285,18 +300,26 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
+	/**
+	 * Get details for a given list of applications. This does a 'best' effort getting the details for
+	 * as many apps as possible but it does not guarantee that it will return details for each app in the
+	 * list. This is to avoid one 'bad apple' from spoiling the whole batch. (I.e if failing to fetch details for
+	 * some apps we can still return details for the others rather than throw an exception).
+	 */
 	@Override
-	public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception {
+	public Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception {
 		return Flux.fromIterable(appsToLookUp)
 		.flatMap((CFApplication appSummary) -> {
 			return operations.applications().get(GetApplicationRequest.builder()
 					.name(appSummary.getName())
 					.build()
 			)
+			.otherwise((error) -> {
+				BootDashActivator.log(error);
+				return Mono.empty();
+			})
 			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails));
-		})
-		.toList()
-		.get(timeToWait);
+		});
 	}
 
 	@Override
@@ -342,14 +365,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception{
-		Mono<StreamingLogToken> result = Mono.defer(() -> {
-			return Mono.just(v1.streamLogs(appName, logConsole));
+	public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception {
+		Mono<StreamingLogToken> result = Mono.fromCallable(() -> {
+			return v1.streamLogs(appName, logConsole);
 		})
-		.retry()
+//		.log("streamLog before retry")
+		.retry(falseAfter(Duration.ofMinutes(1)))
+//		.log("streamLog after retry")
 		.cache();
-		result.publishOn(SCHEDULER_GROUP).consume((token) -> {});
 
+		result.subscribeOn(SCHEDULER_GROUP).consume((token) -> {});
 		return result;
 
 //		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -363,7 +388,24 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //		} finally {
 //			Thread.currentThread().setContextClassLoader(contextClassLoader);
 //		}
-//		return null;
+	}
+
+	private Predicate<Throwable> falseAfter(Duration timeToWait) {
+		return new Predicate<Throwable>() {
+
+			private Long firstCalledAt;
+
+			@Override
+			public boolean test(Throwable t) {
+				if (firstCalledAt==null) {
+					firstCalledAt = System.currentTimeMillis();
+				}
+				long waitedTime = System.currentTimeMillis() - firstCalledAt;
+				debug("falseAfter: remaining = "+(timeToWait.toMillis() - waitedTime));
+				return waitedTime < timeToWait.toMillis();
+			}
+
+		};
 	}
 
 	@Override
@@ -407,7 +449,49 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public SshClientSupport getSshClientSupport() throws Exception {
-		return v1.getSshClientSupport();
+		return new SshClientSupport() {
+
+			@Override
+			public String getSshUser(UUID appGuid, int instance) {
+				return "cf:"+appGuid+"/" + instance;
+			}
+
+			@Override
+			public String getSshUser(String appName, int instance) throws Exception {
+				return ReactorUtils.get(
+						getApplicationId(appName)
+						.map((guid) -> getSshUser(UUID.fromString(guid), instance))
+				);
+			}
+
+			@Override
+			public SshHost getSshHost() throws Exception {
+				return ReactorUtils.get(
+					info.then((i) -> {
+						String fingerPrint = i.getApplicationSshHostKeyFingerprint();
+						String host = i.getApplicationSshEndpoint();
+						int port = 22; //Default ssh port
+						if (host!=null) {
+							if (host.contains(":")) {
+								String[] pieces = host.split(":");
+								host = pieces[0];
+								port = Integer.parseInt(pieces[1]);
+							}
+						}
+						if (host!=null) {
+							return Mono.just(new SshHost(host, port, fingerPrint));
+						}
+						return Mono.empty();
+					})
+				);
+			}
+
+			@Override
+			public String getSshCode() throws Exception {
+				return v1.getSshClientSupport().getSshCode();
+//				throw new OperationNotSupportedException("CF V2 client doesn't support SSH access yet");
+			}
+		};
 	}
 
 	private CloudFoundryOperations operatationsFor(OrganizationSummary org) {
@@ -483,16 +567,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public List<CFBuildpack> getBuildpacks() throws Exception {
 		//XXX CF V2: getBuilpacks using 'operations' API.
-		return PaginationUtils.requestResources((page) -> {
-			return client.buildpacks()
-			.list(ListBuildpacksRequest.builder()
-				.page(page)
-				.build()
-			);
-		})
-		.map(CFWrappingV2::wrap)
-		.toList()
-		.get();
+		return ReactorUtils.get(
+			PaginationUtils.requestResources((page) -> {
+				return client.buildpacks()
+				.list(ListBuildpacksRequest.builder()
+					.page(page)
+					.build()
+				);
+			})
+			.map(CFWrappingV2::wrap)
+			.toList()
+		);
 	}
 
 	@Override
@@ -544,12 +629,19 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//XXX CF V2: push should use 'manifest' in a future version of V2
 		ReactorUtils.get(APP_START_TIMEOUT,
 			operations.applications()
-			.push(CFWrappingV2.toPushRequest(params)
+			.push(toPushRequest(params)
 					.noStart(true)
+					.noRoute(true)
 					.build()
 			)
-			.after(() -> setEnvVars(params.getAppName(), params.getEnv()))
-			.after(() -> bindAndUnbindServices(params.getAppName(), params.getServices()))
+			.after(() ->
+				Flux.merge(
+					setRoutes(params.getAppName(), params.getRoutes()),
+					setEnvVars(params.getAppName(), params.getEnv()),
+					bindAndUnbindServices(params.getAppName(), params.getServices())
+				)
+				.after()
+			)
 			.after(() -> {
 				if (!params.isNoStart()) {
 					return startApp(params.getAppName());
@@ -560,6 +652,215 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	//		.log("pushing")
 		);
 		debug("Pushing app succeeded: "+params.getAppName());
+	}
+
+	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls) {
+		debug("setting routes for '"+appName+"': "+desiredUrls);
+
+		//Carefull! It is not safe map/unnmap multiple routes in parallel. Doing so causes some of the
+		// operations to fail, presumably because of some 'optimisitic locking' being used in the database
+		// that keeps track of routes.
+		//To avoid this problem we must execute all that map / unmap calls in sequence!
+		return ReactorUtils.sequence(
+				unmapUndesiredRoutes(appName, desiredUrls),
+				mapDesiredRoutes(appName, desiredUrls)
+		);
+	}
+
+	private Mono<Void> mapDesiredRoutes(String appName, Collection<String> desiredUrls) {
+		Mono<Set<String>> currentUrlsMono = getUrls(appName).cache();
+		Mono<Set<String>> domains = getDomainNames().cache();
+
+		return currentUrlsMono.then((currentUrls) -> {
+			debug("currentUrls = "+currentUrls);
+			return Flux.fromIterable(desiredUrls)
+			.flatMap((url) -> {
+				if (currentUrls.contains(url)) {
+					debug("skipping: "+url);
+					return Mono.empty();
+				} else {
+					debug("mapping: "+url);
+					return mapRoute(domains, appName, url);
+				}
+			}, 1) //!!!IN SEQUENCE!!!
+			.after();
+		});
+	}
+
+	private Mono<Void> dumpRoutes() {
+		if (DEBUG) {
+			return operations.routes().list(ListRoutesRequest.builder()
+				.level(Level.SPACE)
+				.build()
+			).flatMap((route) -> {
+				System.out.println("Existing Route: "+route);
+				return Mono.empty();
+			})
+			.after();
+		} else {
+			return Mono.empty();
+		}
+	}
+
+	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl) {
+		debug("mapRoute: "+appName+" -> "+desiredUrl);
+		return toRoute(domains, desiredUrl)
+		.then((Route route) -> mapRoute(appName, route));
+	}
+
+//	private Mono<Void> deleteRoute(Route route) {
+//		return operations.routes().delete(DeleteRouteRequest.builder()
+//			.domain(route.getDomain())
+//			.host(route.getHost())
+//			.path("")
+//			.build()
+//		).otherwise((e) -> {
+//			debug("delete route failed: "+route);
+//			debug("         with error: "+ExceptionUtil.getMessage(e));
+//			return Mono.empty();
+//		});
+//	}
+
+	private Mono<Void> mapRoute(String appName, Route route) {
+		MapRouteRequest mapRouteReq = MapRouteRequest.builder()
+				.applicationName(appName)
+				.domain(route.getDomain())
+				.host(route.getHost())
+				.path(route.getPath())
+				.build();
+		debug("mapRoute: "+mapRouteReq);
+		return operations.routes().map(
+				mapRouteReq
+		);
+	}
+
+	private Mono<Void> createRoute(Route route) {
+		CreateRouteRequest request = CreateRouteRequest.builder()
+				.domain(route.getDomain())
+				.host(route.getHost())
+				.path(route.getPath())
+				.space(params.getSpaceName())
+				.build();
+		debug("createRoute: "+request);
+		return operations.routes().create(
+				request
+		).otherwise((e) -> {
+			//More selectively ignore only error for already existing route
+			debug("create route failed: "+route);
+			debug("         with error: "+ExceptionUtil.getMessage(e));
+			return Mono.empty();
+		});
+	}
+
+	private Mono<Route> toRoute(Mono<Set<String>> domains, String desiredUrl) {
+		return domains.then((ds) -> {
+			for (String d : ds) {
+				//TODO: we assume that there's no 'path' component for now, which simpiflies things. What if there is a path component?
+				if (desiredUrl.endsWith(d)) {
+					String host = desiredUrl.substring(0, desiredUrl.length()-d.length());
+					while (host.endsWith(".")) {
+						host = host.substring(0, host.length()-1);
+					}
+					RouteBuilder route = Route.builder();
+					route.domain(d);
+					if (StringUtils.hasText(host)) {
+						route.host(host);
+					}
+					return Mono.just(route.build());
+				}
+			}
+			return Mono.error(new IOException("Couldn't find a domain matching "+desiredUrl));
+		});
+	}
+
+	private Mono<Set<String>> getDomainNames() {
+		return orgId.flatMap(this::requestDomains)
+		.map((r) -> r.getEntity().getName())
+		.toList()
+		.map(ImmutableSet::copyOf);
+	}
+
+	private Mono<Set<String>> getUrls(String appName) {
+		return operations.applications().get(GetApplicationRequest.builder()
+				.name(appName)
+				.build()
+		)
+		.map((app) -> ImmutableSet.copyOf(app.getUrls()));
+	}
+
+	private Mono<Void> unmapUndesiredRoutes(String appName, Collection<String> desiredUrls) {
+		return getExistingRoutes(appName)
+		.flatMap((route) -> {
+			debug("unmap? "+route);
+			if (desiredUrls.contains(getUrl(route))) {
+				debug("unmap? "+route+" SKIP");
+				return Mono.empty();
+			} else {
+				debug("unmap? "+route+" UNMAP");
+				return unmapRoute(appName, route);
+			}
+		}, 1) //!!!IN SEQUENCE!!!
+		.after();
+	}
+
+	private String getUrl(Route route) {
+		String url = route.getDomain();
+		if (route.getHost()!=null) {
+			url = route.getHost() + "." + url;
+		}
+		String path = route.getPath();
+		if (path!=null) {
+			while (path.startsWith("/")) {
+				path = path.substring(1);
+			}
+			if (StringUtils.hasText(path)) {
+				url = url +"/" +path;
+			}
+		}
+		return url;
+	}
+
+	private Mono<Void> unmapRoute(String appName, Route route) {
+		String path = route.getPath();
+		if (!StringUtil.hasText(path)) {
+			//client doesn't like to get 'empty string' it will complain that route doesn't exist.
+			path = null;
+		}
+		return operations.routes().unmap(UnmapRouteRequest.builder()
+			.applicationName(appName)
+			.domain(route.getDomain())
+			.host(route.getHost())
+			.path(path)
+			.build()
+		);
+	}
+
+	private Flux<Route> getExistingRoutes(String appName) {
+		return operations.routes().list(ListRoutesRequest.builder()
+				.level(Level.SPACE)
+				.build()
+		)
+		.flatMap((route) -> {
+			for (String app : route.getApplications()) {
+				if (app.equals(appName)) {
+					return Mono.just(route);
+				}
+			};
+			return Mono.empty();
+		});
+	}
+
+	private static PushApplicationRequestBuilder toPushRequest(CFPushArguments params) {
+		return PushApplicationRequest.builder()
+		.name(params.getAppName())
+		.memory(params.getMemory())
+		.diskQuota(params.getDiskQuota())
+		.timeout(params.getTimeout())
+		.buildpack(params.getBuildpack())
+		.command(params.getCommand())
+		.stack(params.getStack())
+		.instances(params.getInstances())
+		.application(params.getApplicationData());
 	}
 
 	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {

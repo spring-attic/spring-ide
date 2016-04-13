@@ -53,6 +53,7 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackS
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -66,7 +67,7 @@ public class DefaultClientRequestsV1 {
 	 */
 	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -444,7 +445,7 @@ public class DefaultClientRequestsV1 {
 
 	public SshClientSupport getSshClientSupport() throws Exception {
 		HttpProxyConfiguration proxyConf = getProxyConf();
-		return new SshClientSupport(client, getCloudInfoV2(), clientParams.isSelfsigned(), proxyConf);
+		return new SshClientSupportV1(client, getCloudInfoV2(), clientParams.isSelfsigned(), proxyConf);
 	}
 
 	private BuildpackSupport getBuildpackSupport() throws Exception {

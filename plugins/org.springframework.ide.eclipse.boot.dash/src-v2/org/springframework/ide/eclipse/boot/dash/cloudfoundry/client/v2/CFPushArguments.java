@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -29,10 +30,7 @@ import com.google.common.collect.ImmutableMap;
  * @author Nieraj Singh
  */
 public class CFPushArguments implements AutoCloseable {
-	private String host;
-	private String domain;
-	private boolean noRoute = false;
-	private boolean noHost = false;
+	private List<String> routes = ImmutableList.of();
 	private String appName;
 	private Integer memory;
 	private Integer diskQuota;
@@ -46,30 +44,6 @@ public class CFPushArguments implements AutoCloseable {
 	private InputStream applicationData;
 	private boolean noStart = false;
 
-	public String getHost() {
-		return host;
-	}
-	public void setHost(String host) {
-		this.host = host;
-	}
-	public String getDomain() {
-		return domain;
-	}
-	public void setDomain(String domain) {
-		this.domain = domain;
-	}
-	public boolean isNoRoute() {
-		return noRoute;
-	}
-	public void setNoRoute(boolean noRoute) {
-		this.noRoute = noRoute;
-	}
-	public boolean isNoHost() {
-		return noHost;
-	}
-	public void setNoHost(boolean noHost) {
-		this.noHost = noHost;
-	}
 	public String getAppName() {
 		return appName;
 	}
@@ -148,5 +122,14 @@ public class CFPushArguments implements AutoCloseable {
 	}
 	public void setNoStart(boolean noStart) {
 		this.noStart = noStart;
+	}
+	public List<String> getRoutes() {
+		return routes;
+	}
+	public void setRoutes(Collection<String> routes) {
+		this.routes = routes == null ? ImmutableList.of() : ImmutableList.copyOf(routes);
+	}
+	public void setRoutes(String... routes) {
+		setRoutes(ImmutableList.copyOf(routes));
 	}
 }

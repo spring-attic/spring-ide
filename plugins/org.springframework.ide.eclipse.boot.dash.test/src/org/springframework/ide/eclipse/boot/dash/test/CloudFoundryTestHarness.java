@@ -78,7 +78,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	/**
 	 * How long to wait for runtarget to become 'connected'.
 	 */
-	public static final long CONNECT_TARGET_TIMEOUT = 10_000;
+	public static final long CONNECT_TARGET_TIMEOUT = 30_000;
 
 	public static CloudFoundryTestHarness create(BootDashModelContext context) throws Exception {
 		CloudFoundryClientFactory clientFactory = CloudFoundryClientFactory.DEFAULT;

@@ -153,9 +153,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				/*
 				 * Collect data on renamed and removed projects
 				 */
-				Map<IPath, IProject> renamedFrom = new HashMap<IPath, IProject>();
-				Map<IPath, IProject> renamedTo = new HashMap<IPath, IProject>();
-				List<IProject> removedProjects = new ArrayList<IProject>();
+				Map<IPath, IProject> renamedFrom = new HashMap<>();
+				Map<IPath, IProject> renamedTo = new HashMap<>();
+				List<IProject> removedProjects = new ArrayList<>();
 				for (IResourceDelta delta : event.getDelta().getAffectedChildren(IResourceDelta.CHANGED | IResourceDelta.ADDED | IResourceDelta.REMOVED)) {
 					IResource resource = delta.getResource();
 					if (resource instanceof IProject) {
@@ -668,8 +668,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						break;
 						default:
 					}
-
-
 				}
 				// TODO: refactor so that adding archive only gets called once for all properties resolving and creating cases.
 				// Reason to call multiple times in different conditions is to retain the old logic when

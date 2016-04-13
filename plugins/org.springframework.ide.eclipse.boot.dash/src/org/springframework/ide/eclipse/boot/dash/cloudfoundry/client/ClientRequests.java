@@ -22,6 +22,7 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ClientRequests {
@@ -55,7 +56,7 @@ public interface ClientRequests {
 	void updateApplicationServices(String appName, List<String> services) throws Exception;
 	void updateApplicationStaging(String appName, Staging staging) throws Exception;
 	void updateApplicationUris(String appName, List<String> urls) throws Exception;
-	List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp, long timeToWait) throws Exception;
+	Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception;
 	void uploadApplication(String appName, ZipFile archive) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;

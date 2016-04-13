@@ -36,11 +36,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
@@ -140,13 +142,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public List<CFApplicationDetail> waitForApplicationDetails(List<CFApplication> appsToLookUp,
-				long timeToWait) throws Exception {
-			ImmutableList.Builder<CFApplicationDetail> builder = ImmutableList.builder();
-			for (CFApplication app : appsToLookUp) {
-				builder.add(getSpace().getApplication(app.getGuid()).getDetailedInfo());
-			}
-			return builder.build();
+		public Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception {
+			MockCFSpace space = getSpace();
+			return Flux.fromIterable(appsToLookUp)
+			.flatMap((app) -> {
+				return ReactorUtils.just(space.getApplication(app.getGuid()).getDetailedInfo());
+			});
 		}
 
 		@Override
@@ -357,7 +358,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			MockCFSpace space = getSpace();
 			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, space, args.getAppName());
 			app.setBuildpackUrlMaybe(args.getBuildpack());
-			app.setUris(getUris(args));
+			app.setUris(args.getRoutes());
 			app.setCommandMaybe(args.getCommand());
 			app.setDiskQuotaMaybe(args.getDiskQuota());
 			app.setEnvMaybe(args.getEnv());
@@ -369,33 +370,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			space.getPushCount(app.getName()).increment();
 
 			app.start();
-		}
-
-		/**
-		 * Computes the list of 'uris' for this app based on some of the push
-		 * arguments (such as 'noroute', 'nohost', 'host' and 'domain' ...).
-		 */
-		private Collection<String> getUris(CFPushArguments args) {
-			if (args.isNoRoute()) {
-				return ImmutableList.of();
-			} else if (args.isNoHost()) {
-				return ImmutableList.of(getDomain(args));
-			} else {
-				String host = args.getHost();
-				Assert.isNotNull(host);
-				String domain= getDomain(args);
-				Assert.isNotNull(domain);
-				return ImmutableList.of(host+"."+domain);
-			}
-		}
-
-		private String getDomain(CFPushArguments args) {
-			String domain = args.getDomain();
-			if (domain!=null) {
-				return domain;
-			}
-			//Use first domain as a default.
-			return domainsByName.keySet().iterator().next();
 		}
 
 		@Override

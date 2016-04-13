@@ -19,6 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 
+import reactor.core.publisher.Flux;
+
 /**
  * Refreshes the application instances.
  * <p/>
@@ -41,9 +43,10 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		try {
 			if (!appsToLookUp.isEmpty()) {
 				long timeToWait = 1000*30;
-				for (CFApplicationDetail appDetails : model.getRunTarget().getClient().waitForApplicationDetails(appsToLookUp, timeToWait)) {
-					this.model.updateApplication(appDetails);
-				}
+				model.getRunTarget().getClient().getApplicationDetails(appsToLookUp)
+				.doOnNext(this.model::updateApplication)
+				.after()
+				.get(timeToWait);
 			}
 			model.setRefreshState(RefreshState.READY);
 		} catch (Exception e) {

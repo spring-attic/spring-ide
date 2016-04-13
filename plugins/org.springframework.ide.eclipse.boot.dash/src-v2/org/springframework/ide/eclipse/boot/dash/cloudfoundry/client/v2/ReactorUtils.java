@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Function;
 
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
-
 import reactor.core.publisher.Mono;
 
 /**
@@ -33,7 +30,7 @@ public class ReactorUtils {
 	 */
 	public static <T> T get(Mono<T> mono) throws Exception {
 		try {
-			return mono.get(Duration.ofMinutes(1));
+			return mono.get(Duration.ofMinutes(2));
 		} catch (Exception e) {
 //			BootActivator.log(new Exception(e));
 			throw new IOException(e);
@@ -71,5 +68,18 @@ public class ReactorUtils {
 				return Mono.error(caught);
 			}
 		};
+	}
+
+	/**
+	 * Build a Mono<Void> that executes a given number of Mono<Void> one after the
+	 * other.
+	 */
+	@SafeVarargs
+	public static Mono<Void> sequence(Mono<Void>... tasks) {
+		Mono<Void> seq = Mono.empty();
+		for (Mono<Void> t : tasks) {
+			seq = seq.after(t);
+		}
+		return seq;
 	}
 }
