@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
@@ -46,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
@@ -56,6 +58,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -154,11 +157,114 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test
+	public void testPushAndBindHostAndDomain() throws Exception {
+		String appName = appHarness.randomAppName();
+
+		for (int i = 0; i < 2; i++) {
+			//Why this loop? Because there was bug which CF V2 that made second push fail to bind to
+			// map a host that was previously mapped.
+			if (i>0) {
+				System.out.println("Delete app");
+				client.deleteApplication(appName);
+			}
+
+			System.out.println("Pushing "+(i+1));
+			CFPushArguments params = new CFPushArguments();
+			params.setAppName(appName);
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			params.setRoutes(ImmutableList.of(appName+"."+CFAPPS_IO));
+
+			client.push(params);
+		}
+
+		System.out.println("Pushing SUCCESS");
+
+		CFApplicationDetail app = client.getApplication(appName);
+		assertNotNull("Expected application to exist after push: " + appName, app);
+
+		assertEquals(ImmutableSet.of(appName+"."+CFAPPS_IO), ImmutableSet.copyOf(app.getUris()));
+	}
+
+	@Test
+	public void testPushAndBindMultipleHosts() throws Exception {
+		String[] hostNames = {
+				appHarness.randomAppName(),
+				appHarness.randomAppName()
+		};
+		String appName = hostNames[0];
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(hostNames[0]);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+
+		Set<String> routes = ImmutableSet.copyOf(Stream.of(hostNames)
+				.map((host) -> host + "." + CFAPPS_IO)
+				.collect(Collectors.toList())
+		);
+		params.setRoutes(routes);
+
+		client.push(params);
+
+		System.out.println("Pushing SUCCESS");
+
+		CFApplicationDetail app = client.getApplication(appName);
+		assertNotNull("Expected application to exist after push: " + appName, app);
+
+		assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
+	}
+
+	@Test
+	public void testPushAndSetRoutes() throws Exception {
+		String[] hostNames = {
+				appHarness.randomAppName(),
+				appHarness.randomAppName()
+		};
+		String appName = hostNames[0];
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(hostNames[0]);
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+
+		Set<String> routes = ImmutableSet.copyOf(Stream.of(hostNames)
+				.map((host) -> host + "." + CFAPPS_IO)
+				.collect(Collectors.toList())
+		);
+		params.setRoutes(routes);
+
+		client.push(params);
+
+		System.out.println("Pushing SUCCESS");
+
+		{
+			CFApplicationDetail app = client.getApplication(appName);
+			assertNotNull("Expected application to exist after push: " + appName, app);
+			assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
+		}
+
+		doSetRoutesTest(appName, ImmutableSet.of());
+
+		for (String route : routes) {
+			doSetRoutesTest(appName, ImmutableSet.of(route));
+		}
+
+	}
+
+	private void doSetRoutesTest(String appName, ImmutableSet<String> routes) throws Exception {
+		ReactorUtils.get(client.setRoutes(appName, routes));
+		CFApplicationDetail app = client.getApplication(appName);
+		assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
+	}
+
+	@Test
 	public void testPushAndSetEnv() throws Exception {
 		String appName = appHarness.randomAppName();
 
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
+		params.setRoutes(appName+"."+CFAPPS_IO);
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setEnv(ImmutableMap.of(
@@ -169,9 +275,11 @@ public class CloudFoundryClientTest {
 
 		CFApplicationDetail app = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, app);
-		String content = IOUtils.toString(new URI("http://" + appName + '.' + CFAPPS_IO + "/test.txt"));
-		assertTrue(content.length() > 0);
-		assertTrue(content.contains("content"));
+		ACondition.waitFor("app content to be availabe", 10_000, () -> {
+			String content = IOUtils.toString(new URI("http://" + appName + '.' + CFAPPS_IO + "/test.txt"));
+			assertTrue(content.length() > 0);
+			assertTrue(content.contains("content"));
+		});
 
 		{
 			Map<String, String> env = client.getEnv(appName).get();
@@ -490,8 +598,7 @@ public class CloudFoundryClientTest {
 		}
 	}
 
-	@Test
-	public void testSshSupport() throws Exception {
+	@Test public void testSshSupport() throws Exception {
 		String appName = appHarness.randomAppName();
 
 		CFPushArguments params = new CFPushArguments();
@@ -515,6 +622,20 @@ public class CloudFoundryClientTest {
 
 		String code = sshSupport.getSshCode();
 		System.out.println("sshCode = "+code);
+		assertTrue(StringUtil.hasText(code));
+	}
+
+	@Test public void testGetServiceDashboardUrl() throws Exception {
+		String serviceName = services.createTestService();
+		CFService service = null;
+		for (CFService s : client.getServices()) {
+			if (s.getName().equals(serviceName)) {
+				service = s;
+			}
+		}
+		String dashUrl = service.getDashboardUrl();
+		assertNotNull(dashUrl);
+		assertTrue(dashUrl.startsWith("http"));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

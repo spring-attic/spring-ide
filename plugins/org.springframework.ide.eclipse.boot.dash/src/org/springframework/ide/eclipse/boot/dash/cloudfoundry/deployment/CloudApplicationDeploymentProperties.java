@@ -324,22 +324,8 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public CFPushArguments toPushArguments(List<CFCloudDomain> cloudDomains) throws Exception {
 		Set<String> uris = getUris();
-		Set<String> hostsSet = new LinkedHashSet<>();
-		Set<String> domainsSet = new LinkedHashSet<>();
-		ApplicationManifestHandler.extractHostsAndDomains(uris, cloudDomains, hostsSet, domainsSet);
-
-		boolean noRoute = uris.isEmpty();
-		boolean noHost = hostsSet.isEmpty();
-
 		CFPushArguments args = new CFPushArguments();
-		if (!noHost) {
-			args.setHost(getSingle("host", hostsSet));
-		}
-		if (!domainsSet.isEmpty()) {
-			args.setDomain(getSingle("domain", domainsSet));
-		}
-		args.setNoHost(noHost);
-		args.setNoRoute(noRoute);
+		args.setRoutes(uris);
 		args.setAppName(getAppName());
 		args.setMemory(getMemory());
 		args.setDiskQuota(getDiskQuota());
@@ -356,15 +342,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public File getArchive() {
 		return archive;
-	}
-
-	private String getSingle(String propertyName, Set<String> values) {
-		if (values.isEmpty()) {
-			Assert.isLegal(false, "No '"+propertyName+"' provided");
-		} else if (values.size()>1) {
-			Assert.isLegal(false, "Multiple "+propertyName+" not currently supported");
-		}
-		return values.iterator().next();
 	}
 
 	public void setArchive(File archive) {

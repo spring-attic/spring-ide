@@ -69,4 +69,17 @@ public class ReactorUtils {
 			}
 		};
 	}
+
+	/**
+	 * Build a Mono<Void> that executes a given number of Mono<Void> one after the
+	 * other.
+	 */
+	@SafeVarargs
+	public static Mono<Void> sequence(Mono<Void>... tasks) {
+		Mono<Void> seq = Mono.empty();
+		for (Mono<Void> t : tasks) {
+			seq = seq.after(t);
+		}
+		return seq;
+	}
 }

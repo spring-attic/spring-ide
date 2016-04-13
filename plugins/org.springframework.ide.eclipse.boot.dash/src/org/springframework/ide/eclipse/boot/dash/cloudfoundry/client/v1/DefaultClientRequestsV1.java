@@ -67,7 +67,7 @@ public class DefaultClientRequestsV1 {
 	 */
 	public static final String BOOT_DASH_CONNECTION_POOL = "sts.boot.dash.connection.pool";
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {

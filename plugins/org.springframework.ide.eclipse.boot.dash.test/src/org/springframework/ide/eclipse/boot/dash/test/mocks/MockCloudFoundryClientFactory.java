@@ -358,7 +358,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			MockCFSpace space = getSpace();
 			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, space, args.getAppName());
 			app.setBuildpackUrlMaybe(args.getBuildpack());
-			app.setUris(getUris(args));
+			app.setUris(args.getRoutes());
 			app.setCommandMaybe(args.getCommand());
 			app.setDiskQuotaMaybe(args.getDiskQuota());
 			app.setEnvMaybe(args.getEnv());
@@ -370,33 +370,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			space.getPushCount(app.getName()).increment();
 
 			app.start();
-		}
-
-		/**
-		 * Computes the list of 'uris' for this app based on some of the push
-		 * arguments (such as 'noroute', 'nohost', 'host' and 'domain' ...).
-		 */
-		private Collection<String> getUris(CFPushArguments args) {
-			if (args.isNoRoute()) {
-				return ImmutableList.of();
-			} else if (args.isNoHost()) {
-				return ImmutableList.of(getDomain(args));
-			} else {
-				String host = args.getHost();
-				Assert.isNotNull(host);
-				String domain= getDomain(args);
-				Assert.isNotNull(domain);
-				return ImmutableList.of(host+"."+domain);
-			}
-		}
-
-		private String getDomain(CFPushArguments args) {
-			String domain = args.getDomain();
-			if (domain!=null) {
-				return domain;
-			}
-			//Use first domain as a default.
-			return domainsByName.keySet().iterator().next();
 		}
 
 		@Override

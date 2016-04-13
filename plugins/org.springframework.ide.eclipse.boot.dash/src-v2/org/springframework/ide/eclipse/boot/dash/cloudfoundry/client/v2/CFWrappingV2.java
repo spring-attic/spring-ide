@@ -288,20 +288,4 @@ public class CFWrappingV2 {
 		};
 	}
 
-	public static PushApplicationRequestBuilder toPushRequest(CFPushArguments params) {
-		return PushApplicationRequest.builder()
-		.name(params.getAppName())
-		.host(params.getHost())
-		.domain(params.getDomain())
-		.noRoute(params.isNoRoute())
-		.noHostname(params.isNoHost())
-		.memory(params.getMemory())
-		.diskQuota(params.getDiskQuota())
-		.timeout(params.getTimeout())
-		.buildpack(params.getBuildpack())
-		.command(params.getCommand())
-		.stack(params.getStack())
-		.instances(params.getInstances())
-		.application(params.getApplicationData());
-	}
 }

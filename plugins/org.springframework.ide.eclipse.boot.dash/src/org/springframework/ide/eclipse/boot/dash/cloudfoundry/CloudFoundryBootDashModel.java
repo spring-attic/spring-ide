@@ -676,15 +676,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						break;
 						default:
 					}
-
-
 				}
 			} else {
 				deploymentProperties = createDeploymentProperties(project, ui, monitor);
 			}
 		}
 		return deploymentProperties;
-
 	}
 
 	/**
