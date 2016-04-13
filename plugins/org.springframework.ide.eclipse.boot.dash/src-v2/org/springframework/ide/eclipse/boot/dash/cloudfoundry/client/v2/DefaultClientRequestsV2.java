@@ -21,11 +21,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.Staging;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
@@ -321,41 +319,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			})
 			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails));
 		});
-	}
-
-	@Override
-	public void uploadApplication(String appName, ZipFile archive) throws Exception {
-		v1.uploadApplication(appName, archive);
-	}
-
-	@Override
-	public void updateApplicationUris(String appName, List<String> urls) throws Exception {
-		v1.updateApplicationUris(appName, urls);
-	}
-
-	@Override
-	public void updateApplicationStaging(String appName, Staging staging) throws Exception {
-		v1.updateApplicationStaging(appName, staging);
-	}
-
-	@Override
-	public void updateApplicationServices(String appName, List<String> services) throws Exception {
-		v1.updateApplicationServices(appName, services);
-	}
-
-	@Override
-	public void updateApplicationMemory(String appName, int memory) throws Exception {
-		v1.updateApplicationMemory(appName, memory);
-	}
-
-	@Override
-	public void updateApplicationInstances(String appName, int instances) throws Exception {
-		v1.updateApplicationInstances(appName, instances);
-	}
-
-	@Override
-	public void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception {
-		v1.updateApplicationDiskQuota(appName, diskQuota);
 	}
 
 	@Override

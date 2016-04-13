@@ -11,18 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.Staging;
-import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -148,46 +144,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			.flatMap((app) -> {
 				return ReactorUtils.just(space.getApplication(app.getGuid()).getDetailedInfo());
 			});
-		}
-
-		@Override
-		public void uploadApplication(String appName, ZipFile archive) throws Exception {
-			MockCFApplication app = getSpace().getApplication(appName);
-			if (app==null) {
-				throw errorAppNotFound(appName);
-			}
-			//TODO: we just ignore the data. If/when we have tests that wanna do something with this, this may not be
-			// good enough anymore.
-		}
-
-		@Override
-		public void updateApplicationUris(String appName, List<String> urls) throws Exception {
-			MockCFApplication app = getSpace().getApplication(appName);
-			if (app==null) {
-				throw errorAppNotFound(appName);
-			}
-			app.setUris(urls);
-		}
-
-		@Override
-		public void updateApplicationStaging(String appName, Staging staging) throws Exception {
-			notImplementedStub();
-		}
-
-		@Override
-		public void updateApplicationServices(String appName, List<String> services) throws Exception {
-			notImplementedStub();
-		}
-
-		@Override
-		public void updateApplicationMemory(String appName, int memory) throws Exception {
-			notImplementedStub();
-
-		}
-
-		@Override
-		public void updateApplicationInstances(String appName, int instances) throws Exception {
-			notImplementedStub();
 		}
 
 		@Override
@@ -323,11 +279,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public void setHealthCheck(UUID guid, String hcType) {
-			notImplementedStub();
-		}
-
-		@Override
-		public void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception {
 			notImplementedStub();
 		}
 
