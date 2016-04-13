@@ -54,7 +54,6 @@ import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.routes.CreateRouteRequest;
-import org.cloudfoundry.operations.routes.DeleteRouteRequest;
 import org.cloudfoundry.operations.routes.ListRoutesRequest;
 import org.cloudfoundry.operations.routes.ListRoutesRequest.Level;
 import org.cloudfoundry.operations.routes.MapRouteRequest;
@@ -352,13 +351,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public void updateApplicationInstances(String appName, int instances) throws Exception {
 		v1.updateApplicationInstances(appName, instances);
-	}
-
-	@Override
-	public void updateApplicationEnvironment(String appName, Map<String, String> environment) throws Exception {
-		ReactorUtils.get(
-			setEnvVars(appName, environment)
-		);
 	}
 
 	@Override

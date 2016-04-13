@@ -288,7 +288,7 @@ public class CloudFoundryClientTest {
 			assertEquals(2, env.size());
 		}
 
-		client.updateApplicationEnvironment(appName, ImmutableMap.of("other", "value"));
+		client.setEnvVars(appName, ImmutableMap.of("other", "value")).get();
 		{
 			Map<String, String> env = client.getEnv(appName).get();
 			assertEquals("value", env.get("other"));

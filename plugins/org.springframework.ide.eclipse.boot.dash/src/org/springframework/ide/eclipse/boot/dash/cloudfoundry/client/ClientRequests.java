@@ -50,7 +50,6 @@ public interface ClientRequests {
 	void restartApplication(String appName) throws Exception;
 	void stopApplication(String appName) throws Exception;
 	Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception;
-	void updateApplicationEnvironment(String appName, Map<String, String> environmentVariables) throws Exception;
 	void updateApplicationInstances(String appName, int instances) throws Exception;
 	void updateApplicationMemory(String appName, int memory) throws Exception;
 	void updateApplicationServices(String appName, List<String> services) throws Exception;
