@@ -191,16 +191,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void updateApplicationEnvironment(String appName, Map<String, String> environmentVariables)
-				throws Exception {
-			MockCFApplication app = getSpace().getApplication(appName);
-			if (app==null) {
-				throw errorAppNotFound(appName);
-			}
-			app.setEnv(environmentVariables);
-		}
-
-		@Override
 		public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) {
 			//TODO: This 'log streamer' is a total dummy for now. It doesn't stream any data and canceling it does nothing.
 			return Mono.just(new StreamingLogToken() {
