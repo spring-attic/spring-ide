@@ -61,12 +61,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.Deploym
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationDeploymentOperations;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JobBody;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ProjectsDeployer;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSomeApplications;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
@@ -142,8 +142,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
-
-	private ApplicationDeploymentOperations appDeploymentOperations;
 
 	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
 		@Override
@@ -230,11 +228,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
-		this.appDeploymentOperations = new ApplicationDeploymentOperations(this);
 		getRunTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
-			getOperationsExecution().runOpAsynch(new ConnectOperation(this, true));
+			getOperationsExecution().runAsynch(new ConnectOperation(this, true));
 		}
 	}
 
@@ -298,8 +295,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	@Override
 	public void refresh(UserInteractions ui) {
-		getOperationsExecution(ui).runOpAsynch(new TargetApplicationsRefreshOperation(this, ui));
-		getOperationsExecution(ui).runOpAsynch(new ServicesRefreshOperation(this));
+		runAsynch(new TargetApplicationsRefreshOperation(this, ui), ui);
+		runAsynch(new ServicesRefreshOperation(this), ui);
 	}
 
 	@Override
@@ -374,8 +371,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			RunState runOrDebug
 	) throws Exception {
 		DebugSupport debugSuppport = getViewModel().getCfDebugSupport();
-		getOperationsExecution(ui).runOpAsynch(
-				new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport));
+		runAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport),
+				ui);
 	}
 
 	public CloudAppDashElement addElement(CFApplicationDetail appDetail, IProject project) throws Exception {
@@ -469,12 +466,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return builder.build();
 	}
 
-	public OperationsExecution getOperationsExecution(UserInteractions ui) {
-		return new OperationsExecution(ui);
-	}
 
 	public OperationsExecution getOperationsExecution() {
-		return new OperationsExecution(null);
+		return new OperationsExecution(this);
 	}
 
 	public void updateApplication(CFApplicationDetail appDetails) {
@@ -538,7 +532,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		// Allow deletions to occur concurrently with any other application
 		// operation
 		operation.setSchedulingRule(null);
-		getOperationsExecution(ui).runOpAsynch(operation);
+		runAsynch(operation, ui);
 	}
 
 	@Override
@@ -549,10 +543,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public BootDashModelConsoleManager getElementConsoleManager() {
 		return this.consoleManager;
-	}
-
-	public ApplicationDeploymentOperations getApplicationDeploymentOperations() {
-		return this.appDeploymentOperations;
 	}
 
 	/**
@@ -577,7 +567,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
 		CloudAppDashElement element = app == null ? null : getApplication(app.getName());
 		final IFile manifestFile = element == null ? null : element.getDeploymentManifestFile();
-		if (manifestFile != null) {
+		if (manifestFile != null) { // Manifest file deployment mode
+
+			// Check if file exists in case the stored file is obsolete (e.g. no longer exists)
 			if (manifestFile.exists()) {
 				final String yamlContents = IOUtil.toString(manifestFile.getContents());
 				String errorMessage = null;
@@ -679,12 +671,21 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 
 				}
+				// TODO: refactor so that adding archive only gets called once for all properties resolving and creating cases.
+				// Reason to call multiple times in different conditions is to retain the old logic when
+				// switching to v2 usage and not introduce regressions with manifest diffing
+				addApplicationArchive(deploymentProperties, cloudData, ui, monitor);
+
 			} else {
+				// Still in manifest file deployment mode, but manifest file does not exist anymore therefore create properties
 				deploymentProperties = createDeploymentProperties(project, ui, monitor);
 			}
+		} else {
+			// Manual deployment mode
+			addApplicationArchive(deploymentProperties, cloudData, ui, monitor);
 		}
-		return deploymentProperties;
 
+		return deploymentProperties;
 	}
 
 	/**
@@ -714,13 +715,18 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 							: element.getDeploymentManifestFile(),
 					defaultManifest, false, false);
 
-			ICloudApplicationArchiver archiver = getArchiver(props, cloudData, ui, monitor);
-			if (archiver!=null) {
-				File archive = archiver.getApplicationArchive(monitor);
-				props.setArchive(archive);
-			}
+			addApplicationArchive(props, cloudData, ui, monitor);
 		}
 		return props;
+	}
+
+	public void addApplicationArchive(CloudApplicationDeploymentProperties properties, Map<String, Object> cloudData,
+			UserInteractions ui, IProgressMonitor monitor) throws Exception {
+		ICloudApplicationArchiver archiver = getArchiver(properties, cloudData, ui, monitor);
+		if (archiver != null) {
+			File archive = archiver.getApplicationArchive(monitor);
+			properties.setArchive(archive);
+		}
 	}
 
 	protected ICloudApplicationArchiver getArchiver(
@@ -749,8 +755,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			IProgressMonitor mon
 	) throws Exception {
 		IProject project = deploymentProperties.getProject();
-
-//		Map<String, Object> cloudData = model.buildOperationCloudData(mon, project, null);
 
 		IFile manifestFile =  deploymentProperties.getManifestFile();
 		String appName = deploymentProperties.getAppName();
@@ -829,4 +833,16 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	public List<CFCloudDomain> getCloudDomains(IProgressMonitor monitor) throws Exception {
 		return getRunTarget().getDomains(monitor);
 	}
+
+
+	/* TODO: These asynch methods probably should not be here but leaving them in the model for now as model is commonly shared across boot dash  */
+
+	public void runAsynch(String opName, String appName, JobBody body, UserInteractions ui) {
+		getOperationsExecution().runAsynch(opName, appName, body, ui);
+	}
+
+	public void runAsynch(Operation<?> op, UserInteractions ui) {
+		getOperationsExecution().runAsynch(op, ui);
+	}
+
 }

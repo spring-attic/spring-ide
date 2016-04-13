@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,8 +21,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -30,12 +33,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ApplicationStopOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CompositeApplicationOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
@@ -104,16 +108,9 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	};
 
-	public CancelationToken startOperationStarting() {
-		//Note: make sure to create the token *before* changing the state.
-		// That way as soon as the state is 'starting' the operation is already
-		// guaranteed to be cancelable. (If token is create just after changing the
-		// state it introduces a race condition where it looks like the state is 'starting'
-		// but its not actually 'cancelable' yet.
-		CancelationToken token = createCancelationToken();
+	public void startOperationStarting() {
 		setError(null);
 		startOperationInProgress.increment();
-		return token;
 	}
 
 	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
@@ -152,28 +149,30 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-		// Note some stop operations are part of a composite operation that has
-		// a preferred runState (e.g. STARTING)
-		// For example, as part of a large restart operation, an app may be
-		// first stopped. However, in these cases
-		// the app run state in the model should not be updated.
-		// But when directly stopped through element API, ensure that the app
-		// run state IS indeed updated to show that
-		// it is stopped
-		boolean updateElementRunStateInModel = true;
 		cancelOperations();
-		CancelationToken cancelationToken = createCancelationToken();
-		CloudApplicationOperation op = new CompositeApplicationOperation(
-				new ApplicationStopOperation(this, updateElementRunStateInModel, cancelationToken)
-		);
-		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
+		String appName = getName();
+		getCloudModel().runAsynch("Stopping application " + appName, appName, (IProgressMonitor monitor) -> {
+			stop(createCancelationToken(), monitor);
+
+			// The following steps are additional steps performed in an asynch
+			// stop
+			getCloudModel().getElementConsoleManager().terminateConsole(getName());
+
+			CFApplicationDetail updatedInstances = getCloudModel().getClient().getApplication(getName());
+			setDetailedData(updatedInstances);
+		}, ui);
+	}
+
+	public void stop(CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
+		checkTerminationRequested(cancelationToken, monitor);
+		CloudFoundryRunTarget runTarget = getCloudModel().getRunTarget();
+		runTarget.getClient().stopApplication(getName());
 	}
 
 	@Override
-	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
+	public void restart(RunState runningOrDebugging, UserInteractions ui) throws Exception {
 		cancelOperations();
-		Operation<?> op = null;
-		CancelationToken cancelToken = createCancelationToken();
+		CancelationToken cancelationToken = createCancelationToken();
 		// TODO: Only do full upload on restart. Not on debug
 		if (getProject() != null
 		// TODO: commenting out for now as restarting doesnt seem to restage.
@@ -182,14 +181,16 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// through uploading via full deployment
 		// && runingOrDebugging == RunState.RUNNING
 		) {
-			op = cloudModel.getApplicationDeploymentOperations().restartAndPush(this, getDebugSupport(),
-					runingOrDebugging, ui, cancelToken);
+			cloudModel.runAsynch("Restarting in " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
+				// Let push and debug resolve deployment properties
+				CloudApplicationDeploymentProperties deploymentProperties = null;
+				pushAndDebug(deploymentProperties, runningOrDebugging, ui, cancelationToken, monitor);
+			}, ui);
 		} else {
-			// Set the initial run state as Starting
-			op =  cloudModel.getApplicationDeploymentOperations().restartOnly(this, cancelToken);
+			cloudModel.runAsynch("Restarting in " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
+				restartOnly(ui, cancelationToken, monitor);
+			}, ui);
 		}
-
-		cloudModel.getOperationsExecution(ui).runOpAsynch(op);
 	}
 
 	public DebugSupport getDebugSupport() {
@@ -201,9 +202,101 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return getBootDashModel().getViewModel();
 	}
 
-	public void restartOnly(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		CloudApplicationOperation op = cloudModel.getApplicationDeploymentOperations().restartOnly(this, createCancelationToken());
-		cloudModel.getOperationsExecution(ui).runOpAsynch(new CompositeApplicationOperation(op));
+	public void restartWithRemoteClient(UserInteractions ui, CancelationToken cancelationToken) {
+		String opName = "Restart Remote DevTools Client for application '" + getName() + "'";
+		getCloudModel().runAsynch(opName, getName(), (IProgressMonitor monitor) -> {
+			doRestartWithRemoteClient(RunState.RUNNING, ui, cancelationToken, monitor);
+		}, ui);
+	}
+
+	protected void doRestartWithRemoteClient(RunState runningOrDebugging, UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor)
+			throws Exception {
+
+		CloudFoundryBootDashModel model = getCloudModel();
+		Map<String, String> envVars = model.getRunTarget().getClient().getApplicationEnvironment(getName());
+
+		if (getProject() == null) {
+			ExceptionUtil.coreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
+					"Local project not associated to CF app '" + getName() + "'"));
+		}
+
+		new SetHealthCheckOperation(this, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true, cancelationToken)
+				.run(monitor);
+
+		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(getProject()))) {
+			// Let the push and debug operation resolve default properties
+			CloudApplicationDeploymentProperties deploymentProperties = null;
+
+			pushAndDebug(deploymentProperties , runningOrDebugging, ui, cancelationToken, monitor);
+			/*
+			 * Restart and push op resets console anyway, no need to reset it
+			 * again
+			 */
+		} else if (getRunState() == RunState.INACTIVE) {
+			restartOnly(ui, cancelationToken, monitor);
+		}
+
+		new RemoteDevClientStartOperation(model, getName(), runningOrDebugging, cancelationToken).run(monitor);
+	}
+
+
+	public void restartOnly(UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
+		startOperationStarting();
+		try {
+			if (!getClient().applicationExists(getName())) {
+				throw ExceptionUtil.coreException(
+						"Unable to start the application. Application does not exist anymore in Cloud Foundry: "
+								+ getName());
+			}
+
+			checkTerminationRequested(cancelationToken, monitor);
+
+			log("Starting application: " + getName());
+
+			getClient().restartApplication(getName());
+
+			new ApplicationRunningStateTracker(cancelationToken, this).startTracking(monitor);
+
+			CFApplicationDetail updatedInstances = getClient().getApplication(getName());
+			setDetailedData(updatedInstances);
+			startOperationEnded(null, cancelationToken, monitor);
+		} catch (Throwable e) {
+			startOperationEnded(e, cancelationToken, monitor);
+		}
+	}
+
+	public void restartOnlyAsynch(UserInteractions ui, CancelationToken cancelationToken) {
+		String opName = "Restarting application " + getName();
+		getCloudModel().runAsynch(opName, getName(), (IProgressMonitor monitor) -> {
+			restartOnly(ui, cancelationToken, monitor);
+		}, ui);
+	}
+
+	public void pushAndDebug(CloudApplicationDeploymentProperties deploymentProperties, RunState runningOrDebugging,
+			UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
+		String opName = "Starting application '" + getName() + "' in "
+				+ (runningOrDebugging == RunState.DEBUGGING ? "DEBUG" : "RUN") + " mode";
+		DebugSupport debugSupport = getDebugSupport();
+
+		if (runningOrDebugging == RunState.DEBUGGING) {
+
+			if (debugSupport != null && debugSupport.isSupported(this)) {
+				Operation<?> debugOp = debugSupport.createOperation(this, opName, ui, cancelationToken);
+
+				push(deploymentProperties, runningOrDebugging, debugSupport, cancelationToken, ui, monitor);
+				debugOp.run(monitor);
+			} else {
+				String title = "Debugging is not supported for '" + getName() + "'";
+				String msg = debugSupport.getNotSupportedMessage(this);
+				if (msg == null) {
+					msg = title;
+				}
+				ui.errorPopup(title, msg);
+				throw ExceptionUtil.coreException(msg);
+			}
+		} else {
+			push(deploymentProperties, runningOrDebugging, debugSupport, cancelationToken, ui, monitor);
+		}
 	}
 
 	@Override
@@ -333,7 +426,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	/**
 	 * Changes the cached health-check value for this model element. Note that this
-	 * doesn *not* change the real value of the health-check.
+	 * doesnt *not* change the real value of the health-check.
 	 */
 	public void setHealthCheck(String hc) {
 		this.healthCheck.setValue(hc);
@@ -526,4 +619,64 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return getTarget().getClient();
 	}
 
+	public void push(CloudApplicationDeploymentProperties deploymentProperties, RunState runningOrDebugging,
+			DebugSupport debugSupport, CancelationToken cancelationToken, UserInteractions ui, IProgressMonitor monitor)
+			throws Exception {
+
+		boolean isDebugging = runningOrDebugging == RunState.DEBUGGING;
+        startOperationStarting();
+		try {
+			// Refresh app data and check that the application (still) exists in
+			// Cloud Foundry
+			// This also ensures that the 'diff change dialog' will pick up on
+			// the latest changes.
+			// TODO: should this refresh be moved closer to the where we
+			// actually compute the diff?
+			CloudAppDashElement updatedApp = this.refresh();
+			if (updatedApp == null) {
+				ExceptionUtil.coreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
+						"No Cloud Application found for '" + getName() + "'"));
+			}
+			IProject project = getProject();
+			if (project == null) {
+				ExceptionUtil.coreException(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID,
+						"Local project not associated to CF app '" + getName() + "'"));
+			}
+
+			checkTerminationRequested(cancelationToken, monitor);
+
+			CloudApplicationDeploymentProperties properties = deploymentProperties == null
+					? getCloudModel().resolveDeploymentProperties(updatedApp, ui, monitor) : deploymentProperties;
+
+			// Update JAVA_OPTS env variable with Remote DevTools Client secret
+			DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(),
+					DevtoolsUtil.getSecret(project));
+			if (debugSupport != null) {
+				if (isDebugging) {
+					debugSupport.setupEnvVars(properties.getEnvironmentVariables());
+				} else {
+					debugSupport.clearEnvVars(properties.getEnvironmentVariables());
+				}
+			}
+
+			checkTerminationRequested(cancelationToken, monitor);
+
+			CFPushArguments pushArgs = properties.toPushArguments(getCloudModel().getCloudDomains(monitor));
+
+			getClient().push(pushArgs);
+
+			log("Application pushed to Cloud Foundry: " + getName());
+
+			startOperationEnded(null, cancelationToken, monitor);
+		} catch (Throwable e) {
+			startOperationEnded(e, cancelationToken, monitor);
+		}
+	}
+
+	public void checkTerminationRequested(CancelationToken cancelationToken, IProgressMonitor mon)
+			throws OperationCanceledException {
+		if (mon != null && mon.isCanceled() || cancelationToken != null && cancelationToken.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+	}
 }

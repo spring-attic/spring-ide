@@ -17,17 +17,33 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 
 public class OperationsExecution {
 
-	private final UserInteractions ui;
 
-	public OperationsExecution(UserInteractions ui) {
-		this.ui = ui;
+	private final CloudFoundryBootDashModel model;
+
+	public OperationsExecution(CloudFoundryBootDashModel model) {
+		this.model = model;
 	}
 
-	public void runOpAsynch(final Operation<?> op) {
+	public void runAsynch(String opName, String appName, JobBody runnable, UserInteractions ui) {
+		runAsynch(new CloudApplicationOperation(opName, model, appName, CancelationTokens.NULL) {
+			@Override
+			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+				runnable.run(monitor);
+			}
+		}, ui);
+	}
+
+	public void runAsynch(final Operation<?> op) {
+		runAsynch(op, null);
+	}
+
+	public void runAsynch(final Operation<?> op, UserInteractions ui) {
 		if (op!=null) {
 			Job job = new Job(op.getName()) {
 

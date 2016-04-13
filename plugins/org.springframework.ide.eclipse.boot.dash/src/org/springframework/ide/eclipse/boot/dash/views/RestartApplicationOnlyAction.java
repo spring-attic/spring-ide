@@ -19,7 +19,6 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class RestartApplicationOnlyAction extends AbstractCloudAppDashElementsAction {
@@ -41,7 +40,8 @@ public class RestartApplicationOnlyAction extends AbstractCloudAppDashElementsAc
 
 					if (el instanceof CloudAppDashElement) {
 						try {
-							((CloudAppDashElement) el).restartOnly(RunState.RUNNING, ui);
+							CloudAppDashElement cloudAppDashElement = (CloudAppDashElement) el;
+							cloudAppDashElement.restartOnlyAsynch(ui, cloudAppDashElement.createCancelationToken());
 						} catch (Exception e) {
 							ui.errorPopup("Error restarting application", e.getMessage());
 						}

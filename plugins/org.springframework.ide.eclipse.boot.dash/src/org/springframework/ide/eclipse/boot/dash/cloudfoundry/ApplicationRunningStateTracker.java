@@ -11,11 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -23,8 +21,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceS
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ApplicationRunningStateTracker {
 	// Give time for Diego-enabled apps with health check that may take a while to start
@@ -41,19 +40,23 @@ public class ApplicationRunningStateTracker {
 
 	private final long timeout;
 
-	private CloudApplicationOperation op;
+	private final CancelationToken cancelationToken;
 
-	public ApplicationRunningStateTracker(CloudApplicationOperation op, CloudAppDashElement app) {
-		this.op = op;
+	private final CloudAppDashElement app;
+
+
+	public ApplicationRunningStateTracker(CancelationToken cancelationToken, CloudAppDashElement app) {
 		this.model = app.getCloudModel();
 		this.requests = model.getClient();
 		this.appName = app.getName();
 		this.timeout = APP_START_TIMEOUT;
+		this.cancelationToken = cancelationToken;
+		this.app = app;
 	}
 
 	protected void checkTerminate(IProgressMonitor monitor)
 			throws OperationCanceledException {
-		op.checkTerminationRequested(monitor);
+		this.app.checkTerminationRequested(cancelationToken, monitor);
 	}
 
 	/**
@@ -123,7 +126,7 @@ public class ApplicationRunningStateTracker {
 			String warning = "Timed out waiting for application - " + appName
 					+ " to start. Please wait and manually refresh the target, or check if the application logs show any errors.";
 			model.getElementConsoleManager().writeToConsole(appName, warning, LogType.LOCALSTDERROR);
-			throw BootDashActivator.asCoreException(warning);
+			throw ExceptionUtil.coreException(warning);
 
 		} else {
 			model.getElementConsoleManager().writeToConsole(appName, "Application appears to have started - " + appName,
