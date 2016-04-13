@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,15 +7,19 @@
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
 import org.springframework.ide.eclipse.roo.core.internal.model.DefaultRooInstall;
@@ -27,6 +31,7 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
  * 
  * @author Steffen Pingel
  * @author Leo Dos Santos
+ * @author Juan Carlos García
  */
 public class RooUiUtil {
 
@@ -58,6 +63,11 @@ public class RooUiUtil {
 			}
 		}
 		return false;
+	}
+	
+	public static void openPreferences(Shell shell) {
+		String id = "com.springsource.sts.roo.ui.preferencePage";
+		PreferencesUtil.createPreferenceDialogOn(shell, id, new String[] { id }, Collections.EMPTY_MAP).open();
 	}
 	
 }

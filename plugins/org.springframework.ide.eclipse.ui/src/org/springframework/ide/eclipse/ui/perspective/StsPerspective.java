@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012, 2013 GoPivotal, Inc.
+ *  Copyright (c) 2012, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.perspective;
 
@@ -24,6 +25,7 @@ import org.eclipse.ui.texteditor.templates.TemplatesView;
  * Default perspective for STS
  * @author Christian Dupuis
  * @author Steffen Pingel
+ * @author Juan Carlos García
  * @version 2.3.0
  */
 public class StsPerspective implements IPerspectiveFactory {
@@ -126,6 +128,7 @@ public class StsPerspective implements IPerspectiveFactory {
 		layout.addNewWizardShortcut("org.eclipse.ui.editors.wizards.UntitledTextFileWizard");//$NON-NLS-1$
 
 		// new projects
+		layout.addNewWizardShortcut("com.springsource.sts.roo.ui.wizard.newRooProjectWizard");
 		layout.addNewWizardShortcut("org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard");
 		layout.addNewWizardShortcut("org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias");
 		layout.addNewWizardShortcut("com.springsource.sts.wizard.template");

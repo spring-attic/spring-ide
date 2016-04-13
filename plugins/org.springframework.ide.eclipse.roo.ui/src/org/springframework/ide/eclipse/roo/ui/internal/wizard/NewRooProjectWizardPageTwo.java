@@ -1,12 +1,13 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal.wizard;
 
@@ -28,6 +29,7 @@ import org.springframework.ide.eclipse.roo.ui.internal.StyledTextAppender;
 
 /**
  * @author Christian Dupuis
+ * @author Juan Carlos García
  */
 @SuppressWarnings("restriction")
 public class NewRooProjectWizardPageTwo extends WizardPage {
@@ -49,12 +51,13 @@ public class NewRooProjectWizardPageTwo extends WizardPage {
 
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-
+		
 		final Composite composite = new Composite(parent, SWT.NULL);
 		composite.setFont(parent.getFont());
 		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
+		// Create UI Elements
 		text = new StyledText(composite, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		text.setLayoutData(data);
@@ -98,9 +101,7 @@ public class NewRooProjectWizardPageTwo extends WizardPage {
 
 	protected void setControl(Control newControl) {
 		Dialog.applyDialogFont(newControl);
-
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newControl, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
-
 		super.setControl(newControl);
 	}
 
