@@ -106,10 +106,12 @@ import reactor.core.publisher.SchedulerGroup;
 public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
+	private static final Duration GET_SPACES_TIMEOUT = Duration.ofMinutes(1);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static final SchedulerGroup SCHEDULER_GROUP = SchedulerGroup.async();
+
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
 //  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below
@@ -503,7 +505,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
-		return ReactorUtils.get(
+		return ReactorUtils.get(GET_SPACES_TIMEOUT,
 			operations.organizations()
 			.list()
 			.flatMap((OrganizationSummary org) -> {
