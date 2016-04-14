@@ -13,11 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.zip.ZipFile;
 
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.Staging;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
@@ -50,16 +48,9 @@ public interface ClientRequests {
 	void restartApplication(String appName) throws Exception;
 	void stopApplication(String appName) throws Exception;
 	Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception;
-	void updateApplicationInstances(String appName, int instances) throws Exception;
-	void updateApplicationMemory(String appName, int memory) throws Exception;
-	void updateApplicationServices(String appName, List<String> services) throws Exception;
-	void updateApplicationStaging(String appName, Staging staging) throws Exception;
-	void updateApplicationUris(String appName, List<String> urls) throws Exception;
 	Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception;
-	void uploadApplication(String appName, ZipFile archive) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
-	void updateApplicationDiskQuota(String appName, int diskQuota) throws Exception;
 	boolean applicationExists(String appName) throws Exception;
 
 	//Removed in V2
