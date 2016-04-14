@@ -170,13 +170,13 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		// through uploading via full deployment
 		// && runingOrDebugging == RunState.RUNNING
 		) {
-			cloudModel.runAsynch("Restarting in " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
+			cloudModel.runAsynch("Restarting, goal state: " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
 				// Let push and debug resolve deployment properties
 				CloudApplicationDeploymentProperties deploymentProperties = null;
 				pushAndDebug(deploymentProperties, runningOrDebugging, ui, cancelationToken, monitor);
 			}, ui);
 		} else {
-			cloudModel.runAsynch("Restarting in " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
+			cloudModel.runAsynch("Restarting, goal state: " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
 				restartOnly(ui, cancelationToken, monitor);
 			}, ui);
 		}
