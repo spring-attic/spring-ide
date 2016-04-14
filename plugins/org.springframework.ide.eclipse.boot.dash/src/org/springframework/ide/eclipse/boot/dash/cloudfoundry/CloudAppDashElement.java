@@ -108,8 +108,18 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	};
 
 	public void startOperationStarting() {
+		showConsole();
+		print("Starting operation on " + getName());
 		setError(null);
 		startOperationInProgress.increment();
+	}
+
+	protected void showConsole() {
+		try {
+			getCloudModel().getElementConsoleManager().showConsole(this);
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
 	}
 
 	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
