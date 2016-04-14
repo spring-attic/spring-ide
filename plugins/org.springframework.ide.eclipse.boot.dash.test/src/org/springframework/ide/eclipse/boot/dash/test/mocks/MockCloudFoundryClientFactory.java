@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import com.google.common.collect.ImmutableList;
@@ -166,12 +167,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void restartApplication(String appName) throws Exception {
+		public void restartApplication(String appName, CancelationToken cancelationToken) throws Exception {
 			MockCFApplication app = getSpace().getApplication(appName);
 			if (app==null) {
 				throw errorAppNotFound(appName);
 			}
-			app.restart();
+			app.restart(cancelationToken);
 		}
 
 		@Override
@@ -294,7 +295,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void push(CFPushArguments args) throws Exception {
+		public void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception {
 			//TODO: should check services exist and raise an error because non-existant services cannot be bound.
 			MockCFSpace space = getSpace();
 			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, space, args.getAppName());
@@ -310,7 +311,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			space.add(app);
 			space.getPushCount(app.getName()).increment();
 
-			app.start();
+			app.start(cancelationToken);
 		}
 
 		@Override

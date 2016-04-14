@@ -70,6 +70,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
@@ -196,7 +197,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForApps(target, "foo", "bar");
 
-		foo.start();
+		foo.start(CancelationTokens.NULL);
 
 		target.refresh(ui);
 
@@ -697,7 +698,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		RunStateHistory runstateHistory = new RunStateHistory();
 
 		appElement.getBaseRunStateExp().addListener(runstateHistory);
-		doThrow(IOException.class).when(app).start();
+		doThrow(IOException.class).when(app).start(any());
 
 		System.out.println("restarting application...");
 		harness.selection.setElements(appElement);
@@ -903,7 +904,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"- name: "+appName+"\n"
 		);
 		MockCFApplication deployedApp = space.defApp(appName);
-		deployedApp.start();
+		deployedApp.start(CancelationTokens.NULL);
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		waitForApps(model, appName);
@@ -937,7 +938,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"- name: "+appName+"\n"
 		);
 		MockCFApplication deployedApp = space.defApp(appName);
-		deployedApp.start();
+		deployedApp.start(CancelationTokens.NULL);
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		waitForApps(model, appName);

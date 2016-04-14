@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
@@ -96,7 +97,7 @@ public class CloudFoundryClientTest {
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setNoStart(true);
-		client.push(params);
+		push(params);
 
 		{
 			CFApplicationDetail appDetails = client.getApplication(appName);
@@ -105,7 +106,7 @@ public class CloudFoundryClientTest {
 			assertEquals(ImmutableList.of(), appDetails.getInstanceDetails());
 		}
 
-		client.restartApplication(appName);
+		client.restartApplication(appName, CancelationTokens.NULL);
 		{
 			CFApplicationDetail appDetails = client.getApplication(appName);
 			assertEquals(1, appDetails.getRunningInstances());
@@ -137,7 +138,7 @@ public class CloudFoundryClientTest {
 			params.setApplicationData(getTestZip("testapp"));
 			params.setBuildpack("staticfile_buildpack");
 			params.setServices(ImmutableList.of(service1, service2));
-			client.push(params);
+			push(params);
 
 			assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
 
@@ -175,7 +176,7 @@ public class CloudFoundryClientTest {
 			params.setBuildpack("staticfile_buildpack");
 			params.setRoutes(ImmutableList.of(appName+"."+CFAPPS_IO));
 
-			client.push(params);
+			push(params);
 		}
 
 		System.out.println("Pushing SUCCESS");
@@ -205,7 +206,7 @@ public class CloudFoundryClientTest {
 		);
 		params.setRoutes(routes);
 
-		client.push(params);
+		push(params);
 
 		System.out.println("Pushing SUCCESS");
 
@@ -234,7 +235,7 @@ public class CloudFoundryClientTest {
 		);
 		params.setRoutes(routes);
 
-		client.push(params);
+		push(params);
 
 		System.out.println("Pushing SUCCESS");
 
@@ -271,7 +272,7 @@ public class CloudFoundryClientTest {
 				"foo", "foo_value",
 				"bar", "bar_value"
 		));
-		client.push(params);
+		push(params);
 
 		CFApplicationDetail app = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, app);
@@ -316,7 +317,7 @@ public class CloudFoundryClientTest {
 		params.setAppName(appName);
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
-		client.push(params);
+		push(params);
 
 		CFApplicationDetail app = client.getApplication(appName);
 		assertTrue(client.applicationExists(appName));
@@ -336,7 +337,7 @@ public class CloudFoundryClientTest {
 		params.setAppName(appName);
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
-		client.push(params);
+		push(params);
 
 		final CFApplicationDetail runningApp = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, runningApp);
@@ -383,7 +384,7 @@ public class CloudFoundryClientTest {
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setServices(ImmutableList.of(service1, service2));
-		client.push(params);
+		push(params);
 
 		List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
 		CFApplication app = null;
@@ -464,7 +465,7 @@ public class CloudFoundryClientTest {
 		params.setAppName(appName);
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
-		client.push(params);
+		push(params);
 
 		BootDashModelTest.waitForJobsToComplete();
 		verify(listener, atLeastOnce()).onMessage(any());
@@ -478,7 +479,7 @@ public class CloudFoundryClientTest {
 		params.setAppName(appName);
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
-		client.push(params);
+		push(params);
 
 		//Note we try to get the app two different ways because retrieving the info in
 		// each case is slightly different.
@@ -511,7 +512,7 @@ public class CloudFoundryClientTest {
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setStack(stackName);
-		client.push(params);
+		push(params);
 
 		//Note we try to get the app two different ways because retrieving the info in
 		// each case is slightly different.
@@ -543,7 +544,7 @@ public class CloudFoundryClientTest {
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setTimeout(timeout);
-		client.push(params);
+		push(params);
 
 		//Note we try to get the app two different ways because retrieving the info in
 		// each case is slightly different.
@@ -576,7 +577,7 @@ public class CloudFoundryClientTest {
 		params.setBuildpack("staticfile_buildpack");
 		params.setCommand(command);
 		params.setNoStart(true); // Our command is bogus so starting won't work
-		client.push(params);
+		push(params);
 
 		//Note we try to get the app two different ways because retrieving the info in
 		// each case is slightly different.
@@ -605,7 +606,7 @@ public class CloudFoundryClientTest {
 		params.setAppName(appName);
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
-		client.push(params);
+		push(params);
 
 		SshClientSupport sshSupport = client.getSshClientSupport();
 		SshHost sshHost = sshSupport.getSshHost();
@@ -623,6 +624,10 @@ public class CloudFoundryClientTest {
 		String code = sshSupport.getSshCode();
 		System.out.println("sshCode = "+code);
 		assertTrue(StringUtil.hasText(code));
+	}
+
+	private void push(CFPushArguments params) throws Exception {
+		client.push(params, CancelationTokens.NULL);
 	}
 
 	@Test public void testGetServiceDashboardUrl() throws Exception {

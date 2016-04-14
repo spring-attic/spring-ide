@@ -79,7 +79,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT_NAME";
 
-	private CancelationTokens cancelationTokens = new CancelationTokens();
+	private CancelationTokens cancelationTokens;
 
 	private final LiveVariable<String> healthCheck = new LiveVariable<>(HealthCheckSupport.HC_PORT);
 	private final CloudFoundryRunTarget cloudTarget;
@@ -127,6 +127,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
+		this.cancelationTokens = new CancelationTokens(appName);
 		this.cloudTarget = model.getRunTarget();
 		this.cloudModel = model;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
@@ -147,20 +148,14 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		String appName = getName();
 		getCloudModel().runAsynch("Stopping application " + appName, appName, (IProgressMonitor monitor) -> {
 			stop(createCancelationToken(), monitor);
-
-			// The following steps are additional steps performed in an asynch
-			// stop
-			getCloudModel().getElementConsoleManager().terminateConsole(getName());
-
-			CFApplicationDetail updatedInstances = getCloudModel().getClient().getApplication(getName());
-			setDetailedData(updatedInstances);
 		}, ui);
 	}
 
 	public void stop(CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
 		checkTerminationRequested(cancelationToken, monitor);
-		CloudFoundryRunTarget runTarget = getCloudModel().getRunTarget();
-		runTarget.getClient().stopApplication(getName());
+		getClient().stopApplication(getName());
+		getCloudModel().getElementConsoleManager().terminateConsole(getName());
+		refresh();
 	}
 
 	@Override
@@ -245,8 +240,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			checkTerminationRequested(cancelationToken, monitor);
 
 			log("Starting application: " + getName());
-
-			getClient().restartApplication(getName());
+			getClient().restartApplication(getName(), CancelationTokens.merge(cancelationToken, monitor));
 
 			new ApplicationRunningStateTracker(cancelationToken, this).startTracking(monitor);
 
@@ -653,7 +647,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 			CFPushArguments pushArgs = properties.toPushArguments(getCloudModel().getCloudDomains(monitor));
 
-			getClient().push(pushArgs);
+			getClient().push(pushArgs, cancelationToken);
 
 			log("Application pushed to Cloud Foundry: " + getName());
 		});

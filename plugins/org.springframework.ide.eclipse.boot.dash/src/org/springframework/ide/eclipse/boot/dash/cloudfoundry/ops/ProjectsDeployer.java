@@ -100,7 +100,7 @@ public class ProjectsDeployer extends CloudOperation {
 					if (isDebugEnabled()) {
 						debugSupport.setupEnvVars(args.getEnv());
 					}
-					client.push(args);
+					client.push(args, cancelationToken);
 					cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
 				}
 				if (cde.refresh()!=null) {

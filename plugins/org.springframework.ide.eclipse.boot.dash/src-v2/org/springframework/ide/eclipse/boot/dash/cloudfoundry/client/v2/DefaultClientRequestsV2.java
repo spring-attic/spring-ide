@@ -80,6 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
@@ -376,7 +377,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public void restartApplication(String appName) throws Exception {
+	public void restartApplication(String appName, CancelationToken cancelationToken) throws Exception {
+		//TODO: use cancelation token and somehow cancel operation!
 		ReactorUtils.get(APP_START_TIMEOUT,
 			operations.applications().restart(RestartApplicationRequest.builder()
 					.name(appName)
@@ -582,7 +584,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public void push(CFPushArguments params) throws Exception {
+	public void push(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
+		//TODO: obey cancelationToken and cancel push operation
 		debug("Pushing app starting: "+params.getAppName());
 		//XXX CF V2: push should use 'manifest' in a future version of V2
 		ReactorUtils.get(APP_START_TIMEOUT,

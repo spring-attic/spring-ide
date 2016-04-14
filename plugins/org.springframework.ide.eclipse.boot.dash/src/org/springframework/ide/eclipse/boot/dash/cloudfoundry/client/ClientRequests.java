@@ -18,6 +18,7 @@ import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import reactor.core.publisher.Flux;
@@ -45,7 +46,7 @@ public interface ClientRequests {
 	List<CFService> getServices() throws Exception;
 	List<CFSpace> getSpaces() throws Exception;
 	List<CFStack> getStacks() throws Exception;
-	void restartApplication(String appName) throws Exception;
+	void restartApplication(String appName, CancelationToken token) throws Exception;
 	void stopApplication(String appName) throws Exception;
 	Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception;
 	Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception;
@@ -57,7 +58,6 @@ public interface ClientRequests {
 	//void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception;
 
 	//Added since v2:
-	void push(CFPushArguments properties) throws Exception;
+	void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception;
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
-
 }

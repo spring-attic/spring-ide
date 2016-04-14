@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+
 /**
  * Manages a set of CancelationTokens.
  *
@@ -54,6 +57,7 @@ public class CancelationTokens {
 
 	public synchronized CancelationToken create() {
 		CancelationToken token = new ManagedToken();
+		debug("creating cancelation token: "+token);
 		return token;
 	}
 
@@ -68,7 +72,9 @@ public class CancelationTokens {
 
 		public boolean isCanceled() {
 			synchronized (SYNC) {
-				return id < canceledAllBefore;
+				boolean isCanceled = id < canceledAllBefore;
+				debug("isCanceled? => "+isCanceled);
+				return isCanceled;
 			}
 		}
 
@@ -87,5 +93,14 @@ public class CancelationTokens {
 		if (DEBUG!=null) {
 			System.out.println(DEBUG+": "+string);
 		}
+	}
+
+	public static CancelationToken merge(CancelationToken cancelationToken, IProgressMonitor monitor) {
+		return new CancelationToken() {
+			@Override
+			public boolean isCanceled() {
+				return cancelationToken.isCanceled() || monitor.isCanceled();
+			}
+		};
 	}
 }

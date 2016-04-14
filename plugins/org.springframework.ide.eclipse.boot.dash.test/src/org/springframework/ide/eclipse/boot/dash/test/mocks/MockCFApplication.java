@@ -88,7 +88,7 @@ public class MockCFApplication {
 		this.guid = guid;
 		this.instances = instances;
 		this.state = state;
-		this.cancelationTokens = new CancelationTokens(name);
+		this.cancelationTokens = new CancelationTokens();
 	}
 
 	private String healthCheck=HealthCheckSupport.HC_PORT;
@@ -115,18 +115,17 @@ public class MockCFApplication {
 		return stats;
 	}
 
-	public void start() throws Exception {
+	public void start(CancelationToken cancelationToken) throws Exception {
 		Assert.isLegal(CFAppState.STOPPED==state);
 		Assert.isLegal(stats.isEmpty());
 		this.state = CFAppState.UNKNOWN;
 		final long endTime = System.currentTimeMillis()+getStartDelay();
-		final CancelationToken cancelToken = cancelationTokens.create();
 		new ACondition("simulated app starting (waiting)", getStartDelay()+1000) {
 			@Override
 			public boolean test() throws Exception {
-				System.out.println("Checking token: "+cancelToken);
-				if (!cancelToken.isCanceled() && System.currentTimeMillis()<endTime) {
-					System.out.println("Starting "+getName()+"...");
+//				System.out.println("Checking token: "+cancelToken);
+				if (!cancelationToken.isCanceled() && System.currentTimeMillis()<endTime) {
+//					System.out.println("Starting "+getName()+"...");
 					throw new IOException("App still starting");
 				}
 				return true;
@@ -139,7 +138,7 @@ public class MockCFApplication {
 			CFInstanceStats stat = new MockCFInstanceStats(CFInstanceState.RUNNING);
 			builder.add(stat);
 		}
-		if (cancelToken.isCanceled()) {
+		if (cancelationToken.isCanceled()) {
 			System.out.println("Starting "+getName()+" CANCELED");
 			throw new IOException("Operation Canceled");
 		}
@@ -292,9 +291,9 @@ public class MockCFApplication {
 		env = ImmutableMap.copyOf(newEnv);
 	}
 
-	public void restart() throws Exception {
+	public void restart(CancelationToken cancelationToken) throws Exception {
 		stop();
-		start();
+		start(cancelationToken);
 	}
 
 	public void scaleInstances(int desiredInstances) {
