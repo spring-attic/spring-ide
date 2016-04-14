@@ -76,8 +76,8 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	private final CloudFoundryBootDashModel cloudModel;
 	private PropertyStoreApi persistentProperties;
 
-	private final LiveCounter startOperationInProgress = new LiveCounter(0);
 	private final LiveVariable<Throwable> error = new LiveVariable<>();
+	private final OperationTracker startOperationTracker = new OperationTracker(error);
 
 	private final LiveVariable<CFApplication> appData = new LiveVariable<>();
 	private final LiveVariable<List<CFInstanceStats>> instanceData = new LiveVariable<>();
@@ -86,7 +86,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		{
 			dependsOn(appData);
 			dependsOn(instanceData);
-			dependsOn(startOperationInProgress);
+			dependsOn(startOperationTracker.inProgress);
 			dependsOn(error);
 		}
 
@@ -95,7 +95,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			if (error.getValue()!=null) {
 				return RunState.UNKNOWN;
 			}
-			if (startOperationInProgress.getValue() > 0) {
+			if (startOperationTracker.inProgress.getValue()>0) {
 				return RunState.STARTING;
 			}
 			CFApplication app = appData.getValue();
@@ -108,26 +108,11 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	};
 
 	public void startOperationStarting() {
-		setError(null);
-		startOperationInProgress.increment();
+		startOperationTracker.start();
 	}
 
 	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
-		int level = startOperationInProgress.decrement();
-		if (cancelationToken.isCanceled() || monitor.isCanceled()) {
-			//Avoid setting error results for canceled operation. If an op is canceled
-			// its errors should simply be ignored.
-			throw new OperationCanceledException();
-		}
-		if (level==0 && !(error instanceof OperationCanceledException)) {
-			setError(error);
-		}
-		//TODO: this kind of 'error handling' logic shouldn't be in here.
-		// But where should it be? Some kind of wrapper thing that goes around
-		// any kind of operation?
-		if (error != null) {
-			throw ExceptionUtil.exception(error);
-		}
+		startOperationTracker.end(error, cancelationToken, monitor);
 	}
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
