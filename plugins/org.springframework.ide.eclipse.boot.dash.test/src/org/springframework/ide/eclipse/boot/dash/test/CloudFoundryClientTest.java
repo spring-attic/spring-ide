@@ -361,6 +361,23 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test
+	public void getServices() throws Exception {
+		String[] serviceNames = new String[3];
+		for (int i = 0; i < serviceNames.length; i++) {
+			serviceNames[i] = services.createTestService();
+		}
+
+		ImmutableSet<String> actualServiceNames = ImmutableSet.copyOf(
+				client.getServices().stream()
+				.map(CFService::getName)
+				.collect(Collectors.toList())
+		);
+		for (String s : serviceNames) {
+			assertTrue(s+" not found in "+actualServiceNames, actualServiceNames.contains(s));
+		}
+	}
+
+	@Test
 	public void testServiceCreateAndDelete() throws Exception {
 		String serviceName = services.randomServiceName();
 		client.createService(serviceName, "cloudamqp", "lemur").get();
