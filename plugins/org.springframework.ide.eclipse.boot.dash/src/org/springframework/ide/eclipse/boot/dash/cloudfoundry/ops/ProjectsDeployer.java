@@ -82,29 +82,38 @@ public class ProjectsDeployer extends CloudOperation {
 	protected void doDeployProject(CloudAppDashElement cde, CloudApplicationDeploymentProperties properties,
 			IProject project, IProgressMonitor monitor) throws Exception {
 		ClientRequests client = model.getRunTarget().getClient();
-		CancelationToken cancelToken = cde.createCancelationToken();
-		cde.startOperationStarting();
-		Exception error = null;
+		CancelationToken cancelationToken = cde.createCancelationToken();
+
+
 		try {
-			if (client.applicationExists(properties.getAppName())) {
-				if (!confirmOverwriteExisting(properties)) {
-					throw new OperationCanceledException();
+			cde.whileStarting(ui, cancelationToken, monitor, () -> {
+				if (client.applicationExists(properties.getAppName())) {
+					if (!confirmOverwriteExisting(properties)) {
+						throw new OperationCanceledException();
+					}
 				}
-			}
-			cde.setDeploymentManifestFile(properties.getManifestFile());
-			cde.setProject(project);
-			copyTags(project, cde);
-			cde.print("Pushing project '"+project.getName()+"'");
-			try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
-				if (isDebugEnabled()) {
-					debugSupport.setupEnvVars(args.getEnv());
+				cde.setDeploymentManifestFile(properties.getManifestFile());
+				cde.setProject(project);
+				copyTags(project, cde);
+				cde.print("Pushing project '"+project.getName()+"'");
+				try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
+					if (isDebugEnabled()) {
+						debugSupport.setupEnvVars(args.getEnv());
+					}
+					client.push(args);
+					cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
 				}
-				client.push(args);
-				cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
-			}
+				if (cde.refresh()!=null) {
+					//Careful... connecting the debugger must be done after the refresh because it needs the app guid which
+					// won't be available for a newly created element if its not yet been populated with data from CF.
+					if (isDebugEnabled()) {
+						debugSupport.createOperation(cde, "Connect Debugger for "+cde.getName() , ui, cancelationToken).runOp(monitor);
+					}
+				}
+			});
 		} catch (Exception e) {
+			cde.refresh();
 			cde.printError("Pushing FAILED!");
-			error = e;
 			if (!(e instanceof OperationCanceledException)) {
 				BootDashActivator.log(e);
 				if (ui != null) {
@@ -113,16 +122,6 @@ public class ProjectsDeployer extends CloudOperation {
 									+ ". Check Error Log view for further details.";
 					ui.errorPopup("Operation Failure", message);
 				}
-			}
-		} finally {
-			cde.startOperationEnded(error, cancelToken, monitor);
-		}
-		//Don't forget to refresh the element in the model after pushing it.
-		if (cde.refresh()!=null) {
-			//Careful... connectting the debugger must be done after the refresh because it needs the app guid which
-			// won't be available for a newly created element if its not yet been populated with data from CF.
-			if (error==null && isDebugEnabled()) {
-				debugSupport.createOperation(cde, "Connect Debugger for "+cde.getName() , ui, cancelToken).runOp(monitor);
 			}
 		}
 	}

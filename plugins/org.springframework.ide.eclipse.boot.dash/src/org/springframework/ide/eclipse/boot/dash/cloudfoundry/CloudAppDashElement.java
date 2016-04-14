@@ -23,11 +23,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
@@ -66,6 +68,14 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements LogSink {
 
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT_NAME";
 
@@ -77,7 +87,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	private PropertyStoreApi persistentProperties;
 
 	private final LiveVariable<Throwable> error = new LiveVariable<>();
-	private final OperationTracker startOperationTracker = new OperationTracker(error);
+	private final OperationTracker startOperationTracker = new OperationTracker(()-> this.getName(),error);
 
 	private final LiveVariable<CFApplication> appData = new LiveVariable<>();
 	private final LiveVariable<List<CFInstanceStats>> instanceData = new LiveVariable<>();
@@ -107,21 +117,12 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	};
 
-	public void startOperationStarting() {
-		print("Starting operation on " + getName());
-		startOperationTracker.start();
-	}
-
 	protected void showConsole() {
 		try {
 			getCloudModel().getElementConsoleManager().showConsole(this);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
-	}
-
-	public void startOperationEnded(Throwable error, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
-		startOperationTracker.end(error, cancelationToken, monitor);
 	}
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
@@ -234,8 +235,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 
 	public void restartOnly(UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
-		startOperationStarting();
-		try {
+		whileStarting(ui, cancelationToken, monitor, () -> {
 			if (!getClient().applicationExists(getName())) {
 				throw ExceptionUtil.coreException(
 						"Unable to start the application. Application does not exist anymore in Cloud Foundry: "
@@ -252,10 +252,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 			CFApplicationDetail updatedInstances = getClient().getApplication(getName());
 			setDetailedData(updatedInstances);
-			startOperationEnded(null, cancelationToken, monitor);
-		} catch (Throwable e) {
-			startOperationEnded(e, cancelationToken, monitor);
-		}
+		});
 	}
 
 	public void restartOnlyAsynch(UserInteractions ui, CancelationToken cancelationToken) {
@@ -597,6 +594,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	 * refresh we discovered it not longer exists) and if something failed trying to refresh the element.
 	 */
 	public CloudAppDashElement refresh() throws Exception {
+		debug("Refreshing element: "+this.getName());
 		CFApplicationDetail data = getClient().getApplication(getName());
 		if (data==null) {
 			//Looks like element no longer exist in CF so remove it from the model
@@ -617,8 +615,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			throws Exception {
 
 		boolean isDebugging = runningOrDebugging == RunState.DEBUGGING;
-        startOperationStarting();
-		try {
+		whileStarting(ui, cancelationToken, monitor, () -> {
 			// Refresh app data and check that the application (still) exists in
 			// Cloud Foundry
 			// This also ensures that the 'diff change dialog' will pick up on
@@ -659,11 +656,13 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			getClient().push(pushArgs);
 
 			log("Application pushed to Cloud Foundry: " + getName());
+		});
+	}
 
-			startOperationEnded(null, cancelationToken, monitor);
-		} catch (Throwable e) {
-			startOperationEnded(e, cancelationToken, monitor);
-		}
+	public void whileStarting(UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor, Task task) throws Exception {
+		showConsole();
+		startOperationTracker.whileExecuting(ui, cancelationToken, monitor, task);
+		refresh();
 	}
 
 	public void checkTerminationRequested(CancelationToken cancelationToken, IProgressMonitor mon)
