@@ -107,9 +107,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	private static final SchedulerGroup SCHEDULER_GROUP = SchedulerGroup.async();
-
-
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
 //  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below
 //  may not be 100% correct.
@@ -331,7 +328,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //		.log("streamLog after retry")
 		.cache();
 
-		result.subscribeOn(SCHEDULER_GROUP).consume((token) -> {});
+		result.subscribeOn(SchedulerGroup.single()).consume((token) -> {});
 		return result;
 
 //		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
