@@ -104,7 +104,6 @@ import reactor.core.publisher.SchedulerGroup;
 public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
-	private static final Duration GET_SPACES_TIMEOUT = Duration.ofMinutes(1);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -465,7 +464,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
-		return ReactorUtils.get(GET_SPACES_TIMEOUT,
+		return ReactorUtils.get(
 			operations.organizations()
 			.list()
 			.flatMap((OrganizationSummary org) -> {

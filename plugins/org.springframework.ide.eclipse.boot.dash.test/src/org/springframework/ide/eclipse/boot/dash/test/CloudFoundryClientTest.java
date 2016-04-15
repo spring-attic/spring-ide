@@ -110,7 +110,7 @@ public class CloudFoundryClientTest {
 		int failed  = 0;
 
 		Exception error = null;
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 5; i++) {
 			try {
 				long start = System.currentTimeMillis();
 				List<CFSpace> spaces = client.getSpaces();
