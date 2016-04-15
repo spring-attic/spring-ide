@@ -127,7 +127,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
-		this.cancelationTokens = new CancelationTokens(appName);
+		this.cancelationTokens = new CancelationTokens();
 		this.cloudTarget = model.getRunTarget();
 		this.cloudModel = model;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("A"+getName(), modelStore);
