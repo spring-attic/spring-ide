@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
+import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource.ServiceInstanceResourceBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.junit.After;
@@ -111,8 +112,10 @@ public class CloudFoundryClientTest {
 		Exception error = null;
 		for (int i = 0; i < 100; i++) {
 			try {
+				long start = System.currentTimeMillis();
 				List<CFSpace> spaces = client.getSpaces();
-				System.out.println("getSpaces -> "+spaces.size()+" spaces");
+				long duration = System.currentTimeMillis() - start;
+				System.out.println("getSpaces -> "+spaces.size()+" spaces in "+ duration + " ms");
 				success++;
 			} catch (Exception e) {
 				error = e;
