@@ -458,8 +458,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.cloudFoundryClient(client)
 				.target(org.getName())
 				.build()
-		)
-		.subscribeOn(SchedulerGroup.single());
+		);
 	}
 
 	@Override
