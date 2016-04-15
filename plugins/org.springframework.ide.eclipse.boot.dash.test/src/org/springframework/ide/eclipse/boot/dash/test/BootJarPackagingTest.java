@@ -141,7 +141,7 @@ public class BootJarPackagingTest extends StsTestCase {
 		}
 	}
 
-	private File packageAsJar(IProject project, UserInteractions ui) throws Exception {
+	public static File packageAsJar(IProject project, UserInteractions ui) throws Exception {
 		CloudApplicationArchiverStrategy strategy = CloudApplicationArchiverStrategies.packageAsJar(project, ui);
 		ICloudApplicationArchiver archiver = strategy.getArchiver(new NullProgressMonitor());
 		assertNotNull(archiver);

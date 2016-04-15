@@ -378,7 +378,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public void restartApplication(String appName, CancelationToken cancelationToken) throws Exception {
 		//TODO: use cancelation token and somehow cancel operation!
-		ReactorUtils.get(APP_START_TIMEOUT,
+		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
 			operations.applications().restart(RestartApplicationRequest.builder()
 					.name(appName)
 					.build())
@@ -592,7 +592,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//TODO: obey cancelationToken and cancel push operation
 		debug("Pushing app starting: "+params.getAppName());
 		//XXX CF V2: push should use 'manifest' in a future version of V2
-		ReactorUtils.get(APP_START_TIMEOUT,
+		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
 			operations.applications()
 			.push(toPushRequest(params)
 					.noStart(true)

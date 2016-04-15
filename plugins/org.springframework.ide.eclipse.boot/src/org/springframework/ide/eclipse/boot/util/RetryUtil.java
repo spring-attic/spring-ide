@@ -24,10 +24,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class RetryUtil {
 
-	public interface Thunk {
-		void call() throws Exception;
-	}
-
 	public static void retryTimes(String name, int tries, Thunk task) throws Exception {
 		boolean success = false;
 		Throwable error = null;

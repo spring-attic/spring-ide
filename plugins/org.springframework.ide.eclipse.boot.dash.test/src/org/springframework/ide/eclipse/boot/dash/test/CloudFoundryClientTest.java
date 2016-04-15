@@ -15,6 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -24,10 +25,15 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,12 +41,18 @@ import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource.ServiceInstanceResourceBuilder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -54,10 +66,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.boot.util.Thunk;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -67,7 +81,6 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -94,6 +107,8 @@ public class CloudFoundryClientTest {
 	}
 
 	public BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+
+	private UserInteractions ui = Mockito.mock(UserInteractions.class);
 
 	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
 		try {
@@ -133,12 +148,13 @@ public class CloudFoundryClientTest {
 	public void testGetApplicationDetails() throws Exception {
 		String appName = appHarness.randomAppName();
 
-		CFPushArguments params = new CFPushArguments();
-		params.setAppName(appName);
-		params.setApplicationData(getTestZip("testapp"));
-		params.setBuildpack("staticfile_buildpack");
-		params.setNoStart(true);
-		push(params);
+		try (CFPushArguments params = new CFPushArguments()) {
+			params.setAppName(appName);
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			params.setNoStart(true);
+			push(params);
+		}
 
 		{
 			CFApplicationDetail appDetails = client.getApplication(appName);
@@ -697,14 +713,93 @@ public class CloudFoundryClientTest {
 		assertTrue(dashUrl.startsWith("http"));
 	}
 
-	@Test public void pushCanBeCanceled() throws Exception {
+	@Test public void pushAndStartCanBeCanceled() throws Exception {
+		String appName = appHarness.randomAppName();
+		IProject project = projects.createBootWebProject("slow-starter");
+		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
+
+		CancelationTokens cancelationTokens = new CancelationTokens();
+		try (CFPushArguments params = new CFPushArguments()) {
+			params.setAppName(appName);
+			params.setRoutes(appName+"."+CFAPPS_IO);
+			params.setApplicationData(jarFile);
+
+			long starting = System.currentTimeMillis();
+			Future<Void> pushResult = doAsync(() -> {
+				System.out.println("Pushing...");
+				client.push(params, cancelationTokens.create());
+				long duration = System.currentTimeMillis() - starting;
+				System.out.println("Pushing took: "+duration+ " ms");
+			});
+			Thread.sleep(Duration.ofSeconds(10).toMillis());
+			long cancelTime = System.currentTimeMillis();
+			System.out.println("Canceling...");
+			cancelationTokens.cancelAll();
+
+			try {
+				pushResult.get(5, TimeUnit.SECONDS); // Cancel should happen pretty 'fast'!
+				fail("push completed but it should have been canceled");
+			} catch (ExecutionException e) { // real exception is wrapped in EE by Future.get
+				long duration = System.currentTimeMillis() - cancelTime;
+				assertEquals(OperationCanceledException.class, e.getCause().getClass());
+				System.out.println("\nPush Canceled after: "+duration +" ms");
+			}
+		}
+
+		try (CFPushArguments params = new CFPushArguments()) {
+			params.setAppName(appName);
+			params.setRoutes(appName+"."+CFAPPS_IO);
+			params.setApplicationData(jarFile);
+			params.setNoStart(true);
+			client.push(params, CancelationTokens.NULL);
+		}
+
+
+		long starting = System.currentTimeMillis();
+		System.out.println("Starting...");
+		Future<Void> startResult = doAsync(() -> {
+			client.restartApplication(appName, cancelationTokens.create());
+			long duration = System.currentTimeMillis() - starting;
+			System.out.println("started in "+duration+" ms");
+		});
+
+		Thread.sleep(5000);
+		long cancelTime = System.currentTimeMillis();
+		cancelationTokens.cancelAll();
+		try {
+			startResult.get(5, TimeUnit.SECONDS);
+		} catch (ExecutionException e) {
+			long duration = System.currentTimeMillis() - cancelTime;
+			assertEquals(OperationCanceledException.class, e.getCause().getClass());
+			System.out.println("\nRestart Canceled after "+duration+" ms");
+		}
 
 	}
 
+
 	/////////////////////////////////////////////////////////////////////////////
 
-	private void push(CFPushArguments params) throws Exception {
-		client.push(params, CancelationTokens.NULL);
+	private Future<Void> doAsync(Thunk task) {
+		CompletableFuture<Void> result = new CompletableFuture<Void>();
+		Job job = new Job("Async task") {
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					task.call();
+					result.complete(null);
+				} catch (Throwable e) {
+					result.completeExceptionally(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
+		return result;
+	}
+
+	private void push(CFPushArguments _params) throws Exception {
+		try (CFPushArguments params = _params) {
+			client.push(params, CancelationTokens.NULL);
+		}
 	}
 
 	private void assertContains(Set<String> strings, String... expecteds) {

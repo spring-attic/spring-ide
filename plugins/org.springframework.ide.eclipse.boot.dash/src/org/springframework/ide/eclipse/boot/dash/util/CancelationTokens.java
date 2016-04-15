@@ -73,7 +73,7 @@ public class CancelationTokens {
 		public boolean isCanceled() {
 			synchronized (SYNC) {
 				boolean isCanceled = id < canceledAllBefore;
-				debug("isCanceled? => "+isCanceled);
+				debug("isCanceled? ["+id+"] => "+isCanceled);
 				return isCanceled;
 			}
 		}

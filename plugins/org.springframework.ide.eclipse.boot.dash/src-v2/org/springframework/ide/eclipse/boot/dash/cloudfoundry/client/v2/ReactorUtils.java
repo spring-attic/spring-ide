@@ -30,16 +30,14 @@ public class ReactorUtils {
 	 * Convert a {@link CancelationToken} into a Mono that raises
 	 * an {@link OperationCanceledException} when the token is canceled.
 	 */
-	public static Mono<Void> toMono(CancelationToken cancelToken) {
-		return Flux.just("ping")
-		.delay(Duration.ofSeconds(1))
-		.repeat()
-		.flatMap((ping) ->
+	public static <T> Mono<T> toMono(CancelationToken cancelToken) {
+		return Mono.delay(Duration.ofSeconds(1))
+		.then((ping) ->
 			cancelToken.isCanceled()
-				? Mono.error(new CancellationException())
+				? Mono.<T>error(new OperationCanceledException())
 				: Mono.empty()
 		)
-		.after();
+		.repeatWhenEmpty((x) -> x);
 	}
 
 	/**
@@ -65,12 +63,8 @@ public class ReactorUtils {
 	 * This is useful because the actual exception is pretty hard to trace. It doesn't even 'point'
 	 * to the line where 'get' was called.
 	 */
-	public static <T> T get(Duration timeout, Mono<T> mono) throws Exception {
-		try {
-			return mono.get(timeout);
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
+	public static <T> T get(Duration timeout, CancelationToken cancelationToken, Mono<T> mono) throws Exception {
+		return Mono.any(mono, toMono(cancelationToken)).get(timeout);
 	}
 
 	public static <T> Mono<T> just(T it) {
