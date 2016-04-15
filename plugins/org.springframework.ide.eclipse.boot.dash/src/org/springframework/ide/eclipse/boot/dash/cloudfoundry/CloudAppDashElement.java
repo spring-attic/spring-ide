@@ -162,14 +162,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	public void restart(RunState runningOrDebugging, UserInteractions ui) throws Exception {
 		cancelOperations();
 		CancelationToken cancelationToken = createCancelationToken();
-		// TODO: Only do full upload on restart. Not on debug
-		if (getProject() != null
-		// TODO: commenting out for now as restarting doesnt seem to restage.
-		// Need to re-stage for JAVA_OPTS in debugging to be set. right now that
-		// is done
-		// through uploading via full deployment
-		// && runingOrDebugging == RunState.RUNNING
-		) {
+		if (getProject() != null) {
 			cloudModel.runAsynch("Restarting, goal state: " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
 				// Let push and debug resolve deployment properties
 				CloudApplicationDeploymentProperties deploymentProperties = null;

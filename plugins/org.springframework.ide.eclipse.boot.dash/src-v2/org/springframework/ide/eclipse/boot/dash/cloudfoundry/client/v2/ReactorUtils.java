@@ -12,14 +12,35 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.CancellationException;
 import java.util.function.Function;
 
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
  * @author Kris De Volder
  */
 public class ReactorUtils {
+
+	/**
+	 * Convert a {@link CancelationToken} into a Mono that raises
+	 * an {@link OperationCanceledException} when the token is canceled.
+	 */
+	public static Mono<Void> toMono(CancelationToken cancelToken) {
+		return Flux.just("ping")
+		.delay(Duration.ofSeconds(1))
+		.repeat()
+		.flatMap((ping) ->
+			cancelToken.isCanceled()
+				? Mono.error(new CancellationException())
+				: Mono.empty()
+		)
+		.after();
+	}
 
 	/**
 	 * Similar to Mono.get but logs a more traceable version of the exception to Eclipse's error

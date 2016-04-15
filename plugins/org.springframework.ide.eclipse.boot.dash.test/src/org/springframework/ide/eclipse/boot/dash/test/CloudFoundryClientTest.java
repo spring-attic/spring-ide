@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,10 @@ import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
@@ -43,17 +47,20 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -79,12 +86,43 @@ public class CloudFoundryClientTest {
 	@Rule
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
+
+	@After
+	public void teardown() throws Exception {
+		StsTestUtil.cleanUpProjects();
+	}
+
+	public BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+
 	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
 		try {
 			DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
 			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
 		} catch (Exception e) {
 			throw new Error(e);
+		}
+	}
+
+	@Test
+	public void testGetSpaces() throws Exception {
+		int success = 0;
+		int failed  = 0;
+
+		Exception error = null;
+		for (int i = 0; i < 100; i++) {
+			try {
+				List<CFSpace> spaces = client.getSpaces();
+				System.out.println("getSpaces -> "+spaces.size()+" spaces");
+				success++;
+			} catch (Exception e) {
+				error = e;
+				failed++;
+				System.out.println("getSpaces -> "+ExceptionUtil.getMessage(e));
+			}
+		}
+		System.out.println("getSpaces failure rate = "+failed + "/" +(success+failed));
+		if (failed>0) {
+			throw new IOException("getSpaces failure rate = "+failed + "/" +(success+failed), error);
 		}
 	}
 
@@ -643,10 +681,6 @@ public class CloudFoundryClientTest {
 		assertTrue(StringUtil.hasText(code));
 	}
 
-	private void push(CFPushArguments params) throws Exception {
-		client.push(params, CancelationTokens.NULL);
-	}
-
 	@Test public void testGetServiceDashboardUrl() throws Exception {
 		String serviceName = services.createTestService();
 		CFService service = null;
@@ -660,7 +694,15 @@ public class CloudFoundryClientTest {
 		assertTrue(dashUrl.startsWith("http"));
 	}
 
+	@Test public void pushCanBeCanceled() throws Exception {
+
+	}
+
 	/////////////////////////////////////////////////////////////////////////////
+
+	private void push(CFPushArguments params) throws Exception {
+		client.push(params, CancelationTokens.NULL);
+	}
 
 	private void assertContains(Set<String> strings, String... expecteds) {
 		for (String e : expecteds) {

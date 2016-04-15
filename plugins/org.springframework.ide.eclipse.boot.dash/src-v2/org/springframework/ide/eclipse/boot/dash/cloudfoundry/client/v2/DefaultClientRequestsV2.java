@@ -454,6 +454,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private CloudFoundryOperations operatationsFor(OrganizationSummary org) {
+		debug("Creating operations for "+org);
 		return new CloudFoundryOperationsBuilder()
 				.cloudFoundryClient(client)
 				.target(org.getName())
@@ -472,7 +473,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						.map((space) -> CFWrappingV2.wrap(org, space));
 			})
 			.toList()
-			.log("getSpaces")
+//			.log("getSpaces")
 		);
 	}
 
