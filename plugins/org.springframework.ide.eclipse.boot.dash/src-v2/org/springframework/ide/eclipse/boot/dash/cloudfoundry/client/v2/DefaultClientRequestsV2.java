@@ -453,12 +453,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		};
 	}
 
-	private CloudFoundryOperations operatationsFor(OrganizationSummary org) {
+	private Mono<CloudFoundryOperations> operationsFor(OrganizationSummary org) {
 		debug("Creating operations for "+org);
-		return new CloudFoundryOperationsBuilder()
+		return Mono.fromCallable(() -> new CloudFoundryOperationsBuilder()
 				.cloudFoundryClient(client)
 				.target(org.getName())
-				.build();
+				.build()
+		)
+		.subscribeOn(SchedulerGroup.single());
 	}
 
 	@Override
@@ -467,10 +469,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			operations.organizations()
 			.list()
 			.flatMap((OrganizationSummary org) -> {
-				return operatationsFor(org)
-						.spaces()
-						.list()
-						.map((space) -> CFWrappingV2.wrap(org, space));
+				return operationsFor(org).flatMap((operations) ->
+					operations
+					.spaces()
+					.list()
+					.map((space) -> CFWrappingV2.wrap(org, space))
+				);
 			})
 			.toList()
 //			.log("getSpaces")
