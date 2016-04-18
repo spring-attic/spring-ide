@@ -63,30 +63,21 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 		// Only support paths that point to archive files
 		IPath path = new Path(archivePath);
 		if (path.getFileExtension() != null) {
-
-			if (!path.isAbsolute()) {
-				// Check if it is project relative first
-				IFile projectRelativeFile = getProject().getFile(path);
-				if (projectRelativeFile != null && projectRelativeFile.exists()) {
-					packagedFile = projectRelativeFile.getLocation().toFile();
-				} else {
-					// Case where file exists in file system but is not
-					// present in workspace (i.e. IProject may be out of
-					// synch with file system)
-					IPath projectPath = getProject().getLocation();
-					if (projectPath != null) {
-						archivePath = projectPath.append(archivePath).toString();
-						File absoluteFile = new File(archivePath);
-						if (absoluteFile.exists() && absoluteFile.canRead()) {
-							packagedFile = absoluteFile;
-						}
-					}
-				}
-			} else {
+			if (path.isAbsolute()) {
 				// See if it is an absolute path
 				File absoluteFile = new File(archivePath);
 				if (absoluteFile.exists() && absoluteFile.canRead()) {
 					packagedFile = absoluteFile;
+				}
+			} else {
+				// We'll try and resolve the relative starting from the filesystem directory the manifest itself resides in.
+				File manifestLocation = parser.getManifestFile();
+				if (manifestLocation!=null) {
+					File baseDir = manifestLocation.getParentFile();
+					File absoluteFile = new File(baseDir, archivePath).getAbsoluteFile();
+					if (absoluteFile.exists() && absoluteFile.canRead()) {
+						packagedFile = absoluteFile;
+					}
 				}
 			}
 		}

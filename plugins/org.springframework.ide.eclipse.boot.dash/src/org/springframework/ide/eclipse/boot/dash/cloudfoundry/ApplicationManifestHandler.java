@@ -160,7 +160,7 @@ public class ApplicationManifestHandler {
 	 *
 	 * @return manifest file if it exists. Null otherwise
 	 */
-	protected File getManifestFile() {
+	public File getManifestFile() {
 		if (manifestFile != null) {
 			URI locationURI = manifestFile.getLocationURI();
 			File file = new File(locationURI);

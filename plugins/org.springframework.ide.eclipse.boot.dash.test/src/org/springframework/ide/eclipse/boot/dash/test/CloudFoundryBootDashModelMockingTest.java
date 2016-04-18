@@ -997,6 +997,43 @@ public class CloudFoundryBootDashModelMockingTest {
 		verifyNoMoreInteractions(ui);
 	}
 
+
+	@Test public void testDeployManifestWithRelativePathAttribute() throws Exception {
+		final String appName = "foo";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createProject("to-deploy");
+
+		File zipFile = getTestZip("testapp");
+		project.getFolder("zips").create(true, true, new NullProgressMonitor());
+		project.getFolder("manifests").create(true, true, new NullProgressMonitor());
+		createFile(project, "zips/testapp.zip", zipFile);
+
+		IFile manifestFile = createFile(project, "manifests/manifest.yml",
+				"applications:\n" +
+				"- name: foo\n" +
+				"  path: ../zips/testapp.zip\n" +
+				"  buildpack: staticfile_buildpack"
+		);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		waitForApps(model, "foo");
+
+		CloudAppDashElement app = model.getApplication("foo");
+		waitForState(app, RunState.RUNNING, APP_DELETE_TIMEOUT);
+
+		assertEquals(project, app.getProject());
+
+		assertEquals("some content here\n", space.getApplication(appName).getFileContents("test.txt"));
+
+		verify(ui).promptApplicationDeploymentProperties(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+		verifyNoMoreInteractions(ui);
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
