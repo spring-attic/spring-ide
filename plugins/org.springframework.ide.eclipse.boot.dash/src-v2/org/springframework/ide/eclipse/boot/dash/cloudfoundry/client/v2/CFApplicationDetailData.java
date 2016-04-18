@@ -42,5 +42,21 @@ public class CFApplicationDetailData extends CFApplicationSummaryData implements
 		return instanceDetails;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append("CFApplicationDetail(\n");
+		buf.append("  name = "+getName()+"\n");
+		buf.append("  instance = "+getInstances()+"\n");
+		buf.append("  runningInstances = "+getRunningInstances()+"\n");
+		buf.append("  memory = "+getMemory()+"\n");
+		buf.append("  guid = "+getGuid()+"\n");
+		buf.append("  uris = "+getUris()+"\n");
+		buf.append("  state = "+getState()+"\n");
+		buf.append("  diskQuota = "+getDiskQuota()+"\n");
+		buf.append("  instanceDetails = "+getInstanceDetails()+"\n");
+		buf.append(")\n");
+		return buf.toString();
+	}
 
 }

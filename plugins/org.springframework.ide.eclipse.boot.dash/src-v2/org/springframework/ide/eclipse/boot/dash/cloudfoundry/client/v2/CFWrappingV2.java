@@ -135,6 +135,11 @@ public class CFWrappingV2 {
 					return CFInstanceState.UNKNOWN;
 				}
 			}
+
+			@Override
+			public String toString() {
+				return ""+getState();
+			}
 		};
 	}
 
