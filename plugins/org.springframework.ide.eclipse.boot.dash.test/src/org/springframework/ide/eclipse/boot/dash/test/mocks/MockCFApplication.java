@@ -15,6 +15,7 @@ import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.R
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -390,6 +391,10 @@ public class MockCFApplication {
 
 	public void setBits(byte[] bytes) {
 		this.bits = bytes;
+	}
+
+	public InputStream getBits() {
+		return new ByteArrayInputStream(bits);
 	}
 
 }

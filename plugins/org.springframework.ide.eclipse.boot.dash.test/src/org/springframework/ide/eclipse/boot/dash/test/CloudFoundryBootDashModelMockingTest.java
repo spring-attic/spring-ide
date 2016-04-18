@@ -10,29 +10,34 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.*;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1024,7 +1029,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, "foo");
 
 		CloudAppDashElement app = model.getApplication("foo");
-		waitForState(app, RunState.RUNNING, APP_DELETE_TIMEOUT);
+		waitForState(app, RunState.RUNNING, APP_DEPLOY_TIMEOUT);
 
 		assertEquals(project, app.getProject());
 
@@ -1034,10 +1039,48 @@ public class CloudFoundryBootDashModelMockingTest {
 		verifyNoMoreInteractions(ui);
 	}
 
+	@Test public void testDeployManifestWithoutPathAttribute() throws Exception {
+		String appName = "foo";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		IProject project = projects.createBootWebProject("empty-web-app");
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		File referenceJar = BootJarPackagingTest.packageAsJar(project, ui);
+
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+		waitForState(app, RunState.RUNNING, APP_DEPLOY_TIMEOUT);
+
+		try (InputStream actualBits = space.getApplication(appName).getBits()) {
+			try (InputStream expectedBits = new BufferedInputStream(new FileInputStream(referenceJar))) {
+				assertEqualStreams(expectedBits, actualBits);
+			}
+		}
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
 	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	private void assertEqualStreams(InputStream expectedBytes, InputStream actualBytes) throws IOException {
+		int offset = 0;
+		int expected; int actual;
+		while ((expected=expectedBytes.read())>=0) {
+			actual = actualBytes.read();
+			assertEquals("Different bytes at offset: "+offset, expected, actual);
+			offset++;
+		}
+		assertEquals(-1, actualBytes.read());
+	}
 
 	private File getTestZip(String fileName) {
 		File sourceWorkspace = new File(
