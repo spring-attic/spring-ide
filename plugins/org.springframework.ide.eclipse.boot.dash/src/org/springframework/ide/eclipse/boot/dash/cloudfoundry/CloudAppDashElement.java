@@ -640,7 +640,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 			CFPushArguments pushArgs = properties.toPushArguments(getCloudModel().getCloudDomains(monitor));
 
-			getClient().push(pushArgs, cancelationToken);
+			getClient().push(pushArgs, CancelationTokens.merge(cancelationToken, monitor));
 
 			log("Application pushed to Cloud Foundry: " + getName());
 		});

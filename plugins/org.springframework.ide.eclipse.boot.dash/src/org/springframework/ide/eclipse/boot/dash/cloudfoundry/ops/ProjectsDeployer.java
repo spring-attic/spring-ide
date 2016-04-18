@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 public class ProjectsDeployer extends CloudOperation {
@@ -100,7 +101,7 @@ public class ProjectsDeployer extends CloudOperation {
 					if (isDebugEnabled()) {
 						debugSupport.setupEnvVars(args.getEnv());
 					}
-					client.push(args, cancelationToken);
+					client.push(args, CancelationTokens.merge(cancelationToken, monitor));
 					cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
 				}
 				if (cde.refresh()!=null) {

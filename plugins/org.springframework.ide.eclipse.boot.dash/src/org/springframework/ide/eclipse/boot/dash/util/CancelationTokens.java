@@ -99,6 +99,7 @@ public class CancelationTokens {
 		return new CancelationToken() {
 			@Override
 			public boolean isCanceled() {
+				System.out.println("monitor isCanceled? "+monitor.isCanceled());
 				return cancelationToken.isCanceled() || monitor.isCanceled();
 			}
 		};
