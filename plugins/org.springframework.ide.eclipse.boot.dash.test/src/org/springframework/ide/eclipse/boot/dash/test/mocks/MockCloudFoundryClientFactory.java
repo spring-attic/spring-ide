@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -308,6 +309,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setServicesMaybe(args.getServices());
 			app.setStackMaybe(args.getStack());
 			app.setTimeoutMaybe(args.getTimeout());
+			app.setBits(IOUtil.toBytes(args.getApplicationData()));
 			space.add(app);
 			space.getPushCount(app.getName()).increment();
 

@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +23,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.eclipse.core.runtime.Assert;
@@ -95,6 +100,7 @@ public class MockCFApplication {
 	private ImmutableList<CFInstanceStats> stats = ImmutableList.of();
 
 	private CancelationTokens cancelationTokens;
+	private byte[] bits;
 
 	public MockCFApplication(MockCloudFoundryClientFactory owner,  MockCFSpace space, String name) {
 		this(owner,
@@ -358,6 +364,32 @@ public class MockCFApplication {
 
 	public int getNumberOfPushes() {
 		return space.getPushCount(name).getValue();
+	}
+
+	public String getFileContents(String path) throws IOException {
+		ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(this.bits));
+		ZipEntry entry;
+		while (null != (entry = zip.getNextEntry())) {
+			if (!entry.isDirectory()) {
+				if (entry.getName().equals(path)) {
+					return new String(readBytes(zip));
+				}
+			}
+		}
+		return null;
+	}
+
+	private byte[] readBytes(ZipInputStream zip) throws IOException {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		int nextByte;
+		while ((nextByte = zip.read())>=0) {
+			bytes.write(nextByte);
+		}
+		return bytes.toByteArray();
+	}
+
+	public void setBits(byte[] bytes) {
+		this.bits = bytes;
 	}
 
 }

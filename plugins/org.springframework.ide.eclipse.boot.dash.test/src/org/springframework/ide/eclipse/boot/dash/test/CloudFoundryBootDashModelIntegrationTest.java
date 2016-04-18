@@ -14,24 +14,34 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import java.io.File;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;
 import org.junit.Before;
@@ -39,13 +49,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -322,11 +328,53 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	}
 
 
+	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {
+		final String appName = "foo";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		IProject project = projects.createProject("to-deploy");
+
+		File zipFile = getTestZip("testapp");
+
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: foo\n" +
+				"  path: "+zipFile.getAbsolutePath() + "\n" +
+				"  buildpack: staticfile_buildpack"
+		);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getApplication(appName));
+		});
+
+		CloudAppDashElement app = model.getApplication("foo");
+		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, app.getRunState());
+			assertEquals("some content here\n", IOUtils.toString(new URI(app.getUrl()+"/test.txt")));
+		});
+
+		verify(ui).promptApplicationDeploymentProperties(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+		verifyNoMoreInteractions(ui);
+	}
+
+
+
 	//XXX CF V2:
 	//  - Add a test for 'dashboard url'. I.e. a test that verifies the double-click action on a service
 	//    works.
 
 	///////////////////////////////////////////////////////////////////////////////////
 
+	private File getTestZip(String fileName) {
+		File sourceWorkspace = new File(
+				StsTestUtil.getSourceWorkspacePath("org.springframework.ide.eclipse.boot.dash.test"));
+		File file = new File(sourceWorkspace, fileName + ".zip");
+		Assert.isTrue(file.exists(), ""+ file);
+		return file;
+	}
 
 }

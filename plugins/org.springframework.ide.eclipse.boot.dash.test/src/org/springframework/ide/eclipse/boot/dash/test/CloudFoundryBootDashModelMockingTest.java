@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.*;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -29,6 +31,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.w
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,8 +41,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
@@ -959,10 +964,51 @@ public class CloudFoundryBootDashModelMockingTest {
 		verify(ui).openManifestCompareDialog(any(), any());
 	}
 
+	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {
+		final String appName = "foo";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		IProject project = projects.createProject("to-deploy");
+
+		File zipFile = getTestZip("testapp");
+
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: foo\n" +
+				"  path: "+zipFile.getAbsolutePath() + "\n" +
+				"  buildpack: staticfile_buildpack"
+		);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		waitForApps(model, "foo");
+
+		CloudAppDashElement app = model.getApplication("foo");
+		waitForState(app, RunState.RUNNING, APP_DELETE_TIMEOUT);
+
+		assertEquals(project, app.getProject());
+
+		assertEquals("some content here\n", space.getApplication(appName).getFileContents("test.txt"));
+
+		verify(ui).promptApplicationDeploymentProperties(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+		verifyNoMoreInteractions(ui);
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
 	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	private File getTestZip(String fileName) {
+		File sourceWorkspace = new File(
+				StsTestUtil.getSourceWorkspacePath("org.springframework.ide.eclipse.boot.dash.test"));
+		File file = new File(sourceWorkspace, fileName + ".zip");
+		Assert.isTrue(file.exists(), ""+ file);
+		return file;
+	}
 
 	private void assertAppToProjectBinding(CloudFoundryBootDashModel target, IProject project, String appName) throws Exception {
 		CloudAppDashElement appByProject = getApplication(target, project);
