@@ -329,7 +329,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 
 	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {
-		final String appName = "foo";
+		final String appName = harness.randomAppName();
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		IProject project = projects.createProject("to-deploy");
 
@@ -337,7 +337,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		IFile manifestFile = createFile(project, "manifest.yml",
 				"applications:\n" +
-				"- name: foo\n" +
+				"- name: "+appName+"\n" +
 				"  path: "+zipFile.getAbsolutePath() + "\n" +
 				"  buildpack: staticfile_buildpack"
 		);
@@ -351,7 +351,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 			assertNotNull(model.getApplication(appName));
 		});
 
-		CloudAppDashElement app = model.getApplication("foo");
+		CloudAppDashElement app = model.getApplication(appName);
+
 		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, app.getRunState());
 			assertEquals("some content here\n", IOUtils.toString(new URI(app.getUrl()+"/test.txt")));
