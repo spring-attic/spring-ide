@@ -648,39 +648,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		});
 	}
 
-	private Mono<Void> dumpRoutes() {
-		if (DEBUG) {
-			return operations.routes().list(ListRoutesRequest.builder()
-				.level(Level.SPACE)
-				.build()
-			).flatMap((route) -> {
-				System.out.println("Existing Route: "+route);
-				return Mono.empty();
-			})
-			.after();
-		} else {
-			return Mono.empty();
-		}
-	}
-
 	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl) {
 		debug("mapRoute: "+appName+" -> "+desiredUrl);
 		return toRoute(domains, desiredUrl)
 		.then((Route route) -> mapRoute(appName, route));
 	}
-
-//	private Mono<Void> deleteRoute(Route route) {
-//		return operations.routes().delete(DeleteRouteRequest.builder()
-//			.domain(route.getDomain())
-//			.host(route.getHost())
-//			.path("")
-//			.build()
-//		).otherwise((e) -> {
-//			debug("delete route failed: "+route);
-//			debug("         with error: "+ExceptionUtil.getMessage(e));
-//			return Mono.empty();
-//		});
-//	}
 
 	private Mono<Void> mapRoute(String appName, Route route) {
 		MapRouteRequest mapRouteReq = MapRouteRequest.builder()
@@ -693,24 +665,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return operations.routes().map(
 				mapRouteReq
 		);
-	}
-
-	private Mono<Void> createRoute(Route route) {
-		CreateRouteRequest request = CreateRouteRequest.builder()
-				.domain(route.getDomain())
-				.host(route.getHost())
-				.path(route.getPath())
-				.space(params.getSpaceName())
-				.build();
-		debug("createRoute: "+request);
-		return operations.routes().create(
-				request
-		).otherwise((e) -> {
-			//More selectively ignore only error for already existing route
-			debug("create route failed: "+route);
-			debug("         with error: "+ExceptionUtil.getMessage(e));
-			return Mono.empty();
-		});
 	}
 
 	private Mono<Route> toRoute(Mono<Set<String>> domains, String desiredUrl) {
