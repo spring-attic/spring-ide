@@ -53,6 +53,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -117,6 +118,13 @@ public class CloudFoundryClientTest {
 		} catch (Exception e) {
 			throw new Error(e);
 		}
+	}
+
+	@Test
+	public void testGetApiVersion() throws Exception {
+		Version version = client.getApiVersion();
+		System.out.println("Api version = "+version);
+		assertNotNull(version);
 	}
 
 	@Test

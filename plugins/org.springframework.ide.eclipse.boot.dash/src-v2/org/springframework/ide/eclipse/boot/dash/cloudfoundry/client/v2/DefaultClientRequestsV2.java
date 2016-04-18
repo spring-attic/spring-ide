@@ -561,7 +561,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public Version getApiVersion() {
-		return v1.getApiVersion();
+		return info
+		.map((i) -> new Version(i.getApiVersion()))
+		.get();
 	}
 
 	@Override
