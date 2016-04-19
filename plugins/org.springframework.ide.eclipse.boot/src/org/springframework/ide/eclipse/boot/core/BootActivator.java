@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
-import javax.inject.Inject;
-
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -77,12 +75,18 @@ public class BootActivator extends AbstractUIPlugin {
 		return new Status(IStatus.INFO, PLUGIN_ID, msg);
 	}
 
-	public static void log(Throwable e) {
-		getDefault().getLog().log(createErrorStatus(e));
+	/**
+	 * Deprecated use {@link Log}.log() instead.
+	 */
+	@Deprecated public static void log(Throwable e) {
+		Log.log(e);
 	}
 
-	public static void info(String msg) {
-		getDefault().getLog().log(createInfoStatus(msg));
+	/**
+	 * Deprecated use {@link Log}.info() instead.
+	 */
+	@Deprecated public static void info(String msg) {
+		Log.info(msg);
 	}
 
 

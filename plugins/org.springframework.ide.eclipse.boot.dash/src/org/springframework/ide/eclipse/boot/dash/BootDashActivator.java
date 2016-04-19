@@ -100,16 +100,15 @@ public class BootDashActivator extends AbstractUIPlugin {
 	/**
 	 * Deprecated. Use static methods in {@link Log} instead.
 	 */
-	@Deprecated
-	public static void log(Throwable e) {
+	@Deprecated public static void log(Throwable e) {
 		Log.log(e);
 	}
 
-	public static void logWarning(String message) {
-		if (message == null) {
-			message = "";
-		}
-		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null));
+	/**
+	 * Deprecated. Use {@link Log}.warn() instead.
+	 */
+	@Deprecated public static void logWarning(String message) {
+		Log.warn(message);
 	}
 
 	public BootDashViewModel getModel() {

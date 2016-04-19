@@ -20,6 +20,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class OperationsExecution {
 
@@ -52,7 +54,7 @@ public class OperationsExecution {
 					try {
 						op.run(monitor);
 					} catch (Exception e) {
-						if (!(e instanceof OperationCanceledException)) {
+						if (!ExceptionUtil.isCancelation(e)) {
 							if (ui != null) {
 								String message = e.getMessage() != null && e.getMessage().trim().length() > 0
 										? e.getMessage()
@@ -61,7 +63,7 @@ public class OperationsExecution {
 								ui.errorPopup("Operation Failure", message);
 
 							}
-							BootDashActivator.log(e);
+							Log.log(e);
 						}
 					}
 					// Only return OK status to avoid a second error dialogue
