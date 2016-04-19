@@ -17,7 +17,7 @@ import java.io.InputStream;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 public class CopyFromFolder extends CodeSet {

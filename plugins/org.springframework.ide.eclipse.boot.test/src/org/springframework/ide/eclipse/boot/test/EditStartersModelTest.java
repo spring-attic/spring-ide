@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,9 +60,9 @@ import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

@@ -6,7 +6,6 @@ Bundle-Version: 3.8.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit,
- org.springframework.ide.eclipse.wizard,
  org.springsource.ide.eclipse.commons.livexp,
  org.springframework.ide.eclipse.boot,
  org.eclipse.core.resources,
@@ -28,7 +27,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.core,
  org.mockito,
  org.hamcrest,
- org.hamcrest.library
+ org.hamcrest.library,
+ org.springframework.ide.eclipse.boot.wizard
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,14 +38,14 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.test.util.CopyFromFolder;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategies;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
+import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
+import org.springframework.ide.eclipse.boot.wizard.RadioGroup;
+import org.springframework.ide.eclipse.boot.wizard.RadioInfo;
+import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategies;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
