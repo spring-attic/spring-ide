@@ -37,7 +37,7 @@ public class ExtendedDirectedGraphLayoutAlgorithm extends DirectedGraphLayoutAlg
 	@Override
 	protected void applyLayoutInternal(InternalNode[] entitiesToLayout, InternalRelationship[] relationshipsToConsider,
 			double boundsX, double boundsY, double boundsWidth, double boundsHeight) {
-		HashMap mapping = new HashMap(entitiesToLayout.length);
+		HashMap<InternalNode, Node> mapping = new HashMap<InternalNode, Node>(entitiesToLayout.length);
 		// Difference from DGLA; use the unmodified Draw2D DirectedGraph since
 		// the extended one from the superclass does not handle the horizontal
 		// use case properly.
@@ -59,8 +59,8 @@ public class ExtendedDirectedGraphLayoutAlgorithm extends DirectedGraphLayoutAlg
 			graph.nodes.add(node);
 		}
 		for (InternalRelationship relationship : relationshipsToConsider) {
-			Node source = (Node) mapping.get(relationship.getSource());
-			Node dest = (Node) mapping.get(relationship.getDestination());
+			Node source = mapping.get(relationship.getSource());
+			Node dest = mapping.get(relationship.getDestination());
 			if (source != null && dest != null) {
 				Edge edge = new Edge(relationship, source, dest);
 				graph.edges.add(edge);
@@ -69,8 +69,8 @@ public class ExtendedDirectedGraphLayoutAlgorithm extends DirectedGraphLayoutAlg
 		DirectedGraphLayout directedGraphLayout = new DirectedGraphLayout();
 		directedGraphLayout.visit(graph);
 
-		for (Iterator iterator = graph.nodes.iterator(); iterator.hasNext();) {
-			Node node = (Node) iterator.next();
+		for (Iterator<Node> iterator = graph.nodes.iterator(); iterator.hasNext();) {
+			Node node = iterator.next();
 			InternalNode internalNode = (InternalNode) node.data;
 			// For horizontal layout transpose the x and y coordinates
 			if ((layout_styles & SWT.HORIZONTAL) == SWT.HORIZONTAL) {

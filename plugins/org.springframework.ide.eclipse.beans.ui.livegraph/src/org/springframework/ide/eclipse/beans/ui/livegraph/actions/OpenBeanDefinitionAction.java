@@ -35,6 +35,7 @@ import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 /**
  * @author Leo Dos Santos
  */
+@SuppressWarnings("restriction")
 public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 
 	public OpenBeanDefinitionAction() {
@@ -68,7 +69,7 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 	@Override
 	public void run() {
 		IStructuredSelection selection = getStructuredSelection();
-		List elements = selection.toList();
+		List<?> elements = selection.toList();
 		LiveBeansSession session = null;
 		final List<String> contexts = new ArrayList<String>();
 		for (Object obj : elements) {
@@ -104,7 +105,7 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
-			List elements = selection.toList();
+			List<?> elements = selection.toList();
 			for (Object obj : elements) {
 				if (obj instanceof LiveBean) {
 					LiveBean bean = (LiveBean) obj;
