@@ -28,10 +28,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportConfiguration;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategyFactory;
+import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategyFactory;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.util.NatureUtils;
 
