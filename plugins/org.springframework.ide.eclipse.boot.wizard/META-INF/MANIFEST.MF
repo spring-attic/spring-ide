@@ -22,7 +22,6 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.codec,
  org.apache.commons.compress,
  org.apache.commons.io,
- org.springframework.ide.eclipse.boot,
  org.springsource.ide.eclipse.commons.ui,
  org.springframework.ide.eclipse.maven
 Import-Package: org.springframework.http;version="[4.0.0,4.3.0)",
@@ -33,5 +32,12 @@ Import-Package: org.springframework.http;version="[4.0.0,4.3.0)",
  org.springframework.http.client.support;version="[4.0.0,4.3.0)"
 Bundle-Activator: org.springframework.ide.eclipse.boot.wizard.BootWizardActivator
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.boot.wizard.content,
- org.springframework.ide.eclipse.boot.wizard.importing
+Export-Package: org.springframework.ide.eclipse.boot.wizard,
+ org.springframework.ide.eclipse.boot.wizard.content,
+ org.springframework.ide.eclipse.boot.wizard.github,
+ org.springframework.ide.eclipse.boot.wizard.github.auth,
+ org.springframework.ide.eclipse.boot.wizard.guides,
+ org.springframework.ide.eclipse.boot.wizard.guides.ext,
+ org.springframework.ide.eclipse.boot.wizard.importing,
+ org.springframework.ide.eclipse.boot.wizard.json,
+ org.springframework.ide.eclipse.boot.wizard.util

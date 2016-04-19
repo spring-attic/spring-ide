@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,8 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependency
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.DependencyInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.RepoInfo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.SimpleUriBuilder;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.DependencyGroup;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
