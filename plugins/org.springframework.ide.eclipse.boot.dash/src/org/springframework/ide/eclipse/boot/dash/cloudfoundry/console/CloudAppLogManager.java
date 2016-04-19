@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudAppLogManager extends BootDashModelConsoleManager {
 
@@ -107,11 +108,10 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	protected synchronized ApplicationLogConsole getApplicationConsole(TargetProperties targetProperties,
 			String appName) throws Exception {
 		if (appName == null) {
-			throw BootDashActivator
-					.asCoreException("INTERNAL ERROR: No application name specified when writing to console.");
+			throw ExceptionUtil.coreException("INTERNAL ERROR: No application name specified when writing to console.");
 		}
 		if (targetProperties == null) {
-			throw BootDashActivator.asCoreException("INTERNAL ERROR: No target properties specified for application : "
+			throw ExceptionUtil.coreException("INTERNAL ERROR: No target properties specified for application : "
 					+ appName + ". Unable to open console.");
 		}
 		ApplicationLogConsole appConsole = getExisitingConsole(targetProperties, appName);

@@ -42,6 +42,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Resolves all the package fragment roots and main type for a give Java
@@ -95,7 +96,7 @@ public class JavaPackageFragmentRootHandler {
 				}
 
 			} else {
-				throw BootDashActivator.asCoreException("The project : " + javaProject.getProject().getName()
+				throw ExceptionUtil.coreException("The project : " + javaProject.getProject().getName()
 						+ " does not appear to be a Spring Boot project. Only Spring Boot projects can be deployed through the Boot Dashboard.");
 			}
 
@@ -176,7 +177,7 @@ public class JavaPackageFragmentRootHandler {
 		if (type == null) {
 			type = new JavaTypeResolver(javaProject).getMainTypesFromSource(monitor);
 			if (type == null) {
-				throw BootDashActivator.asCoreException(
+				throw ExceptionUtil.coreException(
 						"No main type found. Verify that the project can be packaged as a jar application and contains a main type in source. War packaging of projects is not yet supported.");
 			}
 		}

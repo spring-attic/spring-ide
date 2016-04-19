@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JavaPackageFragmentRootHandler;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 
@@ -65,7 +66,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 			final IPackageFragmentRoot[] roots = rootResolver.getPackageFragmentRoots(monitor);
 
 			if (roots == null || roots.length == 0) {
-				throw BootDashActivator.asCoreException("Unable to package project" + javaProject.getElementName()
+				throw ExceptionUtil.coreException("Unable to package project" + javaProject.getElementName()
 						+ " as a jar application. Please verify that the project is a valid Java project and contains a main type in source.");
 			}
 
@@ -201,8 +202,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 		tempFolder.mkdirs();
 
 		if (!tempFolder.exists()) {
-			throw BootDashActivator
-					.asCoreException("Failed to create temporary jar file when packaging application for deployment: "
+			throw ExceptionUtil.coreException("Failed to create temporary jar file when packaging application for deployment: "
 							+ tempFolder.getAbsolutePath());
 		}
 
@@ -259,7 +259,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 			}
 			// If a path is specified but no file found stop further deployment
 			if (packagedFile == null) {
-				throw BootDashActivator.asCoreException(
+				throw ExceptionUtil.coreException(
 						"No file found at: " + path + ". Unable to package the application for deployment");
 			} else {
 				return packagedFile;

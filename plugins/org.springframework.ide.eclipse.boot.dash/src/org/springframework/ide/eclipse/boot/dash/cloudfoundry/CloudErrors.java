@@ -14,6 +14,7 @@ import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudErrors {
 
@@ -101,7 +102,7 @@ public class CloudErrors {
 			if (errorPrefix != null) {
 				message = errorPrefix + ": " + message;
 			}
-			IStatus status = BootDashActivator.createErrorStatus(e, message);
+			IStatus status = ExceptionUtil.status(e, message);
 			throw new CoreException(status);
 		} else {
 			throw e;
