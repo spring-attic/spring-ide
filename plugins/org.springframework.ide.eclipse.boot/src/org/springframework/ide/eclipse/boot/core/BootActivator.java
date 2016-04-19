@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import javax.inject.Inject;
+
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -81,6 +84,7 @@ public class BootActivator extends AbstractUIPlugin {
 	public static void info(String msg) {
 		getDefault().getLog().log(createInfoStatus(msg));
 	}
+
 
 
 }
