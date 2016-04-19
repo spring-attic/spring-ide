@@ -51,7 +51,6 @@ import org.cloudfoundry.operations.applications.StopApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
-import org.cloudfoundry.operations.routes.CreateRouteRequest;
 import org.cloudfoundry.operations.routes.ListRoutesRequest;
 import org.cloudfoundry.operations.routes.ListRoutesRequest.Level;
 import org.cloudfoundry.operations.routes.MapRouteRequest;
@@ -85,7 +84,6 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -93,9 +91,9 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+import reactor.core.publisher.Computations;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.SchedulerGroup;
 
 /**
  * @author Kris De Volder
@@ -328,7 +326,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //		.log("streamLog after retry")
 		.cache();
 
-		result.subscribeOn(SchedulerGroup.single()).consume((token) -> {});
+		result.subscribeOn(Computations.single()).consume((token) -> {});
 		return result;
 
 //		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
