@@ -28,7 +28,7 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 	@Override
 	public void run() {
 		IStructuredSelection selection = getStructuredSelection();
-		List elements = selection.toList();
+		List<?> elements = selection.toList();
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
@@ -63,7 +63,7 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
-			List elements = selection.toList();
+			List<?> elements = selection.toList();
 			for (Object obj : elements) {
 				if (obj instanceof LiveBean) {
 					LiveBean bean = (LiveBean) obj;

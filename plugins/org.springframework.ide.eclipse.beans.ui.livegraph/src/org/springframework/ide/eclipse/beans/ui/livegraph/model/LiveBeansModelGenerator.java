@@ -226,7 +226,7 @@ public class LiveBeansModelGenerator {
 			throws CoreException {
 		try {
 			if (serviceUrl != null && serviceUrl.length() > 0) {
-				Map env = new HashMap();
+				Map<String, String[]> env = new HashMap<String, String[]>();
 				if (username != null && password != null) {
 					String[] creds = new String[] { username, password };
 					env.put(JMXConnector.CREDENTIALS, creds);

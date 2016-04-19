@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,20 +27,19 @@ import java.util.Set;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
+import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
+import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
+import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
+import org.springframework.ide.eclipse.boot.wizard.RadioGroup;
+import org.springframework.ide.eclipse.boot.wizard.RadioGroups;
+import org.springframework.ide.eclipse.boot.wizard.RadioInfo;
+import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.core.StringUtils;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroup;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioGroups;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.RadioInfo;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;

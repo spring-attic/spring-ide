@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 Pivotal, Inc.
+ * Copyright (c) 2013, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,12 +19,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.DependencyFilterBox;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.SearchBoxSection;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.boot.wizard.DependencyFilterBox;
+import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
+import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,14 +31,14 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.wizard.WizardPlugin;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.HierarchicalMultiSelectionFieldModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.MultiSelectionFieldModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizardModel;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.PopularityTracker;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.wizard.gettingstarted.boot.json.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
+import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
+import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
+import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.DependencyGroup;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
@@ -69,7 +69,7 @@ public class EditStartersModel implements OkButtonHandler {
 		this(
 				selectedProject,
 				SpringBootCore.getDefault(),
-				WizardPlugin.getDefault().getPreferenceStore()
+				BootWizardActivator.getDefault().getPreferenceStore()
 		);
 	}
 

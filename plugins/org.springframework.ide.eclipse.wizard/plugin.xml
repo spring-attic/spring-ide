@@ -13,22 +13,6 @@
  *******************************************************************************/
  -->
 <plugin>
-   <extension-point id="org.springframework.ide.eclipse.wizard.import.strategy" name="org.springframework.ide.eclipse.wizard.import.strategy" schema="schema/org.springframework.ide.eclipse.wizard.import.strategy.exsd"/>
-	<!--extension point="org.eclipse.ui.newWizards">
-		<wizard
-			id="org.springframework.ide.eclipse.beans.ui.wizards.newBeanDefinition"
-            name="New Bean Definition"
-            class="com.springsource.sts.wizard.NewBeanWizard"
-            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
-            icon="icons/full/etool16/newconfig_wiz.gif">
-			<description>
-				Create a new Bean Definition
-			</description>
-			<selection
-				class="org.eclipse.core.resources.IResource">
-			</selection>
-		</wizard>
-	</extension-->
 
 	<extension point="org.eclipse.ui.popupMenus">
 		<objectContribution
@@ -70,36 +54,7 @@
           preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
           project="true">
     </wizard>
-   <wizard
-         category="org.springframework.ide.eclipse.beans.ui.wizards.category"
-         icon="icons/full/etool16/new_template_project_obj.png"
-         class="org.springframework.ide.eclipse.wizard.gettingstarted.boot.NewSpringBootWizard"
-         hasPages="true"
-         id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard"
-         name="Spring Starter Project"
-         project="true">
-       <description>Create new Spring Starter Project via the Spring Initializr Web Service</description>
-   </wizard>
-      
-      <!-- an 'alias' for the GS import wizard that shows up in the File >> New menu -->
-      <wizard
-            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
-            class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard"
-            icon="icons/full/etool16/new_template_project_obj.png"
-            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias"
-            name="Import Spring Getting Started Content"
-            project="true"> 
-         <description> 
-            An import wizards that imports code associated with a Spring Getting Started Guide
-         </description> 
-         <selection class="org.eclipse.core.resources.IResource"/> 
-      </wizard>
-      
-      <category
-            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
-            name="Spring">
-      </category> 
-    
+
     <wizard
           category="org.springframework.ide.eclipse.beans.ui.wizards.category"
           class="org.springframework.ide.eclipse.wizard.ui.BeanWizard"
@@ -108,30 +63,12 @@
           name="Spring Bean Definition">
     </wizard>
     
- </extension>
- 
-<extension 
-     point="org.eclipse.ui.importWizards"> 
-      <wizard
-            category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
-            class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.GSImportWizard"
-            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
-            icon="icons/full/etool16/new_template_project_obj.png"
-            name="Spring Getting Started Content"> 
-         <description> 
-            An import wizards that imports code associated with a Spring Getting Started Guide
-         </description> 
-         <selection class="org.eclipse.core.resources.IResource"/> 
-      </wizard>
-      
       <category
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
             name="Spring">
       </category> 
-</extension>
-
-
- 
+    
+ </extension>
  
 <extension
        point="org.eclipse.ui.navigator.navigatorContent">
@@ -185,23 +122,11 @@
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
-       </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension 
           targetID="org.eclipse.ui.resourcePerspective">
 	   <newWizardShortcut
              id="com.springsource.sts.wizard.template">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
        </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension
@@ -209,23 +134,11 @@
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
-       </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension
           targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
        </newWizardShortcut>
     </perspectiveExtension>
     <perspectiveExtension
@@ -233,25 +146,11 @@
        <newWizardShortcut
              id="com.springsource.sts.wizard.template">
        </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard">
-       </newWizardShortcut>
-       <newWizardShortcut
-             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias">
-       </newWizardShortcut>
     </perspectiveExtension>
  </extension>
     
     <extension
          point="org.eclipse.ui.preferencePages">
-      <!--
-      <page
-            category="org.springsource.ide.eclipse.commons.preferencePage"
-            class="org.springframework.ide.eclipse.wizard.template.util.ExampleProjectsPreferencePage"
-            id="com.springsource.sts.help.ui.examplepreferencepage"
-            name="Example Projects">
-      </page>
-      -->
       <page
             category="org.springsource.ide.eclipse.commons.preferencePage"
             class="org.springframework.ide.eclipse.wizard.template.util.TemplatesPreferencePage"
@@ -259,30 +158,4 @@
             name="Template Projects">
       </page>
       </extension>
-    <extension
-          point="org.springsource.ide.browser.function.browserToEclipse">
-       <function
-             class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.ext.OpenGSFunction"
-             id="org.springframework.openGuideWizard"
-             urlExpression=".*\.html">
-       </function>
-    </extension>
-    <extension
-          point="org.springsource.ide.browser.function.eclipseToBrowser">
-       <provider
-             class="org.springframework.ide.eclipse.wizard.gettingstarted.guides.ext.OpenGSWizardButtonProvider"
-             functionName="addHtml"
-             invokeOnLoad="true"
-             urlExpression=".*org\.springsource\.ide\.eclipse\.commons\.gettingstarted.*/index.html">
-          <argument
-                dynamic="false"
-                id="divId"
-                literal="gettingStarted">
-          </argument>
-          <argument
-                dynamic="true"
-                id="html">
-          </argument>
-       </provider>
-    </extension>
 </plugin>
