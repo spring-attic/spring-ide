@@ -51,6 +51,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
 import org.junit.After;
@@ -1059,6 +1060,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudAppDashElement app = model.getApplication(appName);
 		waitForState(app, RunState.RUNNING, APP_DEPLOY_TIMEOUT);
 
+		System.out.println("platform location = '"+Platform.getLocation()+"'");
 		try (InputStream actualBits = space.getApplication(appName).getBits()) {
 			try (InputStream expectedBits = new BufferedInputStream(new FileInputStream(referenceJar))) {
 				assertEqualStreams(expectedBits, actualBits);
