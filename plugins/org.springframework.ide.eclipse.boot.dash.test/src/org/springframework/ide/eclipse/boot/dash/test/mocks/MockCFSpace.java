@@ -18,7 +18,7 @@ import java.util.UUID;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 
 import com.google.common.collect.ImmutableList;
@@ -29,7 +29,7 @@ public class MockCFSpace extends CFSpaceData {
 	//TODO: the methods in this class should prolly be synchronized somehow. It manipulates mutable
 	//  data and is called from multiple threads.
 
-	private Map<String, CFService> servicesByName = new HashMap<>();
+	private Map<String, CFServiceInstance> servicesByName = new HashMap<>();
 	private Map<String, MockCFApplication> appsByName = new HashMap<>();
 	private MockCloudFoundryClientFactory owner;
 	private Map<String, LiveCounter> pushCounts = new HashMap<>();
@@ -43,7 +43,7 @@ public class MockCFSpace extends CFSpaceData {
 		return owner.getDefaultDomain();
 	}
 
-	public List<CFService> getServices() {
+	public List<CFServiceInstance> getServices() {
 		return ImmutableList.copyOf(servicesByName.values());
 	}
 
@@ -63,10 +63,10 @@ public class MockCFSpace extends CFSpaceData {
 		return existing;
 	}
 
-	public CFService defService(String name) {
-		CFService existing = servicesByName.get(name);
+	public CFServiceInstance defService(String name) {
+		CFServiceInstance existing = servicesByName.get(name);
 		if (existing==null) {
-			servicesByName.put(name, new CFServiceData(
+			servicesByName.put(name, new CFServiceInstanceData(
 					name
 			));
 		}

@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+
 /**
- * General properties view section for Cloud Foundry app elements
+ * Properties view section for Cloud Foundry app elements
  *
  * @author Alex Boyko
- *
  */
-public class CloudFoundryGeneralPropertiesSection extends AbstractBdeGeneralPropertiesSection {
+public class CloudFoundryAppPropertiesSection extends AbstractBdeGeneralPropertiesSection {
 
 	@Override
 	protected BootDashElementPropertyControl[] createPropertyControls() {
@@ -25,10 +26,10 @@ public class CloudFoundryGeneralPropertiesSection extends AbstractBdeGeneralProp
 				new AppPropertyControl(),
 				new ProjectPropertyControl(),
 				new InstancesPropertyControl(),
-				new UrlPropertyControl(),
+				new UrlPropertyControl<>(BootDashElement.class, "URL:", ((e) -> e.getUrl())),
 				new DefaultPathPropertyControl(),
-				new TagsPropertyControl(),
-				new HealthCheckPropertyControl()
+				new HealthCheckPropertyControl(),
+				new TagsPropertyControl()
 		};
 	}
 

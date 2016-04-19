@@ -16,7 +16,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 
@@ -54,7 +54,7 @@ public class PropertiesTitleLabelProvider implements ILabelProvider {
 			IStructuredSelection selection = (IStructuredSelection) element;
 			if (selection.size() == 1) {
 				Object o = selection.getFirstElement();
-				if (o instanceof CloudServiceDashElement) {
+				if (o instanceof CloudServiceInstanceDashElement) {
 					return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.SERVICE_ICON);
 				} else if (o instanceof CloudAppDashElement) {
 					return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON);

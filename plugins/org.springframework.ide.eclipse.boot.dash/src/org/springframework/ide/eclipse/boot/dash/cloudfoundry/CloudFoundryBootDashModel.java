@@ -124,7 +124,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		private int getCategory(BootDashElement o1) {
 			if (o1 instanceof CloudAppDashElement) {
 				return 1;
-			} else if (o1 instanceof CloudServiceDashElement) {
+			} else if (o1 instanceof CloudServiceInstanceDashElement) {
 				return 2;
 			} else {
 				//Not really possible but anyhow...
@@ -135,7 +135,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	private CloudDashElementFactory elementFactory;
 
-	private final LiveSetVariable<CloudServiceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
+	private final LiveSetVariable<CloudServiceInstanceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
 	private final CloudDashApplications applications = new CloudDashApplications(this);
 	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications.getApplications(), services);
 
@@ -781,7 +781,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return getRunTarget().isConnected();
 	}
 
-	public void setServices(Set<CloudServiceDashElement> newServices) {
+	public void setServices(Set<CloudServiceInstanceDashElement> newServices) {
 		this.services.replaceAll(newServices);
 	}
 
@@ -793,7 +793,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return applications.getApplicationValues();
 	}
 
-	public ObservableSet<CloudServiceDashElement> getServices() {
+	public ObservableSet<CloudServiceInstanceDashElement> getServices() {
 		return services;
 	}
 

@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import org.eclipse.jface.viewers.IFilter;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 
 /**
  * Filter for Cloud Service elements
@@ -23,7 +23,7 @@ public class CloudServiceElementFilter implements IFilter {
 
 	@Override
 	public boolean select(Object toTest) {
-		return toTest instanceof CloudServiceDashElement;
+		return toTest instanceof CloudServiceInstanceDashElement;
 	}
 
 }

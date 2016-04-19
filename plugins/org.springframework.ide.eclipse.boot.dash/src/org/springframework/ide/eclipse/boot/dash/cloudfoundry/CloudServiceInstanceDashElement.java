@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -22,14 +22,14 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-public class CloudServiceDashElement extends WrappingBootDashElement<String> {
+public class CloudServiceInstanceDashElement extends WrappingBootDashElement<String> {
 
 	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.TAGS};
 
-	private final CFService service;
+	private final CFServiceInstance service;
 	private final PropertyStoreApi persistentProperties;
 
-	public CloudServiceDashElement(AbstractBootDashModel parent, CFService service, IPropertyStore modelStore) {
+	public CloudServiceInstanceDashElement(AbstractBootDashModel parent, CFServiceInstance service, IPropertyStore modelStore) {
 		super(parent, service.getName()+"@"+parent.getRunTarget().getId());
 		this.service = service;
 		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("S"+getName(), modelStore);
@@ -118,8 +118,27 @@ public class CloudServiceDashElement extends WrappingBootDashElement<String> {
 		return service != null ? service.getDashboardUrl() : null;
 	}
 
-	public CFService getCloudService() {
+	public String getDocumentationUrl() {
+		return service!=null ? service.getDocumentationUrl() : null;
+	}
+
+	public CFServiceInstance getCloudService() {
 		return service;
+	}
+
+	public String getPlan() {
+		CFServiceInstance s = getCloudService();
+		return s==null?null:s.getPlan();
+	}
+
+	public String getService() {
+		CFServiceInstance s = getCloudService();
+		return s==null?null:s.getService();
+	}
+
+	public String getDescription() {
+		CFServiceInstance s = getCloudService();
+		return s==null?null:s.getDescription();
 	}
 
 }

@@ -34,7 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 
@@ -187,44 +187,12 @@ public class CFWrappingV2 {
 		);
 	}
 
-	public static CFService wrap(final ServiceInstance service) {
-		return new CFService() {
-
-			//XXX CF V2: cf service properties
-			// Realign these properties and the corresponding properties page in the GUI as well
-			// so that it displays similar infos as what is shown by 'cf service' UI.
+	public static CFServiceInstance wrap(final ServiceInstance service) {
+		return new CFServiceInstance() {
 
 			@Override
 			public String getName() {
 				return service.getName();
-			}
-
-			/**
-			 * Deprecated because this information is not available in recent
-			 * versions of CF. We should replace this info in our views with information
-			 * similar to what CF CLI displays instead.
-			 */
-			@Override
-			@Deprecated
-			public String getVersion() {
-				return null;
-			}
-
-			@Override
-			public String getType() {
-				//XXX CF V2 CFService.getType
-				return null;
-			}
-
-			/**
-			 * Deprecated because this information is not available in recent
-			 * versions of CF. We should replace this info in our views with information
-			 * similar to what CF CLI displays instead.
-			 */
-			@Override
-			@Deprecated
-			public String getProvider() {
-				return null;
 			}
 
 			@Override
@@ -235,6 +203,21 @@ public class CFWrappingV2 {
 			@Override
 			public String getDashboardUrl() {
 				return service.getDashboardUrl();
+			}
+
+			@Override
+			public String getService() {
+				return service.getService();
+			}
+
+			@Override
+			public String getDescription() {
+				return service.getDescription();
+			}
+
+			@Override
+			public String getDocumentationUrl() {
+				return service.getDocumentationUrl();
 			}
 		};
 	}

@@ -15,7 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
@@ -48,15 +48,15 @@ public class ServicesRefreshOperation extends CloudOperation{
 			monitor.worked(1);
 			if (client!=null) {
 //				debug("Resfres Services for connected client");
-				List<CFService> serviceInfos = client.getServices();
-				Builder<CloudServiceDashElement> services = ImmutableSet.builder();
-				for (CFService service : serviceInfos) {
+				List<CFServiceInstance> serviceInfos = client.getServices();
+				Builder<CloudServiceInstanceDashElement> services = ImmutableSet.builder();
+				for (CFServiceInstance service : serviceInfos) {
 					services.add(elementFactory.createService(service));
 				}
 				model.setServices(services.build());
 			} else {
 //				debug("Resfresh Services for DISconnected client");
-				model.setServices(ImmutableSet.<CloudServiceDashElement>of());
+				model.setServices(ImmutableSet.<CloudServiceInstanceDashElement>of());
 			}
 		} finally {
 			monitor.done();

@@ -43,7 +43,7 @@ public interface ClientRequests {
 	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
 	List<CFBuildpack> getBuildpacks() throws Exception;
 	List<CFCloudDomain> getDomains() throws Exception;
-	List<CFService> getServices() throws Exception;
+	List<CFServiceInstance> getServices() throws Exception;
 	List<CFSpace> getSpaces() throws Exception;
 	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName, CancelationToken token) throws Exception;

@@ -44,7 +44,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequest;
@@ -351,23 +351,6 @@ public class DefaultClientRequestsV1 {
 			@Override
 			protected List<CFCloudDomain> doRun(CloudFoundryOperations client) throws Exception {
 				return wrapDomains(client.getDomains());
-			}
-		}.call();
-	}
-
-	public List<CFService> getServices() throws Exception {
-		return new ClientRequest<List<CFService>>(this.client, "Getting Cloud Services") {
-			@Override
-			protected List<CFService> doRun(CloudFoundryOperations client) throws Exception {
-				List<CloudService> services = client.getServices();
-				if (services != null) {
-					Builder<CFService> builder = ImmutableList.builder();
-					for (CloudService s : services) {
-						builder.add(wrap(s, client.getServiceInstance(s.getName())));
-					}
-					return builder.build();
-				}
-				return null;
 			}
 		}.call();
 	}

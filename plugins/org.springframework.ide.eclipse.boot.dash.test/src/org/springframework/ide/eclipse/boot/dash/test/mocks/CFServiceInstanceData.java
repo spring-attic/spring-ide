@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 
-public class CFServiceData implements CFService {
+public class CFServiceInstanceData implements CFServiceInstance {
 
 	private String name;
 
-	public CFServiceData(String name) {
+	public CFServiceInstanceData(String name) {
 		this.name = name;
 	}
 
@@ -27,26 +27,31 @@ public class CFServiceData implements CFService {
 
 	@Override
 	public String getPlan() {
-		return null;
-	}
-
-	@Override
-	public String getProvider() {
-		return null;
-	}
-
-	@Override
-	public String getVersion() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getDashboardUrl() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getType() {
+	public String getService() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDocumentationUrl() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

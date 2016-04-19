@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport.Buildpack;
@@ -272,44 +272,6 @@ public class CFWrapping {
 //		}
 //	}
 
-
-	public static CFService wrap(final CloudService s, final CloudServiceInstance instance) {
-		if (s!=null) {
-			return new CFService() {
-				@Override
-				public String getName() {
-					return s.getName();
-				}
-
-				@Override
-				public String getPlan() {
-					return s.getPlan();
-				}
-
-				@Override
-				public String getProvider() {
-					return s.getProvider();
-				}
-
-				@Override
-				public String getVersion() {
-					return s.getVersion();
-				}
-
-				@Override
-				public String getDashboardUrl() {
-					return instance.getDashboardUrl();
-				}
-
-				@Override
-				public String getType() {
-					return instance.getType();
-				}
-
-			};
-		}
-		return null;
-	}
 
 	public static CFStack wrap(final CloudStack s) {
 		if (s!=null) {

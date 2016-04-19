@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+
 /**
  * General properties section for Local apps
  *
@@ -25,7 +27,7 @@ public class LocalGeneralPropertiesSection extends AbstractBdeGeneralPropertiesS
 				new InstancesPropertyControl(),
 				new ProjectPropertyControl(),
 				new AppPropertyControl(),
-				new UrlPropertyControl(),
+				new UrlPropertyControl<>(BootDashElement.class, "URL:", (e) -> e.getUrl()),
 				new DefaultPathPropertyControl(),
 				new TagsPropertyControl(),
 				new ExposedPropertyControl()

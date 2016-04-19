@@ -10,21 +10,37 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import java.util.function.Function;
+
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
+
 /**
- * General properties section for cloud service elements
+ * Properties section for cloud service elements
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 public class CloudServiceGeneralPropertiesSection extends AbstractBdeGeneralPropertiesSection {
 
 	@Override
 	protected BootDashElementPropertyControl[] createPropertyControls() {
 		return new BootDashElementPropertyControl[] {
-				new ServiceGeneralPropertiesControl(),
-				new UrlPropertyControl(),
+				//textProperty("Name:", (e) -> e.getName()),
+				textProperty("Service:", (e) -> e.getService()),
+				textProperty("Plan:", (e) -> e.getPlan()),
+				textProperty("Description:",  (e) -> e.getDescription()),
+				urlProperty("Docs:", (e) -> e.getDocumentationUrl()),
+				urlProperty("URL:", (e) -> e.getUrl()),
 				new TagsPropertyControl()
 		};
+	}
+
+	private AbstractBdePropertyControl urlProperty(String label, Function<CloudServiceInstanceDashElement, String> getter) {
+		return new UrlPropertyControl<>(CloudServiceInstanceDashElement.class, label, getter);
+	}
+
+	private AbstractBdePropertyControl textProperty(String label, Function<CloudServiceInstanceDashElement, String> getter) {
+		return new BdeReadOnlyTextPropertyControl<>(CloudServiceInstanceDashElement.class, label, getter);
 	}
 
 }

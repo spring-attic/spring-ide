@@ -10,16 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-public interface CFService extends CFEntity {
+public interface CFServiceInstance extends CFEntity {
 
+	String getName();
+	String getService();
 	String getPlan();
-
-	String getProvider();
-
-	String getVersion();
-
+	String getDescription();
+	String getDocumentationUrl();
 	String getDashboardUrl();
 
-	String getType();
+	//TODO: last operation info?
 
 }

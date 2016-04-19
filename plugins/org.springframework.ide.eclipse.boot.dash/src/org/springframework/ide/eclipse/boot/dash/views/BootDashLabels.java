@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
@@ -187,7 +187,7 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
-		if (element instanceof CloudServiceDashElement) {
+		if (element instanceof CloudServiceInstanceDashElement) {
 			ImageDescriptor img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
 			return toAnimation(img, null);
 		}

@@ -60,7 +60,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFService;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
@@ -434,7 +434,7 @@ public class CloudFoundryClientTest {
 
 		ImmutableSet<String> actualServiceNames = ImmutableSet.copyOf(
 				client.getServices().stream()
-				.map(CFService::getName)
+				.map(CFServiceInstance::getName)
 				.collect(Collectors.toList())
 		);
 		for (String s : serviceNames) {
@@ -446,7 +446,7 @@ public class CloudFoundryClientTest {
 	public void testServiceCreateAndDelete() throws Exception {
 		String serviceName = services.randomServiceName();
 		client.createService(serviceName, "cloudamqp", "lemur").get();
-		List<CFService> services = client.getServices();
+		List<CFServiceInstance> services = client.getServices();
 		assertServices(services, serviceName);
 		client.deleteService(serviceName).get();
 
@@ -710,8 +710,8 @@ public class CloudFoundryClientTest {
 
 	@Test public void testGetServiceDashboardUrl() throws Exception {
 		String serviceName = services.createTestService();
-		CFService service = null;
-		for (CFService s : client.getServices()) {
+		CFServiceInstance service = null;
+		for (CFServiceInstance s : client.getServices()) {
 			if (s.getName().equals(serviceName)) {
 				service = s;
 			}
@@ -820,13 +820,13 @@ public class CloudFoundryClientTest {
 		assertTrue("Expected '"+expected+"' not found in: "+names, names.contains(expected));
 	}
 
-	private void assertNoServices(List<CFService> services, String serviceName) throws Exception {
-		Set<String> names = services.stream().map(CFService::getName).collect(Collectors.toSet());
+	private void assertNoServices(List<CFServiceInstance> services, String serviceName) throws Exception {
+		Set<String> names = services.stream().map(CFServiceInstance::getName).collect(Collectors.toSet());
 		assertFalse(names.contains(serviceName));
 	}
 
-	private void assertServices(List<CFService> services, String... serviceNames) throws Exception {
-		Set<String> names = services.stream().map(CFService::getName).collect(Collectors.toSet());
+	private void assertServices(List<CFServiceInstance> services, String... serviceNames) throws Exception {
+		Set<String> names = services.stream().map(CFServiceInstance::getName).collect(Collectors.toSet());
 		assertContains(names, serviceNames);
 	}
 
