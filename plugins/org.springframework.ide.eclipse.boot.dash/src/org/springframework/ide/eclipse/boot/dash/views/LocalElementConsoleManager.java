@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -76,7 +77,7 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 		if (appConsole != null) {
 			manager.showConsoleView(appConsole);
 		} else {
-			throw BootDashActivator.asCoreException("Failed to open console for: " + element.getName()
+			throw ExceptionUtil.coreException("Failed to open console for: " + element.getName()
 					+ ". Either a process console may not exist or the application is not running.");
 		}
 	}

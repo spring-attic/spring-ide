@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -97,50 +98,17 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Deprecated use {@link ExceptionUtil} methods instead.
+	 * Deprecated. Use static methods in {@link Log} instead.
 	 */
-	@Deprecated
-	public static IStatus createErrorStatus(Throwable exception) {
-		String message = exception.getMessage();
-		if (message == null) {
-			message = "";
-		}
-		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+	@Deprecated public static void log(Throwable e) {
+		Log.log(e);
 	}
 
 	/**
-	 * Deprecated use {@link ExceptionUtil} methods instead.
+	 * Deprecated. Use {@link Log}.warn() instead.
 	 */
-	@Deprecated
-	public static IStatus createErrorStatus(Throwable exception, String message) {
-		if (message == null) {
-			message = "";
-		}
-		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
-	}
-
-	/**
-	 * Deprecated. Use {@link ExceptionUtil}.coreException instead.
-	 */
-	@Deprecated
-	public static CoreException asCoreException(String message) {
-		return new CoreException(createErrorStatus(null, message));
-	}
-
-	public static void log(Throwable e) {
-		try {
-			getDefault().getLog().log(createErrorStatus(e));
-		} catch (NullPointerException npe) {
-			//Can happen if errors are trying to be logged during Eclipse's shutdown
-			e.printStackTrace();
-		}
-	}
-
-	public static void logWarning(String message) {
-		if (message == null) {
-			message = "";
-		}
-		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, 0, message, null));
+	@Deprecated public static void logWarning(String message) {
+		Log.warn(message);
 	}
 
 	public BootDashViewModel getModel() {

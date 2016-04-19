@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Archiver strategy that consults manifest.yml file for an entry pointing to an existing archive.
@@ -83,7 +84,7 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 		}
 		// If a path is specified but no file found stop further deployment
 		if (packagedFile == null) {
-			throw BootDashActivator.asCoreException(
+			throw ExceptionUtil.coreException(
 					"No file found at: " + path + ". Unable to package the application for deployment");
 		} else {
 			return packagedFile;

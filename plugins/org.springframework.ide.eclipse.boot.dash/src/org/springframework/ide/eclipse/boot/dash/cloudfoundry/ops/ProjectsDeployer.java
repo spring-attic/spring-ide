@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.osgi.util.NLS;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -33,6 +32,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ProjectsDeployer extends CloudOperation {
 
@@ -115,8 +116,8 @@ public class ProjectsDeployer extends CloudOperation {
 		} catch (Exception e) {
 			cde.refresh();
 			cde.printError("Pushing FAILED!");
-			if (!(e instanceof OperationCanceledException)) {
-				BootDashActivator.log(e);
+			if (!ExceptionUtil.isCancelation(e)) {
+				Log.log(e);
 				if (ui != null) {
 					String message = e.getMessage() != null && e.getMessage().trim().length() > 0 ? e.getMessage()
 							: "Error type: " + e.getClass().getName()

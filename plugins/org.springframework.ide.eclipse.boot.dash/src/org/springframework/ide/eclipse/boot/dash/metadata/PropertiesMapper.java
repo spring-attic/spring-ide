@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 import java.io.IOException;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,7 +41,7 @@ public class PropertiesMapper<T> {
 				val = getMapper().readValue(json, new TypeReference<T>() {
 				});
 			} catch (IOException e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return val;
@@ -51,10 +53,10 @@ public class PropertiesMapper<T> {
 			try {
 				return getMapper().writeValueAsString(properties);
 			} catch (IOException e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		} else {
-			throw BootDashActivator.asCoreException("Failed to serialize: " + properties.getClass().getName());
+			throw ExceptionUtil.coreException("Failed to serialize: " + properties.getClass().getName());
 		}
 		return null;
 	}
