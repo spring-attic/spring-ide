@@ -777,6 +777,7 @@ public class CloudFoundryClientTest {
 		try {
 			startResult.get(5, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
+			e.printStackTrace();
 			long duration = System.currentTimeMillis() - cancelTime;
 			assertEquals(OperationCanceledException.class, e.getCause().getClass());
 			System.out.println("\nRestart Canceled after "+duration+" ms");
