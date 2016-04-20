@@ -34,10 +34,12 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.w
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,11 +47,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
@@ -89,6 +93,7 @@ import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -1061,17 +1066,53 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.RUNNING, APP_DEPLOY_TIMEOUT);
 
 		System.out.println("platform location = '"+Platform.getLocation()+"'");
-		try (InputStream actualBits = space.getApplication(appName).getBits()) {
-			try (InputStream expectedBits = new BufferedInputStream(new FileInputStream(referenceJar))) {
-				assertEqualStreams(expectedBits, actualBits);
-			}
-		}
+		assertDeployedBytes(referenceJar, space.getApplication(appName));
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be
 	// moved to some kind of 'harness' (if there is a case where it can be reused).
+
+	private void assertDeployedBytes(File referenceJar, MockCFApplication app) throws IOException {
+		try (InputStream actualBits = app.getBits()) {
+			try (InputStream expectedBits = new BufferedInputStream(new FileInputStream(referenceJar))) {
+				try {
+					assertEqualStreams(expectedBits, actualBits);
+					//TODO: When its confirmed this works, move next line into the catch clause! Only save on failed test.
+					saveArtefacts(referenceJar, app);
+				} catch (Exception e) {
+					throw e;
+				}
+			}
+		}
+	}
+
+	private void saveArtefacts(File referenceJar, MockCFApplication app) throws IOException {
+		File targetDir = getSaveDir();
+		if (targetDir!=null) {
+			int id = uniqueId++;
+			File referenceJarCopy = new File(targetDir, "deployed-reference-"+id+".jar");
+			File faultyJarCopy = new File(targetDir, "deployed-faulty-"+id+".jar");
+			FileUtils.copyFile(referenceJar, referenceJarCopy);
+			System.out.println("Reference jar saved: "+referenceJarCopy);
+			IOUtil.pipe(app.getBits(), faultyJarCopy);
+			System.out.println("Faulty jar saved: "+faultyJarCopy);
+		}
+	}
+
+	private static int uniqueId = 0;
+
+	private File getSaveDir() {
+		IPath targetDirPath = Platform.getLocation();
+		while (targetDirPath.segmentCount()>0 && !targetDirPath.lastSegment().equals("target")) {
+			targetDirPath = targetDirPath.removeLastSegments(1);
+		}
+		if (targetDirPath.segmentCount()>0) {
+			return targetDirPath.toFile();
+		}
+		return new File(System.getProperty("user.home"));
+	}
 
 	private void assertEqualStreams(InputStream expectedBytes, InputStream actualBytes) throws IOException {
 		int offset = 0;
