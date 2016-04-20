@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUIImages;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeanRelation;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansGroup;
@@ -38,14 +38,14 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof LiveBean) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+			return LiveGraphUIImages.getImage(LiveGraphUIImages.IMG_OBJS_BEAN);
 		}
 		else if (element instanceof LiveBeansGroup) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
+			return LiveGraphUIImages.getImage(LiveGraphUIImages.IMG_OBJS_CONFIG);
 		}
 		else if (element instanceof LiveBeanRelation) {
 			// TODO: incoming/outgoing arrow images???
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+			return LiveGraphUIImages.getImage(LiveGraphUIImages.IMG_OBJS_BEAN);
 		}
 		return super.getImage(element);
 	}

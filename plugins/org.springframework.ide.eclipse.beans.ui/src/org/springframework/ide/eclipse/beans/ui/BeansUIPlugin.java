@@ -30,7 +30,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
-import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
+import org.springsource.ide.eclipse.commons.ui.ImageDescriptorRegistry;
 
 /**
  * Central access point for the Spring Framework UI plug-in (id <code>"org.springframework.ide.eclipse.beans.ui"</code>

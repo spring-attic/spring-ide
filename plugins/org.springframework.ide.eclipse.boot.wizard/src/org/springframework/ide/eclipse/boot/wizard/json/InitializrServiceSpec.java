@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 GoPivotal, Inc.
+ * Copyright (c) 2014, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -200,9 +200,9 @@ public class InitializrServiceSpec {
 
 	public Map<String, String> getTextInputs() throws JSONException {
 		Map<String,String> defaults = new HashMap<String, String>();
-		Iterator props = data.keys();
+		Iterator<String> props = data.keys();
 		while(props.hasNext()) {
-			String key = (String) props.next();
+			String key = props.next();
 			JSONObject obj = data.getJSONObject(key);
 			String type = obj.optString("type");
 			if ("text".equals(type)) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.livegraph.actions;
 
 import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUIImages;
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 
 /**
@@ -27,11 +27,11 @@ public class ToggleViewModeAction extends Action {
 		super("", AS_RADIO_BUTTON);
 		if (mode == LiveBeansGraphView.DISPLAY_MODE_GRAPH) {
 			setText("Graph View");
-			setImageDescriptor(BeansUIImages.DESC_OBJS_BEAN_REF);
+			setImageDescriptor(LiveGraphUIImages.DESC_OBJS_BEAN_REF);
 		}
 		else if (mode == LiveBeansGraphView.DISPLAY_MODE_TREE) {
 			setText("Tree View");
-			setImageDescriptor(BeansUIImages.DESC_OBJS_COLLECTION);
+			setImageDescriptor(LiveGraphUIImages.DESC_OBJS_COLLECTION);
 		}
 		this.view = view;
 		this.mode = mode;
