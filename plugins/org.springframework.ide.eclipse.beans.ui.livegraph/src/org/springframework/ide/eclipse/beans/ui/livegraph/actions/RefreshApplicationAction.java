@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
-import org.eclipse.mylyn.commons.ui.CommonImages;
+import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUIImages;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
@@ -29,7 +29,7 @@ public class RefreshApplicationAction extends Action {
 	private final LiveBeansGraphView view;
 
 	public RefreshApplicationAction(LiveBeansGraphView view) {
-		super("Refresh Graph", CommonImages.REFRESH);
+		super("Refresh Graph", LiveGraphUIImages.REFRESH);
 		this.view = view;
 	}
 
