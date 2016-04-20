@@ -57,9 +57,9 @@ public class StsPerspective implements IPerspectiveFactory {
 
 		IFolderLayout outputfolder = layout.createFolder("bottom", IPageLayout.BOTTOM, (float) 0.80, editorArea); //$NON-NLS-1$
 		outputfolder.addView(IConsoleConstants.ID_CONSOLE_VIEW);
-		outputfolder.addView("org.eclipse.ui.views.AllMarkersView");
 		outputfolder.addView(IProgressConstants.PROGRESS_VIEW_ID);
-		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
+		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
+		outputfolder.addPlaceholder("org.eclipse.ui.views.AllMarkersView");
 		outputfolder.addPlaceholder(IPageLayout.ID_TASK_LIST);
 		outputfolder.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
@@ -91,7 +91,7 @@ public class StsPerspective implements IPerspectiveFactory {
 
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
-		// layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
+		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
 		layout.addShowViewShortcut("org.eclipse.ui.views.AllMarkersView");
 		// TODO e3.5 replace with IPageLayout.ID_PROJECT_EXPLORER
 		layout.addShowViewShortcut("org.eclipse.ui.navigator.ProjectExplorer");
