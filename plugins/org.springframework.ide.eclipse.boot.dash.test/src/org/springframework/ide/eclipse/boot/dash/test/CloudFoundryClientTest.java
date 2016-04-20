@@ -748,6 +748,7 @@ public class CloudFoundryClientTest {
 				pushResult.get(5, TimeUnit.SECONDS); // Cancel should happen pretty 'fast'!
 				fail("push completed but it should have been canceled");
 			} catch (ExecutionException e) { // real exception is wrapped in EE by Future.get
+				e.printStackTrace();
 				long duration = System.currentTimeMillis() - cancelTime;
 				assertEquals(OperationCanceledException.class, e.getCause().getClass());
 				System.out.println("\nPush Canceled after: "+duration +" ms");
