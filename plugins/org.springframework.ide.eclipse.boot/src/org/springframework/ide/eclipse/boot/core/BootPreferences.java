@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.springframework.ide.eclipse.core.StringUtils;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -80,7 +80,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 		try {
 			if (prefs!=null) {
 				String patternString = prefs.get(PREF_BOOT_PROJECT_EXCLUDE, null);
-				if (StringUtils.hasText(patternString)) {
+				if (StringUtil.hasText(patternString)) {
 					return Pattern.compile(patternString);
 				}
 			}

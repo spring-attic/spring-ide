@@ -18,8 +18,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.ui.ImageDescriptorRegistry;
 
 /**
  * Responsible for creating optionally decorated images from

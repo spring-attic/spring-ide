@@ -28,9 +28,9 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.StringUtils;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class EnableDisableBootDevtools implements IObjectActionDelegate {
 
@@ -135,7 +135,7 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 	private SpringBootStarter getAvaibleDevtools(ISpringBootProject project) {
 		try {
 			String versionString = project.getBootVersion();
-			if (StringUtils.hasText(versionString) && DEVTOOLS_SUPPORTED.includes(new Version(versionString))) {
+			if (StringUtil.hasText(versionString) && DEVTOOLS_SUPPORTED.includes(new Version(versionString))) {
 				return DEVTOOLS_STARTER;
 			}
 		} catch (Exception e) {

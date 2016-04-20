@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Pivotal Software, Inc.
+ * Copyright (c) 2013, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,8 +69,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
-import org.springframework.ide.eclipse.core.StringUtils;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -489,7 +488,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	private void createElementWithTextMaybe(Element parent, String name, String text) {
-		if (StringUtils.hasText(text)) {
+		if (StringUtil.hasText(text)) {
 			createElementWithText(parent, name, text);
 		}
 	}
