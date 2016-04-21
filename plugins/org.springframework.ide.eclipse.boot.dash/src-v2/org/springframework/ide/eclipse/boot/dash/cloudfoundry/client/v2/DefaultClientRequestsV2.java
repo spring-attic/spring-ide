@@ -36,6 +36,7 @@ import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesRequest;
 import org.cloudfoundry.client.v2.serviceinstances.ListServiceInstancesResponse;
 import org.cloudfoundry.client.v2.serviceinstances.ServiceInstanceResource;
 import org.cloudfoundry.client.v2.stacks.GetStackRequest;
+import org.cloudfoundry.client.v2.userprovidedserviceinstances.DeleteUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
@@ -59,6 +60,8 @@ import org.cloudfoundry.operations.routes.Route.RouteBuilder;
 import org.cloudfoundry.operations.routes.UnmapRouteRequest;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
+import org.cloudfoundry.operations.services.CreateUserProvidedServiceInstanceRequest;
+import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
@@ -896,28 +899,42 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	public Mono<Void> deleteService(String serviceName) {
-		return getServiceId(serviceName)
-		.then((serviceId) -> {
-			 return client.serviceInstances().delete(DeleteServiceInstanceRequest.builder()
-			.serviceInstanceId(serviceId)
-			.build());
-		})
-		.after();
+	public Mono<Void> createUserProvidedService(String name, Map<String, Object> credentials) {
+		return operations.services().createUserProvidedInstance(CreateUserProvidedServiceInstanceRequest.builder()
+				.name(name)
+				.credentials(credentials)
+				.build()
+		);
 	}
 
-	protected Mono<String> getServiceId(String serviceName) {
-		return client.serviceInstances().list(ListServiceInstancesRequest.builder()
+	public Mono<Void> deleteService(String serviceName) {
+		return getService(serviceName)
+		.then(this::deleteServiceInstance);
+	}
+
+	protected Mono<Void> deleteServiceInstance(ServiceInstance s) {
+		switch (s.getType()) {
+		case MANAGED:
+			return client.serviceInstances().delete(DeleteServiceInstanceRequest.builder()
+					.serviceInstanceId(s.getId())
+					.build()
+			)
+			.after();
+		case USER_PROVIDED:
+			return client.userProvidedServiceInstances().delete(DeleteUserProvidedServiceInstanceRequest.builder()
+					.userProvidedServiceInstanceId(s.getId())
+					.build()
+			);
+		default:
+			return Mono.error(new IllegalStateException("Unknown service type: "+s.getType()));
+		}
+	}
+
+	protected Mono<ServiceInstance> getService(String serviceName) {
+		return operations.services().getInstance(GetServiceInstanceRequest.builder()
 				.name(serviceName)
 				.build()
-		).then((ListServiceInstancesResponse response) -> {
-			List<ServiceInstanceResource> resources = response.getResources();
-			if (resources.isEmpty()) {
-				return Mono.error(new IOException("Service instance not found: "+serviceName));
-			} else {
-				return Mono.just(resources.get(0).getMetadata().getId());
-			}
-		});
+		);
 	}
 
 	public Mono<Map<String,String>> getEnv(String appName) {
@@ -945,4 +962,5 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		}
 		return builder.build();
 	}
+
 }

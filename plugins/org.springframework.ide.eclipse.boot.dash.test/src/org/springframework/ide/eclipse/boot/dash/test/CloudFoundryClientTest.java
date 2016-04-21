@@ -25,7 +25,9 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -428,15 +430,49 @@ public class CloudFoundryClientTest {
 	@Test
 	public void getServices() throws Exception {
 		String[] serviceNames = new String[3];
+		Set<String> userProvided = new HashSet<>();
 		for (int i = 0; i < serviceNames.length; i++) {
-			serviceNames[i] = services.createTestService();
+			if (i%2==0) {
+				serviceNames[i] = services.createTestService();
+			} else {
+				serviceNames[i] = services.createTestUserProvidedService();
+				userProvided.add(serviceNames[i]);
+			}
 		}
 
+		List<CFServiceInstance> actualServices = client.getServices();
 		ImmutableSet<String> actualServiceNames = ImmutableSet.copyOf(
-				client.getServices().stream()
+				actualServices.stream()
 				.map(CFServiceInstance::getName)
 				.collect(Collectors.toList())
 		);
+
+
+		for (CFServiceInstance s : actualServices) {
+			//Note: because these test on CI host run in parallel with others using same space...
+			// we should assume there might be 'extra stuff' on the space than what we just created here.
+			//So only check that 'our stuff' exists and looks right and ignore the rest.
+			String name = s.getName();
+			if (ImmutableSet.copyOf(serviceNames).contains(name)) {
+				System.out.println("Verifying service: "+name);
+				if (userProvided.contains(name)) {
+					assertEquals("user-provided", s.getService());
+					System.out.println("  user provided => OK");
+				} else {
+					assertEquals("cloudamqp", s.getService());
+					System.out.println("  getService() => OK");
+					assertEquals("lemur", s.getPlan());
+					System.out.println("  getPlan() => OK");
+					assertIsURL(s.getDashboardUrl());
+					System.out.println("  getDashboardUrl() => OK");
+					assertIsURL(s.getDocumentationUrl());
+					System.out.println("  getDocumentationUrl() => OK");
+					assertText(s.getDescription());
+					System.out.println("  getDescription() => OK");
+				}
+			}
+		}
+
 		for (String s : serviceNames) {
 			assertTrue(s+" not found in "+actualServiceNames, actualServiceNames.contains(s));
 		}
@@ -444,15 +480,30 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testServiceCreateAndDelete() throws Exception {
-		String serviceName = services.randomServiceName();
-		client.createService(serviceName, "cloudamqp", "lemur").get();
+		String[] serviceNames = new String[2];
+		for (int i = 0; i < serviceNames.length; i++) {
+			serviceNames[i] = services.randomServiceName();
+		};
+		for (int i = 0; i < serviceNames.length; i++) {
+			String serviceName = serviceNames[i];
+			if (i%2==0) {
+				System.out.println("Create service: "+serviceName);
+				client.createService(serviceName, "cloudamqp", "lemur").get();
+			} else {
+				System.out.println("Create user-provided service: "+serviceName);
+				client.createUserProvidedService(serviceName, ImmutableMap.of()).get();
+			}
+		}
+
 		List<CFServiceInstance> services = client.getServices();
-		assertServices(services, serviceName);
-		client.deleteService(serviceName).get();
+		assertServices(services, serviceNames);
+		for (String serviceName : serviceNames) {
+			client.deleteService(serviceName).get();
+			System.out.println("Deleted service: "+serviceName);
+		}
 
-		assertNoServices(client.getServices(), serviceName);
+		assertNoServices(client.getServices(), serviceNames);
 	}
-
 
 	@Test
 	public void testGetBoundServices() throws Exception {
@@ -789,6 +840,17 @@ public class CloudFoundryClientTest {
 
 	/////////////////////////////////////////////////////////////////////////////
 
+	private void assertText(String s) {
+		if (!StringUtil.hasText(s)) {
+			fail("Found no text, but expected some");
+		}
+	}
+
+	private void assertIsURL(String url) throws URISyntaxException {
+		assertText(url);
+		new URI(url); //parse it
+	}
+
 	private Future<Void> doAsync(Thunk task) {
 		CompletableFuture<Void> result = new CompletableFuture<Void>();
 		Job job = new Job("Async task") {
@@ -822,9 +884,11 @@ public class CloudFoundryClientTest {
 		assertTrue("Expected '"+expected+"' not found in: "+names, names.contains(expected));
 	}
 
-	private void assertNoServices(List<CFServiceInstance> services, String serviceName) throws Exception {
+	private void assertNoServices(List<CFServiceInstance> services, String... serviceNames) throws Exception {
 		Set<String> names = services.stream().map(CFServiceInstance::getName).collect(Collectors.toSet());
-		assertFalse(names.contains(serviceName));
+		for (String serviceName : serviceNames) {
+			assertFalse("Service exists but shouldn't: "+serviceName, names.contains(serviceName));
+		}
 	}
 
 	private void assertServices(List<CFServiceInstance> services, String... serviceNames) throws Exception {

@@ -21,6 +21,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 
+import com.google.common.collect.ImmutableMap;
+
 public class CloudFoundryServicesHarness implements TestRule {
 
 	private DefaultClientRequestsV2 client;
@@ -47,6 +49,12 @@ public class CloudFoundryServicesHarness implements TestRule {
 				}
 			}
 		};
+	}
+
+	public String createTestUserProvidedService() {
+		String name = randomServiceName();
+		client.createUserProvidedService(name, ImmutableMap.of()).get();
+		return name;
 	}
 
 	public String createTestService() {
