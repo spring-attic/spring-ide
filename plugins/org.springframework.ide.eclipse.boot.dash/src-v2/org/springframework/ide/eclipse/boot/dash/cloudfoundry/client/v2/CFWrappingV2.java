@@ -23,6 +23,7 @@ import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.PushApplicationRequest.PushApplicationRequestBuilder;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
+import org.cloudfoundry.operations.services.ServiceInstanceType;
 import org.cloudfoundry.operations.spaces.SpaceSummary;
 import org.cloudfoundry.operations.stacks.Stack;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -207,7 +208,11 @@ public class CFWrappingV2 {
 
 			@Override
 			public String getService() {
-				return service.getService();
+				if (service.getType()==ServiceInstanceType.USER_PROVIDED) {
+					return "user-provided";
+				} else {
+					return service.getService();
+				}
 			}
 
 			@Override

@@ -80,10 +80,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -261,7 +263,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return toFetch
 //		.log(id + " before error handler")
 		.otherwise((error) -> {
-			BootActivator.log(new IOException("Failed prefetch '"+id+"'", error));
+			Log.log(new IOException("Failed prefetch '"+id+"'", error));
 			return Mono.empty();
 		})
 //		.log(id + " after error handler")
@@ -309,7 +311,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.build()
 			)
 			.otherwise((error) -> {
-				BootDashActivator.log(error);
+				BootDashActivator.log(ExceptionUtil.coreException("getting application details for '"+appSummary.getName()+"' failed", error));
 				return Mono.empty();
 			})
 			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails));
