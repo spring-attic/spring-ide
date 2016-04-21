@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -64,7 +65,17 @@ public class ReactorUtils {
 	 * to the line where 'get' was called.
 	 */
 	public static <T> T get(Duration timeout, CancelationToken cancelationToken, Mono<T> mono) throws Exception {
-		return Mono.any(mono, toMono(cancelationToken)).get(timeout);
+		return Mono.any(mono, toMono(cancelationToken))
+		.otherwise(errorFilter(cancelationToken))
+		.get(timeout);
+	}
+
+	/**
+	 * A 'filter' to use as a Mono.otherwise hanlder. It transforms any exception into {@link OperationCanceledException}
+	 * when cancelationToken has been canceled.
+	 */
+	private static <T> Function<Throwable, Mono<T>> errorFilter(CancelationToken cancelationToken) {
+		return (Throwable e) -> cancelationToken.isCanceled()?Mono.error(new OperationCanceledException()):Mono.error(e);
 	}
 
 	public static <T> Mono<T> just(T it) {
