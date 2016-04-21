@@ -76,6 +76,10 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	private CloudFoundryTestHarness harness;
 
 	////////////////////////////////////////////////////////////
+	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
+
+	@Rule
+	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
 	@Rule
 	public AutobuildingEnablement disableAutoBuild = new AutobuildingEnablement(false);
@@ -84,7 +88,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	public TestBracketter testBracketter = new TestBracketter();
 
 
-	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
 	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
@@ -139,7 +142,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		final BootProjectDashElement project = harness.getElementFor(
 				projects.createBootProject("to-deploy", withStarters("actuator", "web"))
 		);
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
 		model.add(ImmutableList.<Object>of(project), ui);
@@ -196,7 +199,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		final BootProjectDashElement project = harness.getElementFor(
 				projects.createBootProject("to-deploy", withStarters("actuator", "web"))
 		);
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
 		model.performDeployment(ImmutableSet.of(project.getProject()), ui, RunState.DEBUGGING);
@@ -275,7 +278,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
 
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		Map<String, String> env = new HashMap<>();
 		env.put("FOO", "something");
@@ -308,7 +311,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				services.createTestService(), services.createTestService()
 		);
 
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui, appName, appName, bindServices);
 
@@ -329,7 +332,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 
 	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		IProject project = projects.createProject("to-deploy");
 

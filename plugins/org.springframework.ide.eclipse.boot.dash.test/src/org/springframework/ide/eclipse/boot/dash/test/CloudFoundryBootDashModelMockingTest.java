@@ -34,12 +34,10 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.w
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,6 +114,9 @@ public class CloudFoundryBootDashModelMockingTest {
 	private BootDashActions actions;
 
 	////////////////////////////////////////////////////////////
+
+	@Rule
+	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(null);
 
 	@Rule
 	public AutobuildingEnablement disableAutoBuild = new AutobuildingEnablement(false);
@@ -569,7 +570,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
 
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		Map<String, String> env = new HashMap<>();
 		env.put("FOO", "something");
@@ -761,7 +762,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
 
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -781,7 +782,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
 
-		final String appName = harness.randomAppName();
+		final String appName = appHarness.randomAppName();
 
 		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
 		harness.answerDeploymentPrompt(ui, appName, appName);

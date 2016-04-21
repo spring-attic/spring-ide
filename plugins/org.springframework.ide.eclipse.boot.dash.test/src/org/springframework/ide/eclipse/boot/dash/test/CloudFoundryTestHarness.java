@@ -92,8 +92,6 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return new CloudFoundryTestHarness(context, clientFactory, cfTargetType);
 	}
 
-	private Set<String> ownedAppNames  = new HashSet<>();
-
 	public CloudFoundryBootDashModel getCfTargetModel() {
 		return (CloudFoundryBootDashModel) getRunTargetModel(cfTargetType);
 	}
@@ -125,12 +123,6 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return (CloudFoundryBootDashModel) model.getSectionByTargetId(cfTarget.getId());
 	}
 
-	public String randomAppName() {
-		String name = randomAlphabetic(15);
-		ownedAppNames.add(name);
-		return name;
-	}
-
 	private static final ImmutableSet<RunTarget> NO_TARGETS = ImmutableSet.of();
 
 	private CloudFoundryClientFactory clientFactory;
@@ -150,36 +142,6 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		}
 		fail("Not found org/space = "+orgName+"/"+spaceName);
 		return null;
-	}
-
-	public void dispose() {
-		deleteOwnedApps();
-		super.dispose();
-	}
-
-	public ClientRequests createExternalClient(CFClientParams params) throws Exception {
-		return clientFactory.getClient(params);
-	}
-
-	protected void deleteOwnedApps() {
-		if (!ownedAppNames.isEmpty()) {
-
-			try {
-				ClientRequests externalClient = createExternalClient(CfTestTargetParams.fromEnv());
-				for (String appName : ownedAppNames) {
-					try {
-						externalClient.deleteApplication(appName);
-					} catch (Exception e) {
-						// May get 404 or other 400 errors if it is alrready
-						// gone so don't prevent other owned apps from being
-						// deleted
-					}
-				}
-
-			} catch (Exception e) {
-				fail("failed to cleanup owned apps: " + e.getMessage());
-			}
-		}
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) {

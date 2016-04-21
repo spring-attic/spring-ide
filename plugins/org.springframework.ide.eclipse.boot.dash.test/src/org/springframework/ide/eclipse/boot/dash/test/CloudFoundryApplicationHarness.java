@@ -16,26 +16,62 @@ import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.cloudfoundry.client.lib.ApplicationLogListener;
+import org.cloudfoundry.client.lib.StreamingLogToken;
+import org.cloudfoundry.client.lib.domain.ApplicationLog;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-public class CloudFoundryApplicationHarness implements TestRule {
+import reactor.core.publisher.Mono;
+
+public class CloudFoundryApplicationHarness extends AbstractDisposable implements TestRule {
 
 	private Set<String> ownedAppNames  = new HashSet<>();
 	private DefaultClientRequestsV2 client;
 
 	public CloudFoundryApplicationHarness(DefaultClientRequestsV2 client) {
 		this.client = client;
+		if (client!=null) {
+			onDispose((d) -> { deleteOwnedApps(); });
+		}
 	}
-	
-	public String randomAppName() {
+
+	public String randomAppName() throws Exception {
 		String name = randomAlphabetic(15);
 		ownedAppNames.add(name);
+		streamOutput(name);
 		return name;
 	}
-	
+
+	private void streamOutput(String name) throws Exception {
+		if (client!=null) {
+			ApplicationLogListener logConsole = new ApplicationLogListener() {
+				@Override
+				public void onMessage(ApplicationLog log) {
+					System.out.println("%"+name+"-out: "+log.getMessage());
+				}
+
+				@Override
+				public void onError(Throwable exception) {
+					System.out.println("%"+name+"-ERROR: "+ExceptionUtil.getMessage(exception));
+				}
+
+				@Override
+				public void onComplete() {
+					System.out.println("%"+name+"-COMPLETE");
+				}
+			};
+			Mono<StreamingLogToken> logToken = client.streamLogs(name, logConsole);
+			onDispose((d) -> {
+				logToken.consume(StreamingLogToken::cancel);
+			});
+		}
+	}
+
 	@Override
 	public Statement apply(Statement base, Description description) {
 		return new Statement() {
@@ -43,7 +79,7 @@ public class CloudFoundryApplicationHarness implements TestRule {
 				try {
 					base.evaluate();
 				} finally {
-					deleteOwnedApps();
+					dispose();
 				}
 			}
 		};
