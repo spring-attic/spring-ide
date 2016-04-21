@@ -84,6 +84,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -483,59 +484,18 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	@Override
 	public void delete(Collection<BootDashElement> toRemove, UserInteractions ui) {
-
 		if (toRemove == null || toRemove.isEmpty()) {
 			return;
 		}
-
 		for (BootDashElement element : toRemove) {
-			if (element instanceof CloudAppDashElement) {
+			if (element instanceof Deletable) {
 				try {
-					delete((CloudAppDashElement) element, ui);
+					((Deletable) element).delete(ui);
 				} catch (Exception e) {
 					BootDashActivator.log(e);
 				}
 			}
 		}
-	}
-
-	/**
-	 * Remove one element at a time, which updates the model
-	 *
-	 * @param element
-	 * @return
-	 * @throws Exception
-	 */
-	protected void delete(final CloudAppDashElement cloudElement, final UserInteractions ui) throws Exception {
-		cloudElement.cancelOperations();
-		CancelationToken cancelToken = cloudElement.createCancelationToken();
-		CloudApplicationOperation operation = new CloudApplicationOperation("Deleting: " + cloudElement.getName(), this,
-				cloudElement.getName(), cancelToken) {
-
-			@Override
-			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				// Delete from CF first. Do it outside of synch block to avoid
-				// deadlock
-				model.getRunTarget().getClient().deleteApplication(appName);
-
-				synchronized (CloudFoundryBootDashModel.this) {
-					getElementConsoleManager().terminateConsole(cloudElement.getName());
-
-					// Add any existing ones that weren't replaced by the new
-					// ones
-					// Replace the existing one with a new one for the given
-					// Cloud
-					// Application
-					applications.removeApplication(cloudElement.getName());
-					cloudElement.setProject(null);
-				}
-			}
-		};
-
-		// Allow deletions to occur concurrently with any other application
-		// operation
-		operation.setSchedulingRule(null);
-		runAsynch(operation, ui);
 	}
 
 	@Override
@@ -773,12 +733,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public boolean canDelete(BootDashElement element) {
 		//Can delete apps, but not services (at leats not yet)
-		return element instanceof CloudAppDashElement;
+		return element instanceof Deletable;
 	}
 
 	@Override
 	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
-		return "Are you sure that you want to delete the selected applications from: "
+		return "Are you sure that you want to delete the selected applications/services from: "
 				+ getRunTarget().getName() + "? The applications will be permanently removed.";
 	}
 

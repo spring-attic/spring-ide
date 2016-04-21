@@ -106,6 +106,9 @@ public class CloudFoundryClientTest {
 
 	@After
 	public void teardown() throws Exception {
+		if (client!=null) {
+			client.logout();
+		}
 		StsTestUtil.cleanUpProjects();
 	}
 
