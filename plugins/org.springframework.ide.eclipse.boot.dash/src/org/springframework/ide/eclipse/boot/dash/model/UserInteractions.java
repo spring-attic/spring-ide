@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -46,6 +47,8 @@ public interface UserInteractions {
 	void openDialog(ToggleFiltersDialogModel model);
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
+	boolean confirmOperation(String title, String message, String okLabel, String cancelLabel);
+
 	/**
 	 * Brings up the UI to enter application deployment manifest
 	 * @param cloudData
@@ -57,9 +60,9 @@ public interface UserInteractions {
 	 * @return
 	 * @throws OperationCanceledException
 	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(Map<String, Object> cloudData,
+	void promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model/*Map<String, Object> cloudData,
 			IProject project, IFile manifest, String defaultYaml, boolean readOnly,
-			boolean noModeSwicth) throws OperationCanceledException;
+			boolean noModeSwicth*/) throws OperationCanceledException;
 
 	/**
 	 * Ask the user to select a file.
