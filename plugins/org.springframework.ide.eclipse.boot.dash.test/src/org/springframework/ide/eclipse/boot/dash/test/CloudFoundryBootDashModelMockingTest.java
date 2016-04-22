@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -880,7 +881,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 		System.out.println(app.getRunState());
 		assertEquals(project, app.getProject());
-		assertEquals(1, deployedApp.getNumberOfPushes());
+		assertEquals(1, deployedApp.getPushCount());
 
 		verify(ui).confirmOperation(any(), any());
 	}
@@ -905,7 +906,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 		assertNull(app.getProject()); // since op was canceled it should not have set the project on the app.
-		assertEquals(0, deployedApp.getNumberOfPushes());							  // since op was canceled it should not have deployed the app.
+		assertEquals(0, deployedApp.getPushCount());							  // since op was canceled it should not have deployed the app.
 
 		verify(ui).confirmOperation(any(), any());
 	}
@@ -941,7 +942,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 
 		//If no change was detected the manfiest compare dialog shouldn't have popped.
-		verify(ui, never()).openManifestCompareDialog(any(), any());
+		verify(ui, never()).openManifestDiffDialog(any());
 	}
 
 	@Test public void manifestDiffDialogShownWhenInstancesChangedExternally() throws Exception {
@@ -973,7 +974,101 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 
 		//If the change was detected the deployment props dialog should have popped exactly once.
-		verify(ui).openManifestCompareDialog(any(), any());
+		verify(ui).openManifestDiffDialog(any());
+	}
+
+	@Test public void manifestDiffDialogChooseUseManfifest() throws Exception {
+		//Setup initial state for our test
+		final String appName = "foo";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  memory: 1111M\n"
+		);
+
+		harness.answerDeploymentPrompt(ui, manifest);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		waitForApps(model, appName);
+		CloudAppDashElement app = model.getApplication(appName);
+		waitForState(app, RunState.RUNNING, APP_DEPLOY_TIMEOUT);
+
+		{
+			MockCFApplication appInCloud = space.getApplication(appName);
+			assertEquals(1111, appInCloud.getMemory());
+			Mockito.reset(ui);
+
+			//// real test begins here
+
+			appInCloud.setMemory(2222);
+		}
+
+		harness.answerManifestDiffDialog(ui, (ManifestDiffDialogModel dialog) -> {
+			//??? code to check what's in the dialog???
+			return ManifestDiffDialogModel.Result.USE_MANIFEST;
+		});
+
+		app.restart(RunState.RUNNING, ui);
+
+		waitForJobsToComplete();
+		{
+			MockCFApplication appInCloud = space.getApplication(appName);
+			assertEquals(2, appInCloud.getPushCount());
+			assertEquals(RunState.RUNNING, app.getRunState());
+			assertEquals(1111, appInCloud.getMemory());
+			assertEquals(1111, (int)app.getMemory());
+		}
+	}
+
+	@Test public void manifestDiffDialogChooseForgetManfifest() throws Exception {
+		//Setup initial state for our test
+		final String appName = "foo";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  memory: 1111M\n"
+		);
+
+		harness.answerDeploymentPrompt(ui, manifest);
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		waitForApps(model, appName);
+		CloudAppDashElement app = model.getApplication(appName);
+		waitForState(app, RunState.RUNNING, APP_DEPLOY_TIMEOUT);
+
+		MockCFApplication appInCloud = space.getApplication(appName);
+		assertEquals(1111, appInCloud.getMemory());
+		Mockito.reset(ui);
+
+		//// real test begins here
+
+		appInCloud.setMemory(2222);
+
+		harness.answerManifestDiffDialog(ui, (ManifestDiffDialogModel dialog) -> {
+			//??? code to check what's in the dialog???
+			return ManifestDiffDialogModel.Result.FORGET_MANIFEST;
+		});
+
+		app.restart(RunState.RUNNING, ui);
+
+		waitForJobsToComplete();
+
+		assertEquals(2, appInCloud.getPushCount());
+		assertEquals(RunState.RUNNING, app.getRunState());
+		assertEquals(2222, appInCloud.getMemory());
+		assertEquals(2222, (int)app.getMemory());
 	}
 
 	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {

@@ -23,6 +23,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 
 /**
  * Dialog to compare and merge manifest file with deployment properties from CF.
@@ -31,7 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
  * @author Alex Boyko
  *
  */
-public class MergeManifestDialog extends TitleAreaDialog {
+public class ManifestDiffDialog extends TitleAreaDialog {
 
 	private final CompareEditorInput fCompareEditorInput;
 
@@ -40,8 +42,9 @@ public class MergeManifestDialog extends TitleAreaDialog {
 	 * @param shell a shell
 	 * @param input the dialog input
 	 */
-	public MergeManifestDialog(Shell shell, CompareEditorInput input) {
+	public ManifestDiffDialog(Shell shell, ManifestDiffDialogModel model) {
 		super(shell);
+		CompareEditorInput input = model.getInput();
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 		Assert.isNotNull(input);
 		fCompareEditorInput= input;
@@ -123,4 +126,16 @@ public class MergeManifestDialog extends TitleAreaDialog {
 		return DIALOG_PERSISTSIZE;
 	}
 
+	public static Result getResultForCode(int buttonId) {
+		switch (buttonId) {
+			case IDialogConstants.NO_ID:
+				return Result.FORGET_MANIFEST;
+			case IDialogConstants.YES_ID:
+				return Result.USE_MANIFEST;
+			case IDialogConstants.CANCEL_ID:
+				return Result.CANCELED;
+			default:
+				throw new IllegalArgumentException("Unknown button ID");
+		}
+	}
 }

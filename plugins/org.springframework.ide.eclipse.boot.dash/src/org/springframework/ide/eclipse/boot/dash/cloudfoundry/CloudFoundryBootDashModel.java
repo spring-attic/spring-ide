@@ -20,7 +20,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +39,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -71,6 +72,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicat
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
@@ -629,17 +632,19 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					};
 					input.setTitle("Merge Local Deployment Manifest File");
 
-					int result = ui.openManifestCompareDialog(input, null);
+					input.run(monitor);
+					ManifestDiffDialogModel model = new ManifestDiffDialogModel(input);
+					Result result = ui.openManifestDiffDialog(model);
 					switch (result) {
-					case IDialogConstants.CANCEL_ID:
+					case CANCELED:
 						throw new OperationCanceledException();
-					case IDialogConstants.NO_ID:
+					case FORGET_MANIFEST:
 						element.setDeploymentManifestFile(null);
 						/*
 						 * Use the current CF deployment properties, hence just break out of the switch
 						 */
 						break;
-					case IDialogConstants.YES_ID:
+					case USE_MANIFEST:
 						/*
 						 * Load deployment properties from YAML text content
 						 */

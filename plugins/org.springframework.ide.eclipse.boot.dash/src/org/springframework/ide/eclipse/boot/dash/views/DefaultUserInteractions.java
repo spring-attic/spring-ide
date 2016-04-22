@@ -18,6 +18,8 @@ import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
@@ -39,12 +41,14 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.MergeManifestDialog;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
@@ -300,28 +304,21 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public int openManifestCompareDialog(final CompareEditorInput input, final IRunnableContext context) throws CoreException {
-		final int[] result = new int[] { -1 };
-		final Exception[] exception = new Exception[] { null };
-		getShell().getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					if (context == null) {
-						PlatformUI.getWorkbench().getProgressService().run(true, true, input);
-					} else {
-						context.run(true, true, input);
-					}
-					result[0] = new MergeManifestDialog(getShell(), input).open();
-				} catch (InvocationTargetException | InterruptedException e) {
-					exception[0] = e;
-				}
+	public Result openManifestDiffDialog(ManifestDiffDialogModel model) throws CoreException {
+		LiveVariable<Integer> resultCode = new LiveVariable<>();
+		LiveVariable<Throwable> error = new LiveVariable<>();
+		getShell().getDisplay().syncExec(() -> {
+			try {
+				resultCode.setValue(new ManifestDiffDialog(getShell(), model).open());
+			} catch (Exception e) {
+				error.setValue(e);
 			}
 		});
-		if (exception[0] != null) {
-			throw ExceptionUtil.coreException(exception[0]);
+		if (error.getValue()!=null) {
+			throw ExceptionUtil.coreException(error.getValue());
+		} else {
+			return ManifestDiffDialog.getResultForCode(resultCode.getValue());
 		}
-		return result[0];
 	}
 
 	@Override

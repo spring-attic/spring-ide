@@ -22,10 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.cloudfoundry.client.lib.domain.InstanceState;
@@ -208,6 +205,10 @@ public class MockCFApplication {
 		this.memory = memory;
 	}
 
+	public int getMemory() {
+		return this.memory;
+	}
+
 	public void setUris(Collection<String> uris) {
 		this.uris = uris==null?null:ImmutableList.copyOf(uris);
 	}
@@ -363,7 +364,7 @@ public class MockCFApplication {
 		}
 	}
 
-	public int getNumberOfPushes() {
+	public int getPushCount() {
 		return space.getPushCount(name).getValue();
 	}
 
@@ -396,5 +397,6 @@ public class MockCFApplication {
 	public InputStream getBits() {
 		return new ByteArrayInputStream(bits);
 	}
+
 
 }

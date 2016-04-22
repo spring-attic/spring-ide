@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -38,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
@@ -252,5 +254,15 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return (LocalBootDashModel) getRunTargetModel(RunTargetTypes.LOCAL);
 	}
 
-
+	public void answerManifestDiffDialog(UserInteractions ui, Function<ManifestDiffDialogModel, ManifestDiffDialogModel.Result> answerer) throws Exception {
+		when(ui.openManifestDiffDialog(any()))
+		.thenAnswer(new Answer<ManifestDiffDialogModel.Result>() {
+			@Override
+			public ManifestDiffDialogModel.Result answer(InvocationOnMock invocation) throws Throwable {
+				Object[] args = invocation.getArguments();
+				ManifestDiffDialogModel dialog = (ManifestDiffDialogModel) args[0];
+				return answerer.apply(dialog);
+			}
+		});
+	}
 }

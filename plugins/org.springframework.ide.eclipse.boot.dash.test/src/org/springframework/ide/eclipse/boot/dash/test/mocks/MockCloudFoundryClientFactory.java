@@ -297,6 +297,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception {
+			System.out.println("Pushing: "+args);
 			//TODO: should check services exist and raise an error because non-existant services cannot be bound.
 			MockCFSpace space = getSpace();
 			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, space, args.getAppName());
@@ -310,7 +311,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setStackMaybe(args.getStack());
 			app.setTimeoutMaybe(args.getTimeout());
 			app.setBits(IOUtil.toBytes(args.getApplicationData()));
-			space.add(app);
+			space.put(app);
 			space.getPushCount(app.getName()).increment();
 
 			app.start(cancelationToken);

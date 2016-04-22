@@ -25,6 +25,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -89,13 +90,7 @@ public interface UserInteractions {
 	 */
 	boolean yesNoWithToggle(String propertyKey, String title, String message, String toggleMessage);
 
-	/**
-	 * Opens manifest compare dialog based on the supplied input
-	 * @param the input for the compare dialog
-	 * @param context runnable context
-	 * @return yes/no/cancel ids yes - use updated manifest, no - stop using manifest
-	 */
-	int openManifestCompareDialog(CompareEditorInput input, IRunnableContext context) throws CoreException;
+	ManifestDiffDialogModel.Result openManifestDiffDialog(ManifestDiffDialogModel model) throws Exception;
 
 	/**
 	 * Opens a {@link EditTemplateDialog} on given dialog model.

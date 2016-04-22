@@ -87,8 +87,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Rule
 	public TestBracketter testBracketter = new TestBracketter();
 
-
-
 	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
 

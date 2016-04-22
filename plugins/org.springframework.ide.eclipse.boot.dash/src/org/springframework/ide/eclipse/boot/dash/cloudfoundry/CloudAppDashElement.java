@@ -376,6 +376,14 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return null;
 	}
 
+	public Integer getMemory() {
+		CFApplication app = getSummaryData();
+		if (app != null) {
+			return app.getMemory();
+		}
+		return null;
+	}
+
 	public CFApplication getSummaryData() {
 		return appData.getValue();
 	}
@@ -658,4 +666,5 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 			throw new OperationCanceledException();
 		}
 	}
+
 }

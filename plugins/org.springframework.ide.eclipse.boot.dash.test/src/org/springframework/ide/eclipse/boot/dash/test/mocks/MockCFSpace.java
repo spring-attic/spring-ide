@@ -95,13 +95,8 @@ public class MockCFSpace extends CFSpaceData {
 		return appsByName.remove(name)!=null;
 	}
 
-	public boolean add(MockCFApplication app) {
-		String name = app.getName();
-		if (appsByName.get(name)==null) {
-			appsByName.put(name, app);
-			return true;
-		}
-		return false;
+	public void put(MockCFApplication app) {
+		appsByName.put(app.getName(), app);
 	}
 
 	public synchronized LiveCounter getPushCount(String name) {

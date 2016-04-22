@@ -132,4 +132,13 @@ public class CFPushArguments implements AutoCloseable {
 	public void setRoutes(String... routes) {
 		setRoutes(ImmutableList.copyOf(routes));
 	}
+	@Override
+	public String toString() {
+		return "CFPushArguments [appName=" + appName + ", routes=" + routes + ", memory=" + memory + ", diskQuota="
+				+ diskQuota + ", timeout=" + timeout + ", buildpack=" + buildpack + ", command=" + command + ", stack="
+				+ stack + ", env=" + env + ", instances=" + instances + ", services=" + services + ", noStart="
+				+ noStart + "]";
+	}
+
+
 }
