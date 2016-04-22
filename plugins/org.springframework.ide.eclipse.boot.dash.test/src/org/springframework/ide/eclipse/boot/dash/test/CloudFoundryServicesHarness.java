@@ -69,7 +69,7 @@ public class CloudFoundryServicesHarness implements TestRule {
 			try {
 				for (String serviceName : ownedServiceNames) {
 					try {
-						this.client.deleteService(serviceName).get();
+						this.client.deleteServiceMono(serviceName).get();
 					} catch (Exception e) {
 						// May get 404 or other 400 errors if it is alrready
 						// gone so don't prevent other owned apps from being

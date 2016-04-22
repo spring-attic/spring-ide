@@ -28,7 +28,9 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
@@ -50,6 +52,8 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	public static final String DEFAULT_RM_PATH_DEFAULT = "/";
 
 	protected final T delegate;
+
+	private CancelationTokens cancelationTokens = new CancelationTokens();
 
 	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
@@ -311,5 +315,11 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		exp.addListener(notifier);
 	}
 
+	public CancelationToken createCancelationToken() {
+		return cancelationTokens.create();
+	}
 
+	public void cancelOperations() {
+		cancelationTokens.cancelAll();
+	}
 }

@@ -11,18 +11,24 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-public class CloudServiceInstanceDashElement extends WrappingBootDashElement<String> {
+public class CloudServiceInstanceDashElement extends WrappingBootDashElement<String> implements Deletable {
 
 	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.TAGS};
 
@@ -139,6 +145,21 @@ public class CloudServiceInstanceDashElement extends WrappingBootDashElement<Str
 	public String getDescription() {
 		CFServiceInstance s = getCloudService();
 		return s==null?null:s.getDescription();
+	}
+
+	@Override
+	public void delete(UserInteractions ui) {
+		CloudFoundryBootDashModel model = getBootDashModel();
+		cancelOperations();
+		String serviceName = getName();
+		model.runAsynch("Deleting service: " + serviceName, serviceName, (IProgressMonitor monitor) -> {
+			getClient().deleteService(serviceName);
+			model.removeService(serviceName);
+		}, ui);
+	}
+
+	private ClientRequests getClient() {
+		return getTarget().getClient();
 	}
 
 }

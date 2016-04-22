@@ -501,7 +501,7 @@ public class CloudFoundryClientTest {
 		List<CFServiceInstance> services = client.getServices();
 		assertServices(services, serviceNames);
 		for (String serviceName : serviceNames) {
-			client.deleteService(serviceName).get();
+			client.deleteServiceMono(serviceName).get();
 			System.out.println("Deleted service: "+serviceName);
 		}
 

@@ -79,6 +79,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -104,8 +105,10 @@ import reactor.core.publisher.Mono;
 public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
+	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
 //  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below
@@ -286,10 +289,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFServiceInstance> getServices() throws Exception {
-		return ReactorUtils.get(
+		return ReactorUtils.get(GET_SERVICES_TIMEOUT, CancelationTokens.NULL,
 			operations
 			.services()
 			.listInstances()
+			.doOnNext(System.out::println)
 			.map(CFWrappingV2::wrap)
 			.toList()
 			.map(ImmutableList::copyOf)
@@ -904,7 +908,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	public Mono<Void> deleteService(String serviceName) {
+	@Override
+	public void deleteService(String serviceName) {
+		deleteServiceMono(serviceName).get();
+	}
+
+	public Mono<Void> deleteServiceMono(String serviceName) {
 		return getService(serviceName)
 		.then(this::deleteServiceInstance);
 	}

@@ -808,4 +808,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		getOperationsExecution().runAsynch(op, ui);
 	}
 
+	public void removeService(String serviceName) {
+		for (CloudServiceInstanceDashElement s : services.getValues()) {
+			if (s.getName().equals(serviceName)) {
+				services.remove(s);
+			}
+		}
+	}
+
 }
