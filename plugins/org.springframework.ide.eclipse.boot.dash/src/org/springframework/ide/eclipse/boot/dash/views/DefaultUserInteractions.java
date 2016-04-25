@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -228,29 +229,21 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(final Map<String, Object> cloudData,
-			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth)
-					throws OperationCanceledException {
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model/*final Map<String, Object> cloudData,
+			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth*/)
+			throws Exception {
 		final Shell shell = getShell();
-		final CloudApplicationDeploymentProperties[] props = new CloudApplicationDeploymentProperties[] { null };
 
 		if (shell != null) {
 			shell.getDisplay().syncExec(new Runnable() {
-
 				@Override
 				public void run() {
-					DeploymentPropertiesDialog dialog = new DeploymentPropertiesDialog(shell, cloudData, project, manifest, defaultYaml, readOnly, noModeSwicth);
-					if (dialog.open() == IDialogConstants.OK_ID) {
-						props[0] = dialog.getCloudApplicationDeploymentProperties();
-					}
+					new DeploymentPropertiesDialog(shell, model/*cloudData, project, manifest, defaultYaml, readOnly, noModeSwicth*/).open();
 				}
 			});
 		}
-		if (props[0] == null) {
-			throw new OperationCanceledException();
-		} else {
-			 return props[0];
-		}
+
+		return model.getDeploymentProperties();
 	}
 
 
@@ -329,4 +322,11 @@ public class DefaultUserInteractions implements UserInteractions {
 			}
 		});
 	}
+
+	@Override
+	public int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex) {
+		return new MessageDialog(getShell(), title, null, message,
+				MessageDialog.QUESTION, buttonLabels, defaultButtonIndex).open();
+	}
+
 }

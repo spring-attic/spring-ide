@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.AnnotationModel;
@@ -191,7 +192,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
 			if (docProvider != null && file != null && file.exists() && docProvider.canSaveDocument(file)) {
 				if (ui.confirmOperation("Changes Detected", "Masnifest file '" + file.getFile().getFullPath().toOSString()
-								+ "' has been changed. Do you want to save changes or discard them?", "Save", "Discard")) {
+								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Discard"}, 0) == 0) {
 					try {
 						docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
 					} catch (CoreException e) {
@@ -306,6 +307,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	final private ManualDeploymentPropertiesDialogModel manualModel;
 
+	private boolean isCancelled = false;
+
 	public DeploymentPropertiesDialogModel(UserInteractions ui, Map<String, Object> cloudData, IProject project, String deployedAppName) {
 		super();
 		this.ui = ui;
@@ -317,6 +320,9 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	}
 
 	public CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
+		if (isCancelled) {
+			throw new OperationCanceledException();
+		}
 		switch (type.getValue()) {
 		case FILE:
 			return fileModel.getDeploymentProperties();
@@ -325,6 +331,44 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		default:
 			return null;
 		}
+	}
+
+	public void cancelPressed() {
+		fileModel.saveOrDiscardIfNeeded();
+		isCancelled = true;
+	}
+
+	public void okPressed() {
+		fileModel.saveOrDiscardIfNeeded();
+		isCancelled = false;
+	}
+
+	public void setSelectedManifest(IResource manifest) {
+		fileModel.selectedFile.setValue(manifest);
+	}
+
+	public void setManualManifest(String manifestText) {
+		manualModel.setText(manifestText);
+	}
+
+	public void setManifestType(ManifestType type) {
+		this.type.setValue(type);
+	}
+
+	public LiveVariable<IResource> getSelectedManifestVar() {
+		return fileModel.selectedFile;
+	}
+
+	public String getProjectName() {
+		return project.getName();
+	}
+
+	public boolean isFileManifestType() {
+		return type.getValue() == ManifestType.FILE;
+	}
+
+	public boolean isManualManifestType() {
+		return type.getValue() == ManifestType.MANUAL;
 	}
 
 }

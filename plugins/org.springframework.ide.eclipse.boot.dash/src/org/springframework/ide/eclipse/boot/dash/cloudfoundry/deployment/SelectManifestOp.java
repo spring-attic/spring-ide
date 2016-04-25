@@ -21,6 +21,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
@@ -79,8 +81,11 @@ public class SelectManifestOp extends CloudOperation {
 
 		String defaultManifest = new Yaml(options).dump(yaml);
 
-		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(cloudData, project,
-				manifest, defaultManifest, true, false);
+		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, cde.getName());
+		dialogModel.setSelectedManifest(manifest);
+		dialogModel.setManualManifest(defaultManifest);
+		dialogModel.setManifestType(manifest == null ? ManifestType.MANUAL : ManifestType.FILE);
+		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(dialogModel);
 
 		if (props == null) {
 			throw ExceptionUtil.coreException("Error loading deployment properties from the manifest YAML");

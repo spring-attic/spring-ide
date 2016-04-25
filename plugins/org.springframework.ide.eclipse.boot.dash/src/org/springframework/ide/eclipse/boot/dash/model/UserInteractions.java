@@ -11,17 +11,11 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Collection;
-import java.util.Map;
 
-import org.eclipse.compare.CompareEditorInput;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
@@ -47,7 +41,7 @@ public interface UserInteractions {
 	void openDialog(ToggleFiltersDialogModel model);
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
-	boolean confirmOperation(String title, String message, String okLabel, String cancelLabel);
+	int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex);
 
 	/**
 	 * Brings up the UI to enter application deployment manifest
@@ -60,9 +54,9 @@ public interface UserInteractions {
 	 * @return
 	 * @throws OperationCanceledException
 	 */
-	void promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model/*Map<String, Object> cloudData,
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model/*Map<String, Object> cloudData,
 			IProject project, IFile manifest, String defaultYaml, boolean readOnly,
-			boolean noModeSwicth*/) throws OperationCanceledException;
+			boolean noModeSwicth*/) throws Exception;
 
 	/**
 	 * Ask the user to select a file.

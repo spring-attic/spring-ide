@@ -72,6 +72,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicat
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
@@ -713,10 +715,22 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 			String defaultManifest = new Yaml(options).dump(yaml);
 
-			props = ui.promptApplicationDeploymentProperties(cloudData, project,
-					element == null ? DeploymentPropertiesDialog.findManifestYamlFile(project)
-							: element.getDeploymentManifestFile(),
-					defaultManifest, false, false);
+			DeploymentPropertiesDialogModel dialogModel;
+			if (element == null) {
+				dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, null);
+				dialogModel.setManualManifest(defaultManifest);
+				IFile foundManifestFile = DeploymentPropertiesDialog.findManifestYamlFile(project);
+				dialogModel.setSelectedManifest(foundManifestFile);
+				dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);
+			} else {
+				dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, element.getName());
+				dialogModel.setManualManifest(defaultManifest);
+				IFile foundManifestFile = element.getDeploymentManifestFile();
+				dialogModel.setSelectedManifest(foundManifestFile);
+				dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);
+			}
+
+			props = ui.promptApplicationDeploymentProperties(dialogModel);
 
 			addApplicationArchive(props, cloudData, ui, monitor);
 		}

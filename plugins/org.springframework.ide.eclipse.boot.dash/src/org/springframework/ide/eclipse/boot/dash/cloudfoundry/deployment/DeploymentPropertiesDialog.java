@@ -15,10 +15,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -95,17 +93,18 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IElementStateListener;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.yaml.snakeyaml.composer.Composer;
 import org.yaml.snakeyaml.nodes.Node;
@@ -186,18 +185,18 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
 
-	final private String appName;
+//	final private String appName;
 
-	private IProject project;
-	private boolean readOnly;
-	private final boolean noModeSwitch;
-	private Map<String, Object> cloudData;
-	private CloudApplicationDeploymentProperties deploymentProperties;
-	private String defaultYaml;
-	private LiveVariable<FileEditorInput> fileModel;
-	private LiveVariable<Boolean> manifestTypeModel;
-	private Set<FileEditorInput> mustSaveFiles;
-	private Set<TextFileDocumentProvider> docProviders;
+//	private IProject project;
+//	private boolean readOnly;
+//	private final boolean noModeSwitch;
+//	private Map<String, Object> cloudData;
+//	private CloudApplicationDeploymentProperties deploymentProperties;
+//	private String defaultYaml;
+//	private LiveVariable<FileEditorInput> fileModel;
+//	private LiveVariable<Boolean> manifestTypeModel;
+//	private Set<FileEditorInput> mustSaveFiles;
+//	private Set<TextFileDocumentProvider> docProviders;
 
 	private SourceViewerDecorationSupport fileYamlDecorationSupport;
 	private SourceViewerDecorationSupport manualYamlDecorationSupport;
@@ -253,88 +252,24 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
 		@Override
 		public void selectionChanged(final SelectionChangedEvent e) {
-			FileEditorInput currentInput = fileModel.getValue();
-			if (currentInput == null || !currentInput.getFile().equals(getStructuredSelection(workspaceViewer).getFirstElement())) {
-				if (saveOrDiscardIfNeeded(false)) {
-					IResource resource = e.getSelection().isEmpty() ? null : (IResource) ((IStructuredSelection) e.getSelection()).toArray()[0];
-					fileModel.setValue(resource instanceof IFile ? new FileEditorInput((IFile) resource) : null);
-					refreshButton.setEnabled(manifestTypeModel.getValue() && !workspaceViewer.getSelection().isEmpty());
-				} else {
-					/*
-					 * Can assume that fileModel has a valid file. Cancelled save.
-					 * Reject selection change, select previously selected.
-					 */
-					workspaceViewer.setSelection(new StructuredSelection(new IFile[] { fileModel.getValue().getFile() }));
-				}
-			}
-		}
-	};
-
-	private IElementStateListener dirtyStateListener = new IElementStateListener() {
-
-		@Override
-		public void elementMoved(Object arg0, Object arg1) {
-		}
-
-		@Override
-		public void elementDirtyStateChanged(final Object file, final boolean dirty) {
-			if (fileModel.getValue() != null && fileModel.getValue().equals(file)) {
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (!fileLabel.isDisposed()) {
-							fileLabel.setText(fileModel.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : ""));
-						}
-					}
-				});
-			}
-		}
-
-		@Override
-		public void elementDeleted(Object arg0) {
-		}
-
-		@Override
-		public void elementContentReplaced(Object file) {
-			if (file.equals(fileModel.getValue())) {
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						updateManifestFile();
-					}
-				});
-			}
-		}
-
-		@Override
-		public void elementContentAboutToBeReplaced(Object arg0) {
+			IResource resource = (IResource) getStructuredSelection(workspaceViewer).getFirstElement();
+			model.setSelectedManifest(resource);
 		}
 	};
 
 	private AnnotationModelListener annotationModelListener = new AnnotationModelListener();
+	final private DeploymentPropertiesDialogModel model;
 
-	public DeploymentPropertiesDialog(Shell parentShell, Map<String, Object> cloudData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch) {
+	public DeploymentPropertiesDialog(Shell parentShell, DeploymentPropertiesDialogModel model/*Map<String, Object> cloudData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch*/) {
 		super(parentShell);
-		this.cloudData = cloudData;
-		this.project = project;
-		this.defaultYaml = defaultYaml;
-		this.readOnly = readOnly;
-		this.noModeSwitch = noModeSwitch;
+		this.model = model;
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
-		this.docProviders = new HashSet<>();
-		this.mustSaveFiles = new HashSet<>();
-		this.appName = ApplicationManifestHandler.getDefaultName(cloudData);
-		manifestTypeModel = new LiveVariable<>();
-		manifestTypeModel.setValue(manifest != null);
-		fileModel = new LiveVariable<>();
-		IFile foundManifest = findManifestYamlFile(project);
-		fileModel.setValue(manifest == null ? (foundManifest == null ? null : new FileEditorInput(foundManifest)) : new FileEditorInput(manifest));
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle("Select Deployment Manifest for '"+project.getName()+"'");
+		setTitle("Select Deployment Manifest for '" + model.getProjectName() + "'");
 		Composite container = (Composite) super.createDialogArea(parent);
 		final Composite composite = new Composite(container, parent.getStyle());
 		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -350,43 +285,37 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		activateHanlders();
 
-		fileModel.addListener(new ValueListener<FileEditorInput>() {
+		model.type.addListener(new ValueListener<ManifestType>() {
 			@Override
-			public void gotValue(LiveExpression<FileEditorInput> exp, final FileEditorInput value) {
-				updateManifestFile();
-			}
-		});
-
-		manifestTypeModel.addListener(new ValueListener<Boolean>() {
-			@Override
-			public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
+			public void gotValue(LiveExpression<ManifestType> exp, ManifestType type) {
 				GridData gridData;
-				buttonFileManifest.setSelection(value);
-				buttonManualManifest.setSelection(!value);
+				boolean isFile = type == ManifestType.FILE;
+				buttonFileManifest.setSelection(isFile);
+				buttonManualManifest.setSelection(!isFile);
 
-				refreshButton.setEnabled(value && !workspaceViewer.getSelection().isEmpty());
-				workspaceViewer.getControl().setEnabled(value);
-				fileLabel.setEnabled(value);
+				refreshButton.setEnabled(isFile && !workspaceViewer.getSelection().isEmpty());
+				workspaceViewer.getControl().setEnabled(isFile);
+				fileLabel.setEnabled(isFile);
 
 //				if (!readOnly) {
 					gridData = GridDataFactory.copyData((GridData) fileGroup.getLayoutData());
-					gridData.exclude = !value;
-					fileGroup.setVisible(value);
+					gridData.exclude = !isFile;
+					fileGroup.setVisible(isFile);
 					fileGroup.setLayoutData(gridData);
 					gridData = GridDataFactory.copyData((GridData) resizeSash.getLayoutData());
-					gridData.exclude = !value;
-					resizeSash.setVisible(value);
+					gridData.exclude = !isFile;
+					resizeSash.setVisible(isFile);
 					resizeSash.setLayoutData(gridData);
 					fileGroup.getParent().layout();
 //				}
 
-				fileYamlComposite.setVisible(value);
+				fileYamlComposite.setVisible(isFile);
 				gridData = GridDataFactory.copyData((GridData) fileYamlComposite.getLayoutData());
-				gridData.exclude = !value;
+				gridData.exclude = !isFile;
 				fileYamlComposite.setLayoutData(gridData);
-				manualYamlComposite.setVisible(!value);
+				manualYamlComposite.setVisible(!isFile);
 				gridData = GridDataFactory.copyData((GridData) manualYamlComposite.getLayoutData());
-				gridData.exclude = value;
+				gridData.exclude = isFile;
 				manualYamlComposite.setLayoutData(gridData);
 				yamlGroup.layout();
 				yamlGroup.getParent().layout();
@@ -409,29 +338,32 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	private void createModeSwitchGroup(Composite composite) {
 		Group typeGroup = new Group(composite, SWT.NONE);
-		typeGroup.setVisible(!noModeSwitch);
 		typeGroup.setText("Manifest Type");
-		typeGroup.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).exclude(noModeSwitch).create());
+		typeGroup.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		typeGroup.setLayout(new GridLayout(2, true));
 
 		buttonFileManifest = new Button(typeGroup, SWT.RADIO);
 		buttonFileManifest.setText("File");
-		buttonFileManifest.setSelection(manifestTypeModel.getValue());
+		buttonFileManifest.setSelection(model.isFileManifestType());
 		buttonFileManifest.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				manifestTypeModel.setValue(buttonFileManifest.getSelection());;
+				if (buttonFileManifest.getSelection()) {
+					model.setManifestType(ManifestType.FILE);
+				}
 			}
 		});
 		buttonFileManifest.setLayoutData(GridDataFactory.fillDefaults().create());
 
 		buttonManualManifest = new Button(typeGroup, SWT.RADIO);
 		buttonManualManifest.setText("Manual");
-		buttonManualManifest.setSelection(!manifestTypeModel.getValue());
+		buttonManualManifest.setSelection(model.isManualManifestType());
 		buttonManualManifest.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				manifestTypeModel.setValue(!buttonManualManifest.getSelection());;
+				if (buttonManualManifest.getSelection()) {
+					model.setManifestType(ManifestType.MANUAL);
+				}
 			}
 		});
 		buttonManualManifest.setLayoutData(GridDataFactory.fillDefaults().create());
@@ -454,12 +386,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		workspaceViewer.setLabelProvider(new WorkbenchLabelProvider());
 		workspaceViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
 		workspaceViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
-		if (fileModel.getValue() == null) {
-			workspaceViewer.reveal(project.getFile("manifest.yml"));
-		} else {
-			workspaceViewer.reveal(fileModel.getValue());
-			workspaceViewer.setSelection(new StructuredSelection(new IResource[] { fileModel.getValue().getFile() }), false);
-		}
+		model.getSelectedManifestVar().addListener(new UIValueListener<IResource>() {
+			@Override
+			protected void uiGotValue(LiveExpression<IResource> exp, IResource value) {
+				workspaceViewer.setSelection(new StructuredSelection(new IResource[] { value }), true);
+			}
+		});
 		workspaceViewer.addSelectionChangedListener(selectionListener);
 
 		Composite fileButtonsComposite = new Composite(fileGroup, SWT.NONE);
