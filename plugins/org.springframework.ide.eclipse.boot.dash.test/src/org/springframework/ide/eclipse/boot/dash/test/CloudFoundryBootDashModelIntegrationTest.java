@@ -359,7 +359,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 			assertEquals("some content here\n", IOUtils.toString(new URI(app.getUrl()+"/test.txt")));
 		});
 
-		verify(ui).promptApplicationDeploymentProperties(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+		verify(ui).promptApplicationDeploymentProperties(any());
 		verifyNoMoreInteractions(ui);
 	}
 

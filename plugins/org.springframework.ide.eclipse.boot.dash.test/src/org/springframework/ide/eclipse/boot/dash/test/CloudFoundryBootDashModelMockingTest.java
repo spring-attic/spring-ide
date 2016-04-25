@@ -17,7 +17,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -1100,7 +1099,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertEquals("some content here\n", space.getApplication(appName).getFileContents("test.txt"));
 
-		verify(ui).promptApplicationDeploymentProperties(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+		verify(ui).promptApplicationDeploymentProperties(any());
 		verifyNoMoreInteractions(ui);
 	}
 
@@ -1137,7 +1136,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertEquals("some content here\n", space.getApplication(appName).getFileContents("test.txt"));
 
-		verify(ui).promptApplicationDeploymentProperties(any(), any(), any(), any(), anyBoolean(), anyBoolean());
+		verify(ui).promptApplicationDeploymentProperties(any());
 		verifyNoMoreInteractions(ui);
 	}
 

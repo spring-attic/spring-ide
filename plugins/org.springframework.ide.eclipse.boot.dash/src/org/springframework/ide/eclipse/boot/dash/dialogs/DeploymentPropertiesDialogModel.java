@@ -2,6 +2,7 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,10 +13,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
@@ -89,48 +92,11 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			});
 		}
 
-		private Set<TextFileDocumentProvider> docProviders;
+		private final Set<TextFileDocumentProvider> docProviders = new HashSet<>();
 
-		final public LiveVariable<IResource> selectedFile = new LiveVariable<>();
+		private final LiveVariable<IResource> selectedFile = new LiveVariable<>();
 
-		final public LiveExpression<IDocument> document = new LiveExpression<IDocument>() {
-
-			{
-				dependsOn(editorInput);
-			}
-
-			@Override
-			protected IDocument compute() {
-				FileEditorInput input = editorInput.getValue();
-				if (input != null) {
-					TextFileDocumentProvider provider = getTextDocumentProvider(input.getFile());
-					if (provider != null) {
-						return provider.getDocument(input);
-					}
-				}
-				return new Document("");
-			}
-
-		};
-
-		final private LiveExpression<String> fileLabel = new LiveExpression<String>() {
-			{
-				dependsOn(editorInput);
-			}
-
-			@Override
-			protected String compute() {
-				FileEditorInput input = editorInput.getValue();
-				if (input != null) {
-					boolean dirty = getTextDocumentProvider(input.getFile()).canSaveDocument(input);
-					return editorInput.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : "");
-				}
-				return "";
-			}
-
-		};
-
-		final public LiveExpression<FileEditorInput> editorInput = new LiveExpression<FileEditorInput>() {
+		private final LiveExpression<FileEditorInput> editorInput = new LiveExpression<FileEditorInput>() {
 
 			{
 				dependsOn(selectedFile);
@@ -147,6 +113,50 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 					}
 				}
 				return null;
+			}
+
+		};
+
+		private final LiveExpression<IDocument> document = new LiveExpression<IDocument>(new Document("")) {
+			{
+				dependsOn(editorInput);
+			}
+
+			@Override
+			protected IDocument compute() {
+				try {
+					FileEditorInput input = editorInput.getValue();
+					if (input != null) {
+						TextFileDocumentProvider provider = getTextDocumentProvider(input.getFile());
+						if (provider != null) {
+							IDocument doc = provider.getDocument(input);
+							if (doc == null) {
+								provider.connect(input);
+								doc = provider.getDocument(input);
+							}
+							return doc;
+						}
+					}
+				} catch (Exception e) {
+					Log.log(e);
+				}
+				return new Document("");
+			}
+		};
+
+		final private LiveExpression<String> fileLabel = new LiveExpression<String>() {
+			{
+				dependsOn(editorInput);
+			}
+
+			@Override
+			protected String compute() {
+				FileEditorInput input = editorInput.getValue();
+				if (input != null) {
+					boolean dirty = getTextDocumentProvider(input.getFile()).canSaveDocument(input);
+					return editorInput.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : "");
+				}
+				return "";
 			}
 
 		};
@@ -191,7 +201,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		private void saveOrDiscardIfNeeded(FileEditorInput file) {
 			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
 			if (docProvider != null && file != null && file.exists() && docProvider.canSaveDocument(file)) {
-				if (ui.confirmOperation("Changes Detected", "Masnifest file '" + file.getFile().getFullPath().toOSString()
+				if (ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
 								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Discard"}, 0) == 0) {
 					try {
 						docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
@@ -338,9 +348,15 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		isCancelled = true;
 	}
 
-	public void okPressed() {
+	public boolean okPressed() {
 		fileModel.saveOrDiscardIfNeeded();
 		isCancelled = false;
+		try {
+			return getDeploymentProperties()!=null;
+		} catch (Exception e) {
+			ui.errorPopup("Invalid YAML content", ExceptionUtil.getMessage(e));
+			return false;
+		}
 	}
 
 	public void setSelectedManifest(IResource manifest) {
@@ -371,4 +387,35 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		return type.getValue() == ManifestType.MANUAL;
 	}
 
+	public IResource getSelectedManifest() {
+		return getSelectedManifestVar().getValue();
+	}
+
+	public String getDeployedAppName() {
+		return deployedAppName;
+	}
+
+	public IDocument getManualDocument() {
+		return manualModel.document;
+	}
+
+	public IAnnotationModel getManualAnnotationModel() {
+		return manualModel.annotationModel;
+	}
+
+	public IProject getProject() {
+		return project;
+	}
+
+	public boolean isManualManifestReadOnly() {
+		return deployedAppName!=null;
+	}
+
+	public LiveExpression<IDocument> getFileDocument() {
+		return fileModel.document;
+	}
+
+	public IAnnotationModel getFileAnnotationModel() {
+		return fileModel.getAnnotationModel();
+	}
 }

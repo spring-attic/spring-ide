@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -39,6 +40,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -146,65 +149,82 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return null;
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) {
-		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) throws Exception {
+		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				Object[] args = invocation.getArguments();
-				@SuppressWarnings("unchecked")
-				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
-				IProject project = (IProject) args[1];
-				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
-				deploymentProperties.setProject(project.getProject());
-				deploymentProperties.setAppName(appName);
-				String url = hostName + "." + domains.get(0).getName();
-				deploymentProperties.setUris(ImmutableList.of(url));
-				return deploymentProperties;
+				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
+				dialog.setManifestType(ManifestType.MANUAL);
+				dialog.setManualManifest(
+						"applications:\n" +
+						"- name: "+appName+"\n" +
+						"  host: "+hostName+"\n"
+				);
+				dialog.okPressed();
+				return dialog.getDeploymentProperties();
 			}
 		});
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) {
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) throws Exception {
 		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
 		// so that it can add additional infos to it.
-		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				Object[] args = invocation.getArguments();
-				@SuppressWarnings("unchecked")
-				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
-				IProject project = (IProject) args[1];
-				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
-				deploymentProperties.setProject(project.getProject());
-				deploymentProperties.setAppName(appName);
-				deploymentProperties.setServices(bindServices);
-				String url = hostName + "." + domains.get(0).getName();
-				deploymentProperties.setUris(ImmutableList.of(url));
-				return deploymentProperties;
+				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
+				dialog.setManifestType(ManifestType.MANUAL);
+				dialog.setManualManifest(
+						"applications:\n" +
+						"- name: "+appName+"\n" +
+						"  host: "+hostName+"\n" +
+						createServicesBlock(bindServices)
+				);
+				dialog.okPressed();
+				return dialog.getDeploymentProperties();
+			}
+
+			private String createServicesBlock(List<String> bindServices) {
+				if (bindServices==null || bindServices.isEmpty()) {
+					return "";
+				}
+				StringBuilder buf = new StringBuilder("  services:\n");
+				for (String s : bindServices) {
+					buf.append("  - "+s);
+				}
+				return buf.toString();
 			}
 		});
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) {
-		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
-		// so that it can add additional infos to it.
-		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) throws Exception {
+		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				Object[] args = invocation.getArguments();
-				@SuppressWarnings("unchecked")
-				List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains((Map<String, Object>)args[0]);
-				IProject project = (IProject) args[1];
-				CloudApplicationDeploymentProperties deploymentProperties = new CloudApplicationDeploymentProperties();
-				deploymentProperties.setProject(project.getProject());
-				deploymentProperties.setAppName(appName);
-				deploymentProperties.setEnvironmentVariables(env);
-				String url = hostName + "." + domains.get(0).getName();
-				deploymentProperties.setUris(ImmutableList.of(url));
-				return deploymentProperties;
+				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
+				dialog.setManifestType(ManifestType.MANUAL);
+				dialog.setManualManifest(
+						"applications:\n" +
+						"- name: "+appName+"\n" +
+						"  host: "+hostName+"\n" +
+						createEnvBlock(env)
+				);
+				dialog.okPressed();
+				return dialog.getDeploymentProperties();
+			}
+
+			private String createEnvBlock(Map<String, String> env) {
+				if (env==null || env.isEmpty()) {
+					return "";
+				}
+				StringBuilder buf = new StringBuilder("  env:\n");
+				for (Entry<String, String> e : env.entrySet()) {
+					buf.append("    "+e.getKey()+": "+e.getValue());
+				}
+				return buf.toString();
 			}
 		});
 	}
@@ -213,17 +233,16 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	 * Does the same thing as what would happen if a user answered the deployment props dialog by selecting an
 	 * existing manifest file.
 	 */
-	public void answerDeploymentPrompt(UserInteractions ui, IFile manifestToSelect) {
-		when(ui.promptApplicationDeploymentProperties(anyMapOf(String.class, Object.class), any(IProject.class), any(IFile.class), any(String.class), any(boolean.class), any(boolean.class)))
+	public void answerDeploymentPrompt(UserInteractions ui, IFile manifestToSelect) throws Exception {
+		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				Object[] args = invocation.getArguments();
-				@SuppressWarnings("unchecked")
-				Map<String, Object> cloudData = (Map<String, Object>)args[0];
-				IProject project = (IProject)args[1];
-				ApplicationManifestHandler manifestParser = new ApplicationManifestHandler(project, cloudData, manifestToSelect);
-				return manifestParser.load(new NullProgressMonitor()).get(0);
+				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
+				dialog.setManifestType(ManifestType.FILE);
+				dialog.setSelectedManifest(manifestToSelect);
+				dialog.okPressed();
+				return dialog.getDeploymentProperties();
 			}
 		});
 	}
