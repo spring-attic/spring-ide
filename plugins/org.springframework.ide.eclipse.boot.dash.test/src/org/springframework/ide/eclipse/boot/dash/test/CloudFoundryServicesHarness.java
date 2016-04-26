@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableMap;
@@ -55,7 +56,9 @@ public class CloudFoundryServicesHarness implements Disposable {
 			try {
 				for (String serviceName : ownedServiceNames) {
 					try {
-						this.client.deleteServiceMono(serviceName).get();
+						RetryUtil.retryTimes("delete sercice "+serviceName, 3, () -> {
+							this.client.deleteServiceMono(serviceName).get();
+						});
 					} catch (Exception e) {
 						// May get 404 or other 400 errors if it is alrready
 						// gone so don't prevent other owned apps from being
