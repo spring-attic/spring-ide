@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Assert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -30,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTarget
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
@@ -55,7 +57,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public interface DeploymentAnswerer {
 
 		void apply(DeploymentPropertiesDialogModel model) throws Exception;
-		
+
 	}
 
 	/**
@@ -89,12 +91,14 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public static final long CONNECT_TARGET_TIMEOUT = 30_000;
 
 	public static CloudFoundryTestHarness create(BootDashModelContext context) throws Exception {
-		CloudFoundryClientFactory clientFactory = CloudFoundryClientFactory.DEFAULT;
+		CloudFoundryClientFactory clientFactory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
 		return create(context, clientFactory);
 	}
 
-	protected static CloudFoundryTestHarness create(BootDashModelContext context,
-			CloudFoundryClientFactory clientFactory) throws Exception {
+	protected static CloudFoundryTestHarness create(
+			BootDashModelContext context,
+			CloudFoundryClientFactory clientFactory
+	) throws Exception {
 		CloudFoundryRunTargetType cfTargetType = new CloudFoundryRunTargetType(context, clientFactory);
 		return new CloudFoundryTestHarness(context, clientFactory, cfTargetType);
 	}
@@ -137,6 +141,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	private CloudFoundryTestHarness(BootDashModelContext context, CloudFoundryClientFactory clientFactory, CloudFoundryRunTargetType cfTargetType) throws Exception {
 		super(context, RunTargetTypes.LOCAL, cfTargetType);
+		Assert.isNotNull(clientFactory, "clientFactory");
 		this.clientFactory = clientFactory;
 		this.cfTargetType = cfTargetType;
 	}
@@ -262,7 +267,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			}
 		});
 	}
-	
+
 	public List<BootDashModel> getCfRunTargetModels() {
 		return getRunTargetModels(cfTargetType);
 	}
