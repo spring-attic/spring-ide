@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
@@ -24,7 +23,8 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;

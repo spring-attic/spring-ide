@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
-import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
@@ -31,6 +30,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractP
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Kris De Volder
