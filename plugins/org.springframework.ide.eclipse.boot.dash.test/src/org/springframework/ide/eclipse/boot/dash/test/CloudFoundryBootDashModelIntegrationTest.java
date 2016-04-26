@@ -28,6 +28,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.SERVICE_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
@@ -382,7 +383,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		model.canDelete(service);
 		model.delete(ImmutableSet.of(service), ui);
 
-		ACondition.waitFor("service to disapear", 10_000, () -> {
+		ACondition.waitFor("service to disapear", SERVICE_DELETE_TIMEOUT, () -> {
 			assertNull(model.getService(serviceName));
 		});
 
