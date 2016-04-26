@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
@@ -137,7 +138,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private CFClientParams params;
-	private SpringCloudFoundryClient client ;
+	private CloudFoundryClient client ;
 	private CloudFoundryOperations operations;
 	private Mono<String> orgId;
 
@@ -146,7 +147,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Deprecated
 	private DefaultClientRequestsV1 v1;
 
-	public DefaultClientRequestsV2(CFClientParams params) throws Exception {
+	public DefaultClientRequestsV2(CloudFoundryClientCache clientFactory, CFClientParams params) throws Exception {
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
 		this.client = SpringCloudFoundryClient.builder()
@@ -393,6 +394,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			v1.logout();
 			v1 = null;
 		}
+	}
+
+	public boolean isLoggedOut() {
+		return client==null;
 	}
 
 	@Override
