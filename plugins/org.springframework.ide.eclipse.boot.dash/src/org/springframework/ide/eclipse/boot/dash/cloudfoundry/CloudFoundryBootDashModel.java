@@ -39,10 +39,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -92,6 +89,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
@@ -100,8 +98,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableList;
@@ -208,9 +204,9 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					notifyElementChanged(app);
 				}
 			} catch (OperationCanceledException oce) {
-				BootDashActivator.log(oce);
+				Log.log(oce);
 			} catch (Exception e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 	};
@@ -260,7 +256,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 									}
 								}
 							} catch (URISyntaxException e) {
-								BootDashActivator.log(e);
+								Log.log(e);
 							}
 							return null;
 						}
@@ -495,7 +491,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				try {
 					delete((CloudAppDashElement) element, ui);
 				} catch (Exception e) {
-					BootDashActivator.log(e);
+					Log.log(e);
 				}
 			}
 		}
@@ -587,13 +583,13 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						errorMessage = "'inherit' attribute is present in the manifest but is not supported. Merge with caution.";
 					}
 				} catch (MalformedTreeException e) {
-					BootDashActivator.log(e);
+					Log.log(e);
 					errorMessage = "Failed to create text differences between local manifest file and deployment properties on CF. Merge with caution.";
 					edit = new ReplaceEdit(0, yamlContents.length(),
 							new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
 									.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
 				} catch (Throwable t) {
-					BootDashActivator.log(t);
+					Log.log(t);
 					errorMessage = "Failed to parse local manifest file YAML contents. Merge with caution.";
 					edit = new ReplaceEdit(0, yamlContents.length(),
 							new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
@@ -741,7 +737,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				}
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}

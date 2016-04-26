@@ -29,19 +29,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -187,7 +185,7 @@ public class ApplicationManifestHandler {
 				return getValue(appMap, propertyName, String.class);
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -310,11 +308,6 @@ public class ApplicationManifestHandler {
 
 		readStack(appMap, allResults, properties);
 
-		ValidationResult validation = properties.getValidator().getValue();
-		if (validation != null && !validation.isOk()) {
-			throw ExceptionUtil.coreException(validation.msg);
-		}
-
 		return properties;
 	}
 
@@ -374,7 +367,7 @@ public class ApplicationManifestHandler {
 		}
 		File file = getManifestFile();
 		if (file != null) {
-			BootDashActivator.logWarning(
+			Log.warn(
 					"Manifest.yml file already found at: " + manifestFile.getFullPath() + ". New content will not be written.");
 			return false;
 		}

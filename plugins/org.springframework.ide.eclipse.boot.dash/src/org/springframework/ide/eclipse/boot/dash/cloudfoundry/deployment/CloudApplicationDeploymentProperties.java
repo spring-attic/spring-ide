@@ -24,7 +24,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -32,9 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
@@ -168,14 +165,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		return this.appName.getValue();
 	}
 
-	/**
-	 *
-	 * @return non-null validator
-	 */
-	public Validator getValidator() {
-		return this.validator == null ? this.validator = new BasicValidator() : this.validator;
-	}
-
 	public void setBuildpack(String buildpack) {
 		this.buildpack.setValue(buildpack);
 	}
@@ -304,15 +293,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 			properties.setUris(app.getUris());
 		}
 		return properties;
-	}
-
-	class BasicValidator extends DeploymentPropertiesValidator {
-
-		@Override
-		protected CloudApplicationDeploymentProperties getProperties() {
-			return CloudApplicationDeploymentProperties.this;
-		}
-
 	}
 
 	public CFPushArguments toPushArguments(List<CFCloudDomain> cloudDomains) throws Exception {

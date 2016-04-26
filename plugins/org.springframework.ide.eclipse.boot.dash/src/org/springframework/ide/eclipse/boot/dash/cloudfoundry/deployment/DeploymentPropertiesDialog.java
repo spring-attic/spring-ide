@@ -105,12 +105,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	final static private String DIALOG_LIST_HEIGHT_SETTING = "ManifestFileDialog.listHeight"; //$NON-NLS-1$
-	final static private String NO_MANIFEST_SELECETED_LABEL = "Deployment manifest file not selected"; //$NON-NLS-1$
 	final static private String YML_EXTENSION = "yml"; //$NON-NLS-1$
 	final static private String[] FILE_FILTER_NAMES = new String[] {"Manifest YAML files - *manifest*.yml", "YAML files - *.yml", "All files - *.*"};
-	final static private String SAVE_BTN_LABEL = "Save";
-	final static private String DISCARD_BTN_LABEL = "Discard";
-//	final static private String LATER_BTN_LABEL = "Later";
 
 
 	private static abstract class DeepFileFilter extends ViewerFilter {
@@ -167,19 +163,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	};
 
 	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
-
-//	final private String appName;
-
-//	private IProject project;
-//	private boolean readOnly;
-//	private final boolean noModeSwitch;
-//	private Map<String, Object> cloudData;
-//	private CloudApplicationDeploymentProperties deploymentProperties;
-//	private String defaultYaml;
-//	private LiveVariable<FileEditorInput> fileModel;
-//	private LiveVariable<Boolean> manifestTypeModel;
-//	private Set<FileEditorInput> mustSaveFiles;
-//	private Set<TextFileDocumentProvider> docProviders;
 
 	private SourceViewerDecorationSupport fileYamlDecorationSupport;
 	private SourceViewerDecorationSupport manualYamlDecorationSupport;
@@ -280,17 +263,15 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				workspaceViewer.getControl().setEnabled(isFile);
 				fileLabel.setEnabled(isFile);
 
-//				if (!readOnly) {
-					gridData = GridDataFactory.copyData((GridData) fileGroup.getLayoutData());
-					gridData.exclude = !isFile;
-					fileGroup.setVisible(isFile);
-					fileGroup.setLayoutData(gridData);
-					gridData = GridDataFactory.copyData((GridData) resizeSash.getLayoutData());
-					gridData.exclude = !isFile;
-					resizeSash.setVisible(isFile);
-					resizeSash.setLayoutData(gridData);
-					fileGroup.getParent().layout();
-//				}
+				gridData = GridDataFactory.copyData((GridData) fileGroup.getLayoutData());
+				gridData.exclude = !isFile;
+				fileGroup.setVisible(isFile);
+				fileGroup.setLayoutData(gridData);
+				gridData = GridDataFactory.copyData((GridData) resizeSash.getLayoutData());
+				gridData.exclude = !isFile;
+				resizeSash.setVisible(isFile);
+				resizeSash.setLayoutData(gridData);
+				fileGroup.getParent().layout();
 
 				fileYamlComposite.setVisible(isFile);
 				gridData = GridDataFactory.copyData((GridData) fileYamlComposite.getLayoutData());
@@ -431,7 +412,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				workspaceViewer.addSelectionChangedListener(selectionListener);
 			}
 		});
-//		fileFilterCombo.setLayoutData(GridDataFactory.fillDefaults().grab(false, false).minSize(0, 0).create());
 	}
 
 	private void createResizeSash(Composite composite) {
@@ -496,7 +476,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
 				IReconcilingStrategy strategy = createReconcilerStrategy(sourceViewer);
 				if (strategy!=null) {
-					ForceableReconciler reconciler = new ForceableReconciler(strategy);
+					InstantForceableReconciler reconciler = new InstantForceableReconciler(strategy);
 					reconciler.setDelay(500);
 					return reconciler;
 				}

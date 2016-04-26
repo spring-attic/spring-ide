@@ -28,10 +28,10 @@ import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
@@ -138,7 +138,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			try {
 				return ApplicationManifestHandler.convertMemory(memoryStringValue);
 			} catch (CoreException e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return DeploymentProperties.DEFAULT_MEMORY;
@@ -1249,7 +1249,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			try {
 				return ApplicationManifestHandler.convertMemory(quotaStringValue);
 			} catch (CoreException e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return DeploymentProperties.DEFAULT_MEMORY;

@@ -28,6 +28,8 @@ import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
  */
 public class InstantForceableReconciler extends ForceableReconciler {
 
+	private final static int NO_DELAY = 1;
+
 	/**
 	 * Original delay. Default value must match the one specified in {@link AbstractReconciler}
 	 */
@@ -36,7 +38,7 @@ public class InstantForceableReconciler extends ForceableReconciler {
 	/**
 	 * Stores original delay value when instant reconcile is performed, 0 otherwise
 	 */
-	private int fTempDelay = 0;
+	private int fTempDelay = NO_DELAY;
 
 	/**
 	 * Creates instance of the reconciler
@@ -60,11 +62,11 @@ public class InstantForceableReconciler extends ForceableReconciler {
 	}
 
 	public void forceReconcileNow() {
-		if (fOriginalDelay > 0 && fTempDelay == 0) {
+		if (fOriginalDelay > NO_DELAY && fTempDelay == NO_DELAY) {
 			// Remember original delay value
 			int temp = fOriginalDelay;
 			// Set delay to 0 to start processing dirty regions immediately
-			setDelay(0);
+			setDelay(NO_DELAY);
 			// Remember the original delay value to set it back when reconciling is complete
 			fTempDelay = temp;
 			forceReconcile();
@@ -74,10 +76,10 @@ public class InstantForceableReconciler extends ForceableReconciler {
 	@Override
 	protected void process(DirtyRegion dirtyRegion) {
 		super.process(dirtyRegion);
-		if (fTempDelay != 0) {
+		if (fTempDelay != NO_DELAY) {
 			// If there is original delay stored set it back on now
 			setDelay(fTempDelay);
-			fTempDelay = 0;
+			fTempDelay = NO_DELAY;
 		}
 	}
 

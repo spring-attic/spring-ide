@@ -30,8 +30,8 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
@@ -232,7 +232,7 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 				}
 			}
 		} catch (Throwable t) {
-			BootDashActivator.log(t);
+			Log.log(t);
 		} finally {
 			fProgressMonitor.done();
 		}

@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
@@ -26,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -95,7 +95,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 				}
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 	}
 

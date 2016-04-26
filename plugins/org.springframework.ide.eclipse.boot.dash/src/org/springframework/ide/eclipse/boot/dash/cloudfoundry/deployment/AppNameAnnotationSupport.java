@@ -32,8 +32,7 @@ import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 /**
  * Application name annotation support for the {@link ISourceViewer}
@@ -130,7 +129,7 @@ public class AppNameAnnotationSupport {
 								return hoverText;
 							}
 						} catch (BadLocationException e) {
-							BootActivator.log(e);
+							Log.log(e);
 						}
 					}
 				}
