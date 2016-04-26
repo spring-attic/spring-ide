@@ -567,7 +567,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		IProject project = cde.getProject();
 		CFApplication app = cde.getSummaryData();
 
-		Map<String, Object> cloudData = buildOperationCloudData(monitor, project, app);
+		Map<String, Object> cloudData = buildOperationCloudData(monitor, project);
 
 		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
 		CloudAppDashElement element = app == null ? null : getApplication(app.getName());
@@ -702,33 +702,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		Map<String, Object> cloudData = buildOperationCloudData(monitor, project, null);
-		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudData, null);
-		CloudAppDashElement element = getApplication(props.getAppName());
+		Map<String, Object> cloudData = buildOperationCloudData(monitor, project);
+		CloudApplicationDeploymentProperties props = null;
 		if (ui != null) {
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudData);
-			DumperOptions options = new DumperOptions();
-			options.setExplicitStart(true);
-			options.setCanonical(false);
-			options.setPrettyFlow(true);
-			options.setDefaultFlowStyle(FlowStyle.BLOCK);
-
-			String defaultManifest = new Yaml(options).dump(yaml);
-
 			DeploymentPropertiesDialogModel dialogModel;
-			if (element == null) {
-				dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, null);
-				dialogModel.setManualManifest(defaultManifest);
-				IFile foundManifestFile = DeploymentPropertiesDialog.findManifestYamlFile(project);
-				dialogModel.setSelectedManifest(foundManifestFile);
-				dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);
-			} else {
-				dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, element.getName());
-				dialogModel.setManualManifest(defaultManifest);
-				IFile foundManifestFile = element.getDeploymentManifestFile();
-				dialogModel.setSelectedManifest(foundManifestFile);
-				dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);
-			}
+			dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, null);
+			IFile foundManifestFile = DeploymentPropertiesDialog.findManifestYamlFile(project);
+			dialogModel.setSelectedManifest(foundManifestFile);
+			dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);
 
 			props = ui.promptApplicationDeploymentProperties(dialogModel);
 
@@ -816,14 +797,11 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return services;
 	}
 
-	public Map<String, Object> buildOperationCloudData(IProgressMonitor monitor, IProject project, CFApplication app) throws Exception {
+	public Map<String, Object> buildOperationCloudData(IProgressMonitor monitor, IProject project) throws Exception {
 		Map<String, Object> cloudData = new HashMap<>();
 		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
 		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
 		cloudData.put(ApplicationManifestHandler.STACK_PROP, getRunTarget().getStacks(monitor));
-		if (app != null) {
-			cloudData.put(ApplicationManifestHandler.NAME_PROP, app.getName());
-		}
 		return cloudData;
 	}
 

@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.DeploymentAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
@@ -60,6 +61,13 @@ import com.google.common.collect.ImmutableSet;
  * @author Kris De Volder
  */
 public class CloudFoundryTestHarness extends BootDashViewModelHarness {
+
+	@FunctionalInterface
+	public interface DeploymentAnswerer {
+
+		void apply(DeploymentPropertiesDialogModel model) throws Exception;
+		
+	}
 
 	/**
 	 * How long to wait for deleted app to disapear from the model.
@@ -247,7 +255,20 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
-
+	public void answerDeploymentPrompt(UserInteractions ui, DeploymentAnswerer answerer) throws Exception {
+		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
+		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+			@Override
+			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
+				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
+				System.out.println("TYPE: " + dialog.type.getValue());
+				System.out.println("MANUAL MANIFEST: \n" + dialog.getManualDocument().get());
+				answerer.apply(dialog);
+				return dialog.getDeploymentProperties();
+			}
+		});
+	}
+	
 	public List<BootDashModel> getCfRunTargetModels() {
 		return getRunTargetModels(cfTargetType);
 	}

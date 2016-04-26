@@ -136,10 +136,6 @@ public class ApplicationManifestHandler {
 		return getDefaultValue(cloudData, BUILDPACK_PROP, String.class);
 	}
 
-	public static String getDefaultName(Map<String, Object> cloudData) {
-		return getDefaultValue(cloudData, NAME_PROP, String.class);
-	}
-
 	@SuppressWarnings("unchecked")
 	public static <T> T getDefaultValue(Map<String, Object> cloudData, String key, Class<T> type) {
 		Object obj = cloudData == null ? null : cloudData.get(key);

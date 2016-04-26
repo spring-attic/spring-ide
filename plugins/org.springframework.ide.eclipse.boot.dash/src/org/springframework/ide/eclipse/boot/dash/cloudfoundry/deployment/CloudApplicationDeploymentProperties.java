@@ -268,7 +268,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> cloudData, CFApplication app) throws Exception {
+	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> cloudData, CFApplication app) {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
@@ -303,13 +303,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		} else {
 			properties.setUris(app.getUris());
 		}
-		Validator validator = properties.getValidator();
-
-		ValidationResult result = validator.getValue();
-		if (!result.isOk()) {
-			throw ExceptionUtil.coreException(result.msg);
-		}
-
 		return properties;
 	}
 

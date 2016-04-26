@@ -775,6 +775,65 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals((Integer)1, space.getPushCount(appName).getValue());
 	}
 
+	@Test public void simpleDeployWithManifest() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		final String appName = appHarness.randomAppName();
+		
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  memory: 512M\n"
+		);
+
+		harness.answerDeploymentPrompt(ui, (dialog) -> {
+			dialog.okPressed();
+		});
+		
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+		
+		waitForState(app, RunState.RUNNING, 10000);
+
+		assertEquals((Integer)1, space.getPushCount(appName).getValue());
+		assertEquals(manifestFile, app.getDeploymentManifestFile());
+		assertEquals(512, (int) app.getMemory());		
+	}
+
+	@Test public void simpleDeployWithDefaultManualManifest() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		final String appName = project.getName();
+		
+		harness.answerDeploymentPrompt(ui, (dialog) -> {
+			dialog.okPressed();
+		});
+		
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+		
+		waitForState(app, RunState.RUNNING, 10000);
+
+		assertEquals((Integer)1, space.getPushCount(appName).getValue());
+		assertNull(app.getDeploymentManifestFile());
+		assertEquals(1024, (int) app.getMemory());
+		assertEquals(appName, app.getName());
+	}
+
 	@Test public void stopCancelsDeploy() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
@@ -1163,7 +1222,85 @@ public class CloudFoundryBootDashModelMockingTest {
 		System.out.println("platform location = '"+Platform.getLocation()+"'");
 		assertDeployedBytes(referenceJar, space.getApplication(appName));
 	}
+	
+	@Test public void testSelectManifestActionEnablement() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 
+		IProject project1 = projects.createProject("pr1");
+		IProject project2 = projects.createProject("pr2");
+
+		final String appName1 = "app1";
+		final String appName2 = "app2";
+
+		MockCFApplication cfApp1 = space.defApp(appName1);
+		MockCFApplication cfApp2 = space.defApp(appName2);
+		
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName1, appName2);
+		
+		CloudAppDashElement app1 = model.getApplication(appName1);
+		CloudAppDashElement app2 = model.getApplication(appName2);
+		
+		app1.setProject(project1);
+		app2.setProject(project2);
+		
+		IAction action = actions.getSelectManifestAction();
+		
+		assertTrue(harness.selection.getElements().isEmpty());
+		assertFalse(action.isEnabled());
+		
+		harness.selection.setElements(ImmutableSet.of(app1));
+		assertNotNull(app1.getProject());
+		assertTrue(action.isEnabled());
+
+		harness.selection.setElements(ImmutableSet.of(app1, app2));
+		assertFalse(action.isEnabled());
+		
+		app1.setProject(null);
+		harness.selection.setElements(ImmutableSet.of(app1));
+		assertFalse(action.isEnabled());
+				
+		harness.selection.setElements(ImmutableSet.of(app2));
+		assertTrue(action.isEnabled());
+		action.run();
+				
+	}
+	
+	@Test public void testSelectManifestAction() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		IProject project = projects.createProject("pr");
+		
+		final String appName = "app";
+
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+
+		space.defApp(appName);
+		
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+		
+		CloudAppDashElement app = model.getApplication(appName);
+		app.setProject(project);
+				
+		harness.selection.setElements(ImmutableSet.of(app));
+		
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		
+		assertNull(app.getDeploymentManifestFile());
+		actions.getSelectManifestAction().run();
+		waitForJobsToComplete();
+		assertEquals(manifestFile, app.getDeploymentManifestFile());
+		
+		verify(ui).promptApplicationDeploymentProperties(any());
+		verifyNoMoreInteractions(ui);
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Stuff below is 'cruft' intended to make the tests above more readable. Maybe this code could be

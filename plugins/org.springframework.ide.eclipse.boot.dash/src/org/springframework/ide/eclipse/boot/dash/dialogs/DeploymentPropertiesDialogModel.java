@@ -25,6 +25,7 @@ import org.eclipse.ui.texteditor.DocumentProviderRegistry;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -32,6 +33,9 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 
 public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
@@ -68,7 +72,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			 * set the applicationName var to null in that case
 			 */
 			CloudApplicationDeploymentProperties deploymentProperties = null;
-			String applicationName = deployedAppName == null ? selectedAppName : deployedAppName;
+			String applicationName = deployedApp == null ? selectedAppName : getDeployedAppName();
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
@@ -267,7 +271,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public class ManualDeploymentPropertiesDialogModel extends AbstractSubModel {
 
-		private IDocument document = new Document("");
+		private IDocument document;
 
 		private boolean readOnly;
 
@@ -276,6 +280,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		ManualDeploymentPropertiesDialogModel(boolean readOnly) {
 			super();
 			this.readOnly = readOnly;
+			this.document = new Document(generateDefaultContent());
 		}
 
 		public void setText(String s) {
@@ -303,11 +308,23 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			return null;
 		}
 
+		private String generateDefaultContent() {
+			CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudData,
+					getDeployedApp());
+			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudData);
+			DumperOptions options = new DumperOptions();
+			options.setExplicitStart(true);
+			options.setCanonical(false);
+			options.setPrettyFlow(true);
+			options.setDefaultFlowStyle(FlowStyle.BLOCK);
+			return new Yaml(options).dump(yaml);
+		}
+
 	}
 
 	final public LiveVariable<ManifestType> type = new LiveVariable<>();
 
-	final private String deployedAppName;
+	final private CFApplication deployedApp;
 
 	final private Map<String, Object> cloudData;
 
@@ -319,13 +336,13 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	private boolean isCancelled = false;
 
-	public DeploymentPropertiesDialogModel(UserInteractions ui, Map<String, Object> cloudData, IProject project, String deployedAppName) {
+	public DeploymentPropertiesDialogModel(UserInteractions ui, Map<String, Object> cloudData, IProject project, CFApplication deployedApp) {
 		super();
 		this.ui = ui;
-		this.deployedAppName = deployedAppName;
+		this.deployedApp = deployedApp;
 		this.cloudData = cloudData;
 		this.project = project;
-		this.manualModel = new ManualDeploymentPropertiesDialogModel(deployedAppName != null);
+		this.manualModel = new ManualDeploymentPropertiesDialogModel(deployedApp != null);
 		this.fileModel = new FileDeploymentPropertiesDialogModel();
 	}
 
@@ -392,7 +409,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	}
 
 	public String getDeployedAppName() {
-		return deployedAppName;
+		return deployedApp == null ? null : deployedApp.getName();
 	}
 
 	public IDocument getManualDocument() {
@@ -408,7 +425,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	}
 
 	public boolean isManualManifestReadOnly() {
-		return deployedAppName!=null;
+		return deployedApp!=null;
 	}
 
 	public LiveExpression<IDocument> getFileDocument() {
@@ -417,5 +434,13 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public IAnnotationModel getFileAnnotationModel() {
 		return fileModel.getAnnotationModel();
+	}
+
+	public LiveExpression<String> getFileLabel() {
+		return fileModel.fileLabel;
+	}
+
+	private CFApplication getDeployedApp() {
+		return deployedApp;
 	}
 }

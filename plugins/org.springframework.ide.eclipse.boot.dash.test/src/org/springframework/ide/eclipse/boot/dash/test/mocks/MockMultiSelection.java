@@ -50,4 +50,8 @@ public class MockMultiSelection<T> {
 		return readableSelection.getValue().isEmpty();
 	}
 
+	public ImmutableSet<T> getElements() {
+		return readableSelection.getElements().getValues();
+	}
+
 }

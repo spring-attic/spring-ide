@@ -51,8 +51,6 @@ public class SelectManifestOp extends CloudOperation {
 
 		IFile manifest = cde.getDeploymentManifestFile();
 
-		Map<Object, Object> yaml = Collections.emptyMap();
-
 		/*
 		 * Commented out because manual manifest contents based on current
 		 * deployment props from CF don't need to be the latest since they are
@@ -63,27 +61,10 @@ public class SelectManifestOp extends CloudOperation {
 //		 */
 //		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
-		CFApplication summaryData = cde.getSummaryData();
-		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project, summaryData);
+		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project);
 
-		try {
-			yaml = ApplicationManifestHandler.toYaml(CloudApplicationDeploymentProperties.getFor(project, cloudData,
-					summaryData), cloudData);
-		} catch (Exception e) {
-			// ignore
-		}
-
-		DumperOptions options = new DumperOptions();
-		options.setExplicitStart(true);
-		options.setCanonical(false);
-		options.setPrettyFlow(true);
-		options.setDefaultFlowStyle(FlowStyle.BLOCK);
-
-		String defaultManifest = new Yaml(options).dump(yaml);
-
-		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, cde.getName());
+		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, cde.getSummaryData());
 		dialogModel.setSelectedManifest(manifest);
-		dialogModel.setManualManifest(defaultManifest);
 		dialogModel.setManifestType(manifest == null ? ManifestType.MANUAL : ManifestType.FILE);
 		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(dialogModel);
 
