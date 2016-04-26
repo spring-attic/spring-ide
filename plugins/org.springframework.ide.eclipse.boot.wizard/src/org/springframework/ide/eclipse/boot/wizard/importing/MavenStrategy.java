@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,15 +12,26 @@ package org.springframework.ide.eclipse.boot.wizard.importing;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.maven.model.Model;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.IMavenProjectImportResult;
+import org.eclipse.m2e.core.project.MavenProjectInfo;
+import org.eclipse.m2e.core.project.ProjectImportConfiguration;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
+import org.eclipse.osgi.util.NLS;
+import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
-import org.springframework.ide.eclipse.maven.MavenCorePlugin;
 
 /**
  * Importer strategy implementation for importing CodeSets into the workspace and set them
@@ -65,7 +76,7 @@ public class MavenStrategy extends ImportStrategy {
 				File pomFile = new File(location, "pom.xml");
 				Assert.isTrue(pomFile.isFile(), "No pom file found: "+pomFile);
 				Assert.isTrue(pomFile.length()>0, "Pom file contains no data: "+pomFile);
-				MavenCorePlugin.createEclipseProjectFromExistingMavenProject(pomFile, new SubProgressMonitor(mon, 3));
+				createEclipseProjectFromExistingMavenProject(pomFile, new SubProgressMonitor(mon, 3));
 			} catch (InterruptedException e) {
 				throw e;
 			} catch (InvocationTargetException e) {
@@ -78,11 +89,46 @@ public class MavenStrategy extends ImportStrategy {
 			}
 		}
 
-
 	}
 
 	@Override
 	public IRunnableWithProgress createOperation(ImportConfiguration conf) {
 		return new MavenCodeSetImport(conf);
 	}
+	
+	protected static void createEclipseProjectFromExistingMavenProject(File pomFile, IProgressMonitor monitor) throws CoreException {
+		Model model = MavenPlugin.getMavenModelManager().readMavenModel(pomFile);
+		String derivedProjectName = model.getName();
+		if (derivedProjectName == null) {
+			derivedProjectName = model.getArtifactId();
+		}
+		if (derivedProjectName == null) {
+			String[] groupPieces = model.getGroupId().split("\\.");
+			int lastIndex = groupPieces.length - 1;
+			if (lastIndex >= 0) {
+				derivedProjectName = groupPieces[lastIndex];
+			} else {
+				String message = NLS.bind("Bad pom.xml: no name, artifactId, or groupId.", null);
+				throw new CoreException(new Status(Status.ERROR, BootWizardActivator.PLUGIN_ID, message));
+			}
+		}
+		MavenProjectInfo parent = null;
+		MavenProjectInfo projectInfo = new MavenProjectInfo(derivedProjectName, pomFile, model, parent);
+		ArrayList<MavenProjectInfo> projectInfos = new ArrayList<MavenProjectInfo>();
+		projectInfos.add(projectInfo);
+		ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+		String activeProfiles = "pom.xml";
+		resolverConfiguration.setActiveProfiles(activeProfiles);
+		ProjectImportConfiguration configuration = new ProjectImportConfiguration(resolverConfiguration);
+
+		List<IMavenProjectImportResult> importResults = MavenPlugin.getProjectConfigurationManager().importProjects(projectInfos, configuration,
+				monitor);
+		for (IMavenProjectImportResult importResult : importResults) {
+			// skip projects which have not been properly imported 
+			if (importResult.getProject() != null)
+				MavenPlugin.getProjectConfigurationManager().updateProjectConfiguration(importResult.getProject(), monitor);
+		}
+	}
+
+
 }
