@@ -23,10 +23,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 
 public abstract class CloudFoundryClientFactory {
 
-//	public static final CloudFoundryClientFactory DEFAULT = new DefaultCloudFoundryClientFactory();
-
-	public static final CloudFoundryClientFactory DEFAULT = DefaultCloudFoundryClientFactoryV2.INSTANCE;
-
 	public abstract ClientRequests getClient(CFClientParams params) throws Exception;
 
 	/**
