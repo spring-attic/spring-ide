@@ -16,6 +16,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 
 public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactory {
 
+	public static final DefaultCloudFoundryClientFactoryV2 INSTANCE = new DefaultCloudFoundryClientFactoryV2();
+
+	/**
+	 * Use 'INSTANCE' constant instead. This class is a singleton.
+	 */
+	private DefaultCloudFoundryClientFactoryV2() {}
+
 	private CloudFoundryClientCache clientFactory = new CloudFoundryClientCache();
 
 	@Override

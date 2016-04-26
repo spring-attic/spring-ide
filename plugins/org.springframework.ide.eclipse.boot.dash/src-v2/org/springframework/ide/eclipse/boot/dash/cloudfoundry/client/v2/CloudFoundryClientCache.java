@@ -32,6 +32,15 @@ import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
  */
 public class CloudFoundryClientCache {
 
+	private static final boolean DEBUG = true;
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
+
 	public static class Params {
 		public final String username;
 		public final String password;
@@ -44,7 +53,7 @@ public class CloudFoundryClientCache {
 		}
 		@Override
 		public String toString() {
-			return "Params [username=" + username + ", password=" + password + ", host=" + host + "]";
+			return "Params [username=" + username + ", host=" + host + "]";
 		}
 		@Override
 		public int hashCode() {
@@ -86,11 +95,17 @@ public class CloudFoundryClientCache {
 
 	private Map<Params, CloudFoundryClient> cache = new HashMap<>();
 
+	private int clientCount = 0;
+
 	public synchronized CloudFoundryClient getOrCreate(String username, String password, String host) {
 		Params params = new Params(username, password, host);
 		CloudFoundryClient client = cache.get(params);
 		if (client==null) {
+			clientCount++;
+			debug("Creating client ["+clientCount+"]: "+params);
 			cache.put(params, client = create(params));
+		} else {
+			debug("Reusing client ["+clientCount+"]: "+params);
 		}
 		return client;
 	}

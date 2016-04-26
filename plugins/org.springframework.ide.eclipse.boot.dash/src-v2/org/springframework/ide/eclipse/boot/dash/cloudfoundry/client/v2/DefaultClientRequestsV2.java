@@ -146,15 +146,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Deprecated
 	private DefaultClientRequestsV1 v1;
+	private CloudFoundryClientCache clients;
 
-	public DefaultClientRequestsV2(CloudFoundryClientCache clientFactory, CFClientParams params) throws Exception {
+	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
+		this.clients = clients;
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
-		this.client = SpringCloudFoundryClient.builder()
-				.username(params.getUsername())
-				.password(params.getPassword())
-				.host(params.getHost())
-				.build();
+		this.client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		this.operations = new CloudFoundryOperationsBuilder()
 			.cloudFoundryClient(client)
 			.target(params.getOrgName(), params.getSpaceName())
@@ -360,7 +358,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					firstCalledAt = System.currentTimeMillis();
 				}
 				long waitedTime = System.currentTimeMillis() - firstCalledAt;
-				debug("falseAfter: remaining = "+(timeToWait.toMillis() - waitedTime));
+				//debug("falseAfter: remaining = "+(timeToWait.toMillis() - waitedTime));
 				return waitedTime < timeToWait.toMillis();
 			}
 

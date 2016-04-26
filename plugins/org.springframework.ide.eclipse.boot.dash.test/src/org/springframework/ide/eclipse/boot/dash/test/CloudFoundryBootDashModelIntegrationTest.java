@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -53,6 +54,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -93,7 +95,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
 		try {
-			DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
+			DefaultCloudFoundryClientFactoryV2 factory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
 			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
 		} catch (Exception e) {
 			throw new Error(e);
