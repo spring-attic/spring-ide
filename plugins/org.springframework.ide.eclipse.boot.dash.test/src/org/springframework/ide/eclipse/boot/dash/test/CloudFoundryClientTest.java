@@ -101,8 +101,8 @@ public class CloudFoundryClientTest {
 
 	@After
 	public void teardown() throws Exception {
+		appHarness.dispose(); //apps first because services still bound to apps can't be deleted!
 		services.dispose();
-		appHarness.dispose();
 		if (client!=null) {
 			client.logout();
 		}

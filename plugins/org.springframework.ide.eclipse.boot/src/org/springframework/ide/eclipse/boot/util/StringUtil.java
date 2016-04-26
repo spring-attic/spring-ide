@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,6 +119,12 @@ public class StringUtil {
 			return Character.toUpperCase(string.charAt(0)) + string.substring(1);
 		}
 		return "";
+	}
+
+	public static String datestamp() {
+		Date d = new Date();
+		SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
+		return f.format(d);
 	}
 
 }

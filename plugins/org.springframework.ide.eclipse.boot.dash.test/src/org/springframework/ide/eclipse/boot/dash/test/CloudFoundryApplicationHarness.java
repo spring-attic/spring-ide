@@ -21,6 +21,7 @@ import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.ApplicationLog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.Mono;
@@ -38,7 +39,7 @@ public class CloudFoundryApplicationHarness extends AbstractDisposable {
 	}
 
 	public String randomAppName() throws Exception {
-		String name = randomAlphabetic(15);
+		String name = StringUtil.datestamp()+"-"+randomAlphabetic(10);
 		ownedAppNames.add(name);
 		streamOutput(name);
 		return name;
