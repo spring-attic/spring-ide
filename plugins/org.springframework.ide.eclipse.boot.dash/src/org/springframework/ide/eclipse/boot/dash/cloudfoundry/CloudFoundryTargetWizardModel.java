@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -61,6 +62,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
 			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context) {
 		super(runTargetType, context);
+		Assert.isNotNull(clientFactory, "clientFactory should not be null");
 		this.existingTargets = existingTargets == null ? ImmutableSet.<RunTarget>of() : existingTargets;
 		this.clientFactory = clientFactory;
 		// The credentials validator should be notified any time there are
