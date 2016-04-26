@@ -116,7 +116,6 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	////////////////////////////////////////////////////////////
 
-	@Rule
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(null);
 
 	@Rule
@@ -144,6 +143,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	@After
 	public void tearDown() throws Exception {
 		waitForJobsToComplete();
+		appHarness.dispose();
 		clientFactory.assertOnlyImplementedStubsCalled();
 		harness.dispose();
 	}

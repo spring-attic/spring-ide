@@ -81,7 +81,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	////////////////////////////////////////////////////////////
 	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
-	@Rule
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
 	@Rule
@@ -90,7 +89,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Rule
 	public TestBracketter testBracketter = new TestBracketter();
 
-	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
 
 	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
@@ -116,6 +114,9 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	@After
 	public void tearDown() throws Exception {
+		appHarness.deleteOwnedApps();
+		services.dispose();
+		client.logout();
 		harness.dispose();
 	}
 

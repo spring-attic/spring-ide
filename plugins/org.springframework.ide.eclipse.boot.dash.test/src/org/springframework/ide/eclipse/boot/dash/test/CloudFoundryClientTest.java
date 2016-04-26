@@ -94,18 +94,14 @@ public class CloudFoundryClientTest {
 
 	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
-	@Rule
 	public TestBracketter bracketer = new TestBracketter();
-
-	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
-
-	@Rule
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
-
 
 	@After
 	public void teardown() throws Exception {
+		services.dispose();
+		appHarness.dispose();
 		if (client!=null) {
 			client.logout();
 		}

@@ -11,19 +11,18 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableMap;
 
-public class CloudFoundryServicesHarness implements TestRule {
+public class CloudFoundryServicesHarness implements Disposable {
 
 	private DefaultClientRequestsV2 client;
 
@@ -36,19 +35,6 @@ public class CloudFoundryServicesHarness implements TestRule {
 		String name = randomAlphabetic(15);
 		ownedServiceNames.add(name);
 		return name;
-	}
-
-	@Override
-	public Statement apply(Statement base, Description description)   {
-		return new Statement() {
-			public void evaluate() throws Throwable {
-				try {
-					base.evaluate();
-				} finally {
-					deleteOwnedServices();
-				}
-			}
-		};
 	}
 
 	public String createTestUserProvidedService() {
@@ -81,5 +67,11 @@ public class CloudFoundryServicesHarness implements TestRule {
 				fail("failed to cleanup owned services: " + e.getMessage());
 			}
 		}
+	}
+
+	@Override
+	public void dispose() {
+		assertTrue(!client.isLoggedOut());
+		deleteOwnedServices();
 	}
 }
