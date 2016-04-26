@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -36,7 +33,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTarget
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -61,7 +57,12 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	/**
 	 * How long to wait for deleted app to disapear from the model.
 	 */
-	public static final long APP_DELETE_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
+	public static final long APP_DELETE_TIMEOUT = TimeUnit.MINUTES.toMillis(1);
+
+	/**
+	 * How long to wait for deleted app to disapear from the model.
+	 */
+	public static final long SERVICE_DELETE_TIMEOUT = TimeUnit.MINUTES.toMillis(1);
 
 	/**
 	 * How long to wait for a deployed app to show up in the model? This should

@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -49,6 +50,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -363,11 +365,28 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		verifyNoMoreInteractions(ui);
 	}
 
+	@Test public void deleteService() throws Exception {
+		String serviceName = services.createTestService();
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
-	//XXX CF V2:
-	//  - Add a test for 'dashboard url'. I.e. a test that verifies the double-click action on a service
-	//    works.
+		ACondition.waitFor("service to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getService(serviceName));
+		});
+
+		when(ui.confirmOperation(contains("Deleting"), contains("Are you sure that you want to delete")))
+		.thenReturn(true);
+
+		CloudServiceInstanceDashElement service = model.getService(serviceName);
+		model.canDelete(service);
+		model.delete(ImmutableSet.of(service), ui);
+
+		ACondition.waitFor("service to disapear", 10_000, () -> {
+			assertNull(model.getService(serviceName));
+		});
+
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////
 

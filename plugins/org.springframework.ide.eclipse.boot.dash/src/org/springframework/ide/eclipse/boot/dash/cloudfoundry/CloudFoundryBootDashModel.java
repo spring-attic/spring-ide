@@ -400,13 +400,19 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public CloudAppDashElement getApplication(String appName) {
 		Set<CloudAppDashElement> apps = getApplications().getValues();
-
-		// Add any existing ones that weren't replaced by the new ones
-		// Replace the existing one with a new one for the given Cloud
-		// Application
 		for (CloudAppDashElement element : apps) {
 			if (appName.equals(element.getName())) {
 				return element;
+			}
+		}
+		return null;
+	}
+
+	public CloudServiceInstanceDashElement getService(String serviceName) {
+		ImmutableSet<CloudServiceInstanceDashElement> services = getServices().getValues();
+		for (CloudServiceInstanceDashElement s : services) {
+			if (s.getName().equals(serviceName)) {
+				return s;
 			}
 		}
 		return null;
@@ -815,5 +821,6 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			}
 		}
 	}
+
 
 }
