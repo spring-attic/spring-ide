@@ -107,4 +107,55 @@ public class CFClientParams {
 		return null;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((apiUrl == null) ? 0 : apiUrl.hashCode());
+		result = prime * result + (isSelfSigned ? 1231 : 1237);
+		result = prime * result + ((orgName == null) ? 0 : orgName.hashCode());
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((spaceName == null) ? 0 : spaceName.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CFClientParams other = (CFClientParams) obj;
+		if (apiUrl == null) {
+			if (other.apiUrl != null)
+				return false;
+		} else if (!apiUrl.equals(other.apiUrl))
+			return false;
+		if (isSelfSigned != other.isSelfSigned)
+			return false;
+		if (orgName == null) {
+			if (other.orgName != null)
+				return false;
+		} else if (!orgName.equals(other.orgName))
+			return false;
+		if (password == null) {
+			if (other.password != null)
+				return false;
+		} else if (!password.equals(other.password))
+			return false;
+		if (spaceName == null) {
+			if (other.spaceName != null)
+				return false;
+		} else if (!spaceName.equals(other.spaceName))
+			return false;
+		if (username == null) {
+			if (other.username != null)
+				return false;
+		} else if (!username.equals(other.username))
+			return false;
+		return true;
+	}
 }

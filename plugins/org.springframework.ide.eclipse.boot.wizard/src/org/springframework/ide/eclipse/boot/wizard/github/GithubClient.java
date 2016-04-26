@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.Credentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.NullCredentials;
@@ -36,7 +37,6 @@ import org.springframework.ide.eclipse.boot.wizard.util.Spring3MappingJacksonHtt
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
-import org.springsource.ide.eclipse.commons.gettingstarted.GettingStartedActivator;
 
 /**
  * A GithubClient instance needs to configured with some credentials and then it is able to
@@ -118,7 +118,7 @@ public class GithubClient {
 		try {
 			return get("/user/repos", Repo[].class);
 		} catch (Throwable e) {
-			GettingStartedActivator.log(e);
+			BootWizardActivator.log(e);
 		}
 		return new Repo[0];
 	}

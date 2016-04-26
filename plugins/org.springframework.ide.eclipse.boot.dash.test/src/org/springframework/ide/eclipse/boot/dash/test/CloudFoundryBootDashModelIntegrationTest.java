@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -27,6 +28,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.SERVICE_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
@@ -38,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -49,7 +52,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -78,7 +83,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	////////////////////////////////////////////////////////////
 	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
-	@Rule
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
 	@Rule
@@ -87,12 +91,11 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Rule
 	public TestBracketter testBracketter = new TestBracketter();
 
-	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
 
 	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
 		try {
-			DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
+			DefaultCloudFoundryClientFactoryV2 factory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
 			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
 		} catch (Exception e) {
 			throw new Error(e);
@@ -113,6 +116,9 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	@After
 	public void tearDown() throws Exception {
+		appHarness.deleteOwnedApps();
+		services.dispose();
+		client.logout();
 		harness.dispose();
 	}
 
@@ -363,11 +369,28 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		verifyNoMoreInteractions(ui);
 	}
 
+	@Test public void deleteService() throws Exception {
+		String serviceName = services.createTestService();
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
-	//XXX CF V2:
-	//  - Add a test for 'dashboard url'. I.e. a test that verifies the double-click action on a service
-	//    works.
+		ACondition.waitFor("service to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getService(serviceName));
+		});
+
+		when(ui.confirmOperation(contains("Deleting"), contains("Are you sure that you want to delete")))
+		.thenReturn(true);
+
+		CloudServiceInstanceDashElement service = model.getService(serviceName);
+		model.canDelete(service);
+		model.delete(ImmutableSet.of(service), ui);
+
+		ACondition.waitFor("service to disapear", SERVICE_DELETE_TIMEOUT, () -> {
+			assertNull(model.getService(serviceName));
+		});
+
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////
 

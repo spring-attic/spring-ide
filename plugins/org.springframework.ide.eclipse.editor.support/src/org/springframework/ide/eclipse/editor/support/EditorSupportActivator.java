@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.editor.support;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 /**
  * The activator class controls the plug-in life cycle

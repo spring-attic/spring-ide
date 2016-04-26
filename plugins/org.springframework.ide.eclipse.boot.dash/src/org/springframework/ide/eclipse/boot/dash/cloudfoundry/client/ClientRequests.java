@@ -60,4 +60,6 @@ public interface ClientRequests {
 	//Added since v2:
 	void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception;
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
+
+	void deleteService(String serviceName) throws Exception;
 }

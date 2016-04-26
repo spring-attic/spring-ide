@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,13 @@ public class MockCFSpace extends CFSpaceData {
 			pushCounts.put(name, counter = new LiveCounter());
 		}
 		return counter;
+	}
+
+	public void deleteService(String serviceName) throws Exception {
+		CFServiceInstance x = servicesByName.remove(serviceName);
+		if (x==null) {
+			throw new IOException("Service doesn't exist: "+serviceName);
+		}
 	}
 
 }

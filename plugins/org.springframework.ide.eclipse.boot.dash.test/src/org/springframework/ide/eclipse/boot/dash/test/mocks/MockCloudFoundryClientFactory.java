@@ -325,6 +325,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			}
 			return ImmutableMap.copyOf(app.getEnv());
 		}
+
+		@Override
+		public void deleteService(String serviceName) throws Exception {
+			getSpace().deleteService(serviceName);
+		}
+
 	}
 
 	public void defBuildpacks(String... names) {

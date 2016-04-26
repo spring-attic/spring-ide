@@ -19,16 +19,14 @@ import java.util.Set;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.ApplicationLog;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.Mono;
 
-public class CloudFoundryApplicationHarness extends AbstractDisposable implements TestRule {
+public class CloudFoundryApplicationHarness extends AbstractDisposable {
 
 	private Set<String> ownedAppNames  = new HashSet<>();
 	private DefaultClientRequestsV2 client;
@@ -41,7 +39,7 @@ public class CloudFoundryApplicationHarness extends AbstractDisposable implement
 	}
 
 	public String randomAppName() throws Exception {
-		String name = randomAlphabetic(15);
+		String name = StringUtil.datestamp()+"-"+randomAlphabetic(10);
 		ownedAppNames.add(name);
 		streamOutput(name);
 		return name;
@@ -72,26 +70,17 @@ public class CloudFoundryApplicationHarness extends AbstractDisposable implement
 		}
 	}
 
-	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
-			public void evaluate() throws Throwable {
-				try {
-					base.evaluate();
-				} finally {
-					dispose();
-				}
-			}
-		};
-	}
 	protected void deleteOwnedApps() {
+		System.out.println("owned app names: "+ownedAppNames);
 		if (!ownedAppNames.isEmpty()) {
 
 			try {
 				for (String name : ownedAppNames) {
 					try {
+						System.out.println("delete owned app: "+name);
 						this.client.deleteApplication(name);
 					} catch (Exception e) {
+						System.out.println("Delete failed: " +ExceptionUtil.getMessage(e));
 						// May get 404 or other 400 errors if it is alrready
 						// gone so don't prevent other owned apps from being
 						// deleted

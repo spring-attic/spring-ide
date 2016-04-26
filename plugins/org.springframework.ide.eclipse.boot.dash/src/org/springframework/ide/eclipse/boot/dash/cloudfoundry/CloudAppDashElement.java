@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
@@ -46,6 +47,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -66,7 +68,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements LogSink {
+public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements Deletable, LogSink {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -667,4 +669,29 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	}
 
+	@Override
+	public void delete(UserInteractions ui) {
+		CloudFoundryBootDashModel model = getCloudModel();
+		CloudAppDashElement cloudElement = this;
+		cloudElement.cancelOperations();
+		CancelationToken cancelToken = cloudElement.createCancelationToken();
+		CloudApplicationOperation operation = new CloudApplicationOperation("Deleting: " + cloudElement.getName(), model,
+				cloudElement.getName(), cancelToken) {
+
+			@Override
+			protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+				// Delete from CF first. Do it outside of synch block to avoid
+				// deadlock
+				model.getRunTarget().getClient().deleteApplication(appName);
+				model.getElementConsoleManager().terminateConsole(cloudElement.getName());
+				model.removeApplication(cloudElement.getName());
+				cloudElement.setProject(null);
+			}
+		};
+
+		// Allow deletions to occur concurrently with any other application
+		// operation
+		operation.setSchedulingRule(null);
+		getCloudModel().runAsynch(operation, ui);
+	}
 }

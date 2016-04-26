@@ -65,6 +65,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -94,18 +95,17 @@ public class CloudFoundryClientTest {
 
 	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
-	@Rule
 	public TestBracketter bracketer = new TestBracketter();
-
-	@Rule
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
-
-	@Rule
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
-
 
 	@After
 	public void teardown() throws Exception {
+		appHarness.dispose(); //apps first because services still bound to apps can't be deleted!
+		services.dispose();
+		if (client!=null) {
+			client.logout();
+		}
 		StsTestUtil.cleanUpProjects();
 	}
 
@@ -115,7 +115,7 @@ public class CloudFoundryClientTest {
 
 	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
 		try {
-			DefaultCloudFoundryClientFactoryV2 factory = new DefaultCloudFoundryClientFactoryV2();
+			DefaultCloudFoundryClientFactoryV2 factory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
 			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
 		} catch (Exception e) {
 			throw new Error(e);
@@ -498,7 +498,7 @@ public class CloudFoundryClientTest {
 		List<CFServiceInstance> services = client.getServices();
 		assertServices(services, serviceNames);
 		for (String serviceName : serviceNames) {
-			client.deleteService(serviceName).get();
+			client.deleteServiceMono(serviceName).get();
 			System.out.println("Deleted service: "+serviceName);
 		}
 

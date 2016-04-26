@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.lib.ApplicationLogListener;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
@@ -79,6 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -104,8 +106,10 @@ import reactor.core.publisher.Mono;
 public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
+	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
 //  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below
@@ -134,7 +138,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private CFClientParams params;
-	private SpringCloudFoundryClient client ;
+	private CloudFoundryClient client ;
 	private CloudFoundryOperations operations;
 	private Mono<String> orgId;
 
@@ -142,15 +146,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Deprecated
 	private DefaultClientRequestsV1 v1;
+	private CloudFoundryClientCache clients;
 
-	public DefaultClientRequestsV2(CFClientParams params) throws Exception {
+	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
+		this.clients = clients;
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
-		this.client = SpringCloudFoundryClient.builder()
-				.username(params.getUsername())
-				.password(params.getPassword())
-				.host(params.getHost())
-				.build();
+		this.client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		this.operations = new CloudFoundryOperationsBuilder()
 			.cloudFoundryClient(client)
 			.target(params.getOrgName(), params.getSpaceName())
@@ -286,10 +288,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFServiceInstance> getServices() throws Exception {
-		return ReactorUtils.get(
+		return ReactorUtils.get(GET_SERVICES_TIMEOUT, CancelationTokens.NULL,
 			operations
 			.services()
 			.listInstances()
+			.doOnNext(System.out::println)
 			.map(CFWrappingV2::wrap)
 			.toList()
 			.map(ImmutableList::copyOf)
@@ -355,7 +358,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					firstCalledAt = System.currentTimeMillis();
 				}
 				long waitedTime = System.currentTimeMillis() - firstCalledAt;
-				debug("falseAfter: remaining = "+(timeToWait.toMillis() - waitedTime));
+				//debug("falseAfter: remaining = "+(timeToWait.toMillis() - waitedTime));
 				return waitedTime < timeToWait.toMillis();
 			}
 
@@ -389,6 +392,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			v1.logout();
 			v1 = null;
 		}
+	}
+
+	public boolean isLoggedOut() {
+		return client==null;
 	}
 
 	@Override
@@ -904,7 +911,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	public Mono<Void> deleteService(String serviceName) {
+	@Override
+	public void deleteService(String serviceName) {
+		deleteServiceMono(serviceName).get();
+	}
+
+	public Mono<Void> deleteServiceMono(String serviceName) {
 		return getService(serviceName)
 		.then(this::deleteServiceInstance);
 	}

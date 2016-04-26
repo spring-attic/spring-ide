@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.hover;
 
-import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
-
-import static org.springframework.ide.eclipse.editor.support.util.HtmlSnippet.*;
+import org.springframework.util.StringUtils;
 
 /**
  * Nicely formatted hover info for a {@link YTypedProperty}
