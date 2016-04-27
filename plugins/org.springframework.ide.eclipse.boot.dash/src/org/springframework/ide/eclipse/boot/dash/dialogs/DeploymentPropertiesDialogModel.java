@@ -218,7 +218,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 						Log.log(e);
 					}
 				}
-				docProvider.disconnect(file);
+//				docProvider.disconnect(file);
 			}
 		}
 

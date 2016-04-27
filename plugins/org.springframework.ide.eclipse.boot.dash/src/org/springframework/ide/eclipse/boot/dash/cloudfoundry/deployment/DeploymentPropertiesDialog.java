@@ -350,12 +350,20 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		workspaceViewer.setLabelProvider(new WorkbenchLabelProvider());
 		workspaceViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
 		workspaceViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
-		model.getSelectedManifestVar().addListener(new UIValueListener<IResource>() {
-			@Override
-			protected void uiGotValue(LiveExpression<IResource> exp, IResource value) {
-				workspaceViewer.setSelection(new StructuredSelection(new IResource[] { value }), true);
-			}
-		});
+
+		/*
+		 * Do not set the selection based on manifest file changes outside of UI. Bad. SWT doesn't like it.
+		 */
+		if (model.getSelectedManifest() != null) {
+			workspaceViewer.setSelection(new StructuredSelection(new Object[] { model.getSelectedManifest() }), true);
+		}
+
+//		model.getSelectedManifestVar().addListener(new UIValueListener<IResource>() {
+//			@Override
+//			protected void uiGotValue(LiveExpression<IResource> exp, IResource value) {
+//				workspaceViewer.setSelection(new StructuredSelection(new IResource[] { exp.getValue() }), true);
+//			}
+//		});
 		workspaceViewer.addSelectionChangedListener(selectionListener);
 
 		Composite fileButtonsComposite = new Composite(fileGroup, SWT.NONE);
@@ -452,7 +460,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		model.getFileLabel().addListener(new UIValueListener<String>() {
 			@Override
 			protected void uiGotValue(LiveExpression<String> exp, String value) {
-				fileLabel.setText(value);
+				fileLabel.setText(exp.getValue());
 			}
 		});
 
