@@ -13,12 +13,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
@@ -34,8 +32,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.Yaml;
 
 public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
@@ -204,8 +202,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		private void saveOrDiscardIfNeeded(FileEditorInput file) {
 			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
-			if (docProvider != null && file != null && file.exists() && docProvider.canSaveDocument(file)) {
-				if (ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
+			if (docProvider != null && file != null && file.exists()) {
+				if (docProvider.canSaveDocument(file) && ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
 								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Discard"}, 0) == 0) {
 					try {
 						docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
@@ -220,6 +218,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 						Log.log(e);
 					}
 				}
+				docProvider.disconnect(file);
 			}
 		}
 
