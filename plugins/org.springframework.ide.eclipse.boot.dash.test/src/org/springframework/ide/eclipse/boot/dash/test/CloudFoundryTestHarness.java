@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.text.IDocument;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -45,6 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -262,10 +264,21 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
 				System.out.println("TYPE: " + dialog.type.getValue());
 				System.out.println("MANUAL MANIFEST: \n" + dialog.getManualDocument().get());
+				System.out.println("FILE MANIFEST: "+dialog.getFileLabel().getValue() +"\n");
+				System.out.println(getFileContent(dialog));
 				answerer.apply(dialog);
 				return dialog.getDeploymentProperties();
 			}
+
 		});
+	}
+
+	private String getFileContent(DeploymentPropertiesDialogModel dialog) {
+		IDocument doc = dialog.getFileDocument().getValue();
+		if (doc!=null) {
+			return doc.get();
+		}
+		return null;
 	}
 
 	public List<BootDashModel> getCfRunTargetModels() {
