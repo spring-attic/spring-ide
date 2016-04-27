@@ -81,7 +81,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	/**
 	 * How long to wait for a deployed app to transition to running state.
 	 */
-	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
+	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(3);
 
 	/**
 	 * How long to wait on retrieving request mappings from a CF app.
@@ -179,33 +179,27 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) throws Exception {
 		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
 		// so that it can add additional infos to it.
-		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
-		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
-			@Override
-			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
-				dialog.setManifestType(ManifestType.MANUAL);
-				dialog.setManualManifest(
-						"applications:\n" +
-						"- name: "+appName+"\n" +
-						"  host: "+hostName+"\n" +
-						createServicesBlock(bindServices)
-				);
-				dialog.okPressed();
-				return dialog.getDeploymentProperties();
-			}
-
-			private String createServicesBlock(List<String> bindServices) {
-				if (bindServices==null || bindServices.isEmpty()) {
-					return "";
-				}
-				StringBuilder buf = new StringBuilder("  services:\n");
-				for (String s : bindServices) {
-					buf.append("  - "+s);
-				}
-				return buf.toString();
-			}
+		answerDeploymentPrompt(ui, (dialog) -> {
+			dialog.setManifestType(ManifestType.MANUAL);
+			dialog.setManualManifest(
+					"applications:\n" +
+					"- name: "+appName+"\n" +
+					"  host: "+hostName+"\n" +
+					createServicesBlock(bindServices)
+			);
+			dialog.okPressed();
 		});
+	}
+
+	private String createServicesBlock(List<String> bindServices) {
+		if (bindServices==null || bindServices.isEmpty()) {
+			return "";
+		}
+		StringBuilder buf = new StringBuilder("  services:\n");
+		for (String s : bindServices) {
+			buf.append("  - "+s+"\n");
+		}
+		return buf.toString();
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) throws Exception {
@@ -262,11 +256,19 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
+				System.out.println(">>>>>>> Opening DeploymentPropertiesDialog");
 				System.out.println("TYPE: " + dialog.type.getValue());
 				System.out.println("MANUAL MANIFEST: \n" + dialog.getManualDocument().get());
 				System.out.println("FILE MANIFEST: "+dialog.getFileLabel().getValue() +"\n");
 				System.out.println(getFileContent(dialog));
 				answerer.apply(dialog);
+
+				System.out.println(">>>>>>> Closed DeploymentPropertiesDialog: "+(dialog.isCanceled()?"CANCEL":"OK"));
+				System.out.println("TYPE: " + dialog.type.getValue());
+				System.out.println("MANUAL MANIFEST: \n" + dialog.getManualDocument().get());
+				System.out.println("FILE MANIFEST: "+dialog.getFileLabel().getValue() +"\n");
+				System.out.println(getFileContent(dialog));
+
 				return dialog.getDeploymentProperties();
 			}
 

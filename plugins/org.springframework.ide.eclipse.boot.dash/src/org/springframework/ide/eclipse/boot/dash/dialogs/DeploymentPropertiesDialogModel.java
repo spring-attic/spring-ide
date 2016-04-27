@@ -442,4 +442,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	private CFApplication getDeployedApp() {
 		return deployedApp;
 	}
+
+	public boolean isCanceled() {
+		return isCancelled;
+	}
 }

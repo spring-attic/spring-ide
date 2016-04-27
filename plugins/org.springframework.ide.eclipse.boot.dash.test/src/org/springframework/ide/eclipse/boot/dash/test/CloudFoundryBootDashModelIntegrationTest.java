@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.cloudfoundry.client.lib.rest.CloudControllerClientFactory;
@@ -54,6 +55,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -314,6 +316,13 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		List<String> bindServices = ImmutableList.of(
 				services.createTestService(), services.createTestService()
 		);
+		ACondition.waitFor("services exist "+bindServices, 30_000, () -> {
+			Set<String> services = client.getServices().stream()
+			.map(CFServiceInstance::getName)
+			.collect(Collectors.toSet());
+			System.out.println("services = "+services);
+			assertTrue(services.containsAll(bindServices));
+		});
 
 		final String appName = appHarness.randomAppName();
 
