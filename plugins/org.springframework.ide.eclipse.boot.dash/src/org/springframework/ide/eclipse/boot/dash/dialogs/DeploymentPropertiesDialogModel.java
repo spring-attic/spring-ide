@@ -35,6 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -209,6 +211,55 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		};
 
+		Validator validator = new Validator() {
+
+			{
+				dependsOn(selectedAppName);
+			}
+
+			@Override
+			protected ValidationResult compute() {
+				ValidationResult result = ValidationResult.OK;
+
+				if (editorInput.getValue() == null) {
+					result = ValidationResult.error("Deployment manifest file not selected");
+				} else if (document.getValue() != null && document.getValue().get().isEmpty()) {
+					result = ValidationResult.error("Unable to load deployment manifest YAML file");
+				}
+
+				if (result.isOk()) {
+					AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
+					if (appNamesModel == null) {
+						result = ValidationResult.error("Application name(s) cannot be found.");
+					}
+					if (result.isOk()) {
+						String appName = getDeployedAppName();
+						if (!appNamesModel.getAnnotationIterator().hasNext()) {
+							result = ValidationResult.error("Manifest file does not have any application name defined");
+						} else {
+							String selectedAnnotation = selectedAppName.getValue();
+							if (appName == null) {
+								if (selectedAnnotation == null) {
+									result = ValidationResult.error("Application name not selected");
+								}
+							} else {
+								if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
+									result = ValidationResult.error("Manifest does not contain deployment properties for application with name '" + appName + "'");
+								}
+							}
+						}
+					}
+				}
+
+				if (result.isOk()) {
+					result = ValidationResult.info("Choose an existing deployment manifest YAML file from the local file system.");
+				}
+
+				return result;
+			}
+
+		};
+
 		private IElementStateListener dirtyStateListener = new IElementStateListener() {
 
 			@Override
@@ -322,6 +373,46 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		private IAnnotationModel annotationModel = new AnnotationModel();
 
+		Validator validator = new Validator() {
+
+			{
+				dependsOn(selectedAppName);
+			}
+
+			@Override
+			protected ValidationResult compute() {
+				ValidationResult result = ValidationResult.OK;
+
+				AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
+				if (appNamesModel == null) {
+					result = ValidationResult.error("Application name(s) cannot be found.");
+				}
+				if (result.isOk()) {
+					String appName = getDeployedAppName();
+					if (!appNamesModel.getAnnotationIterator().hasNext()) {
+						result = ValidationResult.error("Manifest file does not have any application name defined");
+					} else {
+						String selectedAnnotation = selectedAppName.getValue();
+						if (appName == null) {
+							if (selectedAnnotation == null) {
+								result = ValidationResult.error("Application name not selected");
+							}
+						} else {
+							if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
+								result = ValidationResult.error("Manifest does not contain deployment properties for application with name '" + appName + "'");
+							}
+						}
+					}
+				}
+
+				if (result.isOk()) {
+					result = ValidationResult.info(readOnly ? "Current generated deployment manifest" : "Enter deployment manifest YAML manually");
+				}
+
+				return result;
+			}
+		};
+
 		ManualDeploymentPropertiesDialogModel(boolean readOnly) {
 			super();
 			this.readOnly = readOnly;
@@ -394,6 +485,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	private boolean isCancelled = false;
 
+	final private Validator validator;
+
 	public DeploymentPropertiesDialogModel(UserInteractions ui, Map<String, Object> cloudData, IProject project, CFApplication deployedApp) {
 		super();
 		this.ui = ui;
@@ -402,6 +495,27 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		this.project = project;
 		this.manualModel = new ManualDeploymentPropertiesDialogModel(deployedApp != null);
 		this.fileModel = new FileDeploymentPropertiesDialogModel();
+
+		this.validator = new Validator() {
+
+			{
+				dependsOn(type);
+				dependsOn(fileModel.validator);
+				dependsOn(manualModel.validator);
+			}
+
+			@Override
+			protected ValidationResult compute() {
+				if (isFileManifestType()) {
+					return fileModel.validator.getValue();
+				} else if (isManualManifestType()) {
+					return manualModel.validator.getValue();
+				} else {
+					return ValidationResult.error("Unknown deployment manifest type. Must be either 'File' or 'Manual'.");
+				}
+			}
+
+		};
 	}
 
 	public CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
@@ -512,6 +626,10 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public boolean isCanceled() {
 		return isCancelled;
+	}
+
+	public Validator getValidator() {
+		return validator;
 	}
 
 }

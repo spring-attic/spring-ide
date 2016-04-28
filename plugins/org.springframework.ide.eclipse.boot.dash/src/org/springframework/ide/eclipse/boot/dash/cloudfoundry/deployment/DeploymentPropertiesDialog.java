@@ -31,17 +31,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.CompositeRuler;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelListener;
-import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -68,7 +63,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Sash;
@@ -93,6 +87,7 @@ import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
@@ -191,7 +186,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	private ISharedTextColors colorsCache = new ISharedTextColors() {
 
-		private Map<RGB, Color> colors = new HashMap<RGB, Color>();
+		private Map<RGB, Color> colors = new HashMap<>();
 
 		@Override
 		public Color getColor(RGB rgb) {
@@ -223,14 +218,13 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		}
 	};
 
-	private AnnotationModelListener annotationModelListener = new AnnotationModelListener();
 	final private DeploymentPropertiesDialogModel model;
 
-	public DeploymentPropertiesDialog(Shell parentShell, DeploymentPropertiesDialogModel model/*Map<String, Object> cloudData, IProject project, IFile manifest, String defaultYaml, boolean readOnly, boolean noModeSwitch*/) {
+	public DeploymentPropertiesDialog(Shell parentShell, DeploymentPropertiesDialogModel model) {
 		super(parentShell);
 		this.model = model;
 		this.service = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
-		this.activations = new ArrayList<IHandlerActivation>(handlers.length);
+		this.activations = new ArrayList<>(handlers.length);
 	}
 
 	@Override
@@ -283,8 +277,17 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				manualYamlComposite.setLayoutData(gridData);
 				yamlGroup.layout();
 				yamlGroup.getParent().layout();
+			}
+		});
 
-				validate();
+		model.getValidator().addListener(new UIValueListener<ValidationResult>() {
+			@Override
+			protected void uiGotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
+				ValidationResult result = exp.getValue();
+				if (getButton(IDialogConstants.OK_ID) != null) {
+					getButton(IDialogConstants.OK_ID).setEnabled(result.status != IStatus.ERROR);
+				}
+				setMessage(result.msg, result.getMessageProviderStatus());
 			}
 		});
 
@@ -358,12 +361,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			workspaceViewer.setSelection(new StructuredSelection(new Object[] { model.getSelectedManifest() }), true);
 		}
 
-//		model.getSelectedManifestVar().addListener(new UIValueListener<IResource>() {
-//			@Override
-//			protected void uiGotValue(LiveExpression<IResource> exp, IResource value) {
-//				workspaceViewer.setSelection(new StructuredSelection(new IResource[] { exp.getValue() }), true);
-//			}
-//		});
 		workspaceViewer.addSelectionChangedListener(selectionListener);
 
 		Composite fileButtonsComposite = new Composite(fileGroup, SWT.NONE);
@@ -441,7 +438,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	private void createYamlContentsGroup(Composite composite) {
 		yamlGroup = new Group(composite, SWT.NONE);
 		yamlGroup.setText("YAML Content");
@@ -563,9 +559,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
 
 		/*
-		 * Add annotation model listener to manual YAML viewer now because document input is already set on the viewer
+		 * Set App Name annotation model on the dialog's model
 		 */
-		manualYamlViewer.getVisualAnnotationModel().addAnnotationModelListener(annotationModelListener);
 		model.setManualAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(manualYamlViewer));
 	}
 
@@ -617,73 +612,18 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	}
 
 	private void updateManifestFile() {
-		if (fileYamlViewer.getVisualAnnotationModel() != null) {
-			fileYamlViewer.getVisualAnnotationModel().removeAnnotationModelListener(annotationModelListener);
-		}
 		IDocument document = model.getFileDocument().getValue();
 		fileYamlViewer.getControl().setEnabled(document!=null);
 		fileYamlViewer.setDocument(document, model.getFileAnnotationModel());
-
+		/*
+		 * Set New App Name annotation model on the dialog's model
+		 */
 		model.setFileAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(fileYamlViewer));
-
-		if (fileYamlViewer.getVisualAnnotationModel() != null) {
-			fileYamlViewer.getVisualAnnotationModel().addAnnotationModelListener(annotationModelListener);
-		}
-		validate();
 	}
 
 	@Override
 	protected boolean isResizable() {
 		return true;
-	}
-
-	private void validate() {
-		if (model.isFileManifestType()) {
-			setMessage("Choose an existing deployment manifest YAML file from the local file system.", IMessageProvider.INFORMATION);
-		} else {
-			if (model.isManualManifestReadOnly()) {
-				setMessage("Current generated deployment manifest", IMessageProvider.INFORMATION);
-			} else {
-				setMessage("Enter deployment manifest YAML manually", IMessageProvider.INFORMATION);
-			}
-		}
-
-		String error = null;
-		SourceViewer viewer = model.isFileManifestType() ? fileYamlViewer : manualYamlViewer;
-		if (model.isFileManifestType()) {
-			if (model.getSelectedManifest() == null) {
-				error = "Deployment manifest file not selected";
-			} else if (fileYamlViewer.getDocument() != null && fileYamlViewer.getDocument().get().isEmpty()) {
-				error = "Unable to load deployment manifest YAML file";
-			}
-		}
-		AppNameAnnotationModel appNamesModel = AppNameAnnotationSupport.getAppNameAnnotationModel(viewer);
-		if (appNamesModel == null) {
-			error = "Application name(s) cannot be found.";
-		}
-		if (error == null) {
-			String appName = model.getDeployedAppName();
-			if (!appNamesModel.getAnnotationIterator().hasNext()) {
-				error = "Manifest file does not have any application name defined";
-			} else if (appName == null) {
-				if (appNamesModel.getSelectedAppAnnotation() == null) {
-					error = "Application name not selected";
-				}
-			} else {
-				if (appNamesModel.getSelectedAppAnnotation() == null || !appName.equals(appNamesModel.getSelectedAppAnnotation().getText())) {
-					error = "Manifest does not contain deployment properties for application with name '" + appName + "'";
-				}
-			}
-		}
-		setErrorMessage(error);
-	}
-
-	@Override
-	public void setErrorMessage(String newErrorMessage) {
-		super.setErrorMessage(newErrorMessage);
-		if (getButton(IDialogConstants.OK_ID) != null) {
-			getButton(IDialogConstants.OK_ID).setEnabled(newErrorMessage == null);
-		}
 	}
 
 	@Override
@@ -834,31 +774,4 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		return yamlFile;
 	}
 
-
-	private class AnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
-
-		@Override
-		public void modelChanged(IAnnotationModel model) {
-			// Leave empty. AnnotationModelEvent method is the one that will be called
-		}
-
-		@Override
-		public void modelChanged(AnnotationModelEvent event) {
-			if (getShell() != null && !getShell().isDisposed() && event.getAnnotationModel() instanceof AppNameAnnotationModel) {
-				if (Display.getCurrent() != null) {
-					if (getShell() != null && !getShell().isDisposed()) {
-						validate();
-					}
-				} else {
-					getShell().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							if (getShell() != null && !getShell().isDisposed()) {
-								validate();
-							}
-						}
-					});
-				}
-			}
-		}
-	}
 }
