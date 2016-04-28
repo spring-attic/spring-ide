@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -34,8 +35,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -49,12 +48,11 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
-import org.springsource.ide.eclipse.commons.frameworks.core.async.ResolvableFuture;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
@@ -90,7 +88,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private LiveExpression<URI> actuatorUrl;
 
-	@SuppressWarnings("unchecked")
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
 		this.runState = createRunStateExp();
@@ -157,19 +154,19 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 			stop(false);
 		} catch (Exception e) {
 			//Asynch case shouldn't really throw exceptions.
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
 	private void stop(boolean sync) throws Exception {
 		debug("Stopping: "+this+" "+(sync?"...":""));
-		final ResolvableFuture<Void> done = sync?new ResolvableFuture<Void>():null;
+		final CompletableFuture<Void> done = sync?new CompletableFuture<Void>():null;
 		try {
 			ImmutableSet<ILaunch> launches = getLaunches();
 			if (sync) {
 				LaunchUtils.whenTerminated(launches, new Runnable() {
 					public void run() {
-						done.resolve(null);
+						done.complete(null);
 					}
 				});
 			}
@@ -178,10 +175,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				shutdownExpose();
 			} catch (Exception e) {
 				//why does terminating process with Eclipse debug UI fail so #$%# often?
-				BootActivator.log(new Error("Termination of "+this+" failed", e));
+				Log.log(new Error("Termination of "+this+" failed", e));
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		if (sync) {
 			//Eclipse waits for 5 seconds before timing out. So we use a similar timeout but slightly
@@ -223,7 +220,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		try {
 			stop(true);
 		} catch (TimeoutException e) {
-			BootActivator.info("Termination of '"+this.getName()+"' timed-out. Retrying");
+			Log.info("Termination of '"+this.getName()+"' timed-out. Retrying");
 			//Try it one more time. On windows this times out occasionally... and then
 			// it works the next time.
 			stop(true);
@@ -248,7 +245,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				launch(runMode, conf);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -311,7 +308,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				return getBootDashModel().getLaunchConfElementFactory().createOrGet(newConf);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			ui.errorPopup("Couldn't duplicate config", ExceptionUtil.getMessage(e));
 		}
 		return null;
@@ -522,7 +519,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 								return new URI("http://localhost:"+port);
 							}
 						} catch (URISyntaxException e) {
-							BootDashActivator.log(e);
+							Log.log(e);
 						}
 						return null;
 					}
@@ -600,7 +597,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				launch(runMode, workingCopy);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
