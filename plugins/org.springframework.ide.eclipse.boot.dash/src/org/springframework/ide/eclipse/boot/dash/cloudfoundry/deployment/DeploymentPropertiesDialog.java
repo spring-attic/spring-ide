@@ -566,6 +566,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		 * Add annotation model listener to manual YAML viewer now because document input is already set on the viewer
 		 */
 		manualYamlViewer.getVisualAnnotationModel().addAnnotationModelListener(annotationModelListener);
+		model.setManualAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(manualYamlViewer));
 	}
 
 	private void activateHanlders() {
@@ -622,6 +623,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		IDocument document = model.getFileDocument().getValue();
 		fileYamlViewer.getControl().setEnabled(document!=null);
 		fileYamlViewer.setDocument(document, model.getFileAnnotationModel());
+
+		model.setFileAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(fileYamlViewer));
+
 		if (fileYamlViewer.getVisualAnnotationModel() != null) {
 			fileYamlViewer.getVisualAnnotationModel().addAnnotationModelListener(annotationModelListener);
 		}
@@ -856,6 +860,5 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				}
 			}
 		}
-
 	}
 }

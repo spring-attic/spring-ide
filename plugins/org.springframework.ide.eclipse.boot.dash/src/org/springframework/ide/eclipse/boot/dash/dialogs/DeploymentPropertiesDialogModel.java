@@ -16,7 +16,10 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.AnnotationModel;
+import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
@@ -24,6 +27,8 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -46,7 +51,48 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	private abstract class AbstractSubModel {
 
-		String selectedAppName = null;
+		LiveVariable<AppNameAnnotationModel> appNameAnnotationModel = new LiveVariable<>();
+
+		LiveExpression<String> selectedAppName = new LiveExpression<String>() {
+
+			private AppNameAnnotationModel attachedTo = null;
+			private AppNameAnnotationModelListener listener = new AppNameAnnotationModelListener() {
+				public void modelChanged(AnnotationModelEvent event) {
+					refresh();
+				}
+			};
+
+			{
+				dependsOn(appNameAnnotationModel);
+			}
+
+			@Override
+			protected String compute() {
+				AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
+				attachListener(annotationModel);
+				if (annotationModel != null) {
+					AppNameAnnotation a = annotationModel.getSelectedAppAnnotation();
+					if (a != null) {
+						return a.getText();
+					}
+				}
+				return null;
+			}
+
+			synchronized private void attachListener(AppNameAnnotationModel annotationModel) {
+				if (attachedTo == annotationModel) {
+					return;
+				}
+				if (attachedTo != null) {
+					attachedTo.removeAnnotationModelListener(listener);
+				}
+				if (annotationModel != null) {
+					annotationModel.addAnnotationModelListener(listener);
+				}
+				attachedTo = annotationModel;
+			}
+
+		};
 
 		abstract String getManifestContents();
 
@@ -70,7 +116,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			 * set the applicationName var to null in that case
 			 */
 			CloudApplicationDeploymentProperties deploymentProperties = null;
-			String applicationName = deployedApp == null ? selectedAppName : getDeployedAppName();
+			String applicationName = deployedApp == null ? selectedAppName.getValue() : getDeployedAppName();
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
@@ -321,6 +367,19 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	}
 
+	private abstract class AppNameAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
+
+		@Override
+		public void modelChanged(IAnnotationModel model) {
+			// Leave empty. AnnotationModelEvent method is the one that will be called
+		}
+
+		@Override
+		abstract public void modelChanged(AnnotationModelEvent event);
+
+	}
+
+
 	final public LiveVariable<ManifestType> type = new LiveVariable<>();
 
 	final private CFApplication deployedApp;
@@ -443,7 +502,16 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		return deployedApp;
 	}
 
+	public void setFileAppNameAnnotationModel(AppNameAnnotationModel appNameAnnotationModel) {
+		fileModel.appNameAnnotationModel.setValue(appNameAnnotationModel);
+	}
+
+	public void setManualAppNameAnnotationModel(AppNameAnnotationModel appNameAnnotationModel) {
+		manualModel.appNameAnnotationModel.setValue(appNameAnnotationModel);
+	}
+
 	public boolean isCanceled() {
 		return isCancelled;
 	}
+
 }
