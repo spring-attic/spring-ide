@@ -44,7 +44,9 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.cloudfoundry.client,
  org.springsource.ide.eclipse.commons.cloudfoundry.client.v2,
  com.fasterxml.jackson.core.jackson-databind,
- com.fasterxml.jackson.core.jackson-core
+ com.fasterxml.jackson.core.jackson-core,
+ io.projectreactor.reactor-core;bundle-version="2.5.0",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

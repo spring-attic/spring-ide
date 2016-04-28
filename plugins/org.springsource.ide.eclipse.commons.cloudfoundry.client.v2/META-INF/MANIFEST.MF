@@ -137,15 +137,6 @@ Export-Package: org.cloudfoundry,
  org.cloudfoundry.uaa.identityzonemanagement,
  org.cloudfoundry.util,
  org.cloudfoundry.util.test,
- org.cloudfoundry.util.tuple,
- org.reactivestreams,
- reactor.core.converter,
- reactor.core.flow,
- reactor.core.publisher,
- reactor.core.queue,
- reactor.core.scheduler,
- reactor.core.state,
- reactor.core.subscriber,
- reactor.core.test,
- reactor.core.tuple,
- reactor.core.util
+ org.cloudfoundry.util.tuple
+Require-Bundle: io.projectreactor.reactor-core;bundle-version="2.5.0",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0"

@@ -122,6 +122,9 @@ public class CloudFoundryClientTest {
 		}
 	}
 
+	@Rule
+	public TestBracketter testBrack = new TestBracketter();
+
 	@Test
 	public void testGetApiVersion() throws Exception {
 		Version version = client.getApiVersion();
