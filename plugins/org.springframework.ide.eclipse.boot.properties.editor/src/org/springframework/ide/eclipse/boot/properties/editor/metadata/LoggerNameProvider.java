@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -38,7 +39,6 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-import org.springsource.ide.eclipse.commons.frameworks.core.async.ResolvableFuture;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -149,7 +149,7 @@ public class LoggerNameProvider implements ValueProviderStrategy {
 		//Other providers are probably going to want to reuse the timeout mechanics but provide their own
 		// search logic. So this needs to be separated.
 		final ResultsCollector resultsCollector = new ResultsCollector(query);
-		final ResolvableFuture<Collection<ValueHint>> future = new ResolvableFuture<>();
+		final CompletableFuture<Collection<ValueHint>> future = new CompletableFuture<>();
 		Job searchJob = new Job("Seacher for "+this.getClass().getSimpleName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -166,7 +166,7 @@ public class LoggerNameProvider implements ValueProviderStrategy {
 //					debug("Finished search for '"+query+"'");
 //					debug("           results:"+results.size());
 //					debug("          duration: "+duration+" ms");
-					future.resolve(results);
+					future.complete(results);
 					return Status.OK_STATUS;
 				} catch (CoreException e) {
 //					debug("Canceled search for: "+query);
@@ -175,8 +175,8 @@ public class LoggerNameProvider implements ValueProviderStrategy {
 //					long duration = System.currentTimeMillis() - start;
 //					debug("           results:"+results.size());
 //					debug("          duration: "+duration+" ms");
-					future.resolve(results);
-					future.resolve(resultsCollector.getHints());
+					future.complete(results);
+					future.complete(resultsCollector.getHints());
 					return e.getStatus();
 				}
 			}
