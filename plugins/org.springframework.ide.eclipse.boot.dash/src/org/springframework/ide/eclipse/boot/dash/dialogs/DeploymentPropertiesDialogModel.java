@@ -510,4 +510,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		manualModel.appNameAnnotationModel.setValue(appNameAnnotationModel);
 	}
 
+	public boolean isCanceled() {
+		return isCancelled;
+	}
+
 }
