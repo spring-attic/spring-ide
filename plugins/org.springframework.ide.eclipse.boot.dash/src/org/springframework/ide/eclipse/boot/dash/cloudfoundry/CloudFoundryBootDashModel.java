@@ -59,7 +59,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.Deploym
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JobBody;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
@@ -88,7 +87,6 @@ import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
@@ -736,7 +734,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	@Override
 	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
 		return "Are you sure that you want to delete the selected applications/services from: "
-				+ getRunTarget().getName() + "? The applications will be permanently removed.";
+				+ getRunTarget().getName() + "? The applications/services will be permanently removed.";
 	}
 
 	public boolean isConnected() {
