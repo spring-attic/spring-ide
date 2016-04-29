@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -153,7 +154,7 @@ public class DeploymentPropertiesDialogModelTests {
 		
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
-		assertEquals(deploymentProperties.getAppName(), project.getName());
+		assertEquals(project.getName(), deploymentProperties.getAppName());
 	}
 
 	@Test public void testManualTypeForDeployedApp() throws Exception {
@@ -194,12 +195,12 @@ public class DeploymentPropertiesDialogModelTests {
 		
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertTrue(validationResult.status == IStatus.ERROR);
-		assertEquals(DeploymentPropertiesDialogModel.INVALID_YAML_CONTENT, validationResult.msg);
+		assertEquals(DeploymentPropertiesDialogModel.NO_SUPPORT_TO_DETERMINE_APP_NAMES, validationResult.msg);
 
 		model.type.setValue(ManifestType.FILE);
 		validationResult = model.getValidator().getValue();
 		assertTrue(validationResult.status == IStatus.ERROR);
-		assertEquals(DeploymentPropertiesDialogModel.INVALID_YAML_CONTENT, validationResult.msg);
+		assertEquals(DeploymentPropertiesDialogModel.NO_SUPPORT_TO_DETERMINE_APP_NAMES, validationResult.msg);
 	}
 
 	@Test public void testFileManifestFileNotSelected() throws Exception {
@@ -257,7 +258,240 @@ public class DeploymentPropertiesDialogModelTests {
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
-		assertEquals(deploymentProperties.getAppName(), appNameFromFile);
+		assertEquals(appNameFromFile, deploymentProperties.getAppName());
 	}
 
+	@Test public void testSwitchingManifestTypeAndFiles() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		IFile validFile = createFile(project, "manifest.yml", 				
+				"applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512M\n"
+		);
+		IFile invalidFile = createFile(project, "text.yml", "Some text");				
+		
+		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, null);
+		addAppNameReconcilingFeature(model);
+		model.type.setValue(ManifestType.MANUAL);
+		
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		
+		model.type.setValue(ManifestType.FILE);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(DeploymentPropertiesDialogModel.DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		
+		model.setSelectedManifest(validFile);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		
+		model.type.setValue(ManifestType.MANUAL);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		
+		model.type.setValue(ManifestType.FILE);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		
+		model.setSelectedManifest(project);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(DeploymentPropertiesDialogModel.DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		
+		model.setSelectedManifest(invalidFile);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(DeploymentPropertiesDialogModel.MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+	}
+	
+	@Test public void testValidSingleAppFileSelectedForDeployedApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "my-test-app";
+		MockCFApplication cfApp = space.defApp(appName);
+		cfApp.setMemory(512);
+		IProject project = projects.createProject("p1");
+		CFApplication deployedApp = cfApp.getDetailedInfo();
+		
+		IFile validFileSingleName = createFile(project, "manifest.yml", 				
+				"applications:\n" +
+				"- name: " + appName + "\n" +
+				"  memory: 512M\n"
+		);
+		
+		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
+		addAppNameReconcilingFeature(model);
+		model.type.setValue(ManifestType.FILE);
+		
+		model.setSelectedManifest(validFileSingleName);
+		
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);		
+	}
+
+	@Test public void testInvalidSingleAppFileSelectedForDeployedApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "my-test-app";
+		MockCFApplication cfApp = space.defApp(appName);
+		cfApp.setMemory(512);
+		IProject project = projects.createProject("p1");
+		CFApplication deployedApp = cfApp.getDetailedInfo();
+		
+		IFile invalidFileSingleName = createFile(project, "manifest.yml", 				
+				"applications:\n" +
+				"- name: someApp\n" +
+				"  memory: 512M\n"
+		);
+		
+		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
+		addAppNameReconcilingFeature(model);
+		model.type.setValue(ManifestType.FILE);
+		
+		model.setSelectedManifest(invalidFileSingleName);
+		
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(MessageFormat.format(DeploymentPropertiesDialogModel.MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);		
+	}
+
+	@Test public void testValidMultiAppFileSelectedForDeployedApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "my-test-app";
+		MockCFApplication cfApp = space.defApp(appName);
+		cfApp.setMemory(512);
+		IProject project = projects.createProject("p1");
+		CFApplication deployedApp = cfApp.getDetailedInfo();
+		
+		IFile validFileMultiName = createFile(project, "manifest.yml", 				
+				"applications:\n" +
+				"- name: " + project.getName() + "\n" +
+				"  memory: 512M\n" +
+				"- name: " + appName + "\n" +
+				"  memory: 512M\n" +
+				"- name: someApp\n" +
+				"  memory: 512M\n"
+		);
+		
+		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
+		addAppNameReconcilingFeature(model);
+		model.type.setValue(ManifestType.FILE);
+		
+		model.setSelectedManifest(validFileMultiName);
+		
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertNotNull(deploymentProperties);
+		assertEquals(deployedApp.getName(), deploymentProperties.getAppName());
+	}
+
+	@Test public void testInvalidMultiAppFileSelectedForDeployedApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "my-test-app";
+		MockCFApplication cfApp = space.defApp(appName);
+		cfApp.setMemory(512);
+		IProject project = projects.createProject("p1");
+		CFApplication deployedApp = cfApp.getDetailedInfo();
+		
+		IFile invalidFileMultiName = createFile(project, "manifest.yml", 				
+				"applications:\n" +
+				"- name: " + project.getName() + "\n" +
+				"  memory: 512M\n" +
+				"- name: anotherApp\n" +
+				"  memory: 512M\n" +
+				"- name: someApp\n" +
+				"  memory: 512M\n"
+		);
+		
+		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
+		addAppNameReconcilingFeature(model);
+		model.type.setValue(ManifestType.FILE);
+		
+		model.setSelectedManifest(invalidFileMultiName);
+		
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(MessageFormat.format(DeploymentPropertiesDialogModel.MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertEquals(null, deploymentProperties);
+	}
+	
+	@Test public void testSwitchingWithDeployedApp() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "my-test-app";
+		MockCFApplication cfApp = space.defApp(appName);
+		cfApp.setMemory(512);
+		IProject project = projects.createProject("p1");
+		CFApplication deployedApp = cfApp.getDetailedInfo();
+		
+		IFile validFileMultiName = createFile(project, "valid-manifest.yml", 				
+				"applications:\n" +
+				"- name: " + project.getName() + "\n" +
+				"  memory: 512M\n" +
+				"- name: " + appName + "\n" +
+				"  memory: 512M\n" +
+				"- name: someApp\n" +
+				"  memory: 512M\n"
+		);
+		
+		IFile invalidFileMultiName = createFile(project, "invalid-manifest.yml", 				
+				"applications:\n" +
+				"- name: " + project.getName() + "\n" +
+				"  memory: 512M\n" +
+				"- name: anotherApp\n" +
+				"  memory: 512M\n" +
+				"- name: someApp\n" +
+				"  memory: 512M\n"
+		);
+		
+		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
+		addAppNameReconcilingFeature(model);
+		
+		model.type.setValue(ManifestType.FILE);
+		model.setSelectedManifest(validFileMultiName);
+		
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+
+		model.setSelectedManifest(invalidFileMultiName);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(MessageFormat.format(DeploymentPropertiesDialogModel.MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		
+		model.setSelectedManifest(project);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(DeploymentPropertiesDialogModel.DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		
+		model.type.setValue(ManifestType.MANUAL);
+		assertTrue(model.isManualManifestReadOnly());		
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+
+		model.setSelectedManifest(invalidFileMultiName);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.INFO);
+		assertEquals(DeploymentPropertiesDialogModel.CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+
+		model.type.setValue(ManifestType.FILE);
+		validationResult = model.getValidator().getValue();
+		assertTrue(validationResult.status == IStatus.ERROR);
+		assertEquals(MessageFormat.format(DeploymentPropertiesDialogModel.MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+	}
 }

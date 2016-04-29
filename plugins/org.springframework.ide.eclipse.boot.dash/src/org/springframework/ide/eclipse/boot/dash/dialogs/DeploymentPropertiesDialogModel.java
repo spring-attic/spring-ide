@@ -3,7 +3,10 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -46,7 +50,7 @@ import org.yaml.snakeyaml.Yaml;
 public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
-	public static final String INVALID_YAML_CONTENT = "Invalid YAML content in the manifest.";
+	public static final String NO_SUPPORT_TO_DETERMINE_APP_NAMES = "Support for determining application names is unavailable";
 	public static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''.";
 	public static final String APPLICATION_NAME_NOT_SELECTED = "Application name not selected";
 	public static final String MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED = "Manifest does not have any application defined.";
@@ -66,6 +70,52 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	private abstract class AbstractSubModel {
 
 		LiveVariable<AppNameAnnotationModel> appNameAnnotationModel = new LiveVariable<>();
+
+		LiveExpression<List<String>> applicationNames = new LiveExpression<List<String>>() {
+
+			private AppNameAnnotationModel attachedTo = null;
+			private AppNameAnnotationModelListener listener = new AppNameAnnotationModelListener() {
+				public void modelChanged(AnnotationModelEvent event) {
+					refresh();
+				}
+			};
+
+			{
+				dependsOn(appNameAnnotationModel);
+			}
+
+			@Override
+			protected List<String> compute() {
+				AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
+				attachListener(annotationModel);
+				if (annotationModel != null) {
+					List<String> applicationNames = new ArrayList<>();
+					for (Iterator<Annotation> itr = annotationModel.getAnnotationIterator(); itr.hasNext();) {
+						Annotation next = itr.next();
+						if (next instanceof AppNameAnnotation) {
+							AppNameAnnotation a = (AppNameAnnotation) next;
+							applicationNames.add(a.getText());
+						}
+					}
+					return applicationNames;
+				}
+				return Collections.emptyList();
+			}
+
+			synchronized private void attachListener(AppNameAnnotationModel annotationModel) {
+				if (attachedTo == annotationModel) {
+					return;
+				}
+				if (attachedTo != null) {
+					attachedTo.removeAnnotationModelListener(listener);
+				}
+				if (annotationModel != null) {
+					annotationModel.addAnnotationModelListener(listener);
+				}
+				attachedTo = annotationModel;
+			}
+
+		};
 
 		LiveExpression<String> selectedAppName = new LiveExpression<String>() {
 
@@ -227,6 +277,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 			{
 				dependsOn(document);
+				dependsOn(applicationNames);
 				dependsOn(selectedAppName);
 			}
 
@@ -241,11 +292,11 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				if (result.isOk()) {
 					AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
 					if (appNamesModel == null) {
-						result = ValidationResult.error(INVALID_YAML_CONTENT);
+						result = ValidationResult.error(NO_SUPPORT_TO_DETERMINE_APP_NAMES);
 					}
 					if (result.isOk()) {
 						String appName = getDeployedAppName();
-						if (!appNamesModel.getAnnotationIterator().hasNext()) {
+						if (applicationNames.getValue().isEmpty()) {
 							result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED);
 						} else {
 							String selectedAnnotation = selectedAppName.getValue();
@@ -389,6 +440,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		Validator validator = new Validator() {
 
 			{
+				dependsOn(applicationNames);
 				dependsOn(selectedAppName);
 			}
 
@@ -398,11 +450,11 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 				AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
 				if (appNamesModel == null) {
-					result = ValidationResult.error(INVALID_YAML_CONTENT);
+					result = ValidationResult.error(NO_SUPPORT_TO_DETERMINE_APP_NAMES);
 				}
 				if (result.isOk()) {
 					String appName = getDeployedAppName();
-					if (!appNamesModel.getAnnotationIterator().hasNext()) {
+					if (applicationNames.getValue().isEmpty()) {
 						result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED);
 					} else {
 						String selectedAnnotation = selectedAppName.getValue();
