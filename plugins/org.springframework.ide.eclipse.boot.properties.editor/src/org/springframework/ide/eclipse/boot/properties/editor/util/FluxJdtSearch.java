@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
-import java.util.EnumSet;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,17 +27,11 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.subscriber.SignalEmitter;
-import reactor.core.subscriber.SignalEmitter.Emission;
-import reactor.core.util.BackpressureUtils;
 import reactor.core.util.PlatformDependent;
-
-import static reactor.core.subscriber.SignalEmitter.Emission.*;
 
 /**
  * Helper class to perform a search using Eclipse JDT search engine returning

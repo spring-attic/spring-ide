@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
-import java.util.Collection;
-
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.springframework.boot.configurationmetadata.ValueHint;
@@ -28,9 +21,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProv
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.FluxJdtSearch;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,13 +34,13 @@ import reactor.core.publisher.Mono;
  */
 public class LoggerNameProvider extends CachingValueProvider {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-
-	private static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
+//	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+//
+//	private static void debug(String string) {
+//		if (DEBUG) {
+//			System.out.println(string);
+//		}
+//	}
 
 	private  static final ValueProviderStrategy INSTANCE = new LoggerNameProvider();
 	public static final ValueProviderFactory FACTORY = (params) -> INSTANCE;
@@ -92,19 +82,6 @@ public class LoggerNameProvider extends CachingValueProvider {
 		return builder.toString();
 	}
 
-	private IJavaSearchScope searchScopeFor(IJavaProject javaProject) throws JavaModelException {
-//		IPackageFragmentRoot[] roots = javaProject.getPackageFragmentRoots();
-//		List<IPackageFragmentRoot> interestingRoots = new ArrayList<>(roots.length);
-//		for (IPackageFragmentRoot r : roots) {
-//
-//		}
-		int includeMask =
-				IJavaSearchScope.APPLICATION_LIBRARIES |
-				IJavaSearchScope.REFERENCED_PROJECTS |
-				IJavaSearchScope.SOURCES;
-		return SearchEngine.createJavaSearchScope(new IJavaElement[] {javaProject}, includeMask);
-	}
-
 	protected SearchPattern toPattern(String query) {
 		String wildCardedQuery = toWildCardPattern(query);
 		return SearchPattern.createOrPattern(
@@ -125,15 +102,6 @@ public class LoggerNameProvider extends CachingValueProvider {
 		int limitTo = IJavaSearchConstants.DECLARATIONS;
 		int matchRule = SearchPattern.R_PATTERN_MATCH;
 		return SearchPattern.createPattern(wildCardedQuery, searchFor, limitTo, matchRule);
-	}
-
-
-	private static Collection<ValueHint> hints(Collection<String> stringValues) {
-		Builder<ValueHint> builder = ImmutableList.builder();
-		for (String string : stringValues) {
-			builder.add(hint(string));
-		}
-		return builder.build();
 	}
 
 	private static ValueHint hint(String fqName) {
