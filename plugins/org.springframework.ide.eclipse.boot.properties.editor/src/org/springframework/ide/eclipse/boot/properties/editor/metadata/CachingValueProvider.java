@@ -38,13 +38,12 @@ import reactor.core.tuple.Tuple2;
  * <ul>
  *   <li>Limit the duration of time spent on the UI thread.
  *   <li>Cache results of searches for a limited time.
+ *   <li>Speedup queries for successive queries by using the already cached result of a similar (prefix) query.
  *   <li>When the time spent on UI thread waiting for a current search exceeds the allowed time limit,
  *       return immediately with whatever results have been found so far.
  * </ul>
  *
- *
  * @author Kris De Volder
- *
  */
 public abstract class CachingValueProvider implements ValueProviderStrategy {
 
