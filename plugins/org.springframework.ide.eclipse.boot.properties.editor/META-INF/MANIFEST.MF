@@ -30,7 +30,9 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.ui,
  org.springsource.ide.eclipse.commons.livexp,
  org.springframework.ide.eclipse.editor.support,
- com.google.guava
+ com.google.guava,
+ io.projectreactor.reactor-core,
+ org.reactivestreams.reactive-streams
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

@@ -78,6 +78,10 @@ public class ReactorUtils {
 		return (Throwable e) -> cancelationToken.isCanceled()?Mono.error(new OperationCanceledException()):Mono.error(e);
 	}
 
+	/**
+	 * Deprecated because this is really the same as Mono.justOrEmpty, so use that instead.
+	 */
+	@Deprecated
 	public static <T> Mono<T> just(T it) {
 		return it == null ? Mono.empty() : Mono.just(it);
 	}

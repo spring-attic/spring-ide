@@ -57,26 +57,27 @@ public class LimitedTimeCache<K,V> implements Cache<K, V> {
 	};
 
 	private class Entry {
-		long createdAt;
+		long lastUsed;
 		V value;
 		Entry(V v) {
 			this.value = v;
-			this.createdAt = System.currentTimeMillis();
+			this.lastUsed = System.currentTimeMillis();
 		}
 		long age() {
-			return System.currentTimeMillis() - createdAt;
+			return System.currentTimeMillis() - lastUsed;
 		}
 	}
 
 	public LimitedTimeCache(Duration MAX_AGE_DURATION) {
 		MAX_AGE = MAX_AGE_DURATION.toMillis();
-		AGE_MARGIN = Math.min(1000, MAX_AGE / 20);
+		AGE_MARGIN = Math.max(1000, MAX_AGE / 20);
 	}
 
 	@Override
 	public synchronized V get(K key) {
 		Entry e = cache.get(key);
 		if (e!=null) {
+			e.lastUsed = System.currentTimeMillis();
 			return e.value;
 		}
 		return null;
@@ -112,7 +113,7 @@ public class LimitedTimeCache<K,V> implements Cache<K, V> {
 	private synchronized long clearExpired() {
 		debug(">>> clearExpired MAX_AGE = "+MAX_AGE);
 		Iterator<java.util.Map.Entry<K, LimitedTimeCache<K, V>.Entry>> iter = cache.entrySet().iterator();
-		long oldest = 0;
+		long oldest = -1;
 		while (iter.hasNext()) {
 			java.util.Map.Entry<K, LimitedTimeCache<K, V>.Entry> me = iter.next();
 			Entry e = me.getValue();
@@ -124,7 +125,7 @@ public class LimitedTimeCache<K,V> implements Cache<K, V> {
 				oldest = Math.max(oldest, age);
 			}
 		}
-		debug("<<< clearExpired");
+		debug("<<< clearExpired ["+cache.size()+"]");
 		return oldest;
 	}
 

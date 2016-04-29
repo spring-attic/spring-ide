@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import java.time.Duration;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.LoggerNameProvider;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
@@ -2638,7 +2641,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testLoggerNameCompletion() throws Exception {
-		LoggerNameProvider.TIMEOUT = 15000; // the provider can't be reliably tested if its not allowed to
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20); // the provider can't be reliably tested if its not allowed to
 											// fetch all its values (even though in 'production' you
 											// wouldn't want it to block the UI thread for this long.
 		try {
@@ -2669,7 +2672,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 					"    org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration: <*>"
 			);
 		} finally {
-			LoggerNameProvider.restoreDefaults();
+			CachingValueProvider.restoreDefaults();
 		}
 	}
 
