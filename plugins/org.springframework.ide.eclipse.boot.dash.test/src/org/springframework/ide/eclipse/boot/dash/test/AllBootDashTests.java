@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	JarNameGeneratorTest.class,
 	BootJarPackagingTest.class,
 	BootDashViewModelTest.class,
+	DeploymentPropertiesDialogModelTests.class,
 
 	//Long tests (more than 30 seconds):
 	BootDashActionTests.class,
