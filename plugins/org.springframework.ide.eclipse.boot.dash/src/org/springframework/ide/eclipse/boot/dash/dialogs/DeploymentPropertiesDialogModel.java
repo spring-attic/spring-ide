@@ -2,6 +2,7 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,18 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
 public class DeploymentPropertiesDialogModel extends AbstractDisposable {
+
+	public static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
+	public static final String APPLICATION_NAMES_CANNOT_BE_FOUND = "Application name(s) cannot be found.";
+	public static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''";
+	public static final String APPLICATION_NAME_NOT_SELECTED = "Application name not selected";
+	public static final String MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_NAME_DEFINED = "Manifest does not have any application name defined";
+	public static final String ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY = "Enter deployment manifest YAML manually";
+	public static final String CURRENT_GENERATED_DEPLOYMENT_MANIFEST = "Current generated deployment manifest";
+	public static final String CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM = "Choose an existing deployment manifest YAML file from the local file system.";
+	public static final String UNABLE_TO_LOAD_DEPLOYMENT_MANIFEST_YAML_FILE = "Unable to load deployment manifest YAML file";
+	public static final String DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED = "Deployment manifest file not selected";
+
 
 	public static enum ManifestType {
 		FILE,
@@ -214,6 +227,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		Validator validator = new Validator() {
 
 			{
+				dependsOn(document);
 				dependsOn(selectedAppName);
 			}
 
@@ -221,30 +235,32 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			protected ValidationResult compute() {
 				ValidationResult result = ValidationResult.OK;
 
-				if (editorInput.getValue() == null) {
-					result = ValidationResult.error("Deployment manifest file not selected");
+				if (document.getValue() == null) {
+					result = ValidationResult.error(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED);
 				} else if (document.getValue() != null && document.getValue().get().isEmpty()) {
-					result = ValidationResult.error("Unable to load deployment manifest YAML file");
+					result = ValidationResult.error(UNABLE_TO_LOAD_DEPLOYMENT_MANIFEST_YAML_FILE);
 				}
 
 				if (result.isOk()) {
 					AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
 					if (appNamesModel == null) {
-						result = ValidationResult.error("Application name(s) cannot be found.");
+						result = ValidationResult.error(APPLICATION_NAMES_CANNOT_BE_FOUND);
 					}
 					if (result.isOk()) {
 						String appName = getDeployedAppName();
 						if (!appNamesModel.getAnnotationIterator().hasNext()) {
-							result = ValidationResult.error("Manifest file does not have any application name defined");
+							result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_NAME_DEFINED);
 						} else {
 							String selectedAnnotation = selectedAppName.getValue();
 							if (appName == null) {
 								if (selectedAnnotation == null) {
-									result = ValidationResult.error("Application name not selected");
+									result = ValidationResult.error(APPLICATION_NAME_NOT_SELECTED);
 								}
 							} else {
 								if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
-									result = ValidationResult.error("Manifest does not contain deployment properties for application with name '" + appName + "'");
+									result = ValidationResult.error(MessageFormat.format(
+											MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME,
+											appName));
 								}
 							}
 						}
@@ -252,7 +268,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				}
 
 				if (result.isOk()) {
-					result = ValidationResult.info("Choose an existing deployment manifest YAML file from the local file system.");
+					result = ValidationResult.info(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM);
 				}
 
 				return result;
@@ -385,28 +401,30 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 				AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
 				if (appNamesModel == null) {
-					result = ValidationResult.error("Application name(s) cannot be found.");
+					result = ValidationResult.error(APPLICATION_NAMES_CANNOT_BE_FOUND);
 				}
 				if (result.isOk()) {
 					String appName = getDeployedAppName();
 					if (!appNamesModel.getAnnotationIterator().hasNext()) {
-						result = ValidationResult.error("Manifest file does not have any application name defined");
+						result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_NAME_DEFINED);
 					} else {
 						String selectedAnnotation = selectedAppName.getValue();
 						if (appName == null) {
 							if (selectedAnnotation == null) {
-								result = ValidationResult.error("Application name not selected");
+								result = ValidationResult.error(APPLICATION_NAME_NOT_SELECTED);
 							}
 						} else {
 							if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
-								result = ValidationResult.error("Manifest does not contain deployment properties for application with name '" + appName + "'");
+								result = ValidationResult.error(MessageFormat.format(
+										MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME,
+										appName));
 							}
 						}
 					}
 				}
 
 				if (result.isOk()) {
-					result = ValidationResult.info(readOnly ? "Current generated deployment manifest" : "Enter deployment manifest YAML manually");
+					result = ValidationResult.info(readOnly ? CURRENT_GENERATED_DEPLOYMENT_MANIFEST : ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY);
 				}
 
 				return result;
@@ -511,7 +529,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				} else if (isManualManifestType()) {
 					return manualModel.validator.getValue();
 				} else {
-					return ValidationResult.error("Unknown deployment manifest type. Must be either 'File' or 'Manual'.");
+					return ValidationResult.error(UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL);
 				}
 			}
 
@@ -521,6 +539,9 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	public CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
 		if (isCancelled) {
 			throw new OperationCanceledException();
+		}
+		if (type.getValue() == null) {
+			return null;
 		}
 		switch (type.getValue()) {
 		case FILE:
