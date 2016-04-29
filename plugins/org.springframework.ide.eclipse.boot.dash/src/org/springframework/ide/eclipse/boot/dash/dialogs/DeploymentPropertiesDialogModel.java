@@ -46,15 +46,14 @@ import org.yaml.snakeyaml.Yaml;
 public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
-	public static final String APPLICATION_NAMES_CANNOT_BE_FOUND = "Application name(s) cannot be found.";
-	public static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''";
+	public static final String INVALID_YAML_CONTENT = "Invalid YAML content in the manifest.";
+	public static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''.";
 	public static final String APPLICATION_NAME_NOT_SELECTED = "Application name not selected";
-	public static final String MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_NAME_DEFINED = "Manifest does not have any application name defined";
-	public static final String ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY = "Enter deployment manifest YAML manually";
-	public static final String CURRENT_GENERATED_DEPLOYMENT_MANIFEST = "Current generated deployment manifest";
+	public static final String MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED = "Manifest does not have any application defined.";
+	public static final String ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY = "Enter deployment manifest YAML manually.";
+	public static final String CURRENT_GENERATED_DEPLOYMENT_MANIFEST = "Current generated deployment manifest.";
 	public static final String CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM = "Choose an existing deployment manifest YAML file from the local file system.";
-	public static final String UNABLE_TO_LOAD_DEPLOYMENT_MANIFEST_YAML_FILE = "Unable to load deployment manifest YAML file";
-	public static final String DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED = "Deployment manifest file not selected";
+	public static final String DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED = "Deployment manifest file not selected.";
 
 
 	public static enum ManifestType {
@@ -235,21 +234,19 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			protected ValidationResult compute() {
 				ValidationResult result = ValidationResult.OK;
 
-				if (document.getValue() == null) {
+				if (editorInput.getValue() == null) {
 					result = ValidationResult.error(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED);
-				} else if (document.getValue() != null && document.getValue().get().isEmpty()) {
-					result = ValidationResult.error(UNABLE_TO_LOAD_DEPLOYMENT_MANIFEST_YAML_FILE);
 				}
 
 				if (result.isOk()) {
 					AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
 					if (appNamesModel == null) {
-						result = ValidationResult.error(APPLICATION_NAMES_CANNOT_BE_FOUND);
+						result = ValidationResult.error(INVALID_YAML_CONTENT);
 					}
 					if (result.isOk()) {
 						String appName = getDeployedAppName();
 						if (!appNamesModel.getAnnotationIterator().hasNext()) {
-							result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_NAME_DEFINED);
+							result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED);
 						} else {
 							String selectedAnnotation = selectedAppName.getValue();
 							if (appName == null) {
@@ -331,7 +328,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 						Log.log(e);
 					}
 				}
-//				docProvider.disconnect(file);
+				docProvider.disconnect(file);
 			}
 		}
 
@@ -401,12 +398,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 				AppNameAnnotationModel appNamesModel = appNameAnnotationModel.getValue();
 				if (appNamesModel == null) {
-					result = ValidationResult.error(APPLICATION_NAMES_CANNOT_BE_FOUND);
+					result = ValidationResult.error(INVALID_YAML_CONTENT);
 				}
 				if (result.isOk()) {
 					String appName = getDeployedAppName();
 					if (!appNamesModel.getAnnotationIterator().hasNext()) {
-						result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_NAME_DEFINED);
+						result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED);
 					} else {
 						String selectedAnnotation = selectedAppName.getValue();
 						if (appName == null) {
@@ -611,10 +608,6 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public IAnnotationModel getManualAnnotationModel() {
 		return manualModel.annotationModel;
-	}
-
-	public IProject getProject() {
-		return project;
 	}
 
 	public boolean isManualManifestReadOnly() {

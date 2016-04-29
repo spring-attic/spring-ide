@@ -229,7 +229,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle("Select Deployment Manifest for '" + model.getProjectName() + "'");
+		setTitle("Select Deployment Manifest for project '" + model.getProjectName() + "'");
 		Composite container = (Composite) super.createDialogArea(parent);
 		final Composite composite = new Composite(container, parent.getStyle());
 		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -584,7 +584,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	private void refreshManifests() {
 		IResource selectedResource = (IResource) ((IStructuredSelection) workspaceViewer.getSelection()).getFirstElement();
 		final IResource resourceToRefresh = selectedResource instanceof IFile ? selectedResource.getParent() : selectedResource;
-		Job job = new Job("Find all YAML files for project '" + model.getProjectName() + "'") {
+		Job job = new Job("Refreshing resources for '" + resourceToRefresh.getName() + "'") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				IStatus status = Status.OK_STATUS;
@@ -607,7 +607,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				return status;
 			}
 		};
-		job.setRule(model.getProject());
+		job.setRule(resourceToRefresh);
 		job.schedule();
 	}
 
