@@ -276,7 +276,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		Validator validator = new Validator() {
 
 			{
-				dependsOn(document);
+				dependsOn(editorInput);
+				dependsOn(appNameAnnotationModel);
 				dependsOn(applicationNames);
 				dependsOn(selectedAppName);
 			}
@@ -440,6 +441,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		Validator validator = new Validator() {
 
 			{
+				dependsOn(appNameAnnotationModel);
 				dependsOn(applicationNames);
 				dependsOn(selectedAppName);
 			}
@@ -696,6 +698,10 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public Validator getValidator() {
 		return validator;
+	}
+
+	public LiveExpression<AppNameAnnotationModel> getManualAppNameAnnotationModel() {
+		return manualModel.appNameAnnotationModel;
 	}
 
 }
