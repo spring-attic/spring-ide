@@ -217,12 +217,11 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			@Override
 			protected FileEditorInput compute() {
 				IFile file = getFile();
-				if (file != null) {
-					FileEditorInput currentInput = getValue();
-					if (currentInput == null || !currentInput.getFile().equals(file)) {
-						saveOrDiscardIfNeeded(currentInput);
-						return file == null ? null : new FileEditorInput(file);
-					}
+				FileEditorInput currentInput = getValue();
+				boolean changed = currentInput == null || !currentInput.getFile().equals(file);
+				if (changed) {
+					saveOrDiscardIfNeeded(currentInput);
+					return file == null ? null : new FileEditorInput(file);
 				}
 				return null;
 			}
@@ -702,6 +701,10 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public LiveExpression<AppNameAnnotationModel> getManualAppNameAnnotationModel() {
 		return manualModel.appNameAnnotationModel;
+	}
+
+	public LiveExpression<AppNameAnnotationModel> getFileAppNameAnnotationModel() {
+		return fileModel.appNameAnnotationModel;
 	}
 
 }

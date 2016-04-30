@@ -51,6 +51,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFDomain;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -559,5 +560,197 @@ public class DeploymentPropertiesDialogModelTests {
 		assertTrue(model.isCanceled());
 		
 		model.getDeploymentProperties();
+	}
+	
+	@Test public void testManifestFileLabel() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		IFile file = createFile(project, "manifest.yml", 				
+				"applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512M\n"
+		);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		assertEquals(file.getFullPath().toOSString(), model.getFileLabel().getValue());
+		
+		model.getFileDocument().getValue().set("some text");
+
+		assertEquals(file.getFullPath().toOSString() + "*", model.getFileLabel().getValue());
+	}
+	
+	@Test public void testDiscardCancelWithDirtyManifestFile() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		String text = "applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512M\n";
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		model.getFileDocument().getValue().set("some text");
+		
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(1);
+		
+		model.cancelPressed();
+		
+		assertTrue(model.isCanceled());		
+		assertEquals(text, IOUtil.toString(file.getContents()));
+	}
+
+	@Test public void testSaveCancelWithDirtyManifestFile() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		String text = "applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512M\n";
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		String newText = "some text";
+		model.getFileDocument().getValue().set(newText);
+		
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(0);
+		
+		model.cancelPressed();
+		
+		assertTrue(model.isCanceled());		
+		assertEquals(newText, IOUtil.toString(file.getContents()));
+	}
+
+	@Test public void testDiscardOkWithDirtyManifestFile() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		int memory = 512;
+		String text = "applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: " + memory + "\n";
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		model.getFileDocument().getValue().set("some text");
+		
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(1);
+		
+		model.okPressed();
+		
+		assertFalse(model.isCanceled());		
+		assertEquals(text, IOUtil.toString(file.getContents()));
+		
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertNotNull(deploymentProperties);
+		assertEquals(appNameFromFile, deploymentProperties.getAppName());
+		assertEquals(memory, deploymentProperties.getMemory());
+	}
+
+	@Test public void testSaveOkWithDirtyManifestFile() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appName = "app-name-from-file";
+		int memory = 512;
+		String text = "applications:\n" +
+				"- name: " + appName + "\n" +
+				"  memory: " + memory + "\n";
+		String newAppName = "new-app";
+		int newMemory = 768;
+		String newText = "applications:\n" +
+				"- name: " + newAppName + "\n" +
+				"  memory: " + newMemory + "\n";
+
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		model.getFileDocument().getValue().set(newText);
+		// Reconcile to pick the new app name (Simulate what happens in the editor)
+		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
+		
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(0);
+		
+		model.okPressed();
+		
+		assertFalse(model.isCanceled());		
+		assertEquals(newText, IOUtil.toString(file.getContents()));
+		
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertNotNull(deploymentProperties);
+		assertEquals(newAppName, deploymentProperties.getAppName());
+		assertEquals(newMemory, deploymentProperties.getMemory());
+	}
+
+	@Test public void testDiscardOnDirtyManifestFileSwitch() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		int memory = 512;
+		String text = "applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: " + memory + "\n";
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		model.getFileDocument().getValue().set("some text");
+		
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(1);
+		
+		model.setSelectedManifest(project);
+		
+		assertEquals(text, IOUtil.toString(file.getContents()));
+
+		model.setSelectedManifest(file);
+		
+		assertEquals(text, model.getFileDocument().getValue().get());
+		
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertNotNull(deploymentProperties);
+		assertEquals(appNameFromFile, deploymentProperties.getAppName());
+		assertEquals(memory, deploymentProperties.getMemory());
+	}
+	
+	@Test public void testSaveOnDirtyManifestFileSwitch() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appName = "app-name-from-file";
+		int memory = 512;
+		String text = "applications:\n" +
+				"- name: " + appName + "\n" +
+				"  memory: " + memory + "\n";
+		String newAppName = "new-app";
+		int newMemory = 768;
+		String newText = "applications:\n" +
+				"- name: " + newAppName + "\n" +
+				"  memory: " + newMemory + "\n";
+
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);		
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+		
+		model.getFileDocument().getValue().set(newText);
+		// Reconcile to pick the new app name (Simulate what happens in the editor)
+		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
+		
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(0);
+		
+		model.setSelectedManifest(project);
+		
+		assertEquals(newText, IOUtil.toString(file.getContents()));
+		
+		model.setSelectedManifest(file);
+		
+		assertEquals(newText, model.getFileDocument().getValue().get());
+		
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertNotNull(deploymentProperties);
+		assertEquals(newAppName, deploymentProperties.getAppName());
+		assertEquals(newMemory, deploymentProperties.getMemory());
 	}
 }
