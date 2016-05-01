@@ -66,6 +66,10 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class DeploymentPropertiesDialogModelTests {
 	
+	private static final int DISCARD_BUTTON_ID = 1;
+
+	private static final int SAVE_BUTTON_ID = 0;
+	
 	private static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
 	private static final String NO_SUPPORT_TO_DETERMINE_APP_NAMES = "Support for determining application names is unavailable";
 	private static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''.";
@@ -594,7 +598,7 @@ public class DeploymentPropertiesDialogModelTests {
 		
 		model.getFileDocument().getValue().set("some text");
 		
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(1);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
 		
 		model.cancelPressed();
 		
@@ -616,7 +620,7 @@ public class DeploymentPropertiesDialogModelTests {
 		String newText = "some text";
 		model.getFileDocument().getValue().set(newText);
 		
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(0);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
 		
 		model.cancelPressed();
 		
@@ -638,7 +642,7 @@ public class DeploymentPropertiesDialogModelTests {
 		
 		model.getFileDocument().getValue().set("some text");
 		
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(1);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
 		
 		model.okPressed();
 		
@@ -673,7 +677,7 @@ public class DeploymentPropertiesDialogModelTests {
 		// Reconcile to pick the new app name (Simulate what happens in the editor)
 		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
 		
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(0);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
 		
 		model.okPressed();
 		
@@ -700,7 +704,7 @@ public class DeploymentPropertiesDialogModelTests {
 		
 		model.getFileDocument().getValue().set("some text");
 		
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(1);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
 		
 		model.setSelectedManifest(project);
 		
@@ -738,7 +742,7 @@ public class DeploymentPropertiesDialogModelTests {
 		// Reconcile to pick the new app name (Simulate what happens in the editor)
 		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
 		
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(0);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
 		
 		model.setSelectedManifest(project);
 		
