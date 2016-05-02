@@ -10,32 +10,31 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author Kris De Volder
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+	LoggerNameProviderTest.class,
+	QuickfixCreationTests.class,
+	IgnoreProblemTypeInWorkspaceQuickfixTests.class,
+	IgnoreProblemTypeInProjectQuickfixTests.class,
+	StringUtilTests.class,
+	MetaDataManipulatorTest.class,
+	SpringPropertiesEditorTests.class,
+	TypeUtilTests.class,
+	FuzzyMapTests.class,
+	TypeParserTest.class,
+
+	YamlASTTests.class,
+	DocumentEditsTest.class,
+	YamlStructureParserTest.class,
+	IndexNavigatorTest.class,
+	YamlEditorTests.class,
+})
 public class AllPropertiesFileEditorTests {
-
-	public static Test suite() throws Exception {
-		TestSuite suite = new TestSuite(AllPropertiesFileEditorTests.class.getName());
-		suite.addTestSuite(QuickfixCreationTests.class);
-		suite.addTestSuite(IgnoreProblemTypeInWorkspaceQuickfixTests.class);
-		suite.addTestSuite(IgnoreProblemTypeInProjectQuickfixTests.class);
-		suite.addTestSuite(StringUtilTests.class);
-		suite.addTestSuite(MetaDataManipulatorTest.class);
-		suite.addTestSuite(SpringPropertiesEditorTests.class);
-		suite.addTestSuite(TypeUtilTests.class);
-		suite.addTestSuite(FuzzyMapTests.class);
-		suite.addTestSuite(TypeParserTest.class);
-
-		suite.addTestSuite(YamlASTTests.class);
-		suite.addTestSuite(DocumentEditsTest.class);
-		suite.addTestSuite(YamlStructureParserTest.class);
-		suite.addTestSuite(IndexNavigatorTest.class);
-		suite.addTestSuite(YamlEditorTests.class);
-		return suite;
-	}
-
 }
