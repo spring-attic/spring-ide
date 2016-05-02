@@ -593,11 +593,11 @@
 			<layout>p2</layout>
 			<url>http://dist.springsource.com/release/TOOLS/third-party/yedit</url>
 		</repository>
-<!-- 		<repository> -->
-<!-- 			<id>p2-thirdparty-bundles</id> -->
-<!-- 			<layout>p2</layout> -->
-<!-- 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo</url> -->
-<!-- 		</repository> -->
+ 		<repository>
+ 			<id>p2-thirdparty-bundles</id>
+ 			<layout>p2</layout>
+ 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo</url>
+ 		</repository>
 <!-- 		<repository> -->
 <!-- 			<id>yedit</id> -->
 <!-- 			<layout>p2</layout> -->
