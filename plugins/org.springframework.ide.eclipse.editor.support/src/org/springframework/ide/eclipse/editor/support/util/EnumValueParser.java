@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.util;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Parser for checking a 'Enum' style values.
@@ -21,11 +23,15 @@ import java.util.HashSet;
 public class EnumValueParser implements ValueParser {
 
 	private String typeName;
-	private HashSet<String> values;
+	private Set<String> values;
 
-	public EnumValueParser(String typeName, String[] values) {
+	public EnumValueParser(String typeName, String... values) {
+		this(typeName, ImmutableSet.copyOf(values));
+	}
+
+	public EnumValueParser(String typeName, Collection<String> values) {
 		this.typeName = typeName;
-		this.values = new HashSet<String>(Arrays.asList(values));
+		this.values = ImmutableSet.copyOf(values);
 	}
 
 	public Object parse(String str) {

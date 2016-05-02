@@ -266,10 +266,11 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
-			Collection<String> values = getHintValues(query, enumCaseMode);
-			if (values!=null) {
+			Collection<ValueHint> hints = getHintValues(query, enumCaseMode);
+			if (hints!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
-				for (String value : values) {
+				for (ValueHint hint : hints) {
+					String value = ""+hint.getValue();
 					double score = FuzzyMatcher.matchScore(query, value);
 					if (score!=0 && !value.equals(query)) {
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
@@ -283,20 +284,20 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return Collections.emptyList();
 		}
 
-		protected Collection<String> getHintValues(String query, EnumCaseMode enumCaseMode) {
-			HashSet<String> allHints = new HashSet<>();
+		protected Collection<ValueHint> getHintValues(String query, EnumCaseMode enumCaseMode) {
+			ArrayList<ValueHint> allHints = new ArrayList<>();
 			{
-				String[] hints = typeUtil.getHintValues(type, enumCaseMode);
-				if (ArrayUtils.hasElements(hints)) {
-					allHints.addAll(Arrays.asList(hints));
+				Collection<ValueHint> hints = typeUtil.getHintValues(type, query, enumCaseMode);
+				if (CollectionUtil.hasElements(hints)) {
+					allHints.addAll(hints);
 				}
 			}
 			{
 				HintProvider hintProvider = getHintProvider();
 				if (hintProvider!=null) {
 					List<ValueHint> hints = hintProvider.getValueHints(query);
-					for (ValueHint h : hints) {
-						allHints.add(""+h.getValue());
+					if (CollectionUtil.hasElements(hints)) {
+						allHints.addAll(hints);
 					}
 				}
 			}

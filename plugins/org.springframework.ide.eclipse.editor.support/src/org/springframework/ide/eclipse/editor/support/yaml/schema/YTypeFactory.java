@@ -24,6 +24,8 @@ import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Static utility method for creating YType objects representing either
  * 'array-like', 'map-like' or 'object-like' types which can be used

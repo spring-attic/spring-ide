@@ -28,6 +28,12 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class ValueHint implements Serializable {
 
+	public static ValueHint withValue(Object value) {
+		ValueHint hint = new ValueHint();
+		hint.setValue(value);
+		return hint;
+	}
+
 	private Object value;
 
 	private String description;

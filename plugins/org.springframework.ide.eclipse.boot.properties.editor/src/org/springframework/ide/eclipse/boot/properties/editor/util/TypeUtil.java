@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Provider;
 
@@ -44,12 +46,17 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.boot.configurationmetadata.Deprecation;
+import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
@@ -228,7 +235,7 @@ public class TypeUtil {
 		if (simpleParser!=null) {
 			return simpleParser;
 		}
-		String[] enumValues = getAllowedValues(type, EnumCaseMode.ALIASED);
+		Collection<String> enumValues = getAllowedValues(type, EnumCaseMode.ALIASED);
 		if (enumValues!=null) {
 			//Note, technically if 'enumValues is empty array' this means something different
 			// from when it is null. An empty array means a type that has no values, so
@@ -251,19 +258,20 @@ public class TypeUtil {
 	 * @param caseMode determines whether Enum values are returned in 'lower case form', 'orignal form',
 	 * or 'aliased' (meaning both forms are returned).
 	 */
-	public String[] getAllowedValues(Type enumType, EnumCaseMode caseMode) {
+	public Collection<String> getAllowedValues(Type enumType, EnumCaseMode caseMode) {
 		if (enumType!=null) {
 			try {
 				String[] values = TYPE_VALUES.get(enumType.getErasure());
 				if (values!=null) {
 					if (caseMode==EnumCaseMode.ALIASED) {
-						String[] aliased = Arrays.copyOf(values, values.length*2);
+						ImmutableSet.Builder<String> aliased = ImmutableSet.builder();
+						aliased.add(values);
 						for (int i = 0; i < values.length; i++) {
-							aliased[i+values.length] = values[i].toUpperCase();
+							aliased.add(values[i].toUpperCase());
 						}
-						return aliased;
+						return aliased.build();
 					} else {
-						return values;
+						return ImmutableList.copyOf(values);
 					}
 				}
 				IType type = findType(enumType.getErasure());
@@ -271,7 +279,7 @@ public class TypeUtil {
 					IField[] fields = type.getFields();
 
 					if (fields!=null) {
-						ArrayList<String> enums = new ArrayList<String>(fields.length);
+						ImmutableList.Builder<String> enums = ImmutableList.builder();
 						boolean addOriginal = caseMode==EnumCaseMode.ORIGNAL||caseMode==EnumCaseMode.ALIASED;
 						boolean addLowerCased = caseMode==EnumCaseMode.LOWER_CASE||caseMode==EnumCaseMode.ALIASED;
 						for (int i = 0; i < fields.length; i++) {
@@ -286,7 +294,7 @@ public class TypeUtil {
 								}
 							}
 						}
-						return enums.toArray(new String[enums.size()]);
+						return enums.build();
 					}
 				}
 			} catch (Exception e) {
@@ -315,17 +323,21 @@ public class TypeUtil {
 			buf.append(typeStr);
 		}
 		if (isEnum(type)) {
-			String[] values = getAllowedValues(type, EnumCaseMode.ORIGNAL);
-			if (values!=null && values.length>0) {
+			Collection<String> values = getAllowedValues(type, EnumCaseMode.ORIGNAL);
+			if (values!=null && !values.isEmpty()) {
 				buf.append("[");
-				int max = Math.min(4, values.length);
-				for (int i = 0; i < max; i++) {
+				int i = 0;
+				for (String value : values) {
 					if (i>0) {
 						buf.append(", ");
 					}
-					buf.append(values[i]);
+					buf.append(value);
+					i++;
+					if (i>=4) {
+						break;
+					}
 				}
-				if (max!=values.length) {
+				if (i<values.size()) {
 					buf.append(", ...");
 				}
 				buf.append("]");
@@ -530,7 +542,7 @@ public class TypeUtil {
 	}
 
 	private static final String[] NO_PARAMS = new String[0];
-	private static final Map<String, Provider<String[]>> VALUE_HINTERS = new HashMap<>();
+	private static final Map<String, ValueProviderStrategy> VALUE_HINTERS = new HashMap<>();
 	static {
 		valueHints("java.nio.charset.Charset", new LazyProvider<String[]>() {
 			@Override
@@ -594,10 +606,10 @@ public class TypeUtil {
 		if (isMap(type)) {
 			Type keyType = getKeyType(type);
 			if (keyType!=null) {
-				String[] keyValues = getAllowedValues(keyType, enumMode);
-				if (hasElements(keyValues)) {
+				Collection<String> keyValues = getAllowedValues(keyType, enumMode);
+				if (CollectionUtil.hasElements(keyValues)) {
 					Type valueType = getDomainType(type);
-					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.length);
+					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.size());
 					for (String propName : keyValues) {
 						properties.add(new TypedProperty(propName, valueType, null));
 					}
@@ -636,11 +648,34 @@ public class TypeUtil {
 		return null;
 	}
 
-	public static void valueHints(String typeName, Provider<String[]> provider) {
+	/**
+	 * Registers a strategy for providing value hints with a given typeName.
+	 */
+	public static void valueHints(String typeName, ValueProviderStrategy provider) {
 		Assert.isLegal(!VALUE_HINTERS.containsKey(typeName)); //Only one value hinter per type is supported at the moment
 		ATOMIC_TYPES.add(typeName); //valueHints typically implies that the type should be treated as atomic as well.
 		ASSIGNABLE_TYPES.add(typeName); //valueHints typically implies that the type should be treated as atomic as well.
 		VALUE_HINTERS.put(typeName, provider);
+	}
+
+	/**
+	 * Registers a strategy for providing value hints with a given typeName.
+	 */
+	public static void valueHints(String typeName, Provider<String[]> provider) {
+		valueHints(typeName, new ValueProviderStrategy() {
+			@Override
+			public Collection<ValueHint> getValues(IJavaProject javaProject, String query) {
+				String[] values = provider.get();
+				if (ArrayUtils.hasElements(values)) {
+					Builder<ValueHint> hints = ImmutableList.builder();
+					for (String value : values) {
+						hints.add(ValueHint.withValue(value));
+					}
+					return hints.build();
+				}
+				return ImmutableList.of();
+			}
+		});
 	}
 
 	private Deprecation getDeprecation(IMethod m) {
@@ -838,14 +873,14 @@ public class TypeUtil {
 		return msg.toString();
 	}
 
-	public String[] getHintValues(Type type, EnumCaseMode enumCaseMode) {
-		String[] allowed = getAllowedValues(type, enumCaseMode);
+	public Collection<ValueHint> getHintValues(Type type, String query, EnumCaseMode enumCaseMode) {
+		Collection<String> allowed = getAllowedValues(type, enumCaseMode);
 		if (allowed!=null) {
-			return allowed;
+			return allowed.stream().map(ValueHint::withValue).collect(Collectors.toList());
 		}
-		Provider<String[]> valueHinter = VALUE_HINTERS.get(type.getErasure());
+		ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
 		if (valueHinter!=null) {
-			return valueHinter.get();
+			return valueHinter.getValues(javaProject, query);
 		}
 		return null;
 	}

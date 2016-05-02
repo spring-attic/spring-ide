@@ -344,10 +344,11 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				Collection<String> valueCompletions = getValueHints(query, propertyName, caseMode);
+				Collection<ValueHint> valueCompletions = getValueHints(query, propertyName, caseMode);
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					for (String valueCandidate : valueCompletions) {
+					for (ValueHint hint : valueCompletions) {
+						String valueCandidate = ""+hint.getValue();
 						double score = FuzzyMatcher.matchScore(query, valueCandidate);
 						if (score!=0) {
 							DocumentEdits edits = new DocumentEdits(doc);
@@ -368,13 +369,13 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		return Collections.emptyList();
 	}
 
-	private Collection<String> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
+	private Collection<ValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
 		Type type = getValueType(propertyName);
-		HashSet<String> allHints = new HashSet<>();
+		List<ValueHint> allHints = new ArrayList<>();
 		{
-			String[] hints = typeUtil.getHintValues(type, caseMode);
-			if (ArrayUtils.hasElements(hints)) {
-				allHints.addAll(Arrays.asList(hints));
+			Collection<ValueHint> hints = typeUtil.getHintValues(type, query, caseMode);
+			if (CollectionUtil.hasElements(hints)) {
+				allHints.addAll(hints);
 			}
 		}
 		{
@@ -384,9 +385,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				if (!HintProviders.isNull(hintProvider)) {
 					List<ValueHint> hints = hintProvider.getValueHints(query);
 					if (CollectionUtil.hasElements(hints)) {
-						for (ValueHint h : hints) {
-							allHints.add(""+h.getValue());
-						}
+						allHints.addAll(hints);
 					}
 				}
 			}
