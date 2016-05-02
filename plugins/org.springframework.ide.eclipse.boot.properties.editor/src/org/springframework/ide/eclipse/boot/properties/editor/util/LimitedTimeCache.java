@@ -45,6 +45,11 @@ public class LimitedTimeCache<K,V> implements Cache<K, V> {
 	 * Job that removes expired entries from the cache.
 	 */
 	private Job clearExpiredJob = new Job("Clean expired cache entries") {
+
+		{
+			setSystem(true);
+		}
+
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			long oldest = clearExpired();

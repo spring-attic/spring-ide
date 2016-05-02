@@ -46,22 +46,25 @@ public class LoggerNameProvider extends CachingValueProvider {
 	public static final ValueProviderFactory FACTORY = (params) -> INSTANCE;
 
 	@Override
-	protected Flux<ValueHint> getValuesAsycn(IJavaProject javaProject, String query) {
+	public Flux<ValueHint> getValuesAsycn(IJavaProject javaProject, String query) {
 		try {
 			return new FluxJdtSearch()
 				.scope(javaProject)
 				.pattern(toPattern(query))
 				.search()
-				.flatMap(this::getFQName)
+				.flatMap((r) -> getFQName(r))
 				.filter((fqName) -> 0!=FuzzyMatcher.matchScore(query, fqName))
 				.distinct()
-				.map((fqName) -> hint(fqName));
+				.map((fqName) -> {
+					debug("distinct["+query+"]: "+fqName);
+					return hint(fqName);
+				});
 		} catch (Exception e) {
 			return Flux.error(e);
 		}
 	}
 
-	private Mono<String> getFQName(SearchMatch match) {
+	public static Mono<String> getFQName(SearchMatch match) {
 		Object element = match.getElement();
 		if (element instanceof IType) {
 			IType type = (IType) element;
@@ -73,7 +76,7 @@ public class LoggerNameProvider extends CachingValueProvider {
 		return Mono.empty();
 	}
 
-	private String toWildCardPattern(String query) {
+	private static String toWildCardPattern(String query) {
 		StringBuilder builder = new StringBuilder("*");
 		for (char c : query.toCharArray()) {
 			builder.append(c);
@@ -82,7 +85,7 @@ public class LoggerNameProvider extends CachingValueProvider {
 		return builder.toString();
 	}
 
-	protected SearchPattern toPattern(String query) {
+	public static SearchPattern toPattern(String query) {
 		String wildCardedQuery = toWildCardPattern(query);
 		return SearchPattern.createOrPattern(
 				toTypePattern(wildCardedQuery),
@@ -90,14 +93,14 @@ public class LoggerNameProvider extends CachingValueProvider {
 		);
 	}
 
-	private SearchPattern toPackagePattern(String wildCardedQuery) {
+	private static SearchPattern toPackagePattern(String wildCardedQuery) {
 		int searchFor = IJavaSearchConstants.PACKAGE;
 		int limitTo = IJavaSearchConstants.DECLARATIONS;
 		int matchRule = SearchPattern.R_PATTERN_MATCH;
 		return SearchPattern.createPattern(wildCardedQuery, searchFor, limitTo, matchRule);
 	}
 
-	private SearchPattern toTypePattern(String wildCardedQuery) {
+	private static SearchPattern toTypePattern(String wildCardedQuery) {
 		int searchFor = IJavaSearchConstants.TYPE;
 		int limitTo = IJavaSearchConstants.DECLARATIONS;
 		int matchRule = SearchPattern.R_PATTERN_MATCH;

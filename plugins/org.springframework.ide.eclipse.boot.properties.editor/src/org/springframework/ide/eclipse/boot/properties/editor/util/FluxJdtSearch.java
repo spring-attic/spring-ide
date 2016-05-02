@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -78,6 +80,10 @@ public class FluxJdtSearch {
 	public FluxJdtSearch scope(IJavaSearchScope scope) {
 		this.scope = scope;
 		return this;
+	}
+
+	public FluxJdtSearch scope(IProject project) throws JavaModelException {
+		return scope(JavaCore.create(project));
 	}
 
 	public FluxJdtSearch scope(IJavaProject project) throws JavaModelException {

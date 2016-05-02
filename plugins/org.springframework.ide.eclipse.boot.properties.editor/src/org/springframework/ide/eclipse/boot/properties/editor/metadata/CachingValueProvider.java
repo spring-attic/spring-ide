@@ -49,7 +49,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
-	private static void debug(String string) {
+	protected static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
 		}
@@ -60,7 +60,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 						// create and use global timer automatically.
 	}
 
-	private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(2000);
+	private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(1000);
 
 	/**
 	 * Content assist is called inside UI thread and so doing something lenghty things
@@ -79,23 +79,34 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 
 	private class CacheEntry {
 		boolean isComplete = false;
+		int count = 0;
 		Flux<ValueHint> values;
 
 		public CacheEntry(String query, Flux<ValueHint> producer) {
 			values = producer
+			.doOnNext((e) -> {
+				count++;
+				debug("onNext["+query+":"+count+"]: "+e.getValue().toString());
+			})
 			.doOnComplete(() -> {
-				debug("Complete: "+query);
+				debug("onComplete["+query+":"+count+"]");
 				isComplete = true;
 			})
 			.take(MAX_RESULTS)
-			.log("before caching")
 			.cache(MAX_RESULTS);
-			values.subscribe(); // create infite demand so that we actually force cache entries to be fetched upto the max.
+			values.subscribe(); // create infinite demand so that we actually force cache entries to be fetched upto the max.
 		}
+
+		@Override
+		public String toString() {
+			return "CacheEntry [isComplete=" + isComplete + ", count=" + count + "]";
+		}
+
 	}
 
 	@Override
 	public final Collection<ValueHint> getValues(IJavaProject javaProject, String query) {
+		debug("CA query: "+query);
 		Tuple2<String, String> key = key(javaProject, query);
 		CacheEntry cached = cache.get(key);
 		if (cached==null) {
@@ -110,14 +121,24 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	 * Falls back on doing a full-blown search if there's no usable 'prefix-query' in the cache.
 	 */
 	private Flux<ValueHint> getValuesIncremental(IJavaProject javaProject, String query) {
+		debug("trying to solve "+query+" incrementally");
 		String subquery = query;
 		while (subquery.length()>=1) {
 			subquery = subquery.substring(0, subquery.length()-1);
 			CacheEntry cached = cache.get(key(javaProject, subquery));
-			if (cached!=null && cached.isComplete) {
-				return cached.values.filter((hint) -> 0!=FuzzyMatcher.matchScore(query, hint.getValue().toString()));
+			if (cached!=null) {
+				System.out.println("cached "+subquery+": "+cached);
+				if (cached.isComplete) {
+					debug("filtering "+subquery+" -> "+query);
+					return cached.values
+							.doOnNext((hint) -> debug("filter["+query+"]: "+hint.getValue()))
+							.filter((hint) -> 0!=FuzzyMatcher.matchScore(query, hint.getValue().toString()));
+				} else {
+					debug("subquery "+subquery+" cached but is incomplete");
+				}
 			}
 		}
+		debug("full search for: "+query);
 		return getValuesAsycn(javaProject, query);
 	}
 
@@ -128,7 +149,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	}
 
 	protected <K,V> Cache<K,V> createCache() {
-		return new LimitedTimeCache<>(Duration.ofMinutes(5));
+		return new LimitedTimeCache<>(Duration.ofMinutes(1));
 	}
 
 	public static void restoreDefaults() {
