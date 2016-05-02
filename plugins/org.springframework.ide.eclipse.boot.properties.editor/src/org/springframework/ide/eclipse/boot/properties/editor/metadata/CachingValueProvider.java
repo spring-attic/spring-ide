@@ -47,6 +47,9 @@ import reactor.core.tuple.Tuple2;
  */
 public abstract class CachingValueProvider implements ValueProviderStrategy {
 
+	private static final boolean ENABLE_CACHING = false; //XXX: Disabled for now because of reactor bug
+	private static final boolean ENABLE_INCREMENTAL_QUERY_SOLVER = false; //XXX: Disabled for now because of reactor bug
+
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	protected static void debug(String string) {
@@ -106,13 +109,17 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 
 	@Override
 	public final Collection<ValueHint> getValues(IJavaProject javaProject, String query) {
-		debug("CA query: "+query);
-		Tuple2<String, String> key = key(javaProject, query);
-		CacheEntry cached = cache.get(key);
-		if (cached==null) {
-			cache.put(key, cached = new CacheEntry(query, getValuesIncremental(javaProject, query)));
+		if (ENABLE_CACHING) {
+			debug("CA query: "+query);
+			Tuple2<String, String> key = key(javaProject, query);
+			CacheEntry cached = cache.get(key);
+			if (cached==null) {
+				cache.put(key, cached = new CacheEntry(query, getValuesIncremental(javaProject, query)));
+			}
+			return cached.values.take(TIMEOUT).toList().get();
+		} else {
+			return getValuesAsycn(javaProject, query).take(TIMEOUT).toList().get();
 		}
-		return cached.values.take(TIMEOUT).toList().get();
 	}
 
 	/**
@@ -121,20 +128,22 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	 * Falls back on doing a full-blown search if there's no usable 'prefix-query' in the cache.
 	 */
 	private Flux<ValueHint> getValuesIncremental(IJavaProject javaProject, String query) {
-		debug("trying to solve "+query+" incrementally");
-		String subquery = query;
-		while (subquery.length()>=1) {
-			subquery = subquery.substring(0, subquery.length()-1);
-			CacheEntry cached = cache.get(key(javaProject, subquery));
-			if (cached!=null) {
-				System.out.println("cached "+subquery+": "+cached);
-				if (cached.isComplete) {
-					debug("filtering "+subquery+" -> "+query);
-					return cached.values
-							.doOnNext((hint) -> debug("filter["+query+"]: "+hint.getValue()))
-							.filter((hint) -> 0!=FuzzyMatcher.matchScore(query, hint.getValue().toString()));
-				} else {
-					debug("subquery "+subquery+" cached but is incomplete");
+		if (ENABLE_INCREMENTAL_QUERY_SOLVER) {
+			debug("trying to solve "+query+" incrementally");
+			String subquery = query;
+			while (subquery.length()>=1) {
+				subquery = subquery.substring(0, subquery.length()-1);
+				CacheEntry cached = cache.get(key(javaProject, subquery));
+				if (cached!=null) {
+					System.out.println("cached "+subquery+": "+cached);
+					if (cached.isComplete) {
+						debug("filtering "+subquery+" -> "+query);
+						return cached.values
+								.doOnNext((hint) -> debug("filter["+query+"]: "+hint.getValue()))
+								.filter((hint) -> 0!=FuzzyMatcher.matchScore(query, hint.getValue().toString()));
+					} else {
+						debug("subquery "+subquery+" cached but is incomplete");
+					}
 				}
 			}
 		}
