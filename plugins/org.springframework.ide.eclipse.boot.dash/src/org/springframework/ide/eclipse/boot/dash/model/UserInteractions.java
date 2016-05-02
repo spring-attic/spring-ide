@@ -54,9 +54,7 @@ public interface UserInteractions {
 	 * @return
 	 * @throws OperationCanceledException
 	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model/*Map<String, Object> cloudData,
-			IProject project, IFile manifest, String defaultYaml, boolean readOnly,
-			boolean noModeSwicth*/) throws Exception;
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model) throws Exception;
 
 	/**
 	 * Ask the user to select a file.

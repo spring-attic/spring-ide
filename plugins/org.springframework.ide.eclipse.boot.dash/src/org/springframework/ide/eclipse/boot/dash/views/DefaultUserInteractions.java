@@ -10,17 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Map;
 
-import org.eclipse.compare.CompareEditorInput;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -29,14 +21,12 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -46,10 +36,10 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
@@ -78,7 +68,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	@Override
 	public ILaunchConfiguration chooseConfigurationDialog(final String dialogTitle, final String message,
 			final Collection<ILaunchConfiguration> configs) {
-		final LiveVariable<ILaunchConfiguration> chosen = new LiveVariable<ILaunchConfiguration>();
+		final LiveVariable<ILaunchConfiguration> chosen = new LiveVariable<>();
 		context.getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
@@ -112,7 +102,7 @@ public class DefaultUserInteractions implements UserInteractions {
 		} else if (mainTypes.length > 0) {
 			// Take care the UI interactions don't bork if called from non-ui
 			// thread.
-			final LiveVariable<IType> chosenType = new LiveVariable<IType>();
+			final LiveVariable<IType> chosenType = new LiveVariable<>();
 			getShell().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
@@ -229,8 +219,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model/*final Map<String, Object> cloudData,
-			final IProject project, final IFile manifest, final String defaultYaml, final boolean readOnly, final boolean noModeSwicth*/)
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model)
 			throws Exception {
 		final Shell shell = getShell();
 
@@ -238,7 +227,7 @@ public class DefaultUserInteractions implements UserInteractions {
 			shell.getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					new DeploymentPropertiesDialog(shell, model/*cloudData, project, manifest, defaultYaml, readOnly, noModeSwicth*/).open();
+					new DeploymentPropertiesDialog(shell, model).open();
 				}
 			});
 		}
