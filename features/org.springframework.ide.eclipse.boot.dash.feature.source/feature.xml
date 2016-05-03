@@ -29,9 +29,44 @@
    <license url="%licenseUrl">
       %license
    </license>
-
+   
    <plugin
          id="org.springframework.ide.eclipse.boot.dash.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.cloudfoundry.manifest.editor.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+	
+   <plugin
+         id="org.springframework.ide.eclipse.editor.support.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springsource.ide.eclipse.commons.cloudfoundry.client.v2.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="io.projectreactor.reactor-core.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.reactivestreams.reactive-streams.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
