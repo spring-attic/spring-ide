@@ -66,7 +66,7 @@ public class BasicHintProvider implements HintProvider {
 			builder.addAll(valueHints);
 		}
 		if (valueProvider!=null) {
-			Collection<ValueHint> provided = valueProvider.getValues(javaProject, query);
+			Collection<ValueHint> provided = valueProvider.getValuesNow(javaProject, query);
 			if (CollectionUtil.hasElements(provided)) {
 				builder.addAll(provided);
 			}

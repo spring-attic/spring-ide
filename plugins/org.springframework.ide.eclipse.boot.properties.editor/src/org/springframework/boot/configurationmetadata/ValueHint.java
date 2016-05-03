@@ -26,12 +26,23 @@ import java.io.Serializable;
  * @since 1.3.0
  */
 @SuppressWarnings("serial")
-public class ValueHint implements Serializable {
+public class ValueHint implements Serializable, Cloneable {
 
 	public static ValueHint withValue(Object value) {
 		ValueHint hint = new ValueHint();
 		hint.setValue(value);
 		return hint;
+	}
+
+	public ValueHint prefixWith(String prefix) {
+		try {
+			ValueHint clone = (ValueHint) this.clone();
+			clone.setValue(prefix+value);
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			//This is supposed to be impossble.
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Object value;

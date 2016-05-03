@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.firstElement;
-import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.hasElements;
 import static org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils.lastElement;
 
 import java.lang.reflect.Field;
@@ -48,18 +47,20 @@ import org.eclipse.jdt.core.Signature;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
+
+import reactor.core.publisher.Flux;
 
 /**
  * Utilities to work with types represented as Strings as returned by
@@ -521,7 +522,7 @@ public class TypeUtil {
 				return eclipseType.isEnum();
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return false;
 	}
@@ -532,7 +533,7 @@ public class TypeUtil {
 				return javaProject.findType(typeName);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -665,16 +666,13 @@ public class TypeUtil {
 	public static void valueHints(String typeName, Provider<String[]> provider) {
 		valueHints(typeName, new ValueProviderStrategy() {
 			@Override
-			public Collection<ValueHint> getValues(IJavaProject javaProject, String query) {
+			public Flux<ValueHint> getValues(IJavaProject javaProject, String query) {
 				String[] values = provider.get();
 				if (ArrayUtils.hasElements(values)) {
-					Builder<ValueHint> hints = ImmutableList.builder();
-					for (String value : values) {
-						hints.add(ValueHint.withValue(value));
-					}
-					return hints.build();
+					return Flux.fromArray(values)
+					.map(ValueHint::withValue);
 				}
-				return ImmutableList.of();
+				return Flux.empty();
 			}
 		});
 	}
@@ -881,7 +879,7 @@ public class TypeUtil {
 		}
 		ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
 		if (valueHinter!=null) {
-			return valueHinter.getValues(javaProject, query);
+			return valueHinter.getValuesNow(javaProject, query);
 		}
 		return null;
 	}

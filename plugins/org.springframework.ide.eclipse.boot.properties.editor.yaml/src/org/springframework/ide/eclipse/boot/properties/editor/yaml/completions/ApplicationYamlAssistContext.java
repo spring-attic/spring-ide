@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.completions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.Proper
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -110,12 +109,6 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 	}
 
-	private static PrefixFinder prefixfinder = new PrefixFinder() {
-		protected boolean isPrefixChar(char c) {
-			return !Character.isWhitespace(c) && c!=':';
-		}
-	};
-
 	/**
 	 * @return the type expected at this context, may return null if unknown.
 	 */
@@ -167,8 +160,8 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		@Override
-		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
-			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
+		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
+			String query = getPrefix(doc.getDocument(), node, offset);
 			EnumCaseMode enumCaseMode = enumCaseMode(query);
 			BeanPropertyNameMode beanMode = conf.getBeanMode();
 			List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query, enumCaseMode);
@@ -266,7 +259,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
-			Collection<ValueHint> hints = getHintValues(query, enumCaseMode);
+			Collection<ValueHint> hints = getHintValues(query, doc, offset, enumCaseMode);
 			if (hints!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (ValueHint hint : hints) {
@@ -284,7 +277,11 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return Collections.emptyList();
 		}
 
-		protected Collection<ValueHint> getHintValues(String query, EnumCaseMode enumCaseMode) {
+		protected Collection<ValueHint> getHintValues(
+				String query,
+				YamlDocument doc, int offset,
+				EnumCaseMode enumCaseMode
+		) {
 			ArrayList<ValueHint> allHints = new ArrayList<>();
 			{
 				Collection<ValueHint> hints = typeUtil.getHintValues(type, query, enumCaseMode);
@@ -369,8 +366,8 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		@Override
-		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
-			String query = prefixfinder.getPrefix(doc.getDocument(), offset);
+		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
+			String query = getPrefix(doc.getDocument(), node, offset);
 			Collection<Match<PropertyInfo>> matchingProps = indexNav.findMatching(query);
 			if (!matchingProps.isEmpty()) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();

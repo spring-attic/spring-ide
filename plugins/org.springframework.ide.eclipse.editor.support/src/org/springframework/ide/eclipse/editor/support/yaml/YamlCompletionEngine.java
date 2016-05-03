@@ -55,6 +55,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 		return CompletionFactory.DEFAULT;
 	}
 
+	@Override
 	public Collection<ICompletionProposal> getCompletions(IDocument _doc, int offset) throws Exception {
 		YamlDocument doc = new YamlDocument(_doc, structureProvider);
 		if (!doc.isCommented(offset)) {
@@ -63,7 +64,7 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			YamlPath contextPath = getContextPath(doc, current, offset);
 			YamlAssistContext context = getContext(doc, offset, current, contextPath);
 			if (context!=null) {
-				return context.getCompletions(doc, offset);
+				return context.getCompletions(doc, current, offset);
 			}
 		}
 		return Collections.emptyList();

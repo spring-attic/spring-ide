@@ -17,12 +17,13 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 
 /**
  * @author Kris De Volder
  */
 public interface YamlAssistContext extends YamlNavigable<YamlAssistContext> {
-	Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception;
+	Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception;
 
 	//TODO: conceptually... the right thing would be to only implement the second of these
 	// two methods and get rid of the first one.

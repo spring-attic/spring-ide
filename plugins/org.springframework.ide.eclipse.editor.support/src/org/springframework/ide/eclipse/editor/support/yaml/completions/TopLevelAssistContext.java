@@ -17,6 +17,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 
 /**
  * Abstract YamlAssistContext for the toplevel of a YamlDocument.
@@ -43,7 +44,7 @@ public abstract class TopLevelAssistContext implements YamlAssistContext {
 	}
 
 	@Override
-	public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
+	public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
 		//This context really should never be used directly to create completions. But we provide
 		// a dummy implementation anyway.
 		return Collections.emptyList();

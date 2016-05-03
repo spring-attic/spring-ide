@@ -59,23 +59,13 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	}
 
 	@Override
-	public Collection<ICompletionProposal> getCompletions(YamlDocument doc, int offset) throws Exception {
-		String query = getPrefix(doc.getDocument(), offset);
+	public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
+		String query = getPrefix(doc.getDocument(), node, offset);
 		List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query);
 		if (!valueCompletions.isEmpty()) {
 			return valueCompletions;
 		}
 		return getKeyCompletions(doc, offset, query);
-	}
-
-	private static PrefixFinder prefixfinder = new PrefixFinder() {
-		protected boolean isPrefixChar(char c) {
-			return !Character.isWhitespace(c) && c!=':';
-		}
-	};
-
-	private String getPrefix(IDocument doc, int offset) {
-		return prefixfinder.getPrefix(doc, offset);
 	}
 
 	public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query) throws Exception {

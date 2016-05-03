@@ -16,7 +16,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
-import org.springframework.ide.eclipse.boot.properties.editor.metadata.LoggerNameProvider;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -2671,7 +2670,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
-	public void testResourceCompletion() throws Exception {
+	public void testSimpleResourceCompletion() throws Exception {
 		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
 
 		useProject(createPredefinedMavenProject("boot13"));
@@ -2695,10 +2694,42 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				, // =>
 				"classpath:",
 				"classpath*:",
-				"file:///",
+				"file:",
 				"http://",
 				"https://"
 		);
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n" +
+				"      <*>\n"
+				, // =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+		);
+
+	}
+
+	public void testClasspathResourceCompletion() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13"));
+
+		data("my.nice.resource", "org.springframework.core.io.Resource", null, "A very nice resource.");
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource: classpath:app<*>\n"
+				,// =>
+				"classpath:application.properties",
+				"classpath:application.yml"
+		);
+
 	}
 
 	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {

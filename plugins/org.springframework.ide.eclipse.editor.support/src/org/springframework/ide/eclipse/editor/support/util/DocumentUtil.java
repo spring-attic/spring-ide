@@ -15,9 +15,11 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
@@ -107,6 +109,34 @@ public class DocumentUtil {
 			EditorSupportActivator.log(e);
 		}
 		return -1;
+	}
+
+	/**
+	 * Fetch text between two offsets. Doesn't throw BadLocationException.
+	 * If either one or both of the offsets points outside the
+	 * document then they will be adjusted to point the appropriate boundary to
+	 * retrieve the text just upto the end or beginning of the document instead.
+	 */
+	public static String textBetween(IDocument doc, int start, int end) {
+		Assert.isLegal(start<=end);
+		if (start>=doc.getLength()) {
+			return "";
+		}
+		if (start<0) {
+			start = 0;
+		}
+		if (end>doc.getLength()) {
+			end = doc.getLength();
+		}
+		if (end<start) {
+			end = start;
+		}
+		try {
+			return doc.get(start, end-start);
+		} catch (BadLocationException e) {
+			//unless the code above is wrong... this is supposed to be impossible!
+			throw new IllegalStateException("Bug!", e);
+		}
 	}
 
 //	public static IRegion trim(IDocument doc, IRegion region) {

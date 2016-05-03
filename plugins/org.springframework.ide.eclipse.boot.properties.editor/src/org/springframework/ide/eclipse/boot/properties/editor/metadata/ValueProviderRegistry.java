@@ -21,6 +21,8 @@ import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.boot.configurationmetadata.ValueProvider;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 
+import reactor.core.publisher.Flux;
+
 /**
  * An instance of this class serves as a 'registry' that associates known
  * {@link ValueProvider} ids to strategy objects used in the computation of completions
@@ -60,7 +62,14 @@ public class ValueProviderRegistry {
 	}
 
 	public interface ValueProviderStrategy {
-		Collection<ValueHint> getValues(IJavaProject javaProject, String query);
+		Flux<ValueHint> getValues(IJavaProject javaProject, String query);
+
+		default Collection<ValueHint> getValuesNow(IJavaProject javaProject, String query) {
+			return this.getValues(javaProject, query)
+			.take(CachingValueProvider.TIMEOUT)
+			.toList()
+			.get();
+		}
 	}
 
 	/**

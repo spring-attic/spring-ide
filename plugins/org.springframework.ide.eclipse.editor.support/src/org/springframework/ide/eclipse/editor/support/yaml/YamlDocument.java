@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SRootNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
@@ -122,21 +123,8 @@ public class YamlDocument {
 	 * document then they will be adjusted to point the appropriate boundary to
 	 * retrieve the text just upto the end or beginning of the document instead.
 	 */
-	public String textBetween(int start, int end) throws Exception {
-		Assert.isLegal(start<=end);
-		if (start>=doc.getLength()) {
-			return "";
-		}
-		if (start<0) {
-			start = 0;
-		}
-		if (end>doc.getLength()) {
-			end = doc.getLength();
-		}
-		if (end<start) {
-			end = start;
-		}
-		return doc.get(start, end-start);
+	public String textBetween(int start, int end) {
+		return DocumentUtil.textBetween(doc, start, end);
 	}
 
 	public int getColumn(int offset) throws Exception {

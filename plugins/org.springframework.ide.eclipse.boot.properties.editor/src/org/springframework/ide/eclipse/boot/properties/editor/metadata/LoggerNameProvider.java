@@ -34,14 +34,6 @@ import reactor.core.publisher.Mono;
  */
 public class LoggerNameProvider extends CachingValueProvider {
 
-//	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-//
-//	private static void debug(String string) {
-//		if (DEBUG) {
-//			System.out.println(string);
-//		}
-//	}
-
 	private  static final ValueProviderStrategy INSTANCE = new LoggerNameProvider();
 	public static final ValueProviderFactory FACTORY = (params) -> INSTANCE;
 
