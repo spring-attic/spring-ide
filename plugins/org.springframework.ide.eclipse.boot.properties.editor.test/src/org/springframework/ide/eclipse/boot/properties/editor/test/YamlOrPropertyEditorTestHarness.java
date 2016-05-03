@@ -33,6 +33,7 @@ import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
@@ -738,6 +739,10 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	protected abstract HoverInfoProvider getHoverProvider();
+
+	protected void tearDown() throws Exception {
+		CachingValueProvider.restoreDefaults();
+	}
 
 
 }

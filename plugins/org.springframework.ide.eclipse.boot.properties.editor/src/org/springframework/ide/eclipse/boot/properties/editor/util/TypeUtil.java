@@ -581,6 +581,7 @@ public class TypeUtil {
 				return null;
 			}
 		});
+		valueHints("org.springframework.core.io.Resource", new ResourceHintProvider());
 	}
 
 	/**

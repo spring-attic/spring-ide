@@ -2518,7 +2518,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"gson",
 				"jackson"
 		);
-
 	}
 
 	public void testPropertyListHintCompletions() throws Exception {
@@ -2644,36 +2643,62 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20); // the provider can't be reliably tested if its not allowed to
 											// fetch all its values (even though in 'production' you
 											// wouldn't want it to block the UI thread for this long.
-		try {
-			useProject(createPredefinedMavenProject("boot13"));
-			//Finds a package:
-			assertCompletionWithLabel(
-					"logging:\n" +
-					"  level:\n" +
-					"    boot.auto<*>"
-					, //-----------------
-					"org.springframework.boot.autoconfigure : String"
-					, // =>
-					"logging:\n" +
-					"  level:\n" +
-					"    org.springframework.boot.autoconfigure: <*>"
-			);
+		useProject(createPredefinedMavenProject("boot13"));
+		//Finds a package:
+		assertCompletionWithLabel(
+				"logging:\n" +
+				"  level:\n" +
+				"    boot.auto<*>"
+				, //-----------------
+				"org.springframework.boot.autoconfigure : String"
+				, // =>
+				"logging:\n" +
+				"  level:\n" +
+				"    org.springframework.boot.autoconfigure: <*>"
+		);
 
-			//Finds a type:
-			assertCompletionWithLabel(
-					"logging:\n" +
-					"  level:\n" +
-					"    MesgSource<*>"
-					, //-----------------
-					"org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration : String"
-					, // =>
-					"logging:\n" +
-					"  level:\n" +
-					"    org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration: <*>"
-			);
-		} finally {
-			CachingValueProvider.restoreDefaults();
-		}
+		//Finds a type:
+		assertCompletionWithLabel(
+				"logging:\n" +
+				"  level:\n" +
+				"    MesgSource<*>"
+				, //-----------------
+				"org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration : String"
+				, // =>
+				"logging:\n" +
+				"  level:\n" +
+				"    org.springframework.boot.autoconfigure.MessageSourceAutoConfiguration: <*>"
+		);
+	}
+
+	public void testResourceCompletion() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13"));
+
+		data("my.nice.resource", "org.springframework.core.io.Resource", null, "A very nice resource.");
+
+		assertCompletion(
+				"my:\n" +
+				"  nice:\n" +
+				"    <*>\n"
+				,// =>
+				"my:\n" +
+				"  nice:\n" +
+				"    resource: <*>\n"
+		);
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource: <*>\n"
+				, // =>
+				"classpath:",
+				"classpath*:",
+				"file:///",
+				"http://",
+				"https://"
+		);
 	}
 
 	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {

@@ -33,6 +33,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.ReplayProcessor;
 import reactor.core.util.PlatformDependent;
 
 /**
@@ -120,7 +121,7 @@ public class FluxJdtSearch {
 	class FluxSearchRequestor extends SearchRequestor {
 
 		private boolean isCanceled = false;
-		private EmitterProcessor<SearchMatch> emitter = EmitterProcessor.<SearchMatch>replay(bufferSize).connect();
+		private ReplayProcessor<SearchMatch> emitter = ReplayProcessor.<SearchMatch>create(bufferSize).connect();
 		private Flux<SearchMatch> flux = emitter.doOnCancel(() -> isCanceled=true);
 
 		public Flux<SearchMatch> asFlux() {

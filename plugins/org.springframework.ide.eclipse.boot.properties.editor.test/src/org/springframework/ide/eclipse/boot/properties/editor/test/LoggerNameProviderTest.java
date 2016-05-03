@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
@@ -31,6 +33,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingVa
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.LoggerNameProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -88,7 +92,6 @@ public class LoggerNameProviderTest {
 
 	@Test
 	public void cachedResults() throws Exception {
-		//XXX: Currently failing because of suspected bugs in reactor Flux.cache()
 		LoggerNameProvider p = new LoggerNameProvider();
 		for (int i = 0; i < 10; i++) {
 			long startTime = System.currentTimeMillis();
@@ -104,7 +107,6 @@ public class LoggerNameProviderTest {
 
 	@Test
 	public void incrementalResults() throws Exception {
-		//XXX: Currently failing because of suspected bugs in reactor Flux.cache()
 		String fullQuery = "jboss";
 
 		CachingValueProvider p = new LoggerNameProvider();
@@ -114,16 +116,25 @@ public class LoggerNameProviderTest {
 			dumpResults(query, results);
 			if (i==fullQuery.length()) {
 				System.out.println("Verifying final result!");
-				assertElements(results, JBOSS_RESULTS);
+				//Not checking for exact equals because... quircks of JDT search engine means it
+				// will actually finds less results than if we derive them by filtering incrementally.
+				//If all works well, we should never find fewer results than Eclipse does.
+				assertElementsAtLeast(results, JBOSS_RESULTS);
 			}
 		}
+	}
 
-//		p = (CachingValueProvider) LoggerNameProvider.FACTORY.create(null);
-//		for (int i = 0; i <= query.length(); i++) {
-//			String q = query.substring(0, i);
-//			dumpResults(q, getResults(p, q));
-//		}
-
+	private void assertElementsAtLeast(List<String> results, String[] expecteds) {
+		Set<String> actuals = ImmutableSet.copyOf(results);
+		StringBuilder missing = new StringBuilder();
+		boolean hasMissing = false;
+		for (String e : expecteds) {
+			if (!actuals.contains(e)) {
+				missing.append(e+"\n");
+				hasMissing = true;
+			}
+		}
+		assertFalse("Missing elements:\n"+missing, hasMissing);
 	}
 
 	private void assertElements(List<String> _actual, String... _expected) {

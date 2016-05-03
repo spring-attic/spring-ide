@@ -47,8 +47,8 @@ import reactor.core.tuple.Tuple2;
  */
 public abstract class CachingValueProvider implements ValueProviderStrategy {
 
-	private static final boolean ENABLE_CACHING = false; //XXX: Disabled for now because of reactor bug
-	private static final boolean ENABLE_INCREMENTAL_QUERY_SOLVER = false; //XXX: Disabled for now because of reactor bug
+	private static final boolean ENABLE_CACHING = true; //XXX: Disabled for now because of reactor bug
+	private static final boolean ENABLE_INCREMENTAL_QUERY_SOLVER = true; //XXX: Disabled for now because of reactor bug
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -108,7 +108,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	}
 
 	@Override
-	public final Collection<ValueHint> getValues(IJavaProject javaProject, String query) {
+	public Collection<ValueHint> getValues(IJavaProject javaProject, String query) {
 		if (ENABLE_CACHING) {
 			debug("CA query: "+query);
 			Tuple2<String, String> key = key(javaProject, query);

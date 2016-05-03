@@ -55,7 +55,7 @@ public class LimitedTimeCache<K,V> implements Cache<K, V> {
 			long oldest = clearExpired();
 			//Reschedule job to again run when the next entry expires.
 			if (oldest>=0) {
-				clearExpiredJob.schedule(MAX_AGE - oldest);
+				clearExpiredJob.schedule(MAX_AGE - oldest + AGE_MARGIN);
 			}
 			return Status.OK_STATUS;
 		}
