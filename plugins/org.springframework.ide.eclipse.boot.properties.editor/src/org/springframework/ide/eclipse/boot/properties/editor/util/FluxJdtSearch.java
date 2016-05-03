@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.core.util.PlatformDependent;
@@ -113,7 +112,7 @@ public class FluxJdtSearch {
 	}
 
 	/**
-	 * Implementation of {@link SearchRequestor} that emits search results to an {@link EmitterProcessor}
+	 * Implementation of {@link SearchRequestor} that emits search results to an {@link ReplayProcessor}
 	 * with replay capability.
 	 *
 	 * @author Kris De Volder
