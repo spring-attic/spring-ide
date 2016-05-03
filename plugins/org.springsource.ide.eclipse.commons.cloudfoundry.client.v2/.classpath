@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/aopalliance-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.M4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-spring-2.0.0.M4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.M4.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-codec-1.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/commons-lang-2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-logging-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/evo-inflector-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-annotations-2.6.0.jar"/>
@@ -18,7 +17,10 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/java-semver-0.9.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jcl-over-slf4j-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jjwt-0.6.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/protobuf-java-2.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-all-4.1.0.CR7.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/okio-1.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/reactor-ipc-2.5.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/reactor-netty-2.5.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-aop-4.2.5.RELEASE.jar"/>
@@ -35,5 +37,8 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/tomcat-embed-core-8.0.32.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/tomcat-embed-logging-juli-8.0.32.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/tomcat-embed-websocket-8.0.32.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/wire-runtime-2.1.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
