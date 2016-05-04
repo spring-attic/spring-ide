@@ -161,7 +161,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 
 		@Override
 		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
-			String query = getPrefix(doc.getDocument(), node, offset);
+			String query = getPrefix(doc, node, offset);
 			EnumCaseMode enumCaseMode = enumCaseMode(query);
 			BeanPropertyNameMode beanMode = conf.getBeanMode();
 			List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query, enumCaseMode);
@@ -268,6 +268,9 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 					if (score!=0 && !value.equals(query)) {
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
 						edits.delete(offset-query.length(), offset);
+						if (doc.getChar(offset-1)==':') {
+							edits.insert(offset, " ");
+						}
 						edits.insert(offset, YamlUtil.stringEscape(value));
 						completions.add(completionFactory.valueProposal(value, query, type, score, edits));
 					}
@@ -367,7 +370,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 
 		@Override
 		public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
-			String query = getPrefix(doc.getDocument(), node, offset);
+			String query = getPrefix(doc, node, offset);
 			Collection<Match<PropertyInfo>> matchingProps = indexNav.findMatching(query);
 			if (!matchingProps.isEmpty()) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();

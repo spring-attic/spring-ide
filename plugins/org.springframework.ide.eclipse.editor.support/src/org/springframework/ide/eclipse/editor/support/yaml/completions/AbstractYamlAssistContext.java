@@ -46,12 +46,12 @@ public abstract class AbstractYamlAssistContext implements YamlAssistContext {
 
 	private static PrefixFinder prefixfinder = new PrefixFinder() {
 		protected boolean isPrefixChar(char c) {
-			return !Character.isWhitespace(c) && c!=':';
+			return !Character.isWhitespace(c);
 		}
 	};
 
 
-	protected final String getPrefix(IDocument doc, SNode node, int offset) {
+	protected final String getPrefix(YamlDocument doc, SNode node, int offset) {
 		//For value completions... in general we would like to determine the whole text
 		// corresponding to the value, so a simplistic backwards scan isn't good enough.
 		// instead we should use offset in current node / structure to determine the
@@ -59,10 +59,15 @@ public abstract class AbstractYamlAssistContext implements YamlAssistContext {
 		if (node.getNodeType()==SNodeType.KEY) {
 			SKeyNode keyNode = (SKeyNode) node;
 			if (keyNode.isInValue(offset)) {
-				int scanStart = keyNode.getColonOffset();
-				int valueStart = DocumentUtil.skipWhiteSpace(doc, scanStart+1);
-				if (valueStart>=0 && offset>=valueStart) {
-					return DocumentUtil.textBetween(doc, valueStart, offset);
+				int valueStart = keyNode.getColonOffset()+1;
+				while (valueStart<=offset && Character.isWhitespace(doc.getChar(valueStart))) {
+					valueStart++;
+				}
+				if (offset>=valueStart) {
+					return doc.textBetween(valueStart, offset);
+				} else {
+					//only whitespace, or nothing found upto the cursor
+					return "";
 				}
 			}
 //		} else if (node.getNodeType()==SNodeType.RAW) {
@@ -71,7 +76,7 @@ public abstract class AbstractYamlAssistContext implements YamlAssistContext {
 
 		//If not one of the special cases where we try to be more precise...
 		// we use simplistic backward scan to determine 'CA query'.
-		return prefixfinder.getPrefix(doc, offset);
+		return prefixfinder.getPrefix(doc.getDocument(), offset);
 	}
 
 

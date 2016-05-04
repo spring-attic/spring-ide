@@ -63,11 +63,29 @@ public class YamlCompletionEngine implements ICompletionEngine {
 			SNode current = root.find(offset);
 			YamlPath contextPath = getContextPath(doc, current, offset);
 			YamlAssistContext context = getContext(doc, offset, current, contextPath);
+			if (context==null && isDubiousKey(current, offset)) {
+				current = current.getParent();
+				contextPath = contextPath.dropLast();
+				context = getContext(doc, offset, current, contextPath);
+			}
 			if (context!=null) {
 				return context.getCompletions(doc, current, offset);
 			}
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * A 'dubious' key is when the cursor is positioned right after a key's ':' character.
+	 * This key is 'dubious' in that if the user would type a non-whitespace character next...
+	 * then that key is no longer a key but parses as a 'value' instead.
+	 */
+	private boolean isDubiousKey(SNode node, int offset) {
+		if (node.getNodeType()==SNodeType.KEY) {
+			SKeyNode key = (SKeyNode)node;
+			return key.getColonOffset()+1==offset;
+		}
+		return false;
 	}
 
 	protected YamlAssistContext getContext(YamlDocument doc, int offset, SNode node, YamlPath contextPath) {

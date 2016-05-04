@@ -830,19 +830,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  address: localhost\n"+
 				"something: nice\n"
 		);
-
-		assertCompletion(
-				"server:\n"+
-				"  port:8888\n"+
-				"  address: localhost\n"+
-				"something: nice\n"+
-				"po<*>"
-				,
-				"server:\n"+
-				"  port:<*>8888\n" +
-				"  address: localhost\n"+
-				"something: nice\n"
-		);
 	}
 
 
@@ -1332,15 +1319,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 		assertCompletions(
 				"liquibase:\n" +
-				"  enabled:<*>",
-				"liquibase:\n" +
-				"  enabled:false<*>",
-				"liquibase:\n" +
-				"  enabled:true<*>"
-		);
-
-		assertCompletions(
-				"liquibase:\n" +
 				"  enabled:\n" +
 				"    <*>",
 				"liquibase:\n" +
@@ -1363,20 +1341,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  enabled: t<*>\n",
 				"liquibase:\n" +
 				"  enabled: true<*>\n"
-		);
-
-		assertCompletions(
-				"liquibase:\n" +
-				"  enabled:f<*>\n",
-				"liquibase:\n" +
-				"  enabled:false<*>\n"
-		);
-
-		assertCompletions(
-				"liquibase:\n" +
-				"  enabled:t<*>\n",
-				"liquibase:\n" +
-				"  enabled:true<*>\n"
 		);
 
 		assertCompletions(
@@ -1432,6 +1396,17 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"liquibase:\n" +
 				"  check-change-log-location: true<*>"
 		);
+
+		assertCompletions(
+				"liquibase:\n" +
+				"  enabled:<*>",
+				"liquibase:\n" +
+				"  enabled: false<*>",
+				"liquibase:\n" +
+				"  enabled: true<*>"
+		);
+
+
 	}
 
 	public void testEnumValueCompletion() throws Exception {
@@ -2720,11 +2695,35 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		useProject(createPredefinedMavenProject("boot13"));
 
 		data("my.nice.resource", "org.springframework.core.io.Resource", null, "A very nice resource.");
+		data("my.nice.list", "java.util.List<org.springframework.core.io.Resource>", null, "A nice list of resources.");
 
 		assertCompletionsDisplayString(
 				"my:\n" +
 				"  nice:\n" +
 				"    resource: classpath:app<*>\n"
+				,// =>
+				"classpath:application.properties",
+				"classpath:application.yml"
+		);
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  nice:\n" +
+				"    list:\n"+
+				"    - <*>\n"
+				,// =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+		);
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  nice:\n" +
+				"    list:\n"+
+				"    - classpath:app<*>\n"
 				,// =>
 				"classpath:application.properties",
 				"classpath:application.yml"

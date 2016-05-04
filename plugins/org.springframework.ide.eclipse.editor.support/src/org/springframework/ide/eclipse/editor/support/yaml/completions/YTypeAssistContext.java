@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
@@ -26,7 +25,6 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
@@ -60,7 +58,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 
 	@Override
 	public Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception {
-		String query = getPrefix(doc.getDocument(), node, offset);
+		String query = getPrefix(doc, node, offset);
 		List<ICompletionProposal> valueCompletions = getValueCompletions(doc, offset, query);
 		if (!valueCompletions.isEmpty()) {
 			return valueCompletions;
