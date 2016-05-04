@@ -14,12 +14,14 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.*;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getPreferenceName;
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.enableProjectPrefs;
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getSeverity;
-import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.*;
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.projectPreferencesEnabled;
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.setSeverity;
+import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.IGNORE;
+import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.WARNING;
 
 import java.util.EnumSet;
 
