@@ -2697,6 +2697,8 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		data("my.nice.resource", "org.springframework.core.io.Resource", null, "A very nice resource.");
 		data("my.nice.list", "java.util.List<org.springframework.core.io.Resource>", null, "A nice list of resources.");
 
+		//Test 'simple key context'
+
 		assertCompletionsDisplayString(
 				"my:\n" +
 				"  nice:\n" +
@@ -2706,18 +2708,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"classpath:application.yml"
 		);
 
-		assertCompletionsDisplayString(
-				"my:\n" +
-				"  nice:\n" +
-				"    list:\n"+
-				"    - <*>\n"
-				,// =>
-				"classpath:",
-				"classpath*:",
-				"file:",
-				"http://",
-				"https://"
-		);
+		//Test 'list item' context:
 
 		assertCompletionsDisplayString(
 				"my:\n" +
@@ -2729,6 +2720,88 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"classpath:application.yml"
 		);
 
+		assertCompletionWithLabel(
+				"my:\n" +
+				"  nice:\n" +
+				"    list:\n"+
+				"    - classpath:app<*>\n"
+				,// ==========
+				"classpath:application.yml"
+				, // =>
+				"my:\n" +
+				"  nice:\n" +
+				"    list:\n"+
+				"    - classpath:application.yml<*>\n"
+		);
+
+		assertCompletionWithLabel(
+				"my:\n" +
+				"  nice:\n" +
+				"    list:\n"+
+				"    - classpath:<*>\n"
+				,// ==========
+				"classpath:application.yml"
+				, // =>
+				"my:\n" +
+				"  nice:\n" +
+				"    list:\n"+
+				"    - classpath:application.yml<*>\n"
+		);
+
+		//Test 'raw node' context
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:app<*>\n"
+				,// =>
+				"classpath:application.properties",
+				"classpath:application.yml"
+		);
+
+		assertCompletionWithLabel(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:app<*>\n"
+				,//===============
+				"classpath:application.properties"
+				,// =>
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:application.properties<*>\n"
+		);
+
+		assertCompletionWithLabel(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:<*>\n"
+				,//===============
+				"classpath:application.properties"
+				,// =>
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:application.properties<*>\n"
+		);
+
+		// do we find resources in sub-folders too?
+		assertCompletionWithLabel(
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:word<*>\n"
+				,//===============
+				"classpath:stuff/wordlist.txt"
+				,// =>
+				"my:\n" +
+				"  nice:\n" +
+				"    resource:\n"+
+				"      classpath:stuff/wordlist.txt<*>\n"
+		);
 	}
 
 	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {
