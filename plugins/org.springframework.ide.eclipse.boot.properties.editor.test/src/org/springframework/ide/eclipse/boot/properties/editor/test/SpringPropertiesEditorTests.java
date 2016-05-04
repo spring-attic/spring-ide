@@ -26,6 +26,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingVa
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
+import com.google.common.collect.ImmutableList;
+
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 
 	public void testServerPortCompletion() throws Exception {
@@ -1200,6 +1202,42 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				,// =>
 				"my.nice.resource=classpath:stuff/wordlist.txt<*>\n"
 		);
+	}
+
+	public void testClasspathResourceCompletionInCommaList() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13"));
+		data("my.nice.list", "java.util.List<org.springframework.core.io.Resource>", null, "A nice list of resources.");
+		data("my.nice.array", "org.springframework.core.io.Resource[]", null, "A nice array of resources.");
+
+		for (String kind : ImmutableList.of("list", "array")) {
+			assertCompletionWithLabel(
+				"my.nice."+kind+"=classpath:<*>"
+				,//===========
+				"classpath:stuff/wordlist.txt"
+				,//=>
+				"my.nice."+kind+"=classpath:stuff/wordlist.txt<*>"
+			);
+
+			assertCompletionsDisplayString(
+				"my.nice."+kind+"=<*>"
+				,// =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+			);
+
+			assertCompletionWithLabel(
+				"my.nice."+kind+"=classpath:stuff/wordlist.txt,classpath:app<*>"
+				,//===========
+				"classpath:application.yml"
+				,//=>
+				"my.nice."+kind+"=classpath:stuff/wordlist.txt,classpath:application.yml<*>"
+			);
+		}
 	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {

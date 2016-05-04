@@ -321,19 +321,13 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	private ITypedRegion getPartition(IDocument doc, int offset) throws BadLocationException {
 		ITypedRegion part = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
 		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0) {
-			//A special case because when cursor at end of document and just after a '=' sign, then we get a DEFAULT content type
+			//A special case because when cursor at end of document and just after a space-padded '=' sign, then we get a DEFAULT content type
 			// with a empty region. We rather would get the non-empty 'Value' partition just before that (which has the assignment in it.
-			char assign = doc.getChar(offset-1);
-			if (isAssign(assign)) {
-				return new TypedRegion(offset-1, 1, IPropertiesFilePartitions.PROPERTY_VALUE);
-			} else {
-				//For a similar case but where there's extra spaces after the '='
-				ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, true);
-				int previousEnd = previousPart.getOffset()+previousPart.getLength();
-				if (previousEnd==offset) {
-					//prefer this over a 0 length partition ending at the same location
-					return previousPart;
-				}
+			ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, false);
+			int previousEnd = previousPart.getOffset()+previousPart.getLength();
+			if (previousEnd==offset) {
+				//prefer this over a 0 length partition ending at the same location
+				return previousPart;
 			}
 		}
 		return part;
