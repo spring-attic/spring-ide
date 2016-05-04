@@ -13,12 +13,12 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Provider;
 
@@ -45,7 +45,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvi
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProviders;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
-import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -71,6 +70,12 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private boolean preferLowerCaseEnums = true; //might make sense to make this user configurable
 
+	/**
+	 * Pattern we look for at the start of the Document partition in 'value' part of a 'key-value'
+	 * assignment. The stuff matching this pattern isn't to be treated as part of the actual value.
+	 */
+	private static final Pattern ASSIGN = Pattern.compile("^\\h*(=|:)\\h*");
+
 	private static final boolean DEBUG = false;
 	public static void debug(String msg) {
 		if (DEBUG) {
@@ -82,7 +87,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private static final PrefixFinder valuePrefixFinder = new PrefixFinder() {
 		protected boolean isPrefixChar(char c) {
-			return !Character.isWhitespace(c) && !isAssign(c) && c!=',';
+			return !Character.isWhitespace(c) && c!=',';
 		}
 	};
 
@@ -338,8 +343,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
 		int regionStart = valuePartition.getOffset();
 		try {
-			String query = valuePrefixFinder.getPrefix(doc, offset);
-			int startOfValue = offset - query.length();
+			int startOfValue = skipAssign(doc, offset, valuePartition);
+			String query = valuePrefixFinder.getPrefix(doc, offset, startOfValue);
+			startOfValue = offset - query.length();
 			EnumCaseMode caseMode = caseMode(query);
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
@@ -367,6 +373,27 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			SpringPropertiesEditorPlugin.log(e);
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Determine the end of the 'ASSIGN' pattern which is expected at the beginning of a 'value' partition of
+	 * props file. This is used to determine the start of the *real* value region (i.e. the assignment isn't
+	 * really part of the value text even though Eclipse document partitioner inlcudes it as part of the 'valuePartition'
+	 * region).
+	 */
+	private int skipAssign(IDocument doc, int offset, ITypedRegion valuePartition) {
+		try {
+			String text = doc.get(valuePartition.getOffset(), valuePartition.getLength());
+			Matcher matcher = ASSIGN.matcher(text);
+			if (matcher.find() && matcher.start()==0) {
+				int len = matcher.end();
+				return valuePartition.getOffset()+len;
+			}
+			return valuePartition.getOffset();
+		} catch (BadLocationException e) {
+			//This shouldn't really happen, but...
+			return valuePartition.getOffset();
+		}
 	}
 
 	private Collection<ValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
