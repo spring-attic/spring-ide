@@ -430,6 +430,29 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testEnumPropertyCompletionInsideCommaSeparateList() throws Exception {
+		IProject p = createPredefinedMavenProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+
+		data("foo.colors", "java.util.List<demo.Color>", null, "A foonky list");
+
+		//Completion requested right after '=' sign:
+		assertCompletionsDisplayString("foo.colors=<*>", "red", "green", "blue");
+		assertCompletionWithLabel("foo.colors=<*>", "red", "foo.colors=red<*>");
+		assertCompletion("foo.colors=R<*>", "foo.colors=RED<*>");
+		assertCompletion("foo.colors=g<*>", "foo.colors=green<*>");
+		assertCompletion("foo.colors=B<*>", "foo.colors=BLUE<*>");
+
+		//Completion requested after ','
+		assertCompletionsDisplayString("foo.colors=red,<*>", "red", "green", "blue");
+		assertCompletionWithLabel("foo.colors=red,<*>", "green", "foo.colors=red,green<*>");
+		assertCompletion("foo.colors=RED,R<*>", "foo.colors=RED,RED<*>");
+		assertCompletion("foo.colors=RED,G<*>", "foo.colors=RED,GREEN<*>");
+		assertCompletion("foo.colors=RED,B<*>", "foo.colors=RED,BLUE<*>");
+	}
+
 	public void testEnumPropertyCompletion() throws Exception {
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);

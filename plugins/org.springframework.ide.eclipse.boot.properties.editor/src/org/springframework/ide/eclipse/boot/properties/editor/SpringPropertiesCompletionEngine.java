@@ -397,6 +397,10 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private Collection<ValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
 		Type type = getValueType(propertyName);
+		if (TypeUtil.isArray(type) || TypeUtil.isList(type)) {
+			//It is useful to provide content assist for the values in the list when entering a list
+			type = TypeUtil.getDomainType(type);
+		}
 		List<ValueHint> allHints = new ArrayList<>();
 		{
 			Collection<ValueHint> hints = typeUtil.getHintValues(type, query, caseMode);
