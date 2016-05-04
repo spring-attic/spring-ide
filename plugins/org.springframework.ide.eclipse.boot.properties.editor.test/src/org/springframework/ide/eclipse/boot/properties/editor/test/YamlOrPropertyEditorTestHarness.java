@@ -713,10 +713,9 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * computed when hovering mouse at position at the end of first occurence of
 	 * a given string in the editor.
 	 * <p>
-	 * This method should be removed and the corresponding bits and pieces pushed into 'MockPropertiesEditor'
+	 * TODO: This method should be removed and the corresponding bits and pieces pushed into 'MockPropertiesEditor'
 	 * as is already the case for MockYamlEditor.
 	 */
-	@Deprecated
 	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
 		String hoverText = getHoverText(editor, afterString);
 		assertContains(expectSnippet, hoverText);

@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
+import java.time.Duration;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,6 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
@@ -1082,6 +1085,99 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testSimpleResourceCompletion() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13"));
+
+		data("my.nice.resource", "org.springframework.core.io.Resource", null, "A very nice resource.");
+
+		assertCompletion(
+				"nicer<*>\n"
+				,// =>
+				"my.nice.resource=<*>\n"
+		);
+
+		assertCompletionsDisplayString(
+				"my.nice.resource=<*>\n"
+				, // =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+		);
+	}
+
+	public void testClasspathResourceCompletion() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13"));
+
+		data("my.nice.resource", "org.springframework.core.io.Resource", null, "A very nice resource.");
+		data("my.nice.list", "java.util.List<org.springframework.core.io.Resource>", null, "A nice list of resources.");
+
+		assertCompletionsDisplayString(
+				"my.nice.resource=classpath:app<*>\n"
+				,// =>
+				"classpath:application.properties",
+				"classpath:application.yml"
+		);
+
+		//Test 'list item' context:
+
+		assertCompletionsDisplayString(
+				"my.nice.list[0]=<*>"
+				,// =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+		);
+
+		assertCompletionsDisplayString(
+				"my.nice.list[0]=classpath:app<*>\n"
+				,// =>
+				"classpath:application.properties",
+				"classpath:application.yml"
+		);
+
+		assertCompletionWithLabel(
+				"my.nice.list[0]=classpath:app<*>\n"
+				,// ==========
+				"classpath:application.yml"
+				, // =>
+				"my.nice.list[0]=classpath:application.yml<*>\n"
+		);
+
+		assertCompletionWithLabel(
+				"my.nice.list[0]=  classpath:app<*>\n"
+				,// ==========
+				"classpath:application.yml"
+				, // =>
+				"my.nice.list[0]=  classpath:application.yml<*>\n"
+		);
+
+		assertCompletionWithLabel(
+				"my.nice.list[0]=classpath:<*>\n"
+				,// ==========
+				"classpath:application.yml"
+				, // =>
+				"my.nice.list[0]=classpath:application.yml<*>\n"
+		);
+
+		//Test 'raw node' context
+
+		// do we find resources in sub-folders too?
+		assertCompletionWithLabel(
+				"my.nice.resource=classpath:word<*>\n"
+				,//===============
+				"classpath:stuff/wordlist.txt"
+				,// =>
+				"my.nice.resource=classpath:stuff/wordlist.txt<*>\n"
+		);
+	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
