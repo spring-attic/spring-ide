@@ -775,7 +775,47 @@ public class CloudFoundryClientTest {
 		assertTrue(dashUrl.startsWith("http"));
 	}
 
-	@Test public void pushAndStartCanBeCanceled() throws Exception {
+	@Test public void startCanBeCanceled() throws Exception {
+		String appName = appHarness.randomAppName();
+		IProject project = projects.createBootWebProject("slow-starter");
+		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
+
+		try (CFPushArguments params = new CFPushArguments()) {
+			params.setAppName(appName);
+			params.setRoutes(appName+"."+CFAPPS_IO);
+			params.setApplicationData(jarFile);
+			params.setNoStart(true);
+
+			long starting = System.currentTimeMillis();
+			System.out.println("Pushing...");
+			client.push(params, CancelationTokens.NULL);
+			long duration = System.currentTimeMillis() - starting;
+			System.out.println("Pushing took: "+duration+ " ms");
+		}
+
+		CancelationTokens cancelationTokens = new CancelationTokens();
+		long starting = System.currentTimeMillis();
+		System.out.println("Starting...");
+		Future<Void> startResult = doAsync(() -> {
+			client.restartApplication(appName, cancelationTokens.create());
+			long duration = System.currentTimeMillis() - starting;
+			System.out.println("started in "+duration+" ms");
+		});
+
+		Thread.sleep(5000);
+		long cancelTime = System.currentTimeMillis();
+		cancelationTokens.cancelAll();
+		try {
+			startResult.get(5, TimeUnit.SECONDS);
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+			long duration = System.currentTimeMillis() - cancelTime;
+			assertEquals(OperationCanceledException.class, e.getCause().getClass());
+			System.out.println("\nRestart Canceled after "+duration+" ms");
+		}
+	}
+
+	@Test public void pushCanBeCanceled() throws Exception {
 		String appName = appHarness.randomAppName();
 		IProject project = projects.createBootWebProject("slow-starter");
 		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
@@ -808,36 +848,6 @@ public class CloudFoundryClientTest {
 				System.out.println("\nPush Canceled after: "+duration +" ms");
 			}
 		}
-
-		try (CFPushArguments params = new CFPushArguments()) {
-			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO);
-			params.setApplicationData(jarFile);
-			params.setNoStart(true);
-			client.push(params, CancelationTokens.NULL);
-		}
-
-
-		long starting = System.currentTimeMillis();
-		System.out.println("Starting...");
-		Future<Void> startResult = doAsync(() -> {
-			client.restartApplication(appName, cancelationTokens.create());
-			long duration = System.currentTimeMillis() - starting;
-			System.out.println("started in "+duration+" ms");
-		});
-
-		Thread.sleep(5000);
-		long cancelTime = System.currentTimeMillis();
-		cancelationTokens.cancelAll();
-		try {
-			startResult.get(5, TimeUnit.SECONDS);
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-			long duration = System.currentTimeMillis() - cancelTime;
-			assertEquals(OperationCanceledException.class, e.getCause().getClass());
-			System.out.println("\nRestart Canceled after "+duration+" ms");
-		}
-
 	}
 
 
