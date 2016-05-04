@@ -36,7 +36,6 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.boot.configurationmetadata.ValueHint;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
@@ -51,6 +50,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
@@ -200,7 +200,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return Collections.emptyList();
 	}
@@ -247,7 +247,6 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	 * @param type Type of the expression leading upto the 'nav' operator
 	 * @param navOffset Offset of the nav operator (either ']' or '.'
 	 * @param offset Offset of the cursor where CA was requested.
-	 * @return
 	 */
 	private Collection<ICompletionProposal> getNavigationProposals(IDocument doc, Type type, int navOffset, int offset) {
 		try {
@@ -264,7 +263,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				//TODO: other cases ']' or '[' ?
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return Collections.emptyList();
 	}
@@ -437,7 +436,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}

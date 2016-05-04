@@ -19,7 +19,6 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ClasspathListener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ClasspathListenerManager;
-import org.springframework.ide.eclipse.boot.properties.editor.util.ClasspathListenerManager;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ListenerManager;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
 
