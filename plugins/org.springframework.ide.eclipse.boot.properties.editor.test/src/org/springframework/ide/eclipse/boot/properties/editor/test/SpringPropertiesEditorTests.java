@@ -1250,11 +1250,13 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"#comment\n" +
-				"my.colors=RED, green, not-a-color, BLUE"
+				"my.colors=RED, green, not-a-color , BLUE"
 		);
 		assertProblems(editor,
 				"not-a-color|demo.Color"
 		);
+
+		//TODO: commalist spans multiple lines, using \ at end of line
 	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
