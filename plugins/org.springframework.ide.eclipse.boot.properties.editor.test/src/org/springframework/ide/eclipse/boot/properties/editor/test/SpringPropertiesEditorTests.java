@@ -1298,6 +1298,35 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertProblems(editor, "bad|demo.Color");
 	}
 
+	public void testReconcileDuplicateKey() throws Exception {
+		MockPropertiesEditor editor;
+		data("some.property", "java.lang.String", null, "yada");
+		data("some.other.property", "java.lang.String", null, "yada");
+
+		editor = new MockPropertiesEditor(
+				"#comment\n" +
+				"some.property=stuff\n" +
+				"some.other.property=stuff\n" +
+				"some.property=different stuff\n"
+		);
+		assertProblems(editor,
+				"some.property|Duplicate",
+				"some.property|Duplicate"
+		);
+
+		editor = new MockPropertiesEditor(
+				"#comment\n" +
+				"some.property = stuff\n" +
+				"some.other.property=stuff\n" +
+				"some.property: different stuff\n"
+		);
+		assertProblems(editor,
+				"some.property|Duplicate",
+				"some.property|Duplicate"
+		);
+
+	}
+
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
 //	}
