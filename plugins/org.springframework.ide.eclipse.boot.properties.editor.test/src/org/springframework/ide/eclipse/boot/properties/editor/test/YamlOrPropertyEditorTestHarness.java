@@ -619,7 +619,11 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		String badSnippet = parts[0];
 		String messageSnippet = parts[1];
 		try {
-			String actualBadSnippet = editor.getText(problem.getOffset(), problem.getLength()).trim();
+			boolean spaceSensitive = badSnippet.trim().length()<badSnippet.length();
+			String actualBadSnippet = editor.getText(problem.getOffset(), problem.getLength());
+			if (!spaceSensitive) {
+				actualBadSnippet = actualBadSnippet.trim();
+			}
 			return actualBadSnippet.equals(badSnippet)
 					&& problem.getMessage().contains(messageSnippet);
 		} catch (BadLocationException e) {

@@ -1307,6 +1307,17 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"	bad   \n"
 		);
 		assertProblems(editor, "bad|demo.Color");
+
+		editor = new MockPropertiesEditor(
+				"my.colors=red,\n"
+		);
+		assertProblems(editor, ",|demo.Color");
+
+
+		editor = new MockPropertiesEditor(
+				"my.colors=red, \n"
+		);
+		assertProblems(editor, " |demo.Color");
 	}
 
 	public void testReconcileDuplicateKey() throws Exception {

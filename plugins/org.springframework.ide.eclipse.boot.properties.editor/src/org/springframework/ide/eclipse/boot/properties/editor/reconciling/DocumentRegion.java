@@ -210,4 +210,26 @@ public class DocumentRegion implements CharSequence {
 		}
 		return this;
 	}
+
+	/**
+	 * Get the region after this one with a given  lenght.
+	 * <p>
+	 * If the document is too short to provide the requested lenght
+	 * then the region is truncated to end of the document.
+	 */
+	public DocumentRegion textAfter(int len) {
+		Assert.isLegal(len>=0);
+		return new DocumentRegion(doc, end, end+len);
+	}
+
+	/**
+	 * Get the region before this one with a given lenght.
+	 * <p>
+	 * If the requested region extends before the start of the document,
+	 * then the region is shortened so its start coincides with document start.
+	 */
+	public DocumentRegion textBefore(int len) {
+		Assert.isLegal(len>=0);
+		return new DocumentRegion(doc, start-len, start);
+	}
 }

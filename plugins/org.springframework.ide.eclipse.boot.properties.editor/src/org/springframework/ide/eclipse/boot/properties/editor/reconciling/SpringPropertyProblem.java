@@ -84,8 +84,31 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 	}
 
 	public static SpringPropertyProblem problem(SpringPropertiesProblemType problemType, String message, DocumentRegion region) {
+		if (region.isEmpty()) {
+			region = makeVisible(region);
+		}
 		IRegion absolute = region.asRegion();
 		return problem(problemType, message, absolute.getOffset(), absolute.getLength());
+	}
+
+	/**
+	 * Attempt to enlarge a empty document region to include a
+	 * character that can be visibly underlined.
+	 */
+	private static DocumentRegion makeVisible(DocumentRegion region) {
+		DocumentRegion altRegion = region.textAfter(1);
+		if (!altRegion.isEmpty() && canUnderline(altRegion.charAt(0))) {
+			return altRegion;
+		}
+		altRegion = region.textBefore(1);
+		if (!altRegion.isEmpty() && canUnderline(altRegion.charAt(0))) {
+			return altRegion;
+		}
+		return region;
+	}
+
+	private static boolean canUnderline(char c) {
+		return c!='\n'&&c!='\r';
 	}
 
 	public static SpringPropertyProblem problem(SpringPropertiesProblemType problemType, String message, int offset, int len) {
