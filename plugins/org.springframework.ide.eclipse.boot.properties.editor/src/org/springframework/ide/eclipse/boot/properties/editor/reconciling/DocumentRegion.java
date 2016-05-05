@@ -132,7 +132,7 @@ public class DocumentRegion implements CharSequence {
 		int len = length();
 		Assert.isLegal(start>=0);
 		Assert.isLegal(end<=len);
-		if (this.start==0 && this.end==len) {
+		if (start==0 && end==len) {
 			return this;
 		}
 		return new DocumentRegion(doc, this.start+start, this.start+end);
