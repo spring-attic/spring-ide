@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012- 2015 VMware, Inc.
+ *  Copyright (c) 2012- 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -214,7 +214,7 @@ public class Main {
 			configProps.put(Constants.FRAMEWORK_STORAGE, cacheDir);
 		}
 
-		configProps.put("org.osgi.framework.system.packages.extra", "org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins");
+		configProps.put("org.osgi.framework.system.packages.extra", "org.springsource.ide.eclipse.commons.frameworks.core.internal.plugins,org.w3c.dom.traversal");
 		configProps.put("roobot.index.dowload", "false");
 		
 		if (shouldCleanCache(cacheDir, rooVersion)) {
