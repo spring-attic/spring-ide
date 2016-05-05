@@ -1240,6 +1240,23 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		}
 	}
 
+	public void testCommaListReconcile() throws Exception {
+		IProject p = createPredefinedMavenProject("demo-enum");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		assertNotNull(jp.findType("demo.Color"));
+
+		data("my.colors", "java.util.List<demo.Color>", null, "Ooh! nice colors!");
+
+		MockPropertiesEditor editor = new MockPropertiesEditor(
+				"#comment\n" +
+				"my.colors=RED, green, not-a-color, BLUE"
+		);
+		assertProblems(editor,
+				"not-a-color|Color expected"
+		);
+	}
+
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
 //	}

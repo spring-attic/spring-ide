@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal, Inc.
+ * Copyright (c) 2014-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 
 import javax.inject.Provider;
 
+import org.apache.maven.building.ProblemCollector;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
@@ -53,10 +54,12 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
+	private CommaListReconciler commaListReconciler;
 
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		this.fIndexProvider = provider;
 		this.typeUtil = typeUtil;
+		this.commaListReconciler = new CommaListReconciler(typeUtil);
 	}
 
 	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon) {
@@ -150,40 +153,22 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 	private void reconcileType(IDocument doc, Type expectType, ITypedRegion[] regions, int i, IProblemCollector problems) {
 		ValueParser parser = typeUtil.getValueParser(expectType);
 		if (parser!=null) {
-			String escapedValue = getAssignedValue(doc, regions, i);
+			DocumentRegion escapedValue = getAssignedValue(doc, regions, i);
 			IRegion errorRegion = null;
 			if (escapedValue==null) {
 				int charPos = DocumentUtil.lastNonWhitespaceCharOfRegion(doc, regions[i]);
 				if (charPos>=0) {
 					errorRegion = new Region(charPos, 1);
 				}
-			} else { //paddedValue!=null
+			} else { //escapedValue!=null
 				try {
-					String valueStr = PropertiesFileEscapes.unescape(escapedValue.trim());
+					String valueStr = PropertiesFileEscapes.unescape(escapedValue.toString());
 					if (!valueStr.contains("${")) {
 						//Don't check strings that look like they use variable substitution.
 						parser.parse(valueStr);
 					}
 				} catch (Exception e) {
-					errorRegion = regions[i+1]; //i+1 must be in range, otherwise paddedValue would be null
-					//Try to shrink errorRegion to demarkate the value String more precisely
-					try {
-						int endChar = DocumentUtil.lastNonWhitespaceCharOfRegion(doc, errorRegion);
-						if (endChar>=0) {
-							int startChar = DocumentUtil.firstNonWhitespaceCharOfRegion(doc, errorRegion);
-							if (startChar>=0) {
-								char assign = doc.getChar(startChar);
-								if (isAssign(assign)) {
-									startChar = DocumentUtil.firstNonWhitespaceCharOfRegion(doc, new Region(startChar+1, endChar-startChar));
-								}
-							}
-							if (startChar>=0) {
-								errorRegion = new Region(startChar, endChar-startChar+1);
-							}
-						}
-					} catch (Exception e2) {
-						SpringPropertiesEditorPlugin.log(e2);
-					}
+					errorRegion = escapedValue.asRegion();
 				}
 			}
 			if (errorRegion!=null) {
@@ -191,7 +176,13 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						errorRegion.getOffset(), errorRegion.getLength()));
 			}
+		} else if (TypeUtil.isList(expectType)||TypeUtil.isArray(expectType)) {
+			reconcileListType(doc, expectType, regions, i, problems);
 		}
+	}
+
+	private void reconcileListType(IDocument doc, Type listType, ITypedRegion[] region, int i, IProblemCollector problems) {
+		commaListReconciler.reconcile(new DocumentRegion(doc, region[i+1]), listType, problems);
 	}
 
 	/**
@@ -201,26 +192,25 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 	 * @param regions Regions in the document
 	 * @param i Target region (i.e. points at the 'key' region for which we want to find assigned value
 	 */
-	private String getAssignedValue(IDocument doc, ITypedRegion[] regions, int i) {
+	private DocumentRegion getAssignedValue(IDocument doc, ITypedRegion[] regions, int i) {
 		try {
 			int valueRegionIndex = i+1;
 			if (valueRegionIndex<regions.length) {
-				ITypedRegion valueRegion = regions[valueRegionIndex];
-				if (valueRegion.getType()==IPropertiesFilePartitions.PROPERTY_VALUE) {
-					String regionText = doc.get(valueRegion.getOffset(), valueRegion.getLength());
+				String valueRegionType = regions[valueRegionIndex].getType();
+				DocumentRegion valueRegion = new DocumentRegion(doc, regions[valueRegionIndex]);
+				if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(valueRegionType)) {
+					valueRegion = valueRegion.trim();
 					//region text includes
 					//  potential padding with whitespace.
 					//  the ':' or '=' (if its there).
-					regionText = regionText.trim();
-					if (!regionText.isEmpty()) {
-						char assignment = regionText.charAt(0);
+					if (!valueRegion.isEmpty()) {
+						char assignment = valueRegion.charAt(0);
 						if (isAssign(assignment)) {
-							//strip of 'assignment' and also more whitepace which might occur
-							//after it.
-							regionText = regionText.substring(1).trim(); //
+							//end already trimmed so we only need to trim start now
+							valueRegion = valueRegion.subSequence(1).trimStart();
 						}
 					}
-					return regionText;
+					return valueRegion;
 				}
 			}
 		} catch (Exception e) {
