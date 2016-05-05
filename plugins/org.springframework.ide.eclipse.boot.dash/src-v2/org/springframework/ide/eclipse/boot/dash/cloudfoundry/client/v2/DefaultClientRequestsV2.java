@@ -603,9 +603,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.noRoute(true)
 					.build()
 			))
-			.doOnError((e) -> print("operations.push ERROR:" + ExceptionUtil.getMessage(e)))
-			.doOnCancel(() -> print("operations.push CANCEL"))
-			.doOnSuccess((x) -> print("operations.push SUCCESS "+x))
+			.doOnError((e) -> debug("operations.push ERROR:" + ExceptionUtil.getMessage(e)))
+			.doOnCancel(() -> debug("operations.push CANCEL"))
+			.doOnSuccess((x) -> debug("operations.push SUCCESS "+x))
 			.after(() ->
 				Flux.merge(
 					setRoutes(params.getAppName(), params.getRoutes()),
@@ -623,10 +623,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			})
 		);
 		debug("Pushing app succeeded: "+params.getAppName());
-	}
-
-	private void print(String string) {
-		System.out.println(string);
 	}
 
 	private <T> T dump(T x) {
