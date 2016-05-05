@@ -1241,6 +1241,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testCommaListReconcile() throws Exception {
+		MockPropertiesEditor editor;
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
@@ -1248,7 +1249,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		data("my.colors", "java.util.List<demo.Color>", null, "Ooh! nice colors!");
 
-		MockPropertiesEditor editor = new MockPropertiesEditor(
+		editor = new MockPropertiesEditor(
 				"#comment\n" +
 				"my.colors=RED, green, not-a-color , BLUE"
 		);
@@ -1256,16 +1257,45 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"not-a-color|demo.Color"
 		);
 
-		//TODO: commalist spans multiple lines, using \ at end of line
+		editor = new MockPropertiesEditor(
+				"my.colors=\\\n" +
+				"	red,\\\n" +
+				"	green,\\\n" +
+				"	blue\n"
+		);
+		assertProblems(editor /*no problems*/);
 
-		/*
-test case:
-my.welcome.colors=\
-	red,\
-	green,\
-	blue
+		editor = new MockPropertiesEditor(
+				"my.colors=\\\n" +
+				"	bad,\\\n" +
+				"	green,\\\n" +
+				"	blue\n"
+		);
+		assertProblems(editor, "bad|demo.Color");
 
-		 */
+		editor = new MockPropertiesEditor(
+				"my.colors=\\\n" +
+				"	bad , \\\n" +
+				"	green,\\\n" +
+				"	blue\n"
+		);
+		assertProblems(editor, "bad|demo.Color");
+
+		editor = new MockPropertiesEditor(
+				"my.colors=\\\n" +
+				"	red , \\\n" +
+				"	green,\\\n" +
+				"	bad\n"
+		);
+		assertProblems(editor, "bad|demo.Color");
+
+		editor = new MockPropertiesEditor(
+				"my.colors=\\\n" +
+				"	red , \\\n" +
+				"	green,\\\n" +
+				"	bad   \n"
+		);
+		assertProblems(editor, "bad|demo.Color");
 	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
