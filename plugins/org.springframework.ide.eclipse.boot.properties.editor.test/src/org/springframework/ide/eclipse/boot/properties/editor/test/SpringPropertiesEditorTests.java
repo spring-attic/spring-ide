@@ -1257,6 +1257,15 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 
 		//TODO: commalist spans multiple lines, using \ at end of line
+
+		/*
+test case:
+my.welcome.colors=\
+	red,\
+	green,\
+	blue
+
+		 */
 	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {

@@ -74,7 +74,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	 * Pattern we look for at the start of the Document partition in 'value' part of a 'key-value'
 	 * assignment. The stuff matching this pattern isn't to be treated as part of the actual value.
 	 */
-	private static final Pattern ASSIGN = Pattern.compile("^\\h*(=|:)\\h*");
+	public static final Pattern ASSIGN = Pattern.compile("^(\\h)*(=|:)(\\h|\\\\\\s)*");
 
 	private static final boolean DEBUG = false;
 	public static void debug(String msg) {

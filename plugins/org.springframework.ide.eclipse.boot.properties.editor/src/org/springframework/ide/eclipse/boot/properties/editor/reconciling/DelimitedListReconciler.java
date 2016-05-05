@@ -10,40 +10,38 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
-import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
+import java.util.regex.Pattern;
+
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
-
-import reactor.core.publisher.Flux;
 
 /**
  * Helper class to reconcile text contained in a document region as a comma-separated list.
  *
  * @author Kris De Volder
  */
-public class CommaListReconciler {
+public class DelimitedListReconciler {
 
 	interface TypeBasedReconciler {
 		void reconcile(DocumentRegion region, Type expectType, IProblemCollector problems);
 	}
 
 	private final TypeBasedReconciler valueReconciler;
+	private final Pattern delimiter;
 
-	public CommaListReconciler(TypeBasedReconciler valueReconciler) {
+	public DelimitedListReconciler(Pattern delimiter, TypeBasedReconciler valueReconciler) {
 		this.valueReconciler = valueReconciler;
-	}
-
-	void reconcileValue(DocumentRegion region, Type expectType, IProblemCollector problems) {
+		this.delimiter = delimiter;
 	}
 
 	public void reconcile(DocumentRegion region, Type listType, IProblemCollector problems) {
 		Type elType = getElementType(listType);
 		//Its pointless to reconcile list of we can't determine value type.
 		if (elType!=null) {
-			DocumentRegion[] pieces = region.split(',');
+			DocumentRegion[] pieces = region.split(delimiter);
 			for (int i = 0; i < pieces.length; i++) {
-				valueReconciler.reconcile(pieces[i].trim(), elType, problems);
+				valueReconciler.reconcile(pieces[i], elType, problems);
 			}
 		}
 	}

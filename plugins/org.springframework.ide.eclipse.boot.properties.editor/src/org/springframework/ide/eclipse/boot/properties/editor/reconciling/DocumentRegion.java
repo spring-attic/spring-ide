@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
@@ -170,5 +171,43 @@ public class DocumentRegion implements CharSequence {
 		// Do not forget the last piece!
 		pieces.add(subSequence(start, length()));
 		return pieces.toArray(new DocumentRegion[pieces.size()]);
+	}
+
+	public DocumentRegion[] split(Pattern delimiter) {
+		List<DocumentRegion> pieces = new ArrayList<>();
+		int start = 0;
+		Matcher matcher = delimiter.matcher(this);
+		while (matcher.find(start)) {
+			int end = matcher.start();
+			pieces.add(subSequence(start, end));
+			start = matcher.end();
+		}
+		// Do not forget the last piece!
+		pieces.add(subSequence(start, length()));
+		return pieces.toArray(new DocumentRegion[pieces.size()]);
+	}
+
+	/**
+	 * Removes a single occurrence of pat from the start of this region.
+	 */
+	public DocumentRegion trimStart(Pattern pat) {
+		pat = Pattern.compile("^("+pat.pattern()+")");
+		Matcher matcher = pat.matcher(this);
+		if (matcher.find()) {
+			return subSequence(matcher.end());
+		}
+		return this;
+	}
+
+	/**
+	 * Removes a single occurrence of pat from the end of this region.
+	 */
+	public DocumentRegion trimEnd(Pattern pat) {
+		pat = Pattern.compile("("+pat.pattern()+")$");
+		Matcher matcher = pat.matcher(this);
+		if (matcher.find()) {
+			return subSequence(0, matcher.start());
+		}
+		return this;
 	}
 }

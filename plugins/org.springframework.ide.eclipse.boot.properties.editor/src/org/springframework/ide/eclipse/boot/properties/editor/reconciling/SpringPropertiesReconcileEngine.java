@@ -16,6 +16,8 @@ import static org.springframework.ide.eclipse.boot.properties.editor.reconciling
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 
+import java.util.regex.Pattern;
+
 import javax.inject.Provider;
 
 import org.apache.maven.building.ProblemCollector;
@@ -52,9 +54,25 @@ import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 @SuppressWarnings("restriction")
 public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
+	/**
+	 * Regexp that matches a ',' surrounded by whitespace, including escaped whitespace / newlines
+	 */
+	private static final Pattern COMMA = Pattern.compile(
+			"(\\s|\\\\\\s)*,(\\s|\\\\\\s)*"
+	);
+
+	private static final Pattern SPACES = Pattern.compile(
+			"(\\s|\\\\\\s)*"
+	);
+
+	/**
+	 * Regexp that matches a whitespace, including escaped whitespace
+	 */
+	private static final Pattern ASSIGN = SpringPropertiesCompletionEngine.ASSIGN;
+
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
-	private final CommaListReconciler commaListReconciler = new CommaListReconciler(this::reconcileType);
+	private final DelimitedListReconciler commaListReconciler = new DelimitedListReconciler(COMMA, this::reconcileType);
 
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		this.fIndexProvider = provider;
@@ -189,16 +207,10 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 			DocumentRegion valueRegion = new DocumentRegion(doc, regions[valueRegionIndex]);
 			if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(valueRegionType)) {
 				//Need to remove the 'ASSIGN' bit from the start
-				valueRegion = valueRegion.trimStart();
+				valueRegion = valueRegion.trimStart(ASSIGN).trimEnd(SPACES);
 				//region text includes
 				//  potential padding with whitespace.
 				//  the ':' or '=' (if its there).
-				if (!valueRegion.isEmpty()) {
-					char assignment = valueRegion.charAt(0);
-					if (isAssign(assignment)) {
-						valueRegion = valueRegion.subSequence(1).trim();
-					}
-				}
 				return valueRegion;
 			}
 		}
