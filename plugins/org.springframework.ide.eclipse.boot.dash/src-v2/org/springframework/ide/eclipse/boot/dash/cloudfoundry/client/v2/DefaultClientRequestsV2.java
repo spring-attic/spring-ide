@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.cloudfoundry.client.CloudFoundryClient;
@@ -108,7 +109,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = true;//(""+Platform.getLocation()).contains("kdvolder");
 
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
@@ -597,11 +598,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//XXX CF V2: push should use 'manifest' in a future version of V2
 		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
 			operations.applications()
-			.push(toPushRequest(params)
+			.push(dump(toPushRequest(params)
 					.noStart(true)
 					.noRoute(true)
 					.build()
-			)
+			))
+			.doOnError((e) -> print("operations.push ERROR:" + ExceptionUtil.getMessage(e)))
+			.doOnCancel(() -> print("operations.push CANCEL"))
+			.doOnSuccess((x) -> print("operations.push SUCCESS "+x))
 			.after(() ->
 				Flux.merge(
 					setRoutes(params.getAppName(), params.getRoutes()),
@@ -617,9 +621,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					return Mono.empty();
 				}
 			})
-	//		.log("pushing")
 		);
 		debug("Pushing app succeeded: "+params.getAppName());
+	}
+
+	private void print(String string) {
+		System.out.println(string);
+	}
+
+	private <T> T dump(T x) {
+		debug(""+x);
+		return x;
 	}
 
 	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls) {
