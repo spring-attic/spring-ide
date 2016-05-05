@@ -606,7 +606,7 @@ public class CloudFoundryClientTest {
 		});
 
 		ACondition.waitFor("push", TimeUnit.MINUTES.toMillis(3), () -> {
-			pushResult.isDone();
+			assertTrue(pushResult.isDone());
 		});
 		pushResult.get();
 
