@@ -597,11 +597,18 @@ public class CloudFoundryClientTest {
 		Mono<StreamingLogToken> token = client.streamLogs(appName, listener);
 		assertNotNull(token);
 
-		CFPushArguments params = new CFPushArguments();
-		params.setAppName(appName);
-		params.setApplicationData(getTestZip("testapp"));
-		params.setBuildpack("staticfile_buildpack");
-		push(params);
+		Future<Void> pushResult = doAsync(() -> {
+			CFPushArguments params = new CFPushArguments();
+			params.setAppName(appName);
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			push(params);
+		});
+
+		ACondition.waitFor("push", TimeUnit.MINUTES.toMillis(3), () -> {
+			pushResult.isDone();
+		});
+		pushResult.get();
 
 		BootDashModelTest.waitForJobsToComplete();
 		verify(listener, atLeastOnce()).onMessage(any());
