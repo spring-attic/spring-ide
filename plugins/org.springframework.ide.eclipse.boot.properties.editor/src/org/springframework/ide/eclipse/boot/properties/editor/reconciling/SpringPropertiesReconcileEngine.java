@@ -97,13 +97,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 					try {
 						String type = r.getType();
 						if (IDocument.DEFAULT_CONTENT_TYPE.equals(type)) {
-							String fullName = doc.get(r.getOffset(), r.getLength()).trim();
-							IRegion trimmedRegion = r;
-							if (fullName.length()<r.getLength()) {
-								String paddedName = doc.get(r.getOffset(), r.getLength());
-								int start = paddedName.indexOf(fullName);
-								trimmedRegion = new Region(r.getOffset()+start, fullName.length());
-							}
+							DocumentRegion fullName = new DocumentRegion(doc, r).trim();
 							if (fullName.isEmpty()) {
 								if (!isAssigned(doc, r)) {
 									//empty 'properties' are okay if not being assigned to. This just means that
@@ -111,10 +105,14 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 									continue;
 								}
 							}
-							PropertyInfo validProperty = SpringPropertiesCompletionEngine.findLongestValidProperty(index, fullName);
+							PropertyInfo validProperty = SpringPropertiesCompletionEngine.findLongestValidProperty(index, fullName.toString());
 							if (validProperty!=null) {
+								//TODO: Remove last remnants of 'IRegion trimmedRegion' here and replace
+								// it all with just passing around 'fullName' DocumentRegion. This may require changes
+								// in PropertyNavigator (probably these changes are also for the better making it simpler as well)
+								IRegion trimmedRegion = fullName.asRegion();
 								if (validProperty.isDeprecated()) {
-									problemCollector.accept(problemDeprecated(trimmedRegion, validProperty));
+									problemCollector.accept(problemDeprecated(fullName, validProperty));
 								}
 								int offset = validProperty.getId().length() + trimmedRegion.getOffset();
 								PropertyNavigator navigator = new PropertyNavigator(doc, problemCollector, typeUtil, trimmedRegion);
@@ -124,9 +122,9 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 								}
 							} else { //validProperty==null
 								//The name is invalid, with no 'prefix' of the name being a valid property name.
-								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName);
-								String validPrefix = commonPrefix(similarEntry.getId(), fullName);
-								problemCollector.accept(problemUnkownProperty(fullName, trimmedRegion, similarEntry, validPrefix));
+								PropertyInfo similarEntry = index.findLongestCommonPrefixEntry(fullName.toString());
+								CharSequence validPrefix = commonPrefix(similarEntry.getId(), fullName);
+								problemCollector.accept(problemUnkownProperty(fullName, similarEntry, validPrefix));
 							} //end: validProperty==null
 						}
 					} catch (Exception e) {
@@ -141,24 +139,26 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		}
 	}
 
-	protected SpringPropertyProblem problemDeprecated(IRegion trimmedRegion, PropertyInfo property) {
+	protected SpringPropertyProblem problemDeprecated(DocumentRegion trimmedRegion, PropertyInfo property) {
 		SpringPropertyProblem p = problem(PROP_DEPRECATED,
 				TypeUtil.deprecatedPropertyMessage(
 						property.getId(), null,
 						property.getDeprecationReplacement(),
 						property.getDeprecationReason()
 				),
-				trimmedRegion.getOffset(), trimmedRegion.getLength()
+				trimmedRegion
 		);
 		p.setPropertyName(property.getId());
 		return p;
 	}
 
-	protected SpringPropertyProblem problemUnkownProperty(String fullName, IRegion trimmedRegion,
-			PropertyInfo similarEntry, String validPrefix) {
+	protected SpringPropertyProblem problemUnkownProperty(DocumentRegion fullNameRegion,
+			PropertyInfo similarEntry, CharSequence validPrefix) {
+		String fullName = fullNameRegion.toString();
 		SpringPropertyProblem p = problem(PROP_UNKNOWN_PROPERTY,
 				"'"+fullName+"' is an unknown property."+suggestSimilar(similarEntry, validPrefix, fullName),
-				trimmedRegion.getOffset()+validPrefix.length(), trimmedRegion.getLength()-validPrefix.length());
+				fullNameRegion.subSequence(validPrefix.length())
+		);
 		p.setPropertyName(fullName);
 		return p;
 	}
@@ -217,7 +217,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		return null;
 	}
 
-	private String suggestSimilar(PropertyInfo similarEntry, String validPrefix, String fullName) {
+	private String suggestSimilar(PropertyInfo similarEntry, CharSequence validPrefix, CharSequence fullName) {
 		int matchedChars = validPrefix.length();
 		int wrongChars = fullName.length()-matchedChars;
 		if (wrongChars<matchedChars) {
