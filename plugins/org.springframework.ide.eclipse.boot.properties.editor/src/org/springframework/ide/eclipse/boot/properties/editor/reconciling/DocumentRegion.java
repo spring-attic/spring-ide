@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
@@ -145,5 +147,28 @@ public class DocumentRegion implements CharSequence {
 
 	public IRegion asRegion() {
 		return new Region(start, end-start);
+	}
+
+	public int indexOf(char ch, int fromIndex) {
+		while (fromIndex < length()) {
+			if (charAt(fromIndex)==ch) {
+				return fromIndex;
+			}
+			fromIndex++;
+		}
+		return -1;
+	}
+
+	public DocumentRegion[] split(char c) {
+		List<DocumentRegion> pieces = new ArrayList<>();
+		int start = 0;
+		int end;
+		while ((end=indexOf(c, start))>=0) {
+			pieces.add(subSequence(start, end));
+			start = end+1;
+		}
+		// Do not forget the last piece!
+		pieces.add(subSequence(start, length()));
+		return pieces.toArray(new DocumentRegion[pieces.size()]);
 	}
 }

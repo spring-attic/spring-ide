@@ -1253,7 +1253,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"my.colors=RED, green, not-a-color, BLUE"
 		);
 		assertProblems(editor,
-				"not-a-color|Color expected"
+				"not-a-color|demo.Color"
 		);
 	}
 

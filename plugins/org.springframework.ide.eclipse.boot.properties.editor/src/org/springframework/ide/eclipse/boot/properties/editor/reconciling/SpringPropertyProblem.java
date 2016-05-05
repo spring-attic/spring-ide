@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
@@ -80,6 +81,11 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	public SpringPropertiesProblemType getType() {
 		return type;
+	}
+
+	public static SpringPropertyProblem problem(SpringPropertiesProblemType problemType, String message, DocumentRegion region) {
+		IRegion absolute = region.asRegion();
+		return problem(problemType, message, absolute.getOffset(), absolute.getLength());
 	}
 
 	public static SpringPropertyProblem problem(SpringPropertiesProblemType problemType, String message, int offset, int len) {

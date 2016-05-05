@@ -54,12 +54,11 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
-	private CommaListReconciler commaListReconciler;
+	private final CommaListReconciler commaListReconciler = new CommaListReconciler(this::reconcileType);
 
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		this.fIndexProvider = provider;
 		this.typeUtil = typeUtil;
-		this.commaListReconciler = new CommaListReconciler(typeUtil);
 	}
 
 	public void reconcile(IDocument doc, IProblemCollector problemCollector, IProgressMonitor mon) {
@@ -151,70 +150,57 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 	}
 
 	private void reconcileType(IDocument doc, Type expectType, ITypedRegion[] regions, int i, IProblemCollector problems) {
-		ValueParser parser = typeUtil.getValueParser(expectType);
-		if (parser!=null) {
-			DocumentRegion escapedValue = getAssignedValue(doc, regions, i);
-			IRegion errorRegion = null;
-			if (escapedValue==null) {
-				int charPos = DocumentUtil.lastNonWhitespaceCharOfRegion(doc, regions[i]);
-				if (charPos>=0) {
-					errorRegion = new Region(charPos, 1);
-				}
-			} else { //escapedValue!=null
-				try {
-					String valueStr = PropertiesFileEscapes.unescape(escapedValue.toString());
-					if (!valueStr.contains("${")) {
-						//Don't check strings that look like they use variable substitution.
-						parser.parse(valueStr);
-					}
-				} catch (Exception e) {
-					errorRegion = escapedValue.asRegion();
-				}
-			}
-			if (errorRegion!=null) {
+		DocumentRegion escapedValue = getAssignedValue(doc, regions, i);
+		if (escapedValue==null) {
+			int charPos = DocumentUtil.lastNonWhitespaceCharOfRegion(doc, regions[i]);
+			if (charPos>=0) {
 				problems.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
-						errorRegion.getOffset(), errorRegion.getLength()));
+						charPos, 1));
 			}
-		} else if (TypeUtil.isList(expectType)||TypeUtil.isArray(expectType)) {
-			reconcileListType(doc, expectType, regions, i, problems);
+		} else {
+			reconcileType(escapedValue, expectType, problems);
 		}
 	}
 
-	private void reconcileListType(IDocument doc, Type listType, ITypedRegion[] region, int i, IProblemCollector problems) {
-		commaListReconciler.reconcile(new DocumentRegion(doc, region[i+1]), listType, problems);
+	private void reconcileType(DocumentRegion escapedValue, Type expectType, IProblemCollector problems) {
+		ValueParser parser = typeUtil.getValueParser(expectType);
+		if (parser!=null) {
+			try {
+				String valueStr = PropertiesFileEscapes.unescape(escapedValue.toString());
+				if (!valueStr.contains("${")) {
+					//Don't check strings that look like they use variable substitution.
+					parser.parse(valueStr);
+				}
+			} catch (Exception e) {
+				problems.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
+						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
+						escapedValue));
+			}
+		} else if (TypeUtil.isList(expectType)||TypeUtil.isArray(expectType)) {
+			commaListReconciler.reconcile(escapedValue, expectType, problems);
+		}
 	}
 
-	/**
-	 * Extract the 'assigned' value represented as String from document.
-	 *
-	 * @param doc The document
-	 * @param regions Regions in the document
-	 * @param i Target region (i.e. points at the 'key' region for which we want to find assigned value
-	 */
 	private DocumentRegion getAssignedValue(IDocument doc, ITypedRegion[] regions, int i) {
-		try {
-			int valueRegionIndex = i+1;
-			if (valueRegionIndex<regions.length) {
-				String valueRegionType = regions[valueRegionIndex].getType();
-				DocumentRegion valueRegion = new DocumentRegion(doc, regions[valueRegionIndex]);
-				if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(valueRegionType)) {
-					valueRegion = valueRegion.trim();
-					//region text includes
-					//  potential padding with whitespace.
-					//  the ':' or '=' (if its there).
-					if (!valueRegion.isEmpty()) {
-						char assignment = valueRegion.charAt(0);
-						if (isAssign(assignment)) {
-							//end already trimmed so we only need to trim start now
-							valueRegion = valueRegion.subSequence(1).trimStart();
-						}
+		int valueRegionIndex = i+1;
+		if (valueRegionIndex<regions.length) {
+			String valueRegionType = regions[valueRegionIndex].getType();
+			DocumentRegion valueRegion = new DocumentRegion(doc, regions[valueRegionIndex]);
+			if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(valueRegionType)) {
+				//Need to remove the 'ASSIGN' bit from the start
+				valueRegion = valueRegion.trimStart();
+				//region text includes
+				//  potential padding with whitespace.
+				//  the ':' or '=' (if its there).
+				if (!valueRegion.isEmpty()) {
+					char assignment = valueRegion.charAt(0);
+					if (isAssign(assignment)) {
+						valueRegion = valueRegion.subSequence(1).trim();
 					}
-					return valueRegion;
 				}
+				return valueRegion;
 			}
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
 		}
 		return null;
 	}
