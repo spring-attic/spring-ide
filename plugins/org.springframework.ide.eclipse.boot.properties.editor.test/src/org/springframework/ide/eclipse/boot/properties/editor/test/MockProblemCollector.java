@@ -12,9 +12,13 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -22,6 +26,15 @@ import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem
 public class MockProblemCollector implements IProblemCollector {
 
 	private List<ReconcileProblem> problems = null;
+	private final Set<ProblemType> ignoredTypes;
+
+	public MockProblemCollector() {
+		this(ImmutableSet.of());
+	}
+
+	public MockProblemCollector(Set<ProblemType> ignoredTypes) {
+		this.ignoredTypes = ignoredTypes;
+	}
 
 	public List<ReconcileProblem> getAllProblems() {
 		return problems;
@@ -35,6 +48,8 @@ public class MockProblemCollector implements IProblemCollector {
 	}
 
 	public void accept(ReconcileProblem e) {
-		problems.add(e);
+		if (!ignoredTypes.contains(e.getType())) {
+			problems.add(e);
+		}
 	}
 }

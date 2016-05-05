@@ -16,11 +16,12 @@ import static org.springframework.ide.eclipse.boot.properties.editor.reconciling
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
 import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.inject.Provider;
+import javax.print.Doc;
 
-import org.apache.maven.building.ProblemCollector;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
@@ -28,7 +29,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
@@ -89,6 +89,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		}
 		problemCollector.beginCollecting();
 		try {
+			DuplicateNameChecker duplicateNameChecker = new DuplicateNameChecker(problemCollector);
 			ITypedRegion[] regions = TextUtilities.computePartitioning(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, 0, doc.getLength(), true);
 			if (regions!=null && regions.length>0) {
 				mon.beginTask("Reconciling Spring Properties", regions.length);
@@ -105,6 +106,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 									continue;
 								}
 							}
+							duplicateNameChecker.check(fullName);
 							PropertyInfo validProperty = SpringPropertiesCompletionEngine.findLongestValidProperty(index, fullName.toString());
 							if (validProperty!=null) {
 								//TODO: Remove last remnants of 'IRegion trimmedRegion' here and replace

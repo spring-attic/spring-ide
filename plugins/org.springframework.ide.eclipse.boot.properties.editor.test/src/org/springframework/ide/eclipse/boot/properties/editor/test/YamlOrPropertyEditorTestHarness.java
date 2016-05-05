@@ -16,7 +16,9 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,6 +43,7 @@ import org.springframework.ide.eclipse.editor.support.completions.CompletionFact
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 
@@ -77,6 +80,8 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			return new DefaultSeverityProvider();
 		}
 	};
+
+	private Set<ProblemType> ignoredTypes = new HashSet<>();
 
 	protected String getBundleName() {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
@@ -553,9 +558,13 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 	public List<ReconcileProblem> reconcile(MockEditor editor) {
 		IReconcileEngine reconciler = createReconcileEngine();
-		MockProblemCollector problems=new MockProblemCollector();
+		MockProblemCollector problems=new MockProblemCollector(ignoredTypes);
 		reconciler.reconcile(editor.document, problems, new NullProgressMonitor());
 		return problems.getAllProblems();
+	}
+
+	public void ignoreProblem(ProblemType type) {
+		ignoredTypes.add(type);
 	}
 
 	protected abstract IReconcileEngine createReconcileEngine();

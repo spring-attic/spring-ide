@@ -23,8 +23,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_DUPLICATE_KEY;
 
 import com.google.common.collect.ImmutableList;
 
@@ -400,6 +403,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testReconcileValuesWithSpaces() throws Exception {
+		ignoreProblem(PROP_DUPLICATE_KEY); //ignore deliberate abuse of dups
+
 		defaultTestData();
 		MockPropertiesEditor editor = new MockPropertiesEditor(
 				"server.port  =   badPort\n" +
@@ -474,6 +479,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumPropertyReconciling() throws Exception {
+		ignoreProblem(PROP_DUPLICATE_KEY); //ignore deliberate abuse of dups
+
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
@@ -624,6 +631,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testPojoReconciling() throws Exception {
+		ignoreProblem(PROP_DUPLICATE_KEY); //ignore deliberate abuse of dups
+
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
@@ -724,6 +733,8 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
+		ignoreProblem(PROP_DUPLICATE_KEY); //ignore deliberate abuse of dups
+
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
@@ -1318,13 +1329,17 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"#comment\n" +
 				"some.property = stuff\n" +
 				"some.other.property=stuff\n" +
+				"some.property: different stuff\n" +
+				"some.other.property=stuff\n" +
 				"some.property: different stuff\n"
 		);
 		assertProblems(editor,
 				"some.property|Duplicate",
+				"some.other.property|Duplicate",
+				"some.property|Duplicate",
+				"some.other.property|Duplicate",
 				"some.property|Duplicate"
 		);
-
 	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
