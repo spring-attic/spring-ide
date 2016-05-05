@@ -37,7 +37,7 @@ public class StringUtil {
 		return null;
 	}
 
-	public static int commonPrefixLength(String s, String t) {
+	public static int commonPrefixLength(CharSequence s, CharSequence t) {
 		int shortestStringLen = Math.min(s.length(), t.length());
 		for (int i = 0; i < shortestStringLen; i++) {
 			if (s.charAt(i)!=t.charAt(i)) {
@@ -51,16 +51,10 @@ public class StringUtil {
 	/**
 	 * @return longest string which is a prefix of both argument Strings.
 	 */
-	public static String commonPrefix(String s, String t) {
+	public static String commonPrefix(CharSequence s, CharSequence t) {
 		int len = commonPrefixLength(s, t);
 		if (len>0) {
-			if (s.length()==len) {
-				return s; //Avoid needlessly copying s
-			}
-			if (t.length()==len) {
-				return t; //Avoid needlessly copying s
-			}
-			return s.substring(0,len);
+			return s.subSequence(0,len).toString();
 		}
 		return "";
 	}
