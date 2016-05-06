@@ -113,10 +113,10 @@ public class BuildshipImportStrategy extends ImportStrategy {
 					job.schedule();
 
 					// This doesn't work in e44 (api not available until e45):
-					// job.join(0, new SubProgressMonitor(mon, 9));
+					job.join(0, new SubProgressMonitor(mon, 9));
 					// The below works, but makes more assumptions on the internal workings of SynchronizeGradleProjectJob
 					// Namely: how it implements Job.belongsTo to make itself belong to program family equal to its class name.
-					Job.getJobManager().join(SynchronizeGradleProjectJob.class.getName(), new SubProgressMonitor(mon, 9));
+					//Job.getJobManager().join(SynchronizeGradleProjectJob.class.getName(), new SubProgressMonitor(mon, 9));
 
 					IProject p = getProject(loc);
 					if (p!=null) {
