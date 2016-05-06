@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_DUPLICATE_KEY;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarness {
 
@@ -1073,6 +1074,42 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"root : String",
 				//=>
 				"logging.level.root=<*>"
+		);
+	}
+
+	public void testHandleAsResourceContentAssist() throws Exception {
+		//"name": "my.terms-and-conditions",
+		//        "providers": [
+		//                      {
+		//                          "name": "handle-as",
+		//                          "parameters": {
+		//                              "target": "org.springframework.core.io.Resource"
+		//                          }
+		//                      }
+		//                  ]
+		data("my.terms-and-conditions", "java.lang.String", null, "Terms and Conditions text file")
+		.provider("handle-as", "target", "org.springframework.core.io.Resource");
+
+		assertCompletionsDisplayString(
+				"my.terms-and-conditions=<*>"
+				, // =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+		);
+	}
+
+	public void testHandleAsListContentAssist() throws Exception {
+		data("my.tosses", "String[]", null, "A sequence of coin tosses")
+			.provider("handle-as", "target", "java.lang.Boolean[]");
+
+		assertCompletionsDisplayString(
+				"my.tosses[0]=<*>"
+				, // =>
+				"true",
+				"false"
 		);
 	}
 

@@ -14,10 +14,13 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -33,11 +36,14 @@ import org.eclipse.jface.viewers.StyledString;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.boot.configurationmetadata.ValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
+import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
+import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
@@ -54,6 +60,45 @@ import junit.framework.TestCase;
  */
 public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
+	public class ItemConfigurer {
+
+		private ConfigurationMetadataProperty item;
+
+		public ItemConfigurer(ConfigurationMetadataProperty item) {
+			this.item = item;
+		}
+
+		/**
+		 * Add a provider with a single parameter.
+		 */
+		public void provider(String name, String paramName, Object paramValue) {
+			ValueProvider provider = new ValueProvider();
+			provider.setName(name);
+			provider.getParameters().put(paramName, paramValue);
+			item.getHints().getValueProviders().add(provider);
+		}
+
+	}
+
+	Map<String, ConfigurationMetadataProperty> datas = new LinkedHashMap<>();
+	private SpringPropertyIndex index = null;
+
+	protected ValueProviderRegistry valueProviders = ValueProviderRegistry.getDefault();
+
+	protected SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
+
+		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
+			if (index==null) {
+				index =	new SpringPropertyIndex(valueProviders, javaProject);
+				for (ConfigurationMetadataProperty propertyInfo : datas.values()) {
+					index.add(propertyInfo);
+				}
+			}
+			return index;
+		}
+	};
+
+
 	protected static final Comparator<? super ICompletionProposal> COMPARATOR = new Comparator<ICompletionProposal>() {
 		public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 			return CompletionFactory.SORTER.compare(p1, p2);
@@ -67,8 +112,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		}
 	};
 
-	protected ValueProviderRegistry valueProviders = ValueProviderRegistry.getDefault();
-	protected SpringPropertyIndex index = new SpringPropertyIndex();
 	protected IJavaProject javaProject = null;
 	protected DocumentContextFinder documentContextFinder = new DocumentContextFinder() {
 		public IJavaProject getJavaProject(IDocument doc) {
@@ -87,7 +130,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return "org.springframework.ide.eclipse.boot.properties.editor.test";
 	}
 
-	public void data(String id, String type, Object deflt, String description,
+	public ItemConfigurer data(String id, String type, Object deflt, String description,
 			String... source
 	) {
 		ConfigurationMetadataProperty item = new ConfigurationMetadataProperty();
@@ -95,34 +138,34 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		item.setDescription(description);
 		item.setType(type);
 		item.setDefaultValue(deflt);
-		index.add(new PropertyInfo(valueProviders, item));
-//		return item;
+		index = null;
+		datas.put(item.getId(), item);
+		return new ItemConfigurer(item);
 	}
 
 	public void keyHints(String id, String... hintValues) {
-		PropertyInfo info = index.get(id);
-		List<ValueHint> hints = new ArrayList<>(hintValues.length);
+		index = null;
+		List<ValueHint> hints = datas.get(id).getHints().getKeyHints();
 		for (String value : hintValues) {
 			ValueHint hint = new ValueHint();
 			hint.setValue(value);
 			hints.add(hint);
 		}
-		info.addKeyHints(hints);
 	}
 
 	public void valueHints(String id, String... hintValues) {
-		PropertyInfo info = index.get(id);
-		List<ValueHint> hints = new ArrayList<>(hintValues.length);
+		index = null;
+		List<ValueHint> hints = datas.get(id).getHints().getValueHints();
 		for (String value : hintValues) {
 			ValueHint hint = new ValueHint();
 			hint.setValue(value);
 			hints.add(hint);
 		}
-		info.addValueHints(hints);
 	}
 
 	public void deprecate(String key, String replacedBy, String reason) {
-		PropertyInfo info = index.get(key);
+		index = null;
+		ConfigurationMetadataProperty info = datas.get(key);
 		Deprecation d = new Deprecation();
 		d.setReplacement(replacedBy);
 		d.setReason(reason);
@@ -130,8 +173,8 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	public void useProject(IJavaProject jp) throws Exception {
+		index = null;
 		this.javaProject  = jp;
-		this.index = new SpringPropertyIndex(jp, valueProviders);
 	}
 
 	public void useProject(IProject p) throws Exception {

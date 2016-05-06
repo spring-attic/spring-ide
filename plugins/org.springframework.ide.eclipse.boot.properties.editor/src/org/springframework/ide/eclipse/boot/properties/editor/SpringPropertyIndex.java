@@ -23,33 +23,43 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProv
 
 public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 
-	public SpringPropertyIndex(IJavaProject jp, ValueProviderRegistry valueProviders) {
-		try {
-			StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
-			ConfigurationMetadataRepository metadata = loader.load(jp);
-			//^^^ Should be done in bg? It seems fast enough for now.
+	private ValueProviderRegistry valueProviders;
 
-			Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
-			for (ConfigurationMetadataProperty item : allEntries) {
-				add(new PropertyInfo(valueProviders, item));
-			}
+	public SpringPropertyIndex(ValueProviderRegistry valueProviders, IJavaProject jp) {
+		this.valueProviders = valueProviders;
+		if (jp!=null) {
+			try {
+				StsConfigMetadataRepositoryJsonLoader loader = new StsConfigMetadataRepositoryJsonLoader();
+				ConfigurationMetadataRepository metadata = loader.load(jp);
+				//^^^ Should be done in bg? It seems fast enough for now.
 
-			for (ConfigurationMetadataGroup group : metadata.getAllGroups().values()) {
-				for (ConfigurationMetadataSource source : group.getSources().values()) {
-					for (ConfigurationMetadataProperty prop : source.getProperties().values()) {
-						PropertyInfo info = get(prop.getId());
-						info.addSource(source);
+				Collection<ConfigurationMetadataProperty> allEntries = metadata.getAllProperties().values();
+				for (ConfigurationMetadataProperty item : allEntries) {
+					add(new PropertyInfo(valueProviders, item));
+				}
+
+				for (ConfigurationMetadataGroup group : metadata.getAllGroups().values()) {
+					for (ConfigurationMetadataSource source : group.getSources().values()) {
+						for (ConfigurationMetadataProperty prop : source.getProperties().values()) {
+							PropertyInfo info = get(prop.getId());
+							info.addSource(source);
+						}
 					}
 				}
-			}
 
-//			System.out.println(">>> spring properties metadata loaded "+this.size()+" items===");
-//			dumpAsTestData();
-//			System.out.println(">>> spring properties metadata loaded "+this.size()+" items===");
-		} catch (Exception e) {
-			SpringPropertiesEditorPlugin.log(e);
+	//			System.out.println(">>> spring properties metadata loaded "+this.size()+" items===");
+	//			dumpAsTestData();
+	//			System.out.println(">>> spring properties metadata loaded "+this.size()+" items===");
+			} catch (Exception e) {
+				SpringPropertiesEditorPlugin.log(e);
+			}
 		}
 	}
+
+	public void add(ConfigurationMetadataProperty propertyInfo) {
+		add(new PropertyInfo(valueProviders, propertyInfo));
+	}
+
 	/**
 	 * Dumps out 'test data' based on the current contents of the index. This is not meant to be
 	 * used in 'production' code. The idea is to call this method during development to dump a
@@ -112,11 +122,8 @@ public class SpringPropertyIndex extends FuzzyMap<PropertyInfo> {
 		}
 	}
 
-	public SpringPropertyIndex() {}
-
 	@Override
 	protected String getKey(PropertyInfo entry) {
 		return entry.getId();
 	}
-
 }

@@ -18,6 +18,7 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.boot.configurationmetadata.ValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -62,7 +63,7 @@ public class PropertyInfo {
 	}
 
 	final private String id;
-	final private String type;
+	private String type;
 	final private String name;
 	final private Object defaultValue;
 	final private String description;
@@ -108,6 +109,16 @@ public class PropertyInfo {
 			valueProviders.resolve(prop.getHints().getKeyProviders()),
 			null
 		);
+		for (ValueProvider h : prop.getHints().getValueProviders()) {
+			if (h.getName().equals("handle-as")) {
+				handleAs(h.getParameters().get("target"));
+			}
+		}
+	}
+	private void handleAs(Object targetObject) {
+		if (targetObject instanceof String) {
+			this.type = (String)targetObject;
+		}
 	}
 	public String getId() {
 		return id;

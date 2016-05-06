@@ -47,7 +47,7 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 	// in clearing the entire cache.
 	// Probably this is okay, since reading the data is pretty fast.
 
-	private Map<String, FuzzyMap<PropertyInfo>> indexes = null;
+	private Map<String, SpringPropertyIndex> indexes = null;
 	final private ValueProviderRegistry valueProviders;
 
 	public SpringPropertiesIndexManager(ValueProviderRegistry valueProviders) {
@@ -59,11 +59,11 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 	public synchronized FuzzyMap<PropertyInfo> get(IJavaProject jp) {
 		String key = jp.getElementName();
 		if (indexes==null) {
-			indexes = new HashMap<String, FuzzyMap<PropertyInfo>>();
+			indexes = new HashMap<>();
 		}
-		FuzzyMap<PropertyInfo> index = indexes.get(key);
+		SpringPropertyIndex index = indexes.get(key);
 		if (index==null) {
-			index = new SpringPropertyIndex(jp, valueProviders);
+			index = new SpringPropertyIndex(valueProviders, jp);
 			indexes.put(key, index);
 		}
 		return index;

@@ -570,7 +570,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"    bad: BLUE\n" +
 				"  color: Bogus\n"
 		);
-		assertTrue(index.isEmpty());
+		assertTrue(datas.isEmpty());
 		assertProblems(editor
 				//nothing
 		);

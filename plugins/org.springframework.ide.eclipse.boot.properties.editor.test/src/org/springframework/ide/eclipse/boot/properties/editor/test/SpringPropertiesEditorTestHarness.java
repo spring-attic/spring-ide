@@ -51,11 +51,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		super.setUp();
 		engine = new SpringPropertiesCompletionEngine();
 		engine.setDocumentContextFinder(documentContextFinder);
-		engine.setIndexProvider(new Provider<FuzzyMap<PropertyInfo>>() {
-			public FuzzyMap<PropertyInfo> get() {
-				return index;
-			}
-		});
+		engine.setIndexProvider(() -> indexProvider.getIndex(null));
 		engine.setTypeUtil(new TypeUtil(javaProject));
 	}
 

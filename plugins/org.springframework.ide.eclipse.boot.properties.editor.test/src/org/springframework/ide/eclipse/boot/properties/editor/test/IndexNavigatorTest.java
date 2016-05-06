@@ -102,7 +102,7 @@ public class IndexNavigatorTest extends ApplicationYamlEditorTestHarness {
 	 * Reset navigation state to point at the root of the index.
 	 */
 	public void start() {
-		navigator = IndexNavigator.with(index);
+		navigator = IndexNavigator.with(indexProvider.getIndex(null));
 	}
 
 	/**

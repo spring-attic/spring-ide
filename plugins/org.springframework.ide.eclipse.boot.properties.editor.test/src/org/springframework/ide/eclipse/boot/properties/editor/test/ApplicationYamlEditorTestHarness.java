@@ -22,9 +22,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
+import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
@@ -50,13 +53,6 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 	protected YamlStructureProvider structureProvider = ApplicationYamlStructureProvider.INSTANCE;
 	protected Yaml yaml = new Yaml();
 	protected YamlASTProvider parser = new YamlASTProvider(yaml);
-	private SpringPropertyIndexProvider indexProvider = new SpringPropertyIndexProvider() {
-		public FuzzyMap<PropertyInfo> getIndex(IDocument doc) {
-			return index;
-		}
-	};
-
-
 
 	private TypeUtilProvider typeUtilProvider = new TypeUtilProvider() {
 		public TypeUtil getTypeUtil(IDocument doc) {
