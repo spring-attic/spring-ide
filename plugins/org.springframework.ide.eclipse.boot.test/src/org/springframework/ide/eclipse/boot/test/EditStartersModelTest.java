@@ -63,6 +63,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -209,6 +210,11 @@ public class EditStartersModelTest {
 		wizard.performOk();
 
 		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+
+		System.out.println(">>> pom.xml (after dialog closed)");
+		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+		System.out.println("<<< pom.xml (after dialog closed)");
+
 		StsTestUtil.assertNoErrors(project); //force project build
 
 		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka");
