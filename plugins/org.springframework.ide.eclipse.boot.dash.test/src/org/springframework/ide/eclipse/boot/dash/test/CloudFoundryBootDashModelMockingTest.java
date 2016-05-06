@@ -95,6 +95,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -1312,6 +1313,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				try {
 					assertEqualStreams(expectedBits, actualBits);
 				} catch (Exception e) {
+					System.out.println("Failed: "+ExceptionUtil.getMessage(e));
 					saveArtefacts(referenceJar, app);
 					throw e;
 				}
@@ -1320,7 +1322,9 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	private void saveArtefacts(File referenceJar, MockCFApplication app) throws IOException {
+		System.out.println("Trying to save jars...");
 		File targetDir = getSaveDir();
+		System.out.println("targetDir = "+targetDir);
 		if (targetDir!=null) {
 			int id = uniqueId++;
 			File referenceJarCopy = new File(targetDir, "deployed-reference-"+id+".jar");
