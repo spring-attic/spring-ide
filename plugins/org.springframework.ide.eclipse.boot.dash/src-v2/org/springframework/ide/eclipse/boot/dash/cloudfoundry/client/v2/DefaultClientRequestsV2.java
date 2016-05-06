@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.cloudfoundry.client.CloudFoundryClient;
@@ -63,9 +62,7 @@ import org.cloudfoundry.operations.services.CreateUserProvidedServiceInstanceReq
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
-import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
-import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -190,11 +187,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private ApplicationExtras getApplicationExtras(String appName) {
 		//Stuff used in computing the 'extras'...
-		Mono<String> appIdMono = getApplicationId(appName);
+		Mono<UUID> appIdMono = getApplicationId(appName);
 		Mono<ApplicationEntity> entity = appIdMono
 			.then((appId) ->
 				client.applicationsV2().get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
-					.applicationId(appId)
+					.applicationId(appId.toString())
 					.build()
 				)
 			)
@@ -310,10 +307,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception {
 		return Flux.fromIterable(appsToLookUp)
 		.flatMap((CFApplication appSummary) -> {
-			return operations.applications().get(GetApplicationRequest.builder()
-					.name(appSummary.getName())
-					.build()
-			)
+			return getApplicationDetail(appSummary.getName())
 			.otherwise((error) -> {
 				BootDashActivator.log(ExceptionUtil.coreException("getting application details for '"+appSummary.getName()+"' failed", error));
 				return Mono.empty();
@@ -422,7 +416,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			public String getSshUser(String appName, int instance) throws Exception {
 				return ReactorUtils.get(
 						getApplicationId(appName)
-						.map((guid) -> getSshUser(UUID.fromString(guid), instance))
+						.map((guid) -> getSshUser(guid, instance))
 				);
 			}
 
@@ -556,10 +550,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<CFApplicationDetail> getApplicationMono(String appName) {
-		return operations.applications().get(GetApplicationRequest.builder()
-				.name(appName)
-				.build()
-		)
+		return getApplicationDetail(appName)
 		.map((appDetail) -> {
 			//TODO: we have 'real' appdetails now so we could get most of the 'application extras' info from that.
 			return CFWrappingV2.wrap(appDetail, getApplicationExtras(appName));
@@ -606,15 +597,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.doOnError((e) -> debug("operations.push ERROR:" + ExceptionUtil.getMessage(e)))
 			.doOnCancel(() -> debug("operations.push CANCEL"))
 			.doOnSuccess((x) -> debug("operations.push SUCCESS "+x))
-			.after(() ->
-				Flux.merge(
-					setRoutes(params.getAppName(), params.getRoutes()),
-					setEnvVars(params.getAppName(), params.getEnv()),
+			.then(getApplicationDetail(params.getAppName()))
+			.then(appDetail -> {
+				return Flux.merge(
+					setRoutes(appDetail, params.getRoutes()),
+					setEnvVars(appDetail, params.getEnv()),
 					bindAndUnbindServices(params.getAppName(), params.getServices())
 				)
-				.after()
-			)
-			.after(() -> {
+				.then();
+			})
+			.then(() -> {
 				if (!params.isNoStart()) {
 					return startApp(params.getAppName());
 				} else {
@@ -625,42 +617,54 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		debug("Pushing app succeeded: "+params.getAppName());
 	}
 
+	private Mono<ApplicationDetail> getApplicationDetail(String appName) {
+		return operations.applications().get(GetApplicationRequest.builder()
+				.name(appName)
+				.build()
+		);
+	}
+
 	private <T> T dump(T x) {
 		debug(""+x);
 		return x;
 	}
 
-	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls) {
-		debug("setting routes for '"+appName+"': "+desiredUrls);
+	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<String> desiredUrls) {
+		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls);
 
 		//Carefull! It is not safe map/unnmap multiple routes in parallel. Doing so causes some of the
 		// operations to fail, presumably because of some 'optimisitic locking' being used in the database
 		// that keeps track of routes.
 		//To avoid this problem we must execute all that map / unmap calls in sequence!
 		return ReactorUtils.sequence(
-				unmapUndesiredRoutes(appName, desiredUrls),
-				mapDesiredRoutes(appName, desiredUrls)
+				unmapUndesiredRoutes(appDetails.getName(), desiredUrls),
+				mapDesiredRoutes(appDetails, desiredUrls)
 		);
+
 	}
 
-	private Mono<Void> mapDesiredRoutes(String appName, Collection<String> desiredUrls) {
-		Mono<Set<String>> currentUrlsMono = getUrls(appName).cache();
-		Mono<Set<String>> domains = getDomainNames().cache();
+	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls) {
+		return getApplicationDetail(appName)
+		.then(appDetails -> setRoutes(appDetails, desiredUrls));
+	}
 
-		return currentUrlsMono.then((currentUrls) -> {
-			debug("currentUrls = "+currentUrls);
-			return Flux.fromIterable(desiredUrls)
-			.flatMap((url) -> {
-				if (currentUrls.contains(url)) {
-					debug("skipping: "+url);
-					return Mono.empty();
-				} else {
-					debug("mapping: "+url);
-					return mapRoute(domains, appName, url);
-				}
-			}, 1) //!!!IN SEQUENCE!!!
-			.after();
-		});
+	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, Collection<String> desiredUrls) {
+		Set<String> currentUrls = ImmutableSet.copyOf(appDetail.getUrls());
+		Mono<Set<String>> domains = getDomainNames().cache();
+		String appName = appDetail.getName();
+
+		debug("currentUrls = "+currentUrls);
+		return Flux.fromIterable(desiredUrls)
+		.flatMap((url) -> {
+			if (currentUrls.contains(url)) {
+				debug("skipping: "+url);
+				return Mono.empty();
+			} else {
+				debug("mapping: "+url);
+				return mapRoute(domains, appName, url);
+			}
+		}, 1) //!!!IN SEQUENCE!!!
+		.then();
 	}
 
 	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl) {
@@ -710,13 +714,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.map(ImmutableSet::copyOf);
 	}
 
-	private Mono<Set<String>> getUrls(String appName) {
-		return operations.applications().get(GetApplicationRequest.builder()
-				.name(appName)
-				.build()
-		)
-		.map((app) -> ImmutableSet.copyOf(app.getUrls()));
-	}
+//	private Set<String> getUrls(ApplicationDetail app) {
+//		return operations.applications().get(GetApplicationRequest.builder()
+//				.name(appName)
+//				.build()
+//		)
+//		.map((app) -> ImmutableSet.copyOf(app.getUrls()));
+//	}
 
 	private Mono<Void> unmapUndesiredRoutes(String appName, Collection<String> desiredUrls) {
 		return getExistingRoutes(appName)
@@ -730,7 +734,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				return unmapRoute(appName, route);
 			}
 		}, 1) //!!!IN SEQUENCE!!!
-		.after();
+		.then();
 	}
 
 	private String getUrl(Route route) {
@@ -869,22 +873,29 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	private Mono<String> getApplicationId(String appName) {
-		return getApplicationMono(appName)
-		.map((app) -> app.getGuid().toString())
-		.cache();
+	private Mono<UUID> getApplicationId(String appName) {
+		return operations.applications().get(GetApplicationRequest.builder()
+				.name(appName)
+				.build()
+		).map((app) -> UUID.fromString(app.getId()));
+	}
+
+	public Mono<Void> setEnvVars(ApplicationDetail appDetail, Map<String, String> environment) {
+		return setEnvVars(UUID.fromString(appDetail.getId()), environment);
+	}
+
+	public Mono<Void> setEnvVars(UUID appId, Map<String, String> environment) {
+		return client.applicationsV2()
+		.update(UpdateApplicationRequest.builder()
+				.applicationId(appId.toString())
+				.environmentJsons(environment)
+				.build())
+		.after();
 	}
 
 	public Mono<Void> setEnvVars(String appName, Map<String, String> environment) {
 		return getApplicationId(appName)
-		.then(applicationId -> {
-			return client.applicationsV2()
-			.update(UpdateApplicationRequest.builder()
-					.applicationId(applicationId)
-					.environmentJsons(environment)
-					.build())
-			.after();
-		});
+		.then((applicationId) -> setEnvVars(applicationId, environment));
 	}
 
 	protected Publisher<? extends Object> setEnvVar(String appName, String var, String value) {
