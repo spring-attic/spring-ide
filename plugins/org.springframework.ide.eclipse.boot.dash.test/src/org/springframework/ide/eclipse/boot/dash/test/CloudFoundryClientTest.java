@@ -614,6 +614,24 @@ public class CloudFoundryClientTest {
 		verify(listener, atLeastOnce()).onMessage(any());
 	}
 
+//	@Test
+//	public void testGetExistingRoutes() throws Exception {
+//		String appName = "foo";//appHarness.randomAppName();
+//
+////		CFPushArguments params = new CFPushArguments();
+////		params.setAppName(appName);
+////		params.setApplicationData(getTestZip("testapp"));
+////		params.setBuildpack("staticfile_buildpack");
+////		push(params);
+//
+//		for (int i = 0; i < 3; i++) {
+//			System.out.println("====================");
+//			assertTrue(client.getExistingRoutes(appName).toList().get().isEmpty());
+//		}
+//	}
+
+
+
 	@Test
 	public void testGetApplicationBuildpack() throws Exception {
 		String appName = appHarness.randomAppName();

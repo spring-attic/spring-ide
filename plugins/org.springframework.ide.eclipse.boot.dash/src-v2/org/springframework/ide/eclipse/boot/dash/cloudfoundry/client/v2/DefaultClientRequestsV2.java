@@ -640,7 +640,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				unmapUndesiredRoutes(appDetails.getName(), desiredUrls),
 				mapDesiredRoutes(appDetails, desiredUrls)
 		);
-
 	}
 
 	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls) {
@@ -769,7 +768,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	private Flux<Route> getExistingRoutes(String appName) {
+	public Flux<Route> getExistingRoutes(String appName) {
 		return operations.routes().list(ListRoutesRequest.builder()
 				.level(Level.SPACE)
 				.build()
