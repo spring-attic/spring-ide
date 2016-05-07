@@ -15,7 +15,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -157,7 +159,7 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					// create project command
 					String projectLocation = projectFile.getCanonicalPath();
 
-					bootstrap = new Bootstrap(projectLocation, install.getHome(), install.getVersion(), new ProjectRefresher(null));
+					bootstrap = new Bootstrap(null, projectLocation, install.getHome(), install.getVersion(), new ProjectRefresher(null));
 
 					// Init Roo shell
 					bootstrap.start(new StyledTextAppender(shellPage.getRooShell()), projectPage.getProjectName());
@@ -180,24 +182,24 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					builder.append(createCommand);
 					builder.append(" --topLevelPackage ").append(projectPage.getPackageName());
 					if (type == ProjectType.PROJECT) {
-						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --projectName ").append("\"").append(projectPage.getProjectName()).append("\"");
 						builder.append(" --java ").append(rooJavaVersion);
 						if (RooUiUtil.isRoo120OrGreater(install)) {
 							builder.append(" --packaging ").append(packagingProvider);
 						}
 					}
 					else if(type == ProjectType.MULTIMODULE_STANDARD){
-						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --projectName ").append("\"").append(projectPage.getProjectName()).append("\"");
 						builder.append(" --java ").append(rooJavaVersion);
 						builder.append(" --multimodule STANDARD");
 					}
 					else if(type == ProjectType.MULTIMODULE_BASIC){
-						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --projectName ").append("\"").append(projectPage.getProjectName()).append("\"");
 						builder.append(" --java ").append(rooJavaVersion);
 						builder.append(" --multimodule BASIC");
 					}
 					else if(type == ProjectType.ADDON_SUITE){
-						builder.append(" --projectName ").append(projectPage.getProjectName());
+						builder.append(" --projectName ").append("\"").append(projectPage.getProjectName()).append("\"");
 						builder.append(" --description \"").append(projectPage.getDescription()).append("\"");
 
 					}else{
@@ -252,8 +254,10 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					project.create(desc, new NullProgressMonitor());
 					project.open(0, new NullProgressMonitor());
 					project.setDescription(desc, new NullProgressMonitor());
-
-					if (type == ProjectType.PROJECT) {
+					
+					// ROO-3726: Also check MULTIMODULE projects
+					if (type == ProjectType.PROJECT || type == ProjectType.MULTIMODULE_STANDARD 
+							|| type == ProjectType.MULTIMODULE_BASIC) {
 						if (!RooUiUtil.isRoo120OrGreater(install) || "jar".equalsIgnoreCase(packagingProvider)
 								|| "war".equalsIgnoreCase(packagingProvider)) {
 							// For now, only Java projects & web projects
@@ -281,6 +285,84 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					
 					if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT) {
 						DependencyManagementUtils.installDependencyManagement(project, dependencyManagement);
+					}
+					
+					// ROO-3726: If project type is MULTIMODULE_BASIC or MULTIMODULE_STANDARD, also import modules
+					List<IProject> modules = new ArrayList<IProject>();
+
+					if(type == ProjectType.MULTIMODULE_BASIC){
+						// Import application module project
+						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
+						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
+						applicationModuleDescription.setLocation(new Path(projectLocation + "/application"));
+						applicationModuleProject.create(applicationModuleDescription, new NullProgressMonitor());
+						applicationModuleProject.open(0, new NullProgressMonitor());
+						applicationModuleProject.setDescription(applicationModuleDescription, new NullProgressMonitor());
+						modules.add(applicationModuleProject);
+					}else if(type == ProjectType.MULTIMODULE_STANDARD){
+						// Import model module project
+						IProject modelModuleProject = workspace.getRoot().getProject("model".concat(":").concat(project.getName()));
+						IProjectDescription modelModuleDescription = workspace.newProjectDescription("model".concat(":").concat(project.getName()));
+						modelModuleDescription.setLocation(new Path(projectLocation + "/model"));
+						modelModuleProject.create(modelModuleDescription, new NullProgressMonitor());
+						modelModuleProject.open(0, new NullProgressMonitor());
+						modelModuleProject.setDescription(modelModuleDescription, new NullProgressMonitor());
+						modules.add(modelModuleProject);
+						
+						// Import repository module project
+						IProject repositoryModuleProject = workspace.getRoot().getProject("repository".concat(":").concat(project.getName()));
+						repositoryModuleProject.exists();
+						IProjectDescription repositoryModuleDescription = workspace.newProjectDescription("repository".concat(":").concat(project.getName()));
+						repositoryModuleDescription.setLocation(new Path(projectLocation + "/repository"));
+						repositoryModuleProject.create(repositoryModuleDescription, new NullProgressMonitor());
+						repositoryModuleProject.open(0, new NullProgressMonitor());
+						repositoryModuleProject.setDescription(repositoryModuleDescription, new NullProgressMonitor());
+						modules.add(repositoryModuleProject);
+						
+						// Import service-api module project
+						IProject serviceApiModuleProject = workspace.getRoot().getProject("service-api".concat(":").concat(project.getName()));
+						IProjectDescription serviceApiModuleDescription = workspace.newProjectDescription("service-api".concat(":").concat(project.getName()));
+						serviceApiModuleDescription.setLocation(new Path(projectLocation + "/service-api"));
+						serviceApiModuleProject.create(serviceApiModuleDescription, new NullProgressMonitor());
+						serviceApiModuleProject.open(0, new NullProgressMonitor());
+						serviceApiModuleProject.setDescription(serviceApiModuleDescription, new NullProgressMonitor());
+						modules.add(serviceApiModuleProject);
+						
+						// Import service-impl module project
+						IProject serviceImplModuleProject = workspace.getRoot().getProject("service-impl".concat(":").concat(project.getName()));
+						IProjectDescription serviceApiImplDescription = workspace.newProjectDescription("service-impl".concat(":").concat(project.getName()));
+						serviceApiImplDescription.setLocation(new Path(projectLocation + "/service-impl"));
+						serviceImplModuleProject.create(serviceApiImplDescription, new NullProgressMonitor());
+						serviceImplModuleProject.open(0, new NullProgressMonitor());
+						serviceImplModuleProject.setDescription(serviceApiImplDescription, new NullProgressMonitor());
+						modules.add(serviceImplModuleProject);
+						
+						// Import application module project
+						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
+						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
+						applicationModuleDescription.setLocation(new Path(projectLocation + "/application"));
+						applicationModuleProject.create(applicationModuleDescription, new NullProgressMonitor());
+						applicationModuleProject.open(0, new NullProgressMonitor());
+						applicationModuleProject.setDescription(applicationModuleDescription, new NullProgressMonitor());
+						modules.add(applicationModuleProject);
+					}
+					
+					
+					// ROO-3726: If some modules have been imported, configure them.
+					for(IProject module : modules){
+						SpringCoreUtils.addProjectNature(module, SpringCore.NATURE_ID, new NullProgressMonitor());
+						SpringCoreUtils.addProjectNature(module, RooCoreActivator.NATURE_ID, new NullProgressMonitor());
+						
+						SpringCorePreferences.getProjectPreferences(module, RooCoreActivator.PLUGIN_ID).putBoolean(
+								RooCoreActivator.PROJECT_PROPERTY_ID, useDefault);
+						SpringCorePreferences.getProjectPreferences(module, RooCoreActivator.PLUGIN_ID).putString(
+								RooCoreActivator.ROO_INSTALL_PROPERTY, rooInstall);
+						
+						configureProjectUi(module);
+						
+						if (DependencyManagementUtils.IS_M2ECLIPSE_PRESENT) {
+							DependencyManagementUtils.installDependencyManagement(module, dependencyManagement);
+						}
 					}
 					
 					new OpenShellJob(project).schedule();

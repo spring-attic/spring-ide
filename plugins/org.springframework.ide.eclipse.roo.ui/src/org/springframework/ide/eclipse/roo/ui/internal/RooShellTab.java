@@ -1,12 +1,13 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal;
 
@@ -48,7 +49,6 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -86,6 +86,7 @@ import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
  * @author Christian Dupuis
  * @author Steffen Pingel
  * @author Kris De Volder
+ * @author Juan Carlos García
  * @since 2.5.0
  */
 public class RooShellTab {
@@ -436,7 +437,7 @@ public class RooShellTab {
 
 				try {
 					ProjectRefresher refresher = new ProjectRefresher(project);
-					bootstrap = new Bootstrap(projectLocation, install.getHome(), install.getVersion(), refresher);
+					bootstrap = new Bootstrap(project, projectLocation, install.getHome(), install.getVersion(), refresher);
 					bootstrap.start(appender, project.getName());
 
 					setEnabled(true);
