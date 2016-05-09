@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.Platform;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.boot.configurationmetadata.Deprecation;
@@ -36,6 +37,13 @@ import com.google.common.collect.ImmutableList.Builder;
  * @author Kris De Volder
  */
 public class PropertyInfo {
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG)
+			System.out.println(string);
+	}
 
 	/**
 	 * Identifies a 'Source'. This is essentially the sames as {@link ConfigurationMetadataSource}.
@@ -116,6 +124,7 @@ public class PropertyInfo {
 		}
 	}
 	private void handleAs(Object targetObject) {
+		debug("handle-as "+this.getId()+" -> "+targetObject);
 		if (targetObject instanceof String) {
 			this.type = (String)targetObject;
 		}

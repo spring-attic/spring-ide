@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
 import java.time.Duration;
-import java.util.Collection;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;

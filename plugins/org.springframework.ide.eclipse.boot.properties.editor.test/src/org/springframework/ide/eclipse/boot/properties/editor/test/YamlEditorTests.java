@@ -2856,6 +2856,31 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testHandleAsResourceContentAssist() throws Exception {
+		//"name": "my.terms-and-conditions",
+		//        "providers": [
+		//                      {
+		//                          "name": "handle-as",
+		//                          "parameters": {
+		//                              "target": "org.springframework.core.io.Resource"
+		//                          }
+		//                      }
+		//                  ]
+		data("my.terms-and-conditions", "java.lang.String", null, "Terms and Conditions text file")
+		.provider("handle-as", "target", "org.springframework.core.io.Resource");
+
+		assertCompletionsDisplayString(
+				"my:\n" +
+				"  terms-and-conditions: <*>"
+				, // =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
+		);
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {

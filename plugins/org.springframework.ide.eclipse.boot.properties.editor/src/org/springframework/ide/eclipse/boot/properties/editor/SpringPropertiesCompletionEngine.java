@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Provider;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jface.fieldassist.ContentProposal;
@@ -33,7 +34,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
@@ -76,7 +76,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	 */
 	public static final Pattern ASSIGN = Pattern.compile("^(\\h)*(=|:)(\\h|\\\\\\s)*");
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	public static void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("SpringPropertiesCompletionEngine: "+msg);
