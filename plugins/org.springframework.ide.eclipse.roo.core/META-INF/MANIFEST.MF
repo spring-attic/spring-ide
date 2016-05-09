@@ -22,6 +22,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ajdt.core;bundle-version="2.0.0";resolution:=optional,
  org.springsource.ide.eclipse.commons.configurator,
  org.springframework.ide.eclipse.ui,
+ org.springsource.ide.eclipse.commons.core,
  org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true

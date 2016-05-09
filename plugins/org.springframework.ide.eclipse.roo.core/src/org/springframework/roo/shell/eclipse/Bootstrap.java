@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2015 VMware, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
  *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.roo.shell.eclipse;
@@ -20,18 +20,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
 import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.commands.CommandFactory;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.commands.ICommandListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.commands.ICommandParameterDescriptor;
@@ -65,10 +74,13 @@ public class Bootstrap {
 	private final String rooHome;
 
 	private Object shell;
-
+	
 	private final String rooVersion;
+	
+	private IProject project;
 
-	public Bootstrap(String projectLocation, String rooHome, String rooVersion, Object projectRefresher) {
+	public Bootstrap(IProject project, String projectLocation, String rooHome, String rooVersion, Object projectRefresher) {
+		this.project = project;
 		this.projectLocation = projectLocation;
 		this.rooHome = rooHome;
 		this.rooVersion = rooVersion;
@@ -89,7 +101,30 @@ public class Bootstrap {
 	public void execute(String command) {
 		if (shell != null) {
 			try {
-				ClassUtils.invokeMethod(shell, "executeCommand", command);
+				boolean result = (Boolean) ClassUtils.invokeMethod(shell, "executeCommand", command);
+				
+				// ROO-3726: If new module has been create, import it to workspace
+				if(command.startsWith("module create --moduleName ") && result){
+					
+					// Getting module name
+					String moduleName = command.replace("module create --moduleName ", "").split(" ")[0];
+					// Adding module to workspace
+					IWorkspace workspace = ResourcesPlugin.getWorkspace();
+					IProject moduleProject = workspace.getRoot().getProject(moduleName.concat(":").concat(project.getName()));
+					IProjectDescription moduleDescription = workspace.newProjectDescription(moduleName.concat(":").concat(project.getName()));
+					moduleDescription.setLocation(new Path(projectLocation.concat("/").concat(moduleName)));
+					moduleProject.create(moduleDescription, new NullProgressMonitor());
+					moduleProject.open(0, new NullProgressMonitor());
+					moduleProject.setDescription(moduleDescription, new NullProgressMonitor());
+					
+					SpringCoreUtils.addProjectNature(moduleProject, SpringCore.NATURE_ID, new NullProgressMonitor());
+					
+				}
+				
+				// Always refresh the project after execute a command
+				project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+				
+				
 			}
 			catch (Throwable e) {
 				RooCoreActivator.log(e);
@@ -271,7 +306,7 @@ public class Bootstrap {
 //		}
 //		return null;
 //	}
-
+	
 	public void trust(PgpKeyId keyId) {
 		ServiceReference reference = framework.getBundleContext().getServiceReference(PgpService.class.getName());
 		if (reference != null) {
@@ -624,7 +659,7 @@ public class Bootstrap {
 			}
 		}
 	}
-
+	
 	public class RooShellStartupMonitor implements Runnable {
 
 		private static final long STARTUP_TIMEOUT = 60 * 1000;
