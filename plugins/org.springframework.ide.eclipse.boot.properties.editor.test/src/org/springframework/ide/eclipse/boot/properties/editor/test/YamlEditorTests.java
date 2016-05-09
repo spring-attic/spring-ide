@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 
 /**
@@ -2878,6 +2879,21 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"file:",
 				"http://",
 				"https://"
+		);
+	}
+
+	public void testBootBug5905() throws Exception {
+		useProject(createPredefinedMavenProject("demo-with-resource-prop"));
+
+		//Check the metadata reflects the 'handle-as':
+		PropertyInfo metadata = indexProvider.getIndex(null).get("my.welcome.path");
+		assertEquals("org.springframework.core.io.Resource", metadata.getType());
+
+		//Check the content assist based on it works too:
+		assertCompletionsDisplayString(
+				"my:\n"+
+				"  welcome:\n" +
+				"    path: <*>"
 		);
 	}
 
