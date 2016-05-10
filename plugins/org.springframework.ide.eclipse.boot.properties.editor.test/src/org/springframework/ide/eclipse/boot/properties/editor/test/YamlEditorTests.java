@@ -14,6 +14,7 @@ import java.time.Duration;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
@@ -69,8 +70,15 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testHoverInfoForEnumValueInMapKey() throws Exception {
-		useProject(createPredefinedMavenProject("boot13"));
+		IJavaProject project = JavaCore.create(createPredefinedMavenProject("boot13"));
+		useProject(project);
 		MockYamlEditor editor;
+
+		//This test will fail if source jars haven't been downloaded.
+		//Probably that is why it fails in CI build?
+		//Let's check:
+		IType type = project.findType("com.fasterxml.jackson.databind.SerializationFeature");
+		assertNotNull("Source jars missing?", type.getOpenable().getBuffer());
 
 		editor = new YamlEditor(
 				"spring:\n" +
