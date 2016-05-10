@@ -815,12 +815,28 @@ public class TypeUtil {
 
 	public IField getField(Type beanType, String propName) {
 		IType type = findType(beanType);
-		IField f = type.getField(StringUtil.hyphensToCamelCase(propName, false));
-		if (f.exists()) {
+		return getExactField(type, propName);
+	}
+
+	protected IField getExactField(IType type, String fieldName) {
+		IField f = type.getField(StringUtil.hyphensToCamelCase(fieldName, false));
+		if (f!=null && f.exists()) {
 			return f;
 		}
 		return null;
 	}
+
+	public IField getEnumConstant(Type enumType, String propName) {
+		IType type = findType(enumType);
+		//1: if propname is already spelled exactly...
+		IField f = getExactField(type, propName);
+		if (f!=null) return f;
+
+		//2: most likely enum constant is upper-case form of propname
+		String fieldName = StringUtil.hyphensToUpperCase(propName);
+		return getExactField(type, fieldName);
+	}
+
 
 	public IMethod getSetter(Type beanType, String propName) {
 		try {
@@ -902,6 +918,7 @@ public class TypeUtil {
 		}
 		return dim;
 	}
+
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Addapting our interface so it is compatible with YTypeUtil

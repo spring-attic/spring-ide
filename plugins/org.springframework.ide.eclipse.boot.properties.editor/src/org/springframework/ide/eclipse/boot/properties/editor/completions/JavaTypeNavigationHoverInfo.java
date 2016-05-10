@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -28,6 +29,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -175,15 +178,25 @@ public class JavaTypeNavigationHoverInfo extends AbstractPropertyHoverInfo {
 	private List<IJavaElement> getAllJavaElements() {
 		if (propName!=null) {
 			Type beanType = parentType;
-			ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>(3);
-			maybeAdd(elements, typeUtil.getField(beanType, propName));
-			maybeAdd(elements, typeUtil.getSetter(beanType, propName));
-			maybeAdd(elements, typeUtil.getGetter(beanType, propName));
-			if (!elements.isEmpty()) {
-				return elements;
+			if (TypeUtil.isMap(beanType)) {
+				Type keyType = typeUtil.getKeyType(beanType);
+				if (keyType!=null && typeUtil.isEnum(keyType)) {
+					IField field = typeUtil.getEnumConstant(keyType, propName);
+					if (field!=null) {
+						return ImmutableList.of(field);
+					}
+				}
+			} else {
+				ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>(3);
+				maybeAdd(elements, typeUtil.getField(beanType, propName));
+				maybeAdd(elements, typeUtil.getSetter(beanType, propName));
+				maybeAdd(elements, typeUtil.getGetter(beanType, propName));
+				if (!elements.isEmpty()) {
+					return elements;
+				}
 			}
 		}
-		return Collections.emptyList();
+		return ImmutableList.of();
 	}
 
 	private void maybeAdd(ArrayList<IJavaElement> elements, IJavaElement e) {

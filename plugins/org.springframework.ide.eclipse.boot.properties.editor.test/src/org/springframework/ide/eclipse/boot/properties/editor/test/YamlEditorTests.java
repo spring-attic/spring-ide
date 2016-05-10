@@ -70,7 +70,9 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testHoverInfoForEnumValueInMapKey() throws Exception {
 		useProject(createPredefinedMavenProject("boot13"));
-		MockYamlEditor editor = new YamlEditor(
+		MockYamlEditor editor;
+
+		editor = new YamlEditor(
 				"spring:\n" +
 				"  jackson:\n" +
 				"    serialization:\n" +
@@ -78,6 +80,16 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 		editor.assertIsHoverRegion("indent-output");
 		editor.assertHoverContains("indent-output", "allows enabling (or disabling) indentation");
+
+		//Also try that it works when spelled in all upper-case
+		editor = new YamlEditor(
+				"spring:\n" +
+				"  jackson:\n" +
+				"    serialization:\n" +
+				"      INDENT_OUTPUT: true"
+		);
+		editor.assertIsHoverRegion("INDENT_OUTPUT");
+		editor.assertHoverContains("INDENT_OUTPUT", "allows enabling (or disabling) indentation");
 	}
 
 	public void testUserDefinedHoversandLinkTargets() throws Exception {

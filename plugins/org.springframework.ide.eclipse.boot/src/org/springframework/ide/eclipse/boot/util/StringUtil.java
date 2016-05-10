@@ -96,6 +96,13 @@ public class StringUtil {
 		return null;
 	}
 
+	public static String hyphensToUpperCase(String v) {
+		if (v!=null) {
+			return v.toUpperCase().replace('-', '_');
+		}
+		return null;
+	}
+
 	public static String hyphensToCamelCase(String propName, boolean startWithUpperCase) {
 		String [] parts = propName.split("-");
 		if (startWithUpperCase) {
@@ -107,6 +114,7 @@ public class StringUtil {
 		}
 		return camelCased.toString();
 	}
+
 
 	public static String upCaseFirstChar(String string) {
 		if (StringUtil.hasText(string)) {
