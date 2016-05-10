@@ -68,6 +68,18 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		editor.assertNoHover("error");
 	}
 
+	public void testHoverInfoForEnumValueInMapKey() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+		MockYamlEditor editor = new YamlEditor(
+				"spring:\n" +
+				"  jackson:\n" +
+				"    serialization:\n" +
+				"      indent-output: true"
+		);
+		editor.assertIsHoverRegion("indent-output");
+		editor.assertHoverContains("indent-output", "allows enabling (or disabling) indentation");
+	}
+
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
