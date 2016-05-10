@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -853,8 +854,9 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * <p>
 	 * Will do nothing if source for given type is already available. Will
 	 * fail if cannot obtain source code for the type.
+	 * @return
 	 */
-	public void downloadSources(IType element) throws Exception {
+	public String downloadSources(IType element) throws Exception {
 		boolean hasSources = false; //hasSources(element);
 		if (!hasSources) {
 			IClasspathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
@@ -865,6 +867,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 				hasSources(element);
 			});
 		}
+		return element.getOpenable().getBuffer().getContents();
 	}
 
 }
