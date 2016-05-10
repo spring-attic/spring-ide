@@ -39,13 +39,13 @@ class JsonReader {
 
 	private final DescriptionExtractor descriptionExtractor = new DescriptionExtractor();
 
-	public RawConfigurationMetadata read(InputStream in, Charset charset)
+	public RawConfigurationMetadata read(Object origin, InputStream in, Charset charset)
 			throws IOException {
 		JSONObject json = readJson(in, charset);
 		List<ConfigurationMetadataSource> groups = parseAllSources(json);
 		List<ConfigurationMetadataItem> items = parseAllItems(json);
 		List<ConfigurationMetadataHint> hints = parseAllHints(json);
-		return new RawConfigurationMetadata(groups, items, hints);
+		return new RawConfigurationMetadata(origin, groups, items, hints);
 	}
 
 	private List<ConfigurationMetadataSource> parseAllSources(JSONObject root) {

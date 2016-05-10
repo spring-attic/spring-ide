@@ -40,13 +40,23 @@ import org.springframework.ide.eclipse.boot.util.FileUtil;
  */
 public class StsConfigMetadataRepositoryJsonLoader {
 
+	private static final String MAIN_SPRING_CONFIGURATION_METADATA_JSON = "META-INF/spring-configuration-metadata.json";
+
 	public static final String ADDITIONAL_SPRING_CONFIGURATION_METADATA_JSON = "META-INF/additional-spring-configuration-metadata.json";
 
 	/**
-	 * The default classpath location for config metadata.
+	 * The default classpath location for config metadata loaded when scanning .jar files on the classpath.
 	 */
-	public static final String[] META_DATA_LOCATIONS = {
-		"META-INF/spring-configuration-metadata.json",
+	public static final String[] JAR_META_DATA_LOCATIONS = {
+		MAIN_SPRING_CONFIGURATION_METADATA_JSON
+		//Not scanning 'additional' metadata because it integrated already in the main data.
+	};
+
+	/**
+	 * The default classpath location for config metadata loaded when scanning project output folders.
+	 */
+	public static final String[] PROJECT_META_DATA_LOCATIONS = {
+		MAIN_SPRING_CONFIGURATION_METADATA_JSON,
 		ADDITIONAL_SPRING_CONFIGURATION_METADATA_JSON
 	};
 
@@ -102,7 +112,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			IPath outputLoc = project.getOutputLocation();
 			if (outputLoc!=null) {
 				IFolder outputFolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(outputLoc);
-				for (String mdLoc : META_DATA_LOCATIONS) {
+				for (String mdLoc : PROJECT_META_DATA_LOCATIONS) {
 					IFile mdf = outputFolder.getFile(new Path(mdLoc));
 					loadFromJsonFile(mdf);
 				}
@@ -117,7 +127,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 			InputStream is = null;
 			try {
 				is = mdf.getContents(true);
-				loadFromInputStream(is);
+				loadFromInputStream(mdf, is);
 			} catch (Exception e) {
 				SpringPropertiesEditorPlugin.log(e);
 			} finally {
@@ -138,7 +148,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		try {
 			jarFile = new JarFile(f);
 			//jarDump(jarFile);
-			for (String loc : META_DATA_LOCATIONS) {
+			for (String loc : JAR_META_DATA_LOCATIONS) {
 				ZipEntry e = jarFile.getEntry(loc);
 				if (e!=null) {
 					loadFrom(jarFile, e);
@@ -161,7 +171,7 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		InputStream is = null;
 		try {
 			is = jarFile.getInputStream(ze);
-			loadFromInputStream(is);
+			loadFromInputStream(jarFile.getName()+"["+ze.getName()+"]", is);
 		} catch (Throwable e) {
 			SpringPropertiesEditorPlugin.log(e);
 		} finally {
@@ -174,8 +184,8 @@ public class StsConfigMetadataRepositoryJsonLoader {
 		}
 	}
 
-	private void loadFromInputStream(InputStream is) throws IOException {
-		builder.withJsonResource(is);
+	private void loadFromInputStream(Object origin, InputStream is) throws IOException {
+		builder.withJsonResource(origin, is);
 	}
 
 	/// Debug utils

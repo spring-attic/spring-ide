@@ -115,7 +115,7 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 				if (p.isAccessible() && p.hasNature(JavaCore.NATURE_ID)) {
 					IJavaProject jp = JavaCore.create(p);
 					IPath outputPath = jp.getOutputLocation().removeFirstSegments(1); //output path without project name.
-					for (String metaLoc : StsConfigMetadataRepositoryJsonLoader.META_DATA_LOCATIONS) {
+					for (String metaLoc : StsConfigMetadataRepositoryJsonLoader.PROJECT_META_DATA_LOCATIONS) {
 						IResourceDelta metaDelta = delta.findMember(outputPath.append(metaLoc));
 						IFile jsonFile = getFile(metaDelta);
 						if (jsonFile!=null) {
