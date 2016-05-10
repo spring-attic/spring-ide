@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -24,7 +25,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class RetryUtil {
 
-	public static void retryTimes(String name, int tries, Thunk task) throws Exception {
+	public static void retryWhen(String name, int tries, Predicate<Throwable> when, Thunk task) throws Exception {
 		boolean success = false;
 		Throwable error = null;
 		while (!success && tries>0) {
@@ -35,7 +36,7 @@ public class RetryUtil {
 			} catch (Throwable e) {
 				error = e;
 				if (name!=null) {
-					if (tries>0) {
+					if (tries>0 && when.test(e)) {
 						System.out.println(name+" failed: "+ExceptionUtil.getMessage(e));
 						System.out.println("Retrying!");
 					}
@@ -45,6 +46,10 @@ public class RetryUtil {
 		if (!success) {
 			throw ExceptionUtil.exception(error);
 		}
+	}
+
+	public static void retryTimes(String name, int tries, Thunk task) throws Exception {
+		retryWhen(name, tries, (e) -> true, task);
 	}
 
 	/**

@@ -430,56 +430,58 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void getServices() throws Exception {
-		RetryUtil.retryTimes("getServices test", 3, () -> {
-
-			String[] serviceNames = new String[3];
-			Set<String> userProvided = new HashSet<>();
-			for (int i = 0; i < serviceNames.length; i++) {
-				if (i%2==0) {
-					serviceNames[i] = services.createTestService();
-				} else {
-					serviceNames[i] = services.createTestUserProvidedService();
-					userProvided.add(serviceNames[i]);
-				}
-			}
-
-			List<CFServiceInstance> actualServices = client.getServices();
-			ImmutableSet<String> actualServiceNames = ImmutableSet.copyOf(
-					actualServices.stream()
-					.map(CFServiceInstance::getName)
-					.collect(Collectors.toList())
-			);
-
-
-			for (CFServiceInstance s : actualServices) {
-				//Note: because these test on CI host run in parallel with others using same space...
-				// we should assume there might be 'extra stuff' on the space than what we just created here.
-				//So only check that 'our stuff' exists and looks right and ignore the rest.
-				String name = s.getName();
-				if (ImmutableSet.copyOf(serviceNames).contains(name)) {
-					System.out.println("Verifying service: "+name);
-					if (userProvided.contains(name)) {
-						assertEquals("user-provided", s.getService());
-						System.out.println("  user provided => OK");
+		RetryUtil.retryWhen("getServices", 3,
+			(e) -> ExceptionUtil.when,
+			() -> {
+				String[] serviceNames = new String[3];
+				Set<String> userProvided = new HashSet<>();
+				for (int i = 0; i < serviceNames.length; i++) {
+					if (i%2==0) {
+						serviceNames[i] = services.createTestService();
 					} else {
-						assertEquals("cloudamqp", s.getService());
-						System.out.println("  getService() => OK");
-						assertEquals("lemur", s.getPlan());
-						System.out.println("  getPlan() => OK");
-						assertIsURL(s.getDashboardUrl());
-						System.out.println("  getDashboardUrl() => OK");
-						assertIsURL(s.getDocumentationUrl());
-						System.out.println("  getDocumentationUrl() => OK");
-						assertText(s.getDescription());
-						System.out.println("  getDescription() => OK");
+						serviceNames[i] = services.createTestUserProvidedService();
+						userProvided.add(serviceNames[i]);
 					}
 				}
-			}
 
-			for (String s : serviceNames) {
-				assertTrue(s+" not found in "+actualServiceNames, actualServiceNames.contains(s));
+				List<CFServiceInstance> actualServices = client.getServices();
+				ImmutableSet<String> actualServiceNames = ImmutableSet.copyOf(
+						actualServices.stream()
+						.map(CFServiceInstance::getName)
+						.collect(Collectors.toList())
+				);
+
+
+				for (CFServiceInstance s : actualServices) {
+					//Note: because these test on CI host run in parallel with others using same space...
+					// we should assume there might be 'extra stuff' on the space than what we just created here.
+					//So only check that 'our stuff' exists and looks right and ignore the rest.
+					String name = s.getName();
+					if (ImmutableSet.copyOf(serviceNames).contains(name)) {
+						System.out.println("Verifying service: "+name);
+						if (userProvided.contains(name)) {
+							assertEquals("user-provided", s.getService());
+							System.out.println("  user provided => OK");
+						} else {
+							assertEquals("cloudamqp", s.getService());
+							System.out.println("  getService() => OK");
+							assertEquals("lemur", s.getPlan());
+							System.out.println("  getPlan() => OK");
+							assertIsURL(s.getDashboardUrl());
+							System.out.println("  getDashboardUrl() => OK");
+							assertIsURL(s.getDocumentationUrl());
+							System.out.println("  getDocumentationUrl() => OK");
+							assertText(s.getDescription());
+							System.out.println("  getDescription() => OK");
+						}
+					}
+				}
+
+				for (String s : serviceNames) {
+					assertTrue(s+" not found in "+actualServiceNames, actualServiceNames.contains(s));
+				}
 			}
-		});
+		);
 	}
 
 	@Test
