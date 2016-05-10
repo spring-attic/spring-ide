@@ -22,6 +22,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.json.JSONException;
 
@@ -43,7 +45,7 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 
 	private final JsonReader reader = new JsonReader();
 
-	private final List<SimpleConfigurationMetadataRepository> repositories = new ArrayList<SimpleConfigurationMetadataRepository>();
+	private final List<RawConfigurationMetadata> rawDatas = new ArrayList<>();
 
 	private ConfigurationMetadataRepositoryJsonBuilder(Charset defaultCharset) {
 		this.defaultCharset = defaultCharset;
@@ -55,13 +57,14 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 	 * metadata repository holds items that were loaded previously, these are ignored.
 	 * <p>
 	 * Leaves the stream open when done.
+	 * @param origin optional information object to help identify where the inputstream came from
 	 * @param inputStream the source input stream
 	 * @return this builder
 	 * @throws IOException in case of I/O errors
 	 */
 	public ConfigurationMetadataRepositoryJsonBuilder withJsonResource(
-			InputStream inputStream) throws IOException {
-		return withJsonResource(inputStream, this.defaultCharset);
+			Object origin, InputStream inputStream) throws IOException {
+		return withJsonResource(origin, inputStream, this.defaultCharset);
 	}
 
 	/**
@@ -71,17 +74,18 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 	 * ignored.
 	 * <p>
 	 * Leaves the stream open when done.
+	 * @param origin optional information object to help identify where the inputstream came from
 	 * @param inputStream the source input stream
 	 * @param charset the charset of the input
 	 * @return this builder
 	 * @throws IOException in case of I/O errors
 	 */
 	public ConfigurationMetadataRepositoryJsonBuilder withJsonResource(
-			InputStream inputStream, Charset charset) throws IOException {
+			Object origin, InputStream inputStream, Charset charset) throws IOException {
 		if (inputStream == null) {
 			throw new IllegalArgumentException("InputStream must not be null.");
 		}
-		this.repositories.add(add(inputStream, charset));
+		this.rawDatas.add(parseRaw(origin, inputStream, charset));
 		return this;
 	}
 
@@ -92,17 +96,14 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 	 */
 	public ConfigurationMetadataRepository build() {
 		SimpleConfigurationMetadataRepository result = new SimpleConfigurationMetadataRepository();
-		for (SimpleConfigurationMetadataRepository repository : this.repositories) {
-			result.include(repository);
-		}
+		result.include(create(rawDatas));
 		return result;
 	}
 
-	private SimpleConfigurationMetadataRepository add(InputStream in, Charset charset)
+	private RawConfigurationMetadata parseRaw(Object origin, InputStream in, Charset charset)
 			throws IOException {
 		try {
-			RawConfigurationMetadata metadata = this.reader.read(in, charset);
-			return create(metadata);
+			return this.reader.read(origin, in, charset);
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException(
@@ -115,29 +116,36 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 	}
 
 	private SimpleConfigurationMetadataRepository create(
-			RawConfigurationMetadata metadata) {
+			Iterable<RawConfigurationMetadata> metadatas) {
 		SimpleConfigurationMetadataRepository repository = new SimpleConfigurationMetadataRepository();
-		repository.add(metadata.getSources());
-		for (ConfigurationMetadataItem item : metadata.getItems()) {
-			ConfigurationMetadataSource source = getSource(metadata, item);
-			repository.add(item, source);
+
+		for (RawConfigurationMetadata metadata : metadatas) {
+			repository.add(metadata.getSources());
 		}
-		Map<String, ConfigurationMetadataProperty> allProperties = repository
-				.getAllProperties();
-		for (ConfigurationMetadataHint hint : metadata.getHints()) {
-			ConfigurationMetadataProperty property = allProperties.get(hint.getId());
-			if (property != null) {
-				addValueHints(property, hint);
+		for (RawConfigurationMetadata metadata : metadatas) {
+			for (ConfigurationMetadataItem item : metadata.getItems()) {
+				ConfigurationMetadataSource source = getSource(metadata, item);
+				repository.add(item, source);
 			}
-			else {
-				String id = hint.resolveId();
-				property = allProperties.get(id);
+		}
+		for (RawConfigurationMetadata metadata : metadatas) {
+			Map<String, ConfigurationMetadataProperty> allProperties = repository
+					.getAllProperties();
+			for (ConfigurationMetadataHint hint : metadata.getHints()) {
+				ConfigurationMetadataProperty property = allProperties.get(hint.getId());
 				if (property != null) {
-					if (hint.isMapKeyHints()) {
-						addMapHints(property, hint);
-					}
-					else {
-						addValueHints(property, hint);
+					addValueHints(property, hint);
+				}
+				else {
+					String id = hint.resolveId();
+					property = allProperties.get(id);
+					if (property != null) {
+						if (hint.isMapKeyHints()) {
+							addMapHints(property, hint);
+						}
+						else {
+							addValueHints(property, hint);
+						}
 					}
 				}
 			}
@@ -147,14 +155,35 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 
 	private void addValueHints(ConfigurationMetadataProperty property,
 			ConfigurationMetadataHint hint) {
-		property.getHints().getValueHints().addAll(hint.getValueHints());
+		addAll(property.getHints().getValueHints(), hint.getValueHints());
 		property.getHints().getValueProviders().addAll(hint.getValueProviders());
 	}
 
 	private void addMapHints(ConfigurationMetadataProperty property,
 			ConfigurationMetadataHint hint) {
-		property.getHints().getKeyHints().addAll(hint.getValueHints());
+		addAll(property.getHints().getKeyHints(), hint.getValueHints());
 		property.getHints().getKeyProviders().addAll(hint.getValueProviders());
+	}
+
+	/**
+	 * Add a bunch of hints to a list, but guard against duplicates.
+	 */
+	private void addAll(List<ValueHint> existing, List<ValueHint> toAdd) {
+		if (existing.isEmpty()) {
+			existing.addAll(toAdd);
+		} else if (toAdd.isEmpty()) {
+			//nothing to add
+		} else {
+			Set<Object> existingValues = existing
+					.stream()
+					.map((hint) -> ""+hint.getValue())
+					.collect(Collectors.toSet());
+			for (ValueHint hint : toAdd) {
+				if (!existingValues.contains(""+hint.getValue())) {
+					existing.add(hint);
+				}
+			}
+		}
 	}
 
 	private ConfigurationMetadataSource getSource(RawConfigurationMetadata metadata,
@@ -176,7 +205,7 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 			InputStream... inputStreams) throws IOException {
 		ConfigurationMetadataRepositoryJsonBuilder builder = create();
 		for (InputStream inputStream : inputStreams) {
-			builder = builder.withJsonResource(inputStream);
+			builder = builder.withJsonResource(null, inputStream);
 		}
 		return builder;
 	}

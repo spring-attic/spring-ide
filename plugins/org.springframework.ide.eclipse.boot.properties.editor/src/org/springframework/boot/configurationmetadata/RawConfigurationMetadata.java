@@ -27,15 +27,19 @@ import java.util.List;
  */
 class RawConfigurationMetadata {
 
+	private final Object origin;
+
 	private final List<ConfigurationMetadataSource> sources;
 
 	private final List<ConfigurationMetadataItem> items;
 
 	private final List<ConfigurationMetadataHint> hints;
 
-	RawConfigurationMetadata(List<ConfigurationMetadataSource> sources,
+	RawConfigurationMetadata(Object parsedFrom,
+			List<ConfigurationMetadataSource> sources,
 			List<ConfigurationMetadataItem> items,
 			List<ConfigurationMetadataHint> hints) {
+		this.origin = parsedFrom;
 		this.sources = new ArrayList<ConfigurationMetadataSource>(sources);
 		this.items = new ArrayList<ConfigurationMetadataItem>(items);
 		this.hints = new ArrayList<ConfigurationMetadataHint>(hints);
@@ -89,6 +93,14 @@ class RawConfigurationMetadata {
 
 	private static boolean hasLength(String string) {
 		return (string != null && string.length() > 0);
+	}
+
+	@Override
+	public String toString() {
+		if (origin!=null) {
+			return "RawConfigurationMetadata("+origin+")";
+		}
+		return super.toString();
 	}
 
 }

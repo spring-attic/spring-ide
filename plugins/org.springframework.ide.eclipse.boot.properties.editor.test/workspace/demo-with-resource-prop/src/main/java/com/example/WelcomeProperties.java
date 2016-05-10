@@ -10,6 +10,8 @@ public class WelcomeProperties {
 
 	private Resource resource;
 
+	private String path;
+
 	public Resource getResource() {
 		return resource;
 	}
@@ -17,5 +19,13 @@ public class WelcomeProperties {
 	public void setResource(Resource resource) {
 		this.resource = resource;
 	}
-	
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
 }

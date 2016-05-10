@@ -2894,6 +2894,12 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"my:\n"+
 				"  welcome:\n" +
 				"    path: <*>"
+				, // =>
+				"classpath:",
+				"classpath*:",
+				"file:",
+				"http://",
+				"https://"
 		);
 	}
 
