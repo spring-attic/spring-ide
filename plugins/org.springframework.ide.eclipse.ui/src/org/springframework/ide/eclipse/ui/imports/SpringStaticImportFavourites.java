@@ -64,7 +64,10 @@ public class SpringStaticImportFavourites {
 
 	private WorkingCopyManager manager;
 
-	public SpringStaticImportFavourites() {
+	private final StaticImportCatalogue catalogue;
+
+	public SpringStaticImportFavourites(StaticImportCatalogue catalogue) {
+		this.catalogue = catalogue;
 		manager = new WorkingCopyManager();
 	}
 
@@ -78,14 +81,18 @@ public class SpringStaticImportFavourites {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				List<String> customFavourites = loadAndValidateFromCatalogue();
-				setValue(customFavourites);
-				applyChanges();
+				load();
 				return Status.OK_STATUS;
 			}
 		};
 
 		job.schedule();
+	}
+
+	public void load() {
+		List<String> customFavourites = loadAndValidateFromCatalogue();
+		setValue(customFavourites);
+		applyChanges();
 	}
 
 	protected Key getKey(String plugin, String key) {
@@ -111,7 +118,7 @@ public class SpringStaticImportFavourites {
 		return oldValue;
 	}
 
-	private String[] getExisting() {
+	public String[] getFromPreferences() {
 		String str = getValue(PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS);
 		if (str != null && str.length() > 0) {
 			return deserializeFavorites(str);
@@ -149,7 +156,7 @@ public class SpringStaticImportFavourites {
 
 	protected List<String> mergeWithExisting(List<String> favorites) {
 
-		String[] existing = getExisting();
+		String[] existing = getFromPreferences();
 		List<String> merged = new ArrayList<String>(Arrays.asList(existing));
 		for (String fav : favorites) {
 			if (!merged.contains(fav)) {
@@ -160,7 +167,7 @@ public class SpringStaticImportFavourites {
 	}
 
 	protected List<String> loadAndValidateFromCatalogue() {
-		List<String> validated = getValidated(StaticImportCatalogue.getCatalogue());
+		List<String> validated = getValidated(catalogue.getCatalogue());
 		return mergeWithExisting(validated);
 	}
 

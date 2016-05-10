@@ -12,7 +12,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.imports;
 
-public class StaticImportCatalogue {
+public abstract class StaticImportCatalogue {
+
+	public static final StaticImportCatalogue DEFAULT_CATALOGUE = new StaticImportCatalogue() {
+
+		@Override
+		public String[] getCatalogue() {
+			return FAVOURITES;
+		}
+	};
 
 	public static String[] FAVOURITES = new String[] { "org.assertj.core.api.Assertions", "org.mockito.Matchers",
 			"org.mockito.Mockito",
@@ -27,7 +35,5 @@ public class StaticImportCatalogue {
 			"org.springframework.test.web.servlet.result.MockMvcResultMatchers", "org.hamcrest.CoreMatchers",
 			"org.junit.Assert" };
 
-	public static String[] getCatalogue() {
-		return FAVOURITES;
-	}
+	public abstract String[] getCatalogue();
 }
