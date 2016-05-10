@@ -11,9 +11,13 @@
 package org.springframework.ide.eclipse.editor.support.completions;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -24,6 +28,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.TextStyle;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.ColorManager;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractPropertyProposal;
@@ -78,15 +83,15 @@ public class CompletionFactory {
 
 	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
-	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier) {
-		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier);
+	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier, HoverInfo Well ) {
+		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier, Well );
 	}
 
-	public ScoreableProposal simpleProposal(String name, String pattern, double score, ProposalApplier applier) {
-		return new SimpleProposal(name, pattern, score, applier);
+	public ScoreableProposal simpleProposal(String name, String pattern, double score, ProposalApplier applier, HoverInfo info) {
+		return new SimpleProposal(name, pattern, score, applier, info);
 	}
 
-	public static abstract class ScoreableProposal implements ICompletionProposal, ICompletionProposalExtension4, ICompletionProposalExtension6 {
+	public static abstract class ScoreableProposal implements ICompletionProposal, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 		private static final double DEEMP_VALUE = 100000; // should be large enough to move deemphasized stuff to bottom of list.
 
 		private double deemphasizedBy = 0.0;
@@ -144,6 +149,30 @@ public class CompletionFactory {
 		protected abstract boolean isDeprecated();
 		protected abstract String getHighlightPattern();
 		protected abstract String getBaseDisplayString();
+		@Override
+		public IInformationControlCreator getInformationControlCreator() {
+			return new HoverInformationControlCreator("F2 for focus");
+		}
+		@Override
+		public String getAdditionalProposalInfo() {
+			HoverInfo hoverInfo = getAdditionalProposalInfo(new NullProgressMonitor());
+			if (hoverInfo!=null) {
+				return hoverInfo.getHtml();
+			}
+			return null;
+		}
+		@Override
+		public abstract HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor);
+
+		@Override
+		public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+			return null;
+		}
+
+		@Override
+		public int getPrefixCompletionStart(IDocument document, int completionOffset) {
+			return completionOffset;
+		}
 
 	}
 
@@ -153,12 +182,14 @@ public class CompletionFactory {
 		private ProposalApplier applier;
 		private double score;
 		private String pattern;
+		private HoverInfo hoverInfo;
 
-		public SimpleProposal(String value, String pattern, double score, ProposalApplier applier) {
+		public SimpleProposal(String value, String pattern, double score, ProposalApplier applier, HoverInfo info) {
 			this.score = score;
 			this.value = value;
 			this.applier = applier;
 			this.pattern = pattern;
+			this.hoverInfo = info;
 		}
 
 		@Override
@@ -181,8 +212,8 @@ public class CompletionFactory {
 		}
 
 		@Override
-		public String getAdditionalProposalInfo() {
-			return null;
+		public HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return hoverInfo;
 		}
 
 		@Override
@@ -276,12 +307,12 @@ public class CompletionFactory {
 		};
 	}
 
-	public ScoreableProposal valueProposal(String value, String pattern, YType yType, double score, ProposalApplier applier) {
-		return simpleProposal(value, pattern, score, applier);
+	public ScoreableProposal valueProposal(String value, String pattern, YType yType, double score, ProposalApplier applier, HoverInfo info) {
+		return simpleProposal(value, pattern, score, applier, info);
 	}
 
-	public ScoreableProposal valueProposal(String value, String pattern, YType type, int order, ProposalApplier applier) {
-		return valueProposal(value, pattern, type, -(1.0+order), applier);
+	public ScoreableProposal valueProposal(String value, String pattern, YType type, int order, ProposalApplier applier, HoverInfo info) {
+		return valueProposal(value, pattern, type, -(1.0+order), applier, info);
 	}
 
 }

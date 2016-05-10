@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.JavaTy
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.ValueHintHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -273,7 +274,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 							edits.insert(offset, " ");
 						}
 						edits.insert(offset, YamlUtil.stringEscape(value));
-						completions.add(completionFactory.valueProposal(value, query, type, score, edits));
+						completions.add(completionFactory.valueProposal(value, query, type, score, edits, new ValueHintHoverInfo(hint)));
 					}
 				}
 				return completions;

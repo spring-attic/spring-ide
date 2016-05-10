@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.LazyProposalApplier;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.PropertyCompletionFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.completions.SpringPropertyHoverInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.completions.ValueHintHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProviders;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
@@ -354,7 +355,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 							edits.delete(startOfValue, offset);
 							edits.insert(offset, valueCandidate);
 							proposals.add(
-								completionFactory.valueProposal(valueCandidate, query, getValueType(propertyName), score, edits)
+								completionFactory.valueProposal(valueCandidate, query, getValueType(propertyName), score, edits, new ValueHintHoverInfo(hint))
 									//new ValueProposal(startOfValue, valuePrefix, valueCandidate, i)
 							);
 						}

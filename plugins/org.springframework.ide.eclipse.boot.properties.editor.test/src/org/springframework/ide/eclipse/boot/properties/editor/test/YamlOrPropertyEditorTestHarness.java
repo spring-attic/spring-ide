@@ -16,16 +16,13 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -40,7 +37,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.m2e.jdt.IClasspathManager;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
-import org.eclipse.ui.IWorkingSet;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
@@ -51,7 +47,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyInde
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
-import org.springframework.ide.eclipse.boot.properties.editor.test.YamlOrPropertyEditorTestHarness.ItemConfigurer;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
@@ -749,18 +744,16 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	private ICompletionProposal assertCompletionWithLabel(String expectLabel, ICompletionProposal[] completions) {
-		ICompletionProposal completion = null;
 		StringBuilder found = new StringBuilder();
 		for (ICompletionProposal c : completions) {
 			String actualLabel = c.getDisplayString();
 			found.append(actualLabel+"\n");
 			if (actualLabel.equals(expectLabel)) {
-				completion = c;
-				break;
+				return c;
 			}
 		}
-		assertNotNull("No completion found with label '"+expectLabel+"' in:\n"+found, completion);
-		return completion;
+		fail("No completion found with label '"+expectLabel+"' in:\n"+found);
+		return null; //unreachable, but compiler doesn't know that.
 	}
 
 	/**
@@ -853,6 +846,14 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return element.getOpenable().getBuffer()!=null;
 	}
 
+	/**
+	 * Ensures that the source jars for a given {@link IType} are downloaded.
+	 * <p>
+	 * This assumes the test project is a maven project.
+	 * <p>
+	 * Will do nothing if source for given type is already available. Will
+	 * fail if cannot obtain source code for the type.
+	 */
 	public void downloadSources(IType element) throws Exception {
 		boolean hasSources = false; //hasSources(element);
 		if (!hasSources) {

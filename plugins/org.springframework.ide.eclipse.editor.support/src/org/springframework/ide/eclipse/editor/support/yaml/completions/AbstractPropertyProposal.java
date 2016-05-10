@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
@@ -25,12 +22,10 @@ import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 
 public abstract class AbstractPropertyProposal extends ScoreableProposal implements ICompletionProposalExtension3,
-ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6
+ICompletionProposalExtension4, ICompletionProposalExtension6
 {
 
 	protected final IDocument fDoc;
@@ -51,18 +46,6 @@ ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposa
 		}
 	}
 
-
-	@Override
-	public String getAdditionalProposalInfo() {
-		HoverInfo hoverInfo = getAdditionalProposalInfo(new NullProgressMonitor());
-		if (hoverInfo!=null) {
-			return hoverInfo.getHtml();
-		}
-		return null;
-	}
-
-	@Override
-	public abstract HoverInfo getAdditionalProposalInfo(IProgressMonitor monitor);
 
 	public String getDisplayString() {
 		StyledString styledText = getStyledDisplayString();
@@ -116,20 +99,5 @@ ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposa
 		} catch (Exception e) {
 			EditorSupportActivator.log(e);
 		}
-	}
-
-	@Override
-	public IInformationControlCreator getInformationControlCreator() {
-		return new HoverInformationControlCreator("F2 for focus");
-	}
-
-	@Override
-	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return null;
-	}
-
-	@Override
-	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
-		return completionOffset;
 	}
 }
