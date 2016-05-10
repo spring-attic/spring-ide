@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyInde
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
+import org.springframework.ide.eclipse.boot.properties.editor.test.YamlOrPropertyEditorTestHarness.ItemConfigurer;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
@@ -68,14 +69,35 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 		/**
 		 * Add a provider with a single parameter.
+		 * @return
 		 */
-		public void provider(String name, String paramName, Object paramValue) {
+		public ItemConfigurer provider(String name, String paramName, Object paramValue) {
 			ValueProvider provider = new ValueProvider();
 			provider.setName(name);
 			provider.getParameters().put(paramName, paramValue);
 			item.getHints().getValueProviders().add(provider);
+			return this;
 		}
 
+		/**
+		 * Add a value hint. If description contains a '.' the dot is used
+		 * to break description into a short and long description.
+		 * @return
+		 */
+		public ItemConfigurer valueHint(Object value, String description) {
+			ValueHint hint = new ValueHint();
+			hint.setValue(value);
+			if (description!=null) {
+				int dotPos = description.indexOf('.');
+				if (dotPos>=0) {
+					hint.setShortDescription( description.substring(0, dotPos));
+					description = description.substring(dotPos+1).trim();
+				}
+				hint.setDescription(description);
+			}
+			item.getHints().getValueHints().add(hint);
+			return this;
+		}
 	}
 
 	Map<String, ConfigurationMetadataProperty> datas = new LinkedHashMap<>();
@@ -696,6 +718,26 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	public void assertCompletionWithLabel(String textBefore, String expectLabel, String expectTextAfter) throws Exception {
 		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
 		ICompletionProposal[] completions = getCompletions(editor);
+		ICompletionProposal completion = assertCompletionWithLabel(expectLabel, completions);
+		editor.apply(completion);
+		assertEquals(expectTextAfter, editor.getText());
+	}
+
+	/**
+	 * Checks that completions contains a completion with a given display string and that that completion
+	 * has a info hover that contains a given snippet of text.
+	 */
+	public void assertCompletionWithInfoHover(String editorText, String expectLabel, String expectInfoSnippet) throws Exception {
+		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		ICompletionProposal[] completions = getCompletions(editor);
+		ICompletionProposal completion = assertCompletionWithLabel(expectLabel, completions);
+
+		String infoText = completion.getAdditionalProposalInfo();
+		assertNotNull("No hover info", infoText);
+		assertContains(expectInfoSnippet, infoText);
+	}
+
+	private ICompletionProposal assertCompletionWithLabel(String expectLabel, ICompletionProposal[] completions) {
 		ICompletionProposal completion = null;
 		StringBuilder found = new StringBuilder();
 		for (ICompletionProposal c : completions) {
@@ -707,8 +749,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 			}
 		}
 		assertNotNull("No completion found with label '"+expectLabel+"' in:\n"+found, completion);
-		editor.apply(completion);
-		assertEquals(expectTextAfter, editor.getText());
+		return completion;
 	}
 
 	/**

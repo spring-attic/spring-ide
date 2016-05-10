@@ -92,6 +92,38 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		editor.assertHoverContains("INDENT_OUTPUT", "allows enabling (or disabling) indentation");
 	}
 
+	public void testHoverInfoForEnumValueInMapKeyCompletion() throws Exception {
+		useProject(createPredefinedMavenProject("boot13"));
+
+		assertCompletionWithInfoHover(
+				"spring:\n" +
+				"  jackson:\n" +
+				"    serialization:\n" +
+				"      ind<*>"
+				, // ==========
+				"indent-output : boolean"
+				, // ==>
+				"allows enabling (or disabling) indentation"
+		);
+	}
+
+	public void testHoverInfoForValueHint() throws Exception {
+		data("my.bonus", "java.lang.String", null, "Bonus type")
+		.valueHint("small", "A small bonus. For a little extra incentive.")
+		.valueHint("large", "An large bonus. For the ones who deserve it.")
+		.valueHint("exorbitant", "Truly outrageous. Who deserves a bonus like that?");
+
+		assertCompletionWithInfoHover(
+				"my:\n" +
+				"  bonus: l<*>"
+				, // ==========
+				"large"
+				, // ==>
+				"For the ones who deserve it"
+		);
+	}
+
+
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
