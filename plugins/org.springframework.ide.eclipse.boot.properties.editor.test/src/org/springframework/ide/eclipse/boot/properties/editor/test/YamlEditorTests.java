@@ -78,7 +78,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		//Probably that is why it fails in CI build?
 		//Let's check:
 		IType type = project.findType("com.fasterxml.jackson.databind.SerializationFeature");
-		assertNotNull("Source jars missing?", type.getOpenable().getBuffer());
+		downloadSources(type);
 
 		editor = new YamlEditor(
 				"spring:\n" +

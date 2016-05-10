@@ -16,21 +16,31 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.m2e.jdt.IClasspathManager;
+import org.eclipse.m2e.jdt.MavenJdtPlugin;
+import org.eclipse.ui.IWorkingSet;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
@@ -51,6 +61,7 @@ import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import junit.framework.TestCase;
 
@@ -838,5 +849,21 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		CachingValueProvider.restoreDefaults();
 	}
 
+	public boolean hasSources(IType element) throws JavaModelException {
+		return element.getOpenable().getBuffer()!=null;
+	}
+
+	public void downloadSources(IType element) throws Exception {
+		boolean hasSources = false; //hasSources(element);
+		if (!hasSources) {
+			IClasspathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
+			IPackageFragment pkg = element.getPackageFragment();
+			IPackageFragmentRoot fragment = (IPackageFragmentRoot) pkg.getParent();
+			buildpathManager.scheduleDownload(fragment, true, true);
+			ACondition.waitFor("source jar download", 20_000, () -> {
+				hasSources(element);
+			});
+		}
+	}
 
 }
