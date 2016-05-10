@@ -431,7 +431,7 @@ public class CloudFoundryClientTest {
 	@Test
 	public void getServices() throws Exception {
 		RetryUtil.retryWhen("getServices", 3,
-			(e) -> ExceptionUtil.when,
+			(e) -> ExceptionUtil.getMessage(e).contains("502 Bad Gateway"),
 			() -> {
 				String[] serviceNames = new String[3];
 				Set<String> userProvided = new HashSet<>();
