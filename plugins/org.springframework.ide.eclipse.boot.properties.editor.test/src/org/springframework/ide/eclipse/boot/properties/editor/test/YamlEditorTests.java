@@ -70,9 +70,9 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testHoverInfoForEnumValueInMapKey() throws Exception {
+		MockYamlEditor editor;
 		IJavaProject project = JavaCore.create(createPredefinedMavenProject("boot13"));
 		useProject(project);
-		MockYamlEditor editor;
 
 		//This test will fail if source jars haven't been downloaded.
 		//Probably that is why it fails in CI build?
@@ -103,7 +103,16 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testHoverInfoForEnumValueInMapKeyCompletion() throws Exception {
-		useProject(createPredefinedMavenProject("boot13"));
+		IJavaProject project = JavaCore.create(createPredefinedMavenProject("boot13"));
+		useProject(project);
+
+		//This test will fail if source jars haven't been downloaded.
+		//Probably that is why it fails in CI build?
+		//Let's check:
+		IType type = project.findType("com.fasterxml.jackson.databind.SerializationFeature");
+		System.out.println(">>> source for: "+type.getFullyQualifiedName());
+		System.out.println(downloadSources(type));
+		System.out.println("<<< source for: "+type.getFullyQualifiedName());
 
 		assertCompletionWithInfoHover(
 				"spring:\n" +
