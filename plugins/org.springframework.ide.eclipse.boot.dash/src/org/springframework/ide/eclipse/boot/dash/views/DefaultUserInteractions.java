@@ -32,6 +32,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
+import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
@@ -308,6 +310,15 @@ public class DefaultUserInteractions implements UserInteractions {
 		getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				new EditTemplateDialog(model, getShell()).open();
+			}
+		});
+	}
+
+	@Override
+	public void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model) {
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				new CustomizeAppsManagerURLDialog(model, getShell()).open();
 			}
 		});
 	}

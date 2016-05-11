@@ -33,13 +33,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -76,6 +77,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
 	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
 	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, HOST, DEFAULT_PATH, TAGS };
+
+	private static final String APPS_MANAGER_HOST = "APPS_MANAGER_HOST";
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -134,7 +137,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 				return client.getApiVersion();
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -278,7 +281,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 					return javaBuildpack;
 				}
 			} catch (Exception e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 
@@ -298,6 +301,45 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			return getTargetProperties().getUsername();
 		default:
 			return super.getTemplateVar(name);
+		}
+	}
+
+	public String getAppsManagerHost() {
+		PropertyStoreApi props = getPersistentProperties();
+		if (props != null) {
+			String appsManagerURL = props.get(APPS_MANAGER_HOST);
+			if (appsManagerURL != null) {
+				return appsManagerURL;
+			}
+		}
+		return getAppsManagerHostDefault();
+	}
+
+	public void setAppsManagerHost(String appsManagerURL) throws Exception {
+		getPersistentProperties().put(APPS_MANAGER_HOST, appsManagerURL);
+	}
+
+	public String getAppsManagerURL() {
+		String host = getAppsManagerHost();
+		CloudFoundryTargetProperties targetProperties = getTargetProperties();
+
+		String org = targetProperties.getOrganizationGuid();
+		String space = targetProperties.getSpaceGuid();
+
+		if (host != null && host.length() > 0 && org != null && org.length() > 0 && space != null && space.length() > 0) {
+			return host + "/organizations/" + org + "/spaces/" + space;
+		} else {
+			return null;
+		}
+	}
+
+	public String getAppsManagerHostDefault() {
+		String url = getUrl();
+		if (url != null && url.contains("//api.")) {
+			return url.replace("//api.", "//console.");
+		}
+		else {
+			return null;
 		}
 	}
 

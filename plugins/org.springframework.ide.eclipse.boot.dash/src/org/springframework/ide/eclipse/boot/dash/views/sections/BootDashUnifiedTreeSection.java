@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -235,7 +236,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 	public static class CustomTreeViewer extends TreeViewer {
 
-		private LiveVariable<Integer> hiddenElementCount = new LiveVariable<Integer>(0);
+		private LiveVariable<Integer> hiddenElementCount = new LiveVariable<>(0);
 
 		public CustomTreeViewer(Composite page, int style) {
 			super(page, style);
@@ -472,7 +473,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 		manager.add(new Separator());
 
-		addVisible(manager, actions.getCustomizeTargetLabelAction());
 		addVisible(manager, actions.getRemoveRunTargetAction());
 		addVisible(manager, actions.getRefreshRunTargetAction());
 		addVisible(manager, actions.getRestartOnlyApplicationAction());
@@ -483,6 +483,13 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenCloudAdminConsoleAction());
 		addVisible(manager, actions.getToggleTargetConnectionAction());
 		addVisible(manager, actions.getReconnectCloudConsole());
+
+		manager.add(new Separator());
+
+		ImmutableList.Builder<IAction> customizeActions = ImmutableList.builder();
+		customizeActions.add(actions.getCustomizeTargetLabelAction());
+		customizeActions.add(actions.getCustomizeTargetAppsManagerURLAction());
+		addSubmenu(manager, "Customize...", null, customizeActions.build());
 
 //		manager.add
 //		addVisible(manager, new Separator());

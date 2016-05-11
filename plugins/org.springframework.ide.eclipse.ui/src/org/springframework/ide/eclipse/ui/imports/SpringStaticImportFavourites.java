@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
@@ -45,29 +46,31 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  * Loads Types containing statics into Eclipse Static Import favourites
  * preferences.
  * <p/>
- * NOTE: Code derived from:
+ * NOTE: Some code derived from:
  * <p/>
  * org.eclipse.jdt.internal.ui.preferences.CodeAssistFavoritesConfigurationBlock
  * <p/>
  *
  */
 public class SpringStaticImportFavourites {
-	private final Key PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS = getJDTUIKey(
+
+	public static final String SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE = SpringUIPlugin.PLUGIN_ID
+			+ ".importStaticsInstanceScope";
+
+	private static final Key PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS = getJDTUIKey(
 			PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+
+	private static final Key PREF_SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE = getSpringIDEImportStaticsKey(
+			SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE);
 
 	private static final String WILDCARD = ".*";
 
-	private static IScopeContext[] DEFAULT_ORDER = new IScopeContext[] { InstanceScope.INSTANCE,
-			DefaultScope.INSTANCE };
+	private IWorkingCopyManager manager;
 
-	private IScopeContext[] lookUpOrder = DEFAULT_ORDER;
+	private final StaticImportCatalogue importStaticsCatalogue;
 
-	private WorkingCopyManager manager;
-
-	private final StaticImportCatalogue catalogue;
-
-	public SpringStaticImportFavourites(StaticImportCatalogue catalogue) {
-		this.catalogue = catalogue;
+	public SpringStaticImportFavourites(StaticImportCatalogue importStaticsCatalogue) {
+		this.importStaticsCatalogue = importStaticsCatalogue;
 		manager = new WorkingCopyManager();
 	}
 
@@ -90,36 +93,22 @@ public class SpringStaticImportFavourites {
 	}
 
 	public void load() {
-		List<String> customFavourites = loadAndValidateFromCatalogue();
-		setValue(customFavourites);
-		applyChanges();
+
+		// Write to defaults separately as to allow "restore to defaults" to
+		// work
+		writeDefaultScopedImports(this.importStaticsCatalogue);
+
+		// Instance scope is what users edit as their own preferences.
+		writeInstanceScopedImports(this.importStaticsCatalogue);
 	}
 
-	protected Key getKey(String plugin, String key) {
+	protected static Key getKey(String plugin, String key) {
 		return new Key(plugin, key);
 	}
 
-	protected final void setValue(List<String> favorites) {
-		setValue(PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS, serializeFavorites(favorites));
+	public String[] getStoredImportStatics(IScopeContext context) {
+		String str = PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS.getStoredValue(context, manager);
 
-	}
-
-	protected String getValue(Key key) {
-		return key.getStoredValue(getLookupOrder(), false, manager);
-	}
-
-	protected IScopeContext[] getLookupOrder() {
-		return this.lookUpOrder;
-	}
-
-	protected String setValue(Key key, String value) {
-		String oldValue = getValue(key);
-		key.setStoredValue(getLookupOrder()[0], value, manager);
-		return oldValue;
-	}
-
-	public String[] getFromPreferences() {
-		String str = getValue(PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS);
 		if (str != null && str.length() > 0) {
 			return deserializeFavorites(str);
 		}
@@ -128,14 +117,6 @@ public class SpringStaticImportFavourites {
 
 	private String[] deserializeFavorites(String str) {
 		return str.split(";");
-	}
-
-	protected void applyChanges() {
-		try {
-			manager.applyChanges();
-		} catch (BackingStoreException e) {
-			SpringUIPlugin.log(e);
-		}
 	}
 
 	private static String serializeFavorites(List<String> favorites) {
@@ -150,13 +131,17 @@ public class SpringStaticImportFavourites {
 		return buf.toString();
 	}
 
-	protected final Key getJDTUIKey(String key) {
+	protected static final Key getJDTUIKey(String key) {
 		return getKey(JavaUI.ID_PLUGIN, key);
 	}
 
-	protected List<String> mergeWithExisting(List<String> favorites) {
+	protected static Key getSpringIDEImportStaticsKey(String key) {
+		return getKey(SpringUIPlugin.PLUGIN_ID, key);
+	}
 
-		String[] existing = getFromPreferences();
+	protected List<String> mergeWithExisting(List<String> favorites, IScopeContext context) {
+
+		String[] existing = getStoredImportStatics(context);
 		List<String> merged = new ArrayList<String>(Arrays.asList(existing));
 		for (String fav : favorites) {
 			if (!merged.contains(fav)) {
@@ -166,9 +151,30 @@ public class SpringStaticImportFavourites {
 		return merged;
 	}
 
-	protected List<String> loadAndValidateFromCatalogue() {
+	protected void writeDefaultScopedImports(StaticImportCatalogue catalogue) {
 		List<String> validated = getValidated(catalogue.getCatalogue());
-		return mergeWithExisting(validated);
+		List<String> merged = mergeWithExisting(validated, DefaultScope.INSTANCE);
+
+		new FavouritesPreferenceWriter(merged, manager, DefaultScope.INSTANCE).write();
+	}
+
+	protected void writeInstanceScopedImports(StaticImportCatalogue catalogue) {
+		// Only write to instance scope ONCE to avoid undoing any changes users
+		// make to instance
+		// scope preferences on any subsequent restart of STS
+		String writtenVal = PREF_SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE.getStoredValue(InstanceScope.INSTANCE,
+				manager);
+
+		if (writtenVal == null || !Boolean.parseBoolean(writtenVal)) {
+			List<String> validated = getValidated(catalogue.getCatalogue());
+			List<String> merged = mergeWithExisting(validated, InstanceScope.INSTANCE);
+			new FavouritesPreferenceWriter(merged, manager, InstanceScope.INSTANCE).write();
+
+			// Be sure to remember that instance scope was written
+			new PreferenceWriter(Boolean.toString(true), PREF_SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE, manager,
+					InstanceScope.INSTANCE).write();
+		}
+
 	}
 
 	protected List<String> getValidated(String[] original) {
@@ -188,6 +194,50 @@ public class SpringStaticImportFavourites {
 
 	protected String asWildCard(String val) {
 		return val + WILDCARD;
+	}
+
+	class FavouritesPreferenceWriter extends PreferenceWriter {
+
+		public FavouritesPreferenceWriter(List<String> values, IWorkingCopyManager manager, IScopeContext context) {
+			super(serializeFavorites(values), SpringStaticImportFavourites.PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS,
+					manager, context);
+		}
+
+	}
+
+	class PreferenceWriter {
+
+		protected final IWorkingCopyManager manager;
+		protected final IScopeContext context;
+		protected final String values;
+		protected final Key key;
+
+		public PreferenceWriter(String values, Key key, IWorkingCopyManager manager, IScopeContext context) {
+			this.manager = manager;
+			this.context = context;
+			this.values = values;
+			this.key = key;
+		}
+
+		public void write() {
+			write(key, values, context);
+			applyChanges();
+		}
+
+		protected String write(Key key, String value, IScopeContext context) {
+			String oldValue = key.getStoredValue(context, manager);
+			key.setStoredValue(context, value, manager);
+			return oldValue;
+		}
+
+		protected void applyChanges() {
+			try {
+				manager.applyChanges();
+			} catch (BackingStoreException e) {
+				SpringUIPlugin.log(e);
+			}
+		}
+
 	}
 
 }
