@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyI
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
@@ -844,7 +845,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	public boolean hasSources(IType element) throws JavaModelException {
-		return element.getOpenable().getBuffer()!=null;
+		return StringUtil.hasText(element.getOpenable().getBuffer().getContents());
 	}
 
 	/**
@@ -857,16 +858,13 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * @return
 	 */
 	public String downloadSources(IType element) throws Exception {
-		boolean hasSources = hasSources(element);
-		if (!hasSources) {
-			IClasspathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
-			IPackageFragment pkg = element.getPackageFragment();
-			IPackageFragmentRoot fragment = (IPackageFragmentRoot) pkg.getParent();
-			buildpathManager.scheduleDownload(fragment, true, false);
-			ACondition.waitFor("source jar download", 20_000, () -> {
-				hasSources(element);
-			});
-		}
+		IClasspathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
+		IPackageFragment pkg = element.getPackageFragment();
+		IPackageFragmentRoot fragment = (IPackageFragmentRoot) pkg.getParent();
+		buildpathManager.scheduleDownload(fragment, true, false);
+		ACondition.waitFor("source jar download", 20_000, () -> {
+			assertTrue("Sources not yet downloaded", hasSources(element));
+		});
 		return element.getOpenable().getBuffer().getContents();
 	}
 
