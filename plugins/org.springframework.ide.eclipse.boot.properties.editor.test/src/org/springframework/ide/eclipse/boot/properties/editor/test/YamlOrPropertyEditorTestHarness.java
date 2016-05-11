@@ -857,12 +857,12 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * @return
 	 */
 	public String downloadSources(IType element) throws Exception {
-		boolean hasSources = false; //hasSources(element);
+		boolean hasSources = hasSources(element);
 		if (!hasSources) {
 			IClasspathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();
 			IPackageFragment pkg = element.getPackageFragment();
 			IPackageFragmentRoot fragment = (IPackageFragmentRoot) pkg.getParent();
-			buildpathManager.scheduleDownload(fragment, true, true);
+			buildpathManager.scheduleDownload(fragment, true, false);
 			ACondition.waitFor("source jar download", 20_000, () -> {
 				hasSources(element);
 			});
