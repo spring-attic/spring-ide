@@ -420,6 +420,38 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	@Test
+	public void appsManagerDefaultHost() throws Exception {
+		MockCFSpace space = clientFactory.defSpace("my-org", "foo");
+
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = "whocares";
+
+		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+
+		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHost());
+		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
+
+		assertEquals("http://console.some-cloud.com/organizations/" + space.getOrganization().getGuid() + "/spaces/" + space.getGuid(), cfModel.getRunTarget().getAppsManagerURL());
+	}
+
+	@Test
+	public void appsManagerCustomizedHost() throws Exception {
+		MockCFSpace space = clientFactory.defSpace("my-org", "foo");
+
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = "whocares";
+
+		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+
+		cfModel.getRunTarget().setAppsManagerHost("http://totallyDifferentHost.com");
+
+		assertEquals("http://totallyDifferentHost.com", cfModel.getRunTarget().getAppsManagerHost());
+		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
+
+		assertEquals("http://totallyDifferentHost.com/organizations/" + space.getOrganization().getGuid() + "/spaces/" + space.getGuid(), cfModel.getRunTarget().getAppsManagerURL());
+	}
+
+	@Test
 	public void templateDrivenTargetNames() throws Exception {
 		clientFactory.defSpace("my-org", "foo");
 		clientFactory.defSpace("your-org", "bar");
