@@ -81,6 +81,7 @@ public class BootDashActions {
 	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
 	private ToggleFilterAction[] toggleFilterActions;
 	private CustmomizeTargetLabelAction customizeTargetLabelAction;
+	private CustmomizeTargetAppManagerURLAction customizeTargetAppsManagerURLAction;
 
 	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
@@ -174,6 +175,7 @@ public class BootDashActions {
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
 			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
 			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, ui);
+			customizeTargetAppsManagerURLAction = new CustmomizeTargetAppManagerURLAction(sectionSelection, ui);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
@@ -207,7 +209,7 @@ public class BootDashActions {
 
 	private AddRunTargetAction[] createAddTargetActions() {
 		Set<RunTargetType> targetTypes = model.getRunTargetTypes();
-		ArrayList<AddRunTargetAction> actions = new ArrayList<AddRunTargetAction>();
+		ArrayList<AddRunTargetAction> actions = new ArrayList<>();
 		for (RunTargetType tt : targetTypes) {
 			if (tt.canInstantiate()) {
 				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), ui));
@@ -457,6 +459,10 @@ public class BootDashActions {
 
 	public CustmomizeTargetLabelAction getCustomizeTargetLabelAction() {
 		return customizeTargetLabelAction;
+	}
+
+	public CustmomizeTargetAppManagerURLAction getCustomizeTargetAppsManagerURLAction() {
+		return customizeTargetAppsManagerURLAction;
 	}
 
 	public ImmutableList<IAction> getDebugOnTargetActions() {

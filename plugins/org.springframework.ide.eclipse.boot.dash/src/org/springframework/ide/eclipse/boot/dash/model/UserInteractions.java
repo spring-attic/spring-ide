@@ -17,6 +17,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
@@ -91,4 +92,9 @@ public interface UserInteractions {
 	 * Opens a {@link EditTemplateDialog} on given dialog model.
 	 */
 	void openEditTemplateDialog(EditTemplateDialogModel model);
+
+	/**
+	 * Opens a {@link CustomizeAppsManagerURLDialog} on given dialog model.
+	 */
+	void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model);
 }
