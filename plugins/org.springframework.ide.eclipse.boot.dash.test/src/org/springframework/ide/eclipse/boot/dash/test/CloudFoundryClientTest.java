@@ -431,7 +431,7 @@ public class CloudFoundryClientTest {
 	@Test
 	public void getServices() throws Exception {
 		RetryUtil.retryWhen("getServices", 3,
-			(e) -> ExceptionUtil.getMessage(e).contains("502 Bad Gateway"),
+			(e) -> ExceptionUtil.getMessage(e).contains("502"),
 			() -> {
 				String[] serviceNames = new String[3];
 				Set<String> userProvided = new HashSet<>();
@@ -513,29 +513,34 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testGetBoundServices() throws Exception {
-		String appName = appHarness.randomAppName();
-		String service1 = services.createTestService();
-		String service2 = services.createTestService();
-		String service3 = services.createTestService();
+		RetryUtil.retryWhen("testGetBoundServices", 3,
+			(e) -> ExceptionUtil.getMessage(e).contains("502"),
+			() -> {
+				String appName = appHarness.randomAppName();
+				String service1 = services.createTestService();
+				String service2 = services.createTestService();
+				String service3 = services.createTestService();
 
-		CFPushArguments params = new CFPushArguments();
-		params.setAppName(appName);
-		params.setApplicationData(getTestZip("testapp"));
-		params.setBuildpack("staticfile_buildpack");
-		params.setServices(ImmutableList.of(service1, service2));
-		push(params);
+				CFPushArguments params = new CFPushArguments();
+				params.setAppName(appName);
+				params.setApplicationData(getTestZip("testapp"));
+				params.setBuildpack("staticfile_buildpack");
+				params.setServices(ImmutableList.of(service1, service2));
+				push(params);
 
-		List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
-		CFApplication app = null;
-		for (CFApplication a : allApps) {
-			if (a.getName().equals(appName)) {
-				app = a;
+				List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+				CFApplication app = null;
+				for (CFApplication a : allApps) {
+					if (a.getName().equals(appName)) {
+						app = a;
+					}
+				}
+				assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
+
+				app = client.getApplication(appName);
+				assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
 			}
-		}
-		assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
-
-		app = client.getApplication(appName);
-		assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
+		);
 	}
 
 
