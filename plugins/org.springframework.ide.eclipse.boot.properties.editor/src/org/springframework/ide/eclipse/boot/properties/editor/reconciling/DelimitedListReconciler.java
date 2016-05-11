@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 
 /**
  * Helper class to reconcile text contained in a document region as a comma-separated list.

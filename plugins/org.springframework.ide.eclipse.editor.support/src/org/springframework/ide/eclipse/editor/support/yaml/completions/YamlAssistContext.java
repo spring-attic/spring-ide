@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
@@ -29,4 +30,6 @@ public interface YamlAssistContext extends YamlNavigable<YamlAssistContext> {
 	// two methods and get rid of the first one.
 	HoverInfo getHoverInfo();
 	HoverInfo getHoverInfo(YamlPathSegment lastSegment);
+
+	HoverInfo getValueHoverInfo(YamlDocument doc, DocumentRegion documentRegion);
 }

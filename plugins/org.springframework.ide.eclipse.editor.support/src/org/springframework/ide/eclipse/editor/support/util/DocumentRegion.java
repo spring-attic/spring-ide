@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
-import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 
 /**
  * A non-sucky alternative to {@link IRegion}. Represents a region of text in a document.
@@ -231,5 +230,23 @@ public class DocumentRegion implements CharSequence {
 	public DocumentRegion textBefore(int len) {
 		Assert.isLegal(len>=0);
 		return new DocumentRegion(doc, start-len, start);
+	}
+
+	public IDocument getDocument() {
+		return doc;
+	}
+
+	/**
+	 * Get the start of this region in 'absolute' terms (i.e. relative to the document).
+	 */
+	public int getStart() {
+		return start;
+	}
+
+	/**
+	 * Get the end of this region in 'absolute' terms (i.e. relative to the document).
+	 */
+	public int getEnd() {
+		return end;
 	}
 }

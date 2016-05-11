@@ -126,7 +126,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
-	public void testHoverInfoForValueHint() throws Exception {
+	public void testHoverInfoForValueHintCompletion() throws Exception {
 		data("my.bonus", "java.lang.String", null, "Bonus type")
 		.valueHint("small", "A small bonus. For a little extra incentive.")
 		.valueHint("large", "An large bonus. For the ones who deserve it.")
@@ -140,6 +140,22 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				, // ==>
 				"For the ones who deserve it"
 		);
+	}
+
+	public void testHoverInfoForValueHint() throws Exception {
+		data("my.bonus", "java.lang.String", null, "Bonus type")
+		.valueHint("small", "A small bonus. For a little extra incentive.")
+		.valueHint("large", "An large bonus. For the ones who deserve it.")
+		.valueHint("exorbitant", "Truly outrageous. Who deserves a bonus like that?");
+
+		YamlEditor editor = new YamlEditor(
+				"#comment here\n" +
+				"my:\n" +
+				"  bonus: large\n"
+		);
+
+		editor.assertIsHoverRegion("large");
+		editor.assertHoverContains("large", "For the ones who deserve it");
 	}
 
 

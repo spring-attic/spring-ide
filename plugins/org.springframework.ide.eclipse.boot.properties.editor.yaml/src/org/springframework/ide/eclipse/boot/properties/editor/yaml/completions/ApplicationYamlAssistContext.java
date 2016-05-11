@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jface.text.IDocument;
+import javax.annotation.processing.Completions;
+
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -45,8 +46,8 @@ import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
@@ -282,6 +283,19 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return Collections.emptyList();
 		}
 
+		@Override
+		public HoverInfo getValueHoverInfo(YamlDocument doc, DocumentRegion valueRegion) {
+			String value = valueRegion.toString();
+			Collection<ValueHint> hints = getHintValues(value, doc, valueRegion.getEnd(), EnumCaseMode.ALIASED);
+			//The hints where found by fuzzy match so they may not actually match exactly!
+			for (ValueHint h : hints) {
+				if (value.equals(""+h.getValue())) {
+					return new ValueHintHoverInfo(h);
+				}
+			}
+			return super.getValueHoverInfo(doc, valueRegion);
+		}
+
 		protected Collection<ValueHint> getHintValues(
 				String query,
 				YamlDocument doc, int offset,
@@ -356,6 +370,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		protected Type getType() {
 			return type;
 		}
+
 	}
 
 	private static class IndexContext extends ApplicationYamlAssistContext {
