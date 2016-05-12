@@ -48,7 +48,7 @@ public class LoggerNameProvider extends CachingValueProvider {
 				.filter((fqName) -> 0!=FuzzyMatcher.matchScore(query, fqName))
 				.distinct()
 				.map((fqName) -> {
-					debug("distinct["+query+"]: "+fqName);
+//					debug("distinct["+query+"]: "+fqName);
 					return hint(fqName);
 				});
 		} catch (Exception e) {

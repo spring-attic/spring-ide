@@ -49,13 +49,13 @@ import reactor.core.tuple.Tuple2;
  */
 public abstract class CachingValueProvider implements ValueProviderStrategy {
 
-	protected static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-
-	protected static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
+//	protected static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+//
+//	protected static void debug(String string) {
+//		if (DEBUG) {
+//			System.out.println(string);
+//		}
+//	}
 
 	{
 		Timer.global(); //TODO: this shouldn't be needed in later release of reactor. Reactor version *after* 2.5.0.M3 should
@@ -86,14 +86,14 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 
 		public CacheEntry(String query, Flux<ValueHint> producer) {
 			values = producer
-			.doOnNext((e) -> {
-				count++;
-				debug("onNext["+query+":"+count+"]: "+e.getValue().toString());
-			})
-			.doOnComplete(() -> {
-				debug("onComplete["+query+":"+count+"]");
-				isComplete = true;
-			})
+//			.doOnNext((e) -> {
+//				count++;
+//				debug("onNext["+query+":"+count+"]: "+e.getValue().toString());
+//			})
+//			.doOnComplete(() -> {
+//				debug("onComplete["+query+":"+count+"]");
+//				isComplete = true;
+//			})
 			.take(MAX_RESULTS)
 			.cache(MAX_RESULTS);
 			values.subscribe(); // create infinite demand so that we actually force cache entries to be fetched upto the max.
@@ -108,7 +108,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 
 	@Override
 	public final Flux<ValueHint> getValues(IJavaProject javaProject, String query) {
-		debug("CA query: "+query);
+//		debug("CA query: "+query);
 		Tuple2<String, String> key = key(javaProject, query);
 		CacheEntry cached = cache.get(key);
 		if (cached==null) {
@@ -123,7 +123,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	 * Falls back on doing a full-blown search if there's no usable 'prefix-query' in the cache.
 	 */
 	private Flux<ValueHint> getValuesIncremental(IJavaProject javaProject, String query) {
-		debug("trying to solve "+query+" incrementally");
+//		debug("trying to solve "+query+" incrementally");
 		String subquery = query;
 		while (subquery.length()>=1) {
 			subquery = subquery.substring(0, subquery.length()-1);
@@ -131,16 +131,16 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 			if (cached!=null) {
 				System.out.println("cached "+subquery+": "+cached);
 				if (cached.isComplete) {
-					debug("filtering "+subquery+" -> "+query);
+//					debug("filtering "+subquery+" -> "+query);
 					return cached.values
-							.doOnNext((hint) -> debug("filter["+query+"]: "+hint.getValue()))
+//							.doOnNext((hint) -> debug("filter["+query+"]: "+hint.getValue()))
 							.filter((hint) -> 0!=FuzzyMatcher.matchScore(query, hint.getValue().toString()));
 				} else {
-					debug("subquery "+subquery+" cached but is incomplete");
+//					debug("subquery "+subquery+" cached but is incomplete");
 				}
 			}
 		}
-		debug("full search for: "+query);
+//		debug("full search for: "+query);
 		return getValuesAsycn(javaProject, query);
 	}
 
