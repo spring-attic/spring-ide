@@ -35,6 +35,7 @@ import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -54,6 +55,7 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 import com.google.common.collect.ImmutableList;
@@ -236,17 +238,29 @@ public class TypeUtil {
 		if (simpleParser!=null) {
 			return simpleParser;
 		}
-		Collection<String> enumValues = getAllowedValues(type, EnumCaseMode.ALIASED);
+		Collection<StsValueHint> enumValues = getAllowedValues(type, EnumCaseMode.ALIASED);
 		if (enumValues!=null) {
 			//Note, technically if 'enumValues is empty array' this means something different
 			// from when it is null. An empty array means a type that has no values, so
 			// assigning anything to it is an error.
-			return new EnumValueParser(niceTypeName(type), enumValues);
+			return new EnumValueParser(niceTypeName(type), getBareValues(enumValues));
 		}
 		if (isMap(type)) {
 			//Trying to parse map types from scalars is not possible. Thus we
 			// provide a parser that allows throws
 			return new AlwaysFailingParser(niceTypeName(type));
+		}
+		return null;
+	}
+
+	private String[] getBareValues(Collection<StsValueHint> hints) {
+		if (hints!=null) {
+			String[] values = new String[hints.size()];
+			int i = 0;
+			for (StsValueHint h : hints) {
+				values[i++] = h.getValue();
+			}
+			return values;
 		}
 		return null;
 	}
@@ -259,7 +273,7 @@ public class TypeUtil {
 	 * @param caseMode determines whether Enum values are returned in 'lower case form', 'orignal form',
 	 * or 'aliased' (meaning both forms are returned).
 	 */
-	public Collection<String> getAllowedValues(Type enumType, EnumCaseMode caseMode) {
+	public Collection<StsValueHint> getAllowedValues(Type enumType, EnumCaseMode caseMode) {
 		if (enumType!=null) {
 			try {
 				String[] values = TYPE_VALUES.get(enumType.getErasure());
@@ -270,9 +284,9 @@ public class TypeUtil {
 						for (int i = 0; i < values.length; i++) {
 							aliased.add(values[i].toUpperCase());
 						}
-						return aliased.build();
+						return aliased.build().stream().map(StsValueHint::create).collect(Collectors.toList());
 					} else {
-						return ImmutableList.copyOf(values);
+						return Arrays.stream(values).map(StsValueHint::create).collect(Collectors.toList());
 					}
 				}
 				IType type = findType(enumType.getErasure());
@@ -280,18 +294,20 @@ public class TypeUtil {
 					IField[] fields = type.getFields();
 
 					if (fields!=null) {
-						ImmutableList.Builder<String> enums = ImmutableList.builder();
+						ImmutableList.Builder<StsValueHint> enums = ImmutableList.builder();
 						boolean addOriginal = caseMode==EnumCaseMode.ORIGNAL||caseMode==EnumCaseMode.ALIASED;
 						boolean addLowerCased = caseMode==EnumCaseMode.LOWER_CASE||caseMode==EnumCaseMode.ALIASED;
 						for (int i = 0; i < fields.length; i++) {
 							IField f = fields[i];
+							Provider<HtmlSnippet> jdoc = StsValueHint.javaDocSnippet(f);
+							Deprecation deprec = getDeprecation(f);
 							if (f.isEnumConstant()) {
 								String rawName = f.getElementName();
 								if (addOriginal) {
-									enums.add(rawName);
+									enums.add(StsValueHint.create(rawName, jdoc, deprec));
 								}
 								if (addLowerCased) {
-									enums.add(StringUtil.upperCaseToHyphens(rawName));
+									enums.add(StsValueHint.create(StringUtil.upperCaseToHyphens(rawName), jdoc, deprec));
 								}
 							}
 						}
@@ -324,15 +340,15 @@ public class TypeUtil {
 			buf.append(typeStr);
 		}
 		if (isEnum(type)) {
-			Collection<String> values = getAllowedValues(type, EnumCaseMode.ORIGNAL);
+			Collection<StsValueHint> values = getAllowedValues(type, EnumCaseMode.ORIGNAL);
 			if (values!=null && !values.isEmpty()) {
 				buf.append("[");
 				int i = 0;
-				for (String value : values) {
+				for (StsValueHint hint : values) {
 					if (i>0) {
 						buf.append(", ");
 					}
-					buf.append(value);
+					buf.append(hint.getValue());
 					i++;
 					if (i>=4) {
 						break;
@@ -608,12 +624,13 @@ public class TypeUtil {
 		if (isMap(type)) {
 			Type keyType = getKeyType(type);
 			if (keyType!=null) {
-				Collection<String> keyValues = getAllowedValues(keyType, enumMode);
-				if (CollectionUtil.hasElements(keyValues)) {
+				Collection<StsValueHint> keyHints = getAllowedValues(keyType, enumMode);
+				if (CollectionUtil.hasElements(keyHints)) {
 					Type valueType = getDomainType(type);
-					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyValues.size());
-					for (String propName : keyValues) {
-						properties.add(new TypedProperty(propName, valueType, null));
+					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyHints.size());
+					for (StsValueHint hint : keyHints) {
+						String propName = hint.getValue();
+						properties.add(new TypedProperty(propName, valueType, hint.getDescriptionProvider(), hint.getDeprecation()));
 					}
 					return properties;
 				}
@@ -677,7 +694,7 @@ public class TypeUtil {
 		});
 	}
 
-	private Deprecation getDeprecation(IMethod m) {
+	private Deprecation getDeprecation(IAnnotatable m) {
 		try {
 			for (IAnnotation a : m.getAnnotations()) {
 				if (DEPRECATED_ANOT_NAMES.contains(a.getElementName())) {
@@ -889,11 +906,9 @@ public class TypeUtil {
 	}
 
 	public Collection<StsValueHint> getHintValues(Type type, String query, EnumCaseMode enumCaseMode) {
-		Collection<String> allowed = getAllowedValues(type, enumCaseMode);
+		Collection<StsValueHint> allowed = getAllowedValues(type, enumCaseMode);
 		if (allowed!=null) {
-			return allowed.stream()
-			.map((value) -> StsValueHint.create(value, null))
-			.collect(Collectors.toList());
+			return allowed;
 		}
 		ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
 		if (valueHinter!=null) {

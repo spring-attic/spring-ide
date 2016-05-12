@@ -360,7 +360,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 					for (StsValueHint hint : valueCompletions) {
-						String valueCandidate = ""+hint.getValue();
+						String valueCandidate = hint.getValue();
 						double score = FuzzyMatcher.matchScore(query, valueCandidate);
 						if (score!=0) {
 							DocumentEdits edits = new DocumentEdits(doc);
