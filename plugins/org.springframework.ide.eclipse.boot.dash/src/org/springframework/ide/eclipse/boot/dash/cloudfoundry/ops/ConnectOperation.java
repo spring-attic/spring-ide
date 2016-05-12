@@ -75,7 +75,7 @@ public class ConnectOperation extends CloudOperation {
 								} catch (CannotAccessPropertyException e1) {
 									ui.warningPopup("Failed Storing Password",
 											"Failed to store password in Secure Storage for " + passwordDialogModel.getTargetId()
-													+ ". Secure Storage is most likely locked. Current password will be used until workbench is restarted.");
+													+ ". Secure Storage is most likely locked. Current password will be used until disconnect.");
 									// Set "remember password" to false. Password hasn't been stored.
 									model.getRunTarget().getTargetProperties().setStorePassword(false);
 								}
@@ -97,6 +97,10 @@ public class ConnectOperation extends CloudOperation {
 				model.setRefreshState(RefreshState.loading("Disconnecting..."));
 				model.getRunTarget().disconnect();
 				model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
+				if (!model.getRunTarget().getTargetProperties().isStorePassword()) {
+					// Forget password on disconnect if it's not stored
+					model.getRunTarget().getTargetProperties().setPassword(null);
+				}
 				model.getViewModel().updateTargetPropertiesInStore();
 				model.setRefreshState(RefreshState.READY);
 			}

@@ -59,7 +59,7 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 							} catch (CannotAccessPropertyException e) {
 								ui.warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + targetId
-												+ ". Secure Storage is most likely locked. Current password will be used until workbench is restarted.");
+												+ ". Secure Storage is most likely locked. Current password will be used until disconnect.");
 								// Set "remember password" to false. Password hasn't been stored.
 								runTarget.getTargetProperties().setStorePassword(false);
 							}

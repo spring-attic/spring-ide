@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -113,6 +112,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
 		wizard.setUrl(params.getApiUrl());
 		wizard.setUsername(params.getUsername());
+		wizard.setStorePassword(true);
 		wizard.setPassword(params.getPassword());
 		wizard.setSelfsigned(false);
 		wizard.resolveSpaces(new MockRunnableContext());
