@@ -2994,7 +2994,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
-	public void testEnumJavaDocShownValueContentAssist() throws Exception {
+	public void testEnumJavaDocShownInValueContentAssist() throws Exception {
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("my.background", "demo.Color", null, "Color to use as default background.");
 
@@ -3006,6 +3006,26 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				, // ==>
 				"Hot and delicious"
 		);
+	}
+
+	public void testEnumJavaDocShownInValueHover() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		YamlEditor editor;
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: red"
+		);
+		editor.assertHoverContains("red", "Hot and delicious");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: RED"
+		);
+		editor.assertHoverContains("RED", "Hot and delicious");
+
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////
