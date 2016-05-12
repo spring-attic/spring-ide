@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,9 +36,12 @@ public class TargetProperties {
 	public static final String USERNAME_PROP = "username";
 	public static final String URL_PROP = "url";
 
+	private static final String STORE_PASSWORD = "storePassword";
+
 	protected Map<String, String> map;
 	private RunTargetType type;
 	private BootDashModelContext context;
+	private String password;
 
 	public TargetProperties(Map<String, String> map, RunTargetType type, BootDashModelContext context) {
 		this.map = map;
@@ -88,7 +91,7 @@ public class TargetProperties {
 	 * @return non-null map of properties. This is a copy of the actual map
 	 */
 	public Map<String, String> getAllProperties() {
-		return new HashMap<String, String>(map);
+		return new HashMap<>(map);
 	}
 
 	public String getRunTargetId() {
@@ -103,19 +106,36 @@ public class TargetProperties {
 		return map.get(USERNAME_PROP);
 	}
 
+	public boolean isStorePassword() {
+		String s = map.get(STORE_PASSWORD);
+		return s == null ? false : Boolean.valueOf(s);
+	}
+
+	public void setStorePassword(boolean store) {
+		map.put(STORE_PASSWORD, String.valueOf(store));
+	}
+
 	public String getPassword() throws CannotAccessPropertyException {
-		try {
-			return context.getSecuredCredentialsStore().getPassword(secureStoreScopeKey(type.getName(), getRunTargetId()));
-		} catch (StorageException e) {
-			throw new CannotAccessPropertyException("Cannot read password.", e);
+		if (password == null && isStorePassword()) {
+			try {
+				password = context.getSecuredCredentialsStore().getPassword(secureStoreScopeKey(type.getName(), getRunTargetId()));
+			} catch (StorageException e) {
+				throw new CannotAccessPropertyException("Cannot read password.", e);
+			}
 		}
+		return password;
 	}
 
 	public void setPassword(String password) throws CannotAccessPropertyException {
-		try {
-			context.getSecuredCredentialsStore().setPassword(password, secureStoreScopeKey(type.getName(), getRunTargetId()));
-		} catch (StorageException e) {
-			throw new CannotAccessPropertyException("Cannot store password.", e);
+		this.password = password;
+		if (isStorePassword()) {
+			try {
+				context.getSecuredCredentialsStore().setPassword(password, secureStoreScopeKey(type.getName(), getRunTargetId()));
+			} catch (StorageException e) {
+				throw new CannotAccessPropertyException("Cannot store password.", e);
+			}
+		} else {
+			// Shall we clear out the password that might be stored if we don't remember the password?
 		}
 	}
 

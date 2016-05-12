@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -168,20 +169,6 @@ public class DefaultUserInteractions implements UserInteractions {
 			}
 		});
 		return confirm[0];
-	}
-
-	@Override
-	public String updatePassword(final String userName, final String targetId) {
-		final String[] password = new String[1];
-		getShell().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				UpdatePasswordDialog dialog = new UpdatePasswordDialog(getShell(), userName, targetId);
-				if (dialog.open() == Window.OK) {
-					password[0] = dialog.getPassword();
-				}
-			}
-		});
-		return password[0];
 	}
 
 	@Override
@@ -327,6 +314,24 @@ public class DefaultUserInteractions implements UserInteractions {
 	public int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex) {
 		return new MessageDialog(getShell(), title, null, message,
 				MessageDialog.QUESTION, buttonLabels, defaultButtonIndex).open();
+	}
+
+	@Override
+	public void openDialog(PasswordDialogModel model) {
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				new UpdatePasswordDialog(getShell(), model).open();
+			}
+		});
+	}
+
+	@Override
+	public void warningPopup(String title, String message) {
+		getShell().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				MessageDialog.openWarning(getShell(), title, message);
+			}
+		});
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,93 +28,115 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 
 /**
+ * Dialog for setting the password and "store password" flag.
+ *
  * @author Terry Denney
+ * @author Alex Boyko
  */
-public class UpdatePasswordDialog extends MessageDialog {
+public class UpdatePasswordDialog extends TitleAreaDialog {
 
-	private String password;
+	private static final String PLEASE_PRESS_OK_TO_SET_THE_PASSWORD = "Please press 'OK' to set the password.";
+	private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password.";
+	private PasswordDialogModel model;
 
-	private String targetId;
-
-	private Label description;
-
-	public UpdatePasswordDialog(Shell parentShell, String username, String targetId) {
-		super(parentShell, "Enter Password", null, "Enter password for " + username, CONFIRM,
-				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
-		this.targetId = targetId;
-		setShellStyle(getShellStyle() | SWT.RESIZE);
-	}
-
-	public String getPassword() {
-		return password;
+	public UpdatePasswordDialog(Shell parentShell, PasswordDialogModel model) {
+		super(parentShell);
+		this.model = model;
 	}
 
 	@Override
-	protected Control createCustomArea(Composite parent) {
+	protected Control createDialogArea(Composite parent) {
 
-		Composite area = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(area);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(area);
+		setTitle("Enter Password");
+		if (model.getPasswordVar().getValue() == null || model.getPasswordVar().getValue().isEmpty()) {
+			setMessage(PLEASE_ENTER_A_PASSWORD, IStatus.INFO);
+		} else {
+			setMessage(PLEASE_PRESS_OK_TO_SET_THE_PASSWORD, IStatus.INFO);
+		}
 
-		description = new Label(area, SWT.NONE | SWT.WRAP);
+		Composite composite = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
+
+		Label description = new Label(composite, SWT.NONE | SWT.WRAP);
 
 		// Set a minimum width such that the wrapped text does not enlarge the
 		// dialogue with extra space
-		GridDataFactory.fillDefaults().hint(400, SWT.DEFAULT).applyTo(description);
-		description.setText("The password must match your existing target credentials in " + targetId
-				+ ".");
-
-		Composite composite = new Composite(area, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
+		GridDataFactory.fillDefaults().span(2, 1).hint(300, SWT.DEFAULT).applyTo(description);
+		description.setText("The password must match your existing target credentials in " + model.getTargetId() + ".");
 
 		Label updatePasswordLabel = new Label(composite, SWT.NONE);
 		updatePasswordLabel.setText("Password:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(updatePasswordLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(updatePasswordLabel);
 
-		final Text newPasswordText = new Text(composite, SWT.PASSWORD | SWT.BORDER);
+		Composite passwordComposite = new Composite(composite, SWT.NONE);
+		GridLayoutFactory.fillDefaults().spacing(10, 10).applyTo(passwordComposite);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(passwordComposite);
+
+		final Text newPasswordText = new Text(passwordComposite, SWT.PASSWORD | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(newPasswordText);
 		newPasswordText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
-				password = newPasswordText.getText();
-				update();
+				String password = newPasswordText.getText();
+				model.getPasswordVar().setValue(password);
+
+				getButton(OK).setEnabled(password != null && password.length() > 0);
+
+				if (password == null || password.isEmpty()) {
+					setMessage(PLEASE_ENTER_A_PASSWORD, IStatus.INFO);
+					getButton(OK).setEnabled(false);
+				} else {
+					setMessage(PLEASE_PRESS_OK_TO_SET_THE_PASSWORD, IStatus.INFO);
+					getButton(OK).setEnabled(true);
+				}
 			}
 		});
 
-		return area;
-	}
+		final Button secureStorage = new Button(passwordComposite, SWT.CHECK);
+		secureStorage.setText("Remember Password");
+		GridDataFactory.fillDefaults().applyTo(secureStorage);
+		secureStorage.addSelectionListener(new SelectionAdapter() {
 
-	private void update() {
-		getButton(OK).setEnabled(password != null && password.length() > 0);
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				model.getStoreVar().setValue(secureStorage.getSelection());
+			}
 
-		if (password == null || password.length() == 0) {
-			description.setText("Please enter a password.");
-			getButton(OK).setEnabled(false);
-		} else {
-			description.setText("Please press 'OK' to update the password.");
-			getButton(OK).setEnabled(true);
-		}
+		});
+
+		parent.pack(true);
+
+		return composite;
 	}
 
 	@Override
-	protected Control createButtonBar(Composite parent) {
-		Control buttonBar = super.createButtonBar(parent);
-		getButton(OK).setEnabled(false);
-		return buttonBar;
+	protected boolean isResizable() {
+		return true;
 	}
+
+	@Override
+	protected void buttonPressed(int buttonId) {
+		model.buttonPressed(buttonId);
+		super.buttonPressed(buttonId);
+	}
+
 }

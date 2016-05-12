@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,11 +17,13 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -35,11 +37,12 @@ public interface UserInteractions {
 	ILaunchConfiguration chooseConfigurationDialog(String dialogTitle, String message, Collection<ILaunchConfiguration> configs);
 	IType chooseMainType(IType[] mainTypes, String dialogTitle, String message);
 	void errorPopup(String title, String message);
+	void warningPopup(String title, String message);
 	void openLaunchConfigurationDialogOnGroup(ILaunchConfiguration selection, String launchGroup);
 	void openUrl(String url);
 	boolean confirmOperation(String title, String message);
-	String updatePassword(String userName, String targetId);
 	void openDialog(ToggleFiltersDialogModel model);
+	void openDialog(PasswordDialogModel model);
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
 	int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex);

@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
@@ -40,28 +41,38 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 		if (runTarget!=null) {
 			final String userName = runTarget.getTargetProperties().get(TargetProperties.USERNAME_PROP);
 			final String targetId = runTarget.getId();
+			final boolean storePassword = runTarget.getTargetProperties().isStorePassword();
 			Job job = new Job("Updating password") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					String password = ui.updatePassword(userName, targetId);
-					if (password != null) {
-						try {
-							runTarget.getTargetProperties().setPassword(password);
+					PasswordDialogModel passwordDialogModel = new PasswordDialogModel(userName, targetId, storePassword);
+					ui.openDialog(passwordDialogModel);
+					if (passwordDialogModel.isOk()) {
+						runTarget.getTargetProperties().setStorePassword(passwordDialogModel.getStoreVar().getValue());
+						String password = passwordDialogModel.getPasswordVar().getValue();
+						// The password cannot be null or empty string - enforced by the dialog
+						// Do the check just in case for tests bypassing the UI
+						if (password != null && !password.isEmpty()) {
+							try {
+								runTarget.getTargetProperties().setPassword(password);
+							} catch (CannotAccessPropertyException e) {
+								ui.warningPopup("Failed Storing Password",
+										"Failed to store password in Secure Storage for " + targetId
+												+ ". Secure Storage is most likely locked. Current password will be used until workbench is restarted.");
+								// Set "remember password" to false. Password hasn't been stored.
+								runTarget.getTargetProperties().setStorePassword(false);
+							}
 
-							runTarget.refresh();
-
-							// launch refresh if it validates
-							targetModel.refresh(ui);
-
-						} catch (CannotAccessPropertyException e) {
-							ui.errorPopup("Update Password Failure", "Cannot store credentials for " + targetId
-									+ ". Please ensure that secure storage is unlocked.");
-						} catch (Exception e) {
-							ui.errorPopup("Update Password Failure", "Credentials for " + targetId
-									+ " are not valid. Please ensure that you entered the right credentials.");
+							try {
+								runTarget.refresh();
+								// launch refresh if it validates
+								targetModel.refresh(ui);
+							} catch (Exception e) {
+								ui.errorPopup("Failed Setting Password", "Credentials for " + targetId
+										+ " are not valid. Ensure credentials are correct.");
+							}
 						}
-
 					}
 					return Status.OK_STATUS;
 				}
