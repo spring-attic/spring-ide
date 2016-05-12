@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 
 /**
  * Basic 'simulated' editor. Contains text and a cursor position / selection.
@@ -32,8 +33,8 @@ public class MockPropertiesEditor extends MockEditor {
 	 * <p>
 	 * If no markers are present the cursor is placed at the very end of the document.
 	 */
-	public MockPropertiesEditor(String text) {
-		super(text);
+	public MockPropertiesEditor(String text, HoverInfoProvider hoverProvider) {
+		super(text, hoverProvider);
 		PropertiesFileDocumentSetupParticipant.setupDocument(document);
 	}
 

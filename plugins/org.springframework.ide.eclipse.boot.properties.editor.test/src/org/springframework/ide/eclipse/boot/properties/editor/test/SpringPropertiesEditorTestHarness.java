@@ -75,7 +75,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	}
 
 	public void assertCompletionDisplayString(String editorContents, String expected) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(editorContents);
+		MockPropertiesEditor editor = newEditor(editorContents);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		assertEquals(expected, completion.getDisplayString());
 	}

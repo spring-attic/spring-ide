@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser;
@@ -748,7 +749,7 @@ public class YamlStructureParserTest extends ApplicationYamlEditorTestHarness {
 		assertValueRange(editor, root, "foo:", null);
 	}
 
-	private void assertValueRange(MockYamlEditor editor, SRootNode root, String nodeText, String expectedValue) throws Exception {
+	private void assertValueRange(MockEditor editor, SRootNode root, String nodeText, String expectedValue) throws Exception {
 		int start = editor.getText().indexOf(nodeText);
 		SKeyNode node = (SKeyNode) root.find(start);
 		int valueRangeStart;
@@ -868,7 +869,7 @@ public class YamlStructureParserTest extends ApplicationYamlEditorTestHarness {
 		return new YamlPath(segments);
 	}
 
-	private void assertKey(MockYamlEditor editor, SRootNode root, String nodeText, String expectedKey) throws Exception {
+	private void assertKey(MockEditor editor, SRootNode root, String nodeText, String expectedKey) throws Exception {
 		int start = editor.getText().indexOf(nodeText);
 		SKeyNode node = (SKeyNode) root.find(start);
 		String key = node.getKey();
@@ -884,7 +885,7 @@ public class YamlStructureParserTest extends ApplicationYamlEditorTestHarness {
 		assertFalse(node.isInKey(endOfKeyRange+1));
 	}
 
-	private void assertFind(MockYamlEditor editor, SRootNode root, String snippet, int... expectPath) {
+	private void assertFind(MockEditor editor, SRootNode root, String snippet, int... expectPath) {
 		int start = editor.getRawText().indexOf(snippet);
 		int end = start+snippet.length();
 		int middle = (start+end) / 2;
@@ -896,13 +897,13 @@ public class YamlStructureParserTest extends ApplicationYamlEditorTestHarness {
 		assertEquals(expectNode, root.find(end));
 	}
 
-	private void assertFindStart(MockYamlEditor editor, SRootNode root, String snippet, int... expectPath) {
+	private void assertFindStart(MockEditor editor, SRootNode root, String snippet, int... expectPath) {
 		int start = editor.getRawText().indexOf(snippet);
 		SNode expectNode = getNodeAtPath(root, expectPath);
 		assertEquals(expectNode, root.find(start));
 	}
 
-	private void assertTreeText(MockYamlEditor editor, SNode node, String expected) throws Exception {
+	private void assertTreeText(MockEditor editor, SNode node, String expected) throws Exception {
 		String actual = editor.textBetween(node.getStart(), node.getTreeEnd());
 		assertEquals(expected.trim(), actual.trim());
 	}

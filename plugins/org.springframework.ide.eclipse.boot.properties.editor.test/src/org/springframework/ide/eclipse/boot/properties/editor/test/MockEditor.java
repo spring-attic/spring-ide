@@ -10,11 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 
 /**
  * Basic 'simulated' editor. Contains text and a cursor position / selection.
@@ -24,6 +33,7 @@ public class MockEditor {
 	protected int selectionStart;
 	private int selectionEnd;
 	Document document;
+	private final HoverInfoProvider hoverProvider;
 	public static final String CURSOR = "<*>";
 
 	public Document getDocument() {
@@ -31,6 +41,11 @@ public class MockEditor {
 	}
 
 	public MockEditor(String text) {
+		this(text, null);
+	}
+
+	public MockEditor(String text, HoverInfoProvider hoverProvider) {
+		this.hoverProvider = hoverProvider;
 		selectionStart = text.indexOf(MockPropertiesEditor.CURSOR);
 		if (selectionStart>=0) {
 			text = text.substring(0,selectionStart) + text.substring(selectionStart+MockPropertiesEditor.CURSOR.length());
@@ -105,5 +120,68 @@ public class MockEditor {
 	@Override
 	public String toString() {
 		return "===== editor ====\n"+getText()+"\n===============\n";
+	}
+
+	public void assertHoverContains(String hoverOver, String expect) {
+		HoverInfo info = getHoverInfo(middleOf(hoverOver));
+		assertNotNull("No hover info for '"+ hoverOver +"'", info);
+		assertContains(expect, info.getHtml());
+	}
+
+	public int middleOf(String nodeText) {
+		int start = startOf(nodeText);
+		if (start>=0) {
+			return start + nodeText.length()/2;
+		}
+		return -1;
+	}
+
+	public int startOf(String nodeText) {
+		return document.get().indexOf(nodeText);
+	}
+
+	public int endOf(String nodeText) {
+		int start = startOf(nodeText);
+		if (start>=0) {
+			return start+nodeText.length();
+		}
+		return -1;
+	}
+
+	public String textBetween(int start, int end) {
+		return DocumentUtil.textBetween(document, start, end);
+	}
+
+	public String textUnder(IRegion r) throws BadLocationException {
+		return document.get(r.getOffset(), r.getLength());
+	}
+
+	public IRegion getHoverRegion(int offset) {
+		return hoverProvider.getHoverRegion(document, offset);
+	}
+
+	public HoverInfo getHoverInfo(int offset) {
+		IRegion r = getHoverRegion(offset);
+		if (r!=null) {
+			return hoverProvider.getHoverInfo(document, r);
+		}
+		return null;
+	}
+
+	public void assertNoHover(String hoverOver) {
+		HoverInfo info = getHoverInfo(middleOf(hoverOver));
+		assertNull(info);
+	}
+
+	public void assertIsHoverRegion(String string) throws BadLocationException {
+		assertHoverRegionCovers(middleOf(string), string);
+		assertHoverRegionCovers(startOf(string), string);
+		assertHoverRegionCovers(endOf(string)-1, string);
+	}
+
+	public void assertHoverRegionCovers(int offset, String expect) throws BadLocationException {
+		IRegion r = getHoverRegion(offset);
+		String actual = textUnder(r);
+		assertEquals(expect, actual);
 	}
 }

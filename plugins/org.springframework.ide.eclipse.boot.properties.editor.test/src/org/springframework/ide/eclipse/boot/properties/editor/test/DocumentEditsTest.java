@@ -30,7 +30,7 @@ public class DocumentEditsTest extends TestCase {
 		}
 
 		public void reset() {
-			this.editor = new MockPropertiesEditor(orgText);
+			this.editor = new MockPropertiesEditor(orgText, null);
 			this.edits = new DocumentEdits(editor.document);
 		}
 

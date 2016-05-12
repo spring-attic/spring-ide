@@ -73,7 +73,7 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 	//TODO: the link targets bits are almost dupiclates from the SpringProperties editor test harness.
 	//  should be able to pull up with some reworking of the SpringProperties harness (i.e. add required
 	//  abstract methods to MockPropertiesEditor and make a subclass for SpringProperties harness.
-	protected List<IJavaElement> getLinkTargets(MockYamlEditor editor, int pos) {
+	protected List<IJavaElement> getLinkTargets(MockEditor editor, int pos) {
 		HoverInfo info = editor.getHoverInfo(pos);
 		if (info!=null) {
 			return info.getJavaElements();
@@ -81,7 +81,7 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 		return Collections.emptyList();
 	}
 
-	public void assertLinkTargets(MockYamlEditor editor, String hoverOver, String... expecteds) {
+	public void assertLinkTargets(MockEditor editor, String hoverOver, String... expecteds) {
 		int pos = editor.middleOf(hoverOver);
 		assertTrue("Not found in editor: '"+hoverOver+"'", pos>=0);
 
@@ -112,7 +112,7 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 	}
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		MockPropertiesEditor editor = newEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		String[] actualLabels = new String[completions.length];
 		for (int i = 0; i < actualLabels.length; i++) {
@@ -128,12 +128,12 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 			}
 
 	public void assertNoCompletions(String text) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(text);
+		MockPropertiesEditor editor = newEditor(text);
 		assertEquals(0, getCompletions(editor).length);
 	}
 
 	public void assertCompletion(String before, String after) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(before);
+		MockPropertiesEditor editor = newEditor(before);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		String actual = editor.getText();
@@ -142,16 +142,12 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 
 	public class YamlEditor extends MockYamlEditor {
 		public YamlEditor(String string) {
-			super(string, structureProvider, parser, hoverProvider);
+			super(string, structureProvider, parser, ApplicationYamlEditorTestHarness.this.hoverProvider);
 		}
 	}
 
 	@Override
 	protected HoverInfoProvider getHoverProvider() {
-		fail("HoverInfoProvider missing");
 		return null;
 	}
-
-
-
 }

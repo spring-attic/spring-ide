@@ -27,7 +27,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testHovers() throws Exception {
 		defaultTestData();
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"spring:\n" +
 				"  application:\n" +
 				"    name: foofoo\n" +
@@ -70,7 +70,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testHoverInfoForEnumValueInMapKey() throws Exception {
-		MockYamlEditor editor;
+		MockEditor editor;
 		IJavaProject project = JavaCore.create(createPredefinedMavenProject("boot13"));
 		useProject(project);
 
@@ -162,7 +162,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"#A comment at the start\n" +
 				"foo:\n" +
 				"  data:\n" +
@@ -191,7 +191,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"server:\n"+
 				"  port: 888\n" +
 				"spring:\n" +
@@ -2375,7 +2375,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testDeprecatedPropertyHoverInfo() throws Exception {
 		data("error.path", "java.lang.String", null, "Path of the error controller.");
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"# a comment\n"+
 				"error:\n" +
 				"  path: foo\n"
@@ -2400,7 +2400,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		IProject jp = createPredefinedMavenProject("demo");
 		useProject(jp);
 		data("foo", "demo.Deprecater", null, "A bean with deprecated property.");
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"# a comment\n"+
 				"foo:\n" +
 				"  name: foo\n"
