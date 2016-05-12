@@ -3025,7 +3025,24 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  background: RED"
 		);
 		editor.assertHoverContains("RED", "Hot and delicious");
+	}
 
+	public void testHyperLinkEnumValue() throws Exception {
+		YamlEditor editor;
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: RED"
+		);
+		assertLinkTargets(editor, "RED", "demo.Color.RED");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: red"
+		);
+		assertLinkTargets(editor, "red", "demo.Color.RED");
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////

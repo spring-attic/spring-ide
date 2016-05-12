@@ -35,12 +35,9 @@ import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IAnnotatable;
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,6 +45,7 @@ import org.eclipse.jdt.core.Signature;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.DeprecationUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
@@ -71,13 +69,6 @@ import reactor.core.publisher.Flux;
  * @author Kris De Volder
  */
 public class TypeUtil {
-
-	private static final ImmutableSet<String> DEPRECATED_ANOT_NAMES = ImmutableSet.of(
-			"org.springframework.boot.context.properties.DeprecatedConfigurationProperty",
-			"DeprecatedConfigurationProperty",
-			"java.lang.Deprecated",
-			"Deprecated"
-	);
 
 	private static abstract class RadixableParser implements ValueParser {
 		protected abstract Object parse(String str, int radix);
@@ -300,14 +291,13 @@ public class TypeUtil {
 						for (int i = 0; i < fields.length; i++) {
 							IField f = fields[i];
 							Provider<HtmlSnippet> jdoc = StsValueHint.javaDocSnippet(f);
-							Deprecation deprec = getDeprecation(f);
 							if (f.isEnumConstant()) {
 								String rawName = f.getElementName();
 								if (addOriginal) {
-									enums.add(StsValueHint.create(rawName, jdoc, deprec));
+									enums.add(StsValueHint.create(rawName, f));
 								}
 								if (addLowerCased) {
-									enums.add(StsValueHint.create(StringUtil.upperCaseToHyphens(rawName), jdoc, deprec));
+									enums.add(StsValueHint.create(StringUtil.upperCaseToHyphens(rawName), f));
 								}
 							}
 						}
@@ -646,12 +636,12 @@ public class TypeUtil {
 				if (getters!=null && !getters.isEmpty()) {
 					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(getters.size());
 					for (IMethod m : getters) {
-						Deprecation deprecation = getDeprecation(m);
+						Deprecation deprecation = DeprecationUtil.extract(m);
 						Type propType = null;
 						try {
 							propType = Type.fromSignature(m.getReturnType(), eclipseType);
 						} catch (JavaModelException e) {
-							BootActivator.log(e);
+							Log.log(e);
 						}
 						if (beanMode.includesHyphenated()) {
 							properties.add(new TypedProperty(getterOrSetterNameToProperty(m.getElementName()), propType, deprecation));
@@ -692,28 +682,6 @@ public class TypeUtil {
 				return Flux.empty();
 			}
 		});
-	}
-
-	private Deprecation getDeprecation(IAnnotatable m) {
-		try {
-			for (IAnnotation a : m.getAnnotations()) {
-				if (DEPRECATED_ANOT_NAMES.contains(a.getElementName())) {
-					Deprecation d = new Deprecation();
-					for (IMemberValuePair pair : a.getMemberValuePairs()) {
-						String name = pair.getMemberName();
-						if (name.equals("reason")) {
-							d.setReason((String) pair.getValue());
-						} else if (name.equals("replacement")) {
-							d.setReplacement((String) pair.getValue());
-						}
-					}
-					return d;
-				}
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return null;
 	}
 
 	private String getterOrSetterNameToProperty(String name) {

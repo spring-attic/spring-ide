@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
+import java.util.List;
+
+import org.eclipse.jdt.core.IJavaElement;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
+
+import com.google.common.collect.ImmutableList;
 
 public class ValueHintHoverInfo extends HoverInfo {
 
@@ -30,6 +35,15 @@ public class ValueHintHoverInfo extends HoverInfo {
 		hint.getDescription().render(html);
 		html.raw("</p>");
 		return html.toString();
+	}
+
+	@Override
+	public List<IJavaElement> getJavaElements() {
+		IJavaElement el = hint.getJavaElement();
+		if (el!=null) {
+			return ImmutableList.of(el);
+		}
+		return ImmutableList.of();
 	}
 
 }

@@ -7,11 +7,14 @@ import javax.inject.Provider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.metadata.DeprecationUtil.*;
 
 /**
  * Sts version of {@link ValueHint} contains similar data, but accomoates
@@ -54,8 +57,13 @@ public class StsValueHint {
 		return new StsValueHint(""+hint.getValue(), textSnippet(hint.getDescription()), null);
 	}
 
-	public static StsValueHint create(String value, Provider<HtmlSnippet> description, Deprecation deprecation) {
-		return new StsValueHint(value, description, deprecation);
+	public static StsValueHint create(String value, IField enumField) {
+		return new StsValueHint(value, javaDocSnippet(enumField), DeprecationUtil.extract(enumField)) {
+			@Override
+			public IJavaElement getJavaElement() {
+				return enumField;
+			}
+		};
 	}
 
 	/**
@@ -101,6 +109,10 @@ public class StsValueHint {
 
 	public Deprecation getDeprecation() {
 		return deprecation;
+	}
+
+	public IJavaElement getJavaElement() {
+		return null;
 	}
 
 
