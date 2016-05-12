@@ -2994,6 +2994,20 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testEnumJavaDocShownValueContentAssist() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		assertCompletionWithInfoHover(
+				"my:\n" +
+				"  background: <*>"
+				, // ==========
+				"red"
+				, // ==>
+				"Hot and delicious"
+		);
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
