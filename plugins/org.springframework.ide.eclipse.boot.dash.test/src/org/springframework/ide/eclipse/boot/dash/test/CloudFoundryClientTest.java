@@ -36,6 +36,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,6 +91,13 @@ import reactor.core.publisher.Mono;
 public class CloudFoundryClientTest {
 
 	private static final String CFAPPS_IO = "cfapps.io";
+
+	private static final Predicate<Throwable> FLAKY_SERVICE_BROKER = (e) -> {
+		String msg = ExceptionUtil.getMessage(e).toLowerCase();
+		return msg.contains("500")
+			|| msg.contains("502")
+			;
+	};
 
 	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
 
@@ -430,8 +438,7 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void getServices() throws Exception {
-		RetryUtil.retryWhen("getServices", 3,
-			(e) -> ExceptionUtil.getMessage(e).contains("502"),
+		RetryUtil.retryWhen("getServices", 3, FLAKY_SERVICE_BROKER,
 			() -> {
 				String[] serviceNames = new String[3];
 				Set<String> userProvided = new HashSet<>();
@@ -486,61 +493,60 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testServiceCreateAndDelete() throws Exception {
-		String[] serviceNames = new String[2];
-		for (int i = 0; i < serviceNames.length; i++) {
-			serviceNames[i] = services.randomServiceName();
-		};
-		for (int i = 0; i < serviceNames.length; i++) {
-			String serviceName = serviceNames[i];
-			if (i%2==0) {
-				System.out.println("Create service: "+serviceName);
-				client.createService(serviceName, "cloudamqp", "lemur").get();
-			} else {
-				System.out.println("Create user-provided service: "+serviceName);
-				client.createUserProvidedService(serviceName, ImmutableMap.of()).get();
+		RetryUtil.retryWhen("testServiceCreateAndDelete", 3, FLAKY_SERVICE_BROKER, () -> {
+			String[] serviceNames = new String[2];
+			for (int i = 0; i < serviceNames.length; i++) {
+				serviceNames[i] = services.randomServiceName();
+			};
+			for (int i = 0; i < serviceNames.length; i++) {
+				String serviceName = serviceNames[i];
+				if (i%2==0) {
+					System.out.println("Create service: "+serviceName);
+					client.createService(serviceName, "cloudamqp", "lemur").get();
+				} else {
+					System.out.println("Create user-provided service: "+serviceName);
+					client.createUserProvidedService(serviceName, ImmutableMap.of()).get();
+				}
 			}
-		}
 
-		List<CFServiceInstance> services = client.getServices();
-		assertServices(services, serviceNames);
-		for (String serviceName : serviceNames) {
-			client.deleteServiceMono(serviceName).get();
-			System.out.println("Deleted service: "+serviceName);
-		}
+			List<CFServiceInstance> services = client.getServices();
+			assertServices(services, serviceNames);
+			for (String serviceName : serviceNames) {
+				client.deleteServiceMono(serviceName).get();
+				System.out.println("Deleted service: "+serviceName);
+			}
 
-		assertNoServices(client.getServices(), serviceNames);
+			assertNoServices(client.getServices(), serviceNames);
+		});
 	}
 
 	@Test
 	public void testGetBoundServices() throws Exception {
-		RetryUtil.retryWhen("testGetBoundServices", 3,
-			(e) -> ExceptionUtil.getMessage(e).contains("502"),
-			() -> {
-				String appName = appHarness.randomAppName();
-				String service1 = services.createTestService();
-				String service2 = services.createTestService();
-				String service3 = services.createTestService();
+		RetryUtil.retryWhen("testGetBoundServices", 3, FLAKY_SERVICE_BROKER, () -> {
+			String appName = appHarness.randomAppName();
+			String service1 = services.createTestService();
+			String service2 = services.createTestService();
+			String service3 = services.createTestService();
 
-				CFPushArguments params = new CFPushArguments();
-				params.setAppName(appName);
-				params.setApplicationData(getTestZip("testapp"));
-				params.setBuildpack("staticfile_buildpack");
-				params.setServices(ImmutableList.of(service1, service2));
-				push(params);
+			CFPushArguments params = new CFPushArguments();
+			params.setAppName(appName);
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			params.setServices(ImmutableList.of(service1, service2));
+			push(params);
 
-				List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
-				CFApplication app = null;
-				for (CFApplication a : allApps) {
-					if (a.getName().equals(appName)) {
-						app = a;
-					}
+			List<CFApplication> allApps = client.getApplicationsWithBasicInfo();
+			CFApplication app = null;
+			for (CFApplication a : allApps) {
+				if (a.getName().equals(appName)) {
+					app = a;
 				}
-				assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
-
-				app = client.getApplication(appName);
-				assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
 			}
-		);
+			assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
+
+			app = client.getApplication(appName);
+			assertEquals(ImmutableSet.of(service1, service2), ImmutableSet.copyOf(app.getServices()));
+		});
 	}
 
 
