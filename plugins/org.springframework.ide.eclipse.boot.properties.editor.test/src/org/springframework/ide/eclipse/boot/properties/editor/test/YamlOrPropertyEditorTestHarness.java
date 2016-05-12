@@ -99,7 +99,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 				int dotPos = description.indexOf('.');
 				if (dotPos>=0) {
 					hint.setShortDescription( description.substring(0, dotPos));
-					description = description.substring(dotPos+1).trim();
 				}
 				hint.setDescription(description);
 			}

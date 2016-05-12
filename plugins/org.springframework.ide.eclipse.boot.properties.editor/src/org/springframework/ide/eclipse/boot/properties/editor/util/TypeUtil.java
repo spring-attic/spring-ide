@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.Signature;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -887,14 +888,19 @@ public class TypeUtil {
 		return msg.toString();
 	}
 
-	public Collection<ValueHint> getHintValues(Type type, String query, EnumCaseMode enumCaseMode) {
+	public Collection<StsValueHint> getHintValues(Type type, String query, EnumCaseMode enumCaseMode) {
 		Collection<String> allowed = getAllowedValues(type, enumCaseMode);
 		if (allowed!=null) {
-			return allowed.stream().map(ValueHint::withValue).collect(Collectors.toList());
+			return allowed.stream()
+			.map((value) -> StsValueHint.create(value, null))
+			.collect(Collectors.toList());
 		}
 		ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
 		if (valueHinter!=null) {
-			return valueHinter.getValuesNow(javaProject, query);
+			Collection<ValueHint> rawHints = valueHinter.getValuesNow(javaProject, query);
+			return rawHints.stream()
+					.map(StsValueHint::create)
+					.collect(Collectors.toList());
 		}
 		return null;
 	}

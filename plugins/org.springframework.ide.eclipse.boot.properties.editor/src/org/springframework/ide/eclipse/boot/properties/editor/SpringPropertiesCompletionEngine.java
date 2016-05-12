@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.ValueH
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProviders;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -355,10 +356,10 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				Collection<ValueHint> valueCompletions = getValueHints(query, propertyName, caseMode);
+				Collection<StsValueHint> valueCompletions = getValueHints(query, propertyName, caseMode);
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					for (ValueHint hint : valueCompletions) {
+					for (StsValueHint hint : valueCompletions) {
 						String valueCandidate = ""+hint.getValue();
 						double score = FuzzyMatcher.matchScore(query, valueCandidate);
 						if (score!=0) {
@@ -401,15 +402,15 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		}
 	}
 
-	private Collection<ValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
+	private Collection<StsValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
 		Type type = getValueType(propertyName);
 		if (TypeUtil.isArray(type) || TypeUtil.isList(type)) {
 			//It is useful to provide content assist for the values in the list when entering a list
 			type = TypeUtil.getDomainType(type);
 		}
-		List<ValueHint> allHints = new ArrayList<>();
+		List<StsValueHint> allHints = new ArrayList<>();
 		{
-			Collection<ValueHint> hints = typeUtil.getHintValues(type, query, caseMode);
+			Collection<StsValueHint> hints = typeUtil.getHintValues(type, query, caseMode);
 			if (CollectionUtil.hasElements(hints)) {
 				allHints.addAll(hints);
 			}
@@ -421,7 +422,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				if (!HintProviders.isNull(hintProvider)) {
 					List<ValueHint> hints = hintProvider.getValueHints(query);
 					if (CollectionUtil.hasElements(hints)) {
-						allHints.addAll(hints);
+						for (ValueHint h : hints) {
+							allHints.add(StsValueHint.create(h));
+						}
 					}
 				}
 			}
