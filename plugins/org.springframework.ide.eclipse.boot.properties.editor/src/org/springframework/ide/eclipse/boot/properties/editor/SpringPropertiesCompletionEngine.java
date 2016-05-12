@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import javax.inject.Provider;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jface.fieldassist.ContentProposal;
@@ -77,7 +76,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	 */
 	public static final Pattern ASSIGN = Pattern.compile("^(\\h)*(=|:)(\\h|\\\\\\s)*");
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 	public static void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("SpringPropertiesCompletionEngine: "+msg);
@@ -321,7 +320,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private ITypedRegion getPartition(IDocument doc, int offset) throws BadLocationException {
 		ITypedRegion part = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
-		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0) {
+		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0 && !newlineBefore(doc, offset)) {
 			//A special case because when cursor at end of document and just after a space-padded '=' sign, then we get a DEFAULT content type
 			// with a empty region. We rather would get the non-empty 'Value' partition just before that (which has the assignment in it.
 			ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, false);
@@ -332,6 +331,18 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			}
 		}
 		return part;
+	}
+
+	private boolean newlineBefore(IDocument doc, int offset) {
+		try {
+			if (offset>0) {
+				char c = doc.getChar(offset-1);
+				return c == '\n' || c=='\r';
+			}
+		} catch (BadLocationException e) {
+			Log.log(e);
+		}
+		return false;
 	}
 
 	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
