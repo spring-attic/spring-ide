@@ -1387,6 +1387,23 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void test_PT_119352965() throws Exception {
+		data("some.property", "java.lang.String", null, "Some property to test stuff")
+		.valueHint("SOMETHING", "A value for something")
+		.valueHint("ALTERNATE", "An alternative value");
+		data("some.other.property", "java.lang.String", null, "Another property to test stuff");
+
+		assertCompletionWithLabel(
+				"some.property=SOMETHING\n" +
+				"<*>"
+				, // ===============
+				"some.other.property : String"
+				, // =>
+				"some.property=SOMETHING\n" +
+				"some.other.property=<*>"
+		);
+	}
+
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
 //	}
