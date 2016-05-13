@@ -32,7 +32,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -127,7 +126,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		private CFClientParams params;
 		private boolean connected = true;
 
-		public MockClient(CFClientParams params) {
+		public MockClient(CFClientParams params) throws Exception {
+			checkCredentials(params.getUsername(), params.getPassword());
 			this.params = params;
 		}
 
@@ -144,7 +144,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			MockCFSpace space = getSpace();
 			return Flux.fromIterable(appsToLookUp)
 			.flatMap((app) -> {
-				return ReactorUtils.just(space.getApplication(app.getGuid()).getDetailedInfo());
+				return Mono.justOrEmpty(space.getApplication(app.getGuid()).getDetailedInfo());
 			});
 		}
 
@@ -279,6 +279,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			}
 		}
 
+		private void checkCredentials(String username, String password) throws Exception {
+			if (password.startsWith("wrong")) {
+				throw errorInvalidCredentials();
+			}
+		}
+
 		@Override
 		public void setHealthCheck(UUID guid, String hcType) {
 			notImplementedStub();
@@ -370,6 +376,10 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	protected IOException errorAppAlreadyExists(String detail) {
 		return new IOException("App already exists: "+detail);
+	}
+
+	protected Exception errorInvalidCredentials() {
+		return new Exception("Cannot connect to CF. Invalid credentials.");
 	}
 
 	public void setAppStartDelay(TimeUnit timeUnit, int howMany) {

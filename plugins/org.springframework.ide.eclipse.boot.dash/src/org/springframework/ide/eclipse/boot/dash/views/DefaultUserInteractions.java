@@ -317,7 +317,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public void openDialog(PasswordDialogModel model) {
+	public void openPasswordDialog(PasswordDialogModel model) {
 		getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				new UpdatePasswordDialog(getShell(), model).open();

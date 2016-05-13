@@ -16,7 +16,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -47,7 +49,7 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					PasswordDialogModel passwordDialogModel = new PasswordDialogModel(userName, targetId, storePassword);
-					ui.openDialog(passwordDialogModel);
+					ui.openPasswordDialog(passwordDialogModel);
 					if (passwordDialogModel.isOk()) {
 						runTarget.getTargetProperties().setStorePassword(passwordDialogModel.getStoreVar().getValue());
 						String password = passwordDialogModel.getPasswordVar().getValue();
@@ -59,19 +61,23 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 							} catch (CannotAccessPropertyException e) {
 								ui.warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + targetId
-												+ ". Secure Storage is most likely locked. Current password will be used until disconnect.");
+												+ ". Secure Storage is most likely locked. Current password will be remembered until workbench is restarted.");
 								// Set "remember password" to false. Password hasn't been stored.
 								runTarget.getTargetProperties().setStorePassword(false);
 							}
 
 							try {
 								runTarget.refresh();
-								// launch refresh if it validates
-								targetModel.refresh(ui);
 							} catch (Exception e) {
+								if (targetModel instanceof AbstractBootDashModel) {
+									((AbstractBootDashModel)targetModel).setRefreshState(RefreshState.error(e));
+								}
 								ui.errorPopup("Failed Setting Password", "Credentials for " + targetId
 										+ " are not valid. Ensure credentials are correct.");
 							}
+
+							// launch refresh if disconnected it would just clear out children
+							targetModel.refresh(ui);
 						}
 					}
 					return Status.OK_STATUS;
