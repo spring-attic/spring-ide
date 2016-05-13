@@ -135,9 +135,9 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	private List<PropertySource> getRawLinkTargets(MockPropertiesEditor editor, int pos) {
 		IRegion region = engine.getHoverRegion(editor.document, pos);
 		if (region!=null) {
-			SpringPropertyHoverInfo hover = engine.getHoverInfo(editor.document, region);
-			if (hover!=null) {
-				return hover.getSources();
+			HoverInfo hover = engine.getHoverInfo(editor.document, region);
+			if (hover instanceof SpringPropertyHoverInfo) {
+				return ((SpringPropertyHoverInfo)hover).getSources();
 			}
 		}
 		return Collections.emptyList();

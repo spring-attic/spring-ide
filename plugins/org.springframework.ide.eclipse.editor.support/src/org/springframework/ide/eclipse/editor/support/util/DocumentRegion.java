@@ -19,7 +19,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TypedRegion;
 
 /**
  * A non-sucky alternative to {@link IRegion}. Represents a region of text in a document.
@@ -149,6 +151,11 @@ public class DocumentRegion implements CharSequence {
 		return new Region(start, end-start);
 	}
 
+	public ITypedRegion asTypedRegion(String type) {
+		return new TypedRegion(start, length(), type);
+	}
+
+
 	public int indexOf(char ch, int fromIndex) {
 		while (fromIndex < length()) {
 			if (charAt(fromIndex)==ch) {
@@ -249,4 +256,12 @@ public class DocumentRegion implements CharSequence {
 	public int getEnd() {
 		return end;
 	}
+
+	/**
+	 * Convert the given document offset into an offset relative to this region.
+	 */
+	public int toRelative(int offset) {
+		return offset-start;
+	}
+
 }

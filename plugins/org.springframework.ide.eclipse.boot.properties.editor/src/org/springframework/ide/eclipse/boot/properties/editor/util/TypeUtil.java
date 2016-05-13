@@ -874,16 +874,18 @@ public class TypeUtil {
 	}
 
 	public Collection<StsValueHint> getHintValues(Type type, String query, EnumCaseMode enumCaseMode) {
-		Collection<StsValueHint> allowed = getAllowedValues(type, enumCaseMode);
-		if (allowed!=null) {
-			return allowed;
-		}
-		ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
-		if (valueHinter!=null) {
-			Collection<ValueHint> rawHints = valueHinter.getValuesNow(javaProject, query);
-			return rawHints.stream()
-					.map(StsValueHint::create)
-					.collect(Collectors.toList());
+		if (type!=null) {
+			Collection<StsValueHint> allowed = getAllowedValues(type, enumCaseMode);
+			if (allowed!=null) {
+				return allowed;
+			}
+			ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
+			if (valueHinter!=null) {
+				Collection<ValueHint> rawHints = valueHinter.getValuesNow(javaProject, query);
+				return rawHints.stream()
+						.map(StsValueHint::create)
+						.collect(Collectors.toList());
+			}
 		}
 		return null;
 	}

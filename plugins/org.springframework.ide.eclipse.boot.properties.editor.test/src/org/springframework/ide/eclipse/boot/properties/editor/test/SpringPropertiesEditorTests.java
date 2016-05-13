@@ -1410,8 +1410,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("my.background", "demo.Color", null, "Color to use as default background.");
 
 		assertCompletionWithInfoHover(
-				"my:\n" +
-				"  background: <*>"
+				"my.background=<*>"
 				, // ==========
 				"red"
 				, // ==>
@@ -1426,15 +1425,15 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		MockPropertiesEditor editor;
 
 		editor = newEditor(
-				"my.background: red"
+				"my.background: RED"
 		);
-		editor.assertHoverContains("red", "Hot and delicious");
+		editor.assertIsHoverRegion("RED");
+		editor.assertHoverContains("RED", "Hot and delicious");
 
 		editor = newEditor(
-				"my:\n" +
-				"  background: RED"
+				"my.background=red"
 		);
-		editor.assertHoverContains("RED", "Hot and delicious");
+		editor.assertHoverContains("red", "Hot and delicious");
 	}
 
 //	public void testContentAssistAfterRBrack() throws Exception {
