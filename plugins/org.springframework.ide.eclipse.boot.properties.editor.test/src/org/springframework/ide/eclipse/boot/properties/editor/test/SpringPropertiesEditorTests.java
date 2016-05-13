@@ -1436,6 +1436,24 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		editor.assertHoverContains("red", "Hot and delicious");
 	}
 
+
+	public void testEnumInValueLink() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		MockPropertiesEditor editor;
+
+		editor = newEditor(
+				"my.background: RED"
+		);
+		assertLinkTargets(editor, "RED", "demo.Color.RED");
+
+		editor = newEditor(
+				"my.background=red"
+		);
+		assertLinkTargets(editor, "red", "demo.Color.RED");
+	}
+
 //	public void testContentAssistAfterRBrack() throws Exception {
 //		//TODO: content assist after ] (auto insert leading '.' if necessary)
 //	}

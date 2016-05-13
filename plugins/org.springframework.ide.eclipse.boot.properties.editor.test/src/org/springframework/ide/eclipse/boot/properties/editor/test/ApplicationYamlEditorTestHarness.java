@@ -85,23 +85,12 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 		int pos = editor.middleOf(hoverOver);
 		assertTrue("Not found in editor: '"+hoverOver+"'", pos>=0);
 
-//		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
-//		assertEquals(expecteds.length, rawTargets.size());
-
 		List<IJavaElement> targets = getLinkTargets(editor, pos);
 		assertEquals(expecteds.length, targets.size());
 		for (int i = 0; i < expecteds.length; i++) {
 			assertEquals(expecteds[i], JavaElementLabels.getElementLabel(targets.get(i), JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES));
 		}
 	}
-
-//	private List<PropertySource> getRawLinkTargets(YamlEditor editor, int pos) {
-//		HoverInfo hover = editor.getHoverInfo(pos);
-//		if (hover!=null && hover instanceof SpringPropertyHoverInfo) {
-//			return ((SpringPropertyHoverInfo)hover).getSources();
-//		}
-//		return Collections.emptyList();
-//	}
 
 	@Override
 	public ICompletionProposal[] getCompletions(MockEditor editor) throws Exception {
