@@ -14,15 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.cloudfoundry.client.lib.ApplicationLogListener;
-import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
+import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 public interface ClientRequests {
 
@@ -48,7 +47,7 @@ public interface ClientRequests {
 	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName, CancelationToken token) throws Exception;
 	void stopApplication(String appName) throws Exception;
-	Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception;
+	Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception;
 	Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;

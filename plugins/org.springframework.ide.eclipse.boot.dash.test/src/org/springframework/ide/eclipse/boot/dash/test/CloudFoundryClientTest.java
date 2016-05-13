@@ -41,8 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.cloudfoundry.client.lib.ApplicationLogListener;
-import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
@@ -69,6 +67,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
@@ -85,8 +84,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 public class CloudFoundryClientTest {
 
@@ -607,8 +606,8 @@ public class CloudFoundryClientTest {
 		client = createClient(CfTestTargetParams.fromEnv());
 
 		String appName = appHarness.randomAppName();
-		ApplicationLogListener listener = mock(ApplicationLogListener.class);
-		Mono<StreamingLogToken> token = client.streamLogs(appName, listener);
+		IApplicationLogConsole listener = mock(IApplicationLogConsole.class);
+		Cancellation token = client.streamLogs(appName, listener);
 		assertNotNull(token);
 
 		Future<Void> pushResult = doAsync(() -> {

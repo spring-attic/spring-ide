@@ -22,9 +22,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import org.cloudfoundry.client.CloudFoundryClient;
-import org.cloudfoundry.client.lib.ApplicationLogListener;
-import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
@@ -41,6 +38,7 @@ import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
+import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.PushApplicationRequest.PushApplicationRequestBuilder;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
@@ -62,6 +60,9 @@ import org.cloudfoundry.operations.services.CreateUserProvidedServiceInstanceReq
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
+import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.osgi.framework.Version;
 import org.reactivestreams.Publisher;
@@ -78,6 +79,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -93,7 +95,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-import reactor.core.publisher.Computations;
+import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -136,7 +138,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private CFClientParams params;
-	private CloudFoundryClient client ;
+	private SpringCloudFoundryClient client ;
 	private CloudFoundryOperations operations;
 	private Mono<String> orgId;
 
@@ -152,9 +154,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this.v1 = new DefaultClientRequestsV1(params);
 		this.client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		this.operations = new CloudFoundryOperationsBuilder()
-			.cloudFoundryClient(client)
-			.target(params.getOrgName(), params.getSpaceName())
-			.build();
+				.cloudFoundryClient(client)
+				.dopplerClient(ReactorDopplerClient.builder()
+						.cloudFoundryClient((ConnectionContextSupplier)client)
+						.build())
+				.target(params.getOrgName(), params.getSpaceName())
+				.build();
+
 		this.orgId = getOrgId();
 		this.info = client.info().get(GetInfoRequest.builder().build()).cache();
 	}
@@ -317,17 +323,24 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) throws Exception {
-		Mono<StreamingLogToken> result = Mono.fromCallable(() -> {
-			return v1.streamLogs(appName, logConsole);
-		})
-//		.log("streamLog before retry")
-		.retry(falseAfter(Duration.ofMinutes(1)))
-//		.log("streamLog after retry")
-		.cache();
+	public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
 
-		result.subscribeOn(Computations.single()).consume((token) -> {});
-		return result;
+		 Cancellation cancellation = operations.applications().logs(LogsRequest
+				   .builder()
+				   .name(appName)
+				   // BUG: show recent appears to throw exception with PWS. May be fixed in the future, but now only "pure" streaming is supported
+				   .recent(false)
+				   .build()
+				)
+				.retry(falseAfter(Duration.ofMinutes(1)))
+				.doOnError((onError) -> {
+					logConsole.onError(onError.fillInStackTrace());
+				})
+		        .subscribe((logMessage) -> {
+					logConsole.onMessage(logMessage);
+				});
+
+		 return cancellation;
 
 //		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 //		try {
