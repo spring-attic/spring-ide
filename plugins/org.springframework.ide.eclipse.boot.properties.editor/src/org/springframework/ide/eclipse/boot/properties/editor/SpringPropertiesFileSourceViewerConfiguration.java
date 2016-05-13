@@ -121,7 +121,8 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		ITextHover delegate = new ReconcileProblemAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
 		try {
-			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)
+			|| contentType.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
 				if (engine!=null) {
 					return new HoverInfoTextHover(sourceViewer, engine, delegate);
