@@ -99,7 +99,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 				int dotPos = description.indexOf('.');
 				if (dotPos>=0) {
 					hint.setShortDescription( description.substring(0, dotPos));
-					description = description.substring(dotPos+1).trim();
 				}
 				hint.setDescription(description);
 			}
@@ -712,7 +711,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * Simulates applying the first completion to a text buffer and checks the result.
 	 */
 	public void assertCompletion(String textBefore, String expectTextAfter) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
+		MockPropertiesEditor editor = newEditor(textBefore);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		assertEquals(expectTextAfter, editor.getText());
@@ -724,7 +723,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * it applies as expected).
 	 */
 	public void assertCompletionWithLabel(String textBefore, String expectLabel, String expectTextAfter) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
+		MockPropertiesEditor editor = newEditor(textBefore);
 		ICompletionProposal[] completions = getCompletions(editor);
 		ICompletionProposal completion = assertCompletionWithLabel(expectLabel, completions);
 		editor.apply(completion);
@@ -736,7 +735,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * has a info hover that contains a given snippet of text.
 	 */
 	public void assertCompletionWithInfoHover(String editorText, String expectLabel, String expectInfoSnippet) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		MockPropertiesEditor editor = newEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		ICompletionProposal completion = assertCompletionWithLabel(expectLabel, completions);
 
@@ -763,7 +762,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * expected results.
 	 */
 	public void assertCompletions(String textBefore, String... expectTextAfter) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(textBefore);
+		MockPropertiesEditor editor = newEditor(textBefore);
 		StringBuilder expect = new StringBuilder();
 		StringBuilder actual = new StringBuilder();
 		for (String after : expectTextAfter) {
@@ -773,7 +772,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 
 		ICompletionProposal[] completions = getCompletions(editor);
 		for (int i = 0; i < completions.length; i++) {
-			editor = new MockPropertiesEditor(textBefore);
+			editor = newEditor(textBefore);
 			editor.apply(completions[i]);
 			actual.append(editor.getText());
 			actual.append("\n-------------------\n");
@@ -782,7 +781,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		MockPropertiesEditor editor = newEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		String[] actualLabels = new String[completions.length];
 		for (int i = 0; i < actualLabels.length; i++) {
@@ -792,7 +791,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	public void assertStyledCompletions(String editorText, StyledStringMatcher... expectStyles) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(editorText);
+		MockPropertiesEditor editor = newEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		assertEquals("Wrong number of elements", expectStyles.length, completions.length);
 		for (int i = 0; i < expectStyles.length; i++) {
@@ -809,14 +808,18 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		return new StyledString(completion.getDisplayString());
 	}
 
+	protected MockPropertiesEditor newEditor(String editorContents) {
+		return new MockPropertiesEditor(editorContents, getHoverProvider());
+	}
+
 	/**
 	 * Verifies an expected textSnippet is contained in the hovertext that is
 	 * computed when hovering mouse at position at the end of first occurence of
 	 * a given string in the editor.
 	 * <p>
-	 * TODO: This method should be removed and the corresponding bits and pieces pushed into 'MockPropertiesEditor'
-	 * as is already the case for MockYamlEditor.
+	 * Deprecated: This method should be removed and the similar api in MockPropertiesEditor used instead.
 	 */
+	@Deprecated
 	public void assertHoverText(MockPropertiesEditor editor, String afterString, String expectSnippet) {
 		String hoverText = getHoverText(editor, afterString);
 		assertContains(expectSnippet, hoverText);
@@ -825,7 +828,10 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	/**
 	 * Compute hover text when mouse hovers at the end of the first occurence of
 	 * a given String in the editor contents.
+	 * <p>
+	 * Deprecated: This method should be removed and the similar api in MockPropertiesEditor used instead.
 	 */
+	@Deprecated
 	public String getHoverText(MockPropertiesEditor editor, String atString) {
 		int pos = editor.getText().indexOf(atString);
 		if (pos>=0) {

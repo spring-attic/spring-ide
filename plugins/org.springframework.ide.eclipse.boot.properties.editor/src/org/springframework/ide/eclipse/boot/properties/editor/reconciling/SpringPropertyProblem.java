@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnorePro
 import org.springframework.ide.eclipse.editor.support.reconcile.FixableProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 /**

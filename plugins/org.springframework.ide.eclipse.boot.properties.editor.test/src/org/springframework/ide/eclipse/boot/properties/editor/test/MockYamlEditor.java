@@ -10,14 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IRegion;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
@@ -29,15 +21,12 @@ import org.yaml.snakeyaml.nodes.Node;
 
 public class MockYamlEditor extends MockEditor {
 
-	private YamlDocument ymlDoc;
+	YamlDocument ymlDoc;
 	protected final YamlASTProvider astProvider;
-	private HoverInfoProvider hoverProvider;
-
 	public MockYamlEditor(String string, YamlStructureProvider structureProvider, YamlASTProvider astProvider, HoverInfoProvider hoverProvider) {
-		super(string);
+		super(string, hoverProvider);
 		ymlDoc = new YamlDocument(document, structureProvider);
 		this.astProvider = astProvider;
-		this.hoverProvider = hoverProvider;
 	}
 
 	public YamlFileAST parse() {
@@ -52,26 +41,6 @@ public class MockYamlEditor extends MockEditor {
 		return ymlDoc.getStructure();
 	}
 
-	public int startOf(String nodeText) {
-		return document.get().indexOf(nodeText);
-	}
-
-	public int endOf(String nodeText) {
-		int start = startOf(nodeText);
-		if (start>=0) {
-			return start+nodeText.length();
-		}
-		return -1;
-	}
-
-	public int middleOf(String nodeText) {
-		int start = startOf(nodeText);
-		if (start>=0) {
-			return start + nodeText.length()/2;
-		}
-		return -1;
-	}
-
 	public String textUnder(Node node) throws Exception {
 		int start = node.getStartMark().getIndex();
 		int end = node.getEndMark().getIndex();
@@ -82,49 +51,6 @@ public class MockYamlEditor extends MockEditor {
 		int start = node.getStart();
 		int end = node.getTreeEnd();
 		return document.get(start, end-start);
-	}
-
-	public String textUnder(IRegion r) throws BadLocationException {
-		return document.get(r.getOffset(), r.getLength());
-	}
-
-	public IRegion getHoverRegion(int offset) {
-		return hoverProvider.getHoverRegion(document, offset);
-	}
-
-	public HoverInfo getHoverInfo(int offset) {
-		IRegion r = getHoverRegion(offset);
-		if (r!=null) {
-			return hoverProvider.getHoverInfo(document, r);
-		}
-		return null;
-	}
-
-	public String textBetween(int start, int end) throws Exception {
-		return ymlDoc.textBetween(start, end);
-	}
-
-	public void assertNoHover(String hoverOver) {
-		HoverInfo info = getHoverInfo(middleOf(hoverOver));
-		assertNull(info);
-	}
-
-	public void assertIsHoverRegion(String string) throws BadLocationException {
-		assertHoverRegionCovers(middleOf(string), string);
-		assertHoverRegionCovers(startOf(string), string);
-		assertHoverRegionCovers(endOf(string)-1, string);
-	}
-
-	public void assertHoverRegionCovers(int offset, String expect) throws BadLocationException {
-		IRegion r = getHoverRegion(offset);
-		String actual = textUnder(r);
-		assertEquals(expect, actual);
-	}
-
-	public void assertHoverContains(String hoverOver, String expect) {
-		HoverInfo info = getHoverInfo(middleOf(hoverOver));
-		assertNotNull("No hover info for '"+ hoverOver +"'", info);
-		assertContains(expect, info.getHtml());
 	}
 
 }

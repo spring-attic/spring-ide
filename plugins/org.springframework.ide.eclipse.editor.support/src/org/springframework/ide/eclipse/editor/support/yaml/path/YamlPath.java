@@ -245,6 +245,13 @@ public class YamlPath {
 		return s!=null && s.getType()==YamlPathSegmentType.KEY_AT_KEY;
 	}
 
-
+	public boolean pointsAtValue() {
+		YamlPathSegment s = getLastSegment();
+		if (s!=null) {
+			YamlPathSegmentType type = s.getType();
+			return type==YamlPathSegmentType.VAL_AT_KEY || type==YamlPathSegmentType.VAL_AT_INDEX;
+		}
+		return false;
+	}
 
 }

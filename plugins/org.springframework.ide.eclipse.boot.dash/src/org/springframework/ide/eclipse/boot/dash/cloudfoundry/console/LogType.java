@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
 
-import org.cloudfoundry.client.lib.domain.ApplicationLog.MessageType;
+import org.cloudfoundry.doppler.LogMessage;
+import org.cloudfoundry.doppler.LogMessage.MessageType;
 import org.eclipse.swt.SWT;
 
 public class LogType {
 	/*
-	 * CF Loggregator types
+	 * CF  log types
 	 */
-	public static final LogType CFSTDERROR = new LogType(MessageType.STDERR, SWT.COLOR_RED);
-	public static final LogType CFSTDOUT = new LogType(MessageType.STDOUT, SWT.COLOR_DARK_GREEN);
+	public static final LogType CFSTDERROR = new LogType(MessageType.ERR.toString(), SWT.COLOR_RED);
+	public static final LogType CFSTDOUT = new LogType(MessageType.OUT.toString(), SWT.COLOR_DARK_GREEN);
 
 	/*
 	 * Local messages types
@@ -27,12 +28,12 @@ public class LogType {
 	public static final LogType LOCALSTDOUT = new LogType(SWT.COLOR_DARK_BLUE);
 	public static final LogType LOCALSTDERROR = new LogType(SWT.COLOR_RED);
 
-	public static final LogType[] LOGGREGATORTYPES = { CFSTDOUT, CFSTDERROR };
+	public static final LogType[] CFLOG_TYPES = { CFSTDOUT, CFSTDERROR };
 
-	private final MessageType type;
+	private final String type;
 	private final int displayColour;
 
-	public LogType(MessageType type, int displayColour) {
+	public LogType(String type, int displayColour) {
 		this.displayColour = displayColour;
 		this.type = type;
 	}
@@ -41,7 +42,7 @@ public class LogType {
 		this(null, displayColour);
 	}
 
-	public MessageType getMessageType() {
+	public String getMessageType() {
 		return this.type;
 	}
 
@@ -49,10 +50,10 @@ public class LogType {
 		return this.displayColour;
 	}
 
-	public static LogType getLoggregatorType(MessageType type) {
-		for (LogType config : LOGGREGATORTYPES) {
-			if (config.getMessageType() != null && config.getMessageType().equals(type)) {
-				return config;
+	public static LogType getLogType(LogMessage message) {
+		for (LogType type : CFLOG_TYPES) {
+			if (type.getMessageType() != null && type.getMessageType().equals(message.getMessageType().toString())) {
+				return type;
 			}
 		}
 		return CFSTDOUT;

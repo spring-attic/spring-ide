@@ -12,12 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.cloudfoundry.client.lib.ApplicationLogListener;
-import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.ApplicationLog;
+import org.cloudfoundry.doppler.LogMessage;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -29,44 +26,37 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
 
-import reactor.core.publisher.Mono;
+import reactor.core.flow.Cancellation;
 
 @SuppressWarnings("restriction")
-public class ApplicationLogConsole extends MessageConsole implements ApplicationLogListener, IPropertyChangeListener {
+public class ApplicationLogConsole extends MessageConsole implements IPropertyChangeListener, IApplicationLogConsole {
 
 	private Map<LogType, IOConsoleOutputStream> activeStreams = new HashMap<>();
 
-	private Mono<StreamingLogToken> loggregatorToken;
+	private Cancellation logStreamingToken;
 
 	public ApplicationLogConsole(String name, String type) {
 		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
 	}
 
-	public synchronized void writeLoggregatorLogs(List<ApplicationLog> logs) {
-		if (logs != null) {
-			for (ApplicationLog log : logs) {
-				writeLoggregatorLog(log);
-			}
+	public synchronized void setLogStreamingToken(Cancellation logStreamingToken) {
+		if (this.logStreamingToken != null) {
+			this.logStreamingToken.dispose();
 		}
+		this.logStreamingToken = logStreamingToken;
 	}
 
-	public synchronized void setLoggregatorToken(Mono<StreamingLogToken> loggregatorToken) {
-		if (this.loggregatorToken != null) {
-			this.loggregatorToken.consume(StreamingLogToken::cancel);
-		}
-		this.loggregatorToken = loggregatorToken;
+	public synchronized Cancellation getLogStreamingToken() {
+		return this.logStreamingToken;
 	}
 
-	public synchronized Mono<StreamingLogToken> getLoggregatorToken() {
-		return this.loggregatorToken;
-	}
-
-	public synchronized void writeLoggregatorLog(ApplicationLog log) {
+	public synchronized void writeLog(LogMessage log) {
 		if (log == null) {
 			return;
 		}
-		final LogType logType = LogType.getLoggregatorType(log.getMessageType());
+		final LogType logType = LogType.getLogType(log);
 		writeApplicationLog(log.getMessage(), logType);
 	}
 
@@ -101,24 +91,20 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 	}
 
 	public synchronized void close() {
-		setLoggregatorToken(null);
+		setLogStreamingToken(null);
 
 		for (IOConsoleOutputStream outputStream : activeStreams.values()) {
 			if (!outputStream.isClosed()) {
 				try {
 					outputStream.close();
 				} catch (IOException e) {
-					BootDashActivator.log(e);
+					Log.log(e);
 				}
 			}
 		}
 		activeStreams.clear();
 		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
 		manager.removeConsoles(new IConsole[] { this });
-	}
-
-	public synchronized void clearConnection() {
-		setLoggregatorToken(null);
 	}
 
 	protected synchronized IOConsoleOutputStream getStream(final LogType logType) {
@@ -163,13 +149,10 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 		return false;
 	}
 
-	/**
-	 * Cloud Foundry Loggregator handler API
-	 *
-	 */
+	
 	@Override
-	public void onMessage(ApplicationLog log) {
-		writeLoggregatorLog(log);
+	public void onMessage(LogMessage log) {
+		writeLog(log);
 	}
 
 	@Override
@@ -181,7 +164,7 @@ public class ApplicationLogConsole extends MessageConsole implements Application
 	public void onError(Throwable exception) {
 		writeApplicationLog(exception.getMessage(), LogType.CFSTDERROR);
 	}
-
+	
 	@Override
 	protected void init() {
 		super.init();

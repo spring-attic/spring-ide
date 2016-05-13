@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -32,6 +31,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.Spring
 import org.springframework.ide.eclipse.boot.properties.editor.completions.ValueHintHoverInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -45,8 +45,8 @@ import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
@@ -260,11 +260,11 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		}
 
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
-			Collection<ValueHint> hints = getHintValues(query, doc, offset, enumCaseMode);
+			Collection<StsValueHint> hints = getHintValues(query, doc, offset, enumCaseMode);
 			if (hints!=null) {
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
-				for (ValueHint hint : hints) {
-					String value = ""+hint.getValue();
+				for (StsValueHint hint : hints) {
+					String value = hint.getValue();
 					double score = FuzzyMatcher.matchScore(query, value);
 					if (score!=0 && !value.equals(query)) {
 						DocumentEdits edits = new DocumentEdits(doc.getDocument());
@@ -282,14 +282,27 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return Collections.emptyList();
 		}
 
-		protected Collection<ValueHint> getHintValues(
+		@Override
+		public HoverInfo getValueHoverInfo(YamlDocument doc, DocumentRegion valueRegion) {
+			String value = valueRegion.toString();
+			Collection<StsValueHint> hints = getHintValues(value, doc, valueRegion.getEnd(), EnumCaseMode.ALIASED);
+			//The hints where found by fuzzy match so they may not actually match exactly!
+			for (StsValueHint h : hints) {
+				if (value.equals(h.getValue())) {
+					return new ValueHintHoverInfo(h);
+				}
+			}
+			return super.getValueHoverInfo(doc, valueRegion);
+		}
+
+		protected Collection<StsValueHint> getHintValues(
 				String query,
 				YamlDocument doc, int offset,
 				EnumCaseMode enumCaseMode
 		) {
-			ArrayList<ValueHint> allHints = new ArrayList<>();
+			Collection<StsValueHint> allHints = new ArrayList<>();
 			{
-				Collection<ValueHint> hints = typeUtil.getHintValues(type, query, enumCaseMode);
+				Collection<StsValueHint> hints = typeUtil.getHintValues(type, query, enumCaseMode);
 				if (CollectionUtil.hasElements(hints)) {
 					allHints.addAll(hints);
 				}
@@ -299,7 +312,9 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				if (hintProvider!=null) {
 					List<ValueHint> hints = hintProvider.getValueHints(query);
 					if (CollectionUtil.hasElements(hints)) {
-						allHints.addAll(hints);
+						for (ValueHint h : hints) {
+							allHints.add(StsValueHint.create(h));
+						}
 					}
 				}
 			}
@@ -356,6 +371,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		protected Type getType() {
 			return type;
 		}
+
 	}
 
 	private static class IndexContext extends ApplicationYamlAssistContext {

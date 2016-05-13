@@ -10,41 +10,40 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
-import org.springframework.boot.configurationmetadata.ValueHint;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import java.util.List;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 
+import com.google.common.collect.ImmutableList;
+
 public class ValueHintHoverInfo extends HoverInfo {
 
-	private ValueHint hint;
+	private StsValueHint hint;
 
-	public ValueHintHoverInfo(ValueHint hint) {
+	public ValueHintHoverInfo(StsValueHint hint) {
 		this.hint = hint;
 	}
 
 	@Override
 	protected String renderAsHtml() {
-		String description = getDescription();
-		if (description!=null) {
-			HtmlBuffer html = new HtmlBuffer();
-			html.bold(""+hint.getValue());
-			html.p(description);
-			return html.toString();
-		}
-		return null;
+		HtmlBuffer html = new HtmlBuffer();
+		html.bold(""+hint.getValue());
+		html.raw("<p>");
+		hint.getDescription().render(html);
+		html.raw("</p>");
+		return html.toString();
 	}
 
-	private String getDescription() {
-		String d = hint.getDescription();
-		if (StringUtil.hasText(d)) {
-			return d;
+	@Override
+	public List<IJavaElement> getJavaElements() {
+		IJavaElement el = hint.getJavaElement();
+		if (el!=null) {
+			return ImmutableList.of(el);
 		}
-		d = hint.getShortDescription();
-		if (StringUtil.hasText(d)) {
-			return d;
-		}
-		return null;
+		return ImmutableList.of();
 	}
 
 }

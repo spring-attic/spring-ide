@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.cloudfoundry.client.lib.ApplicationLogListener;
-import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -32,6 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -39,6 +38,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -149,13 +149,9 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Mono<StreamingLogToken> streamLogs(String appName, ApplicationLogListener logConsole) {
+		public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) {
 			//TODO: This 'log streamer' is a total dummy for now. It doesn't stream any data and canceling it does nothing.
-			return Mono.just(new StreamingLogToken() {
-				@Override
-				public void cancel() {
-				}
-			});
+           return Flux.empty().subscribe();
 		}
 
 		@Override

@@ -12,12 +12,15 @@ package org.springframework.ide.eclipse.editor.support.yaml.hover;
 
 import java.util.List;
 
+import javax.swing.plaf.ListUI;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
@@ -60,20 +63,25 @@ public class YamlHoverInfoProvider implements HoverInfoProvider {
 	public HoverInfo getHoverInfo(IDocument doc, IRegion r) {
 		YamlFileAST ast = getAst(doc);
 		if (ast!=null) {
-			YamlAssistContext assistContext = assistContextProvider.getGlobalAssistContext(new YamlDocument(doc, structureProvider));
+			YamlDocument ymlDoc = new YamlDocument(doc, structureProvider);
+			YamlAssistContext assistContext = assistContextProvider.getGlobalAssistContext(ymlDoc);
 			if (assistContext!=null) {
 				List<NodeRef<?>> astPath = ast.findPath(r.getOffset());
-				YamlPath path = YamlPath.fromASTPath(astPath);
+				final YamlPath path = YamlPath.fromASTPath(astPath);
 				if (path!=null) {
-					if (path.pointsAtKey()) {
+					YamlPath assistPath = path;
+					if (assistPath.pointsAtKey()) {
 						//When a path points at a key we must tramsform it to a 'value-terminating path'
 						// to be able to reuse the 'getHoverInfo' method on YamlAssistContext (as navigation
 						// into 'key' is not defined for YamlAssistContext.
 						String key = path.getLastSegment().toPropString();
-						path = path.dropLast().append(YamlPathSegment.valueAt(key));
+						assistPath = path.dropLast().append(YamlPathSegment.valueAt(key));
 					}
-					assistContext = path.traverse(assistContext);
+					assistContext = assistPath.traverse(assistContext);
 					if (assistContext!=null) {
+						if (path.pointsAtValue()) {
+							return assistContext.getValueHoverInfo(ymlDoc, new DocumentRegion(doc, r));
+						}
 						return assistContext.getHoverInfo();
 					}
 				}

@@ -27,7 +27,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testHovers() throws Exception {
 		defaultTestData();
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"spring:\n" +
 				"  application:\n" +
 				"    name: foofoo\n" +
@@ -70,7 +70,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testHoverInfoForEnumValueInMapKey() throws Exception {
-		MockYamlEditor editor;
+		MockEditor editor;
 		IJavaProject project = JavaCore.create(createPredefinedMavenProject("boot13"));
 		useProject(project);
 
@@ -126,7 +126,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
-	public void testHoverInfoForValueHint() throws Exception {
+	public void testHoverInfoForValueHintCompletion() throws Exception {
 		data("my.bonus", "java.lang.String", null, "Bonus type")
 		.valueHint("small", "A small bonus. For a little extra incentive.")
 		.valueHint("large", "An large bonus. For the ones who deserve it.")
@@ -142,11 +142,27 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testHoverInfoForValueHint() throws Exception {
+		data("my.bonus", "java.lang.String", null, "Bonus type")
+		.valueHint("small", "A small bonus. For a little extra incentive.")
+		.valueHint("large", "An large bonus. For the ones who deserve it.")
+		.valueHint("exorbitant", "Truly outrageous. Who deserves a bonus like that?");
+
+		YamlEditor editor = new YamlEditor(
+				"#comment here\n" +
+				"my:\n" +
+				"  bonus: large\n"
+		);
+
+		editor.assertIsHoverRegion("large");
+		editor.assertHoverContains("large", "For the ones who deserve it");
+	}
+
 
 	public void testUserDefinedHoversandLinkTargets() throws Exception {
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("foo.link-tester", "demo.LinkTestSubject", null, "for testing different Pojo link cases");
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"#A comment at the start\n" +
 				"foo:\n" +
 				"  data:\n" +
@@ -175,7 +191,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"server:\n"+
 				"  port: 888\n" +
 				"spring:\n" +
@@ -2359,7 +2375,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void testDeprecatedPropertyHoverInfo() throws Exception {
 		data("error.path", "java.lang.String", null, "Path of the error controller.");
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"# a comment\n"+
 				"error:\n" +
 				"  path: foo\n"
@@ -2384,7 +2400,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		IProject jp = createPredefinedMavenProject("demo");
 		useProject(jp);
 		data("foo", "demo.Deprecater", null, "A bean with deprecated property.");
-		MockYamlEditor editor = new YamlEditor(
+		MockEditor editor = new YamlEditor(
 				"# a comment\n"+
 				"foo:\n" +
 				"  name: foo\n"
@@ -2975,6 +2991,93 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"file:",
 				"http://",
 				"https://"
+		);
+	}
+
+	public void testEnumJavaDocShownInValueContentAssist() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		assertCompletionWithInfoHover(
+				"my:\n" +
+				"  background: <*>"
+				, // ==========
+				"red"
+				, // ==>
+				"Hot and delicious"
+		);
+	}
+
+	public void testEnumJavaDocShownInValueHover() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		YamlEditor editor;
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: red"
+		);
+		editor.assertHoverContains("red", "Hot and delicious");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: RED"
+		);
+		editor.assertHoverContains("RED", "Hot and delicious");
+	}
+
+	public void testHyperLinkEnumValue() throws Exception {
+		YamlEditor editor;
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.background", "demo.Color", null, "Color to use as default background.");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: RED"
+		);
+		assertLinkTargets(editor, "RED", "demo.Color.RED");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  background: red"
+		);
+		assertLinkTargets(editor, "red", "demo.Color.RED");
+	}
+
+	public void testHyperLinkEnumValueInMapKey() throws Exception {
+		YamlEditor editor;
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.color.map", "java.util.Map<demo.Color,java.lang.String>", null, "Pretty names for the colors.");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  color:\n" +
+				"    map:\n" +
+				"      RED: Rood\n" +
+				"      green: Groen\n"
+		);
+		assertLinkTargets(editor, "RED", "demo.Color.RED");
+		assertLinkTargets(editor, "green", "demo.Color.GREEN");
+
+		editor = new YamlEditor(
+			"spring:\n" +
+			"  jackson:\n" +
+			"    serialization:\n" +
+			"      INDENT_OUTPUT: true"
+		);
+		assertLinkTargets(editor, "INDENT_OUTPUT",
+				"com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT"
+		);
+
+		editor = new YamlEditor(
+			"spring:\n" +
+			"  jackson:\n" +
+			"    serialization:\n" +
+			"      indent-output: true"
+		);
+		assertLinkTargets(editor, "indent-output",
+				"com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT"
 		);
 	}
 

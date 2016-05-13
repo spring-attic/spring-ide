@@ -38,12 +38,12 @@ import com.google.common.collect.ImmutableList.Builder;
  */
 public class PropertyInfo {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-
-	private static void debug(String string) {
-		if (DEBUG)
-			System.out.println(string);
-	}
+//	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+//
+//	private static void debug(String string) {
+//		if (DEBUG)
+//			System.out.println(string);
+//	}
 
 	/**
 	 * Identifies a 'Source'. This is essentially the sames as {@link ConfigurationMetadataSource}.
@@ -124,7 +124,7 @@ public class PropertyInfo {
 		}
 	}
 	private void handleAs(Object targetObject) {
-		debug("handle-as "+this.getId()+" -> "+targetObject);
+//		debug("handle-as "+this.getId()+" -> "+targetObject);
 		if (targetObject instanceof String) {
 			this.type = (String)targetObject;
 		}

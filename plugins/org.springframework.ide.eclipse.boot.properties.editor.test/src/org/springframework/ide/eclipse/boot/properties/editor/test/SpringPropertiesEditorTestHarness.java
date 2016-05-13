@@ -75,7 +75,7 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 	}
 
 	public void assertCompletionDisplayString(String editorContents, String expected) throws Exception {
-		MockPropertiesEditor editor = new MockPropertiesEditor(editorContents);
+		MockPropertiesEditor editor = newEditor(editorContents);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		assertEquals(expected, completion.getDisplayString());
 	}
@@ -122,8 +122,8 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		assertTrue("Not found in editor: '"+hoverAtEndOf+"'", pos>=0);
 		pos += hoverAtEndOf.length();
 
-		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
-		assertEquals(expecteds.length, rawTargets.size());
+//		List<PropertySource> rawTargets = getRawLinkTargets(editor, pos);
+//		assertEquals(expecteds.length, rawTargets.size());
 
 		List<IJavaElement> targets = getLinkTargets(editor, pos);
 		assertEquals(expecteds.length, targets.size());
@@ -132,16 +132,16 @@ public abstract class SpringPropertiesEditorTestHarness extends YamlOrPropertyEd
 		}
 	}
 
-	private List<PropertySource> getRawLinkTargets(MockPropertiesEditor editor, int pos) {
-		IRegion region = engine.getHoverRegion(editor.document, pos);
-		if (region!=null) {
-			SpringPropertyHoverInfo hover = engine.getHoverInfo(editor.document, region);
-			if (hover!=null) {
-				return hover.getSources();
-			}
-		}
-		return Collections.emptyList();
-	}
+//	private List<PropertySource> getRawLinkTargets(MockPropertiesEditor editor, int pos) {
+//		IRegion region = engine.getHoverRegion(editor.document, pos);
+//		if (region!=null) {
+//			HoverInfo hover = engine.getHoverInfo(editor.document, region);
+//			if (hover instanceof SpringPropertyHoverInfo) {
+//				return ((SpringPropertyHoverInfo)hover).getSources();
+//			}
+//		}
+//		return Collections.emptyList();
+//	}
 
 	protected List<IJavaElement> getLinkTargets(MockPropertiesEditor editor, int pos) {
 		IRegion region = engine.getHoverRegion(editor.document, pos);

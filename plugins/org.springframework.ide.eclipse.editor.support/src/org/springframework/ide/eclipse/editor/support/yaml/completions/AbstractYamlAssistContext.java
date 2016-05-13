@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.editor.support.yaml.completions;
 import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
@@ -101,6 +102,13 @@ public abstract class AbstractYamlAssistContext implements YamlAssistContext {
 	@Override
 	public HoverInfo getHoverInfo() {
 		return null;
+	}
+
+	@Override
+	public HoverInfo getValueHoverInfo(YamlDocument doc, DocumentRegion documentRegion) {
+		//By default we don't provide value-specific hover, so just show the same hover
+		// as the assistContext the value is in. This is likely more interesting than showing nothing at all.
+		return getHoverInfo();
 	}
 
 

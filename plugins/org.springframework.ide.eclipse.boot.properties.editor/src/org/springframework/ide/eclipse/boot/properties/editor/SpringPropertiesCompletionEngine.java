@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 import javax.inject.Provider;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jface.fieldassist.ContentProposal;
@@ -44,6 +43,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.completions.ValueH
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.HintProviders;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.PropertyNavigator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
@@ -56,8 +56,10 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 
@@ -77,7 +79,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	 */
 	public static final Pattern ASSIGN = Pattern.compile("^(\\h)*(=|:)(\\h|\\\\\\s)*");
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 	public static void debug(String msg) {
 		if (DEBUG) {
 			System.out.println("SpringPropertiesCompletionEngine: "+msg);
@@ -86,10 +88,15 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	public static final boolean DEFAULT_VALUE_INCLUDED = false; //might make sense to make this user configurable
 
+	private static boolean isValuePrefixChar(char c) {
+		return !Character.isWhitespace(c) && c!=',';
+	}
+
 	private static final PrefixFinder valuePrefixFinder = new PrefixFinder() {
 		protected boolean isPrefixChar(char c) {
-			return !Character.isWhitespace(c) && c!=',';
+			return isValuePrefixChar(c);
 		}
+
 	};
 
 	private static final PrefixFinder fuzzySearchPrefix = new PrefixFinder() {
@@ -321,7 +328,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private ITypedRegion getPartition(IDocument doc, int offset) throws BadLocationException {
 		ITypedRegion part = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset, true);
-		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0) {
+		if (part.getType()==IDocument.DEFAULT_CONTENT_TYPE && part.getLength()==0 && offset==doc.getLength() && offset>0 && !newlineBefore(doc, offset)) {
 			//A special case because when cursor at end of document and just after a space-padded '=' sign, then we get a DEFAULT content type
 			// with a empty region. We rather would get the non-empty 'Value' partition just before that (which has the assignment in it.
 			ITypedRegion previousPart = TextUtilities.getPartition(doc, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, offset-1, false);
@@ -334,7 +341,44 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		return part;
 	}
 
-	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, ITypedRegion valuePartition) {
+	private boolean newlineBefore(IDocument doc, int offset) {
+		try {
+			if (offset>0) {
+				char c = doc.getChar(offset-1);
+				return c == '\n' || c=='\r';
+			}
+		} catch (BadLocationException e) {
+			Log.log(e);
+		}
+		return false;
+	}
+
+	private HoverInfo getValueHoverInfo(DocumentRegion value) {
+		try {
+			String valueString = value.toString();
+			IDocument doc = value.getDocument();
+			ITypedRegion valuePartition = getPartition(value.getDocument(), value.getStart());
+			int valuePartitionStart = valuePartition.getOffset();
+			String propertyName = fuzzySearchPrefix.getPrefix(doc, valuePartitionStart); //note: no need to skip whitespace backwards.
+											//because value partition includes whitespace around the assignment
+
+			Collection<StsValueHint> hints = getValueHints(valueString, propertyName, EnumCaseMode.ALIASED);
+			if (hints!=null) {
+				for (StsValueHint h : hints) {
+					if (valueString.equals(h.getValue())) {
+						return new ValueHintHoverInfo(h);
+					}
+				}
+			}
+		} catch (BadLocationException e) {
+			Log.log(e);
+		}
+		return null;
+	}
+
+
+
+	private Collection<ICompletionProposal> getValueCompletions(IDocument doc, int offset, IRegion valuePartition) {
 		int regionStart = valuePartition.getOffset();
 		try {
 			int startOfValue = skipAssign(doc, offset, valuePartition);
@@ -344,11 +388,11 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, regionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 			if (propertyName!=null) {
-				Collection<ValueHint> valueCompletions = getValueHints(query, propertyName, caseMode);
+				Collection<StsValueHint> valueCompletions = getValueHints(query, propertyName, caseMode);
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
 					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-					for (ValueHint hint : valueCompletions) {
-						String valueCandidate = ""+hint.getValue();
+					for (StsValueHint hint : valueCompletions) {
+						String valueCandidate = hint.getValue();
 						double score = FuzzyMatcher.matchScore(query, valueCandidate);
 						if (score!=0) {
 							DocumentEdits edits = new DocumentEdits(doc);
@@ -375,7 +419,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 	 * really part of the value text even though Eclipse document partitioner inlcudes it as part of the 'valuePartition'
 	 * region).
 	 */
-	private int skipAssign(IDocument doc, int offset, ITypedRegion valuePartition) {
+	private int skipAssign(IDocument doc, int offset, IRegion valuePartition) {
 		try {
 			String text = doc.get(valuePartition.getOffset(), valuePartition.getLength());
 			Matcher matcher = ASSIGN.matcher(text);
@@ -390,15 +434,15 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		}
 	}
 
-	private Collection<ValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
+	private Collection<StsValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
 		Type type = getValueType(propertyName);
 		if (TypeUtil.isArray(type) || TypeUtil.isList(type)) {
 			//It is useful to provide content assist for the values in the list when entering a list
 			type = TypeUtil.getDomainType(type);
 		}
-		List<ValueHint> allHints = new ArrayList<>();
+		List<StsValueHint> allHints = new ArrayList<>();
 		{
-			Collection<ValueHint> hints = typeUtil.getHintValues(type, query, caseMode);
+			Collection<StsValueHint> hints = typeUtil.getHintValues(type, query, caseMode);
 			if (CollectionUtil.hasElements(hints)) {
 				allHints.addAll(hints);
 			}
@@ -410,7 +454,9 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				if (!HintProviders.isNull(hintProvider)) {
 					List<ValueHint> hints = hintProvider.getValueHints(query);
 					if (CollectionUtil.hasElements(hints)) {
-						allHints.addAll(hints);
+						for (ValueHint h : hints) {
+							allHints.add(StsValueHint.create(h));
+						}
 					}
 				}
 			}
@@ -513,20 +559,24 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 
 
-	public SpringPropertyHoverInfo getHoverInfo(IDocument doc, IRegion region) {
-		debug("getHoverInfo("+region+")");
+	public HoverInfo getHoverInfo(IDocument doc, IRegion _region) {
+		debug("getHoverInfo("+_region+")");
+
 		//The delegate 'getHoverRegion' for spring propery editor will return smaller word regions.
 		// we must ensure to use our own region finder to identify correct property name.
-		region = getHoverRegion(doc, region.getOffset());
+		ITypedRegion region = getHoverRegion(doc, _region.getOffset());
 		if (region!=null) {
+			String contentType = region.getType();
 			try {
-	//			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+				if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 					debug("hoverRegion = "+region);
 					PropertyInfo best = findBestHoverMatch(doc.get(region.getOffset(), region.getLength()).trim());
 					if (best!=null) {
 						return new SpringPropertyHoverInfo(documentContextFinder.getJavaProject(doc), best);
 					}
-	//			}
+				} else if (contentType.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
+					return getValueHoverInfo(new DocumentRegion(doc, region));
+				}
 			} catch (Exception e) {
 				SpringPropertiesEditorPlugin.log(e);
 			}
@@ -534,15 +584,40 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		return null;
 	}
 
-	public IRegion getHoverRegion(IDocument document, int offset) {
-    	try {
-    		ITypedRegion candidate = getPartition(document, offset);
-    		if (candidate!=null && candidate.getType()==IDocument.DEFAULT_CONTENT_TYPE) {
-    			return candidate;
-    		}
-    	} catch (Exception e) {
-    		SpringPropertiesEditorPlugin.log(e);
-    	}
+	public ITypedRegion getHoverRegion(IDocument document, int offset) {
+		try {
+			ITypedRegion candidate = getPartition(document, offset);
+			if (candidate!=null) {
+				String type = candidate.getType();
+				if (IDocument.DEFAULT_CONTENT_TYPE.equals(type)) {
+					return candidate;
+				} else if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(type)) {
+					DocumentRegion valueRegion = new DocumentRegion(document, candidate).trimStart(ASSIGN);
+					return getValueHoverRegion(valueRegion, valueRegion.toRelative(offset));
+				}
+			}
+		} catch (Exception e) {
+			SpringPropertiesEditorPlugin.log(e);
+		}
+		return null;
+	}
+
+	private ITypedRegion getValueHoverRegion(DocumentRegion r, int offset) {
+		int len = r.length();
+		if (offset>=0 && offset<=len) {
+			int start = offset;
+			while (start>0 && isValuePrefixChar(r.charAt(start-1))) {
+				start--;
+			}
+			int end = offset;
+			while (end<len && isValuePrefixChar(r.charAt(end))) {
+				end++;
+			}
+			r = r.subSequence(start, end);
+			if (!r.isEmpty()) {
+				return r.asTypedRegion(IPropertiesFilePartitions.PROPERTY_VALUE);
+			}
+		}
 		return null;
 	}
 

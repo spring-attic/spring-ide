@@ -22,6 +22,8 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 import org.springframework.ide.eclipse.editor.support.util.HtmlUtil;
 
+import com.google.common.collect.ImmutableList;
+
 @SuppressWarnings("restriction")
 public abstract class HoverInfo extends BrowserInformationControlInput {
 
@@ -79,7 +81,7 @@ public abstract class HoverInfo extends BrowserInformationControlInput {
 	 * action.
 	 */
 	public List<IJavaElement> getJavaElements() {
-		return Collections.emptyList();
+		return ImmutableList.of();
 	}
 
 	public static HoverInfo withText(final String plainText) {

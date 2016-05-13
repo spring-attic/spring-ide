@@ -15,6 +15,7 @@ import java.util.Collections;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
@@ -56,6 +57,11 @@ public abstract class TopLevelAssistContext implements YamlAssistContext {
 	}
 
 	public HoverInfo getHoverInfo(YamlPathSegment lastSegment) {
+		return null;
+	}
+
+	@Override
+	public HoverInfo getValueHoverInfo(YamlDocument doc, DocumentRegion documentRegion) {
 		return null;
 	}
 

@@ -16,15 +16,14 @@ import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.cloudfoundry.client.lib.ApplicationLogListener;
-import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.ApplicationLog;
+import org.cloudfoundry.doppler.LogMessage;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-import reactor.core.publisher.Mono;
+import reactor.core.flow.Cancellation;
 
 public class CloudFoundryApplicationHarness extends AbstractDisposable {
 
@@ -47,10 +46,16 @@ public class CloudFoundryApplicationHarness extends AbstractDisposable {
 
 	private void streamOutput(String name) throws Exception {
 		if (client!=null) {
-			ApplicationLogListener logConsole = new ApplicationLogListener() {
+			IApplicationLogConsole logConsole = new IApplicationLogConsole() {
+
 				@Override
-				public void onMessage(ApplicationLog log) {
+				public void onMessage(LogMessage log) {
 					System.out.println("%"+name+"-out: "+log.getMessage());
+				}
+
+				@Override
+				public void onComplete() {
+					System.out.println("%"+name+"-COMPLETE");
 				}
 
 				@Override
@@ -58,14 +63,10 @@ public class CloudFoundryApplicationHarness extends AbstractDisposable {
 					System.out.println("%"+name+"-ERROR: "+ExceptionUtil.getMessage(exception));
 				}
 
-				@Override
-				public void onComplete() {
-					System.out.println("%"+name+"-COMPLETE");
-				}
 			};
-			Mono<StreamingLogToken> logToken = client.streamLogs(name, logConsole);
+			Cancellation logToken = client.streamLogs(name, logConsole);
 			onDispose((d) -> {
-				logToken.consume(StreamingLogToken::cancel);
+				logToken.dispose();
 			});
 		}
 	}
