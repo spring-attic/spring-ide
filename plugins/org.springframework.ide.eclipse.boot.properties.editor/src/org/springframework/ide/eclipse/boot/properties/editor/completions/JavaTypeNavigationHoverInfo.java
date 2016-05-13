@@ -157,19 +157,29 @@ public class JavaTypeNavigationHoverInfo extends AbstractPropertyHoverInfo {
 	@Override
 	public List<IJavaElement> getJavaElements() {
 		if (propName!=null) {
-			IJavaElement je;
-			Type beanType = parentType;
-			je = typeUtil.getSetter(beanType, propName);
-			if (je!=null) {
-				return Collections.singletonList(je);
-			}
-			je = typeUtil.getGetter(beanType, propName);
-			if (je!=null) {
-				return Collections.singletonList(je);
-			}
-			je = typeUtil.getField(beanType, propName);
-			if (je!=null) {
-				return Collections.singletonList(je);
+			if (TypeUtil.isMap(parentType)) {
+				Type enumType = typeUtil.getKeyType(parentType);
+				if (typeUtil.isEnum(enumType)) {
+					IField f = typeUtil.getEnumConstant(enumType, propName);
+					if (f!=null) {
+						return ImmutableList.of(f);
+					}
+				}
+			} else {
+				IJavaElement je;
+				Type beanType = parentType;
+				je = typeUtil.getSetter(beanType, propName);
+				if (je!=null) {
+					return Collections.singletonList(je);
+				}
+				je = typeUtil.getGetter(beanType, propName);
+				if (je!=null) {
+					return Collections.singletonList(je);
+				}
+				je = typeUtil.getField(beanType, propName);
+				if (je!=null) {
+					return Collections.singletonList(je);
+				}
 			}
 		}
 		return Collections.emptyList();
