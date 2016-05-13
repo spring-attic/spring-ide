@@ -3060,6 +3060,25 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertLinkTargets(editor, "RED", "demo.Color.RED");
 		assertLinkTargets(editor, "green", "demo.Color.GREEN");
 
+		editor = new YamlEditor(
+			"spring:\n" +
+			"  jackson:\n" +
+			"    serialization:\n" +
+			"      INDENT_OUTPUT: true"
+		);
+		assertLinkTargets(editor, "INDENT_OUTPUT",
+				"com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT"
+		);
+
+		editor = new YamlEditor(
+			"spring:\n" +
+			"  jackson:\n" +
+			"    serialization:\n" +
+			"      indent-output: true"
+		);
+		assertLinkTargets(editor, "indent-output",
+				"com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT"
+		);
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////
