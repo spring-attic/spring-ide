@@ -93,13 +93,13 @@ public class CloudFoundryClientCache {
 
 	}
 
-	private Map<Params, CloudFoundryClient> cache = new HashMap<>();
+	private Map<Params, SpringCloudFoundryClient> cache = new HashMap<>();
 
 	private int clientCount = 0;
 
-	public synchronized CloudFoundryClient getOrCreate(String username, String password, String host) {
+	public synchronized SpringCloudFoundryClient getOrCreate(String username, String password, String host) {
 		Params params = new Params(username, password, host);
-		CloudFoundryClient client = cache.get(params);
+		SpringCloudFoundryClient client = cache.get(params);
 		if (client==null) {
 			clientCount++;
 			debug("Creating client ["+clientCount+"]: "+params);
@@ -110,7 +110,7 @@ public class CloudFoundryClientCache {
 		return client;
 	}
 
-	protected CloudFoundryClient create(Params params) {
+	protected SpringCloudFoundryClient create(Params params) {
 		return SpringCloudFoundryClient.builder()
 				.username(params.username)
 				.password(params.password)

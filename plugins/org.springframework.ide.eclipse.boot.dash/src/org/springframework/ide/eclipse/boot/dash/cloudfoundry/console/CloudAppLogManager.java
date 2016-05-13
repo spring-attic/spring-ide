@@ -16,7 +16,6 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -59,7 +58,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		ApplicationLogConsole console = getExisitingConsole(runTarget.getTargetProperties(), appName);
 		if (console != null) {
 			console.clearConsole();
-			console.setLoggregatorToken(null);
+			console.setLogStreamingToken(null);
 		}
 	}
 
@@ -134,11 +133,10 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		if (logConsole == null) {
 			return;
 		}
-		if (logConsole.getLoggregatorToken() == null) {
-
+		if (logConsole.getLogStreamingToken() == null) {
 			try {
 				ClientRequests client = runTarget.getClient();
-				logConsole.setLoggregatorToken(client.streamLogs(appName, logConsole));
+				logConsole.setLogStreamingToken(client.streamLogs(appName, logConsole));
 			} catch (Exception e) {
 				logConsole.writeApplicationLog("Failed to stream contents from Cloud Foundry due to: " + e.getMessage(),
 						LogType.LOCALSTDERROR);
@@ -189,7 +187,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	public void reconnect(BootDashElement element) throws Exception {
 		String appName = element.getName();
 		ApplicationLogConsole console = getApplicationConsole(runTarget.getTargetProperties(), appName);
-		console.clearConnection();
+		console.setLogStreamingToken(null);
 		connectLoggregator(console, appName);
 		consoleManager.showConsoleView(console);
 	}
