@@ -93,6 +93,7 @@ public class UpdatePasswordDialog extends TitleAreaDialog {
 
 		final Text newPasswordText = new Text(passwordComposite, SWT.PASSWORD | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(newPasswordText);
+		newPasswordText.setText(model.getPasswordVar().getValue() == null ? "" : model.getPasswordVar().getValue());
 		newPasswordText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -111,14 +112,15 @@ public class UpdatePasswordDialog extends TitleAreaDialog {
 			}
 		});
 
-		final Button secureStorage = new Button(passwordComposite, SWT.CHECK);
-		secureStorage.setText("Remember Password");
-		GridDataFactory.fillDefaults().applyTo(secureStorage);
-		secureStorage.addSelectionListener(new SelectionAdapter() {
+		final Button rememberPassword = new Button(passwordComposite, SWT.CHECK);
+		rememberPassword.setText("Remember Password");
+		rememberPassword.setSelection(model.getStoreVar().getValue());
+		GridDataFactory.fillDefaults().applyTo(rememberPassword);
+		rememberPassword.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.getStoreVar().setValue(secureStorage.getSelection());
+				model.getStoreVar().setValue(rememberPassword.getSelection());
 			}
 
 		});

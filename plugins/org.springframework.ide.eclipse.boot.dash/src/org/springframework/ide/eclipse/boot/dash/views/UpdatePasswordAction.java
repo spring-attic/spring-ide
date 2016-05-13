@@ -15,8 +15,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -26,7 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAcce
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-public class UpdatePasswordAction extends AbstractBootDashModelAction {
+public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 
 	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection,
 			UserInteractions ui) {
@@ -38,7 +39,7 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 
 	@Override
 	public void run() {
-		final BootDashModel targetModel = sectionSelection.getValue();
+		final CloudFoundryBootDashModel targetModel = (CloudFoundryBootDashModel) sectionSelection.getValue();
 		final RunTargetWithProperties runTarget = getCredentialsHolder(targetModel);
 		if (runTarget!=null) {
 			final String userName = runTarget.getTargetProperties().get(TargetProperties.USERNAME_PROP);
@@ -61,17 +62,23 @@ public class UpdatePasswordAction extends AbstractBootDashModelAction {
 							} catch (CannotAccessPropertyException e) {
 								ui.warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + targetId
-												+ ". Secure Storage is most likely locked. Current password will be remembered until workbench is restarted.");
+												+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
 								// Set "remember password" to false. Password hasn't been stored.
 								runTarget.getTargetProperties().setStorePassword(false);
 							}
 
 							try {
-								runTarget.refresh();
-							} catch (Exception e) {
-								if (targetModel instanceof AbstractBootDashModel) {
-									((AbstractBootDashModel)targetModel).setRefreshState(RefreshState.error(e));
+								if (targetModel.isConnected()) {
+									// Disconnect if connected
+									new ConnectOperation(targetModel, false, ui).run(monitor);
+									// Disconnect will wipe out password if it's not stored, so reset it below.
+									if (!runTarget.getTargetProperties().isStorePassword()) {
+										runTarget.getTargetProperties().setPassword(password);
+									}
 								}
+								new ConnectOperation(targetModel, true, ui).run(monitor);
+							} catch (Exception e) {
+								targetModel.setRefreshState(RefreshState.error(e));
 								ui.errorPopup("Failed Setting Password", "Credentials for " + targetId
 										+ " are not valid. Ensure credentials are correct.");
 							}

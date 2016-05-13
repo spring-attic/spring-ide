@@ -75,7 +75,7 @@ public class ConnectOperation extends CloudOperation {
 								} catch (CannotAccessPropertyException e1) {
 									ui.warningPopup("Failed Storing Password",
 											"Failed to store password in Secure Storage for " + passwordDialogModel.getTargetId()
-													+ ". Secure Storage is most likely locked. Current password will be remembered until workbench is restarted.");
+													+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
 									// Set "remember password" to false. Password hasn't been stored.
 									model.getRunTarget().getTargetProperties().setStorePassword(false);
 								}
