@@ -3045,6 +3045,23 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertLinkTargets(editor, "red", "demo.Color.RED");
 	}
 
+	public void testHyperLinkEnumValueInMapKey() throws Exception {
+		YamlEditor editor;
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.color.map", "java.util.Map<demo.Color,java.lang.String>", null, "Pretty names for the colors.");
+
+		editor = new YamlEditor(
+				"my:\n" +
+				"  color:\n" +
+				"    map:\n" +
+				"      RED: Rood\n" +
+				"      green: Groen\n"
+		);
+		assertLinkTargets(editor, "RED", "demo.Color.RED");
+		assertLinkTargets(editor, "green", "demo.Color.GREEN");
+
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
