@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -55,6 +56,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -76,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -1331,6 +1334,157 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(manifestFile, app.getDeploymentManifestFile());
 
 		verify(ui).promptApplicationDeploymentProperties(any());
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void disconnectTarget() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "someApp";
+		space.defApp(appName);
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+		harness.sectionSelection.setValue(model);
+		IAction disconnectAction = actions.getToggleTargetConnectionAction();
+		assertTrue(disconnectAction.isEnabled());
+		disconnectAction.run();
+		waitForApps(model);
+		assertFalse(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+	}
+
+	@Test public void updateTargetPassword() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "someApp";
+		space.defApp(appName);
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		waitForApps(model, appName);
+
+		harness.sectionSelection.setValue(model);
+		IAction updatePassword = actions.getUpdatePasswordAction();
+		assertTrue(updatePassword.isEnabled());
+
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getPasswordVar().setValue(targetParams.getPassword());
+			d.buttonPressed(IDialogConstants.OK_ID);
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		assertNotNull(model.getApplication(appName));
+		assertTrue(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+
+		// Clear out any mocks on the ui object set above
+		reset(ui);
+
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getPasswordVar().setValue("wrong password");
+			d.buttonPressed(IDialogConstants.OK_ID);
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		assertNull(model.getApplication(appName));
+		assertFalse(model.isConnected());
+		assertEquals(RefreshState.ERROR.getId(), model.getRefreshState().getId());
+	}
+
+
+	@Test public void dontRememberTargetPassword() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "someApp";
+		space.defApp(appName);
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+
+		harness.sectionSelection.setValue(model);
+		IAction updatePassword = actions.getUpdatePasswordAction();
+		assertTrue(updatePassword.isEnabled());
+
+		// Clear out any mocks on the ui object
+		reset(ui);
+
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getPasswordVar().setValue(targetParams.getPassword());
+			d.getStoreVar().setValue(false);
+			d.buttonPressed(IDialogConstants.OK_ID);
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		assertTrue(model.isConnected());
+		assertNotNull(model.getApplication(appName));
+		assertEquals(RefreshState.READY, model.getRefreshState());
+
+		actions.getToggleTargetConnectionAction().run();
+
+		waitForJobsToComplete();
+		assertFalse(model.isConnected());
+
+		// Clear out any mocks on the ui object to get the right count below
+		reset(ui);
+
+		actions.getToggleTargetConnectionAction().run();
+		waitForJobsToComplete();
+
+		assertFalse(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+		assertNull(model.getApplication(appName));
+
+		verify(ui).openPasswordDialog(any());
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void rememberTargetPassword() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		String appName = "someApp";
+		space.defApp(appName);
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForApps(model, appName);
+
+		harness.sectionSelection.setValue(model);
+		IAction updatePassword = actions.getUpdatePasswordAction();
+		assertTrue(updatePassword.isEnabled());
+
+		// Clear out any mocks on the ui object
+		reset(ui);
+
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getPasswordVar().setValue(targetParams.getPassword());
+			d.getStoreVar().setValue(true);
+			d.buttonPressed(IDialogConstants.OK_ID);
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		actions.getToggleTargetConnectionAction().run();
+
+		waitForJobsToComplete();
+		assertFalse(model.isConnected());
+
+		// Clear out any mocks on the ui object to get the right count below
+		reset(ui);
+
+		actions.getToggleTargetConnectionAction().run();
+		waitForJobsToComplete();
+
+		assertTrue(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+		assertNotNull(model.getApplication(appName));
+
 		verifyNoMoreInteractions(ui);
 	}
 

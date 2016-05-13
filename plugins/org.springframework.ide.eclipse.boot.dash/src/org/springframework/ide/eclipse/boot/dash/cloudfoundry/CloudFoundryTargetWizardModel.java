@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -44,12 +40,13 @@ import com.google.common.collect.ImmutableSet;
  */
 public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties {
 
-	private LiveVariable<String> url = new LiveVariable<String>();
-	private LiveVariable<CFSpace> space = new LiveVariable<CFSpace>();
-	private LiveVariable<Boolean> selfsigned = new LiveVariable<Boolean>(false);
-	private LiveVariable<String> userName = new LiveVariable<String>();
-	private LiveVariable<String> password = new LiveVariable<String>();
-	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<OrgsAndSpaces>();
+	private LiveVariable<String> url = new LiveVariable<>();
+	private LiveVariable<CFSpace> space = new LiveVariable<>();
+	private LiveVariable<Boolean> selfsigned = new LiveVariable<>(false);
+	private LiveVariable<String> userName = new LiveVariable<>();
+	private LiveVariable<String> password = new LiveVariable<>();
+	private LiveVariable<Boolean> storePassword = new LiveVariable<>(false);
+	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<>();
 
 	private Validator credentialsValidator = new CredentialsValidator();
 	private Validator spacesValidator = new CloudSpaceValidator();
@@ -194,6 +191,22 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		}
 	}
 
+	public void setStorePassword(boolean store) {
+		if (get(TargetProperties.RUN_TARGET_ID) == null) {
+			storePassword.setValue(store);
+		} else {
+			super.setStorePassword(store);
+		}
+	}
+
+	public boolean isStorePassword() {
+		if (get(TargetProperties.RUN_TARGET_ID) == null) {
+			return storePassword.getValue();
+		} else {
+			return super.isStorePassword();
+		}
+	}
+
 	protected String getDefaultTargetUrl() {
 		return "https://api.run.pivotal.io";
 	}
@@ -225,6 +238,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	public CloudFoundryRunTarget finish() throws Exception {
 		String id = CloudFoundryTargetProperties.getId(this);
 		put(TargetProperties.RUN_TARGET_ID, id);
+		super.setStorePassword(storePassword.getValue());
 		super.setPassword(password.getValue());
 		return (CloudFoundryRunTarget) getRunTargetType().createRunTarget(this);
 	}

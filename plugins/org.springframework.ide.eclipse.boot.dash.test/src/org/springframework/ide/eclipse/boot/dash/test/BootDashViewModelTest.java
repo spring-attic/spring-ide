@@ -487,14 +487,14 @@ public class BootDashViewModelTest {
 	private void assertFilterAccepts(boolean expectedAccept, LiveExpression<Filter<BootDashElement>> filter, String... tags) {
 		BootDashElement element = mock(BootDashElement.class);
 		when(element.getCurrentChildren()).thenReturn(ImmutableSet.<BootDashElement>of());
-		when(element.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList(tags)));
+		when(element.getTags()).thenReturn(new LinkedHashSet<>(Arrays.asList(tags)));
 		assertEquals(expectedAccept, filter.getValue().accept(element));
 	}
 
 	@Test
 	public void testGetSectionByTargetId() throws Exception {
 		BootDashViewModel view = mock(BootDashViewModel.class);
-		LiveSet<BootDashModel> sections = new LiveSet<BootDashModel>();
+		LiveSet<BootDashModel> sections = new LiveSet<>();
 		when(view.getSectionModels()).thenReturn(sections);
 		when(view.getSectionByTargetId(anyString())).thenCallRealMethod();
 
@@ -625,15 +625,40 @@ public class BootDashViewModelTest {
 
 		harness.model.updateTargetPropertiesInStore();
 
+		assertEquals("secret", target.getTargetProperties().getPassword());
+
+		harness.reload();
+
+		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
+		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
+												// expected the restored target is a brand new object
+	}
+
+	@Test
+	public void testRememberPassword() throws Exception {
+		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
+		harness = new BootDashViewModelHarness(context, targetType);
+		targetType.setRequiresCredentials(true);
+		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
+		properties.setStorePassword(true);
+		properties.setPassword("secret");
+
+		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
+		harness.model.getRunTargets().add(target);
+
+		harness.model.updateTargetPropertiesInStore();
+
 		SecuredCredentialsStore secureStore = harness.context.getSecuredCredentialsStore();
 
 		//This test needs to have knowledge what keys the passwords are store under.
 		// That seems undesirable.
 		String key = "mock-type:target-id";
+		assertTrue(target.getTargetProperties().isStorePassword());
+		assertEquals("secret", target.getTargetProperties().getPassword());
 		assertEquals("secret", secureStore.getPassword(key));
 
 		/////////////////////////////////////////
-		// also check that when runtargets are restored from the store the password prop is properly
+		// check that when runtargets are restored from the store the password prop is properly
 		// restored
 
 		harness.reload();
@@ -641,7 +666,43 @@ public class BootDashViewModelTest {
 		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
+		assertTrue(restoredTarget.getTargetProperties().isStorePassword());
 		assertEquals("secret", restoredTarget.getTargetProperties().getPassword());
-
 	}
+
+	@Test
+	public void testDontRememberPassword() throws Exception {
+		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
+		harness = new BootDashViewModelHarness(context, targetType);
+		targetType.setRequiresCredentials(true);
+		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
+		properties.setStorePassword(false);
+		properties.setPassword("secret");
+
+		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
+		harness.model.getRunTargets().add(target);
+
+		harness.model.updateTargetPropertiesInStore();
+
+		SecuredCredentialsStore secureStore = harness.context.getSecuredCredentialsStore();
+
+		//This test needs to have knowledge what keys the passwords are store under.
+		// That seems undesirable.
+		String key = "mock-type:target-id";
+		assertFalse(target.getTargetProperties().isStorePassword());
+		assertEquals("secret", target.getTargetProperties().getPassword());
+		assertNull(secureStore.getPassword(key));
+
+		/////////////////////////////////////////
+		// check that when runtargets are restored from the store the password is not remebered
+
+		harness.reload();
+
+		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
+		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
+												// expected the restored target is a brand new object
+		assertFalse(restoredTarget.getTargetProperties().isStorePassword());
+		assertNull(restoredTarget.getTargetProperties().getPassword());
+	}
+
 }
