@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -37,6 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
@@ -46,7 +48,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -60,6 +61,11 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 		void apply(DeploymentPropertiesDialogModel model) throws Exception;
 
+	}
+
+	@FunctionalInterface
+	public interface PasswordAnswerer {
+		void apply(PasswordDialogModel model);
 	}
 
 	/**
@@ -113,6 +119,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
 		wizard.setUrl(params.getApiUrl());
 		wizard.setUsername(params.getUsername());
+		wizard.setStorePassword(true);
 		wizard.setPassword(params.getPassword());
 		wizard.setSelfsigned(false);
 		wizard.resolveSpaces(new MockRunnableContext());
@@ -273,6 +280,17 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			}
 
 		});
+	}
+
+	public void answerPasswordPrompt(UserInteractions ui, PasswordAnswerer answerer) {
+		doAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(InvocationOnMock invocation) throws Throwable {
+				PasswordDialogModel dialog = (PasswordDialogModel) invocation.getArguments()[0];
+				answerer.apply(dialog);
+				return dialog.isOk();
+			}
+		}).when(ui).openPasswordDialog(any(PasswordDialogModel.class));
 	}
 
 	private String getFileContent(DeploymentPropertiesDialogModel dialog) {

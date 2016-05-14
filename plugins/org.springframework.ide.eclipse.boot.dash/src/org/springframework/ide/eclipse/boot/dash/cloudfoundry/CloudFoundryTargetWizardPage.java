@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,16 +22,15 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -89,7 +88,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 	private void createCredentialsUI(Composite parent) {
 
 		Composite topComposite = new Composite(parent, SWT.NONE);
-		topComposite.setLayout(new GridLayout(2, false));
+		topComposite.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(false).spacing(5, 10).create());
 		topComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Label emailLabel = new Label(topComposite, SWT.NONE);
@@ -108,11 +107,15 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		});
 
 		Label passwordLabel = new Label(topComposite, SWT.NONE);
-		passwordLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		passwordLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		passwordLabel.setText("Password: ");
 
-		passwordText = new Text(topComposite, SWT.PASSWORD | SWT.BORDER);
-		passwordText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite passwordComposite = new Composite(topComposite, SWT.NONE);
+		GridLayoutFactory.fillDefaults().spacing(5, 2).applyTo(passwordComposite);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(passwordComposite);
+
+		passwordText = new Text(passwordComposite, SWT.PASSWORD | SWT.BORDER);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(passwordText);
 		passwordText.setEditable(true);
 
 		passwordText.addModifyListener(new ModifyListener() {
@@ -123,6 +126,18 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 					// Ignore. This will execute without exception
 				}
 			}
+		});
+
+		final Button rememberPassword = new Button(passwordComposite, SWT.CHECK);
+		rememberPassword.setText("Remember Password");
+		rememberPassword.setSelection(false);
+		rememberPassword.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				wizardModel.setStorePassword(rememberPassword.getSelection());
+			}
+
 		});
 
 		Label urlLabel = new Label(topComposite, SWT.NONE);
@@ -167,7 +182,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				try {
 					spaces = wizardModel.resolveSpaces(getWizard().getContainer());
 				} catch (Exception e) {
-					BootActivator.log(e);
+					Log.log(e);
 					setErrorMessage(ExceptionUtil.getMessage(e));
 					refreshWizardUI();
 					return;
@@ -242,7 +257,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		try {
 			return wizardModel.finish();
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
