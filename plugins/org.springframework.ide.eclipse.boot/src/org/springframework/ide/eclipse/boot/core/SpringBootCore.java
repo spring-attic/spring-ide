@@ -80,7 +80,7 @@ public class SpringBootCore {
 		if (project.hasNature(M2E_NATURE)) {
 			return new MavenSpringBootProject(project, initializr);
 		} else {
-			throw ExceptionUtil.coreException("This feature is only implemented for m2e enabled maven projects");
+			return null;
 		}
 	}
 

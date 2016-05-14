@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.core;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
+import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -21,10 +22,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
 /**
  * Model for a ChooseDependencyDialog.
- * 
- * TODO: it looks like this could be generalized to a reusable 'ChooseOneModel<T>' that
- * should work with a 'ChooseOneDialog<T>' 
- * 
+ *
  * @author Kris De Volder
  */
 public class ChooseDependencyModel implements OkButtonHandler {
@@ -32,19 +30,38 @@ public class ChooseDependencyModel implements OkButtonHandler {
 	public final MavenCoordinates[] availableChoices;
 	public final LiveVariable<MavenCoordinates> selected = new LiveVariable<MavenCoordinates>();
 	public final LiveExpression<ValidationResult> validator = Validator.notNull(selected, "No dependency selected");
-	
+
+	public final LiveExpression<String> previewText = new LiveExpression<String>("") {
+		{
+			dependsOn(selected);
+		}
+
+		@Override
+		protected String compute() {
+			MavenCoordinates d = selected.getValue();
+			if (d!=null) {
+				return d.toXmlString();
+			}
+			return "";
+		}
+	};
+
 	/**
 	 * Records when performOk is called. This allows us to determine if the dialog was closed
 	 * via ok button or via another means (i.e. cancel button).
 	 */
 	private boolean okPerformed = false;
+	private String dependencyFileName;
+	private ExternalType type;
 
-	public ChooseDependencyModel(Collection<MavenCoordinates> availableChoices) {
+	public ChooseDependencyModel(Collection<MavenCoordinates> availableChoices, String dependencyFileName, ExternalType type) {
+		this.type = type;
+		this.dependencyFileName = dependencyFileName;
 		Assert.isLegal(!availableChoices.isEmpty());
 		this.availableChoices = availableChoices.toArray(new MavenCoordinates[availableChoices.size()]);
 		selected.setValue(this.availableChoices[0]);
 	}
-	
+
 	public MavenCoordinates getResult() {
 		if (okPerformed) {
 			return selected.getValue();
@@ -52,13 +69,27 @@ public class ChooseDependencyModel implements OkButtonHandler {
 		//We cannot distinguish between cancelation and no selection is this a problem?
 		return null;
 	}
-	
+
 
 	@Override
 	public void performOk() throws Exception {
 		okPerformed = true;
 	}
 
+	public String getTitle() {
+		return "Confirm Changes to '"+dependencyFileName+"'";
+	}
 
+	public String getDependencyFileName() {
+		return dependencyFileName;
+	}
+
+	public boolean isShowChoices() {
+		return availableChoices.length>1;
+	}
+
+	public String getTypeName() {
+		return type.getFullyQualifiedName();
+	}
 
 }

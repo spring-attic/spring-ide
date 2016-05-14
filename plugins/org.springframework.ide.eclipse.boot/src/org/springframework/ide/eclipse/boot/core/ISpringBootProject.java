@@ -101,4 +101,9 @@ public interface ISpringBootProject {
 	 */
 	public void removeMavenDependency(MavenId mavenId) throws CoreException;
 
+	/**
+	 * The name of the file in which the list of dependencies for this project are maintained. E.g "pom.xml" for maven projects.
+	 */
+	public String getDependencyFileName();
+
 }

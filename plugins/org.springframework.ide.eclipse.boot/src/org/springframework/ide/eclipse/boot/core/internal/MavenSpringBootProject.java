@@ -493,4 +493,9 @@ public class MavenSpringBootProject extends SpringBootProject {
 		}
 	}
 
+	@Override
+	public String getDependencyFileName() {
+		return "pom.xml";
+	}
+
 }

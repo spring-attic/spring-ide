@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.core;
 
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.DependencyInfo;
+import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
@@ -109,5 +110,20 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 	@Override
 	public String getLabel() {
 		return artifact;
+	}
+
+	public String toXmlString() {
+		StringBuilder xml = new StringBuilder();
+		xml.append("<dependency>\n");
+		xml.append("   <artifactId>"+artifact+"</artifactId>\n");
+		xml.append("   <groupId>"+artifact+"</groupId>\n");
+		if (StringUtil.hasText(version)) {
+			xml.append("   <version>"+version+"</version>\n");
+		}
+		if (StringUtil.hasText(classifier)) {
+			xml.append("   <classifier>"+classifier+"</classifier>\n");
+		}
+		xml.append("</dependency>");
+		return xml.toString();
 	}
 }

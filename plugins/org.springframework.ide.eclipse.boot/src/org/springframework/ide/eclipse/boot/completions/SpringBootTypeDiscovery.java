@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.ui.ChooseDependencyDialog;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.completions.externaltype.AbstractExternalTypeSource;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
@@ -46,8 +47,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * This example 'discovers' types by reading a large xml file. This xml file is
- * created 'offline' and contains a dependency graph of maven artifacts and types.
+ * This {@link ExternalTypeDiscovery} 'discovers' types by reading a large xml file.
+ * This xml file is created 'offline' and contains a dependency graph of maven artifacts and types.
  *
  * @author Kris De Volder
  */
@@ -105,21 +106,20 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			this.type = type;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void addToClassPath(IJavaProject project, IProgressMonitor mon) {
 			try {
-				//TODO: progress monitor handling
 				ISpringBootProject bootProject = SpringBootCore.create(project);
-
-				Collection<MavenCoordinates> sources;
-				sources = getProviders();
-				MavenCoordinates source = chooseSource(sources);
-				if (source!=null) {
-					bootProject.addMavenDependency(source, preferManagedVersion);
+				if (bootProject!=null) {
+					Collection<MavenCoordinates> sources;
+					sources = getProviders();
+					MavenCoordinates source = chooseSource(sources, bootProject);
+					if (source!=null) {
+						bootProject.addMavenDependency(source, preferManagedVersion);
+					}
 				}
 			} catch (Exception e) {
-				BootActivator.log(e);
+				Log.log(e);
 			}
 		}
 
@@ -142,21 +142,9 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		 * <p>
 		 * If the collection of choices is empty then the dialog is also skipped and null is returned.
 		 */
-		private MavenCoordinates chooseSource(Collection<MavenCoordinates> sources) {
-			if (sources!=null) {
-				if (sources.size()==1) {
-					for (MavenCoordinates mavenCoordinates : sources) {
-						return mavenCoordinates;
-					}
-				} else if (sources.isEmpty()) {
-					return null;
-				}
-				//There are at least 2 choices available. Offer them to the user.
-				return ChooseDependencyDialog.openOn("Choose a Dependency",
-						"How do you want to add <b>"+type.getName()
-						+"</b> from <b>"+type.getPackage()+"</b> to your classpath?",
-						sources
-				);
+		private MavenCoordinates chooseSource(Collection<MavenCoordinates> sources, ISpringBootProject project) {
+			if (sources!=null && !sources.isEmpty()) {
+				return ChooseDependencyDialog.openOn(type, sources, project.getDependencyFileName());
 			}
 			return null;
 		}
@@ -357,7 +345,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
