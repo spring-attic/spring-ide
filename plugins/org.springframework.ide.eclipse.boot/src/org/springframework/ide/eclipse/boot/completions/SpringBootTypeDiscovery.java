@@ -26,22 +26,27 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.ChooseDependencyModel;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.ui.ChooseDependencyDialog;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.completions.JDTContentAssistPrefsHelper;
 import org.springsource.ide.eclipse.commons.completions.externaltype.AbstractExternalTypeSource;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeDiscovery;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalTypeEntry;
 import org.springsource.ide.eclipse.commons.completions.util.Requestor;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager.DownloadRequestor;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -144,12 +149,28 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		 */
 		private MavenCoordinates chooseSource(Collection<MavenCoordinates> sources, ISpringBootProject project) {
 			if (sources!=null && !sources.isEmpty()) {
-				return ChooseDependencyDialog.openOn(type, sources, project.getDependencyFileName());
+				ChooseDependencyModel model = new ChooseDependencyModel(sources, project.getDependencyFileName(), type);
+				MavenCoordinates chosen = ChooseDependencyDialog.openOn(model);
+				if (model.disableJarTypeAssist.getValue()) {
+					disable();
+				}
+				return chosen;
 			}
 			return null;
 		}
 
-		@SuppressWarnings("rawtypes")
+		/**
+		 * Modify JDT content assist preferences to disable this
+		 */
+		private void disable() {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			JDTContentAssistPrefsHelper.disableJarTypeSearch();
+			MessageDialog.openInformation(shell, "Jar Type Search Disabled",
+					"The content assist provider called 'Jar Type Search' has now been disabled. "+
+					"You can re-enable it via 'Preferences >> Java >> Editor >> Content Assist >> Advanced'"
+			);
+		}
+
 		@Override
 		public String getDescription() {
 			//The dgraph map actually contains inverted dependency edges so we have to
@@ -186,8 +207,6 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 		}
 	}
 
-	//TODO: should generate or obtain this data based on spring boot version of project. For now only use rest api call that
-	// retrieves type graph data for default version of spring boot.
 	private static URI XML_DATA_LOCATION;
 	static {
 		try {
@@ -195,7 +214,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 			//XML_DATA_LOCATION = new URI("platform:/plugin/org.springframework.ide.eclipse.boot/resources/boot-completion-data.txt");
 			XML_DATA_LOCATION = new URI(stsProps.get("spring.boot.typegraph.url"));
 		} catch (URISyntaxException e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -390,7 +409,7 @@ public class SpringBootTypeDiscovery implements ExternalTypeDiscovery {
 							new File(cacheFolder, name).delete();
 						}
 					} catch (Throwable e) {
-						BootActivator.log(e);
+						Log.log(e);
 					}
 				}
 			}

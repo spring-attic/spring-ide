@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
+import org.springsource.ide.eclipse.commons.livexp.core.BooleanFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -30,6 +31,11 @@ public class ChooseDependencyModel implements OkButtonHandler {
 	public final MavenCoordinates[] availableChoices;
 	public final LiveVariable<MavenCoordinates> selected = new LiveVariable<MavenCoordinates>();
 	public final LiveExpression<ValidationResult> validator = Validator.notNull(selected, "No dependency selected");
+
+	public final BooleanFieldModel disableJarTypeAssist = new BooleanFieldModel("disableJarTypeAssist", false);
+	{
+		disableJarTypeAssist.label("Don't ask again (disables Jar Type Search content assistant)");
+	}
 
 	public final LiveExpression<String> previewText = new LiveExpression<String>("") {
 		{
@@ -63,13 +69,12 @@ public class ChooseDependencyModel implements OkButtonHandler {
 	}
 
 	public MavenCoordinates getResult() {
-		if (okPerformed) {
+		if (okPerformed && !disableJarTypeAssist.getValue()) {
 			return selected.getValue();
 		}
 		//We cannot distinguish between cancelation and no selection is this a problem?
 		return null;
 	}
-
 
 	@Override
 	public void performOk() throws Exception {

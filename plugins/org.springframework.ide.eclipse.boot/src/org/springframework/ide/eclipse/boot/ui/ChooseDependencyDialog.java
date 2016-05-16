@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.core.ChooseDependencyModel;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DescriptionSection;
@@ -64,6 +65,8 @@ public class ChooseDependencyDialog extends DialogWithSections {
 				text.setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 			}
 		});
+		sections.add(new HLineSection(this));
+		sections.add(new CheckboxSection(this, model.disableJarTypeAssist));
 		return sections;
 	}
 
@@ -83,20 +86,19 @@ public class ChooseDependencyDialog extends DialogWithSections {
 //		return model.getResult();
 //	}
 
-	public static MavenCoordinates openOn(ExternalType type, Collection<MavenCoordinates> sources, String dependencyFileName) {
+	public static MavenCoordinates openOn(ChooseDependencyModel model) {
 		try {
 			//TODO: Getting the shell in the manner below is iffy... and we might not even be
 			// in the UI thread here!
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			return openOn(type, sources, dependencyFileName, shell);
+			return openOn(model, shell);
 		} catch (Exception e) {
 			Log.log(e);
 		}
 		return null;
 	}
 
-	public static MavenCoordinates openOn(ExternalType type, Collection<MavenCoordinates> sources, String dependencyFileName, Shell shell) {
-		ChooseDependencyModel model = new ChooseDependencyModel(sources, dependencyFileName, type);
+	public static MavenCoordinates openOn(ChooseDependencyModel model, Shell shell) {
 		ChooseDependencyDialog dialog = new ChooseDependencyDialog(model, shell);
 		dialog.setBlockOnOpen(true);
 		dialog.open();
