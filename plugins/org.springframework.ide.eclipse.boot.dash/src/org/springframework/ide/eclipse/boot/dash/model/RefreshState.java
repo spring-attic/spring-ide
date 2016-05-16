@@ -23,7 +23,8 @@ import com.google.common.base.Objects;
 public class RefreshState {
 	public static final RefreshState READY = new RefreshState("READY");
 	public static final RefreshState LOADING = new RefreshState("LOADING");
-	public static final RefreshState ERROR = new RefreshState("ERROR");
+	private static final RefreshState ERROR = new RefreshState("ERROR");
+	private static final RefreshState WARNING = new RefreshState("ERROR");
 
 	public static RefreshState error(String msg) {
 		return new RefreshState(ERROR.id, msg);
@@ -33,6 +34,10 @@ public class RefreshState {
 		return error(ExceptionUtil.getMessage(e));
 	}
 
+	public static RefreshState warning(String message) {
+		return new RefreshState(WARNING.id, message);
+	}
+
 	public static RefreshState loading(String message) {
 		return new RefreshState(LOADING.id, message);
 	}
@@ -40,11 +45,11 @@ public class RefreshState {
 	private String id;
 	private String message;
 
-	public RefreshState(String id) {
+	private RefreshState(String id) {
 		this.id = id;
 	}
 
-	public RefreshState(String id, String message) {
+	private RefreshState(String id, String message) {
 		this(id);
 		this.message = message;
 	}
@@ -74,6 +79,10 @@ public class RefreshState {
 			return Objects.equal(id, other.id) && Objects.equal(message, other.message);
 		}
 		return false;
+	}
+
+	public boolean isError() {
+		return id==ERROR.id;
 	}
 
 }

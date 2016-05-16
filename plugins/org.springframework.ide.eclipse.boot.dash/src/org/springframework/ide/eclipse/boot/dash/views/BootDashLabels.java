@@ -165,7 +165,7 @@ public class BootDashLabels implements Disposable {
 	}
 
 	private ImageDescriptor getDecoration(BootDashModel element) {
-		if (element.getRefreshState().getId() == RefreshState.ERROR.getId()) {
+		if (element.getRefreshState().isError()) {
 			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
 		} else if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
 			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");

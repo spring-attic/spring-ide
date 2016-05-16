@@ -1393,7 +1393,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertNull(model.getApplication(appName));
 		assertFalse(model.isConnected());
-		assertEquals(RefreshState.ERROR.getId(), model.getRefreshState().getId());
+		assertTrue(model.getRefreshState().isError());
 	}
 
 
