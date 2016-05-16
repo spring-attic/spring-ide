@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -341,6 +342,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		else {
 			return null;
 		}
+	}
+
+	public LiveExpression<ClientRequests> getClientExp() {
+		return cachedClient;
 	}
 
 }

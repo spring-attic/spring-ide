@@ -41,7 +41,7 @@ public class RefreshSomeApplications extends CloudOperation {
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		if (apps != null && !apps.isEmpty()) {
-			this.model.setRefreshState(RefreshState.loading("Fetching App Instances..."));
+			this.model.setBaseRefreshState(RefreshState.loading("Fetching App Instances..."));
 			try {
 				ClientRequests client = model.getRunTarget().getClient();
 				for (CloudAppDashElement app : model.getApplicationValues()) {
@@ -49,9 +49,9 @@ public class RefreshSomeApplications extends CloudOperation {
 					CFApplicationDetail newDetails = client.getApplication(appName);
 					app.setDetailedData(newDetails);
 				}
-				model.setRefreshState(RefreshState.READY);
+				model.setBaseRefreshState(RefreshState.READY);
 			} catch (Throwable e) {
-				model.setRefreshState(RefreshState.error(e));
+				model.setBaseRefreshState(RefreshState.error(e));
 				throw ExceptionUtil.exception(e);
 			}
 		}

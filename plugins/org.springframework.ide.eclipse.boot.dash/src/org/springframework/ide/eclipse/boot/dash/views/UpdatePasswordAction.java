@@ -78,7 +78,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 								}
 								new ConnectOperation(targetModel, true, ui).run(monitor);
 							} catch (Exception e) {
-								targetModel.setRefreshState(RefreshState.error(e));
+								targetModel.setBaseRefreshState(RefreshState.error(e));
 								ui.errorPopup("Failed Setting Password", "Credentials for " + targetId
 										+ " are not valid. Ensure credentials are correct.");
 							}

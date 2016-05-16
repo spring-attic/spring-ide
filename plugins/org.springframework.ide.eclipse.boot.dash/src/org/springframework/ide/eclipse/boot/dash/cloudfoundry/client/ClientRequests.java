@@ -26,6 +26,16 @@ import reactor.core.publisher.Flux;
 public interface ClientRequests {
 
 	/**
+	 * The actual Rest API version that cloud controller claims to be.
+	 */
+	Version getApiVersion();
+
+	/**
+	 * The minimum version that the CF V2 java client claims to support.
+	 */
+	Version getSupportedApiVersion();
+
+	/**
 	 * Returns null if the application does not exist. Throws some kind of Exception if there's any other kind of problem.
 	 */
 	CFApplicationDetail getApplication(String appName) throws Exception;
@@ -36,7 +46,6 @@ public interface ClientRequests {
 
 
 	void deleteApplication(String name) throws Exception;
-	Version getApiVersion();
 	void logout();
 
 	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
@@ -61,4 +70,5 @@ public interface ClientRequests {
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
 
 	void deleteService(String serviceName) throws Exception;
+
 }

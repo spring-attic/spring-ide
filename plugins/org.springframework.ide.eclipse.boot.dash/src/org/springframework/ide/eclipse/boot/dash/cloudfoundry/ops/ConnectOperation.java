@@ -49,14 +49,14 @@ public class ConnectOperation extends CloudOperation {
 		if (model.getRunTarget() != null) {
 			if (connect && !model.getRunTarget().isConnected()) {
 				try {
-					model.setRefreshState(RefreshState.loading("Connecting..."));
+					model.setBaseRefreshState(RefreshState.loading("Connecting..."));
 					model.getRunTarget().connect();
 					model.refresh(ui);
 					model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
 					model.getViewModel().updateTargetPropertiesInStore();
-					model.setRefreshState(RefreshState.READY);
+					model.setBaseRefreshState(RefreshState.READY);
 				} catch (MissingPasswordException|CannotAccessPropertyException|AssertionFailedException e) {
-					model.setRefreshState(RefreshState.READY);
+					model.setBaseRefreshState(RefreshState.READY);
 					if (ui == null) {
 						Log.log(e);
 					} else {
@@ -85,7 +85,7 @@ public class ConnectOperation extends CloudOperation {
 						}
 					}
 				} catch (Exception e) {
-					model.setRefreshState(RefreshState.error(e));
+					model.setBaseRefreshState(RefreshState.error(e));
 					if (ui == null) {
 						throw e;
 					} else {
@@ -94,7 +94,7 @@ public class ConnectOperation extends CloudOperation {
 					}
 				}
 			} else if (!connect && model.getRunTarget().isConnected()) {
-				model.setRefreshState(RefreshState.loading("Disconnecting..."));
+				model.setBaseRefreshState(RefreshState.loading("Disconnecting..."));
 				model.getRunTarget().disconnect();
 				model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
 				if (!model.getRunTarget().getTargetProperties().isStorePassword()) {
@@ -102,7 +102,7 @@ public class ConnectOperation extends CloudOperation {
 					model.getRunTarget().getTargetProperties().setPassword(null);
 				}
 				model.getViewModel().updateTargetPropertiesInStore();
-				model.setRefreshState(RefreshState.READY);
+				model.setBaseRefreshState(RefreshState.READY);
 			}
 		}
 	}

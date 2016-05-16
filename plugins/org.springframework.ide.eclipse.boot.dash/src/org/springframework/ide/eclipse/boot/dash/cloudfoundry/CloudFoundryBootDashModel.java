@@ -47,6 +47,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -84,6 +85,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -92,8 +94,10 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -142,6 +146,44 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
+
+	private LiveVariable<RefreshState> baseRefeshState = new LiveVariable<>();
+
+	private LiveExpression<RefreshState> apiWarning = new AsyncLiveExpression<RefreshState>(RefreshState.READY, "Check CC api version") {
+		{
+			dependsOn(getClientExp());
+		}
+
+		@Override
+		protected RefreshState compute() {
+			ClientRequests client = getClient();
+			if (client!=null) {
+				Version actual = client.getApiVersion();
+				Version supported = client.getSupportedApiVersion();
+				if (actual.compareTo(supported)>0) {
+					return RefreshState.warning(
+							"Client supports API version "+supported+
+							" and is connected to server with API version "+actual+". "+
+							"Things may not work as expected."
+					);
+				}
+			}
+			return RefreshState.READY;
+		}
+	};
+
+	private LiveExpression<RefreshState> refreshState = new LiveExpression<RefreshState>() {
+		{
+			dependsOn(baseRefeshState);
+			dependsOn(apiWarning);
+			addListener((e,v) -> notifyModelStateChanged());
+		}
+
+		@Override
+		protected RefreshState compute() {
+			return RefreshState.merge(baseRefeshState.getValue(), apiWarning.getValue());
+		}
+	};
 
 	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
 		@Override
@@ -209,6 +251,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			}
 		}
 	};
+
+	public RefreshState getRefreshState() {
+		return refreshState.getValue();
+	}
 
 	final private ValueListener<ClientRequests> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<ClientRequests>() {
 		@Override
@@ -779,16 +825,20 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public void connect() throws Exception {
 		getRunTarget().connect();
+		apiWarning.refresh();
 	}
 
 	public ClientRequests getClient() {
 		return getRunTarget().getClient();
 	}
 
+	private LiveExpression<ClientRequests> getClientExp() {
+		return getRunTarget().getClientExp();
+	}
+
 	public List<CFCloudDomain> getCloudDomains(IProgressMonitor monitor) throws Exception {
 		return getRunTarget().getDomains(monitor);
 	}
-
 
 	/* TODO: These asynch methods probably should not be here but leaving them in the model for now as model is commonly shared across boot dash  */
 
@@ -808,5 +858,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		}
 	}
 
-
+	public void setBaseRefreshState(RefreshState newState) {
+		baseRefeshState.setValue(newState);
+	}
 }

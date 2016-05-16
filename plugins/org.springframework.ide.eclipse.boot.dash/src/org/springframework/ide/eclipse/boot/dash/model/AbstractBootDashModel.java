@@ -15,20 +15,21 @@ import java.util.Comparator;
 import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+
+import static org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode.*;
 
 public abstract class AbstractBootDashModel extends AbstractDisposable implements BootDashModel {
 
-	private BootDashViewModel parent;
-	private RunTarget target;
-
-	private LiveVariable<RefreshState> refreshState;
+	private final BootDashViewModel parent;
+	private final RunTarget target;
 
 	public AbstractBootDashModel(RunTarget target, BootDashViewModel parent) {
 		super();
 		this.target = target;
 		this.parent = parent;
-		this.refreshState = new LiveVariable<RefreshState>(RefreshState.READY, this);
 	}
 
 	public RunTarget getRunTarget() {
@@ -43,6 +44,10 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 				((BootDashModel.ElementStateListener) l).stateChanged(element);
 			}
 		}
+	}
+
+	protected LiveExpression<RefreshState> createRefreshState() {
+		return LiveExpression.constant(RefreshState.READY);
 	}
 
 	ListenerList modelStateListeners = new ListenerList();
@@ -70,17 +75,11 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 	abstract public void refresh(UserInteractions ui);
 
 	/**
-	 * Returns the state of the model
-	 * @return
+	 * Returns the state of the model. Default implementation is 'stateless'.
 	 */
 	@Override
 	public RefreshState getRefreshState() {
-		return refreshState.getValue();
-	}
-
-	public final void setRefreshState(RefreshState newState) {
-		refreshState.setValue(newState);
-		notifyModelStateChanged();
+		return RefreshState.READY;
 	}
 
 	public void addElementStateListener(BootDashModel.ElementStateListener l) {

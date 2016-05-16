@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
@@ -579,6 +580,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
+	public Version getSupportedApiVersion() {
+		return new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
+	}
+
+	@Override
 	public void deleteApplication(String appName) throws Exception {
 		ReactorUtils.get(operations.applications().delete(DeleteApplicationRequest
 				.builder()
@@ -1002,5 +1008,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		}
 		return builder.build();
 	}
+
 
 }

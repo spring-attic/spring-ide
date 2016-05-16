@@ -52,7 +52,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
 		if (model.getRunTarget().isConnected()) {
-			model.setRefreshState(RefreshState.loading("Fetching Apps..."));
+			model.setBaseRefreshState(RefreshState.loading("Fetching Apps..."));
 			for (CloudAppDashElement app : model.getApplicationValues()) {
 				app.setError(null); // clear old error states.
 			}
@@ -68,13 +68,13 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 				// 2. Launch the slower app stats/instances refresh operation.
 				this.model.runAsynch(new AppInstancesRefreshOperation(this.model, apps), ui);
 				this.model.runAsynch(new HealthCheckRefreshOperation(this.model), ui);
-				model.setRefreshState(RefreshState.READY);
+				model.setBaseRefreshState(RefreshState.READY);
 			} catch (Exception e) {
 				/*
 				 * Failed to obtain applications list from CF
 				 */
 				model.updateElements(null);
-				model.setRefreshState(RefreshState.error(e));
+				model.setBaseRefreshState(RefreshState.error(e));
 				throw e;
 			}
 		} else {

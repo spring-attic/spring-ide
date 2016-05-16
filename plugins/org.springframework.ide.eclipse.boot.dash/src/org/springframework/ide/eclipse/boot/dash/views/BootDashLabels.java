@@ -167,7 +167,9 @@ public class BootDashLabels implements Disposable {
 	private ImageDescriptor getDecoration(BootDashModel element) {
 		if (element.getRefreshState().isError()) {
 			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
-		} else if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
+		} else if (element.getRefreshState().isWarning()) {
+			return BootDashActivator.getImageDescriptor("icons/warning_ovr.gif");
+		} else if (element.getRefreshState().isLoading()) {
 			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
 		}
 		return null;
@@ -212,7 +214,7 @@ public class BootDashLabels implements Disposable {
 	public StyledString getStyledText(BootDashModel element, BootDashColumn column) {
 		if (element != null) {
 			if (element.getRunTarget() != null) {
-				if (element.getRefreshState().getId() == RefreshState.LOADING.getId()) {
+				if (element.getRefreshState().isLoading()) {
 					StyledString prefix = new StyledString();
 					if (element.getRefreshState().getMessage() != null) {
 						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));

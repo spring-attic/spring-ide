@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import reactor.core.publisher.Flux;
 
@@ -39,7 +40,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception {
-		this.model.setRefreshState(RefreshState.loading("Fetching App Instances..."));
+		this.model.setBaseRefreshState(RefreshState.loading("Fetching App Instances..."));
 		try {
 			if (!appsToLookUp.isEmpty()) {
 				long timeToWait = 1000*30;
@@ -48,9 +49,9 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				.after()
 				.get(timeToWait);
 			}
-			model.setRefreshState(RefreshState.READY);
+			model.setBaseRefreshState(RefreshState.READY);
 		} catch (Exception e) {
-			this.model.setRefreshState(RefreshState.error(e));
+			this.model.setBaseRefreshState(RefreshState.error(e));
 			throw e;
 		}
 	}

@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.cloudfoundry.client.CloudFoundryClient;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -125,6 +126,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		private CFClientParams params;
 		private boolean connected = true;
+		private Version apiVersion = new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
+		private Version supportedApiVersion = apiVersion;
 
 		public MockClient(CFClientParams params) throws Exception {
 			checkCredentials(params.getUsername(), params.getPassword());
@@ -243,8 +246,12 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public Version getApiVersion() {
-			notImplementedStub();
-			return null;
+			return apiVersion;
+		}
+
+		@Override
+		public Version getSupportedApiVersion() {
+			return supportedApiVersion;
 		}
 
 		@Override

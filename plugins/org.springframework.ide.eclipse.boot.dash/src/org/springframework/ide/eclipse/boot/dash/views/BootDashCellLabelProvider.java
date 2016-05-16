@@ -69,7 +69,7 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 	public String getToolTipText(Object element) {
 		if (element instanceof BootDashModel) {
 			RefreshState state = ((BootDashModel) element).getRefreshState();
-			if (state.isError()) {
+			if (state!=null) {
 				return state.getMessage();
 			}
 		}
