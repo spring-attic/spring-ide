@@ -45,6 +45,9 @@ import reactor.core.publisher.Mono;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
+	private Version supportedApiVersion = new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
+	private Version apiVersion = supportedApiVersion;
+
 	private Map<String, CFOrganization> orgsByName = new LinkedHashMap<>();
 	private Map<String, MockCFSpace> spacesByName = new LinkedHashMap<>();
 	private Map<String, MockCFDomain> domainsByName = new LinkedHashMap<>();
@@ -126,8 +129,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		private CFClientParams params;
 		private boolean connected = true;
-		private Version apiVersion = new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
-		private Version supportedApiVersion = apiVersion;
 
 		public MockClient(CFClientParams params) throws Exception {
 			checkCredentials(params.getUsername(), params.getPassword());
@@ -394,6 +395,14 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	 */
 	public long getStartDelay() {
 		return startDelay;
+	}
+
+	public void setApiVersion(String string) {
+		apiVersion = new Version(string);
+	}
+
+	public void setSupportedApiVersion(String string) {
+		supportedApiVersion = new Version(string);
 	}
 
 }

@@ -16,6 +16,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
@@ -1486,6 +1489,25 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNotNull(model.getApplication(appName));
 
 		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void apiVersionCheck() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		clientFactory.setSupportedApiVersion("1.1.0");
+		clientFactory.setApiVersion("1.1.1");
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		ACondition.waitFor("connected to target", 10_000, () -> model.isConnected());
+
+		waitForJobsToComplete();
+
+		assertTrue(model.getRefreshState().isWarning());
+		String msg = model.getRefreshState().getMessage();
+		assertContains("may not work as expected", msg);
+		assertContains("1.1.1", msg);
+		assertContains("1.1.0", msg);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
