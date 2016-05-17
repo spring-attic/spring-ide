@@ -88,6 +88,7 @@ import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -276,8 +277,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 		getRunTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
-		if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null) {
-			getOperationsExecution().runAsynch(new ConnectOperation(this, true));
+		try {
+			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
+					&& (getRunTarget().getTargetProperties().isStorePassword() || getRunTarget().getTargetProperties().getPassword() != null)) {
+				// If CF target was connected previously and either password is stored or not stored but non-null then connect automatically
+				getOperationsExecution().runAsynch(new ConnectOperation(this, true));
+			}
+		} catch (CannotAccessPropertyException e) {
+			// ignore shouldn't happen. Get password is called only if password not stored
 		}
 	}
 
