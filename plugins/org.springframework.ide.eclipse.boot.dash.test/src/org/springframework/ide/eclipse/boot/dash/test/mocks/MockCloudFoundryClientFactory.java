@@ -337,8 +337,15 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void deleteService(String serviceName) throws Exception {
-			getSpace().deleteService(serviceName);
+		public Mono<Void> deleteServiceAsync(String serviceName) {
+			return Mono.defer(() -> {
+				try {
+					getSpace().deleteService(serviceName);
+					return Mono.empty();
+				} catch (Exception e) {
+					return Mono.error(e);
+				}
+			});
 		}
 
 	}

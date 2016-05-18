@@ -948,12 +948,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	@Override
-	public void deleteService(String serviceName) {
-		deleteServiceMono(serviceName).get();
-	}
+//	@Override
+//	public void deleteService(String serviceName) {
+//		deleteServiceMono(serviceName).get();
+//	}
 
-	public Mono<Void> deleteServiceMono(String serviceName) {
+	@Override
+	public Mono<Void> deleteServiceAsync(String serviceName) {
 		return getService(serviceName)
 		.then(this::deleteServiceInstance);
 	}

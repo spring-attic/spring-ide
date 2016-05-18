@@ -12,12 +12,12 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -111,5 +111,34 @@ public class ReactorUtils {
 			seq = seq.after(t);
 		}
 		return seq;
+	}
+
+	/**
+	 * Execute a bunch of mono in parallel. All monos are executed to completion (rather than canceled early
+	 * when one of them fails)
+	 * <p>
+	 * When at least one operation has failed then, upon completion or failure of the last Mono we guarantee that at least
+	 * one of the exceptions is propagated.
+	 */
+	public static Mono<Void> safeMerge(Flux<Mono<Void>> operations, int concurrency) {
+		AtomicReference<Throwable> failure =  new AtomicReference<Throwable>(null);
+		return Flux.merge(
+			operations
+			.map((Mono<Void> op) -> {
+				return op.otherwise((e) -> {
+					failure.compareAndSet(null, e);
+					return Mono.empty();
+				});
+			}),
+			concurrency //limit concurrency otherwise troubles (flooding/choking request broker?)
+		)
+		.then(() -> {
+			Throwable error = failure.get();
+			if (error!=null) {
+				return Mono.error(error);
+			} else {
+				return Mono.empty();
+			}
+		});
 	}
 }
