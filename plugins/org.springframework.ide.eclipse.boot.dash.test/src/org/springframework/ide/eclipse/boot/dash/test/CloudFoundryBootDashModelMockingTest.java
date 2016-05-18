@@ -1495,8 +1495,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 
-		clientFactory.setSupportedApiVersion("1.1.0");
-		clientFactory.setApiVersion("1.1.1");
+		clientFactory.setApiVersion("1.1.0");
+		clientFactory.setSupportedApiVersion("1.1.1");
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		ACondition.waitFor("connected to target", 10_000, () -> model.isConnected());

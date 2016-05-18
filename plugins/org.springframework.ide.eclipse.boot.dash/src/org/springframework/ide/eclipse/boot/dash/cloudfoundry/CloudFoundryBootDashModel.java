@@ -159,12 +159,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		protected RefreshState compute() {
 			ClientRequests client = getClient();
 			if (client!=null) {
-				Version actual = client.getApiVersion();
+				Version server = client.getApiVersion();
 				Version supported = client.getSupportedApiVersion();
-				if (actual.compareTo(supported)>0) {
+				if (server.compareTo(supported)<0) {
 					return RefreshState.warning(
-							"Client supports API version "+supported+
-							" and is connected to server with API version "+actual+". "+
+							"Client supports API version "+server+
+							" and is connected to server with API version "+supported+". "+
 							"Things may not work as expected."
 					);
 				}
