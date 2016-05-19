@@ -22,6 +22,7 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientS
 
 import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface ClientRequests {
 
@@ -69,6 +70,6 @@ public interface ClientRequests {
 	void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception;
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
 
-	void deleteService(String serviceName) throws Exception;
+	Mono<Void> deleteServiceAsync(String serviceName);
 
 }

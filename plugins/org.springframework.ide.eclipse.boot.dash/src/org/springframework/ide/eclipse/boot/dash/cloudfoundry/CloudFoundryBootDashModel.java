@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -53,6 +55,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -80,6 +83,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -94,8 +98,8 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManag
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -107,6 +111,9 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class CloudFoundryBootDashModel extends AbstractBootDashModel implements ModifiableModel {
 
@@ -542,14 +549,42 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		if (toRemove == null || toRemove.isEmpty()) {
 			return;
 		}
+		List<Mono<Void>> asyncDeletions = new ArrayList<>(toRemove.size());
 		for (BootDashElement element : toRemove) {
-			if (element instanceof Deletable) {
+			if (element instanceof AsyncDeletable) {
+				asyncDeletions.add(((AsyncDeletable)element).deleteAsync());
+			}
+			else if (element instanceof Deletable) {
 				try {
 					((Deletable) element).delete(ui);
 				} catch (Exception e) {
 					Log.log(e);
 				}
 			}
+		}
+		if (!asyncDeletions.isEmpty()) {
+			int numElements = asyncDeletions.size();
+			runAsynch("Deleting ["+numElements+"] services", "", (IProgressMonitor mon) -> {
+				//Careful... deleting more elements takes more time...
+				Duration timeout = Duration.ofSeconds(20*asyncDeletions.size());
+				mon.beginTask("Deleting ["+numElements+"] services", numElements);
+				AtomicInteger leftToDelete = new AtomicInteger(numElements);
+				try {
+					ReactorUtils.safeMerge(
+						Flux.fromIterable(asyncDeletions)
+						.map((Mono<Void> deleteOp) -> {
+							return deleteOp.doOnTerminate((a,b) -> {
+								mon.worked(1);
+								mon.setTaskName("Deleting ["+leftToDelete.decrementAndGet()+"] services");
+							});
+						}),
+						5 //limit concurrency to avoid flooding/choking request broker
+					)
+					.get(timeout);
+				} finally {
+					mon.done();
+				}
+			}, ui);
 		}
 	}
 
@@ -780,8 +815,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	@Override
 	public boolean canDelete(BootDashElement element) {
-		//Can delete apps, but not services (at leats not yet)
-		return element instanceof Deletable;
+		return element instanceof Deletable || element instanceof AsyncDeletable;
 	}
 
 	@Override

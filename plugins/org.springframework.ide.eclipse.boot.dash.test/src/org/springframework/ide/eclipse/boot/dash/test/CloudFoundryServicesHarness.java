@@ -60,7 +60,7 @@ public class CloudFoundryServicesHarness implements Disposable {
 					System.out.println("delete service: "+serviceName);
 					try {
 						RetryUtil.retryTimes("delete sercice "+serviceName, 3, () -> {
-							this.client.deleteServiceMono(serviceName).get();
+							this.client.deleteServiceAsync(serviceName).get();
 						});
 					} catch (Exception e) {
 						System.out.println("Failed to delete ["+serviceName+"]: "+ExceptionUtil.getMessage(e));
