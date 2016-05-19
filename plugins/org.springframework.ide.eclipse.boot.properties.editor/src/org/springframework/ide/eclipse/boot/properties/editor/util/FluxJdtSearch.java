@@ -156,6 +156,9 @@ public class FluxJdtSearch {
 
 	public Flux<SearchMatch> search() {
 		validate();
+		if (scope==null) {
+			return Flux.empty();
+		}
 		FluxSearchRequestor requestor = new FluxSearchRequestor();
 		Job job = new Job("Search for "+pattern) {
 			@Override
@@ -183,7 +186,9 @@ public class FluxJdtSearch {
 
 	private void validate() {
 		Assert.isNotNull(engine, "engine");
-		Assert.isNotNull(scope, "scope");
+		//We allow scope to be set to null. This means there's no valid scope (or empty scope)
+		// and the search should just return no results.
+		//		Assert.isNotNull(scope, "scope");
 		Assert.isNotNull(pattern, "pattern");
 		Assert.isNotNull(participants, "participants");
 		Assert.isLegal(bufferSize > 0);

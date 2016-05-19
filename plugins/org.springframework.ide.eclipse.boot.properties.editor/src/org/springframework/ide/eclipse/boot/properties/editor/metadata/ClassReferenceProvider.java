@@ -61,7 +61,7 @@ public class ClassReferenceProvider extends JdtSearchingValueProvider {
 	}
 
 	public IJavaSearchScope getScope(IJavaProject project) throws JavaModelException {
-		try {
+		if (target!=null) {
 			IType type = getTargetType(project);
 			if (type!=null) {
 				boolean onlySubtypes = true;
@@ -69,8 +69,9 @@ public class ClassReferenceProvider extends JdtSearchingValueProvider {
 				WorkingCopyOwner owner = null;
 				return SearchEngine.createStrictHierarchyScope(project, type, onlySubtypes, includeFocusType, owner);
 			}
-		} catch (Exception e) {
-			Log.log(e);
+			return null; //target type not on classpath so... can't search (and arguably if type isn't on CP
+						// neither should any of its subtypes... so searching is a bit pointless).
+						// scope = null will cause FluxJdtSearch to quickly return zero results.
 		}
 		return FluxJdtSearch.searchScope(project);
 	}

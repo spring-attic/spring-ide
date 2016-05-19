@@ -92,6 +92,7 @@ public class TypeUtil {
 	private static final Object OBJECT_TYPE_NAME = Object.class.getName();
 	private static final String STRING_TYPE_NAME = String.class.getName();
 	private static final String INET_ADDRESS_TYPE_NAME = InetAddress.class.getName();
+	private static final String CLASS_TYPE_NAME = Class.class.getName();
 
 	public enum BeanPropertyNameMode {
 		HYPHENATED(true,false), //bean property name in hyphenated form. E.g 'some-property-name'
@@ -163,6 +164,7 @@ public class TypeUtil {
 			"java.lang.Character",
 			"java.lang.Byte",
 			INET_ADDRESS_TYPE_NAME,
+			CLASS_TYPE_NAME,
 			"java.lang.String[]"
 	));
 
@@ -170,6 +172,7 @@ public class TypeUtil {
 	static {
 		ATOMIC_TYPES.add(INET_ADDRESS_TYPE_NAME);
 		ATOMIC_TYPES.add(STRING_TYPE_NAME);
+		ATOMIC_TYPES.add(CLASS_TYPE_NAME);
 	}
 
 	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();
@@ -318,6 +321,10 @@ public class TypeUtil {
 	}
 
 	public void niceTypeName(Type type, StringBuilder buf) {
+		if (type==null) {
+			buf.append("null");
+			return;
+		}
 		String typeStr = type.getErasure();
 		String primTypeName = PRIMITIVE_TYPE_NAMES.get(typeStr);
 		if (primTypeName!=null) {

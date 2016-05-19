@@ -2896,6 +2896,62 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testClassReferenceCompletion() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13_with_mongo"));
+
+		assertCompletion(
+				"spring:\n" +
+				"  data:\n" +
+				"    mongodb:\n" +
+				"      field-na<*>"
+				, // =>
+				"spring:\n" +
+				"  data:\n" +
+				"    mongodb:\n" +
+				"      field-naming-strategy: <*>"
+		);
+
+		assertCompletionsDisplayString(
+			"spring:\n" +
+			"  data:\n" +
+			"    mongodb:\n" +
+			"      field-naming-strategy: <*>"
+			, // =>
+			"org.springframework.data.mapping.model.CamelCaseAbbreviatingFieldNamingStrategy",
+			"org.springframework.data.mapping.model.CamelCaseSplittingFieldNamingStrategy",
+			"org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy",
+			"org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy"
+		);
+
+		assertCompletionWithLabel(
+			"spring:\n" +
+			"  data:\n" +
+			"    mongodb:\n" +
+			"      field-naming-strategy: <*>"
+			, //=====
+			"org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy"
+			, //=>
+			"spring:\n" +
+			"  data:\n" +
+			"    mongodb:\n" +
+			"      field-naming-strategy: org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy<*>"
+		);
+
+		//Test what happens when 'target' type isn't on the classpath:
+		useProject(createPredefinedMavenProject("boot13"));
+		assertCompletionsDisplayString(
+			"spring:\n" +
+			"  data:\n" +
+			"    mongodb:\n" +
+			"      field-naming-strategy: <*>"
+			// =>
+			/*NONE*/
+		);
+
+	}
+
 	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {
 		YamlEditor editor;
 		useProject(createPredefinedMavenProject("demo-sts-4335"));
