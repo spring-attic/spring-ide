@@ -185,8 +185,9 @@ public class FluxJdtSearch {
 		Assert.isNotNull(engine, "engine");
 		Assert.isNotNull(scope, "scope");
 		Assert.isNotNull(pattern, "pattern");
-		Assert.isNotNull(participants, "pattern");
+		Assert.isNotNull(participants, "participants");
 		Assert.isLegal(bufferSize > 0);
 	}
+
 
 }
