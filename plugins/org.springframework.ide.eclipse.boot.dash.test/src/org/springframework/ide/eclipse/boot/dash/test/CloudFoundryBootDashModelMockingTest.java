@@ -1520,7 +1520,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			try (InputStream expectedBits = new BufferedInputStream(new FileInputStream(referenceJar))) {
 				try {
 					assertEqualStreams(expectedBits, actualBits);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					System.out.println("Failed: "+ExceptionUtil.getMessage(e));
 					saveArtefacts(referenceJar, app);
 					throw e;
