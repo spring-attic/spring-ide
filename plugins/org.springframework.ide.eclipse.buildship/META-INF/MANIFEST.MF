@@ -15,5 +15,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.boot.wizard,
  org.eclipse.jface,
  org.apache.commons.io,
- org.eclipse.buildship.core;bundle-version="[0.0.0,1.2.0)";resolution:=optional,
+ org.eclipse.buildship.core;bundle-version="[0.0.0,2.0.0)";resolution:=optional,
  com.gradleware.tooling.model;resolution:=optional
