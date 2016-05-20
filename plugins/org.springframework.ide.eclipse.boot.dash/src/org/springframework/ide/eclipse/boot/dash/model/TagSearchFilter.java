@@ -12,18 +12,19 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.springframework.ide.eclipse.core.PatternUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
  * The filter for searching for tags.
  *
  * @author Alex Boyko
- *
+ * @author Kris De Volder
  */
 public class  TagSearchFilter<T extends Taggable> implements Filter<T> {
 
@@ -61,34 +62,22 @@ public class  TagSearchFilter<T extends Taggable> implements Filter<T> {
 			return true;
 		}
 
-		List<String> searchTags_caseIndependent = new ArrayList<>(searchTags.length);
+		List<Predicate<String>> patterns = new ArrayList<>(searchTags.length);
 		for (String searchTag : searchTags) {
-			searchTags_caseIndependent.add(searchTag.toLowerCase());
+			patterns.add(toPattern(searchTag));
 		}
-
-		String searchTerm_caseIndependent = searchTerm.toLowerCase();
+		patterns.add(toPattern("*"+searchTerm+"*"));
 
 		Set<String> elementTags = getTags(element);
-		HashSet<String> tags_caseIndependent = new HashSet<>();
-		for (String tag : elementTags) {
-			tags_caseIndependent.add(tag.toLowerCase());
-		}
 
-		int initSize = tags_caseIndependent.size();
-		tags_caseIndependent.removeAll(searchTags_caseIndependent);
-		// Check if all search tags are present in the element tags set
-		if (tags_caseIndependent.size() == initSize - searchTags_caseIndependent.size()) {
-			if (searchTerm_caseIndependent.isEmpty()) {
-				return true;
-			} else {
-				for (String elementTag : tags_caseIndependent) {
-					if (elementTag.contains(searchTerm_caseIndependent)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+		return patterns.stream().allMatch(
+				(pat) -> elementTags.stream().anyMatch(pat)
+		);
+	}
+
+	private Predicate<String> toPattern(String wildcarded) {
+		Pattern pat = PatternUtils.createPattern(wildcarded, false, false);
+		return (s) -> pat.matcher(s).matches();
 	}
 
 	@Override

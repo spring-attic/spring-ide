@@ -60,6 +60,8 @@ public class BootDashElementSearchFilter extends TagSearchFilter<BootDashElement
 	@Override
 	protected Set<String> getTags(BootDashElement element) {
 		Set<String> tags = super.getTags(element);
+		// Add implicit tag for element name
+		tags.add(element.getName());
 		// Add implicit tags for Working Sets
 		if (element.getProject() != null) {
 			Set<String> workingSetNames = getMapping().get(element.getProject());

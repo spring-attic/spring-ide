@@ -37,7 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
  */
 public class BootDashElementTagsTests extends Mocks {
 
-	private static TestElement createElement(String name, String[] tags) {
+	private static TestElement createElement(String name, String... tags) {
 //		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
 //		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
 //		IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
@@ -190,7 +190,7 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
-	
+
 	@Test
 	public void multipleSearchTagsWithWhiteSpace_FilterTest() throws Exception {
 		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
@@ -232,4 +232,46 @@ public class BootDashElementTagsTests extends Mocks {
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {"xd", "source"})));
 		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("t1", new String[] {})));
 	}
+
+	@Test
+	public void filterMatchesElementName() throws Exception {
+		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
+		filterBoxModel.getText().setValue("foo");
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("demo-foo", new String[] {})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("demo-foo-bar", new String[] {})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("foo", new String[] {})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("demo", new String[] {})));
+	}
+
+	@Test
+	public void starWildcardInSearchTerm() throws Exception {
+		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
+		filterBoxModel.getText().setValue("foo*bar");
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("something-foo-more-bar", new String[] {})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("demo-bar", new String[] {})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("foobar", new String[] {})));
+	}
+
+	@Test
+	public void questionmarkWildcardInSearchTerm() throws Exception {
+		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
+		filterBoxModel.getText().setValue("foo?bar");
+
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("something-foo-bar", new String[] {})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("something-foo-more-bar", new String[] {})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("foobar", new String[] {})));
+	}
+
+	@Test
+	public void wildcardInTag() throws Exception {
+		BootDashElementsFilterBoxModel filterBoxModel = new BootDashElementsFilterBoxModel();
+		filterBoxModel.getText().setValue("foo*bar,");
+
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("something-foo-bar", new String[] {})));
+		assertFalse(filterBoxModel.getFilter().getValue().accept(createElement("something-foo-more-bar", new String[] {})));
+		assertTrue(filterBoxModel.getFilter().getValue().accept(createElement("foobar", new String[] {})));
+	}
+
 }
