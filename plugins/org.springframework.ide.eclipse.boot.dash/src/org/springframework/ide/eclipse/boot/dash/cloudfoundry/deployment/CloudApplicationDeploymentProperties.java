@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,119 +28,111 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationUR
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
-	//TODO: It looks like use of LiveVariable in here is pointless, and the BasicValidator that
-	//  appears to be using it is most likely broken (not recomputing). It is not really being
-	//  used anymore since the embedded manifest editor is 'validating' the editor contents instead.
-	//Consider removing use live variables and LiveSet in this class alltogether, as well as the
-	// validator related code.
+	private List<String> boundServices;
+	private Map<String, String> environmentVariables;
+	private String buildpack;
 
-	protected final LiveSet<String> boundServices = new LiveSet<String>(new HashSet<String>());
-	protected final LiveVariable<Map<String, String>> environmentVariables = new LiveVariable<Map<String, String>>(
-			new HashMap<String, String>());
-	protected final LiveVariable<String> buildpack = new LiveVariable<String>("");
-
-	protected final LiveVariable<Integer> instances = new LiveVariable<Integer>(DeploymentProperties.DEFAULT_INSTANCES);
-
-	private LiveVariable<Boolean> writeManifest = new LiveVariable<>(false);
+	private int instances;
 
 	/*
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
-	protected final LiveVariable<LinkedHashSet<String>> urls = new LiveVariable<LinkedHashSet<String>>(new LinkedHashSet<String>());
+	private LinkedHashSet<String> urls;
 
-	protected final LiveVariable<String> appName = new LiveVariable<>();
+	private String appName;
 
-	protected final LiveVariable<IProject> project = new LiveVariable<>();
+	private IProject project;
 
-	protected final LiveVariable<Integer> memory = new LiveVariable<Integer>(DeploymentProperties.DEFAULT_MEMORY);
+	private int memory;
 
-	protected final LiveVariable<Integer> diskQuota = new LiveVariable<Integer>(DeploymentProperties.DEFAULT_MEMORY);
+	private int diskQuota;
 
-	protected final LiveVariable<IFile> manifestFile = new LiveVariable<IFile>();
+	private IFile manifestFile;
 
-	protected final LiveVariable<Integer> timeout = new LiveVariable<>();
+	private Integer timeout;
 
-	protected final LiveVariable<String> command = new LiveVariable<>();
+	private String command;
 
-	protected final LiveVariable<String> stack = new LiveVariable<>();
+	private String stack;
 
 	/**
 	 * Path to a zipFile containing the contents of the stuff to deploy.
 	 */
 	private File archive;
 
-	protected Validator validator;
-
 	public CloudApplicationDeploymentProperties() {
-
+		boundServices = new ArrayList<>();
+		environmentVariables = new HashMap<>();
+		buildpack = "";
+		instances = DeploymentProperties.DEFAULT_INSTANCES;
+		urls = new LinkedHashSet<>();
+		appName = null;
+		project = null;
+		memory = DeploymentProperties.DEFAULT_MEMORY;
+		diskQuota = DeploymentProperties.DEFAULT_MEMORY;
+		manifestFile = null;
+		timeout = null;
+		command = null;
+		stack = null;
 	}
 
-	/*
-	 * Additional properties
-	 */
-
-	private boolean shouldRestart = true;
-
 	public void setProject(IProject project) {
-		this.project.setValue(project);
+		this.project = project;
 	}
 
 	public IProject getProject() {
-		return this.project.getValue();
+		return project;
 	}
 
 	public void setMemory(int memory) {
-		this.memory.setValue(memory);
+		this.memory = memory;
 	}
 
 	public int getMemory() {
-		return memory.getValue();
+		return memory;
 	}
 
 	public void setDiskQuota(int diskQuota) {
-		this.diskQuota.setValue(diskQuota);
+		this.diskQuota = diskQuota;
 	}
 
 	public int getDiskQuota() {
-		return diskQuota.getValue();
+		return diskQuota;
 	}
 
 	public void setTimeout(Integer timeout) {
-		this.timeout.setValue(timeout);
+		this.timeout = timeout;
 	}
 
 	public Integer getTimeout() {
-		return timeout.getValue();
+		return timeout;
 	}
 
 	public void setCommand(String command) {
-		this.command.setValue(command);
+		this.command = command;
 	}
 
 	public String getCommand() {
-		return command.getValue();
+		return command;
 	}
 
 	public void setStack(String stack) {
-		this.stack.setValue(stack);
+		this.stack = stack;
 	}
 
 	public String getStack() {
-		return stack.getValue();
+		return stack;
 	}
 
 	public void setManifestFile(IFile file) {
-		this.manifestFile.setValue(file);
+		this.manifestFile = file;
 	}
 
 	public IFile getManifestFile() {
-		return this.manifestFile.getValue();
+		return this.manifestFile;
 	}
 
 	/**
@@ -150,72 +141,58 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 * @return never null
 	 */
 	public Set<String> getUris() {
-		return urls.getValue();
+		return urls;
 	}
 
 	public void setUris(Collection<String> urls) {
-		this.urls.setValue(urls == null ? new LinkedHashSet<String>() : new LinkedHashSet<>(urls));
+		this.urls = urls == null ? new LinkedHashSet<>() : new LinkedHashSet<>(urls);
 	}
 
 	public void setAppName(String appName) {
-		this.appName.setValue(appName);
+		this.appName = appName;
 	}
 
 	public String getAppName() {
-		return this.appName.getValue();
+		return this.appName;
 	}
 
 	public void setBuildpack(String buildpack) {
-		this.buildpack.setValue(buildpack);
+		this.buildpack = buildpack;
 	}
 
 	public void setServices(List<String> services) {
-		if (services == null) {
-			services = new ArrayList<String>();
-		}
-		this.boundServices.addAll(services);
+		/*
+		 * List should be read/write accessible hence create new instance rather
+		 * than use emptyList from Collections if null is passed in
+		 */
+		boundServices = services == null ? new ArrayList<>() : services;
 	}
 
 	public void setInstances(int instances) {
-		this.instances.setValue(instances);
+		this.instances = instances;
 	}
 
 	public void setEnvironmentVariables(Map<String, String> environmentVariables) {
-		if (environmentVariables == null) {
-			environmentVariables = new HashMap<String, String>();
-		}
-		this.environmentVariables.setValue(environmentVariables);
-	}
-
-	public void setShouldRestart(boolean shouldRestart) {
-		this.shouldRestart = shouldRestart;
-	}
-
-	public boolean shouldRestart() {
-		return this.shouldRestart;
+		/*
+		 * Map should be read/write accessible hence create new instance rather
+		 * than use emptyMap from Collections if null is passed in
+		 */
+		this.environmentVariables = environmentVariables == null ? new HashMap<>() : environmentVariables;
 	}
 
 	public String getBuildpack() {
-		return buildpack.getValue() == null || buildpack.getValue().isEmpty() ? null : buildpack.getValue();
+		return buildpack == null || buildpack.isEmpty() ? null : buildpack;
 	}
 
 	public int getInstances() {
-		return instances.getValue();
-	}
-
-	public boolean writeManifest() {
-		return writeManifest.getValue();
-	}
-
-	public void setWriteManifest(boolean writeManifest) {
-		this.writeManifest.setValue(writeManifest);
+		return instances;
 	}
 
 	/**
 	 * @return never null
 	 */
 	public Map<String, String> getEnvironmentVariables() {
-		return environmentVariables.getValue();
+		return environmentVariables;
 	}
 
 	/**
@@ -223,38 +200,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 * @return never null
 	 */
 	public List<String> getServices() {
-		return boundServices.getValues();
-	}
-
-	/**
-	 * Merges properties of this source into a target properties. Properties
-	 * like application name and project in the user defined version replace
-	 * those in the target one. However, URLs and other "collections" are merged
-	 * into the target collections, rather than replace them.
-	 *
-	 * @param toMerge
-	 *            target properties that will be updated with properties from
-	 *            this source.
-	 * @return merged properties or null if no properties to merge
-	 */
-	public CloudApplicationDeploymentProperties mergeInto(CloudApplicationDeploymentProperties target) {
-		if (target == null) {
-			return null;
-		}
-
-		target.setAppName(this.getAppName());
-		target.setProject(this.getProject());
-
-		// Instead of replacing URLs, merge them
-		Set<String> targetUrls = target.getUris();
-		for (String url : this.getUris()) {
-			if (!targetUrls.contains(url)) {
-				targetUrls.add(url);
-			}
-		}
-		target.setUris(targetUrls);
-		return target;
-
+		return boundServices;
 	}
 
 	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> cloudData, CFApplication app) {
