@@ -24,9 +24,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.test.ApplicationYamlEditorTestHarness.YamlEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 
 import com.google.common.collect.ImmutableList;
 
@@ -907,6 +909,24 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		deprecate("error.path", null, null);
 		assertHoverText(editor, "path", "<b>Deprecated!</b>");
+	}
+
+	public void testDeprecatedPropertyQuickfix() throws Exception {
+		data("error.path", "java.lang.String", null, "Path of the error controller.");
+		deprecate("error.path", "server.error.path", null);
+
+		MockPropertiesEditor editor = newEditor(
+				"# a comment\n"+
+				"error.path=foo\n"
+		);
+
+		ReconcileProblem problem = assertProblem(editor, "error.path");
+		ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'server.error.path'");
+		editor.apply(fix);
+		editor.assertText(
+				"# a comment\n"+
+				"server.error.path<*>=foo\n"
+		);
 	}
 
 	public void testDeprecatedBeanPropertyReconcile() throws Exception {

@@ -15,15 +15,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 
 /**
  * Basic 'simulated' editor. Contains text and a cursor position / selection.

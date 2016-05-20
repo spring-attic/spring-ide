@@ -23,13 +23,13 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -38,6 +38,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.m2e.jdt.IClasspathManager;
 import org.eclipse.m2e.jdt.MavenJdtPlugin;
+import org.mockito.Mockito;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
@@ -50,14 +51,18 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyI
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
+import org.springframework.ide.eclipse.editor.support.reconcile.FixableProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import junit.framework.TestCase;
@@ -66,6 +71,48 @@ import junit.framework.TestCase;
  * @author Kris De Volder
  */
 public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
+
+	protected final UserInteractions ui = Mockito.mock(UserInteractions.class);
+	protected final MockPrefsStore projectPrefs = new MockPrefsStore();
+	protected final MockPrefsStore workspacePrefs = new MockPrefsStore();
+
+	protected QuickfixContext getQuickfixContext(MockEditor editor) {
+		return new QuickfixContext() {
+
+			@Override
+			public IPreferenceStore getWorkspacePreferences() {
+				return workspacePrefs;
+			}
+
+			@Override
+			public UserInteractions getUI() {
+				return ui;
+			}
+
+			@Override
+			public IPreferenceStore getProjectPreferences() {
+				return projectPrefs;
+			}
+
+			@Override
+			public IProject getProject() {
+				if (javaProject!=null) {
+					return javaProject.getProject();
+				}
+				return null;
+			}
+
+			@Override
+			public IJavaProject getJavaProject() {
+				return javaProject;
+			}
+
+			@Override
+			public IDocument getDocument() {
+				return editor.getDocument();
+			}
+		};
+	}
 
 	public class ItemConfigurer {
 
@@ -638,6 +685,34 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	protected abstract IReconcileEngine createReconcileEngine();
+
+	/**
+	 * Get a problem that covers the given text in the editor. Throws exception
+	 * if no matching problem is found.
+	 */
+	public ReconcileProblem assertProblem(MockEditor editor, String coveredText) throws Exception {
+		List<ReconcileProblem> problems = reconcile(editor);
+		for (ReconcileProblem p : problems) {
+			String c = editor.getText(p.getOffset(), p.getLength());
+			if (c.equals(coveredText)) {
+				return p;
+			}
+		}
+		fail("No problem found covering the text '"+coveredText+"' in: \n"
+				+ problemSumary(editor, problems)
+		);
+		return null; //unreachable but compiler doesn't know
+	}
+
+	public ICompletionProposal assertFirstQuickfix(MockEditor editor, ReconcileProblem problem, String expectLabel) {
+		assertTrue("The problem is not Fixable", problem instanceof FixableProblem);
+		FixableProblem fixable = (FixableProblem) problem;
+		List<ICompletionProposal> fixes = fixable.getQuickfixes(getQuickfixContext(editor));
+		assertFalse("There are no quickfixes", fixes.isEmpty());
+		ICompletionProposal fix = fixes.get(0);
+		assertEquals(expectLabel, fix.getDisplayString());
+		return fix;
+	}
 
 	/**
 	 * Check that a 'expectedProblems' are found by the reconciler. Expected problems are

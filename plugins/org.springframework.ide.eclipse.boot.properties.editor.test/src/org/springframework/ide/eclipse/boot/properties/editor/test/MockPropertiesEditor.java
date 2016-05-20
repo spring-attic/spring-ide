@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 
@@ -36,6 +38,10 @@ public class MockPropertiesEditor extends MockEditor {
 	public MockPropertiesEditor(String text, HoverInfoProvider hoverProvider) {
 		super(text, hoverProvider);
 		PropertiesFileDocumentSetupParticipant.setupDocument(document);
+	}
+
+	public void assertText(String expected) {
+		assertEquals(expected, getText());
 	}
 
 
