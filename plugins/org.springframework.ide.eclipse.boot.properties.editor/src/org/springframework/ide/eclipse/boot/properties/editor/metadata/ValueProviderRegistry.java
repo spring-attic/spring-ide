@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IJavaProject;
@@ -52,15 +53,7 @@ public class ValueProviderRegistry {
 		def("class-reference", ClassReferenceProvider.FACTORY);
 	}
 
-	private Map<String, ValueProviderFactory> registry = new HashMap<>();
-
-	/**
-	 * Value provider strategies may be parameterized. Thus instances
-	 * are created via a factory that accepts the parameters.
-	 */
-	public interface ValueProviderFactory {
-		ValueProviderStrategy create(Map<String, Object> params);
-	}
+	private Map<String, Function<Map<String, Object>, ValueProviderStrategy>> registry = new HashMap<>();
 
 	public interface ValueProviderStrategy {
 		Flux<ValueHint> getValues(IJavaProject javaProject, String query);
@@ -76,7 +69,7 @@ public class ValueProviderRegistry {
 	/**
 	 * Defines a value provider by binding its id to a strategy.
 	 */
-	public void def(String id, ValueProviderFactory algo) {
+	public void def(String id, Function<Map<String, Object>, ValueProviderStrategy> algo) {
 		Assert.isLegal(!registry.containsKey(id));
 		registry.put(id, algo);
 	}
@@ -94,10 +87,10 @@ public class ValueProviderRegistry {
 	public ValueProviderStrategy resolve(List<ValueProvider> providerDescriptors) {
 		if (CollectionUtil.hasElements(providerDescriptors)) {
 			for (ValueProvider descriptor : providerDescriptors) {
-				ValueProviderFactory factory = registry.get(descriptor.getName());
+				Function<Map<String, Object>, ValueProviderStrategy> factory = registry.get(descriptor.getName());
 				if (factory!=null) {
 					Map<String, Object> params = descriptor.getParameters();
-					return factory.create(params);
+					return factory.apply(params);
 				}
 			}
 		}

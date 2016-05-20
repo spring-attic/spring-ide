@@ -10,17 +10,26 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
+import java.time.Duration;
+import java.util.Map;
+import java.util.function.Function;
+
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderFactory;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.FluxJdtSearch;
+import org.springframework.ide.eclipse.boot.properties.editor.util.LimitedTimeCache;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.StringUtil;
+
+import reactor.core.publisher.Mono;
 
 /**
  * Provides the algorithm for 'class-reference' valueProvider.
@@ -31,33 +40,116 @@ import org.springframework.ide.eclipse.boot.util.StringUtil;
  */
 public class ClassReferenceProvider extends JdtSearchingValueProvider {
 
-	private static final ClassReferenceProvider UNTARGETTED_INSTANCE = new ClassReferenceProvider(null);
+	/**
+	 * Default value for the 'concrete' parameter.
+	 */
+	private static final boolean DEFAULT_CONCRETE = true;
 
-	public static final ValueProviderFactory FACTORY = (params) -> {
+	private static final ClassReferenceProvider UNTARGETTED_INSTANCE = new ClassReferenceProvider(null, DEFAULT_CONCRETE);
+
+	public static final Function<Map<String, Object>, ValueProviderStrategy> FACTORY = LimitedTimeCache.applyOn(
+		Duration.ofMinutes(1),
+		(params) -> {
+			String target = getTarget(params);
+			Boolean concrete = getConcrete(params);
+			if (target!=null || concrete!=null) {
+				if (concrete==null) {
+					concrete = DEFAULT_CONCRETE;
+				}
+				return new ClassReferenceProvider(target, concrete);
+			}
+			return UNTARGETTED_INSTANCE;
+		}
+	);
+
+	private static String getTarget(Map<String, Object> params) {
 		if (params!=null) {
 			Object obj = params.get("target");
 			if (obj instanceof String) {
 				String target = (String) obj;
 				if (StringUtil.hasText(target)) {
-					return new ClassReferenceProvider(target);
+					return target;
 				}
 			}
 		}
-		return UNTARGETTED_INSTANCE;
-	};
+		return null;
+	}
+
+	/**
+	 * Filter that drops all search matches that are not concrete types.
+	 */
+	private static Mono<String> filterConcreteTypes(SearchMatch match) {
+		Object element = match.getElement();
+		if (element instanceof IType) {
+			IType type = (IType) element;
+			if (isAbstract(type)) {
+				return Mono.empty();
+			}
+			return Mono.justOrEmpty(type.getFullyQualifiedName());
+		}
+		return Mono.empty();
+	}
+
+	private static boolean isAbstract(IType type) {
+		try {
+			return type.isInterface() || Flags.isAbstract(type.getFlags());
+		} catch (Exception e) {
+			Log.log(e);
+			return false;
+		}
+	}
+
+	@Override
+	protected Function<SearchMatch, Mono<String>> getPostProcessor() {
+		if (concrete) {
+			return ClassReferenceProvider::filterConcreteTypes;
+		}
+		return super.getPostProcessor();
+	}
+
+	private static Boolean getConcrete(Map<String, Object> params) {
+		try {
+			if (params!=null) {
+				Object obj = params.get("concrete");
+				if (obj instanceof String) {
+					String concrete = (String) obj;
+					return Boolean.valueOf(concrete);
+				} else if (obj instanceof Boolean) {
+					return (Boolean) obj;
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
+	}
 
 	/**
 	 * Optional, fully qualified name of the 'target' type. Suggested hints should be a subtype of this type.
 	 */
 	private String target;
 
-	private ClassReferenceProvider(String target) {
+	/**
+	 * Optional parameter, whether only concrete types should be suggested. Default value is true.
+	 */
+	private boolean concrete;
+
+	private ClassReferenceProvider(String target, boolean concrete) {
 		this.target = target;
+		this.concrete = concrete;
 	}
+
 
 	@Override
 	protected SearchPattern toPattern(String query) {
-		return toTypePattern(toWildCardPattern(query));
+		String wildcardedQuery = toWildCardPattern(query);
+// Beware: the commented code may seem like a good idea, but its not, because it drops 'enums' from the search results.
+// So... for example org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy will not be found as a
+// a concrete mongodb FieldNamingStrategy implementation!
+//		if (concrete) {
+//			return toClassPattern(wildcardedQuery);
+//		}
+		return toTypePattern(wildcardedQuery);
 	}
 
 	public IJavaSearchScope getScope(IJavaProject project) throws JavaModelException {
@@ -65,7 +157,7 @@ public class ClassReferenceProvider extends JdtSearchingValueProvider {
 			IType type = getTargetType(project);
 			if (type!=null) {
 				boolean onlySubtypes = true;
-				boolean includeFocusType = false;
+				boolean includeFocusType = true;
 				WorkingCopyOwner owner = null;
 				return SearchEngine.createStrictHierarchyScope(project, type, onlySubtypes, includeFocusType, owner);
 			}

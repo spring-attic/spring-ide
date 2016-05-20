@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -132,6 +133,24 @@ public class LimitedTimeCache<K,V> implements Cache<K, V> {
 		}
 		debug("<<< clearExpired ["+cache.size()+"]");
 		return oldest;
+	}
+
+	/**
+	 * Applies a {@link LimitedTimeCache} cache around a given function.
+	 *
+	 * @param duration time after which entries in the cache should expire.
+	 * @param func Function to wrap the cache around
+	 * @return Equivalent function but with caching.
+	 */
+	public static <K,V> Function<K,V> applyOn(Duration duration, Function<K,V> func) {
+		LimitedTimeCache<K, V> cache = new LimitedTimeCache<>(duration);
+		return (k) -> {
+			V v = cache.get(k);
+			if (v==null) {
+				cache.put(k, v=func.apply(k));
+			}
+			return v;
+		};
 	}
 
 }

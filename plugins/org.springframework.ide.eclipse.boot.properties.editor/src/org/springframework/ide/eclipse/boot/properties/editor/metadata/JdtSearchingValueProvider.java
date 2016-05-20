@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
+import java.util.function.Function;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -52,6 +54,13 @@ public abstract class JdtSearchingValueProvider extends CachingValueProvider {
 		return SearchPattern.createPattern(wildCardedQuery, searchFor, limitTo, matchRule);
 	}
 
+	public static SearchPattern toClassPattern(String wildCardedQuery) {
+		int searchFor = IJavaSearchConstants.CLASS;
+		int limitTo = IJavaSearchConstants.DECLARATIONS;
+		int matchRule = SearchPattern.R_PATTERN_MATCH;
+		return SearchPattern.createPattern(wildCardedQuery, searchFor, limitTo, matchRule);
+	}
+
 	public static SearchPattern toTypePattern(String wildCardedQuery) {
 		int searchFor = IJavaSearchConstants.TYPE;
 		int limitTo = IJavaSearchConstants.DECLARATIONS;
@@ -89,7 +98,7 @@ public abstract class JdtSearchingValueProvider extends CachingValueProvider {
 			.scope(getScope(javaProject))
 			.pattern(toPattern(query))
 			.search()
-			.flatMap((r) -> getFQName(r))
+			.flatMap(getPostProcessor())
 			.filter((fqName) -> 0!=FuzzyMatcher.matchScore(query, fqName))
 			.distinct()
 			.map((fqName) -> {
@@ -99,5 +108,9 @@ public abstract class JdtSearchingValueProvider extends CachingValueProvider {
 		} catch (Exception e) {
 			return Flux.error(e);
 		}
+	}
+
+	protected Function<SearchMatch, Mono<String>> getPostProcessor() {
+		return JdtSearchingValueProvider::getFQName;
 	}
 }

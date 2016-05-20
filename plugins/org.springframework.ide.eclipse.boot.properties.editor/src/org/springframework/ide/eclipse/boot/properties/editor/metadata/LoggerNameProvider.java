@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
+import java.util.Map;
+import java.util.function.Function;
+
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderFactory;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 
 /**
@@ -24,7 +26,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProv
 public class LoggerNameProvider extends JdtSearchingValueProvider {
 
 	private  static final ValueProviderStrategy INSTANCE = new LoggerNameProvider();
-	public static final ValueProviderFactory FACTORY = (params) -> INSTANCE;
+	public static final Function<Map<String, Object>, ValueProviderStrategy> FACTORY = (params) -> INSTANCE;
 
 	@Override
 	protected SearchPattern toPattern(String query) {
