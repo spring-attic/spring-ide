@@ -10,6 +10,6 @@ applications:
   domain: springsource.org
   services:
   - s3
+  - s1
   - s4
   - s5
-  - s1
