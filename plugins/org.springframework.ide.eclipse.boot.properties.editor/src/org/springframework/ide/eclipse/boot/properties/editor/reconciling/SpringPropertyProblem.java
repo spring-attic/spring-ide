@@ -22,10 +22,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.ReplaceDeprecatedPropertyQuickfix;
 import org.springframework.ide.eclipse.editor.support.reconcile.FixableProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
@@ -50,6 +52,8 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	//Optional properties (only some problems or problemtypes may set them, so they might be null)
 	private String propertyName;
+
+	private PropertyInfo metadata;
 
 	/**
 	 * Create a SpringProperty file annotation with a given severity.
@@ -118,6 +122,40 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	public List<ICompletionProposal> getQuickfixes(QuickfixContext context) {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(2);
+
+		addDeprecationFixes(context, proposals);
+		addUnknownPropertyFixes(context, proposals);
+		addIgnoreProblemFixes(context, proposals);
+
+		return Collections.unmodifiableList(proposals);
+	}
+
+	private void addDeprecationFixes(QuickfixContext context, List<ICompletionProposal> proposals) {
+		SpringPropertiesProblemType problemType = getType();
+		if (problemType==SpringPropertiesProblemType.PROP_DEPRECATED) {
+			PropertyInfo metadata = getMetadata();
+			if (metadata!=null) {
+				String replacement = metadata.getDeprecationReplacement();
+				if (replacement!=null) {
+					proposals.add(new ReplaceDeprecatedPropertyQuickfix(context, this));
+				}
+			}
+		}
+	}
+
+	private void addIgnoreProblemFixes(QuickfixContext context, List<ICompletionProposal> proposals) {
+		IPreferenceStore projectPrefs = context.getProjectPreferences();
+		SpringPropertiesProblemType problemType = getType();
+		EditorType editorType = problemType.getEditorType();
+		proposals.add(new IgnoreProblemTypeInProjectQuickfix(context, problemType));
+		if (!ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs, editorType)) {
+			//Workspace wide settings are only effective projectPrefs are still disabled. If project prefs
+			// are already enabled then setting global pref will have no effect!
+			proposals.add(new IgnoreProblemTypeInWorkspaceQuickfix(context.getWorkspacePreferences(), getType()));
+		}
+	}
+
+	private void addUnknownPropertyFixes(QuickfixContext context, List<ICompletionProposal> proposals) {
 		if (FIXABLE_UNKNOWN_PROPERTY_PROBLEM_TYPES.contains(type)) {
 			String missingProperty = getPropertyName();
 			IJavaProject project = context.getJavaProject();
@@ -125,17 +163,6 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 				proposals.add(new CreateAdditionalMetadataQuickfix(project, missingProperty, context.getUI()));
 			}
 		}
-		IPreferenceStore projectPrefs = context.getProjectPreferences();
-		SpringPropertiesProblemType problemType = getType();
-		EditorType editorType = problemType.getEditorType();
-
-		proposals.add(new IgnoreProblemTypeInProjectQuickfix(context, problemType));
-		if (!ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs, editorType)) {
-			//Workspace wide settings are only effective projectPrefs are still disabled. If project prefs
-			// are already enabled then setting global pref will have no effect!
-			proposals.add(new IgnoreProblemTypeInWorkspaceQuickfix(context.getWorkspacePreferences(), getType()));
-		}
-		return Collections.unmodifiableList(proposals);
 	}
 
 	public String getPropertyName() {
@@ -144,5 +171,13 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	public void setPropertyName(String propertyName) {
 		this.propertyName = propertyName;
+	}
+
+	public PropertyInfo getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(PropertyInfo property) {
+		this.metadata = property;
 	}
 }

@@ -47,7 +47,7 @@ public class DefaultQuickfixContext implements QuickfixContext {
 	}
 
 	public IProject getProject() {
-		IDocument doc = sourceViever.getDocument();
+		IDocument doc = getDocument();
 		if (doc!=null) {
 			return DocumentUtil.getProject(doc);
 		}
@@ -84,6 +84,11 @@ public class DefaultQuickfixContext implements QuickfixContext {
 			return new ScopedPreferenceStore(new ProjectScope(project), PLUGIN_ID);
 		}
 		return null;
+	}
+
+	@Override
+	public IDocument getDocument() {
+		return sourceViever.getDocument();
 	}
 
 }

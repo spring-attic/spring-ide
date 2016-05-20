@@ -152,6 +152,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 				trimmedRegion
 		);
 		p.setPropertyName(property.getId());
+		p.setMetadata(property);
 		return p;
 	}
 

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.editor.support.reconcile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 
 /**
@@ -27,4 +28,5 @@ public interface QuickfixContext {
 	IPreferenceStore getProjectPreferences();
 	IJavaProject getJavaProject();
 	UserInteractions getUI();
+	IDocument getDocument();
 }
