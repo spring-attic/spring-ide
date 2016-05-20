@@ -39,11 +39,11 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalProces
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotationHover;
 import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
 

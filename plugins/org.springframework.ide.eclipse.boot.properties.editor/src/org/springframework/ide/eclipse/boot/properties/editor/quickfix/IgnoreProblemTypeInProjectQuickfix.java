@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.preferences.Editor
 import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.*;
 

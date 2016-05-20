@@ -23,7 +23,6 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 public class ReconcileProblemAnnotationHover implements ITextHover, ITextHoverExtension, ITextHoverExtension2 {
 

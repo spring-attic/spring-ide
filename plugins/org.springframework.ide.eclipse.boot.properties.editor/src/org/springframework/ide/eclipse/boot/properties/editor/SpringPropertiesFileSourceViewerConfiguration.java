@@ -49,9 +49,9 @@ import org.springframework.ide.eclipse.editor.support.completions.ProposalProces
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotationHover;
 import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 
 @SuppressWarnings("restriction")

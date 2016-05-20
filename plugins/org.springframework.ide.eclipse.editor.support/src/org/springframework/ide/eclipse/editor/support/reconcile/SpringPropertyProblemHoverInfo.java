@@ -15,7 +15,6 @@ import java.util.List;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 import com.google.common.collect.ImmutableList;
 

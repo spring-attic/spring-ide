@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.preferences.Editor
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 
 import junit.framework.TestCase;
 

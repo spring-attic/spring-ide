@@ -27,10 +27,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.preferences.Proble
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
 import org.springframework.ide.eclipse.editor.support.reconcile.FixableProblem;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 /**
  * @author Kris De Volder

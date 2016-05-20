@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.editor.support.reconcile;
 import java.util.List;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 public interface FixableProblem {
 	List<ICompletionProposal> getQuickfixes(QuickfixContext context);

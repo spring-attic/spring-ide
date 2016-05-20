@@ -21,7 +21,6 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 /**
  * Default implementation of {@link QuickfixContext} that derives context information for

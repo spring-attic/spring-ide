@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.preferences.Proble
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
+import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.QuickfixContext;
 
 import junit.framework.TestCase;
 
