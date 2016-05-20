@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
 import java.time.Duration;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;

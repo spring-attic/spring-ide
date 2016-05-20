@@ -110,6 +110,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
 	private static final boolean DEBUG = true;//(""+Platform.getLocation()).contains("kdvolder");
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
@@ -132,11 +137,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //		};
 //	};
 
-	private static void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
 
 	private CFClientParams params;
 	private SpringCloudFoundryClient client ;

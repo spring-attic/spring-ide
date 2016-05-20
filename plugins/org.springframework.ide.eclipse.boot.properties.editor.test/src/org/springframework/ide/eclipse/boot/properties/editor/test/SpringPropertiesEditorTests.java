@@ -1286,6 +1286,43 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		}
 	}
 
+	public void testClassReferenceCompletion() throws Exception {
+		CachingValueProvider.TIMEOUT = Duration.ofSeconds(20);
+
+		useProject(createPredefinedMavenProject("boot13_with_mongo"));
+
+		assertCompletion(
+				"spring.data.mongodb.field-na<*>"
+				, // =>
+				"spring.data.mongodb.field-naming-strategy=<*>"
+		);
+
+		assertCompletionsDisplayString(
+			"spring.data.mongodb.field-naming-strategy=<*>"
+			, // =>
+			"org.springframework.data.mapping.model.CamelCaseAbbreviatingFieldNamingStrategy",
+			"org.springframework.data.mapping.model.CamelCaseSplittingFieldNamingStrategy",
+			"org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy",
+			"org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy"
+		);
+
+		assertCompletionWithLabel(
+			"spring.data.mongodb.field-naming-strategy=<*>"
+			, //=====
+			"org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy"
+			, //=>
+			"spring.data.mongodb.field-naming-strategy=org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy<*>"
+		);
+
+		//Test what happens when 'target' type isn't on the classpath:
+		useProject(createPredefinedMavenProject("boot13"));
+		assertCompletionsDisplayString(
+			"spring.data.mongodb.field-naming-strategy=<*>"
+			// =>
+			/*NONE*/
+		);
+	}
+
 	public void testCommaListReconcile() throws Exception {
 		MockPropertiesEditor editor;
 		IProject p = createPredefinedMavenProject("demo-enum");
