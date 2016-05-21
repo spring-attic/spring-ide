@@ -380,10 +380,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void stopApplication(String appName) throws Exception {
 		ReactorUtils.get(
 			operations.applications().stop(StopApplicationRequest.builder()
-					.name(appName)
-					.build()
-					)
-			);
+				.name(appName)
+				.build()
+			)
+		);
 	}
 
 	@Override
