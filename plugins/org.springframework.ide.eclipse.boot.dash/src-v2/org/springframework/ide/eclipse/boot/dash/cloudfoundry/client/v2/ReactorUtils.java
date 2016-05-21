@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.tuple.Tuple;
 import reactor.core.tuple.Tuple2;
 
 /**
@@ -146,20 +147,11 @@ public class ReactorUtils {
 	}
 
 	/**
-	 * Infinite stream of timestamps which come as fast as subscriber wants (its up to subscriber to
-	 * to not demand too much.
+	 * Attach a timestamp to each element in a Stream
 	 */
-	public static final Flux<Long> timestamps = Flux.fromIterable(() -> new Iterator<Long>() {
-		@Override
-		public boolean hasNext() {
-			return true;
-		}
-
-		@Override
-		public Long next() {
-			return System.currentTimeMillis();
-		}
-	});
+	public static <T> Flux<Tuple2<T,Long>> timestamp(Flux<T> stream) {
+		return stream.map((e) -> Tuple.of(e, System.currentTimeMillis()));
+	}
 
 	/**
 	 * Sorts the elements in a flux in a moving time window. I.e. this assumes element order may be
@@ -212,8 +204,7 @@ public class ReactorUtils {
 			}
 		}
 
-		return stream
-		.zipWith(timestamps)
+		return timestamp(stream)
 		.window(bufferTime)
 		.scan(new SorterAccumulator(), SorterAccumulator::next)
 		.flatMap(SorterAccumulator::getReleased, 1);
