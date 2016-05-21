@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -19,6 +20,8 @@ import java.util.regex.Pattern;
 
 import org.springframework.ide.eclipse.core.PatternUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * The filter for searching for tags.
@@ -89,8 +92,12 @@ public class  TagSearchFilter<T extends Taggable> implements Filter<T> {
 		return initSearchText;
 	}
 
-	protected Set<String> getTags(T element) {
-		return element.getTags();
+	protected ImmutableSet<String> getTags(T element) {
+		LinkedHashSet<String> tags = element.getTags();
+		if (tags==null) {
+			return ImmutableSet.of();
+		}
+		return ImmutableSet.copyOf(tags);
 	}
 
 }

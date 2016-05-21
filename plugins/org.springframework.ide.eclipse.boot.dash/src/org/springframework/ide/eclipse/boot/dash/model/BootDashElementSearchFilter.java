@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,6 +20,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 /**
  * Boot Dash elements filter working on strings from BDEs tags combined with
@@ -58,8 +62,9 @@ public class BootDashElementSearchFilter extends TagSearchFilter<BootDashElement
 	}
 
 	@Override
-	protected Set<String> getTags(BootDashElement element) {
-		Set<String> tags = super.getTags(element);
+	protected ImmutableSet<String> getTags(BootDashElement element) {
+		Builder<String> tags = ImmutableSet.builder();
+		tags.addAll(super.getTags(element));
 		// Add implicit tag for element name
 		tags.add(element.getName());
 		// Add implicit tags for Working Sets
@@ -69,7 +74,7 @@ public class BootDashElementSearchFilter extends TagSearchFilter<BootDashElement
 				tags.addAll(workingSetNames);
 			}
 		}
-		return tags;
+		return tags.build();
 	}
 
 }
