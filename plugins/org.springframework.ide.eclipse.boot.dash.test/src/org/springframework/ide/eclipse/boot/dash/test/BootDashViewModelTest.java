@@ -429,8 +429,8 @@ public class BootDashViewModelTest {
 			}
 		});
 		toggleFilters.add(toggleFilter);
-		assertFilterAccepts(false, filter, "a-tag");
-		assertFilterAccepts(true, filter, "foo");
+		assertFilterAccepts(false, filter, "app-name", "a-tag");
+		assertFilterAccepts(true, filter, "app-name", "foo");
 	}
 
 	@Test
@@ -476,7 +476,7 @@ public class BootDashViewModelTest {
 
 	private void assertFilterAccepts(boolean expected, LiveExpression<Filter<BootDashElement>> filter, BootDashElement... elements) {
 		for (BootDashElement bde : elements) {
-			assertEquals("element with tags "+bde.getTags(), expected, filter.getValue().accept(bde));
+			assertEquals("element '"+bde.getName()+"'with tags "+bde.getTags(), expected, filter.getValue().accept(bde));
 		}
 	}
 
@@ -484,8 +484,9 @@ public class BootDashViewModelTest {
 		element.setTags(new LinkedHashSet<>(Arrays.asList(tags)));
 	}
 
-	private void assertFilterAccepts(boolean expectedAccept, LiveExpression<Filter<BootDashElement>> filter, String... tags) {
+	private void assertFilterAccepts(boolean expectedAccept, LiveExpression<Filter<BootDashElement>> filter, String elementName, String... tags) {
 		BootDashElement element = mock(BootDashElement.class);
+		when(element.getName()).thenReturn(elementName);
 		when(element.getCurrentChildren()).thenReturn(ImmutableSet.<BootDashElement>of());
 		when(element.getTags()).thenReturn(new LinkedHashSet<>(Arrays.asList(tags)));
 		assertEquals(expectedAccept, filter.getValue().accept(element));

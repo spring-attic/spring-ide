@@ -23,8 +23,6 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	//Tests suites are put in order roughly based on
 	// how long it takes to run them. Faster ones at the top.
 
-	CloudFoundryClientTest.class,
-
 	//Added by Alex:
 	DeploymentProperties2Yaml.class,
 	Yaml2DeploymentProperties.class,
@@ -41,15 +39,16 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	ToggleFiltersModelTest.class,
 
 	//Medium length (less than 30 seconds):
-	CloudFoundryBootDashModelMockingTest.class,
 	JarNameGeneratorTest.class,
 	BootJarPackagingTest.class,
 	BootDashViewModelTest.class,
 	DeploymentPropertiesDialogModelTests.class,
 
 	//Long tests (more than 30 seconds):
+	CloudFoundryBootDashModelMockingTest.class,
 	BootDashActionTests.class,
 	BootDashModelTest.class,
+	CloudFoundryClientTest.class,
 	CloudFoundryBootDashModelIntegrationTest.class,
 })
 public class AllBootDashTests {
