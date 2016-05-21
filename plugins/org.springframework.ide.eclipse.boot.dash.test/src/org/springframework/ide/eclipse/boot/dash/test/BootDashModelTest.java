@@ -995,7 +995,19 @@ public class BootDashModelTest {
 
 	@Test
 	public void testWorkingSetMatch_4() throws Exception {
-		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"), new BdeInfo("b", new String[]{"a", "c"}, "xxx")}, "a, x", new String[]{"b"});
+		testBdeFiltering(
+				new BdeInfo[]{
+					new BdeInfo("z",
+							new String[]{"aaa", "bbb"},
+							"xxx"
+					),
+					new BdeInfo("b",
+							new String[]{"a", "c"},
+							"xxx")
+				},
+				"a, x",
+				new String[]{"b"}
+		);
 	}
 
 	/**************************************************************************************
