@@ -33,6 +33,7 @@ import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.stacks.GetStackRequest;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.DeleteUserProvidedServiceInstanceRequest;
+import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
@@ -326,22 +327,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
 
-		 Cancellation cancellation = operations.applications().logs(LogsRequest
-				   .builder()
-				   .name(appName)
-				   // BUG: show recent appears to throw exception with PWS. May be fixed in the future, but now only "pure" streaming is supported
-				   .recent(false)
-				   .build()
-				)
-				.retry(falseAfter(Duration.ofMinutes(1)))
-				.doOnError((onError) -> {
-					logConsole.onError(onError.fillInStackTrace());
-				})
-		        .subscribe((logMessage) -> {
-					logConsole.onMessage(logMessage);
-				});
+		Flux<LogMessage> stream = operations.applications()
+		.logs(LogsRequest.builder()
+			.name(appName)
+			// BUG: show recent appears to throw exception with PWS. May be fixed in the future, but now only "pure" streaming is supported
+			.recent(false)
+			.build()
+		)
+		.retry(falseAfter(Duration.ofMinutes(1)));
 
-		 return cancellation;
+		 Cancellation cancellation = ReactorUtils.sort(
+				stream,
+				(m1, m2) -> Long.compare(m1.getTimestamp(), m2.getTimestamp()),
+				Duration.ofSeconds(1)
+		)
+		.subscribe(logConsole::onMessage, logConsole::onError);
+
+		return cancellation;
 
 //		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 //		try {
