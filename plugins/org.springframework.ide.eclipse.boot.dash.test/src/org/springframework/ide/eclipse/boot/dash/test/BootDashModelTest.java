@@ -970,12 +970,26 @@ public class BootDashModelTest {
 
 	@Test
 	public void testNoWorkingSetMatch_3() throws Exception {
-		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "xxx, a", new String[0]);
+		testBdeFiltering(
+				new BdeInfo[]{
+						new BdeInfo("b", null, "xxx"),
+						new BdeInfo("c", null, "xxx")
+				},
+				"xxx, a",
+				new String[0]
+		);
 	}
 
 	@Test
 	public void testNoWorkingSetMatch_4() throws Exception {
-		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", null, "xxx"), new BdeInfo("b", null, "xxx")}, "a, x", new String[0]);
+		testBdeFiltering(
+			new BdeInfo[]{
+				new BdeInfo("a", null, "xxx"),
+				new BdeInfo("b", null, "xxx")
+			},
+			"c, x",
+			new String[0]
+		);
 	}
 
 	@Test
@@ -990,7 +1004,13 @@ public class BootDashModelTest {
 
 	@Test
 	public void testWorkingSetMatch_3() throws Exception {
-		testBdeFiltering(new BdeInfo[]{new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"), new BdeInfo("b", new String[]{"a", "c"}, "xxx")}, "xxx, a", new String[]{"a", "b"});
+		testBdeFiltering(
+				new BdeInfo[]{
+						new BdeInfo("a", new String[]{"aaa", "bbb"}, "xxx"),
+						new BdeInfo("b", new String[]{"a", "c"}, "xxx")
+				},
+				"xxx, a",
+				new String[]{"a", "b"});
 	}
 
 	@Test
