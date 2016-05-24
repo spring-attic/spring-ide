@@ -201,6 +201,9 @@
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
+		
+		<!-- import statics -->
+		<module>plugins/org.springframework.ide.eclipse.imports</module>
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
