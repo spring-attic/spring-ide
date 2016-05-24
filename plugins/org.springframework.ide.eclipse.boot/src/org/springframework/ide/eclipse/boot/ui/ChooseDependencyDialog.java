@@ -18,7 +18,9 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -38,11 +40,27 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
 public class ChooseDependencyDialog extends DialogWithSections {
 
+	private static final int DISABLE_BUTTON_ID = 100;
 	private ChooseDependencyModel model;
 
 	public ChooseDependencyDialog(ChooseDependencyModel model, Shell shell) {
 		super(model.getTitle(), model, shell);
 		this.model = model;
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		createButton(parent, DISABLE_BUTTON_ID, "Disable", false);
+	}
+
+	@Override
+	protected void buttonPressed(int buttonId) {
+		if (buttonId==DISABLE_BUTTON_ID) {
+			model.performDisable();
+			close();
+		}
+		super.buttonPressed(buttonId);
 	}
 
 	@Override
@@ -65,8 +83,8 @@ public class ChooseDependencyDialog extends DialogWithSections {
 				text.setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 			}
 		});
-		sections.add(new HLineSection(this));
-		sections.add(new CheckboxSection(this, model.disableJarTypeAssist));
+//		sections.add(new HLineSection(this));
+//		sections.add(new CheckboxSection(this, model.disableJarTypeAssist));
 		return sections;
 	}
 

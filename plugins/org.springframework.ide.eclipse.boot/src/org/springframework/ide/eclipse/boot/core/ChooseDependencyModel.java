@@ -81,6 +81,10 @@ public class ChooseDependencyModel implements OkButtonHandler {
 		okPerformed = true;
 	}
 
+	public void performDisable() {
+		disableJarTypeAssist.setValue(true);
+	}
+
 	public String getTitle() {
 		return "Confirm Changes to '"+dependencyFileName+"'";
 	}
@@ -96,5 +100,6 @@ public class ChooseDependencyModel implements OkButtonHandler {
 	public String getTypeName() {
 		return type.getFullyQualifiedName();
 	}
+
 
 }
