@@ -56,6 +56,17 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 	private PropertyInfo metadata;
 
 	/**
+	 * If non-null, gets a chance to contribute additional quick fixes for this problem.
+	 * This was put in to allow specific editor type to contribute their own strategies for
+	 * fixing problems, without introducing circular plugin dependency.
+	 * <p>
+	 * Problems which can be fixed without 'editor-specific' knowledge are implement
+	 * directly in here. But problems which require editor-specific handling can be attached
+	 * by the editor when it creates the object representing the problem.
+	 */
+	private ProblemFixer problemFixer;
+
+	/**
 	 * Create a SpringProperty file annotation with a given severity.
 	 * The severity should be one of the XXX_TYPE constants defined in
 	 * {@link ReconcileProblemAnnotation}.
@@ -123,23 +134,16 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 	public List<ICompletionProposal> getQuickfixes(QuickfixContext context) {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(2);
 
-		addDeprecationFixes(context, proposals);
+		addProvidedFixes(context, proposals);
 		addUnknownPropertyFixes(context, proposals);
 		addIgnoreProblemFixes(context, proposals);
 
 		return Collections.unmodifiableList(proposals);
 	}
 
-	private void addDeprecationFixes(QuickfixContext context, List<ICompletionProposal> proposals) {
-		SpringPropertiesProblemType problemType = getType();
-		if (problemType==SpringPropertiesProblemType.PROP_DEPRECATED) {
-			PropertyInfo metadata = getMetadata();
-			if (metadata!=null) {
-				String replacement = metadata.getDeprecationReplacement();
-				if (replacement!=null) {
-					proposals.add(new ReplaceDeprecatedPropertyQuickfix(context, this));
-				}
-			}
+	private void addProvidedFixes(QuickfixContext context, List<ICompletionProposal> proposals) {
+		if (getProblemFixer()!=null) {
+			getProblemFixer().contributeFixes(context, this, proposals);
 		}
 	}
 
@@ -179,5 +183,13 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	public void setMetadata(PropertyInfo property) {
 		this.metadata = property;
+	}
+
+	public ProblemFixer getProblemFixer() {
+		return problemFixer;
+	}
+
+	public void setProblemFixer(ProblemFixer problemFixer) {
+		this.problemFixer = problemFixer;
 	}
 }

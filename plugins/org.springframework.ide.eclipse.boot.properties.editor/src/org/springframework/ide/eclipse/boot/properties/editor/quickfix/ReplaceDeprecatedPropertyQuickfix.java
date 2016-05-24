@@ -16,6 +16,8 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.reconciling.ProblemFixer;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
@@ -23,6 +25,17 @@ import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 
 @SuppressWarnings("restriction")
 public class ReplaceDeprecatedPropertyQuickfix implements ICompletionProposal {
+
+	public static ProblemFixer FIXER = (context, problem, proposals) -> {
+		PropertyInfo metadata = problem.getMetadata();
+		if (metadata!=null) {
+			String replacement = metadata.getDeprecationReplacement();
+			if (replacement!=null) {
+				//No need to check problem type...  we only attach this fixer to problems of applicable type.
+				proposals.add(new ReplaceDeprecatedPropertyQuickfix(context, problem));
+			}
+		}
+	};
 
 	private final SpringPropertyProblem problem;
 	private DocumentEdits edits;

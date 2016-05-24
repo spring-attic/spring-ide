@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.ReplaceDeprecatedPropertyQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeParser;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -153,6 +154,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 		);
 		p.setPropertyName(property.getId());
 		p.setMetadata(property);
+		p.setProblemFixer(ReplaceDeprecatedPropertyQuickfix.FIXER);
 		return p;
 	}
 
